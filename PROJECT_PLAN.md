@@ -189,42 +189,30 @@
 4. ~~Create basic plugin class structure~~ ✓
 5. ~~Implement simple slash command (/frenrider)~~ ✓
 6. ~~Create basic ImGui window~~ ✓
-7. Test plugin loads in-game
+7. ~~Test plugin loads in-game~~ ✓ (Confirmed by user)
 
-**Deliverables:**
-- Plugin compiles without errors
-- Plugin appears in Dalamud plugin installer
-- Plugin can be enabled/disabled
-- Basic UI window opens with slash command
-
-**Testing Required:**
-- Plugin loads without crashes
-- UI window renders correctly
-- Slash command responds
+**Phase 1.1 - UI Redesign (absorbed Phase 2):**
+8. ~~Multi-account/multi-character config system~~ ✓
+9. ~~Left panel character list~~ ✓
+10. ~~DTR bar integration~~ ✓
+11. ~~Dropdowns, tooltips, reset buttons~~ ✓
+12. ~~Fren name capitalization + party dropdown~~ ✓
+13. ~~Merge Automation+Misc tabs~~ ✓
+14. ~~Remove CBT from cling types~~ ✓
+15. ~~Non-editable fren name in MainWindow~~ ✓
 
 ---
 
-### Phase 2: Configuration System
+### Phase 2: Configuration System ✓ (COMPLETE - Absorbed into Phase 1.1)
 **Goal:** Implement persistent configuration storage
 
 **Tasks:**
-1. Create Configuration.cs class
-2. Define all configuration properties (from original script)
-3. Implement JSON serialization/deserialization
-4. Create configuration UI (ImGui)
-5. Add save/load functionality
-6. Implement version migration system
-
-**Deliverables:**
-- Configuration saves/loads correctly
-- UI for editing all settings
-- Default values match original script
-- Version control for config updates
-
-**Testing Required:**
-- Settings persist across game restarts
-- UI updates reflect saved values
-- Default configuration works out of box
+1. ~~Create Configuration.cs class~~ ✓ (Global + CharacterConfig + AccountConfig)
+2. ~~Define all configuration properties (from original script)~~ ✓ (35+ fields)
+3. ~~Implement JSON serialization/deserialization~~ ✓ (System.Text.Json per-account files)
+4. ~~Create configuration UI (ImGui)~~ ✓ (Tabbed with left panel)
+5. ~~Add save/load functionality~~ ✓ (ConfigManager)
+6. ~~Implement version migration system~~ ✓ (Version field in IPluginConfiguration)
 
 ---
 

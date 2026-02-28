@@ -1,22 +1,46 @@
 using System;
+using System.Linq;
 using System.Numerics;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Windowing;
+using FrenRider.Models;
+using FrenRider.Services;
 
 namespace FrenRider.Windows;
 
 public class ConfigWindow : Window, IDisposable
 {
+    private readonly Plugin plugin;
     private readonly Configuration configuration;
+    private readonly ConfigManager configManager;
+
+    private string currentTab = "Party";
+    private string accountAliasEdit = "";
+    private string frenNameInput = "";
+    private bool frenNameFocused = false;
+
+    private static readonly string[] CompanionStances = { "Free Stance", "Defender Stance", "Attacker Stance", "Healer Stance", "Follow" };
+    private static readonly string[] ClingTypes = { "NavMesh", "Visland", "BossMod Follow", "Vanilla Follow" };
+    private static readonly string[] RotationPlugins = { "BMR", "VBM", "RSR", "WRATH" };
+    private static readonly string[] RotationTypes = { "Auto", "Manual", "none" };
+    private static readonly string[] BossModAIOptions = { "on", "off" };
+    private static readonly string[] Positionals = { "Front", "Rear", "Any", "Auto" };
+    private static readonly string[] FollowInCombatOptions = { "No", "Yes", "Auto" };
+    private static readonly string[] LootTypes = { "unchanged", "need", "greed", "pass" };
+    private static readonly string[] OnOff = { "Off", "On" };
+    private static readonly string[] RepairOptions = { "No", "Self Repair", "Inn NPC" };
+    private static readonly string[] IdleActionModes = { "Specific Action", "Action From List" };
+    private static readonly string[] IdleListModes = { "Default List", "Custom List" };
 
     public ConfigWindow(Plugin plugin) : base("Fren Rider Settings###FrenRiderConfig")
     {
-        Flags = ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse;
-
-        Size = new Vector2(500, 600);
+        Flags = ImGuiWindowFlags.NoCollapse;
+        Size = new Vector2(850, 550);
         SizeCondition = ImGuiCond.FirstUseEver;
 
-        configuration = plugin.Configuration;
+        this.plugin = plugin;
+        this.configuration = plugin.Configuration;
+        this.configManager = plugin.ConfigManager;
     }
 
     public void Dispose() { }
@@ -24,402 +48,777 @@ public class ConfigWindow : Window, IDisposable
     public override void PreDraw()
     {
         if (configuration.IsConfigWindowMovable)
-        {
             Flags &= ~ImGuiWindowFlags.NoMove;
-        }
         else
-        {
             Flags |= ImGuiWindowFlags.NoMove;
-        }
+
+        // Update window title based on selected character
+        var sel = configManager.SelectedCharacterKey;
+        WindowName = string.IsNullOrEmpty(sel)
+            ? "Fren Rider Settings - DEFAULT CONFIG###FrenRiderConfig"
+            : $"Fren Rider Settings - {sel}###FrenRiderConfig";
     }
 
     public override void Draw()
     {
+        var config = configManager.GetActiveConfig();
+        if (config == null) return;
+
+        // Left panel
+        ImGui.BeginChild("LeftPanel", new Vector2(200, 0), true);
+        DrawLeftPanel();
+        ImGui.EndChild();
+
+        ImGui.SameLine();
+
+        // Right panel
+        ImGui.BeginChild("RightPanel", Vector2.Zero, false);
+        DrawRightPanel(config);
+        ImGui.EndChild();
+    }
+
+    private void DrawLeftPanel()
+    {
+        var account = configManager.GetCurrentAccount();
+        if (account == null)
+        {
+            ImGui.TextColored(new Vector4(1, 0.4f, 0.4f, 1), "No account loaded.");
+            ImGui.TextWrapped("Log in to a character to create one.");
+            return;
+        }
+
+        // Account alias (editable)
+        ImGui.TextColored(new Vector4(0.7f, 0.7f, 1f, 1), "ACCOUNT");
+        if (accountAliasEdit != account.AccountAlias)
+            accountAliasEdit = account.AccountAlias;
+        ImGui.SetNextItemWidth(-1);
+        if (ImGui.InputText("##AccountAlias", ref accountAliasEdit, 64))
+        {
+            configManager.UpdateAccountAlias(accountAliasEdit);
+        }
+        HelpMarker("Human-readable alias for this account group. Linked to account ID internally.");
+
+        ImGui.Spacing();
+        ImGui.Separator();
+        ImGui.Spacing();
+
+        // DEFAULT CONFIG
+        var isDefault = string.IsNullOrEmpty(configManager.SelectedCharacterKey);
+        if (ImGui.Selectable("DEFAULT CONFIG", isDefault))
+        {
+            configManager.SelectedCharacterKey = "";
+            SyncFrenNameInput();
+        }
+
+        ImGui.Spacing();
+        ImGui.Separator();
+        ImGui.Spacing();
+
+        // Current character (bold/highlighted)
+        var currentCharKey = GetCurrentCharacterKey();
+        if (!string.IsNullOrEmpty(currentCharKey))
+        {
+            var isCurrent = configManager.SelectedCharacterKey == currentCharKey;
+            ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.4f, 1f, 0.4f, 1));
+            if (ImGui.Selectable(currentCharKey, isCurrent))
+            {
+                configManager.SelectedCharacterKey = currentCharKey;
+                SyncFrenNameInput();
+            }
+            ImGui.PopStyleColor();
+        }
+
+        // Other characters sorted alphabetically
+        foreach (var charKey in configManager.GetSortedCharacterKeys())
+        {
+            if (charKey == currentCharKey) continue;
+            var isSelected = configManager.SelectedCharacterKey == charKey;
+            if (ImGui.Selectable(charKey, isSelected))
+            {
+                configManager.SelectedCharacterKey = charKey;
+                SyncFrenNameInput();
+            }
+        }
+    }
+
+    private void DrawRightPanel(CharacterConfig config)
+    {
+        // Reset buttons (top right)
+        var avail = ImGui.GetContentRegionAvail().X;
+        ImGui.SameLine(avail - 230);
+        ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.6f, 0.2f, 0.2f, 1));
+        if (ImGui.Button("Reset All"))
+        {
+            configManager.ResetCharacterToDefault(configManager.SelectedCharacterKey);
+            SyncFrenNameInput();
+        }
+        HelpMarker("Reset ALL tabs for this character to default values.");
+        ImGui.SameLine();
+        ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.6f, 0.4f, 0.2f, 1));
+        if (ImGui.Button("Reset This Page"))
+        {
+            configManager.ResetCharacterTabToDefault(configManager.SelectedCharacterKey, currentTab);
+            SyncFrenNameInput();
+        }
+        ImGui.PopStyleColor(2);
+        HelpMarker("Reset only the current tab for this character to default values.");
+
+        ImGui.Spacing();
+
         if (ImGui.BeginTabBar("FrenRiderTabs"))
         {
-            DrawPartyTab();
-            DrawDistanceTab();
-            DrawCombatTab();
-            DrawAutomationTab();
-            DrawMiscTab();
+            if (ImGui.BeginTabItem("Party / Friend"))
+            {
+                currentTab = "Party";
+                DrawPartyTab(config);
+                ImGui.EndTabItem();
+            }
+            if (ImGui.BeginTabItem("Distance / Following"))
+            {
+                currentTab = "Distance";
+                DrawDistanceTab(config);
+                ImGui.EndTabItem();
+            }
+            if (ImGui.BeginTabItem("Combat / AI"))
+            {
+                currentTab = "Combat";
+                DrawCombatTab(config);
+                ImGui.EndTabItem();
+            }
+            if (ImGui.BeginTabItem("Misc"))
+            {
+                currentTab = "Misc";
+                DrawMiscTab(config);
+                ImGui.EndTabItem();
+            }
             ImGui.EndTabBar();
         }
     }
 
-    private void DrawPartyTab()
+    private void DrawPartyTab(CharacterConfig config)
     {
-        if (ImGui.BeginTabItem("Party / Friend"))
+        ImGui.Spacing();
+
+        // Fren Name with party dropdown and capitalization fix
+        ImGui.Text("Fren Name");
+        ImGui.SameLine();
+        HelpMarker("Name of the party member to follow. Can be partial if unique.\nNames are auto-capitalized. Select from party or type manually.");
+        if (frenNameInput != config.FrenName && !frenNameFocused)
+            frenNameInput = config.FrenName;
+        ImGui.SetNextItemWidth(300);
+        frenNameFocused = false;
+        if (ImGui.InputText("##FrenName", ref frenNameInput, 64))
         {
-            ImGui.Spacing();
+            frenNameFocused = true;
+        }
+        if (ImGui.IsItemDeactivatedAfterEdit())
+        {
+            config.FrenName = ConfigManager.FixNameCapitalization(frenNameInput);
+            frenNameInput = config.FrenName;
+            configManager.SaveCurrentAccount();
+        }
 
-            var frenName = configuration.FrenName;
-            if (ImGui.InputText("Fren Name", ref frenName, 64))
+        // Party member quick-select dropdown
+        ImGui.SameLine();
+        if (ImGui.BeginCombo("##PartySelect", "", ImGuiComboFlags.NoPreview | ImGuiComboFlags.PopupAlignLeft))
+        {
+            var partyCount = Plugin.PartyList.Length;
+            if (partyCount > 0)
             {
-                configuration.FrenName = frenName;
-                configuration.Save();
+                for (var i = 0; i < partyCount; i++)
+                {
+                    var member = Plugin.PartyList[i];
+                    if (member == null) continue;
+                    var memberName = member.Name.ToString();
+                    var worldName = member.World.Value.Name.ToString();
+                    var display = $"{memberName}@{worldName}";
+                    if (ImGui.Selectable(display))
+                    {
+                        config.FrenName = display;
+                        frenNameInput = display;
+                        configManager.SaveCurrentAccount();
+                    }
+                }
             }
-            if (ImGui.IsItemHovered())
+            else
             {
-                ImGui.SetTooltip("Partial name OK if unique. Do not include @Server.");
+                ImGui.TextDisabled("Not in a party");
             }
+            ImGui.EndCombo();
+        }
+        if (ImGui.IsItemHovered())
+            ImGui.SetTooltip("Select from current party members");
 
-            var flyYouFools = configuration.FlyYouFools;
-            if (ImGui.Checkbox("Fly You Fools (fly alongside instead of pillion)", ref flyYouFools))
-            {
-                configuration.FlyYouFools = flyYouFools;
-                configuration.Save();
-            }
+        ImGui.Spacing();
 
-            var foolFlier = configuration.FoolFlier;
-            if (ImGui.InputText("Mount Name (if flying solo)", ref foolFlier, 64))
-            {
-                configuration.FoolFlier = foolFlier;
-                configuration.Save();
-            }
+        // Fly You Fools
+        var flyYouFools = config.FlyYouFools;
+        if (ImGui.Checkbox("Fly You Fools (fly alongside instead of pillion)", ref flyYouFools))
+        {
+            config.FlyYouFools = flyYouFools;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("If enabled, summon your own mount and fly alongside fren instead of riding their multi-seater.\nUseful when you don't have access to the fren's mount or want separate mounts.");
 
-            var forceGysahl = configuration.ForceGysahl;
-            if (ImGui.Checkbox("Force Gysahl Green Usage", ref forceGysahl))
-            {
-                configuration.ForceGysahl = forceGysahl;
-                configuration.Save();
-            }
+        // Mount Name (searchable input for now, full mount list in future phase)
+        var foolFlier = config.FoolFlier;
+        ImGui.SetNextItemWidth(300);
+        if (ImGui.InputText("Mount Name (if flying solo)", ref foolFlier, 64))
+        {
+            config.FoolFlier = foolFlier;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Exact mount name with correct capitalization.\nTop of list should be 'Mount Roulette'.\nFull mount selection from game data planned for a future update.");
 
-            var companionStrat = configuration.CompanionStrat;
-            if (ImGui.InputText("Companion Stance", ref companionStrat, 32))
-            {
-                configuration.CompanionStrat = companionStrat;
-                configuration.Save();
-            }
-            if (ImGui.IsItemHovered())
-            {
-                ImGui.SetTooltip("Follow, Free Stance, Defender Stance, Healer Stance, Attacker Stance");
-            }
+        // Force Gysahl
+        var forceGysahl = config.ForceGysahl;
+        if (ImGui.Checkbox("Force Gysahl Green Usage", ref forceGysahl))
+        {
+            config.ForceGysahl = forceGysahl;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Force use of Gysahl Greens to summon your chocobo companion.\nMay cause issues in towns.");
 
-            var timeFriction = configuration.TimeFriction;
-            if (ImGui.SliderFloat("Tick Rate (seconds)", ref timeFriction, 0.1f, 2.0f))
-            {
-                configuration.TimeFriction = timeFriction;
-                configuration.Save();
-            }
+        // Companion Stance (dropdown)
+        var companionIdx = Array.IndexOf(CompanionStances, config.CompanionStrat);
+        if (companionIdx < 0) companionIdx = 0;
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.Combo("Companion Stance", ref companionIdx, CompanionStances, CompanionStances.Length))
+        {
+            config.CompanionStrat = CompanionStances[companionIdx];
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Chocobo companion battle stance.\nControls how your companion behaves in combat.");
 
-            ImGui.EndTabItem();
+        ImGui.Spacing();
+        ImGui.Separator();
+        ImGui.Spacing();
+
+        // Update Interval
+        var updateInterval = config.UpdateInterval;
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.SliderFloat("Update Interval (seconds)", ref updateInterval, 0.05f, 5.0f, "%.2f"))
+        {
+            config.UpdateInterval = Math.Max(0.05f, updateInterval);
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("How often the plugin runs its main logic loop.\nLower values = more responsive but higher CPU usage.\nDefault: 0.3s. WARNING: Values below 0.1 may impact performance.");
+        if (updateInterval < 0.1f)
+        {
+            ImGui.TextColored(new Vector4(1, 0.4f, 0.4f, 1), "WARNING: Very low update interval may impact game performance!");
         }
     }
 
-    private void DrawDistanceTab()
+    private void DrawDistanceTab(CharacterConfig config)
     {
-        if (ImGui.BeginTabItem("Distance / Following"))
+        ImGui.Spacing();
+
+        var cling = config.Cling;
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.SliderFloat("Cling Distance", ref cling, 0.5f, 30.0f))
         {
-            ImGui.Spacing();
+            config.Cling = cling;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Distance threshold (yalms) to start following fren.\nWhen you are farther than this from fren, navigation begins.");
 
-            var cling = configuration.Cling;
-            if (ImGui.SliderFloat("Cling Distance", ref cling, 0.5f, 30.0f))
+        // Cling Type (no CBT)
+        var clingType = config.ClingType;
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.Combo("Cling Type", ref clingType, ClingTypes, ClingTypes.Length))
+        {
+            config.ClingType = clingType;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Navigation method to reach fren.\nNavMesh: VNavmesh plugin pathfinding (recommended)\nVisland: Alternative navigation\nBossMod Follow: Uses BossMod's follow leader\nVanilla Follow: Game's built-in /follow");
+
+        var clingTypeDuty = config.ClingTypeDuty;
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.Combo("Cling Type (Duty)", ref clingTypeDuty, ClingTypes, ClingTypes.Length))
+        {
+            config.ClingTypeDuty = clingTypeDuty;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Navigation method to use inside duties.\nMay need a different method than overworld.");
+
+        ImGui.Spacing();
+        ImGui.Separator();
+        ImGui.Text("Social Distancing");
+        ImGui.Spacing();
+
+        var sd = config.SocialDistancing;
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.SliderFloat("Social Distance (yalms)", ref sd, 0.0f, 30.0f))
+        {
+            config.SocialDistancing = sd;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Minimum distance to maintain from fren in outdoor/foray zones.\nPrevents characters from stacking on top of each other (less bot-like).\nSet to 0 to disable.");
+
+        var sdIndoors = config.SocialDistancingIndoors;
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.Combo("Social Distance Indoors", ref sdIndoors, OnOff, OnOff.Length))
+        {
+            config.SocialDistancingIndoors = sdIndoors;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Enable social distancing indoors too.\nOff by default. Turn on if you want spacing in dungeons.");
+
+        var xw = config.SocialDistanceXWiggle;
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.SliderFloat("X Wiggle (+/- yalms)", ref xw, 0.0f, 5.0f))
+        {
+            config.SocialDistanceXWiggle = xw;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Random variance on X axis during social distancing.\nAdds natural-looking movement variance.");
+
+        var zw = config.SocialDistanceZWiggle;
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.SliderFloat("Z Wiggle (+/- yalms)", ref zw, 0.0f, 5.0f))
+        {
+            config.SocialDistanceZWiggle = zw;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Random variance on Z axis during social distancing.");
+
+        ImGui.Spacing();
+        ImGui.Separator();
+        ImGui.Text("Max Distances");
+        ImGui.Spacing();
+
+        var maxB = config.MaxBistance;
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.InputFloat("Max Follow Distance", ref maxB))
+        {
+            config.MaxBistance = maxB;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Maximum distance (yalms) to chase fren.\nBeyond this, stop following to avoid zone-hopping.");
+
+        var maxBf = config.MaxBistanceForay;
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.InputFloat("Max Follow Distance (Foray)", ref maxBf))
+        {
+            config.MaxBistanceForay = maxBf;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Max follow distance in forays (Eureka/Bozja).\nLower value to avoid mini-aetheryte transition issues.");
+
+        var dd = config.DDDistance;
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.InputFloat("DD Extra Distance", ref dd))
+        {
+            config.DDDistance = dd;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Extra distance added to cling in Deep Dungeons.\nPrevents constant chasing in PotD/HoH.");
+
+        var fd = config.FDistance;
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.InputFloat("FATE Extra Distance", ref fd))
+        {
+            config.FDistance = fd;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Extra distance padding during FATEs.\nAllows more spread-out positioning.");
+
+        ImGui.Spacing();
+        ImGui.Separator();
+        ImGui.Spacing();
+
+        var formation = config.Formation;
+        if (ImGui.Checkbox("Formation Following", ref formation))
+        {
+            config.Formation = formation;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Follow in a formation pattern (8-person grid).\nPositions based on party slot number.\nDisabled during mounting.");
+
+        var fic = config.FollowInCombat;
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.Combo("Follow in Combat", ref fic, FollowInCombatOptions, FollowInCombatOptions.Length))
+        {
+            config.FollowInCombat = fic;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Whether to follow fren during combat.\nAuto: Let the plugin decide based on your job/role.");
+
+        var hcr = config.HClingReset;
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.InputInt("Harmonized Cling Reset Ticks", ref hcr))
+        {
+            config.HClingReset = hcr;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Number of ticks before harmonized cling resets to 0.\nHandles special logic like DD/FATE force cling.");
+    }
+
+    private void DrawCombatTab(CharacterConfig config)
+    {
+        ImGui.Spacing();
+
+        // Rotation Plugin (dropdown)
+        var rotPlugin = config.RotationPlugin;
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.Combo("Rotation Plugin", ref rotPlugin, RotationPlugins, RotationPlugins.Length))
+        {
+            config.RotationPlugin = rotPlugin;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Which rotation automation plugin to use.\nBMR: BossModReborn\nVBM: VanillaBossMod\nRSR: RotationSolver Reborn\nWRATH: Wrath");
+
+        // Rotation Plugin Foray (dropdown)
+        var rotPluginForay = config.RotationPluginForay;
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.Combo("Rotation Plugin (Foray)", ref rotPluginForay, RotationPlugins, RotationPlugins.Length))
+        {
+            config.RotationPluginForay = rotPluginForay;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Rotation plugin for foray content (Eureka/Bozja).\nWRATH recommended for phantom job support.");
+
+        ImGui.Spacing();
+        ImGui.Separator();
+        ImGui.Text("Presets");
+        ImGui.Spacing();
+
+        var autoRot = config.AutoRotationType;
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.InputText("Auto Rotation Preset", ref autoRot, 32))
+        {
+            config.AutoRotationType = autoRot;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Name of the auto-rotation preset for general content.\nMust match a preset name in your rotation plugin.\nUse 'none' to not change the preset.");
+
+        var autoRotDD = config.AutoRotationTypeDD;
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.InputText("Auto Rotation Preset (DD)", ref autoRotDD, 32))
+        {
+            config.AutoRotationTypeDD = autoRotDD;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Preset name for Deep Dungeon content.");
+
+        var autoRotFATE = config.AutoRotationTypeFATE;
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.InputText("Auto Rotation Preset (FATE)", ref autoRotFATE, 32))
+        {
+            config.AutoRotationTypeFATE = autoRotFATE;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Preset name for FATE content.");
+
+        ImGui.Spacing();
+        ImGui.Separator();
+        ImGui.Text("Behavior");
+        ImGui.Spacing();
+
+        // Rotation Type (dropdown)
+        var rotType = config.RotationType;
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.Combo("Rotation Type", ref rotType, RotationTypes, RotationTypes.Length))
+        {
+            config.RotationType = rotType;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("RSR rotation mode.\nAuto: Fully automated rotation\nManual: Manual trigger\nnone: Don't change setting");
+
+        // BossMod AI (dropdown)
+        var bossModAI = config.BossModAI;
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.Combo("BossMod AI", ref bossModAI, BossModAIOptions, BossModAIOptions.Length))
+        {
+            config.BossModAI = bossModAI;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Enable or disable BossMod AI module.");
+
+        // Positional (dropdown)
+        var positional = config.PositionalInCombat;
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.Combo("Positional", ref positional, Positionals, Positionals.Length))
+        {
+            config.PositionalInCombat = positional;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Combat positional preference.\nFront: Stay in front of target\nRear: Stay behind target\nAny: No preference\nAuto: Let plugin decide based on job");
+
+        var maxAIDist = config.MaxAIDistance;
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.InputFloat("Max AI Distance", ref maxAIDist))
+        {
+            config.MaxAIDistance = maxAIDist;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Max distance to targets for combat AI.\n424242 = Auto (plugin decides based on job: melee 2.6, caster 10).");
+
+        var limitPct = config.LimitPct;
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.InputFloat("LB Threshold %", ref limitPct))
+        {
+            config.LimitPct = limitPct;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Target HP percentage to use Limit Break.\n-1 = Disabled.\nAutomatically uses LB3 if available, otherwise LB2.");
+    }
+
+    private void DrawMiscTab(CharacterConfig config)
+    {
+        ImGui.Spacing();
+
+        // --- Loot ---
+        ImGui.Text("Loot");
+        ImGui.Spacing();
+
+        var fulfIdx = Array.IndexOf(LootTypes, config.FulfType);
+        if (fulfIdx < 0) fulfIdx = 0;
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.Combo("Loot Type", ref fulfIdx, LootTypes, LootTypes.Length))
+        {
+            config.FulfType = LootTypes[fulfIdx];
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("How loot is handled if LazyLoot is installed.\n'unchanged' = Don't modify loot settings.");
+
+        ImGui.Spacing();
+        ImGui.Separator();
+        ImGui.Spacing();
+
+        // --- Food ---
+        ImGui.Text("Food");
+        ImGui.Spacing();
+
+        var feedMeItem = config.FeedMeItem;
+        ImGui.SetNextItemWidth(300);
+        if (ImGui.InputText("Food Item Name", ref feedMeItem, 64))
+        {
+            config.FeedMeItem = feedMeItem;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Name of food to auto-consume.\nFull item search from game data planned for a future update.");
+
+        var feedMeSearch = config.FeedMeSearch;
+        if (ImGui.Checkbox("Search for Food if Depleted", ref feedMeSearch))
+        {
+            config.FeedMeSearch = feedMeSearch;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("If your configured food runs out, search inventory for any food starting from lowest item ID.");
+
+        ImGui.Spacing();
+        ImGui.Separator();
+        ImGui.Spacing();
+
+        // --- XP / Repair ---
+        ImGui.Text("XP / Repair");
+        ImGui.Spacing();
+
+        var xpItem = config.XpItem;
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.InputInt("XP Item ID (0=Off)", ref xpItem))
+        {
+            config.XpItem = xpItem;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Item ID to auto-equip for XP bonus.\nAzyma Earring = 41081.\nUse SimpleTweaks to see item IDs.\n0 = Disabled.");
+
+        var repair = config.Repair;
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.Combo("Repair", ref repair, RepairOptions, RepairOptions.Length))
+        {
+            config.Repair = repair;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Auto-repair method.\nNo: Don't auto-repair\nSelf Repair: Use dark matter\nInn NPC: Use inn repair NPC (only if parked at inn)");
+
+        var tornClothes = config.TornClothes;
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.InputInt("Repair At % Durability", ref tornClothes))
+        {
+            config.TornClothes = tornClothes;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Trigger repair when gear durability falls below this percentage.");
+
+        ImGui.Spacing();
+        ImGui.Separator();
+        ImGui.Spacing();
+
+        // --- Duty ---
+        ImGui.Text("Duty");
+        ImGui.Spacing();
+
+        var cbtEdse = config.CbtEdse;
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.Combo("Enhanced Duty Start/End", ref cbtEdse, OnOff, OnOff.Length))
+        {
+            config.CbtEdse = cbtEdse;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("CBT enhanced duty start/end.\nEnables special settings when entering/leaving duties.");
+
+        ImGui.Spacing();
+        ImGui.Separator();
+        ImGui.Spacing();
+
+        // --- Idle Behavior ---
+        ImGui.Text("Idle Behavior");
+        ImGui.Spacing();
+
+        var idleMode = config.IdleActionMode;
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.Combo("Idle Mode", ref idleMode, IdleActionModes, IdleActionModes.Length))
+        {
+            config.IdleActionMode = idleMode;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("What to do when idle.\nSpecific Action: Execute a single command\nAction From List: Pick randomly from a list");
+
+        if (config.IdleActionMode == 0)
+        {
+            // Specific action
+            var idleAction = config.IdleAction;
+            ImGui.SetNextItemWidth(300);
+            if (ImGui.InputText("Idle Command", ref idleAction, 64))
             {
-                configuration.Cling = cling;
-                configuration.Save();
+                config.IdleAction = idleAction;
+                configManager.SaveCurrentAccount();
             }
-            if (ImGui.IsItemHovered())
+            ImGui.SameLine();
+            HelpMarker("Slash command to execute when idle.\nExamples: /tomescroll, /dance, /snd run scriptname");
+        }
+        else
+        {
+            // Action from list
+            var listMode = config.IdleListMode;
+            ImGui.SetNextItemWidth(200);
+            if (ImGui.Combo("List Source", ref listMode, IdleListModes, IdleListModes.Length))
             {
-                ImGui.SetTooltip("Distance threshold to start following fren.");
+                config.IdleListMode = listMode;
+                configManager.SaveCurrentAccount();
             }
+            ImGui.SameLine();
+            HelpMarker("Default List: Built-in emote list\nCustom List: Your own list of commands");
 
-            var clingType = configuration.ClingType;
-            if (ImGui.Combo("Cling Type", ref clingType, "NavMesh\0Visland\0BossMod Follow\0CBT Autofollow\0Vanilla Follow\0"))
+            if (config.IdleListMode == 1)
             {
-                configuration.ClingType = clingType;
-                configuration.Save();
+                ImGui.TextColored(new Vector4(1, 1, 0.4f, 1), "Custom list editor planned for future update.");
+                ImGui.TextWrapped("Tip: You can use commands like /snd run scriptname or /simulationf motion");
             }
+        }
 
-            var clingTypeDuty = configuration.ClingTypeDuty;
-            if (ImGui.Combo("Cling Type (Duty)", ref clingTypeDuty, "NavMesh\0Visland\0BossMod Follow\0CBT Autofollow\0Vanilla Follow\0"))
-            {
-                configuration.ClingTypeDuty = clingTypeDuty;
-                configuration.Save();
-            }
+        var idleTicks = config.IdleTicksBeforeAction;
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.InputInt("Idle Ticks Before Action", ref idleTicks))
+        {
+            config.IdleTicksBeforeAction = idleTicks;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Number of update ticks before idle action triggers.");
 
-            ImGui.Separator();
-            ImGui.Text("Social Distancing");
+        ImGui.Spacing();
+        ImGui.Separator();
+        ImGui.Spacing();
 
-            var socialDistancing = configuration.SocialDistancing;
-            if (ImGui.SliderFloat("Social Distance (yalms)", ref socialDistancing, 0.0f, 30.0f))
-            {
-                configuration.SocialDistancing = socialDistancing;
-                configuration.Save();
-            }
+        // --- Debug ---
+        ImGui.Text("Debug / Logging");
+        ImGui.Spacing();
 
-            var sdIndoors = configuration.SocialDistancingIndoors;
-            if (ImGui.Combo("Social Distance Indoors", ref sdIndoors, "Off\0On\0"))
-            {
-                configuration.SocialDistancingIndoors = sdIndoors;
-                configuration.Save();
-            }
+        var spamPrinter = config.SpamPrinter;
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.Combo("Echo Messages", ref spamPrinter, OnOff, OnOff.Length))
+        {
+            config.SpamPrinter = spamPrinter;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Print status messages to game chat.\nUseful for debugging but fills chat quickly.");
 
-            var xWiggle = configuration.SocialDistanceXWiggle;
-            if (ImGui.SliderFloat("X Wiggle (+/- yalms)", ref xWiggle, 0.0f, 5.0f))
-            {
-                configuration.SocialDistanceXWiggle = xWiggle;
-                configuration.Save();
-            }
+        ImGui.Spacing();
+        ImGui.Separator();
+        ImGui.Spacing();
 
-            var zWiggle = configuration.SocialDistanceZWiggle;
-            if (ImGui.SliderFloat("Z Wiggle (+/- yalms)", ref zWiggle, 0.0f, 5.0f))
-            {
-                configuration.SocialDistanceZWiggle = zWiggle;
-                configuration.Save();
-            }
+        // --- UI Settings ---
+        ImGui.Text("UI Settings");
+        ImGui.Spacing();
 
-            ImGui.Separator();
-            ImGui.Text("Max Distances");
-
-            var maxBistance = configuration.MaxBistance;
-            if (ImGui.InputFloat("Max Follow Distance", ref maxBistance))
-            {
-                configuration.MaxBistance = maxBistance;
-                configuration.Save();
-            }
-
-            var maxBistanceForay = configuration.MaxBistanceForay;
-            if (ImGui.InputFloat("Max Follow Distance (Foray)", ref maxBistanceForay))
-            {
-                configuration.MaxBistanceForay = maxBistanceForay;
-                configuration.Save();
-            }
-
-            var ddDist = configuration.DDDistance;
-            if (ImGui.InputFloat("DD Extra Distance", ref ddDist))
-            {
-                configuration.DDDistance = ddDist;
-                configuration.Save();
-            }
-
-            var fDist = configuration.FDistance;
-            if (ImGui.InputFloat("FATE Extra Distance", ref fDist))
-            {
-                configuration.FDistance = fDist;
-                configuration.Save();
-            }
-
-            var formation = configuration.Formation;
-            if (ImGui.Checkbox("Formation Following", ref formation))
-            {
-                configuration.Formation = formation;
-                configuration.Save();
-            }
-
-            var followInCombat = configuration.FollowInCombat;
-            if (ImGui.InputInt("Follow in Combat (0=No, 1=Yes, 42=Auto)", ref followInCombat))
-            {
-                configuration.FollowInCombat = followInCombat;
-                configuration.Save();
-            }
-
-            ImGui.EndTabItem();
+        var movable = configuration.IsConfigWindowMovable;
+        if (ImGui.Checkbox("Movable Config Window", ref movable))
+        {
+            configuration.IsConfigWindowMovable = movable;
+            configuration.Save();
         }
     }
 
-    private void DrawCombatTab()
+    // --- Helpers ---
+
+    private string GetCurrentCharacterKey()
     {
-        if (ImGui.BeginTabItem("Combat / AI"))
-        {
-            ImGui.Spacing();
-
-            var rotPlugin = configuration.RotationPlugin;
-            if (ImGui.InputText("Rotation Plugin", ref rotPlugin, 16))
-            {
-                configuration.RotationPlugin = rotPlugin;
-                configuration.Save();
-            }
-            if (ImGui.IsItemHovered())
-            {
-                ImGui.SetTooltip("BMR, VBM, RSR, or WRATH");
-            }
-
-            var rotPluginForay = configuration.RotationPluginForay;
-            if (ImGui.InputText("Rotation Plugin (Foray)", ref rotPluginForay, 16))
-            {
-                configuration.RotationPluginForay = rotPluginForay;
-                configuration.Save();
-            }
-
-            var autoRot = configuration.AutoRotationType;
-            if (ImGui.InputText("Auto Rotation Preset", ref autoRot, 32))
-            {
-                configuration.AutoRotationType = autoRot;
-                configuration.Save();
-            }
-
-            var autoRotDD = configuration.AutoRotationTypeDD;
-            if (ImGui.InputText("Auto Rotation Preset (DD)", ref autoRotDD, 32))
-            {
-                configuration.AutoRotationTypeDD = autoRotDD;
-                configuration.Save();
-            }
-
-            var autoRotFATE = configuration.AutoRotationTypeFATE;
-            if (ImGui.InputText("Auto Rotation Preset (FATE)", ref autoRotFATE, 32))
-            {
-                configuration.AutoRotationTypeFATE = autoRotFATE;
-                configuration.Save();
-            }
-
-            var rotType = configuration.RotationType;
-            if (ImGui.InputText("Rotation Type (Auto/Manual)", ref rotType, 16))
-            {
-                configuration.RotationType = rotType;
-                configuration.Save();
-            }
-
-            var bossModAI = configuration.BossModAI;
-            if (ImGui.InputText("BossMod AI (on/off)", ref bossModAI, 8))
-            {
-                configuration.BossModAI = bossModAI;
-                configuration.Save();
-            }
-
-            var positional = configuration.PositionalInCombat;
-            if (ImGui.InputInt("Positional (0=Front, 1=Rear, 2=Any, 42=Auto)", ref positional))
-            {
-                configuration.PositionalInCombat = positional;
-                configuration.Save();
-            }
-
-            var maxAIDist = configuration.MaxAIDistance;
-            if (ImGui.InputFloat("Max AI Distance (424242=Auto)", ref maxAIDist))
-            {
-                configuration.MaxAIDistance = maxAIDist;
-                configuration.Save();
-            }
-
-            var limitPct = configuration.LimitPct;
-            if (ImGui.InputFloat("LB Threshold % (-1=Off)", ref limitPct))
-            {
-                configuration.LimitPct = limitPct;
-                configuration.Save();
-            }
-
-            ImGui.EndTabItem();
-        }
+        if (!Plugin.ClientState.IsLoggedIn) return "";
+        var charName = Plugin.ObjectTable.LocalPlayer?.Name.ToString() ?? "";
+        var worldName = Plugin.ObjectTable.LocalPlayer?.HomeWorld.Value.Name.ToString() ?? "";
+        return !string.IsNullOrEmpty(charName) && !string.IsNullOrEmpty(worldName)
+            ? $"{charName}@{worldName}"
+            : "";
     }
 
-    private void DrawAutomationTab()
+    private void SyncFrenNameInput()
     {
-        if (ImGui.BeginTabItem("Automation"))
-        {
-            ImGui.Spacing();
-
-            ImGui.Text("Food");
-            var feedMe = configuration.FeedMe;
-            if (ImGui.InputInt("Food Item ID (0=Off)", ref feedMe))
-            {
-                configuration.FeedMe = feedMe;
-                configuration.Save();
-            }
-
-            var feedMeItem = configuration.FeedMeItem;
-            if (ImGui.InputText("Food Item Name", ref feedMeItem, 64))
-            {
-                configuration.FeedMeItem = feedMeItem;
-                configuration.Save();
-            }
-
-            var feedMeSearch = configuration.FeedMeSearch;
-            if (ImGui.Checkbox("Search for Food if Depleted", ref feedMeSearch))
-            {
-                configuration.FeedMeSearch = feedMeSearch;
-                configuration.Save();
-            }
-
-            ImGui.Separator();
-            ImGui.Text("XP / Repair");
-
-            var xpItem = configuration.XpItem;
-            if (ImGui.InputInt("XP Item ID (0=Off)", ref xpItem))
-            {
-                configuration.XpItem = xpItem;
-                configuration.Save();
-            }
-            if (ImGui.IsItemHovered())
-            {
-                ImGui.SetTooltip("Azyma Earring = 41081. Use SimpleTweaks to see item IDs.");
-            }
-
-            var repair = configuration.Repair;
-            if (ImGui.InputInt("Repair (0=No, 1=Self, 2=Inn NPC)", ref repair))
-            {
-                configuration.Repair = repair;
-                configuration.Save();
-            }
-
-            var tornClothes = configuration.TornClothes;
-            if (ImGui.InputInt("Repair At % Durability", ref tornClothes))
-            {
-                configuration.TornClothes = tornClothes;
-                configuration.Save();
-            }
-
-            ImGui.Separator();
-            ImGui.Text("Idle Behavior");
-
-            var idleShitter = configuration.IdleShitter;
-            if (ImGui.InputText("Idle Action", ref idleShitter, 64))
-            {
-                configuration.IdleShitter = idleShitter;
-                configuration.Save();
-            }
-            if (ImGui.IsItemHovered())
-            {
-                ImGui.SetTooltip("Options: list, hfh, nothing, or any /slash command");
-            }
-
-            var idleShitterTic = configuration.IdleShitterTic;
-            if (ImGui.InputInt("Idle Ticks Before Action", ref idleShitterTic))
-            {
-                configuration.IdleShitterTic = idleShitterTic;
-                configuration.Save();
-            }
-
-            ImGui.EndTabItem();
-        }
+        var config = configManager.GetActiveConfig();
+        frenNameInput = config?.FrenName ?? "";
     }
 
-    private void DrawMiscTab()
+    private static void HelpMarker(string desc)
     {
-        if (ImGui.BeginTabItem("Misc"))
+        ImGui.SameLine();
+        ImGui.TextDisabled("(?)");
+        if (ImGui.IsItemHovered())
         {
-            ImGui.Spacing();
-
-            var fulfType = configuration.FulfType;
-            if (ImGui.InputText("Loot Type (unchanged/need/greed/pass)", ref fulfType, 16))
-            {
-                configuration.FulfType = fulfType;
-                configuration.Save();
-            }
-
-            var cbtEdse = configuration.CbtEdse;
-            if (ImGui.InputInt("Enhanced Duty Start/End (0=Off, 1=On)", ref cbtEdse))
-            {
-                configuration.CbtEdse = cbtEdse;
-                configuration.Save();
-            }
-
-            var spamPrinter = configuration.SpamPrinter;
-            if (ImGui.InputInt("Spam Printer (0=Off, 1=On)", ref spamPrinter))
-            {
-                configuration.SpamPrinter = spamPrinter;
-                configuration.Save();
-            }
-
-            ImGui.Separator();
-            ImGui.Spacing();
-
-            var movable = configuration.IsConfigWindowMovable;
-            if (ImGui.Checkbox("Movable Config Window", ref movable))
-            {
-                configuration.IsConfigWindowMovable = movable;
-                configuration.Save();
-            }
-
-            ImGui.EndTabItem();
+            ImGui.BeginTooltip();
+            ImGui.PushTextWrapPos(ImGui.GetFontSize() * 20.0f);
+            ImGui.TextUnformatted(desc);
+            ImGui.PopTextWrapPos();
+            ImGui.EndTooltip();
         }
     }
 }

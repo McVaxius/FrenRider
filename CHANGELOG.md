@@ -149,6 +149,123 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+### Phase 1.1 - UI Redesign & Multi-Account Config (Complete)
+
+#### [0.1.1] - 2026-02-28 @ 10:35 AM EST
+
+**Added:**
+- Multi-account/multi-character configuration system
+  - `FrenRider/Models/CharacterConfig.cs` - Per-character settings (35+ fields with Clone())
+  - `FrenRider/Models/AccountConfig.cs` - Account container (alias, default config, character dictionary)
+  - `FrenRider/Services/ConfigManager.cs` - File I/O for `<accountId>_FrenRider.json` files
+  - Account auto-detection: characters auto-register to accounts on login
+  - Per-account JSON files stored in plugin config directory
+- Left panel in ConfigWindow with character list
+  - Editable account alias at top
+  - DEFAULT CONFIG selectable
+  - Current character highlighted in green
+  - Other characters sorted alphabetically
+  - Clicking any entry populates settings on right side
+- DTR bar integration (`IDtrBar` service)
+  - Shows "FR: On" / "FR: Off" in server info bar
+  - Click DTR entry to toggle main window
+  - Tooltip shows active fren name or disabled status
+  - Checkbox in MainWindow to enable/disable DTR bar
+- (?) help markers next to every setting with detailed tooltips
+- Reset buttons: "Reset All" (all tabs) and "Reset This Page" (current tab only)
+  - Resets character to default config; if default, resets to plugin defaults
+- Fren name auto-capitalization (e.g., "gabe newell@pcmr" -> "Gabe Newell@Pcmr")
+- Party member quick-select dropdown for fren name field
+- Window title updates to show selected character name
+
+**Changed:**
+- Configuration.cs simplified to global settings only (DtrBarEnabled, IsConfigWindowMovable, LastAccountId)
+- All per-character settings moved to CharacterConfig.cs
+- Plugin.cs rewritten with:
+  - ConfigManager integration
+  - DTR bar setup/update
+  - Login event detection with Framework.Update fallback
+  - IObjectTable.LocalPlayer (replaces deprecated IClientState.LocalPlayer)
+- ConfigWindow.cs completely rewritten:
+  - Left panel + right panel layout (200px / rest)
+  - Companion Stance: now dropdown (Free Stance, Defender Stance, Attacker Stance, Healer Stance, Follow)
+  - Cling Type: CBT Autofollow removed, now 4 options (NavMesh, Visland, BossMod Follow, Vanilla Follow)
+  - Combat tab: Rotation Plugin, Rotation Plugin Foray, Rotation Type, BossMod AI, Positional, Follow in Combat all converted to dropdowns
+  - Loot Type: now dropdown (unchanged, need, greed, pass)
+  - Repair: now dropdown (No, Self Repair, Inn NPC)
+  - Enhanced Duty Start/End, Echo Messages: now On/Off dropdowns
+  - Automation and Misc tabs merged into single "Misc" tab
+  - Idle behavior: now 2-tier dropdown (Specific Action / Action From List -> Default List / Custom List)
+  - Tick Rate renamed to "Update Interval" with 0.05-5.0s range and performance warning
+  - Food Item ID removed (plugin version doesn't need it, just name)
+- MainWindow.cs rewritten:
+  - Fren Name now read-only (displays from config, editable only in Settings)
+  - DTR Bar checkbox added next to Enabled
+  - Shows account alias in status section
+  - Fren detection uses name part before @ for partial matching
+
+**Build Results:**
+- `dotnet build --configuration Debug` - SUCCESS
+- 0 errors, 0 warnings
+- Output: `FrenRider/bin/x64/Debug/FrenRider.dll`
+
+**Files Created:**
+- `FrenRider/Models/CharacterConfig.cs`
+- `FrenRider/Models/AccountConfig.cs`
+- `FrenRider/Services/ConfigManager.cs`
+
+**Files Modified:**
+- `FrenRider/Configuration.cs` (simplified to global only)
+- `FrenRider/Plugin.cs` (DTR bar, ConfigManager, login detection)
+- `FrenRider/Windows/ConfigWindow.cs` (complete rewrite)
+- `FrenRider/Windows/MainWindow.cs` (read-only fren, DTR toggle)
+
+**Backups Created:**
+- `backups/Plugin_20260228_102120.cs`
+- `backups/Configuration_20260228_102120.cs`
+- `backups/MainWindow_20260228_102120.cs`
+- `backups/ConfigWindow_20260228_102120.cs`
+
+**Testing Required (User):**
+1. Rebuild or reload plugin in Dalamud
+2. Type `/frenrider` - main window should open
+3. **Verify:** Fren Name is read-only (just text, not editable)
+4. **Verify:** DTR Bar checkbox toggles "FR: Off" in server info bar
+5. **Verify:** Click DTR bar entry toggles main window
+6. **Verify:** Click "Open Settings" - config window has left panel with character list
+7. **Verify:** Your current character appears in green in the left panel
+8. **Verify:** DEFAULT CONFIG is selectable; switching characters changes right panel
+9. **Verify:** Window title shows "Fren Rider Settings - CharName@Server"
+10. **Verify:** (?) icons show tooltips on hover for all settings
+11. **Verify:** "Reset All" / "Reset This Page" buttons visible (red/orange)
+12. **Verify:** Companion Stance is a dropdown (5 options)
+13. **Verify:** Cling Type has 4 options (no CBT)
+14. **Verify:** Combat tab settings are mostly dropdowns
+15. **Verify:** Only 4 tabs: Party/Friend, Distance/Following, Combat/AI, Misc
+16. **Verify:** Fren Name has party member dropdown button next to it
+17. **Verify:** Account alias editable at top of left panel
+18. **Verify:** No crashes or errors in `/xllog`
+19. **Verify:** Config persists after close/reopen (check plugin config directory for `*_FrenRider.json`)
+
+**Known Issues:**
+- Mount selection is still free-text (full mount list from game data planned for future phase)
+- Food item name is still free-text (full item search from game data planned for future phase)
+- Custom idle list editor shows placeholder message (planned for future update)
+- Plugin icon (3 guys on shoulders) not yet created
+- Old Dalamud IPluginConfiguration (FrenRider.json) may conflict with new system on first run - delete old config if issues arise
+
+**Research Notes:**
+- VBM/BMR autorotation presets can be loaded via slash commands:
+  - `/vbm ar set <preset>` for VanillaBossMod
+  - `/bmr ar set <preset>` for BossModReborn
+  - `/bmrai setpresetname <preset>` for BMR AI
+  - This means we CAN inject presets from the plugin via CommandManager
+- IDtrBarEntry is in `Dalamud.Game.Gui.Dtr` namespace
+- OnClick delegate takes `DtrInteractionEvent` parameter (not parameterless)
+- IClientState.LocalPlayer is deprecated in favor of IObjectTable.LocalPlayer or IPlayerState
+
+---
+
 ## Changelog Format
 
 Each entry should include:
