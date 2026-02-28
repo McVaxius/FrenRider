@@ -14,7 +14,7 @@
       "mount"
     ],
     "RepoUrl": "https://github.com/McVaxius/FrenRider",
-    "AssemblyVersion": "0.0.0.1",
+    "AssemblyVersion": "0.10.1",
     "DalamudApiLevel": 14,
     "DownloadLinkInstall": "https://github.com/McVaxius/FrenRider/releases/latest/download/latest.zip",
     "DownloadLinkUpdate": "https://github.com/McVaxius/FrenRider/releases/latest/download/latest.zip",
