@@ -19,7 +19,10 @@ public class CombatService
     private readonly ZoneService zoneService;
 
     private bool wasInCombat;
+    private bool wasInDuty;
     private long lastRotationToggleMs;
+    private long lastPluginCheckMs;
+    private int lastActivePluginIdx = -1;
 
     private static readonly string[] RotationPluginNames = { "BMR", "VBM", "RSR", "WRATH" };
 
@@ -58,13 +61,24 @@ public class CombatService
         }
 
         var inCombat = Plugin.Condition[ConditionFlag.InCombat];
+        var inDuty = Plugin.Condition[ConditionFlag.BoundByDuty];
         var now = Environment.TickCount64;
 
-        // Entered combat
-        if (inCombat && !wasInCombat)
+        // Aggressively ensure non-selected rotation plugins are disabled
+        // In duty: check every 2 seconds to handle config changes
+        // Out of duty: check every 5 seconds
+        var checkInterval = inDuty ? 2000 : 5000;
+        if (now - lastPluginCheckMs > checkInterval)
         {
-            wasInCombat = true;
-            State = CombatState.EnteringCombat;
+            lastPluginCheckMs = now;
+            DisableOtherRotationPlugins(config);
+        }
+
+        // Entered duty (activate rotation immediately)
+        if (inDuty && !wasInDuty)
+        {
+            wasInDuty = true;
+            Plugin.Log.Information("Entered duty - activating rotation");
 
             if (config.RotationType != 2) // 2 = none
             {
@@ -76,20 +90,62 @@ public class CombatService
                 ToggleBossModAI(true);
             }
         }
-        // Left combat
-        else if (!inCombat && wasInCombat)
+        // Left duty (deactivate rotation)
+        else if (!inDuty && wasInDuty)
         {
+            wasInDuty = false;
             wasInCombat = false;
             State = CombatState.LeavingCombat;
             DeactivateRotation(config);
+            Plugin.Log.Information("Left duty - deactivating rotation");
 
             if (config.BossModAI == 0)
             {
                 ToggleBossModAI(false);
             }
         }
-        // Ongoing combat
-        else if (inCombat)
+        // Entered combat (while already in duty or not)
+        else if (inCombat && !wasInCombat)
+        {
+            wasInCombat = true;
+            State = CombatState.EnteringCombat;
+
+            // Only activate if not already active from duty entry
+            if (!inDuty && config.RotationType != 2)
+            {
+                ActivateRotation(config);
+            }
+
+            if (!inDuty && config.BossModAI == 0)
+            {
+                ToggleBossModAI(true);
+            }
+        }
+        // Left combat (but stay active if in duty)
+        else if (!inCombat && wasInCombat)
+        {
+            wasInCombat = false;
+
+            // Only deactivate if NOT in duty
+            if (!inDuty)
+            {
+                State = CombatState.LeavingCombat;
+                DeactivateRotation(config);
+
+                if (config.BossModAI == 0)
+                {
+                    ToggleBossModAI(false);
+                }
+            }
+            else
+            {
+                // Still in duty, just out of combat - keep rotation active
+                State = CombatState.InCombat;
+                StateDetail = $"In duty (out of combat) - rotation active";
+            }
+        }
+        // Ongoing combat or in duty
+        else if (inCombat || inDuty)
         {
             State = CombatState.InCombat;
 
@@ -122,9 +178,14 @@ public class CombatService
             ? config.RotationPluginForay
             : config.RotationPlugin;
 
+        lastActivePluginIdx = pluginIdx;
+
         var pluginName = pluginIdx >= 0 && pluginIdx < RotationPluginNames.Length
             ? RotationPluginNames[pluginIdx]
             : "RSR";
+
+        // Disable other rotation plugins first
+        DisableOtherRotationPlugins(config);
 
         // Send activation commands
         switch (pluginName)
@@ -226,6 +287,48 @@ public class CombatService
     {
         var state = enable ? "on" : "off";
         SendCommand($"/bmrai {state}");
+    }
+
+    private void DisableOtherRotationPlugins(CharacterConfig config)
+    {
+        // Disable all rotation plugins except the currently selected one
+        var pluginIdx = zoneService.CurrentZone == ZoneType.Foray
+            ? config.RotationPluginForay
+            : config.RotationPlugin;
+
+        var activePluginName = (pluginIdx >= 0 && pluginIdx < RotationPluginNames.Length)
+            ? RotationPluginNames[pluginIdx]
+            : "none";
+
+        Plugin.Log.Debug($"DisableOtherRotationPlugins: pluginIdx={pluginIdx}, activePlugin={activePluginName}, isForay={zoneService.CurrentZone == ZoneType.Foray}");
+
+        for (var i = 0; i < RotationPluginNames.Length; i++)
+        {
+            var pluginName = RotationPluginNames[i];
+            
+            if (i == pluginIdx)
+            {
+                Plugin.Log.Debug($"  Skipping {pluginName} (index {i}) - this is the active plugin");
+                continue; // Skip the active plugin
+            }
+
+            Plugin.Log.Debug($"  Disabling {pluginName} (index {i})");
+            switch (pluginName)
+            {
+                case "RSR":
+                    SendCommand("/rotation cancel");
+                    break;
+                case "WRATH":
+                    SendCommand("/wrath auto off");
+                    break;
+                case "BMR":
+                    SendCommand("/bmrai off");
+                    break;
+                case "VBM":
+                    SendCommand("/vbmai off");
+                    break;
+            }
+        }
     }
 
     private void CheckLimitBreak(CharacterConfig config)

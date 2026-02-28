@@ -201,7 +201,13 @@ public class FollowService
     {
         // Check if PLAYER is flying - use larger threshold for flying to reduce command spam
         var selfFlying = Plugin.Condition[ConditionFlag.InFlight];
-        var distanceThreshold = selfFlying ? 5.0f : 1.0f;
+        var inDuty = Plugin.Condition[ConditionFlag.BoundByDuty];
+        
+        // Use larger thresholds to reduce navigation command spam:
+        // - Flying: 5.0 yalms (prevents spam while airborne)
+        // - Duty (ground): 2.5 yalms (prevents slowdowns in dungeons)
+        // - Overworld (ground): 1.0 yalms (tighter following)
+        var distanceThreshold = selfFlying ? 5.0f : (inDuty ? 2.5f : 1.0f);
         
         // Only re-issue nav command if target moved significantly
         if (Vector3.Distance(target, lastNavTarget) < distanceThreshold && isNavigating)
