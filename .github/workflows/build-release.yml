@@ -73,7 +73,7 @@ jobs:
           if [ "${{ github.ref_type }}" == "tag" ]; then
             echo "version=${{ github.ref_name }}" >> $GITHUB_OUTPUT
           else
-            echo "version=v0.0.0.2" >> $GITHUB_OUTPUT
+            echo "version=v0.0.0.3" >> $GITHUB_OUTPUT
           fi
 
       - name: Create Release
