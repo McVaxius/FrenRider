@@ -47,6 +47,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - DTR bar: Restored toggle behavior (toggles enabled state, not window)
 - UI: Mount search field now stays fixed at top while scrolling mount list
 
+**Added:**
+- GitHub Actions workflow for automated releases (`.github/workflows/build-release.yml`)
+- Plugin repository manifest (`repo.json`) for Dalamud custom repo support
+- Comprehensive README.md with installation instructions and feature list
+
 **Changed:**
 - `Plugin` - Added `ITargetManager` service for direct targeting
 - `Plugin.OnLogin()` - Added detailed logging for ContentId and account selection
@@ -775,12 +780,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 18. **Verify:** No crashes or errors in `/xllog`
 19. **Verify:** Config persists after close/reopen (check plugin config directory for `*_FrenRider.json`)
 
-**Known Issues:**
-- Mount selection is still free-text (full mount list from game data planned for future phase)
+**Known Issues / Future Enhancements:**
+- Plugin icon (3 guys on shoulders concept) - **TODO: Requires image file creation**
+  - Format: PNG (64x64 or 128x128)
+  - Location: `FrenRider/icon.png`
+  - Once created, add to `.csproj` as Content and reference in `FrenRider.json`
+- Mount selection uses searchable dropdown (✅ IMPLEMENTED via Lumina mount data)
 - Food item name is still free-text (full item search from game data planned for future phase)
 - Custom idle list editor shows placeholder message (planned for future update)
-- Plugin icon (3 guys on shoulders) not yet created
-- Old Dalamud IPluginConfiguration (FrenRider.json) may conflict with new system on first run - delete old config if issues arise
 
 **Research Notes:**
 - VBM/BMR autorotation presets can be loaded via slash commands:
