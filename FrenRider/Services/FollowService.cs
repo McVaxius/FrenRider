@@ -113,6 +113,29 @@ public class FollowService
             return;
         }
 
+        // Formation mode: override target with formation position
+        var formationTarget = plugin.FormationService.GetFormationTarget();
+        if (formationTarget.HasValue)
+        {
+            var localPlayer = Plugin.ObjectTable.LocalPlayer;
+            if (localPlayer != null)
+            {
+                var formDist = Vector3.Distance(localPlayer.Position, formationTarget.Value);
+                if (formDist <= 1.5f)
+                {
+                    if (isNavigating) StopNavigation(config);
+                    State = FollowState.InRange;
+                    StateDetail = $"Formation slot {plugin.FormationService.AssignedSlot} ({formDist:F1}y)";
+                    return;
+                }
+
+                State = FollowState.Following;
+                StateDetail = $"Formation slot {plugin.FormationService.AssignedSlot} ({formDist:F1}y)";
+                NavigateToPosition(config, formationTarget.Value);
+                return;
+            }
+        }
+
         // Follow
         State = FollowState.Following;
         StateDetail = $"Following ({distance:F1}y, cling {clingDist:F1}y)";
@@ -152,6 +175,11 @@ public class FollowService
         if (ShouldApplySocialDistancing(config))
             target = ApplySocialDistancing(config, target);
 
+        NavigateToPosition(config, target);
+    }
+
+    private void NavigateToPosition(CharacterConfig config, Vector3 target)
+    {
         // Only re-issue nav command if target moved significantly
         if (Vector3.Distance(target, lastNavTarget) < 1.0f && isNavigating)
             return;

@@ -9,6 +9,117 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Phase 9 - Formation System
+
+#### [0.8.0] - 2026-02-28
+
+**Added:**
+- `FormationService` - 8-slot formation grid system:
+  - 8 predefined position offsets (behind fren, fanning out left/right in two rows)
+  - Auto-assigns party slot based on party index (excluding fren)
+  - Calculates world-space formation target from fren's position
+  - Activates when `config.Formation = true`
+- FollowService formation integration:
+  - When formation active, navigates to assigned formation position instead of fren directly
+  - 1.5y threshold for "in position" detection
+  - StateDetail shows formation slot number and distance
+  - Refactored `NavigateToFren` → `NavigateToPosition` for reuse
+
+**Changed:**
+- `FollowService.cs` - Formation target override, extracted `NavigateToPosition` method
+- `Plugin.cs` - Creates FormationService, calls Update in framework loop
+
+**Build Results:**
+- 0 errors, 0 warnings
+
+**Files Created:**
+- `FrenRider/Services/FormationService.cs`
+
+**Files Modified:**
+- `FrenRider/Services/FollowService.cs` - Formation integration
+- `FrenRider/Plugin.cs` - Service wiring
+
+**Testing Required:**
+1. Enable Formation toggle → party members navigate to grid positions
+2. Disable Formation → reverts to normal cling following
+3. Formation slot assignment changes with party composition
+4. StateDetail shows correct slot number
+
+---
+
+### Phase 8 - Automation Features
+
+#### [0.7.0] - 2026-02-28
+
+**Added:**
+- `AutomationService` - Idle action and QoL automation:
+  - Idle action system: performs emotes/actions when standing idle near fren
+  - Tick counter: waits `IdleTicksBeforeAction` ticks before first idle action
+  - Two idle modes: specific action (`IdleAction`) or rotating list
+  - List modes: default built-in list (8 emotes) or custom user list
+  - 30-second minimum between idle actions to prevent spam
+  - Food consumption check framework (60s interval, Well Fed buff check stub)
+  - Repair trigger method (self-repair via `/generalaction "Repair"`, NPC stub)
+  - Zone transition reset clears idle state
+  - Skips idle when in combat or mounted
+- Default idle emote list: /tomescroll, /doze, /sit, /think, /lookout, /stretch, /box, /pushups
+
+**Changed:**
+- `Plugin.cs` - Creates AutomationService, calls Update in framework loop
+
+**Build Results:**
+- 0 errors, 0 warnings
+
+**Files Created:**
+- `FrenRider/Services/AutomationService.cs`
+
+**Files Modified:**
+- `FrenRider/Plugin.cs` - Service wiring
+
+**Testing Required:**
+1. Stand idle near fren → idle action triggers after configured tick count
+2. IdleActionMode=0 uses specific action, =1 uses list
+3. Idle actions don't fire during combat or while mounted
+4. Zone change resets idle counter
+5. Check /xllog for idle action messages
+
+---
+
+### Phase 7 - Zone-Specific Logic
+
+#### [0.6.0] - 2026-02-28
+
+**Added:**
+- FATE detection via FFXIVClientStructs `FateManager`:
+  - `ZoneService.InFate` / `CurrentFateId` properties
+  - Detects FATE join/leave via `FateManager.FateJoined` and `GetCurrentFateId()`
+  - Logs FATE entry/exit events
+- `ZoneService.ZoneChanged` flag for territory transition detection
+  - Fires once per zone change, resets next frame
+  - Logs old → new territory ID
+- Zone transition reset in FollowService and CombatService:
+  - Stops navigation, deactivates rotation, resets state on zone change
+  - Clears social distancing offset and nav target
+- FDistance integration: `config.FDistance` added to effective cling distance when in a FATE
+- FATE preset selection: CombatService uses `AutoRotationTypeFATE` when `InFate` is true
+
+**Changed:**
+- `ZoneService.cs` - Added FATE detection, zone transition tracking, FFXIVClientStructs FateManager import
+- `FollowService.cs` - Zone transition reset, FDistance in FATE cling calculation
+- `CombatService.cs` - Zone transition reset, FATE preset selection
+
+**Build Results:**
+- 0 errors, 0 warnings
+
+**Testing Required:**
+1. Enter a FATE → InFate=true, cling distance increases by FDistance
+2. Leave a FATE → InFate=false, cling returns to normal
+3. Zone change (teleport/duty) → all services reset cleanly
+4. Combat in FATE uses AutoRotationTypeFATE preset
+5. Check /xllog for zone change and FATE join/leave messages
+
+---
+
 ### Phase 6 - Combat System Integration
 
 #### [0.5.0] - 2026-02-28

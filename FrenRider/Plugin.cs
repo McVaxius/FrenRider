@@ -38,6 +38,8 @@ public sealed class Plugin : IDalamudPlugin
     public FollowService FollowService { get; init; }
     public MountService MountService { get; init; }
     public CombatService CombatService { get; init; }
+    public AutomationService AutomationService { get; init; }
+    public FormationService FormationService { get; init; }
     public string[] MountNames { get; private set; } = Array.Empty<string>();
 
     public readonly WindowSystem WindowSystem = new("FrenRider");
@@ -61,6 +63,8 @@ public sealed class Plugin : IDalamudPlugin
         FollowService = new FollowService(this, FrenTracker, ZoneService);
         MountService = new MountService(this, FrenTracker, ZoneService);
         CombatService = new CombatService(this, FrenTracker, ZoneService);
+        AutomationService = new AutomationService(this, FrenTracker, ZoneService);
+        FormationService = new FormationService(this, FrenTracker);
 
         ConfigWindow = new ConfigWindow(this);
         MainWindow = new MainWindow(this);
@@ -180,6 +184,8 @@ public sealed class Plugin : IDalamudPlugin
         FollowService.Update();
         MountService.Update();
         CombatService.Update();
+        AutomationService.Update();
+        FormationService.Update();
     }
 
     public void SetupDtrBar()
