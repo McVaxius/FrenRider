@@ -132,11 +132,7 @@ public class MountService
             StateDetail = "";
         }
 
-        // Gysahl Green: summon companion chocobo if configured and not in combat/mounted
-        if (config.ForceGysahl && !selfMounted && !inCombat && !fren.IsMounted && fren.IsVisible)
-        {
-            // Companion summoning handled via separate cooldown/check in future
-        }
+        // Companion summoning is handled by AutomationService.CheckCompanion()
     }
 
     private void MountSelf(CharacterConfig config)
@@ -205,23 +201,19 @@ public class MountService
     }
 
     /// <summary>
-    /// Summon chocobo companion via Gysahl Greens.
+    /// Summon chocobo companion via Gysahl Greens (manual trigger).
+    /// Auto-summoning is handled by AutomationService.CheckCompanion().
     /// </summary>
     public void SummonCompanion(CharacterConfig config)
     {
-        var stanceCmd = config.CompanionStrat switch
+        if (GameHelpers.GetInventoryItemCount(GameHelpers.GysahlGreensItemId) <= 0)
         {
-            "Defender Stance" => "/cstance defender",
-            "Attacker Stance" => "/cstance attacker",
-            "Healer Stance" => "/cstance healer",
-            "Follow" => "/cstance follow",
-            _ => "/cstance free",
-        };
+            Plugin.Log.Warning("SummonCompanion: No Gysahl Greens in inventory");
+            return;
+        }
 
-        SendCommand("/gysahlgreens");
-        // Set stance after a delay (companion needs time to spawn)
-        // For now, just send stance command — the game queues it
-        SendCommand(stanceCmd);
+        Plugin.Log.Information("SummonCompanion: Using Gysahl Greens");
+        GameHelpers.UseItem(GameHelpers.GysahlGreensItemId);
     }
 
     private static unsafe void SendCommand(string command)

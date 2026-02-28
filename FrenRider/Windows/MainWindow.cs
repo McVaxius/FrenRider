@@ -200,6 +200,28 @@ public class MainWindow : Window, IDisposable
                 }
             }
 
+            // Food status
+            if (!string.IsNullOrEmpty(auto.FoodStatus))
+            {
+                var foodColor = auto.FoodStatus.StartsWith("Well Fed")
+                    ? new Vector4(0.4f, 1f, 0.4f, 1)
+                    : auto.FoodStatus.Contains("Ate") || auto.FoodStatus.Contains("Switched")
+                        ? new Vector4(1f, 0.9f, 0.4f, 1)
+                        : new Vector4(1f, 0.5f, 0.3f, 1);
+                ImGui.TextColored(foodColor, $"Food: {auto.FoodStatus}");
+            }
+
+            // Companion status
+            if (!string.IsNullOrEmpty(auto.CompanionStatus))
+            {
+                var compColor = auto.CompanionStatus.StartsWith("Companion:")
+                    ? new Vector4(0.4f, 1f, 0.8f, 1)
+                    : auto.CompanionStatus.Contains("Summoning")
+                        ? new Vector4(1f, 1f, 0.4f, 1)
+                        : new Vector4(0.8f, 0.6f, 0.4f, 1);
+                ImGui.TextColored(compColor, auto.CompanionStatus);
+            }
+
             // Formation info
             var formation = plugin.FormationService;
             if (formation.IsActive)

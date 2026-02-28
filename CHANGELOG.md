@@ -9,6 +9,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Phase 11 - Food Eating & Chocobo Summoning
+
+#### [0.10.0] - 2026-02-28
+
+**Added:**
+- **Food eating automation** (AutomationService + GameHelpers):
+  - Checks Well Fed buff (status ID 48) remaining time every 10 seconds
+  - If buff is below 90 seconds, automatically uses configured food item from inventory
+  - Resolves food item name to ID via known food list (fast) or Lumina game data (fallback)
+  - Food search: if configured food runs out and `FeedMeSearch` is enabled, scans inventory for best alternative from priority list (Orange Juice → Mate Cookie)
+  - Uses `InventoryManager.GetInventoryItemCount()` for inventory checks
+  - Uses `ActionManager.UseAction(ActionType.Item, itemId)` for item usage
+  - Uses `StatusManager` on player character for buff checking
+  - Only eats when alive, not in combat, and not simultaneously in duty + combat
+  - Food item ID is cached and re-resolved on zone change or config change
+- **Chocobo companion summoning** (AutomationService + GameHelpers):
+  - When `ForceGysahl` is enabled, checks every 15 seconds if companion needs summoning
+  - Uses Gysahl Greens (item ID 4868) via `ActionManager.UseAction`
+  - Checks companion timer via `UIState.Buddy.CompanionInfo.TimeLeft`
+  - Only summons when: not mounted, not in duty, not in sanctuary, buddy time < 900s (15 min)
+  - Sanctuary detection via `ActionManager.GetActionStatus(GeneralAction, 9)` (Mount action availability)
+  - Deferred companion stance setting: sends `/cac "stance"` command 3 seconds after summoning
+  - Supports all stances: Free Stance, Defender, Attacker, Healer, Follow
+- **GameHelpers.cs** - New static unsafe helper class:
+  - `GetInventoryItemCount(uint itemId)` - NQ + HQ inventory count
+  - `GetStatusTimeRemaining(uint statusId)` - player buff remaining time
+  - `UseItem(uint itemId)` - use item via ActionManager with status check
+  - `GetBuddyTimeRemaining()` - companion chocobo timer
+  - `IsInSanctuary()` - sanctuary detection
+  - `LookupFoodItemId(string name)` - Lumina item name → ID lookup
+  - `FindBestAvailableFood()` - scan inventory for best food from priority list
+  - `IsPlayerAlive()` - HP > 0 check
+- **MainWindow**: Food status and companion status display with color-coded indicators
+- **MountService**: Updated `SummonCompanion()` to use `GameHelpers.UseItem()` instead of non-existent `/gysahlgreens` command
+
+**Changed:**
+- Food check interval reduced from 60s to 10s for faster buff refresh
+- Companion summoning moved from MountService to AutomationService for proper lifecycle management
+- AutomationService now exposes `FoodStatus` and `CompanionStatus` properties for UI display
+- Added `InvalidateFoodCache()` method for config change handling
+
 ### Phase 10.1 - Bug Fixes
 
 #### [0.9.1] - 2026-02-28
