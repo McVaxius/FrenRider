@@ -257,22 +257,22 @@
 
 ---
 
-### Phase 4: Basic Following System
+### Phase 4: Basic Following System ✓ (COMPLETE)
 **Goal:** Implement core following mechanics (non-combat)
 
 **Tasks:**
-1. Integrate with VNavmesh plugin API
-2. Implement basic pathfinding to fren position
-3. Add cling distance trigger logic
-4. Create social distancing calculations
-5. Implement max distance checks
-6. Add zone type detection (outdoor/indoor/duty)
+1. ~~Integrate with VNavmesh plugin API~~ ✓ (ICommandManager.ProcessCommand for /vnav, /visland, /bmr, /follow)
+2. ~~Implement basic pathfinding to fren position~~ ✓ (FollowService.NavigateToFren)
+3. ~~Add cling distance trigger logic~~ ✓ (effective cling = base + DD extra + social distancing)
+4. ~~Create social distancing calculations~~ ✓ (random X/Z offset, regenerated every 5s)
+5. ~~Implement max distance checks~~ ✓ (standard + foray-specific max distances)
+6. ~~Add zone type detection (outdoor/indoor/duty)~~ ✓ (ZoneService: condition flags + territory ID sets)
 
 **Deliverables:**
-- Character follows fren when distance > cling
-- Stops at appropriate distance
-- Social distancing works in outdoor zones
-- Doesn't follow beyond max distance
+- ~~Character follows fren when distance > cling~~ ✓
+- ~~Stops at appropriate distance~~ ✓
+- ~~Social distancing works in outdoor zones~~ ✓
+- ~~Doesn't follow beyond max distance~~ ✓
 
 **Testing Required:**
 - Following works in overworld

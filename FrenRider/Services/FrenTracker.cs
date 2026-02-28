@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 
 namespace FrenRider.Services;
 
@@ -88,6 +89,19 @@ public class FrenTracker
                     info.Position = obj.Position;
                     info.DistanceToPlayer = Vector3.Distance(localPlayer.Position, obj.Position);
                     info.IsVisible = true;
+
+                    // Mount detection via FFXIVClientStructs
+                    try
+                    {
+                        unsafe
+                        {
+                            var chara = (Character*)obj.Address;
+                            info.IsMounted = chara->IsMounted();
+                            info.MountId = chara->Mount.MountId;
+                        }
+                    }
+                    catch { /* Mount data inaccessible */ }
+
                     break;
                 }
             }
@@ -136,6 +150,8 @@ public class FrenTracker
                     ClassJobName = member.ClassJobName,
                     Role = member.Role,
                     InParty = true,
+                    IsMounted = member.IsMounted,
+                    MountId = member.MountId,
                 };
                 return;
             }
@@ -150,7 +166,7 @@ public class FrenTracker
             if (obj == localPlayer) continue;
             if (!objName.Contains(searchName, StringComparison.OrdinalIgnoreCase)) continue;
 
-            Fren = new FrenState
+            var frenState = new FrenState
             {
                 Name = objName,
                 Position = obj.Position,
@@ -159,6 +175,20 @@ public class FrenTracker
                 IsVisible = true,
                 InParty = false,
             };
+
+            // Mount detection
+            try
+            {
+                unsafe
+                {
+                    var chara = (Character*)obj.Address;
+                    frenState.IsMounted = chara->IsMounted();
+                    frenState.MountId = chara->Mount.MountId;
+                }
+            }
+            catch { /* Mount data inaccessible */ }
+
+            Fren = frenState;
             return;
         }
 
@@ -218,6 +248,8 @@ public class FrenTracker
         public string ClassJobName { get; set; } = "";
         public string Role { get; set; } = "";
         public bool InParty { get; set; }
+        public bool IsMounted { get; set; }
+        public ushort MountId { get; set; }
     }
 
     public class PartyMemberState
@@ -231,5 +263,7 @@ public class FrenTracker
         public string Role { get; set; } = "";
         public int PartyIndex { get; set; }
         public bool IsVisible { get; set; }
+        public bool IsMounted { get; set; }
+        public ushort MountId { get; set; }
     }
 }

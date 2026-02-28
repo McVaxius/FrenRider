@@ -9,6 +9,70 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Phase 4 - Basic Following System
+
+#### [0.3.0] - 2026-02-28
+
+**Added:**
+- `FollowService` - Core following state machine with 5 states:
+  - Idle: disabled / no fren / fren not visible
+  - Following: actively navigating to fren via configured nav plugin
+  - InRange: within cling distance, navigation stopped
+  - TooFar: beyond max distance, navigation stopped
+  - InCombat: combat detected, follow paused based on FollowInCombat config
+- `ZoneService` - Zone type detection using condition flags + territory ID sets:
+  - Overworld, Duty, DeepDungeon, Foray detection
+  - Indoor/outdoor classification
+  - Deep dungeon IDs: PotD, HoH, Eureka Orthos
+  - Foray IDs: Eureka zones, Bozja, Zadnor
+- Navigation command dispatch via `ICommandManager.ProcessCommand()`:
+  - VNavmesh: `/vnav moveto X Y Z` / `/vnav stop`
+  - Visland: `/visland moveto X Y Z` / `/visland stop`
+  - BossMod Follow: `/bmr follow`
+  - Vanilla Follow: `/follow` (no explicit stop)
+- Cling distance logic:
+  - Base cling from config + DD extra distance when in deep dungeons
+  - Social distancing added to effective cling distance
+- Max distance enforcement:
+  - Standard max distance for overworld/duty
+  - Foray-specific max distance for Eureka/Bozja
+- Social distancing:
+  - Random X/Z offset regenerated every 5 seconds for natural movement
+  - Only active outdoors (or indoors if config allows)
+  - Offset persists between ticks to avoid jitter
+- Navigation re-issue threshold: only sends new command if target moved >1y
+- MainWindow now shows:
+  - Follow state with color coding (blue=following, green=in range, orange=too far, red=combat)
+  - State detail text (distance, cling, max info)
+  - Zone type and territory ID
+
+**Changed:**
+- `Plugin.cs` - Creates ZoneService + FollowService, calls Update in framework loop
+- `MainWindow.cs` - Added follow state and zone info display
+
+**Build Results:**
+- 0 errors, 0 warnings
+
+**Files Created:**
+- `FrenRider/Services/ZoneService.cs`
+- `FrenRider/Services/FollowService.cs`
+
+**Files Modified:**
+- `FrenRider/Plugin.cs` - Service wiring
+- `FrenRider/Windows/MainWindow.cs` - Status display
+
+**Testing Required:**
+1. Enable plugin with fren in party → Follow state changes from Idle to Following/InRange
+2. Walk away from fren → state changes to Following, nav commands sent
+3. Walk back close → state changes to InRange, nav stops
+4. Walk very far → state changes to TooFar
+5. Enter combat → state changes to InCombat (if FollowInCombat=No)
+6. Enter a duty → zone type shows Duty, uses ClingTypeDuty
+7. Check /xllog for nav commands and any warnings
+8. Verify VNavmesh `/vnav moveto` commands work when VNavmesh is installed
+
+---
+
 ### Phase 3.1 - In-Game Testing Feedback Fixes
 
 #### [0.2.1] - 2026-02-28
