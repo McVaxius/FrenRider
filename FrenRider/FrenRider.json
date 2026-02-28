@@ -1,0 +1,14 @@
+{
+  "Author": "McVaxius",
+  "Name": "Fren Rider",
+  "Punchline": "Multiboxing follow and automation companion for FFXIV.",
+  "Description": "Converts the frenrider Lua script into a native Dalamud plugin for managing 2+ characters in various situations. Follow party members, auto-mount, combat integration, and more. Use /frenrider to open.",
+  "ApplicableVersion": "any",
+  "Tags": [
+    "multibox",
+    "follow",
+    "automation",
+    "party",
+    "mount"
+  ]
+}

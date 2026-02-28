@@ -1,0 +1,165 @@
+# Fren Rider - Git Ignore File
+
+## Build Outputs
+bin/
+obj/
+*.dll
+*.exe
+*.pdb
+*.cache
+
+## Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
+
+## Rider
+.idea/
+*.sln.iml
+
+## Backup Files
+backups/
+*.backup
+*.bak
+*.old
+*~
+
+## Development Notes (Not for End Users)
+KNOWLEDGE_BASE.md
+dev-notes.md
+notes.txt
+TODO.txt
+
+## Configuration Files (Local Only)
+*.ini
+config.json
+settings.json
+
+## Logs
+logs/
+*.log
+
+## Temporary Files
+temp/
+tmp/
+*.tmp
+
+## OS Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+## Package Manager
+packages/
+*.nupkg
+
+## Test Files
+test-results/
+TestResults/
+
+## Documentation Drafts
+*-draft.md
+*-wip.md
+
+## Personal Settings
+personal/
+local/
+
+## Compiled Documentation
+*.pdf
+*.docx
+
+## IDE Specific
+*.swp
+*.swo
+*~
+
+## NuGet
+*.nuget.props
+*.nuget.targets
+
+## Build Results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+## Visual Studio Code
+.vscode/
+*.code-workspace
+
+## MonoDevelop
+*.pidb
+*.userprefs
+
+## Xamarin
+*.apk
+*.aab
+
+## Windows Installer
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+
+## JetBrains Rider
+.idea/
+*.sln.iml
+
+## User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+## Mono auto generated files
+mono_crash.*
+
+## Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+## Folder config file
+Desktop.ini
+
+## Recycle Bin
+$RECYCLE.BIN/
+
+## Mac
+.DS_Store
+.AppleDouble
+.LSOverride
+
+## Thumbnails
+._*
+
+## Files that might appear in the root
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+## Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk

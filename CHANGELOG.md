@@ -1,0 +1,244 @@
+# Fren Rider - Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+---
+
+## [Unreleased]
+
+### Phase 0 - Project Initialization (Current)
+
+#### [0.0.1] - 2026-02-28 @ 03:19 AM EST
+
+**Added:**
+- Initial project documentation structure
+- README.md with project description and goals
+- PROJECT_PLAN.md with comprehensive development roadmap
+- KNOWLEDGE_BASE.md with technical reference (gitignored)
+- how-to-import-plugins.md with user installation guide
+- .gitignore with appropriate exclusions
+- CHANGELOG.md (this file)
+- Git repository initialized
+
+**Files Created:**
+- `d:\temp\FrenRider\README.MD`
+- `d:\temp\FrenRider\PROJECT_PLAN.md`
+- `d:\temp\FrenRider\KNOWLEDGE_BASE.md`
+- `d:\temp\FrenRider\how-to-import-plugins.md`
+- `d:\temp\FrenRider\.gitignore`
+- `d:\temp\FrenRider\CHANGELOG.md`
+
+**Research Completed:**
+- Analyzed SamplePlugin template structure
+- Reviewed frenrider_McVaxius.lua script (v5)
+- Studied dfunc.lua utility library
+- Examined SomethingNeedDoing plugin architecture
+- Documented 50+ configuration variables
+- Identified 11 development phases
+- Mapped Lua-to-C# translation requirements
+
+**Technical Decisions:**
+- Framework: .NET Core 8 with Dalamud
+- Language: C#
+- UI: ImGui.NET
+- Config: JSON-based (IPluginConfiguration)
+- Navigation: VNavmesh primary, Visland secondary
+- Combat: Multi-plugin support (BMR/VBM/RSR/Wrath)
+
+**Next Steps:**
+- User review and approval of project plan
+- Begin Phase 1: Basic Plugin Structure
+- Clone SamplePlugin template
+- Rename to FrenRider
+- Test initial plugin load
+
+**Testing Required:**
+- None yet (documentation phase)
+
+**Notes:**
+- Project scope: Convert Lua script to native Dalamud plugin
+- Target: Multiboxing support for 2+ characters
+- Original script: ~1000+ lines of Lua
+- Estimated timeline: 18-30 development sessions
+
+---
+
+### Phase 1 - Basic Plugin Structure (Complete)
+
+#### [0.1.0] - 2026-02-28 @ 03:32 AM EST
+
+**Added:**
+- Complete plugin project structure based on SamplePlugin template
+- `FrenRider.sln` - Visual Studio solution file
+- `FrenRider/FrenRider.csproj` - Project file using Dalamud.NET.Sdk/14.0.2
+- `FrenRider/FrenRider.json` - Plugin manifest with metadata
+- `FrenRider/Plugin.cs` - Main plugin class with:
+  - Dalamud service injection (ClientState, Framework, PartyList, Condition, ChatGui, ObjectTable, etc.)
+  - `/frenrider` slash command registration
+  - WindowSystem with MainWindow and ConfigWindow
+  - Proper Dispose pattern for cleanup
+- `FrenRider/Configuration.cs` - Full configuration class with all 35+ settings from original Lua script:
+  - Party/Friend settings (FrenName, FlyYouFools, FoolFlier, CompanionStrat, etc.)
+  - Distance/Following settings (Cling, ClingType, SocialDistancing, MaxBistance, etc.)
+  - Combat/AI settings (RotationPlugin, AutoRotationType, Positional, etc.)
+  - Automation settings (FeedMe, XpItem, Repair, IdleShitter, etc.)
+  - Misc settings (FulfType, SpamPrinter, CbtEdse)
+- `FrenRider/Windows/MainWindow.cs` - Main UI window with:
+  - Enable/Disable toggle
+  - Fren Name input
+  - Live status display (logged in, party count, fren detection, zone ID)
+  - Settings button
+- `FrenRider/Windows/ConfigWindow.cs` - Configuration UI with tabbed layout:
+  - Party/Friend tab
+  - Distance/Following tab
+  - Combat/AI tab
+  - Automation tab
+  - Misc tab
+  - All settings save immediately on change
+
+**Implementation Details:**
+- Used Dalamud.NET.Sdk v14.0.2 (matches current SamplePlugin template)
+- All SamplePlugin references renamed to FrenRider
+- Namespace: `FrenRider` with `FrenRider.Windows` sub-namespace
+- Configuration uses JSON serialization via `IPluginConfiguration`
+- All original Lua config variables mapped to C# properties with matching defaults
+- ImGui UI uses tabbed interface for organized settings
+- MainWindow shows real-time party detection and fren name matching
+
+**Build Results:**
+- `dotnet restore` - SUCCESS
+- `dotnet build --configuration Debug` - SUCCESS
+- Output: `FrenRider/bin/x64/Debug/FrenRider.dll` (37,376 bytes)
+- Output: `FrenRider/bin/x64/Debug/FrenRider.json` (674 bytes)
+- 0 errors, 0 warnings
+
+**Testing Performed:**
+- Compilation verified - no errors or warnings
+- Output DLL produced correctly
+- JSON manifest included in output
+
+**Testing Required (User):**
+1. Open FFXIV with XIVLauncher/Dalamud
+2. Go to `/xlsettings` → Experimental → Dev Plugin Locations
+3. Add the full path: `D:\temp\FrenRider\FrenRider\bin\x64\Debug`
+4. Go to `/xlplugins` → Dev Tools → Installed Dev Plugins
+5. Enable "Fren Rider"
+6. Type `/frenrider` in chat
+7. **Verify:** Main window opens showing status info
+8. **Verify:** Click "Open Settings" → Config window opens with 5 tabs
+9. **Verify:** Change Fren Name → close and reopen → value persists
+10. **Verify:** No crashes or errors in `/xllog`
+
+**Known Issues:**
+- Plugin is UI-only at this point, no following/combat logic yet
+- Configuration values are saved but not yet used by any system
+- Party detection shown in UI but no action taken on it
+
+**Files Created:**
+- `FrenRider.sln`
+- `FrenRider/FrenRider.csproj`
+- `FrenRider/FrenRider.json`
+- `FrenRider/Plugin.cs`
+- `FrenRider/Configuration.cs`
+- `FrenRider/Windows/MainWindow.cs`
+- `FrenRider/Windows/ConfigWindow.cs`
+- `backups/` (empty directory for future backups)
+
+---
+
+## Changelog Format
+
+Each entry should include:
+
+### [Version] - YYYY-MM-DD @ HH:MM AM/PM TZ
+
+**Added:**
+- New features or files
+
+**Changed:**
+- Modifications to existing functionality
+
+**Fixed:**
+- Bug fixes
+
+**Removed:**
+- Removed features or files
+
+**Deprecated:**
+- Soon-to-be removed features
+
+**Security:**
+- Security-related changes
+
+**Files Modified:**
+- List of files changed with brief description
+
+**Implementation Details:**
+- Technical details of what was implemented
+- Why certain approaches were chosen
+- Any deviations from plan
+
+**Testing Performed:**
+- What was tested
+- Results of testing
+- Any issues found
+
+**Testing Required (User):**
+- Specific things user should test
+- Expected behavior
+- How to verify functionality
+
+**Known Issues:**
+- Any bugs or limitations discovered
+- Workarounds if available
+
+**Performance Impact:**
+- FPS impact (if measurable)
+- Memory usage changes
+- CPU usage notes
+
+---
+
+## Version Numbering
+
+**Format:** MAJOR.MINOR.PATCH
+
+- **MAJOR:** Incompatible API changes or complete rewrites
+- **MINOR:** New functionality in backwards-compatible manner
+- **PATCH:** Backwards-compatible bug fixes
+
+**Development Phases:**
+- 0.0.x - Phase 0 (Documentation)
+- 0.1.x - Phase 1 (Basic Structure)
+- 0.2.x - Phase 2 (Configuration)
+- 0.3.x - Phase 3 (Party Detection)
+- 0.4.x - Phase 4 (Following System)
+- 0.5.x - Phase 5 (Mount System)
+- 0.6.x - Phase 6 (Combat Integration)
+- 0.7.x - Phase 7 (Zone Logic)
+- 0.8.x - Phase 8 (Automation)
+- 0.9.x - Phase 9 (Formation - Optional)
+- 0.10.x - Phase 10 (Polish)
+- 1.0.0 - First stable release
+- 1.x.x - Phase 11+ (Advanced Features)
+
+---
+
+## Backup Policy
+
+Before editing any file:
+1. Create timestamped backup in `/backups/` folder
+2. Format: `filename_YYYYMMDD_HHMMSS.ext`
+3. Keep last 10 backups per file
+4. Backups are gitignored
+
+Example:
+- Original: `Plugin.cs`
+- Backup: `backups/Plugin_20260228_031900.cs`
+
+---
+
+*This changelog will be updated with every change to the project.*
