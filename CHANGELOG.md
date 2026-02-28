@@ -11,6 +11,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Phase 11 - Food Eating & Chocobo Summoning
 
+#### [0.10.1] - 2026-02-28
+
+**Fixed:**
+- **CRITICAL: Item usage now works properly**:
+  - Added `extraParam: 65535` to `ActionManager.UseAction()` for items (required parameter from AutoDuty)
+  - Added proper casting check (`player.IsCasting`) before item usage
+  - Added occupied state checks (cutscene, quest event, etc.) before item usage
+  - Fixed deprecated `IClientState.LocalPlayer` warnings by using `IObjectTable.LocalPlayer`
+- **Throttling to prevent action spam**:
+  - Food eating: 5-second cooldown between attempts, 20-second delay after success
+  - Companion summoning: 5-second cooldown between attempts, 20-second delay after success
+  - Prevents rapid-fire attempts that cause action cancellation
+  - Status display shows cooldown timer when throttled
+- **Self-repair implementation** (from AutoDuty):
+  - Added `GameHelpers.NeedsRepair(conditionPercent)` - checks equipped gear durability
+  - Added `GameHelpers.UseRepairAction()` - uses General Action 6 (Repair with dark matter)
+  - Updated `AutomationService.TriggerRepair()` to use new repair methods
+  - Respects `TornClothes` config for repair threshold
+  - NPC repair remains unimplemented (requires navigation + ATK interaction)
+
+**Changed:**
+- `GameHelpers.UseItem()` now checks player state before attempting item usage
+- Food/companion status messages now show throttle cooldown timers
+- Improved logging: changed failed attempts from `Information` to `Debug` level
+
 #### [0.10.0] - 2026-02-28
 
 **Added:**

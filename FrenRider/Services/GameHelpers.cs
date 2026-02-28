@@ -79,24 +79,54 @@ public static class GameHelpers
 
     /// <summary>
     /// Use an item from inventory by item ID.
+    /// Mirrors AutoDuty's approach: uses extraParam 65535 and checks for casting/occupied state.
     /// </summary>
     public static unsafe bool UseItem(uint itemId)
     {
         try
         {
+            var player = Plugin.ObjectTable.LocalPlayer;
+            if (player == null)
+            {
+                Plugin.Log.Warning($"UseItem({itemId}): LocalPlayer is null");
+                return false;
+            }
+
+            // Check if player is casting
+            if (player.IsCasting)
+            {
+                Plugin.Log.Debug($"UseItem({itemId}): Player is casting, skipping");
+                return false;
+            }
+
+            // Check if player is occupied (in cutscene, etc)
+            if (Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.OccupiedInQuestEvent] ||
+                Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.OccupiedInCutSceneEvent] ||
+                Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.Occupied33] ||
+                Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.Occupied39])
+            {
+                Plugin.Log.Debug($"UseItem({itemId}): Player is occupied, skipping");
+                return false;
+            }
+
             var am = ActionManager.Instance();
-            if (am == null) return false;
+            if (am == null)
+            {
+                Plugin.Log.Warning($"UseItem({itemId}): ActionManager is null");
+                return false;
+            }
 
             // Check if the action is ready
             var status = am->GetActionStatus(ActionType.Item, itemId);
             if (status != 0)
             {
-                Plugin.Log.Warning($"UseItem({itemId}): ActionStatus={status}, not ready");
+                Plugin.Log.Debug($"UseItem({itemId}): ActionStatus={status}, not ready");
                 return false;
             }
 
-            var result = am->UseAction(ActionType.Item, itemId);
-            Plugin.Log.Information($"UseItem({itemId}): result={result}");
+            // Use item with extraParam 65535 (required for item usage)
+            var result = am->UseAction(ActionType.Item, itemId, extraParam: 65535);
+            Plugin.Log.Information($"UseItem({itemId}): UseAction result={result}");
             return result;
         }
         catch (Exception ex)
@@ -198,5 +228,89 @@ public static class GameHelpers
         var player = Plugin.ObjectTable.LocalPlayer;
         if (player == null) return false;
         return player.CurrentHp > 0;
+    }
+
+    /// <summary>
+    /// Check if any equipped gear needs repair (below specified condition percentage).
+    /// </summary>
+    public static unsafe bool NeedsRepair(int conditionPercent = 0)
+    {
+        try
+        {
+            var im = InventoryManager.Instance();
+            if (im == null) return false;
+
+            // Check equipped gear slots
+            var equippedContainer = im->GetInventoryContainer(InventoryType.EquippedItems);
+            if (equippedContainer == null) return false;
+
+            for (var i = 0; i < equippedContainer->Size; i++)
+            {
+                var item = equippedContainer->GetInventorySlot(i);
+                if (item == null || item->ItemId == 0) continue;
+
+                // Check condition (durability)
+                if (item->Condition < conditionPercent)
+                    return true;
+            }
+
+            return false;
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log.Error($"NeedsRepair({conditionPercent}) failed: {ex.Message}");
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Use the Repair general action (self-repair with dark matter).
+    /// General Action 6 = Repair.
+    /// </summary>
+    public static unsafe bool UseRepairAction()
+    {
+        try
+        {
+            var player = Plugin.ObjectTable.LocalPlayer;
+            if (player == null)
+            {
+                Plugin.Log.Warning("UseRepairAction: LocalPlayer is null");
+                return false;
+            }
+
+            // Check if player is casting
+            if (player.IsCasting)
+            {
+                Plugin.Log.Debug("UseRepairAction: Player is casting, skipping");
+                return false;
+            }
+
+            // Check if player is occupied
+            if (Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.OccupiedInQuestEvent] ||
+                Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.OccupiedInCutSceneEvent] ||
+                Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.Occupied33] ||
+                Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.Occupied39])
+            {
+                Plugin.Log.Debug("UseRepairAction: Player is occupied, skipping");
+                return false;
+            }
+
+            var am = ActionManager.Instance();
+            if (am == null)
+            {
+                Plugin.Log.Warning("UseRepairAction: ActionManager is null");
+                return false;
+            }
+
+            // Use General Action 6 (Repair)
+            var result = am->UseAction(ActionType.GeneralAction, 6);
+            Plugin.Log.Information($"UseRepairAction: UseAction result={result}");
+            return result;
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log.Error($"UseRepairAction failed: {ex.Message}");
+            return false;
+        }
     }
 }

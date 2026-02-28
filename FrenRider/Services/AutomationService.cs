@@ -13,7 +13,9 @@ public class AutomationService
     private int idleTickCounter;
     private long lastIdleActionMs;
     private long lastFoodCheckMs;
+    private long lastFoodAttemptMs;
     private long lastCompanionCheckMs;
+    private long lastCompanionAttemptMs;
     private long companionStanceCooldownMs;
     private int idleListIndex;
 
@@ -193,14 +195,30 @@ public class AutomationService
             // Not in duty or not in combat — safe to eat (matches Lua: Condition[34]==false or Condition[26]==false)
             var inDuty = Plugin.Condition[ConditionFlag.BoundByDuty];
             var inCombat = Plugin.Condition[ConditionFlag.InCombat];
+            var now = Environment.TickCount64;
 
             if (!inDuty || !inCombat)
             {
+                // Throttle: only attempt once per 5 seconds to avoid spam
+                if (now - lastFoodAttemptMs < 5000)
+                {
+                    FoodStatus = $"Need food (cooldown {(5000 - (now - lastFoodAttemptMs)) / 1000.0:F1}s)";
+                    return;
+                }
+
+                lastFoodAttemptMs = now;
                 Plugin.Log.Information($"Eating food: {resolvedFoodItemName} (ID={resolvedFoodItemId}, count={count}, wellFed={wellFedRemaining:F1}s)");
                 var result = GameHelpers.UseItem(resolvedFoodItemId);
-                FoodStatus = result
-                    ? $"Ate {resolvedFoodItemName} ({count - 1} left)"
-                    : $"Failed to eat {resolvedFoodItemName}";
+                if (result)
+                {
+                    FoodStatus = $"Ate {resolvedFoodItemName} ({count - 1} left)";
+                    // Success - don't check again for 30 seconds to let buff apply
+                    lastFoodCheckMs = now + 20000; // Add 20s to the next check time
+                }
+                else
+                {
+                    FoodStatus = $"Failed to eat {resolvedFoodItemName}";
+                }
             }
             else
             {
@@ -336,7 +354,15 @@ public class AutomationService
             return;
         }
 
+        // Throttle: only attempt once per 5 seconds to avoid spam
+        if (now - lastCompanionAttemptMs < 5000)
+        {
+            CompanionStatus = $"Need companion (cooldown {(5000 - (now - lastCompanionAttemptMs)) / 1000.0:F1}s)";
+            return;
+        }
+
         // Summon companion!
+        lastCompanionAttemptMs = now;
         Plugin.Log.Information($"Summoning companion chocobo (buddyTime={buddyTime:F1}s, greens={greensCount})");
         var result = GameHelpers.UseItem(GameHelpers.GysahlGreensItemId);
         if (result)
@@ -346,6 +372,9 @@ public class AutomationService
             // Set stance after a short delay (companion needs to spawn)
             // The actual stance command fires from Update() when cooldown expires
             companionStanceCooldownMs = now + 3000; // 3 seconds
+            
+            // Success - don't check again for 30 seconds to let companion spawn
+            lastCompanionCheckMs = now + 20000; // Add 20s to the next check time
         }
         else
         {
@@ -378,12 +407,23 @@ public class AutomationService
     {
         switch (config.Repair)
         {
-            case 1: // Self repair
-                SendCommand("/generalaction \"Repair\"");
-                Plugin.Log.Information("Triggered self repair");
+            case 1: // Self repair with dark matter
+                if (GameHelpers.NeedsRepair(config.TornClothes))
+                {
+                    Plugin.Log.Information($"Triggering self repair (condition < {config.TornClothes}%)");
+                    var result = GameHelpers.UseRepairAction();
+                    if (result)
+                    {
+                        Plugin.Log.Information("Self repair action used successfully");
+                    }
+                    else
+                    {
+                        Plugin.Log.Warning("Self repair action failed");
+                    }
+                }
                 break;
             case 2: // NPC repair (would need to interact with mender NPC)
-                Plugin.Log.Information("NPC repair not yet implemented");
+                Plugin.Log.Information("NPC repair not yet implemented - requires navigation to mender and ATK interaction");
                 break;
         }
     }
