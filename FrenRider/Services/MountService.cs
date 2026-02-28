@@ -54,66 +54,73 @@ public class MountService
 
         var selfMounted = Plugin.Condition[ConditionFlag.Mounted] || Plugin.Condition[ConditionFlag.Mounting71];
         var selfFlying = Plugin.Condition[ConditionFlag.InFlight];
+        var inCombat = Plugin.Condition[ConditionFlag.InCombat];
         var now = Environment.TickCount64;
 
-        // Cooldown between mount/dismount actions to avoid spam
-        if (now < mountCooldownMs)
+        // DISMOUNT LOGIC: If fren is not mounted and FlyYouFools is enabled, dismount
+        // This matches SND: "if IsPartyMemberMounted(fren) == false and fly_you_fools == true"
+        if (!fren.IsMounted && config.FlyYouFools && selfMounted)
         {
-            StateDetail = "Cooldown...";
+            if (now >= mountCooldownMs)
+            {
+                State = MountState.Dismounting;
+                StateDetail = "Fren dismounted (FlyYouFools), dismounting...";
+                DismountSelf();
+            }
+            else
+            {
+                StateDetail = $"Dismount cooldown ({(mountCooldownMs - now) / 1000.0:F1}s)";
+            }
+            wasFrenMounted = false;
             return;
         }
 
-        // Fren just mounted
+        // MOUNT LOGIC: If fren is mounted and FlyYouFools is enabled, mount up
+        if (fren.IsMounted && config.FlyYouFools && !selfMounted && !inCombat)
+        {
+            if (!wasFrenMounted)
+            {
+                wasFrenMounted = true;
+                Plugin.Log.Information($"Fren mounted (MountId={fren.MountId}), will mount self");
+            }
+            
+            if (now >= mountCooldownMs)
+            {
+                State = MountState.Mounting;
+                StateDetail = "Fren mounted (FlyYouFools), mounting...";
+                MountSelf(config);
+            }
+            else
+            {
+                State = MountState.WaitingToMount;
+                StateDetail = $"Mount cooldown ({(mountCooldownMs - now) / 1000.0:F1}s)";
+            }
+            return;
+        }
+
+        // Track fren mount state
         if (fren.IsMounted && !wasFrenMounted)
         {
             wasFrenMounted = true;
             Plugin.Log.Information($"Fren mounted (MountId={fren.MountId})");
-
-            if (!selfMounted)
-            {
-                if (config.FlyYouFools)
-                {
-                    // Fly alongside: mount our own mount
-                    State = MountState.WaitingToMount;
-                    StateDetail = "Fren mounted, preparing to mount...";
-                    MountSelf(config);
-                }
-                else
-                {
-                    // Pillion: would need to interact with fren's mount
-                    // For now, just mount own mount as fallback
-                    State = MountState.WaitingToMount;
-                    StateDetail = "Fren mounted, mounting up...";
-                    MountSelf(config);
-                }
-            }
         }
-        // Fren just dismounted
         else if (!fren.IsMounted && wasFrenMounted)
         {
             wasFrenMounted = false;
             Plugin.Log.Information("Fren dismounted");
-
-            if (selfMounted)
-            {
-                State = MountState.Dismounting;
-                StateDetail = "Fren dismounted, dismounting...";
-                DismountSelf();
-            }
         }
+
         // Update ongoing state
-        else if (fren.IsMounted && selfMounted)
+        if (fren.IsMounted && selfMounted)
         {
             State = MountState.Mounted;
             StateDetail = selfFlying ? "Flying alongside fren" : "Mounted alongside fren";
         }
-        else if (fren.IsMounted && !selfMounted)
+        else if (fren.IsMounted && !selfMounted && config.FlyYouFools)
         {
-            // We should be mounted but aren't - retry
-            if (State == MountState.WaitingToMount && now - mountCooldownMs > 3000)
-            {
-                MountSelf(config);
-            }
+            // We should be mounted but aren't - waiting for cooldown
+            State = MountState.WaitingToMount;
+            StateDetail = "Waiting to mount...";
         }
         else
         {
@@ -122,8 +129,7 @@ public class MountService
         }
 
         // Gysahl Green: summon companion chocobo if configured and not in combat/mounted
-        if (config.ForceGysahl && !selfMounted && !Plugin.Condition[ConditionFlag.InCombat]
-            && !fren.IsMounted && fren.IsVisible)
+        if (config.ForceGysahl && !selfMounted && !inCombat && !fren.IsMounted && fren.IsVisible)
         {
             // Companion summoning handled via separate cooldown/check in future
         }
@@ -180,8 +186,11 @@ public class MountService
     {
         try
         {
+            Plugin.Log.Information($"MountService sending command: {command}");
             if (!Plugin.CommandManager.ProcessCommand(command))
                 Plugin.Log.Warning($"Mount command not handled: {command}");
+            else
+                Plugin.Log.Information($"Mount command sent successfully: {command}");
         }
         catch (Exception ex)
         {

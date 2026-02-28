@@ -140,10 +140,17 @@ public sealed class Plugin : IDalamudPlugin
             var worldName = ObjectTable.LocalPlayer?.HomeWorld.Value.Name.ToString() ?? "";
             if (!string.IsNullOrEmpty(charName) && !string.IsNullOrEmpty(worldName))
             {
+                var contentId = PlayerState.ContentId;
+                Log.Information($"OnLogin: Character={charName}@{worldName}, ContentId={contentId:X16}");
+                ConfigManager.EnsureAccountSelected(contentId, charName);
                 ConfigManager.EnsureCharacterExists(charName, worldName);
                 Configuration.LastAccountId = ConfigManager.CurrentAccountId;
                 Configuration.Save();
                 Log.Information($"Character detected: {charName}@{worldName} -> Account {ConfigManager.CurrentAccountId}");
+            }
+            else
+            {
+                Log.Warning($"OnLogin: Missing data - charName={charName}, worldName={worldName}");
             }
         }
         catch (Exception ex)
@@ -248,6 +255,16 @@ public sealed class Plugin : IDalamudPlugin
             Log.Error($"Failed to load mount names: {ex.Message}");
             MountNames = new[] { "Mount Roulette", "Company Chocobo" };
         }
+    }
+
+    /// <summary>
+    /// Debug log that only fires when SpamPrinter is enabled in config.
+    /// </summary>
+    public void SpamLog(string message)
+    {
+        var config = ConfigManager.GetActiveConfig();
+        if (config.SpamPrinter == 1)
+            Log.Debug($"[SPAM] {message}");
     }
 
     public void ToggleConfigUi() => ConfigWindow.Toggle();

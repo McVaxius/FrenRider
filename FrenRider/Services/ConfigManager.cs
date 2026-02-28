@@ -66,6 +66,86 @@ public class ConfigManager
         return account.Characters.TryGetValue(charKey, out var cc) ? cc : account.DefaultConfig;
     }
 
+    public void EnsureAccountSelected(ulong contentId, string? aliasHint = null)
+    {
+        if (contentId == 0)
+        {
+            log.Warning("Cannot select account with content ID 0 - using fallback");
+            // Fallback: use first account or create one
+            if (accounts.Count > 0)
+            {
+                CurrentAccountId = accounts.Keys.First();
+                log.Information($"Using fallback account: {CurrentAccountId}");
+                return;
+            }
+            else
+            {
+                // Create a fallback account with a random ID
+                var fallbackId = Guid.NewGuid().ToString("N")[..8];
+                var fallbackAccount = new AccountConfig
+                {
+                    AccountId = fallbackId,
+                    AccountAlias = aliasHint ?? "Fallback Account",
+                };
+                accounts[fallbackId] = fallbackAccount;
+                CurrentAccountId = fallbackId;
+                SaveAccount(fallbackId);
+                log.Warning($"Created fallback account {fallbackId}");
+                return;
+            }
+        }
+
+        var accountId = contentId.ToString("X");
+        log.Information($"EnsureAccountSelected: ContentId={contentId:X16}, AccountId={accountId}");
+        if (!accounts.TryGetValue(accountId, out var account))
+        {
+            // Migration: if only one legacy account exists, move it to the new ID
+            if (accounts.Count == 1)
+            {
+                var kvp = accounts.First();
+                var oldId = kvp.Key;
+                account = kvp.Value;
+                accounts.Remove(oldId);
+                account.AccountId = accountId;
+                accounts[accountId] = account;
+
+                try
+                {
+                    var oldFile = Path.Combine(configDir, $"{oldId}_FrenRider.json");
+                    if (File.Exists(oldFile))
+                        File.Delete(oldFile);
+                }
+                catch (Exception ex)
+                {
+                    log.Warning($"Failed to delete legacy config file for {oldId}: {ex.Message}");
+                }
+
+                SaveAccount(accountId);
+                log.Information($"Migrated legacy account {oldId} -> {accountId}");
+            }
+            else
+            {
+                account = new AccountConfig
+                {
+                    AccountId = accountId,
+                    AccountAlias = !string.IsNullOrWhiteSpace(aliasHint)
+                        ? aliasHint
+                        : $"Account {accounts.Count + 1}",
+                };
+                accounts[accountId] = account;
+                SaveAccount(accountId);
+                log.Information($"Created account {accountId} ({account.AccountAlias})");
+            }
+        }
+        else if (!string.IsNullOrWhiteSpace(aliasHint) && string.IsNullOrWhiteSpace(account.AccountAlias))
+        {
+            account.AccountAlias = aliasHint;
+            SaveAccount(accountId);
+        }
+
+        CurrentAccountId = accountId;
+    }
+
     public void EnsureCharacterExists(string characterName, string worldName)
     {
         if (string.IsNullOrEmpty(characterName) || string.IsNullOrEmpty(worldName))
@@ -84,45 +164,35 @@ public class ConfigManager
             }
         }
 
-        // Character not found in any account
-        if (accounts.Count == 0)
+        if (string.IsNullOrEmpty(CurrentAccountId))
         {
-            // Create first account
-            var newId = Guid.NewGuid().ToString("N")[..8];
-            var newAccount = new AccountConfig
+            // No account selected yet (should not happen, but guard anyway)
+            var fallbackId = accounts.Keys.FirstOrDefault();
+            if (fallbackId == null)
             {
-                AccountId = newId,
-                AccountAlias = "Account 1",
-            };
-            newAccount.Characters[charKey] = newAccount.DefaultConfig.Clone();
-            accounts[newId] = newAccount;
-            CurrentAccountId = newId;
-            SelectedCharacterKey = charKey;
-            SaveAccount(newId);
-            log.Information($"Created new account {newId} with character {charKey}");
+                fallbackId = Guid.NewGuid().ToString("N")[..8];
+                accounts[fallbackId] = new AccountConfig
+                {
+                    AccountId = fallbackId,
+                    AccountAlias = "Account 1",
+                };
+                SaveAccount(fallbackId);
+                log.Warning($"Fallback account {fallbackId} created for character {charKey}");
+            }
+
+            CurrentAccountId = fallbackId;
         }
-        else if (accounts.Count == 1)
+
+        if (!accounts.TryGetValue(CurrentAccountId, out var accountForChar))
         {
-            // Add to the only existing account
-            var acc = accounts.First();
-            acc.Value.Characters[charKey] = acc.Value.DefaultConfig.Clone();
-            CurrentAccountId = acc.Key;
-            SelectedCharacterKey = charKey;
-            SaveAccount(acc.Key);
-            log.Information($"Added character {charKey} to account {acc.Key}");
+            log.Error($"Current account {CurrentAccountId} missing when adding {charKey}");
+            return;
         }
-        else
-        {
-            // Multiple accounts exist - add to current or first
-            var targetId = !string.IsNullOrEmpty(CurrentAccountId) && accounts.ContainsKey(CurrentAccountId)
-                ? CurrentAccountId
-                : accounts.First().Key;
-            accounts[targetId].Characters[charKey] = accounts[targetId].DefaultConfig.Clone();
-            CurrentAccountId = targetId;
-            SelectedCharacterKey = charKey;
-            SaveAccount(targetId);
-            log.Information($"Added character {charKey} to account {targetId}");
-        }
+
+        accountForChar.Characters[charKey] = accountForChar.DefaultConfig.Clone();
+        SelectedCharacterKey = charKey;
+        SaveAccount(CurrentAccountId);
+        log.Information($"Added character {charKey} to account {CurrentAccountId}");
     }
 
     public string CreateNewAccount(string alias)

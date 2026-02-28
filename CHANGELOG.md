@@ -9,6 +9,70 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Phase 10.1 - Bug Fixes
+
+#### [0.9.1] - 2026-02-28
+
+**Fixed:**
+- Account separation: Enhanced account identification and fallback handling
+  - `ConfigManager.EnsureAccountSelected()` uses `PlayerState.ContentId` to uniquely identify accounts
+  - Added fallback handling for contentId=0 cases (uses first account or creates new one)
+  - Account IDs are hex-formatted content IDs for proper separation
+  - Migration logic handles existing single-account configs automatically
+  - Added detailed logging for account selection debugging
+- Mount logic: Fixed "Fly You Fools" behavior to match SND script
+  - Dismount when fren dismounts (if FlyYouFools enabled)
+  - Mount when fren mounts (if FlyYouFools enabled and not in combat)
+  - Added proper condition checks for combat state
+  - Simplified mount/dismount logic for reliability
+- DTR bar: Restored toggle behavior (toggles enabled state, not window)
+
+**Changed:**
+- `Plugin.OnLogin()` - Added detailed logging for ContentId and account selection
+- `ConfigManager.EnsureAccountSelected()` - Enhanced with fallback logic and better logging
+- `MountService.Update()` - Rewritten mount/dismount logic to match SND behavior
+- `Plugin.SetupDtrBar()` - DTR bar OnClick toggles `cfg.Enabled` state
+
+**Build Results:**
+- 0 errors, 0 warnings
+
+**Testing Required:**
+1. Check /xllog for ContentId values when logging in with different accounts
+2. Verify FlyYouFools: mount when fren mounts, dismount when fren dismounts
+3. Click DTR bar entry → should toggle plugin enabled state (FR: On/Off)
+4. Multiple clients should create separate JSON files (check ContentId in logs)
+
+---
+
+### Phase 10 - Polish & Optimization
+
+#### [0.9.0] - 2026-02-28
+
+**Added:**
+- `Plugin.SpamLog()` debug helper: verbose logging gated by `SpamPrinter` config (0=off, 1=on)
+  - Outputs `[SPAM]` prefixed messages at Debug level only when enabled
+- MainWindow enhancements:
+  - Idle status display (blue text, shows last idle action performed)
+  - Formation slot display (purple text, shows assigned slot number)
+  - FATE indicator in zone info line (shows FATE ID when in a FATE)
+  - Zone extra info consolidated (indoor + FATE in one line)
+
+**Changed:**
+- `Plugin.cs` - Added SpamLog method
+- `MainWindow.cs` - Added idle, formation, and FATE display sections
+
+**Build Results:**
+- 0 errors, 0 warnings
+
+**Testing Required:**
+1. Enable SpamPrinter → verbose debug messages appear in /xllog
+2. Disable SpamPrinter → no spam messages
+3. MainWindow shows idle status when standing near fren
+4. MainWindow shows formation slot when Formation enabled
+5. FATE ID appears in zone info when in a FATE
+
+---
+
 ### Phase 9 - Formation System
 
 #### [0.8.0] - 2026-02-28

@@ -188,11 +188,33 @@ public class MainWindow : Window, IDisposable
                 }
             }
 
+            // Idle / Automation status
+            var auto = plugin.AutomationService;
+            if (auto.IsIdle)
+            {
+                ImGui.TextColored(new Vector4(0.6f, 0.8f, 1f, 1), "Idle");
+                if (!string.IsNullOrEmpty(auto.LastIdleAction))
+                {
+                    ImGui.SameLine();
+                    ImGui.TextDisabled($"- Last: {auto.LastIdleAction}");
+                }
+            }
+
+            // Formation info
+            var formation = plugin.FormationService;
+            if (formation.IsActive)
+            {
+                ImGui.TextColored(new Vector4(0.8f, 0.6f, 1f, 1), $"Formation: Slot {formation.AssignedSlot}");
+            }
+
             // Zone info
             var zone = plugin.ZoneService;
+            var zoneExtra = "";
+            if (zone.InFate) zoneExtra += $", FATE {zone.CurrentFateId}";
+            if (zone.IsIndoors) zoneExtra += ", indoors";
             ImGui.Text($"Zone: {zone.CurrentZone}");
             ImGui.SameLine();
-            ImGui.TextDisabled($"(ID {zone.TerritoryId}{(zone.IsIndoors ? ", indoors" : "")})");
+            ImGui.TextDisabled($"(ID {zone.TerritoryId}{zoneExtra})");
         }
 
         ImGui.Spacing();
