@@ -3,6 +3,7 @@ using System.Numerics;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Windowing;
 using FrenRider.Models;
+using FrenRider.Services;
 
 namespace FrenRider.Windows;
 
@@ -63,7 +64,7 @@ public class MainWindow : Window, IDisposable
         if (string.IsNullOrEmpty(frenName))
             ImGui.TextColored(new Vector4(0.5f, 0.5f, 0.5f, 1), "(not set - configure in Settings)");
         else
-            ImGui.TextColored(new Vector4(0.8f, 0.9f, 1f, 1), frenName);
+            ImGui.TextColored(new Vector4(0.8f, 0.9f, 1f, 1), Disp(frenName));
 
         ImGui.Spacing();
 
@@ -89,40 +90,52 @@ public class MainWindow : Window, IDisposable
                 ImGui.TextDisabled($"[{account.AccountAlias}]");
             }
 
-            // Party info
-            var partyCount = Plugin.PartyList.Length;
+            // Party info (from FrenTracker)
+            var tracker = plugin.FrenTracker;
+            var partyCount = tracker.Party.Count;
             ImGui.Text($"Party Members: {partyCount}");
 
-            if (partyCount > 0 && !string.IsNullOrEmpty(frenName))
+            if (partyCount > 0)
             {
-                var foundFren = false;
-                for (var i = 0; i < partyCount; i++)
+                // Party composition summary
+                var comp = tracker.GetPartyComposition();
+                var compParts = new System.Collections.Generic.List<string>();
+                foreach (var kvp in comp)
+                    compParts.Add($"{kvp.Value} {kvp.Key}");
+                if (compParts.Count > 0)
                 {
-                    var member = Plugin.PartyList[i];
-                    if (member != null)
-                    {
-                        var memberName = member.Name.ToString();
-                        if (memberName.Contains(frenName.Split('@')[0], StringComparison.OrdinalIgnoreCase))
-                        {
-                            ImGui.TextColored(new Vector4(0.4f, 1, 0.4f, 1), $"Fren found: {memberName}");
-                            foundFren = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (!foundFren)
-                {
-                    ImGui.TextColored(new Vector4(1, 1, 0.4f, 1), "Fren not found in party.");
+                    ImGui.SameLine();
+                    ImGui.TextDisabled($"({string.Join(", ", compParts)})");
                 }
             }
-            else if (string.IsNullOrEmpty(frenName))
+
+            // Fren tracking status
+            var fren = tracker.Fren;
+            if (string.IsNullOrEmpty(frenName))
             {
                 ImGui.TextColored(new Vector4(1, 1, 0.4f, 1), "No fren configured.");
             }
+            else if (fren == null)
+            {
+                ImGui.TextColored(new Vector4(0.5f, 0.5f, 0.5f, 1), "Tracking inactive.");
+            }
+            else if (fren.IsFound && fren.IsVisible)
+            {
+                var dispName = Disp(fren.Name);
+                var jobInfo = !string.IsNullOrEmpty(fren.ClassJobName) ? $" [{fren.ClassJobName}]" : "";
+                var partyInfo = fren.InParty ? "" : " (not in party)";
+                ImGui.TextColored(new Vector4(0.4f, 1, 0.4f, 1), $"Fren: {dispName}{jobInfo}{partyInfo}");
+                ImGui.Text($"Distance: {fren.Distance:F1}y");
+                ImGui.SameLine();
+                ImGui.TextDisabled($"({fren.Position.X:F0}, {fren.Position.Y:F0}, {fren.Position.Z:F0})");
+            }
+            else if (fren.IsFound)
+            {
+                ImGui.TextColored(new Vector4(1, 1, 0.4f, 1), $"Fren {Disp(fren.Name)} in party but not visible.");
+            }
             else
             {
-                ImGui.TextColored(new Vector4(1, 1, 0.4f, 1), "Not in a party.");
+                ImGui.TextColored(new Vector4(1, 0.4f, 0.4f, 1), "Fren not found.");
             }
 
             // Current zone
@@ -145,5 +158,10 @@ public class MainWindow : Window, IDisposable
         {
             IsOpen = false;
         }
+    }
+
+    private string Disp(string name)
+    {
+        return plugin.Configuration.KrangleEnabled ? KrangleService.KrangleName(name) : name;
     }
 }

@@ -33,6 +33,7 @@ public sealed class Plugin : IDalamudPlugin
 
     public Configuration Configuration { get; init; }
     public ConfigManager ConfigManager { get; init; }
+    public FrenTracker FrenTracker { get; init; }
     public string[] MountNames { get; private set; } = Array.Empty<string>();
 
     public readonly WindowSystem WindowSystem = new("FrenRider");
@@ -49,6 +50,8 @@ public sealed class Plugin : IDalamudPlugin
 
         if (!string.IsNullOrEmpty(Configuration.LastAccountId))
             ConfigManager.CurrentAccountId = Configuration.LastAccountId;
+
+        FrenTracker = new FrenTracker(this);
 
         ConfigWindow = new ConfigWindow(this);
         MainWindow = new MainWindow(this);
@@ -141,6 +144,9 @@ public sealed class Plugin : IDalamudPlugin
 
         // Update DTR bar
         UpdateDtrBar();
+
+        // Update fren tracking
+        FrenTracker.Update();
     }
 
     public void SetupDtrBar()

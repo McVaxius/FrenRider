@@ -9,6 +9,113 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Phase 3 - Party & Target Detection
+
+#### [0.2.0] - 2026-02-28
+
+**Added:**
+- `FrenTracker` service: real-time party member enumeration and fren tracking
+  - Party member scanning with position, distance, ClassJob, and role detection
+  - Fren name matching: partial, case-insensitive, @Server stripped for search
+  - ObjectTable scanning for nearby non-party fren fallback
+  - Distance calculation (3D Euclidean via Vector3.Distance)
+  - Party composition analyzer (role counts: Tank/Healer/Melee/Ranged/Caster)
+  - ClassJob → Role mapping for all combat jobs including VPR (41), PCT (42)
+  - Update throttled by config's UpdateInterval setting
+- MainWindow now shows real-time fren tracking info:
+  - Fren name, job, distance, position coordinates
+  - "in party" vs "not in party" indicator
+  - Party composition summary (e.g. "1 Tank, 1 Healer, 2 Melee")
+  - "Tracking inactive" when disabled, "Fren not found" when missing
+- FrenTracker integrated into Plugin.cs framework update loop
+
+**Changed:**
+- MainWindow status display replaced manual party scanning with FrenTracker data
+
+**Build Results:**
+- 0 errors, 0 warnings
+
+**Files Created:**
+- `FrenRider/Services/FrenTracker.cs`
+
+**Files Modified:**
+- `FrenRider/Plugin.cs` - FrenTracker creation and Update() call
+- `FrenRider/Windows/MainWindow.cs` - FrenTracker-based status display
+
+**Backups:**
+- `backups/Plugin_*.cs`
+- `backups/MainWindow_*.cs`
+
+**Testing Required:**
+1. Enable plugin and join a party → party members listed with count
+2. Set fren name → "Fren found" with job, distance, position shown
+3. Walk away from fren → distance updates in real-time
+4. Leave party → fren detected via ObjectTable if nearby
+5. Fren not nearby → "Fren not found" displayed
+6. Disable plugin → "Tracking inactive"
+7. No crashes in /xllog
+
+---
+
+### Phase 1.1 - UI Feedback & New Features
+
+#### [0.1.1] - 2026-02-28
+
+**Fixed:**
+- DTR bar click now toggles Fren Rider on/off instead of opening main window
+- Left panel widened from 200px to 240px with spacing between entries to fix name truncation
+- "Reset This Page" renamed to "Reset This" for shorter label; both Reset buttons now have (?) tooltips
+- Window default size bumped from 850 to 900px wide
+- Fren Name tooltip clarifies @Server is cosmetic only
+
+**Added:**
+- `[DELETE]` button for non-DEFAULT character configs (requires CTRL+click, dimmed when CTRL not held)
+- `[ ] Krangle` checkbox: garbles all identifying text (names, servers) with military/exercise words
+  - Deterministic per-name (same input → same output)
+  - Respects FF14 naming conventions (max 14 per part, max 22 total, server max 25)
+  - Applies to ConfigWindow title, left panel, and MainWindow fren display
+  - Tooltip explains purpose (screenshots for issue reporting)
+- Mount selector: searchable dropdown populated from Lumina Mount sheet (game data)
+  - IDataManager service added to Plugin.cs
+  - "Mount Roulette" always first, rest sorted alphabetically
+  - Filter-as-you-type search box inside dropdown
+- `KrangleService.cs` - static service for deterministic name garbling
+- `DeleteCharacter()` method in ConfigManager
+- `KrangleEnabled` property in Configuration.cs
+
+**Changed:**
+- Mount Name input replaced with searchable combo box (was plain InputText)
+- Upper-right layout: `[ ] Krangle ... [Reset All] (?) [Reset This] (?) [DELETE]`
+
+**Build Results:**
+- 0 errors, 0 warnings
+
+**Files Created:**
+- `FrenRider/Services/KrangleService.cs`
+
+**Files Modified:**
+- `FrenRider/Plugin.cs` - IDataManager, mount loading, DTR toggle fix
+- `FrenRider/Configuration.cs` - KrangleEnabled
+- `FrenRider/Services/ConfigManager.cs` - DeleteCharacter
+- `FrenRider/Windows/ConfigWindow.cs` - All UI changes
+- `FrenRider/Windows/MainWindow.cs` - Krangle display support
+
+**Backups:**
+- `backups/Plugin_*.cs`
+- `backups/ConfigWindow_*.cs`
+- `backups/MainWindow_*.cs`
+
+**Testing Required:**
+1. DTR bar click toggles FR: On/Off (not main window)
+2. Left panel names not truncated, spacing between entries
+3. Krangle checkbox garbles names in config window title, left panel, main window
+4. Reset All (?) and Reset This (?) both show tooltips
+5. DELETE button appears only for non-DEFAULT entries, dimmed without CTRL, works with CTRL held
+6. Mount dropdown populated with game mounts, searchable
+7. No crashes in /xllog
+
+---
+
 ### Phase 0 - Project Initialization (Current)
 
 #### [0.0.1] - 2026-02-28 @ 03:19 AM EST

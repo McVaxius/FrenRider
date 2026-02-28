@@ -847,6 +847,12 @@ public class ConfigWindow : Window, IDisposable
 
     // --- Helpers ---
 
+    /// <summary>Display a name, applying Krangle if enabled.</summary>
+    private string Disp(string name)
+    {
+        return configuration.KrangleEnabled ? KrangleService.KrangleName(name) : name;
+    }
+
     private string GetCurrentCharacterKey()
     {
         if (!Plugin.ClientState.IsLoggedIn) return "";

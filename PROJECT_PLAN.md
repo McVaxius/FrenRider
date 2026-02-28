@@ -201,6 +201,15 @@
 14. ~~Remove CBT from cling types~~ ✓
 15. ~~Non-editable fren name in MainWindow~~ ✓
 
+**Phase 1.1 - UI Feedback & New Features:**
+16. ~~DTR bar click toggles on/off (not main window)~~ ✓
+17. ~~Widen left panel, fix name truncation, add spacing~~ ✓
+18. ~~Krangle checkbox: garble names with exercise words~~ ✓
+19. ~~DELETE button for non-DEFAULT chars (CTRL+click)~~ ✓
+20. ~~Mount selector: Lumina searchable dropdown~~ ✓
+21. ~~Upper-right layout: Krangle + Reset All/This + DELETE~~ ✓
+22. ~~Both Reset buttons have (?) tooltips~~ ✓
+
 ---
 
 ### Phase 2: Configuration System ✓ (COMPLETE - Absorbed into Phase 1.1)
@@ -216,22 +225,22 @@
 
 ---
 
-### Phase 3: Party & Target Detection
+### Phase 3: Party & Target Detection ✓ (COMPLETE)
 **Goal:** Detect and track the designated "fren" in party
 
 **Tasks:**
-1. Implement party member enumeration
-2. Create friend name matching logic
-3. Add target position tracking
-4. Implement distance calculation functions
-5. Create party composition analyzer
-6. Add job detection for party members
+1. ~~Implement party member enumeration~~ ✓ (FrenTracker.ScanParty)
+2. ~~Create friend name matching logic~~ ✓ (partial, case-insensitive, @Server stripped)
+3. ~~Add target position tracking~~ ✓ (ObjectTable lookup, Vector3 position)
+4. ~~Implement distance calculation functions~~ ✓ (Vector3.Distance, displayed in MainWindow)
+5. ~~Create party composition analyzer~~ ✓ (GetPartyComposition role counts)
+6. ~~Add job detection for party members~~ ✓ (ClassJob ID → Role mapping, all jobs incl VPR/PCT)
 
 **Deliverables:**
-- Plugin can find "fren" by partial name
-- Real-time position tracking
-- Distance calculations working
-- Party role detection
+- ~~Plugin can find "fren" by partial name~~ ✓
+- ~~Real-time position tracking~~ ✓
+- ~~Distance calculations working~~ ✓
+- ~~Party role detection~~ ✓
 
 **Testing Required:**
 - Correctly identifies fren in various party sizes
