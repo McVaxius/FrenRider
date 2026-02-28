@@ -18,6 +18,7 @@ public class ConfigWindow : Window, IDisposable
     private string accountAliasEdit = "";
     private string frenNameInput = "";
     private bool frenNameFocused = false;
+    private string mountSearch = "";
 
     private static readonly string[] CompanionStances = { "Free Stance", "Defender Stance", "Attacker Stance", "Healer Stance", "Follow" };
     private static readonly string[] ClingTypes = { "NavMesh", "Visland", "BossMod Follow", "Vanilla Follow" };
@@ -35,7 +36,7 @@ public class ConfigWindow : Window, IDisposable
     public ConfigWindow(Plugin plugin) : base("Fren Rider Settings###FrenRiderConfig")
     {
         Flags = ImGuiWindowFlags.NoCollapse;
-        Size = new Vector2(850, 550);
+        Size = new Vector2(900, 550);
         SizeCondition = ImGuiCond.FirstUseEver;
 
         this.plugin = plugin;
@@ -52,11 +53,10 @@ public class ConfigWindow : Window, IDisposable
         else
             Flags |= ImGuiWindowFlags.NoMove;
 
-        // Update window title based on selected character
+        // Update window title based on selected character (krangled if enabled)
         var sel = configManager.SelectedCharacterKey;
-        WindowName = string.IsNullOrEmpty(sel)
-            ? "Fren Rider Settings - DEFAULT CONFIG###FrenRiderConfig"
-            : $"Fren Rider Settings - {sel}###FrenRiderConfig";
+        var displaySel = string.IsNullOrEmpty(sel) ? "DEFAULT CONFIG" : Disp(sel);
+        WindowName = $"Fren Rider Settings - {displaySel}###FrenRiderConfig";
     }
 
     public override void Draw()
@@ -64,8 +64,8 @@ public class ConfigWindow : Window, IDisposable
         var config = configManager.GetActiveConfig();
         if (config == null) return;
 
-        // Left panel
-        ImGui.BeginChild("LeftPanel", new Vector2(200, 0), true);
+        // Left panel (wider for names)
+        ImGui.BeginChild("LeftPanel", new Vector2(240, 0), true);
         DrawLeftPanel();
         ImGui.EndChild();
 
@@ -114,54 +114,89 @@ public class ConfigWindow : Window, IDisposable
         ImGui.Separator();
         ImGui.Spacing();
 
-        // Current character (bold/highlighted)
+        // Current character (green highlight, with spacing)
         var currentCharKey = GetCurrentCharacterKey();
         if (!string.IsNullOrEmpty(currentCharKey))
         {
             var isCurrent = configManager.SelectedCharacterKey == currentCharKey;
             ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.4f, 1f, 0.4f, 1));
-            if (ImGui.Selectable(currentCharKey, isCurrent))
+            if (ImGui.Selectable(Disp(currentCharKey), isCurrent))
             {
                 configManager.SelectedCharacterKey = currentCharKey;
                 SyncFrenNameInput();
             }
             ImGui.PopStyleColor();
+            ImGui.Spacing();
         }
 
-        // Other characters sorted alphabetically
+        // Other characters sorted alphabetically (with spacing between)
         foreach (var charKey in configManager.GetSortedCharacterKeys())
         {
             if (charKey == currentCharKey) continue;
             var isSelected = configManager.SelectedCharacterKey == charKey;
-            if (ImGui.Selectable(charKey, isSelected))
+            if (ImGui.Selectable(Disp(charKey), isSelected))
             {
                 configManager.SelectedCharacterKey = charKey;
                 SyncFrenNameInput();
             }
+            ImGui.Spacing();
         }
     }
 
     private void DrawRightPanel(CharacterConfig config)
     {
-        // Reset buttons (top right)
+        // --- Top bar: Krangle | Reset All (?) | Reset This (?) ---
+        var krangleEnabled = configuration.KrangleEnabled;
+        if (ImGui.Checkbox("Krangle", ref krangleEnabled))
+        {
+            configuration.KrangleEnabled = krangleEnabled;
+            configuration.Save();
+            KrangleService.ClearCache();
+        }
+        HelpMarker("Garble all identifying text (character names, fren names, servers)\nwith military/exercise words. Useful for taking screenshots\nto report issues without revealing personal info.");
+
+        // Right-align the buttons
         var avail = ImGui.GetContentRegionAvail().X;
-        ImGui.SameLine(avail - 230);
+        var buttonGroupWidth = 340f;
+        ImGui.SameLine(ImGui.GetCursorPosX() + avail - buttonGroupWidth);
+
         ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.6f, 0.2f, 0.2f, 1));
         if (ImGui.Button("Reset All"))
         {
             configManager.ResetCharacterToDefault(configManager.SelectedCharacterKey);
             SyncFrenNameInput();
         }
-        HelpMarker("Reset ALL tabs for this character to default values.");
+        ImGui.PopStyleColor();
+        HelpMarker("Reset ALL tabs for this character to default values.\nIf editing DEFAULT CONFIG, resets to plugin defaults.");
+
         ImGui.SameLine();
         ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.6f, 0.4f, 0.2f, 1));
-        if (ImGui.Button("Reset This Page"))
+        if (ImGui.Button("Reset This"))
         {
             configManager.ResetCharacterTabToDefault(configManager.SelectedCharacterKey, currentTab);
             SyncFrenNameInput();
         }
-        ImGui.PopStyleColor(2);
+        ImGui.PopStyleColor();
         HelpMarker("Reset only the current tab for this character to default values.");
+
+        // DELETE button (only for non-default characters, requires CTRL)
+        if (!string.IsNullOrEmpty(configManager.SelectedCharacterKey))
+        {
+            ImGui.SameLine();
+            var io = ImGui.GetIO();
+            var ctrlHeld = io.KeyCtrl;
+            if (!ctrlHeld) ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 0.5f);
+            ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.7f, 0.1f, 0.1f, 1));
+            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(0.9f, 0.2f, 0.2f, 1));
+            if (ImGui.Button("DELETE") && ctrlHeld)
+            {
+                configManager.DeleteCharacter(configManager.SelectedCharacterKey);
+            }
+            ImGui.PopStyleColor(2);
+            if (!ctrlHeld) ImGui.PopStyleVar();
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("Hold CTRL and click to delete this character's config.\nThis cannot be undone.");
+        }
 
         ImGui.Spacing();
 
@@ -202,7 +237,7 @@ public class ConfigWindow : Window, IDisposable
         // Fren Name with party dropdown and capitalization fix
         ImGui.Text("Fren Name");
         ImGui.SameLine();
-        HelpMarker("Name of the party member to follow. Can be partial if unique.\nNames are auto-capitalized. Select from party or type manually.");
+        HelpMarker("Name of the party member to follow. Can be partial if unique.\nThe @Server part is cosmetic for display; targeting uses the name before @.\nNames are auto-capitalized. Select from party or type manually.");
         if (frenNameInput != config.FrenName && !frenNameFocused)
             frenNameInput = config.FrenName;
         ImGui.SetNextItemWidth(300);
@@ -261,16 +296,36 @@ public class ConfigWindow : Window, IDisposable
         ImGui.SameLine();
         HelpMarker("If enabled, summon your own mount and fly alongside fren instead of riding their multi-seater.\nUseful when you don't have access to the fren's mount or want separate mounts.");
 
-        // Mount Name (searchable input for now, full mount list in future phase)
-        var foolFlier = config.FoolFlier;
-        ImGui.SetNextItemWidth(300);
-        if (ImGui.InputText("Mount Name (if flying solo)", ref foolFlier, 64))
-        {
-            config.FoolFlier = foolFlier;
-            configManager.SaveCurrentAccount();
-        }
+        // Mount Name (searchable dropdown from game data)
+        ImGui.Text("Mount Name (if flying solo)");
         ImGui.SameLine();
-        HelpMarker("Exact mount name with correct capitalization.\nTop of list should be 'Mount Roulette'.\nFull mount selection from game data planned for a future update.");
+        HelpMarker("Select the mount to use when flying solo.\n'Mount Roulette' picks a random mount.\nType to search the list.");
+
+        var mountNames = plugin.MountNames;
+        var currentMount = config.FoolFlier;
+        ImGui.SetNextItemWidth(300);
+        if (ImGui.BeginCombo("##MountSelect", string.IsNullOrEmpty(currentMount) ? "(none)" : currentMount))
+        {
+            ImGui.SetNextItemWidth(-1);
+            ImGui.InputText("##MountSearch", ref mountSearch, 64);
+            ImGui.Separator();
+            for (var i = 0; i < mountNames.Length; i++)
+            {
+                if (!string.IsNullOrEmpty(mountSearch) &&
+                    !mountNames[i].Contains(mountSearch, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                var isSelected = mountNames[i] == currentMount;
+                if (ImGui.Selectable(mountNames[i], isSelected))
+                {
+                    config.FoolFlier = mountNames[i];
+                    configManager.SaveCurrentAccount();
+                    mountSearch = "";
+                }
+                if (isSelected) ImGui.SetItemDefaultFocus();
+            }
+            ImGui.EndCombo();
+        }
 
         // Force Gysahl
         var forceGysahl = config.ForceGysahl;

@@ -11,6 +11,7 @@ public class Configuration : IPluginConfiguration
     // --- Global UI Settings ---
     public bool IsConfigWindowMovable { get; set; } = true;
     public bool DtrBarEnabled { get; set; } = true;
+    public bool KrangleEnabled { get; set; } = false;
 
     // --- Account Tracking ---
     public string LastAccountId { get; set; } = "";

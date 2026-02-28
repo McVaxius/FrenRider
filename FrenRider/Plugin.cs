@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Dalamud.Game.Command;
 using Dalamud.Game.Gui.Dtr;
 using Dalamud.Game.Text.SeStringHandling;
@@ -24,12 +26,14 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static ICondition Condition { get; private set; } = null!;
     [PluginService] internal static IChatGui ChatGui { get; private set; } = null!;
     [PluginService] internal static IDtrBar DtrBar { get; private set; } = null!;
+    [PluginService] internal static IDataManager DataManager { get; private set; } = null!;
     [PluginService] internal static IPluginLog Log { get; private set; } = null!;
 
     private const string CommandName = "/frenrider";
 
     public Configuration Configuration { get; init; }
     public ConfigManager ConfigManager { get; init; }
+    public string[] MountNames { get; private set; } = Array.Empty<string>();
 
     public readonly WindowSystem WindowSystem = new("FrenRider");
     private ConfigWindow ConfigWindow { get; init; }
@@ -60,6 +64,9 @@ public sealed class Plugin : IDalamudPlugin
         PluginInterface.UiBuilder.Draw += WindowSystem.Draw;
         PluginInterface.UiBuilder.OpenConfigUi += ToggleConfigUi;
         PluginInterface.UiBuilder.OpenMainUi += ToggleMainUi;
+
+        // Load mount names from game data
+        LoadMountNames();
 
         // DTR bar
         SetupDtrBar();
@@ -143,7 +150,12 @@ public sealed class Plugin : IDalamudPlugin
             dtrEntry = DtrBar.Get("Fren Rider");
             dtrEntry.Shown = Configuration.DtrBarEnabled;
             dtrEntry.Text = new SeString(new TextPayload("FR: Off"));
-            dtrEntry.OnClick = (_) => MainWindow.Toggle();
+            dtrEntry.OnClick = (_) =>
+            {
+                var cfg = ConfigManager.GetActiveConfig();
+                cfg.Enabled = !cfg.Enabled;
+                ConfigManager.SaveCurrentAccount();
+            };
         }
         catch (Exception ex)
         {
@@ -165,6 +177,32 @@ public sealed class Plugin : IDalamudPlugin
             config.Enabled
                 ? $"Fren Rider active - Following {config.FrenName}"
                 : "Fren Rider disabled - Click to toggle"));
+    }
+
+    private void LoadMountNames()
+    {
+        try
+        {
+            var names = new List<string> { "Mount Roulette" };
+            var sheet = DataManager.GetExcelSheet<Lumina.Excel.Sheets.Mount>();
+            if (sheet != null)
+            {
+                foreach (var row in sheet)
+                {
+                    var name = row.Singular.ToString();
+                    if (!string.IsNullOrWhiteSpace(name))
+                        names.Add(name);
+                }
+            }
+            names.Sort(1, names.Count - 1, StringComparer.OrdinalIgnoreCase);
+            MountNames = names.ToArray();
+            Log.Information($"Loaded {MountNames.Length} mount names from game data");
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"Failed to load mount names: {ex.Message}");
+            MountNames = new[] { "Mount Roulette", "Company Chocobo" };
+        }
     }
 
     public void ToggleConfigUi() => ConfigWindow.Toggle();

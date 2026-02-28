@@ -233,6 +233,21 @@ public class ConfigManager
         SaveCurrentAccount();
     }
 
+    public bool DeleteCharacter(string charKey)
+    {
+        var account = GetCurrentAccount();
+        if (account == null || string.IsNullOrEmpty(charKey)) return false;
+        if (!account.Characters.ContainsKey(charKey)) return false;
+
+        account.Characters.Remove(charKey);
+        if (SelectedCharacterKey == charKey)
+            SelectedCharacterKey = "";
+
+        SaveCurrentAccount();
+        log.Information($"Deleted character config: {charKey}");
+        return true;
+    }
+
     public IEnumerable<string> GetSortedCharacterKeys()
     {
         var account = GetCurrentAccount();
