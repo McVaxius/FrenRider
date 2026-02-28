@@ -12,6 +12,7 @@ public class Configuration : IPluginConfiguration
     public bool IsConfigWindowMovable { get; set; } = true;
     public bool DtrBarEnabled { get; set; } = true;
     public bool KrangleEnabled { get; set; } = false;
+    public float LeftPanelWidth { get; set; } = 240f;
 
     // --- Account Tracking ---
     public string LastAccountId { get; set; } = "";

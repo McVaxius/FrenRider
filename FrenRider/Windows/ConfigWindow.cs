@@ -19,6 +19,7 @@ public class ConfigWindow : Window, IDisposable
     private string frenNameInput = "";
     private bool frenNameFocused = false;
     private string mountSearch = "";
+    private bool isDraggingSplitter = false;
 
     private static readonly string[] CompanionStances = { "Free Stance", "Defender Stance", "Attacker Stance", "Healer Stance", "Follow" };
     private static readonly string[] ClingTypes = { "NavMesh", "Visland", "BossMod Follow", "Vanilla Follow" };
@@ -64,10 +65,43 @@ public class ConfigWindow : Window, IDisposable
         var config = configManager.GetActiveConfig();
         if (config == null) return;
 
-        // Left panel (wider for names)
-        ImGui.BeginChild("LeftPanel", new Vector2(240, 0), true);
+        var panelWidth = configuration.LeftPanelWidth;
+
+        // Left panel (user-resizable)
+        ImGui.BeginChild("LeftPanel", new Vector2(panelWidth, 0), true);
         DrawLeftPanel();
         ImGui.EndChild();
+
+        ImGui.SameLine();
+
+        // Splitter handle (vertical drag bar)
+        var cursorPos = ImGui.GetCursorScreenPos();
+        var splitterHeight = ImGui.GetContentRegionAvail().Y;
+        ImGui.InvisibleButton("##Splitter", new Vector2(6, splitterHeight));
+        if (ImGui.IsItemActive())
+        {
+            var delta = ImGui.GetIO().MouseDelta.X;
+            if (delta != 0)
+            {
+                configuration.LeftPanelWidth = Math.Clamp(panelWidth + delta, 120f, 500f);
+                if (!isDraggingSplitter)
+                    isDraggingSplitter = true;
+            }
+        }
+        else if (isDraggingSplitter)
+        {
+            isDraggingSplitter = false;
+            configuration.Save();
+        }
+        if (ImGui.IsItemHovered() || ImGui.IsItemActive())
+            ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeEw);
+
+        // Draw visible splitter line
+        var drawList = ImGui.GetWindowDrawList();
+        var lineColor = ImGui.IsItemHovered() || ImGui.IsItemActive()
+            ? ImGui.GetColorU32(new Vector4(0.6f, 0.6f, 0.9f, 1f))
+            : ImGui.GetColorU32(new Vector4(0.4f, 0.4f, 0.4f, 1f));
+        drawList.AddLine(new Vector2(cursorPos.X + 2, cursorPos.Y), new Vector2(cursorPos.X + 2, cursorPos.Y + splitterHeight), lineColor, 2f);
 
         ImGui.SameLine();
 
@@ -238,51 +272,64 @@ public class ConfigWindow : Window, IDisposable
         ImGui.Text("Fren Name");
         ImGui.SameLine();
         HelpMarker("Name of the party member to follow. Can be partial if unique.\nThe @Server part is cosmetic for display; targeting uses the name before @.\nNames are auto-capitalized. Select from party or type manually.");
-        if (frenNameInput != config.FrenName && !frenNameFocused)
-            frenNameInput = config.FrenName;
-        ImGui.SetNextItemWidth(300);
-        frenNameFocused = false;
-        if (ImGui.InputText("##FrenName", ref frenNameInput, 64))
-        {
-            frenNameFocused = true;
-        }
-        if (ImGui.IsItemDeactivatedAfterEdit())
-        {
-            config.FrenName = ConfigManager.FixNameCapitalization(frenNameInput);
-            frenNameInput = config.FrenName;
-            configManager.SaveCurrentAccount();
-        }
 
-        // Party member quick-select dropdown
-        ImGui.SameLine();
-        if (ImGui.BeginCombo("##PartySelect", "", ImGuiComboFlags.NoPreview | ImGuiComboFlags.PopupAlignLeft))
+        if (configuration.KrangleEnabled)
         {
-            var partyCount = Plugin.PartyList.Length;
-            if (partyCount > 0)
+            // Krangled: show read-only garbled name
+            var krangled = Disp(config.FrenName);
+            ImGui.SetNextItemWidth(300);
+            ImGui.InputText("##FrenNameKrangled", ref krangled, 64, ImGuiInputTextFlags.ReadOnly);
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("Disable Krangle to edit fren name.");
+        }
+        else
+        {
+            if (frenNameInput != config.FrenName && !frenNameFocused)
+                frenNameInput = config.FrenName;
+            ImGui.SetNextItemWidth(300);
+            frenNameFocused = false;
+            if (ImGui.InputText("##FrenName", ref frenNameInput, 64))
             {
-                for (var i = 0; i < partyCount; i++)
+                frenNameFocused = true;
+            }
+            if (ImGui.IsItemDeactivatedAfterEdit())
+            {
+                config.FrenName = ConfigManager.FixNameCapitalization(frenNameInput);
+                frenNameInput = config.FrenName;
+                configManager.SaveCurrentAccount();
+            }
+
+            // Party member quick-select dropdown
+            ImGui.SameLine();
+            if (ImGui.BeginCombo("##PartySelect", "", ImGuiComboFlags.NoPreview | ImGuiComboFlags.PopupAlignLeft))
+            {
+                var partyCount = Plugin.PartyList.Length;
+                if (partyCount > 0)
                 {
-                    var member = Plugin.PartyList[i];
-                    if (member == null) continue;
-                    var memberName = member.Name.ToString();
-                    var worldName = member.World.Value.Name.ToString();
-                    var display = $"{memberName}@{worldName}";
-                    if (ImGui.Selectable(display))
+                    for (var i = 0; i < partyCount; i++)
                     {
-                        config.FrenName = display;
-                        frenNameInput = display;
-                        configManager.SaveCurrentAccount();
+                        var member = Plugin.PartyList[i];
+                        if (member == null) continue;
+                        var memberName = member.Name.ToString();
+                        var worldName = member.World.Value.Name.ToString();
+                        var display = $"{memberName}@{worldName}";
+                        if (ImGui.Selectable(display))
+                        {
+                            config.FrenName = display;
+                            frenNameInput = display;
+                            configManager.SaveCurrentAccount();
+                        }
                     }
                 }
+                else
+                {
+                    ImGui.TextDisabled("Not in a party");
+                }
+                ImGui.EndCombo();
             }
-            else
-            {
-                ImGui.TextDisabled("Not in a party");
-            }
-            ImGui.EndCombo();
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("Select from current party members");
         }
-        if (ImGui.IsItemHovered())
-            ImGui.SetTooltip("Select from current party members");
 
         ImGui.Spacing();
 
@@ -356,7 +403,7 @@ public class ConfigWindow : Window, IDisposable
         // Update Interval
         var updateInterval = config.UpdateInterval;
         ImGui.SetNextItemWidth(200);
-        if (ImGui.SliderFloat("Update Interval (seconds)", ref updateInterval, 0.05f, 5.0f, "%.2f"))
+        if (ImGui.InputFloat("Update Interval (seconds)", ref updateInterval, 0.01f, 0.1f, "%.3f"))
         {
             config.UpdateInterval = Math.Max(0.05f, updateInterval);
             configManager.SaveCurrentAccount();
@@ -375,7 +422,7 @@ public class ConfigWindow : Window, IDisposable
 
         var cling = config.Cling;
         ImGui.SetNextItemWidth(200);
-        if (ImGui.SliderFloat("Cling Distance", ref cling, 0.5f, 30.0f))
+        if (ImGui.InputFloat("Cling Distance", ref cling, 0.5f, 1.0f, "%.3f"))
         {
             config.Cling = cling;
             configManager.SaveCurrentAccount();
@@ -411,7 +458,7 @@ public class ConfigWindow : Window, IDisposable
 
         var sd = config.SocialDistancing;
         ImGui.SetNextItemWidth(200);
-        if (ImGui.SliderFloat("Social Distance (yalms)", ref sd, 0.0f, 30.0f))
+        if (ImGui.InputFloat("Social Distance (yalms)", ref sd, 0.5f, 1.0f, "%.3f"))
         {
             config.SocialDistancing = sd;
             configManager.SaveCurrentAccount();
@@ -431,7 +478,7 @@ public class ConfigWindow : Window, IDisposable
 
         var xw = config.SocialDistanceXWiggle;
         ImGui.SetNextItemWidth(200);
-        if (ImGui.SliderFloat("X Wiggle (+/- yalms)", ref xw, 0.0f, 5.0f))
+        if (ImGui.InputFloat("X Wiggle (+/- yalms)", ref xw, 0.1f, 0.5f, "%.3f"))
         {
             config.SocialDistanceXWiggle = xw;
             configManager.SaveCurrentAccount();
@@ -441,7 +488,7 @@ public class ConfigWindow : Window, IDisposable
 
         var zw = config.SocialDistanceZWiggle;
         ImGui.SetNextItemWidth(200);
-        if (ImGui.SliderFloat("Z Wiggle (+/- yalms)", ref zw, 0.0f, 5.0f))
+        if (ImGui.InputFloat("Z Wiggle (+/- yalms)", ref zw, 0.1f, 0.5f, "%.3f"))
         {
             config.SocialDistanceZWiggle = zw;
             configManager.SaveCurrentAccount();

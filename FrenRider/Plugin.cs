@@ -42,6 +42,7 @@ public sealed class Plugin : IDalamudPlugin
 
     private IDtrBarEntry? dtrEntry;
     private bool wasLoggedIn;
+    private int loginDetectionDelay;
 
     public Plugin()
     {
@@ -74,13 +75,16 @@ public sealed class Plugin : IDalamudPlugin
         // DTR bar
         SetupDtrBar();
 
-        // Login detection
-        ClientState.Login += OnLogin;
+        // Login detection (deferred via framework update to avoid thread issues)
+        ClientState.Login += OnLoginEvent;
         Framework.Update += OnFrameworkUpdate;
 
-        // If already logged in at plugin load
+        // If already logged in at plugin load, defer detection to framework update
         if (ClientState.IsLoggedIn)
-            OnLogin();
+        {
+            wasLoggedIn = true;
+            loginDetectionDelay = 3;
+        }
 
         Log.Information("===Fren Rider loaded!===");
     }
@@ -88,7 +92,7 @@ public sealed class Plugin : IDalamudPlugin
     public void Dispose()
     {
         Framework.Update -= OnFrameworkUpdate;
-        ClientState.Login -= OnLogin;
+        ClientState.Login -= OnLoginEvent;
 
         PluginInterface.UiBuilder.Draw -= WindowSystem.Draw;
         PluginInterface.UiBuilder.OpenConfigUi -= ToggleConfigUi;
@@ -107,6 +111,13 @@ public sealed class Plugin : IDalamudPlugin
     private void OnCommand(string command, string args)
     {
         MainWindow.Toggle();
+    }
+
+    private void OnLoginEvent()
+    {
+        // Don't run OnLogin here - Login event fires off main thread.
+        // Instead, set a delay so OnFrameworkUpdate picks it up.
+        loginDetectionDelay = 3;
     }
 
     private void OnLogin()
@@ -131,15 +142,23 @@ public sealed class Plugin : IDalamudPlugin
 
     private void OnFrameworkUpdate(IFramework fw)
     {
-        // Delayed login detection (LocalPlayer may not be ready on Login event)
+        // Delayed login detection (LocalPlayer may not be ready immediately)
         if (ClientState.IsLoggedIn && !wasLoggedIn)
         {
             wasLoggedIn = true;
-            OnLogin();
+            loginDetectionDelay = 3; // Wait a few frames for LocalPlayer to be ready
         }
         else if (!ClientState.IsLoggedIn && wasLoggedIn)
         {
             wasLoggedIn = false;
+            loginDetectionDelay = 0;
+        }
+
+        if (loginDetectionDelay > 0)
+        {
+            loginDetectionDelay--;
+            if (loginDetectionDelay == 0)
+                OnLogin();
         }
 
         // Update DTR bar
