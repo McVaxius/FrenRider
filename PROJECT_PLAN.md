@@ -249,6 +249,14 @@
 
 ---
 
+**Phase 3.1 - In-Game Testing Feedback Fixes:**
+23. ~~Resizable left panel via drag splitter~~ ✓
+24. ~~Krangle locks Fren Name field read-only~~ ✓
+25. ~~Replace all SliderFloat with InputFloat (3 decimal places)~~ ✓
+26. ~~Fix "Not on main thread!" login detection error~~ ✓
+
+---
+
 ### Phase 4: Basic Following System
 **Goal:** Implement core following mechanics (non-combat)
 

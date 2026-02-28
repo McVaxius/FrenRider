@@ -9,6 +9,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Phase 3.1 - In-Game Testing Feedback Fixes
+
+#### [0.2.1] - 2026-02-28
+
+**Fixed:**
+- Left panel now user-resizable via drag splitter (120px–500px range, persisted in config)
+  - Visual splitter line highlights on hover, cursor changes to resize arrow
+  - Width saved to `Configuration.LeftPanelWidth` on release
+- Krangle now locks Fren Name field to read-only when enabled, showing garbled text
+  - Party member dropdown hidden when Krangle is on (can't edit anyway)
+  - Tooltip: "Disable Krangle to edit fren name."
+- All `SliderFloat` controls replaced with `InputFloat` (editable fields, up to 3 decimal places)
+  - Affected: Update Interval, Cling Distance, Social Distance, X Wiggle, Z Wiggle
+- Login detection "Not on main thread!" error fixed
+  - `ClientState.Login` event now defers to framework update via 3-frame delay
+  - Plugin load with already-logged-in character also deferred
+  - `OnLoginEvent()` sets delay flag; `OnLogin()` only runs from framework update
+
+**Changed:**
+- `Configuration.cs` - Added `LeftPanelWidth` property (default 240f)
+- `Plugin.cs` - Split login handling into `OnLoginEvent` (event handler) and `OnLogin` (deferred)
+
+**Build Results:**
+- 0 errors, 0 warnings
+
+**Files Modified:**
+- `FrenRider/Configuration.cs` - LeftPanelWidth
+- `FrenRider/Plugin.cs` - Deferred login detection
+- `FrenRider/Windows/ConfigWindow.cs` - Resizable splitter, Krangle fren lock, InputFloat
+
+**Testing Required:**
+1. Drag the splitter between left and right panels → resizes, cursor changes
+2. Close and reopen settings → panel width persisted
+3. Enable Krangle → Fren Name becomes read-only with garbled text, dropdown hidden
+4. Disable Krangle → Fren Name editable again with real text
+5. All numeric fields are now text inputs with +/- buttons (no sliders)
+6. Character swap / logout-login → no "Not on main thread!" error in /xllog
+
+---
+
 ### Phase 3 - Party & Target Detection
 
 #### [0.2.0] - 2026-02-28

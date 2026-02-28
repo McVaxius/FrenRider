@@ -34,6 +34,8 @@ public sealed class Plugin : IDalamudPlugin
     public Configuration Configuration { get; init; }
     public ConfigManager ConfigManager { get; init; }
     public FrenTracker FrenTracker { get; init; }
+    public ZoneService ZoneService { get; init; }
+    public FollowService FollowService { get; init; }
     public string[] MountNames { get; private set; } = Array.Empty<string>();
 
     public readonly WindowSystem WindowSystem = new("FrenRider");
@@ -53,6 +55,8 @@ public sealed class Plugin : IDalamudPlugin
             ConfigManager.CurrentAccountId = Configuration.LastAccountId;
 
         FrenTracker = new FrenTracker(this);
+        ZoneService = new ZoneService();
+        FollowService = new FollowService(this, FrenTracker, ZoneService);
 
         ConfigWindow = new ConfigWindow(this);
         MainWindow = new MainWindow(this);
@@ -166,6 +170,10 @@ public sealed class Plugin : IDalamudPlugin
 
         // Update fren tracking
         FrenTracker.Update();
+
+        // Update zone detection and following
+        ZoneService.Update();
+        FollowService.Update();
     }
 
     public void SetupDtrBar()

@@ -138,8 +138,25 @@ public class MainWindow : Window, IDisposable
                 ImGui.TextColored(new Vector4(1, 0.4f, 0.4f, 1), "Fren not found.");
             }
 
-            // Current zone
-            ImGui.Text($"Zone ID: {Plugin.ClientState.TerritoryType}");
+            // Follow state
+            var follow = plugin.FollowService;
+            var stateColor = follow.State switch
+            {
+                FollowState.Following => new Vector4(0.4f, 0.8f, 1f, 1),
+                FollowState.InRange => new Vector4(0.4f, 1f, 0.4f, 1),
+                FollowState.TooFar => new Vector4(1f, 0.6f, 0.2f, 1),
+                FollowState.InCombat => new Vector4(1f, 0.4f, 0.4f, 1),
+                _ => new Vector4(0.5f, 0.5f, 0.5f, 1),
+            };
+            ImGui.TextColored(stateColor, $"Follow: {follow.State}");
+            ImGui.SameLine();
+            ImGui.TextDisabled($"- {follow.StateDetail}");
+
+            // Zone info
+            var zone = plugin.ZoneService;
+            ImGui.Text($"Zone: {zone.CurrentZone}");
+            ImGui.SameLine();
+            ImGui.TextDisabled($"(ID {zone.TerritoryId}{(zone.IsIndoors ? ", indoors" : "")})");
         }
 
         ImGui.Spacing();
