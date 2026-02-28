@@ -138,6 +138,20 @@ public class FrenTracker
         {
             if (member.Name.Contains(searchName, StringComparison.OrdinalIgnoreCase))
             {
+                // Check if fren is flying by looking at their GameObject
+                var frenFlying = false;
+                foreach (var obj in Plugin.ObjectTable)
+                {
+                    if (obj != null && obj.Name.ToString() == member.Name)
+                    {
+                        // Check if the object has InFlight condition
+                        // Note: We can't directly check other player's conditions, so we check position height
+                        // If mounted and Y position is significantly higher than ground, likely flying
+                        frenFlying = member.IsMounted && obj.Position.Y > localPlayer.Position.Y + 2.0f;
+                        break;
+                    }
+                }
+                
                 Fren = new FrenState
                 {
                     Name = member.Name,
@@ -152,6 +166,7 @@ public class FrenTracker
                     InParty = true,
                     IsMounted = member.IsMounted,
                     MountId = member.MountId,
+                    IsFlying = frenFlying,
                 };
                 return;
             }
@@ -250,6 +265,7 @@ public class FrenTracker
         public bool InParty { get; set; }
         public bool IsMounted { get; set; }
         public ushort MountId { get; set; }
+        public bool IsFlying { get; set; }
     }
 
     public class PartyMemberState

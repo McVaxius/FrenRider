@@ -1,6 +1,9 @@
 using System;
 using System.Numerics;
+using System.Text;
 using Dalamud.Game.ClientState.Conditions;
+using FFXIVClientStructs.FFXIV.Client.System.String;
+using FFXIVClientStructs.FFXIV.Client.UI;
 using FrenRider.Models;
 
 namespace FrenRider.Services;
@@ -24,6 +27,7 @@ public class FollowService
     private bool isNavigating;
     private Vector3 socialOffset;
     private long lastOffsetChangeMs;
+    private long lastFlyingAdjustMs;
 
     private static readonly string[] ClingTypeNames = { "NavMesh", "Visland", "BossMod Follow", "Vanilla Follow" };
 
@@ -113,6 +117,21 @@ public class FollowService
             return;
         }
 
+        // Flying follow: if fren is flying and we're mounted but NOT already flying, send jump
+        // This matches SND: "if Svc.Condition[77] then flying_adjust = flying_adjust + 1"
+        var selfMounted = Plugin.Condition[ConditionFlag.Mounted];
+        var selfFlying = Plugin.Condition[ConditionFlag.InFlight];
+        var frenFlying = fren.IsFlying;
+        var now = Environment.TickCount64;
+        
+        if (selfMounted && frenFlying && !selfFlying && now - lastFlyingAdjustMs > 1000)
+        {
+            // Send jump command to initiate flight (only if not already flying)
+            SendCommand("/gaction jump");
+            lastFlyingAdjustMs = now;
+            Plugin.Log.Information("Flying follow: sent jump command to initiate flight");
+        }
+
         // Formation mode: override target with formation position
         var formationTarget = plugin.FormationService.GetFormationTarget();
         if (formationTarget.HasValue)
@@ -180,12 +199,25 @@ public class FollowService
 
     private void NavigateToPosition(CharacterConfig config, Vector3 target)
     {
+        // Check if PLAYER is flying - use larger threshold for flying to reduce command spam
+        var selfFlying = Plugin.Condition[ConditionFlag.InFlight];
+        var distanceThreshold = selfFlying ? 5.0f : 1.0f;
+        
         // Only re-issue nav command if target moved significantly
-        if (Vector3.Distance(target, lastNavTarget) < 1.0f && isNavigating)
+        if (Vector3.Distance(target, lastNavTarget) < distanceThreshold && isNavigating)
             return;
 
         lastNavTarget = target;
         isNavigating = true;
+
+        if (selfFlying)
+        {
+            // When player is flying, use /vnav flyto for flying navigation
+            var cmd = $"/vnav flyto {target.X:F2} {target.Y:F2} {target.Z:F2}";
+            SendCommand(cmd);
+            Plugin.Log.Information($"Using /vnav flyto for flying navigation to {target.X:F2}, {target.Y:F2}, {target.Z:F2}");
+            return;
+        }
 
         var clingType = zoneService.CurrentZone == ZoneType.Duty
             ? config.ClingTypeDuty
@@ -247,31 +279,41 @@ public class FollowService
             ? config.ClingTypeDuty
             : config.ClingType;
 
-        var typeName = clingType >= 0 && clingType < ClingTypeNames.Length
-            ? ClingTypeNames[clingType]
-            : "NavMesh";
-
-        var cmd = typeName switch
+        var cmd = clingType switch
         {
-            "NavMesh" => "/vnav stop",
-            "Visland" => "/visland stop",
-            _ => null, // BossMod/Vanilla have no explicit stop
+            0 => "/vnavmesh stop",
+            1 => "/visland stop",
+            2 => "/bmrai follow off",
+            3 => "/follow",
+            _ => "/vnavmesh stop",
         };
 
-        if (cmd != null)
-            SendCommand(cmd);
+        SendCommand(cmd);
     }
 
     /// <summary>
-    /// Send a slash command via Dalamud's command manager.
-    /// Works for commands registered by any Dalamud plugin (VNavmesh, Visland, BossMod, etc.).
+    /// Send a slash command to the game.
+    /// Uses UIModule.ProcessChatBoxEntry to send commands directly to game (like typing in chat).
     /// </summary>
-    private static void SendCommand(string command)
+    private static unsafe void SendCommand(string command)
     {
         try
         {
-            if (!Plugin.CommandManager.ProcessCommand(command))
-                Plugin.Log.Warning($"Command not handled: {command}");
+            // Try plugin command first (for nav commands)
+            if (Plugin.CommandManager.ProcessCommand(command))
+                return;
+            
+            // Fall back to game command (for /hold, /release, etc.)
+            var uiModule = UIModule.Instance();
+            if (uiModule == null)
+            {
+                Plugin.Log.Error("UIModule is null, cannot send command");
+                return;
+            }
+
+            var bytes = Encoding.UTF8.GetBytes(command);
+            var utf8String = Utf8String.FromSequence(bytes);
+            uiModule->ProcessChatBoxEntry(utf8String, nint.Zero);
         }
         catch (Exception ex)
         {

@@ -1,0 +1,89 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+env:
+  PLUGIN_NAME: FrenRider
+  SOLUTION_NAME: FrenRider
+  INTERNAL_NAME: FrenRider
+  RELEASE_DIR: FrenRider\bin\x64\Release\FrenRider
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Download Dalamud
+        run: |
+          Invoke-WebRequest -Uri https://goatcorp.github.io/dalamud-distrib/latest.zip -OutFile latest.zip
+          Expand-Archive -Force latest.zip "$env:AppData\XIVLauncher\addon\Hooks\dev\"
+
+      - name: Build
+        run: |
+          dotnet restore -r win ${{ env.SOLUTION_NAME }}.sln
+          dotnet build --configuration Release
+        env:
+          DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.PLUGIN_NAME }}-artifact
+          path: ${{ env.RELEASE_DIR }}
+          if-no-files-found: error
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.PLUGIN_NAME }}-artifact
+          path: artifact
+
+      - name: Create latest.zip
+        run: |
+          cd artifact
+          zip -r ../latest.zip .
+          cd ..
+
+      - name: Get version from tag
+        id: get_version
+        run: |
+          if [ "${{ github.ref_type }}" == "tag" ]; then
+            echo "version=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=v0.0.0.1" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.get_version.outputs.version }}
+          name: Release ${{ steps.get_version.outputs.version }}
+          draft: false
+          prerelease: false
+          files: |
+            latest.zip
+            artifact/${{ env.INTERNAL_NAME }}.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -27,6 +27,7 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static IChatGui ChatGui { get; private set; } = null!;
     [PluginService] internal static IDtrBar DtrBar { get; private set; } = null!;
     [PluginService] internal static IDataManager DataManager { get; private set; } = null!;
+    [PluginService] internal static ITargetManager TargetManager { get; private set; } = null!;
     [PluginService] internal static IPluginLog Log { get; private set; } = null!;
 
     private const string CommandName = "/frenrider";

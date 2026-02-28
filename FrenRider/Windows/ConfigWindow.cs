@@ -353,9 +353,13 @@ public class ConfigWindow : Window, IDisposable
         ImGui.SetNextItemWidth(300);
         if (ImGui.BeginCombo("##MountSelect", string.IsNullOrEmpty(currentMount) ? "(none)" : currentMount))
         {
+            // Search field - fixed at top
             ImGui.SetNextItemWidth(-1);
             ImGui.InputText("##MountSearch", ref mountSearch, 64);
             ImGui.Separator();
+            
+            // Scrollable list area
+            ImGui.BeginChild("##MountList", new Vector2(0, 200), false);
             for (var i = 0; i < mountNames.Length; i++)
             {
                 if (!string.IsNullOrEmpty(mountSearch) &&
@@ -371,6 +375,7 @@ public class ConfigWindow : Window, IDisposable
                 }
                 if (isSelected) ImGui.SetItemDefaultFocus();
             }
+            ImGui.EndChild();
             ImGui.EndCombo();
         }
 

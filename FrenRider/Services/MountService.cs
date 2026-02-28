@@ -1,5 +1,9 @@
 using System;
+using System.Linq;
+using System.Text;
 using Dalamud.Game.ClientState.Conditions;
+using FFXIVClientStructs.FFXIV.Client.System.String;
+using FFXIVClientStructs.FFXIV.Client.UI;
 using FrenRider.Models;
 
 namespace FrenRider.Services;
@@ -75,19 +79,19 @@ public class MountService
             return;
         }
 
-        // MOUNT LOGIC: If fren is mounted and FlyYouFools is enabled, mount up
-        if (fren.IsMounted && config.FlyYouFools && !selfMounted && !inCombat)
+        // MOUNT LOGIC: If fren is mounted, mount up or ride pillion
+        if (fren.IsMounted && !selfMounted && !inCombat)
         {
             if (!wasFrenMounted)
             {
                 wasFrenMounted = true;
-                Plugin.Log.Information($"Fren mounted (MountId={fren.MountId}), will mount self");
+                Plugin.Log.Information($"Fren mounted (MountId={fren.MountId}), will {(config.FlyYouFools ? "mount self" : "ride pillion")}");
             }
             
             if (now >= mountCooldownMs)
             {
                 State = MountState.Mounting;
-                StateDetail = "Fren mounted (FlyYouFools), mounting...";
+                StateDetail = config.FlyYouFools ? "Fren mounted (FlyYouFools), mounting..." : "Fren mounted, riding pillion...";
                 MountSelf(config);
             }
             else
@@ -140,23 +144,61 @@ public class MountService
         var mountName = config.FoolFlier;
         mountCooldownMs = Environment.TickCount64 + 2000; // 2s cooldown
 
-        if (string.IsNullOrEmpty(mountName) || mountName == "Mount Roulette")
+        if (config.FlyYouFools)
         {
-            SendCommand("/mountroulette");
+            // Fly You Fools: mount own mount
+            if (string.IsNullOrEmpty(mountName) || mountName == "Mount Roulette")
+            {
+                // Mount Roulette - use Company Chocobo as fallback
+                SendCommand("/mount \"Company Chocobo\"");
+            }
+            else
+            {
+                // Use /mount "Mount Name" with proper case sensitivity
+                SendCommand($"/mount \"{mountName}\"");
+            }
+            State = MountState.Mounting;
+            StateDetail = $"Mounting: {mountName}";
         }
         else
         {
-            // Use /mount "Name" command
-            SendCommand($"/mount \"{mountName}\"");
+            // Pillion riding: target fren and ride pillion
+            var fren = tracker.Fren;
+            if (fren != null && fren.IsFound)
+            {
+                // Find fren in ObjectTable and set as target
+                var frenObj = Plugin.ObjectTable.FirstOrDefault(obj => 
+                    obj != null && obj.Name.ToString() == fren.Name);
+                
+                if (frenObj != null)
+                {
+                    Plugin.TargetManager.Target = frenObj;
+                    Plugin.Log.Information($"Targeted fren: {fren.Name}");
+                    
+                    // Send pillion command
+                    SendCommand("/ridepillion <t> 2");
+                    State = MountState.Mounting;
+                    StateDetail = "Riding pillion on fren's mount";
+                }
+                else
+                {
+                    State = MountState.Idle;
+                    StateDetail = "Can't pillion: fren not in ObjectTable";
+                    Plugin.Log.Warning($"Fren {fren.Name} not found in ObjectTable for targeting");
+                }
+            }
+            else
+            {
+                State = MountState.Idle;
+                StateDetail = "Can't pillion: fren not found";
+            }
         }
-
-        State = MountState.Mounting;
-        StateDetail = $"Mounting: {mountName}";
     }
 
     private void DismountSelf()
     {
         mountCooldownMs = Environment.TickCount64 + 1500; // 1.5s cooldown
+        // /mount toggles mount on/off - when mounted, it dismounts
         SendCommand("/mount");
         State = MountState.Dismounting;
         StateDetail = "Dismounting...";
@@ -182,15 +224,28 @@ public class MountService
         SendCommand(stanceCmd);
     }
 
-    private static void SendCommand(string command)
+    private static unsafe void SendCommand(string command)
     {
         try
         {
             Plugin.Log.Information($"MountService sending command: {command}");
-            if (!Plugin.CommandManager.ProcessCommand(command))
-                Plugin.Log.Warning($"Mount command not handled: {command}");
-            else
-                Plugin.Log.Information($"Mount command sent successfully: {command}");
+            
+            // Use UIModule to send command directly to game
+            var uiModule = UIModule.Instance();
+            if (uiModule == null)
+            {
+                Plugin.Log.Error("UIModule is null, cannot send command");
+                return;
+            }
+
+            // Create Utf8String for the command
+            var bytes = Encoding.UTF8.GetBytes(command);
+            var utf8String = Utf8String.FromSequence(bytes);
+            
+            // Send command through ProcessChatBoxEntry
+            uiModule->ProcessChatBoxEntry(utf8String, nint.Zero);
+            
+            Plugin.Log.Information($"Mount command sent to game: {command}");
         }
         catch (Exception ex)
         {

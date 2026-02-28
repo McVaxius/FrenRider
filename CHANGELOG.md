@@ -20,27 +20,72 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Account IDs are hex-formatted content IDs for proper separation
   - Migration logic handles existing single-account configs automatically
   - Added detailed logging for account selection debugging
-- Mount logic: Fixed "Fly You Fools" behavior to match SND script
-  - Dismount when fren dismounts (if FlyYouFools enabled)
+- Mount logic: Fixed "Fly You Fools" behavior and command syntax
+  - **CRITICAL FIX**: Changed to proper `/mount "Mount Name"` syntax (case-sensitive, with quotes)
+  - **CRITICAL FIX**: Changed from `ICommandManager.ProcessCommand()` to `UIModule.ProcessChatBoxEntry()` to send commands directly to game
+  - Dismount when fren dismounts (if FlyYouFools enabled) using `/mount` toggle
   - Mount when fren mounts (if FlyYouFools enabled and not in combat)
+  - **Pillion riding fixed**: Now uses `ITargetManager.Target` to directly set target instead of `/target` command
+  - Pillion riding: Finds fren in ObjectTable and sets as target, then sends `/ridepillion <t> 2`
   - Added proper condition checks for combat state
-  - Simplified mount/dismount logic for reliability
+  - Fixed cooldown display to show remaining time
+  - Added detailed logging for mount commands and targeting
+  - Cooldown no longer blocks state updates (only command execution)
+  - Mount Roulette fallback: uses "Company Chocobo" since true roulette requires plugin support
+- **Flying follow**: When mounted and fren is flying, sends jump command (`/gaction jump`) to initiate flight
+  - **FIXED**: Changed from `/hold SPACE` to `/gaction jump` (proper FFXIV general action command)
+  - **FIXED**: Only sends jump when NOT already flying (checks `InFlight` condition) to prevent spam
+  - **FIXED**: Increased cooldown from 100ms to 1000ms (1 second) to prevent command spam
+  - **FIXED**: Uses `/vnav flyto` when PLAYER is flying (not just when fren is flying)
+  - **FIXED**: Increased distance threshold for flying navigation from 1.0 to 5.0 yalms
+  - **CRITICAL**: Checks player's `InFlight` condition to determine navigation mode
+  - When player is airborne: uses `/vnav flyto` with 5.0 yalm threshold for smooth flying
+  - When player is on ground: uses normal navigation with 1.0 yalm threshold
+  - Prevents getting stuck in air after fren lands (continues using flyto until player lands)
+  - Reduces navigation command spam for smoother flying movement at full speed
+  - Jump command only sent when mounted, fren flying, and player not already flying
 - DTR bar: Restored toggle behavior (toggles enabled state, not window)
+- UI: Mount search field now stays fixed at top while scrolling mount list
 
 **Changed:**
+- `Plugin` - Added `ITargetManager` service for direct targeting
 - `Plugin.OnLogin()` - Added detailed logging for ContentId and account selection
 - `ConfigManager.EnsureAccountSelected()` - Enhanced with fallback logic and better logging
-- `MountService.Update()` - Rewritten mount/dismount logic to match SND behavior
+- `MountService.Update()` - Rewritten mount/dismount logic with better cooldown handling and pillion support
+- `MountService.MountSelf()` - **Changed to use `ITargetManager.Target` for pillion riding instead of `/target` command**
+- `MountService.MountSelf()` - Uses `/mount "Mount Name"` (proper FFXIV syntax) for Fly You Fools mode
+- `MountService.DismountSelf()` - Uses `/mount` to toggle dismount
+- `MountService.SendCommand()` - **CRITICAL: Changed from `ICommandManager.ProcessCommand()` to `UIModule.ProcessChatBoxEntry()` to send commands directly to game**
+- `FollowService.Update()` - **CRITICAL: Fixed flying follow logic to prevent spam and work correctly**
+  - Added `InFlight` condition check to only send jump when player is NOT already flying
+  - Increased jump cooldown from 100ms to 1000ms to prevent command spam
+  - Jump command only sent when: mounted AND fren flying AND not already flying AND cooldown expired
+- `FollowService.NavigateToPosition()` - **CRITICAL: Use /vnav flyto when PLAYER is flying**
+  - Checks player's `InFlight` condition flag to determine navigation mode
+  - When player is flying: uses `/vnav flyto` with 5.0 yalm distance threshold
+  - When player is on ground: uses normal navigation with 1.0 yalm distance threshold
+  - Prevents getting stuck in air when fren lands (continues flyto until player lands)
+  - Larger threshold for flying reduces command spam and allows smoother movement at full speed
+- `FollowService.SendCommand()` - Enhanced to try plugin commands first, then fall back to UIModule for game commands
+- `FrenTracker.FrenState` - Added `IsFlying` property to detect when fren is flying
+- `FrenTracker.FindFren()` - Added flying detection based on Y position comparison
 - `Plugin.SetupDtrBar()` - DTR bar OnClick toggles `cfg.Enabled` state
+- `ConfigWindow` - Mount selector now uses BeginChild for scrollable list with fixed search
 
 **Build Results:**
 - 0 errors, 0 warnings
 
 **Testing Required:**
-1. Check /xllog for ContentId values when logging in with different accounts
-2. Verify FlyYouFools: mount when fren mounts, dismount when fren dismounts
-3. Click DTR bar entry → should toggle plugin enabled state (FR: On/Off)
-4. Multiple clients should create separate JSON files (check ContentId in logs)
+1. Check /xllog for mount commands: should see `/mount "Company Chocobo"` or `/mount "Mount Name"`
+2. Verify FlyYouFools ON: mount when fren mounts, dismount when fren dismounts
+3. **Verify FlyYouFools OFF**: should ride pillion when fren mounts
+   - Check logs for "Targeted fren: [Name]" message
+   - Should see `/ridepillion <t> 2` command
+   - Character should actually target fren and ride pillion
+4. **Verify flying follow**: When mounted and fren flies, should see `/gaction jump` in logs and character should take flight
+5. Click DTR bar entry → should toggle plugin enabled state (FR: On/Off)
+6. Mount search field should stay visible while scrolling mount list
+7. Check /xllog for ContentId values when logging in with different accounts
 
 ---
 
