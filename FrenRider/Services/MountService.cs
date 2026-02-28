@@ -53,7 +53,7 @@ public class MountService
         }
 
         var selfMounted = Plugin.Condition[ConditionFlag.Mounted] || Plugin.Condition[ConditionFlag.Mounting71];
-        var selfFlying = Plugin.Condition[ConditionFlag.Flying];
+        var selfFlying = Plugin.Condition[ConditionFlag.InFlight];
         var now = Environment.TickCount64;
 
         // Cooldown between mount/dismount actions to avoid spam

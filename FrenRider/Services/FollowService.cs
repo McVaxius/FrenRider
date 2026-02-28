@@ -40,6 +40,18 @@ public class FollowService
     public void Update()
     {
         var config = plugin.ConfigManager.GetActiveConfig();
+
+        // Zone transition: stop navigation and reset
+        if (zoneService.ZoneChanged)
+        {
+            if (isNavigating) StopNavigation(config);
+            State = FollowState.Idle;
+            StateDetail = "Zone transition";
+            lastNavTarget = default;
+            socialOffset = default;
+            return;
+        }
+
         if (!config.Enabled)
         {
             if (isNavigating) StopNavigation(config);
@@ -113,6 +125,10 @@ public class FollowService
 
         if (zoneService.CurrentZone == ZoneType.DeepDungeon)
             cling += config.DDDistance;
+
+        // FATE extra distance
+        if (zoneService.InFate && config.FDistance > 0)
+            cling += config.FDistance;
 
         // Add social distancing offset so we stop farther away
         if (ShouldApplySocialDistancing(config))

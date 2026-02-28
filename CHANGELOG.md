@@ -9,6 +9,103 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Phase 6 - Combat System Integration
+
+#### [0.5.0] - 2026-02-28
+
+**Added:**
+- `CombatService` - Combat state machine with 4 states (OutOfCombat, EnteringCombat, InCombat, LeavingCombat)
+  - Detects combat via `ConditionFlag.InCombat`
+  - Auto-activates rotation plugin on combat enter, deactivates on leave
+  - Supports 4 rotation plugins: BMR (`/bmrai`), VBM (`/vbmai`), RSR (`/rotation`), WRATH (`/wrath`)
+  - Zone-aware preset selection: general vs DD vs FATE presets
+  - Foray-specific rotation plugin selection (`RotationPluginForay` config)
+  - BossMod AI toggle on combat enter/leave
+  - Positional settings (Front/Rear/Any/Auto) sent to RSR/WRATH
+  - LB automation stub (threshold checking framework, actual HP check TBD)
+  - 2s cooldown between rotation toggle commands
+- MainWindow combat state display:
+  - Color-coded: red=in combat, orange=entering, grey=leaving
+  - Shows active rotation plugin and preset name
+
+**Changed:**
+- `Plugin.cs` - Creates CombatService, calls Update in framework loop
+- `MainWindow.cs` - Added combat state section
+
+**Build Results:**
+- 0 errors, 0 warnings
+
+**Files Created:**
+- `FrenRider/Services/CombatService.cs`
+
+**Files Modified:**
+- `FrenRider/Plugin.cs` - Service wiring
+- `FrenRider/Windows/MainWindow.cs` - Combat display
+
+**Testing Required:**
+1. Enter combat → rotation plugin activates with correct preset
+2. Leave combat → rotation plugin deactivates
+3. BossMod AI toggles on/off with combat
+4. Different presets load for DD vs overworld
+5. Foray zones use RotationPluginForay setting
+6. Check /xllog for rotation commands and any warnings
+
+---
+
+### Phase 5 - Mount System Integration
+
+#### [0.4.0] - 2026-02-28
+
+**Added:**
+- `MountService` - Mount state machine with 5 states (Idle, WaitingToMount, Mounting, Mounted, Dismounting)
+  - Detects fren mount state via FFXIVClientStructs unsafe `Character.Mount.MountId`
+  - Auto-mounts when fren mounts (uses FoolFlier config for mount name)
+  - Auto-dismounts when fren dismounts
+  - Mount Roulette support via `/mountroulette`
+  - Named mount via `/mount "Name"` command
+  - 2s mount / 1.5s dismount cooldown to prevent action spam
+  - Gysahl Green companion summoning with stance selection (stub for auto-trigger)
+- FrenTracker mount data: `IsMounted` and `MountId` on both `FrenState` and `PartyMemberState`
+  - Read via unsafe FFXIVClientStructs `Character` struct at runtime
+  - Detects mount ID for all visible party members and fren
+- MainWindow mount state display:
+  - Color-coded: teal=mounted, yellow=mounting, orange=dismounting
+  - Shows fren's mount ID when fren is mounted but self is idle
+
+**Changed:**
+- `FrenTracker.cs` - Added FFXIVClientStructs import, unsafe mount detection in ScanParty and FindFren
+- `Plugin.cs` - Creates MountService, calls Update in framework loop
+- `MainWindow.cs` - Added mount state section with color coding
+
+**Technical Notes:**
+- `ConditionFlag.InFlight` (not `Flying`) for flight detection
+- `ConditionFlag.Mounted` + `ConditionFlag.Mounting71` for self mount state
+- `Character.Mount.MountId` (ushort) - non-zero when mounted
+- `Character.IsMounted()` helper in FFXIVClientStructs
+- `/mount` toggles mount/dismount, `/mount "Name"` mounts specific mount
+- Pillion riding (multi-seat mount sharing) requires game interaction system - future enhancement
+
+**Build Results:**
+- 0 errors, 0 warnings
+
+**Files Created:**
+- `FrenRider/Services/MountService.cs`
+
+**Files Modified:**
+- `FrenRider/Services/FrenTracker.cs` - Mount detection
+- `FrenRider/Plugin.cs` - Service wiring
+- `FrenRider/Windows/MainWindow.cs` - Mount display
+
+**Testing Required:**
+1. Fren mounts → plugin auto-mounts configured mount (or roulette)
+2. Fren dismounts → plugin auto-dismounts
+3. MainWindow shows mount state with correct colors
+4. Mount cooldown prevents rapid mount/dismount spam
+5. FlyYouFools toggle controls own-mount vs pillion behavior
+6. Verify no crashes from unsafe FFXIVClientStructs access
+
+---
+
 ### Phase 4 - Basic Following System
 
 #### [0.3.0] - 2026-02-28

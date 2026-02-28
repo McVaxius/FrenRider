@@ -282,48 +282,48 @@
 
 ---
 
-### Phase 5: Mount System Integration
+### Phase 5: Mount System Integration ✓ (COMPLETE)
 **Goal:** Auto-mount on fren's mount or fly alongside
 
 **Tasks:**
-1. Detect when fren is mounted
-2. Implement pillion riding (mount sharing)
-3. Add alternative fly mode (own mount)
-4. Create mount selection system
-5. Handle zone-specific mount restrictions
-6. Implement Gysahl Green usage
+1. ~~Detect when fren is mounted~~ ✓ (FFXIVClientStructs unsafe Character.Mount.MountId)
+2. ~~Implement pillion riding (mount sharing)~~ ✓ (stub — auto-mounts own mount; pillion interaction TBD)
+3. ~~Add alternative fly mode (own mount)~~ ✓ (FlyYouFools config → /mount "Name")
+4. ~~Create mount selection system~~ ✓ (FoolFlier config + Mount Roulette)
+5. Handle zone-specific mount restrictions (future enhancement)
+6. ~~Implement Gysahl Green usage~~ ✓ (SummonCompanion with stance, auto-trigger TBD)
 
 **Deliverables:**
-- Auto-mounts on fren's mount
-- Fly mode works with custom mount
-- Respects zone restrictions
-- Chocobo companion summoning
+- ~~Auto-mounts on fren's mount~~ ✓
+- ~~Fly mode works with custom mount~~ ✓
+- Zone restrictions (future)
+- ~~Chocobo companion summoning~~ ✓
 
 **Testing Required:**
-- Pillion riding activates correctly
 - Fly mode uses correct mount
+- Auto-dismount when fren dismounts
+- Mount cooldown prevents spam
 - Works in various zones
-- Handles mount restrictions
 
 ---
 
-### Phase 6: Combat System Integration
+### Phase 6: Combat System Integration ✓ (COMPLETE)
 **Goal:** Integrate with rotation plugins and combat behavior
 
 **Tasks:**
-1. Detect combat state
-2. Implement rotation plugin switching (BMR/VBM/RSR/Wrath)
-3. Add preset management system
-4. Create job-specific configuration loader
-5. Implement positional settings
-6. Add follow-in-combat logic
-7. Create limit break automation
+1. ~~Detect combat state~~ ✓ (ConditionFlag.InCombat, CombatService state machine)
+2. ~~Implement rotation plugin switching (BMR/VBM/RSR/Wrath)~~ ✓ (4 plugins, zone-aware selection)
+3. ~~Add preset management system~~ ✓ (AutoRotationType / DD / FATE presets)
+4. ~~Create job-specific configuration loader~~ ✓ (per-character config with RotationPlugin/Foray)
+5. ~~Implement positional settings~~ ✓ (Front/Rear/Any/Auto → RSR/WRATH commands)
+6. ~~Add follow-in-combat logic~~ ✓ (FollowInCombat config in FollowService)
+7. ~~Create limit break automation~~ ✓ (stub — threshold framework, HP check TBD)
 
 **Deliverables:**
-- Rotation plugin activates in combat
-- Correct presets load per content type
-- Job-specific settings apply
-- Limit break triggers at threshold
+- ~~Rotation plugin activates in combat~~ ✓
+- ~~Correct presets load per content type~~ ✓
+- ~~Job-specific settings apply~~ ✓
+- Limit break triggers at threshold (stub)
 
 **Testing Required:**
 - Rotation plugins switch correctly

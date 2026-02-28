@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using Dalamud.Game.ClientState.Conditions;
+using FFXIVClientStructs.FFXIV.Client.Game.Fate;
 
 namespace FrenRider.Services;
 
@@ -30,14 +32,26 @@ public class ZoneService
         920, 975,           // Bozja Southern Front, Zadnor
     };
 
+    private uint lastTerritoryId;
+
     public ZoneType CurrentZone { get; private set; }
     public bool IsIndoors { get; private set; }
     public uint TerritoryId { get; private set; }
+    public bool InFate { get; private set; }
+    public ushort CurrentFateId { get; private set; }
+    public bool ZoneChanged { get; private set; }
 
     public void Update()
     {
         TerritoryId = Plugin.ClientState.TerritoryType;
 
+        // Detect zone transitions
+        ZoneChanged = TerritoryId != lastTerritoryId && lastTerritoryId != 0;
+        if (ZoneChanged)
+            Plugin.Log.Information($"Zone changed: {lastTerritoryId} → {TerritoryId}");
+        lastTerritoryId = TerritoryId;
+
+        // Zone type detection
         if (DeepDungeonIds.Contains(TerritoryId))
         {
             CurrentZone = ZoneType.DeepDungeon;
@@ -58,5 +72,37 @@ public class ZoneService
             CurrentZone = ZoneType.Overworld;
             IsIndoors = false;
         }
+
+        // FATE detection via FFXIVClientStructs
+        UpdateFateStatus();
+    }
+
+    private void UpdateFateStatus()
+    {
+        try
+        {
+            unsafe
+            {
+                var fm = FateManager.Instance();
+                if (fm != null && fm->FateJoined != 0 && fm->CurrentFate != null)
+                {
+                    var fateId = fm->GetCurrentFateId();
+                    if (fateId != 0)
+                    {
+                        if (!InFate)
+                            Plugin.Log.Information($"Joined FATE (ID {fateId})");
+                        InFate = true;
+                        CurrentFateId = fateId;
+                        return;
+                    }
+                }
+            }
+        }
+        catch { /* FateManager access failed */ }
+
+        if (InFate)
+            Plugin.Log.Information("Left FATE");
+        InFate = false;
+        CurrentFateId = 0;
     }
 }

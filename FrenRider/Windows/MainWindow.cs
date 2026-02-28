@@ -152,6 +152,42 @@ public class MainWindow : Window, IDisposable
             ImGui.SameLine();
             ImGui.TextDisabled($"- {follow.StateDetail}");
 
+            // Mount state
+            var mount = plugin.MountService;
+            if (mount.State != MountState.Idle || (fren != null && fren.IsFound && fren.IsMounted))
+            {
+                var mountColor = mount.State switch
+                {
+                    MountState.Mounted => new Vector4(0.4f, 1f, 0.8f, 1),
+                    MountState.Mounting or MountState.WaitingToMount => new Vector4(1f, 1f, 0.4f, 1),
+                    MountState.Dismounting => new Vector4(1f, 0.6f, 0.4f, 1),
+                    _ => new Vector4(0.5f, 0.5f, 0.5f, 1),
+                };
+                var mountText = mount.State != MountState.Idle
+                    ? $"Mount: {mount.State} - {mount.StateDetail}"
+                    : $"Fren mounted (ID {fren!.MountId})";
+                ImGui.TextColored(mountColor, mountText);
+            }
+
+            // Combat state
+            var combat = plugin.CombatService;
+            if (combat.State != CombatState.OutOfCombat)
+            {
+                var combatColor = combat.State switch
+                {
+                    CombatState.InCombat => new Vector4(1f, 0.3f, 0.3f, 1),
+                    CombatState.EnteringCombat => new Vector4(1f, 0.6f, 0.2f, 1),
+                    CombatState.LeavingCombat => new Vector4(0.6f, 0.6f, 0.6f, 1),
+                    _ => new Vector4(0.5f, 0.5f, 0.5f, 1),
+                };
+                ImGui.TextColored(combatColor, $"Combat: {combat.State}");
+                if (!string.IsNullOrEmpty(combat.StateDetail))
+                {
+                    ImGui.SameLine();
+                    ImGui.TextDisabled($"- {combat.StateDetail}");
+                }
+            }
+
             // Zone info
             var zone = plugin.ZoneService;
             ImGui.Text($"Zone: {zone.CurrentZone}");
