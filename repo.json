@@ -16,9 +16,9 @@
     "RepoUrl": "https://github.com/McVaxius/FrenRider",
     "AssemblyVersion": "0.0.0.4",
     "DalamudApiLevel": 14,
-    "DownloadLinkInstall": "https://github.com/McVaxius/FrenRider/releases/latest/download/latest.zip",
-    "DownloadLinkUpdate": "https://github.com/McVaxius/FrenRider/releases/latest/download/latest.zip",
-    "DownloadLinkTesting": "https://github.com/McVaxius/FrenRider/releases/latest/download/latest.zip",
+    "DownloadLinkInstall": "https://github.com/McVaxius/FrenRider/releases/download/v0.0.0.4/latest.zip",
+    "DownloadLinkUpdate": "https://github.com/McVaxius/FrenRider/releases/download/v0.0.0.4/latest.zip",
+    "DownloadLinkTesting": "https://github.com/McVaxius/FrenRider/releases/download/v0.0.0.4/latest.zip",
     "IsHide": false,
     "IsTestingExclusive": false,
     "LoadPriority": 0
