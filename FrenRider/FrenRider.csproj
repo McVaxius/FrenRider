@@ -1,9 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <Project Sdk="Dalamud.NET.Sdk/14.0.2">
+
   <PropertyGroup>
-    <Version>0.0.0.7</Version>
+
+    <Version>0.0.0.9</Version>
+
     <PackageProjectUrl>https://github.com/McVaxius/FrenRider</PackageProjectUrl>
+
     <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
+
     <IsPackable>false</IsPackable>
+
   </PropertyGroup>
+
+
+
+  <Target Name="CopyPluginArtifacts" AfterTargets="Build">
+
+    <PropertyGroup>
+
+      <PluginOutput>$(OutputPath)$(AssemblyName)</PluginOutput>
+
+    </PropertyGroup>
+
+
+
+    <MakeDir Directories="$(PluginOutput)" />
+
+
+
+    <ItemGroup>
+
+      <PluginFiles Include="$(TargetPath)" />
+
+      <PluginFiles Include="$(ProjectDir)$(AssemblyName).json" />
+
+    </ItemGroup>
+
+    <ItemGroup>
+
+      <DalamudPackagerFile Include="icon.png" />
+
+    </ItemGroup>
+
+
+    <Copy SourceFiles="@(PluginFiles)"
+
+          DestinationFolder="$(PluginOutput)" />
+
+  </Target>
+
 </Project>
+
