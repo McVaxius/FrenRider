@@ -6,20 +6,4 @@
     <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
-
-  <Target Name="CopyPluginArtifacts" AfterTargets="Build">
-    <PropertyGroup>
-      <PluginOutput>$(OutputPath)$(AssemblyName)</PluginOutput>
-    </PropertyGroup>
-
-    <MakeDir Directories="$(PluginOutput)" />
-
-    <ItemGroup>
-      <PluginFiles Include="$(TargetPath)" />
-      <PluginFiles Include="$(ProjectDir)$(AssemblyName).json" />
-    </ItemGroup>
-
-    <Copy SourceFiles="@(PluginFiles)"
-          DestinationFolder="$(PluginOutput)" />
-  </Target>
 </Project>
