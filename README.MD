@@ -5,6 +5,7 @@ A native FFXIV Dalamud plugin for multiboxing support, converting the original [
 Some things not done
 NPC repair Via the Inn
 searching for items to eat
+leaving a duty when its over
 
 ## Features
 
