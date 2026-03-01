@@ -30,7 +30,7 @@ A native FFXIV Dalamud plugin for multiboxing support, converting the original [
 2. Go to Experimental tab
 3. Add custom plugin repository:
    ```
-   https://raw.githubusercontent.com/McVaxius/FrenRider/master/repo.json
+   https://raw.githubusercontent.com/McVaxius/TheDumpsterFire/refs/heads/master/repo.json
    ```
 4. Open Plugin Installer (`/xlplugins`)
 5. Search for "Fren Rider" and click Install
