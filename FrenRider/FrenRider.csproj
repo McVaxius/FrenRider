@@ -16,6 +16,10 @@
 
 
 
+  <ItemGroup>
+    <None Include="images\**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <Target Name="CopyPluginArtifacts" AfterTargets="Build">
 
     <PropertyGroup>
@@ -40,7 +44,7 @@
 
     <ItemGroup>
 
-      <DalamudPackagerFile Include="icon.png" />
+      <DalamudPackagerFile Include="images\icon.png" />
 
     </ItemGroup>
 
