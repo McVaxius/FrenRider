@@ -11,6 +11,7 @@ public class Configuration : IPluginConfiguration
     // --- Global UI Settings ---
     public bool IsConfigWindowMovable { get; set; } = true;
     public bool DtrBarEnabled { get; set; } = true;
+    public bool DtrBarIconMode { get; set; } = false;
     public bool KrangleEnabled { get; set; } = false;
     public float LeftPanelWidth { get; set; } = 240f;
 

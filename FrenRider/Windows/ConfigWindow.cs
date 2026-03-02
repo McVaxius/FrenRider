@@ -20,6 +20,7 @@ public class ConfigWindow : Window, IDisposable
     private bool frenNameFocused = false;
     private string mountSearch = "";
     private bool isDraggingSplitter = false;
+    private string whitelistInput = "";
 
     private static readonly string[] CompanionStances = { "Free Stance", "Defender Stance", "Attacker Stance", "Healer Stance", "Follow" };
     private static readonly string[] ClingTypes = { "NavMesh", "Visland", "BossMod Follow", "Vanilla Follow" };
@@ -258,6 +259,12 @@ public class ConfigWindow : Window, IDisposable
             {
                 currentTab = "Misc";
                 DrawMiscTab(config);
+                ImGui.EndTabItem();
+            }
+            if (ImGui.BeginTabItem("About"))
+            {
+                currentTab = "About";
+                DrawAboutTab();
                 ImGui.EndTabItem();
             }
             ImGui.EndTabBar();
@@ -895,6 +902,166 @@ public class ConfigWindow : Window, IDisposable
             configuration.IsConfigWindowMovable = movable;
             configuration.Save();
         }
+
+        var dtrEnabled = configuration.DtrBarEnabled;
+        if (ImGui.Checkbox("DTR Bar Enabled", ref dtrEnabled))
+        {
+            configuration.DtrBarEnabled = dtrEnabled;
+            configuration.Save();
+        }
+        ImGui.SameLine();
+        HelpMarker("Show/hide the DTR bar entry (server info bar).");
+
+        var dtrIcon = configuration.DtrBarIconMode;
+        if (ImGui.Checkbox("DTR Bar Icon Mode", ref dtrIcon))
+        {
+            configuration.DtrBarIconMode = dtrIcon;
+            configuration.Save();
+        }
+        ImGui.SameLine();
+        HelpMarker("Use icons instead of text in the DTR bar entry.\nDTRicon0.png = enabled, DTRicon1.png = disabled.");
+
+        ImGui.Spacing();
+        ImGui.Separator();
+        ImGui.Spacing();
+
+        // --- Invite Whitelist ---
+        ImGui.Text("Invite Whitelist");
+        ImGui.SameLine();
+        HelpMarker("Players in this list will have their party invites automatically accepted.\nEnter names without the @Server part.");
+        ImGui.Spacing();
+
+        for (int i = 0; i < config.InviteWhitelist.Count; i++)
+        {
+            var entry = config.InviteWhitelist[i];
+            ImGui.Text($"  {Disp(entry)}");
+            ImGui.SameLine();
+            if (ImGui.SmallButton($"X##wl{i}"))
+            {
+                config.InviteWhitelist.RemoveAt(i);
+                configManager.SaveCurrentAccount();
+                break;
+            }
+        }
+
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.InputText("##WhitelistAdd", ref whitelistInput, 64, ImGuiInputTextFlags.EnterReturnsTrue))
+        {
+            var trimmed = whitelistInput.Trim();
+            if (!string.IsNullOrEmpty(trimmed) && !config.InviteWhitelist.Contains(trimmed))
+            {
+                config.InviteWhitelist.Add(ConfigManager.FixNameCapitalization(trimmed));
+                configManager.SaveCurrentAccount();
+            }
+            whitelistInput = "";
+        }
+        ImGui.SameLine();
+        if (ImGui.SmallButton("Add"))
+        {
+            var trimmed = whitelistInput.Trim();
+            if (!string.IsNullOrEmpty(trimmed) && !config.InviteWhitelist.Contains(trimmed))
+            {
+                config.InviteWhitelist.Add(ConfigManager.FixNameCapitalization(trimmed));
+                configManager.SaveCurrentAccount();
+            }
+            whitelistInput = "";
+        }
+
+        ImGui.Spacing();
+        ImGui.Separator();
+        ImGui.Spacing();
+
+        // --- Auto Leave Duty ---
+        ImGui.Text("Auto Leave Duty");
+        ImGui.Spacing();
+
+        var autoLeave = config.AutoLeaveDutyEnabled;
+        if (ImGui.Checkbox("Enable Auto Leave", ref autoLeave))
+        {
+            config.AutoLeaveDutyEnabled = autoLeave;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Automatically leave a duty when certain conditions are met.");
+
+        if (config.AutoLeaveDutyEnabled)
+        {
+            var allLeft = config.AutoLeaveWhenAllLeft;
+            if (ImGui.Checkbox("Leave when all others left", ref allLeft))
+            {
+                config.AutoLeaveWhenAllLeft = allLeft;
+                configManager.SaveCurrentAccount();
+            }
+
+            var dutyEnded = config.AutoLeaveWhenDutyEnded;
+            if (ImGui.Checkbox("Leave when duty ended", ref dutyEnded))
+            {
+                config.AutoLeaveWhenDutyEnded = dutyEnded;
+                configManager.SaveCurrentAccount();
+            }
+        }
+
+        ImGui.Spacing();
+        ImGui.Separator();
+        ImGui.Spacing();
+
+        // --- Autorot IPC ---
+        ImGui.Text("Autorot Presets");
+        ImGui.Spacing();
+
+        var pushOnEnable = config.AutorotPushOnEnable;
+        if (ImGui.Checkbox("Push presets on enable", ref pushOnEnable))
+        {
+            config.AutorotPushOnEnable = pushOnEnable;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Automatically push FRENRIDER and DD presets\ninto BMR/VBM via IPC when the plugin is enabled.");
+
+        if (ImGui.Button("Push Presets Now"))
+        {
+            plugin.AutorotIpcService.CreatePresets();
+        }
+        ImGui.SameLine();
+        ImGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1), plugin.AutorotIpcService.LastStatus);
+    }
+
+    private void DrawAboutTab()
+    {
+        ImGui.Spacing();
+        ImGui.TextColored(new Vector4(0.4f, 0.8f, 1f, 1), "Fren Rider");
+        ImGui.Text("A Dalamud plugin for FFXIV multiplayer follow/combat automation.");
+        ImGui.Spacing();
+        ImGui.Separator();
+        ImGui.Spacing();
+
+        ImGui.Text("Commands:");
+        ImGui.BulletText("/frenrider - Open main window");
+        ImGui.BulletText("/fr - Open main window (alias)");
+        ImGui.BulletText("/fr on - Enable Fren Rider");
+        ImGui.BulletText("/fr off - Disable Fren Rider");
+        ImGui.Spacing();
+        ImGui.Separator();
+        ImGui.Spacing();
+
+        ImGui.Text("Multiplayer Guide:");
+        ImGui.Spacing();
+        var guideUrl = "https://github.com/McVaxius/dhogsbreakfeast/tree/main/Dungeons%20and%20Multiboxing/Multiplayer%20Guide";
+        ImGui.TextColored(new Vector4(0.3f, 0.7f, 1f, 1), guideUrl);
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+            ImGui.SetTooltip("Click to copy URL to clipboard");
+        }
+        if (ImGui.IsItemClicked())
+        {
+            ImGui.SetClipboardText(guideUrl);
+        }
+
+        ImGui.Spacing();
+        ImGui.Separator();
+        ImGui.Spacing();
+        ImGui.TextColored(new Vector4(0.5f, 0.5f, 0.5f, 1), "Made by McVaxius");
     }
 
     // --- Helpers ---

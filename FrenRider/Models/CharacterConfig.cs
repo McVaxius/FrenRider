@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace FrenRider.Models;
 
@@ -56,6 +57,17 @@ public class CharacterConfig
     public int CbtEdse { get; set; } = 0; // 0=off, 1=on
     public int SpamPrinter { get; set; } = 0; // 0=off, 1=on
 
+    // --- Invite Whitelist ---
+    public List<string> InviteWhitelist { get; set; } = new();
+
+    // --- Auto Leave Duty ---
+    public bool AutoLeaveDutyEnabled { get; set; } = false;
+    public bool AutoLeaveWhenAllLeft { get; set; } = true;
+    public bool AutoLeaveWhenDutyEnded { get; set; } = true;
+
+    // --- Autorot IPC ---
+    public bool AutorotPushOnEnable { get; set; } = true;
+
     // --- Plugin State ---
     public bool Enabled { get; set; } = false;
 
@@ -106,6 +118,11 @@ public class CharacterConfig
             TornClothes = TornClothes,
             CbtEdse = CbtEdse,
             SpamPrinter = SpamPrinter,
+            InviteWhitelist = new List<string>(InviteWhitelist),
+            AutoLeaveDutyEnabled = AutoLeaveDutyEnabled,
+            AutoLeaveWhenAllLeft = AutoLeaveWhenAllLeft,
+            AutoLeaveWhenDutyEnded = AutoLeaveWhenDutyEnded,
+            AutorotPushOnEnable = AutorotPushOnEnable,
             Enabled = Enabled,
         };
     }

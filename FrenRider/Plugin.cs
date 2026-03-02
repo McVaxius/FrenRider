@@ -31,6 +31,7 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static IPluginLog Log { get; private set; } = null!;
 
     private const string CommandName = "/frenrider";
+    private const string AliasCommandName = "/fr";
 
     public Configuration Configuration { get; init; }
     public ConfigManager ConfigManager { get; init; }
@@ -41,6 +42,7 @@ public sealed class Plugin : IDalamudPlugin
     public CombatService CombatService { get; init; }
     public AutomationService AutomationService { get; init; }
     public FormationService FormationService { get; init; }
+    public AutorotIpcService AutorotIpcService { get; init; }
     public string[] MountNames { get; private set; } = Array.Empty<string>();
 
     public readonly WindowSystem WindowSystem = new("FrenRider");
@@ -66,6 +68,7 @@ public sealed class Plugin : IDalamudPlugin
         CombatService = new CombatService(this, FrenTracker, ZoneService);
         AutomationService = new AutomationService(this, FrenTracker, ZoneService);
         FormationService = new FormationService(this, FrenTracker);
+        AutorotIpcService = new AutorotIpcService(PluginInterface, Log);
 
         ConfigWindow = new ConfigWindow(this);
         MainWindow = new MainWindow(this);
@@ -76,6 +79,11 @@ public sealed class Plugin : IDalamudPlugin
         CommandManager.AddHandler(CommandName, new CommandInfo(OnCommand)
         {
             HelpMessage = "Open the Fren Rider main window."
+        });
+
+        CommandManager.AddHandler(AliasCommandName, new CommandInfo(OnAliasCommand)
+        {
+            HelpMessage = "Fren Rider: /fr [on|off] to toggle, or /fr to open UI."
         });
 
         PluginInterface.UiBuilder.Draw += WindowSystem.Draw;
@@ -116,14 +124,33 @@ public sealed class Plugin : IDalamudPlugin
         ConfigWindow.Dispose();
         MainWindow.Dispose();
 
+        AutorotIpcService.Dispose();
+
         dtrEntry?.Remove();
 
+        CommandManager.RemoveHandler(AliasCommandName);
         CommandManager.RemoveHandler(CommandName);
     }
 
     private void OnCommand(string command, string args)
     {
         MainWindow.Toggle();
+    }
+
+    private void OnAliasCommand(string command, string args)
+    {
+        var arg = args.Trim().ToLowerInvariant();
+        if (arg == "on" || arg == "off")
+        {
+            var cfg = ConfigManager.GetActiveConfig();
+            cfg.Enabled = arg == "on";
+            ConfigManager.SaveCurrentAccount();
+            Log.Information($"Fren Rider {(cfg.Enabled ? "enabled" : "disabled")} via /fr {arg}");
+        }
+        else
+        {
+            MainWindow.Toggle();
+        }
     }
 
     private void OnLoginEvent()
@@ -224,8 +251,19 @@ public sealed class Plugin : IDalamudPlugin
         if (!Configuration.DtrBarEnabled) return;
 
         var config = ConfigManager.GetActiveConfig();
-        var statusText = config.Enabled ? "FR: On" : "FR: Off";
-        dtrEntry.Text = new SeString(new TextPayload(statusText));
+
+        if (Configuration.DtrBarIconMode)
+        {
+            // Compact icon-style indicators
+            var icon = config.Enabled ? "\uE03C" : "\uE03D";
+            dtrEntry.Text = new SeString(new TextPayload($"{icon} FR"));
+        }
+        else
+        {
+            var statusText = config.Enabled ? "FR: On" : "FR: Off";
+            dtrEntry.Text = new SeString(new TextPayload(statusText));
+        }
+
         dtrEntry.Tooltip = new SeString(new TextPayload(
             config.Enabled
                 ? $"Fren Rider active - Following {config.FrenName}"
