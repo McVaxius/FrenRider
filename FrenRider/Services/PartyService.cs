@@ -159,17 +159,31 @@ public class PartyService
 
             log.Debug($"SelectYesno addon at index {i} prompt: {prompt}");
 
+            log.Debug($"SelectYesno addon at index {i} checking regex match against: '{prompt.Trim()}'");
             var match = InvitePromptRegex.Match(prompt.Trim());
             if (!match.Success)
+            {
+                log.Debug($"SelectYesno addon at index {i} regex match failed");
                 continue;
+            }
 
             var inviterRaw = match.Groups["name"].Value;
+            log.Debug($"SelectYesno addon at index {i} regex matched, inviter raw: '{inviterRaw}'");
             var normalizedInviter = NormalizeName(inviterRaw);
             if (string.IsNullOrEmpty(normalizedInviter))
+            {
+                log.Warning($"SelectYesno addon at index {i} normalized inviter name is empty");
                 continue;
+            }
 
+            log.Debug($"SelectYesno addon at index {i} normalized inviter: '{normalizedInviter}', checking whitelist");
             if (!IsWhitelisted(config, normalizedInviter))
+            {
+                log.Debug($"SelectYesno addon at index {i} inviter '{normalizedInviter}' not in whitelist");
                 continue;
+            }
+
+            log.Information($"SelectYesno addon at index {i} inviter '{normalizedInviter}' is whitelisted, proceeding to accept");
 
             var now = Environment.TickCount64;
 
