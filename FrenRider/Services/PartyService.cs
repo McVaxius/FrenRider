@@ -245,6 +245,14 @@ public class PartyService
             return string.Empty;
 
         var trimmed = raw.Trim();
+        
+        // Strip @Server part if present
+        var atIndex = trimmed.IndexOf('@');
+        if (atIndex >= 0)
+        {
+            trimmed = trimmed.Substring(0, atIndex).Trim();
+        }
+
         var tokens = trimmed.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         if (tokens.Length >= 2)
         {
