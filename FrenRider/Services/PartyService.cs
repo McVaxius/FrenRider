@@ -153,14 +153,25 @@ public class PartyService
     {
         // Use /callback command approach (same as SND plugin)
         // Pattern: /callback SelectYesno true 0
+        log.Information($"AcceptInvite called - Addon visible: {addon->AtkUnitBase.IsVisible}");
+        
         var button = addon->YesButton;
-        if (button == null || !button->IsEnabled)
+        if (button == null)
         {
-            log.Warning("SelectYesno Yes button is null or not enabled");
+            log.Warning("SelectYesno Yes button is null");
+            return;
+        }
+        
+        log.Information($"YesButton found - IsEnabled: {button->IsEnabled}");
+        if (!button->IsEnabled)
+        {
+            log.Warning("SelectYesno Yes button is not enabled");
             return;
         }
 
+        log.Information("Executing: /callback SelectYesno true 0");
         Plugin.CommandManager.ProcessCommand("/callback SelectYesno true 0");
+        log.Information("Callback command sent");
     }
 
     private static string NormalizeName(string raw)
