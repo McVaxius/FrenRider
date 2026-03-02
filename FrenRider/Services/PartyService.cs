@@ -154,7 +154,7 @@ public class PartyService
         var args = stackalloc AtkValue[1];
         args[0].Type = FFXIVClientStructs.FFXIV.Component.GUI.ValueType.Int;
         args[0].Int = 0; // 0 = Yes button
-        addon->AtkUnitBase.FireCallback(1, args);
+        addon->AtkUnitBase.FireCallback(1, args, true);
     }
 
     private static string NormalizeName(string raw)
