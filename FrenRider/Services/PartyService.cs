@@ -115,71 +115,75 @@ public class PartyService
         if (Plugin.PartyList.Length > 0)
             return;
 
-        nint addonPtr = gameGui.GetAddonByName("SelectYesno", 1);
-        if (addonPtr == nint.Zero)
-            return;
-
-        var addon = (AddonSelectYesno*)addonPtr;
-
-        if (!addon->AtkUnitBase.IsVisible)
-            return;
-
-        var promptNode = addon->PromptText;
-        if (promptNode == null)
-            return;
-
-        var textPtr = promptNode->NodeText.StringPtr;
-        if (textPtr == null)
-            return;
-
-        var promptSe = MemoryHelper.ReadSeStringNullTerminated(new IntPtr(textPtr));
-        var prompt = promptSe.TextValue;
-        if (string.IsNullOrEmpty(prompt))
-            return;
-
-        var match = InvitePromptRegex.Match(prompt.Trim());
-        if (!match.Success)
-            return;
-
-        var inviterRaw = match.Groups["name"].Value;
-        var normalizedInviter = NormalizeName(inviterRaw);
-        if (string.IsNullOrEmpty(normalizedInviter))
-            return;
-
-        if (!IsWhitelisted(config, normalizedInviter))
-            return;
-
-        var now = Environment.TickCount64;
-
-        if (lastPromptInviter != normalizedInviter)
+        // Try multiple addon indices like AutoRetainer does
+        for (int i = 1; i < 100; i++)
         {
-            lastPromptInviter = normalizedInviter;
-            lastPromptHandled = 0;
-            callbackAttempts = 0;
-            log.Information($"SelectYesno invite matched whitelist: {normalizedInviter}");
-        }
+            nint addonPtr = gameGui.GetAddonByName("SelectYesno", i);
+            if (addonPtr == nint.Zero)
+                continue;
 
-        if (callbackAttempts >= MaxCallbackAttempts)
-        {
-            if (now - lastPromptHandled >= 2000)
+            var addon = (AddonSelectYesno*)addonPtr;
+            if (!addon->AtkUnitBase.IsVisible)
+                continue;
+
+            var promptNode = addon->PromptText;
+            if (promptNode == null)
+                continue;
+
+            var textPtr = promptNode->NodeText.StringPtr;
+            if (textPtr == null)
+                continue;
+
+            var promptSe = MemoryHelper.ReadSeStringNullTerminated(new IntPtr(textPtr));
+            var prompt = promptSe.TextValue;
+            if (string.IsNullOrEmpty(prompt))
+                continue;
+
+            var match = InvitePromptRegex.Match(prompt.Trim());
+            if (!match.Success)
+                continue;
+
+            var inviterRaw = match.Groups["name"].Value;
+            var normalizedInviter = NormalizeName(inviterRaw);
+            if (string.IsNullOrEmpty(normalizedInviter))
+                continue;
+
+            if (!IsWhitelisted(config, normalizedInviter))
+                continue;
+
+            var now = Environment.TickCount64;
+
+            if (lastPromptInviter != normalizedInviter)
             {
-                lastPromptHandled = now;
-                log.Warning($"Reached max callback attempts ({MaxCallbackAttempts}) for invite from {normalizedInviter}. Waiting for dialog state change.");
+                lastPromptInviter = normalizedInviter;
+                lastPromptHandled = 0;
+                callbackAttempts = 0;
+                log.Information($"SelectYesno invite matched whitelist: {normalizedInviter}");
             }
-            return;
-        }
 
-        if (now - lastPromptHandled < CallbackRetryMs)
-            return;
+            if (callbackAttempts >= MaxCallbackAttempts)
+            {
+                if (now - lastPromptHandled >= 2000)
+                {
+                    lastPromptHandled = now;
+                    log.Warning($"Reached max callback attempts ({MaxCallbackAttempts}) for invite from {normalizedInviter}. Waiting for dialog state change.");
+                }
+                return;
+            }
 
-        var accepted = AcceptInvite(addon, normalizedInviter, callbackAttempts + 1);
-        lastPromptHandled = now;
-        callbackAttempts++;
+            if (now - lastPromptHandled < CallbackRetryMs)
+                return;
 
-        if (accepted)
-        {
-            lastInviterName = normalizedInviter;
-            log.Information($"Issued accept attempt #{callbackAttempts} for whitelisted invite from: {normalizedInviter}");
+            var accepted = AcceptInvite(addon, normalizedInviter, callbackAttempts + 1);
+            lastPromptHandled = now;
+            callbackAttempts++;
+
+            if (accepted)
+            {
+                lastInviterName = normalizedInviter;
+                log.Information($"Issued accept attempt #{callbackAttempts} for whitelisted invite from: {normalizedInviter}");
+            }
+            return; // Found matching addon, exit loop
         }
     }
 
@@ -200,15 +204,12 @@ public class PartyService
                 return false;
             }
 
-            var callbackHandled = Plugin.CommandManager.ProcessCommand("/callback SelectYesno true 0");
-            log.Information($"Invite accept attempt #{attempt} for {inviterName}: /callback handled={callbackHandled}");
-
-            // Fallback: direct FireCallback in case /callback command handler is unavailable.
+            // Use ClickLib pattern like AutoRetainer
             var args = stackalloc AtkValue[1];
             args[0].Type = FFXIVClientStructs.FFXIV.Component.GUI.ValueType.Int;
             args[0].Int = 0;
             addon->AtkUnitBase.FireCallback(1, args, true);
-            log.Information($"Invite accept attempt #{attempt} for {inviterName}: direct FireCallback sent");
+            log.Information($"Invite accept attempt #{attempt} for {inviterName}: FireCallback sent");
 
             return true;
         }
