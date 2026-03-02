@@ -53,8 +53,6 @@ public class CharacterConfig
     public string FeedMeItem { get; set; } = "Boiled Egg";
     public bool FeedMeSearch { get; set; } = true;
     public int XpItem { get; set; } = 0;
-    public List<XpItemEntry> XpItems { get; set; } = new();
-    public bool XpItemsEnabled { get; set; } = false;
     public int Repair { get; set; } = 0; // 0=No, 1=Self, 2=Inn NPC
     public int TornClothes { get; set; } = 0;
     public int CbtEdse { get; set; } = 0; // 0=off, 1=on
@@ -117,8 +115,6 @@ public class CharacterConfig
             FeedMeItem = FeedMeItem,
             FeedMeSearch = FeedMeSearch,
             XpItem = XpItem,
-            XpItems = XpItems.Select(x => x.Clone()).ToList(),
-            XpItemsEnabled = XpItemsEnabled,
             Repair = Repair,
             TornClothes = TornClothes,
             CbtEdse = CbtEdse,

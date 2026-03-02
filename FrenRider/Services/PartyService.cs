@@ -55,26 +55,30 @@ public class PartyService
         if (!config.Enabled || config.InviteWhitelist.Count == 0)
             return;
 
-        // Check if this is a party invite message (type 2105 is party invite)
-        if (type != (XivChatType)2105)
-            return;
-
         // Don't auto-accept if already in a party
         if (Plugin.PartyList.Length > 0)
             return;
 
-        // Extract sender name from SeString
-        var senderName = sender.TextValue;
-        var normalizedSender = senderName.Split('@')[0].Trim();
+        // Parse message text for party invite pattern: "Name invites you to a party."
+        var messageText = message.TextValue;
+        if (string.IsNullOrEmpty(messageText))
+            return;
+
+        // Check if this is a party invite message
+        if (!messageText.Contains("invites you to a party", StringComparison.OrdinalIgnoreCase))
+            return;
+
+        // Extract inviter name from message (format: "Name invites you to a party.")
+        var inviterName = messageText.Split(new[] { " invites you to a party" }, StringSplitOptions.None)[0].Trim();
         
-        // Check if sender is on whitelist
+        // Check if inviter is on whitelist
         if (config.InviteWhitelist.Any(wl => 
-            normalizedSender.Equals(wl, StringComparison.OrdinalIgnoreCase)))
+            inviterName.Equals(wl, StringComparison.OrdinalIgnoreCase)))
         {
-            lastInviterName = normalizedSender;
+            lastInviterName = inviterName;
             // Auto-accept invite using /join command
             Plugin.CommandManager.ProcessCommand("/join");
-            log.Information($"Auto-accepted party invite from whitelisted player: {normalizedSender}");
+            log.Information($"Auto-accepted party invite from whitelisted player: {inviterName}");
         }
     }
 }
