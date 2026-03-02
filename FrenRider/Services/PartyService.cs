@@ -99,15 +99,10 @@ public class PartyService
         
         // Check if inviter is on whitelist
         var normalized = NormalizeName(inviterName);
-        if (config.InviteWhitelist.Any(wl => 
+        if (IsWhitelisted(config, normalized, out var matchedEntry))
         {
-            var normalizedWl = NormalizeName(wl);
-            return normalized.Contains(normalizedWl, StringComparison.OrdinalIgnoreCase) ||
-                   normalizedWl.Contains(normalized, StringComparison.OrdinalIgnoreCase);
-        }))
-        {
-            lastInviterName = normalized;
-            log.Information($"Whitelisted party invite detected from: {normalized}. Waiting for SelectYesno dialog to accept.");
+            lastInviterName = matchedEntry; // Store the whitelist entry, not the full name
+            log.Information($"Whitelisted party invite detected from: {matchedEntry}. Waiting for SelectYesno dialog to accept.");
         }
     }
 
@@ -151,7 +146,7 @@ public class PartyService
         if (string.IsNullOrEmpty(normalizedInviter))
             return;
 
-        if (!IsWhitelisted(config, normalizedInviter))
+        if (!IsWhitelisted(config, normalizedInviter, out var matchedEntry))
             return;
 
         var now = Environment.TickCount64;
@@ -161,6 +156,7 @@ public class PartyService
             lastPromptInviter = normalizedInviter;
             lastPromptHandled = 0;
             callbackAttempts = 0;
+            lastInviterName = matchedEntry; // Store the whitelist entry, not the full name
             log.Information($"SelectYesno invite matched whitelist: {normalizedInviter}");
         }
 
@@ -183,7 +179,6 @@ public class PartyService
 
         if (accepted)
         {
-            lastInviterName = normalizedInviter;
             log.Information($"Issued accept attempt #{callbackAttempts} for whitelisted invite from: {normalizedInviter}");
         }
     }
@@ -228,19 +223,24 @@ public class PartyService
         // Apply proper capitalization without server processing
         var parts = trimmed.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         var result = string.Join(" ", parts.Select(w => 
-            w.Length > 0 ? char.ToUpper(w[0]) + (w.Length > 1 ? w[1..].ToLower() : "") : w));
+            w.Length > 0 ? char.ToUpper(w[0]) + (w.Length > 1 ? w[1..].ToLower() : "") : string.Empty));
         
         return result;
     }
 
-    private static bool IsWhitelisted(CharacterConfig config, string inviterName)
+    private static bool IsWhitelisted(CharacterConfig config, string inviterName, out string matchedEntry)
     {
-        return config.InviteWhitelist.Any(wl => 
+        matchedEntry = null;
+        foreach (var wl in config.InviteWhitelist)
         {
             var normalizedWl = NormalizeName(wl);
-            // Check if whitelist entry is contained within the inviter name (partial match)
-            return inviterName.Contains(normalizedWl, StringComparison.OrdinalIgnoreCase) ||
-                   normalizedWl.Contains(inviterName, StringComparison.OrdinalIgnoreCase);
-        });
+            if (inviterName.Contains(normalizedWl, StringComparison.OrdinalIgnoreCase) ||
+                normalizedWl.Contains(inviterName, StringComparison.OrdinalIgnoreCase))
+            {
+                matchedEntry = wl; // Return the original whitelist entry
+                return true;
+            }
+        }
+        return false;
     }
 }
