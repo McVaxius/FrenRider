@@ -258,10 +258,16 @@ public class PartyService
         var tokens = trimmed.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         if (tokens.Length >= 2)
         {
+            // Take first two tokens (first name and last name)
             trimmed = $"{tokens[0]} {tokens[1]}";
         }
 
-        return ConfigManager.FixNameCapitalization(trimmed);
+        // Apply proper capitalization without server processing
+        var parts = trimmed.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var result = string.Join(" ", parts.Select(w => 
+            w.Length > 0 ? char.ToUpper(w[0]) + (w.Length > 1 ? w[1..].ToLower() : "") : w));
+        
+        return result;
     }
 
     private static bool IsWhitelisted(CharacterConfig config, string normalizedName)
