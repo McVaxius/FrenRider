@@ -4,7 +4,7 @@
 
   <PropertyGroup>
 
-    <Version>0.0.0.27</Version>
+    <Version>0.0.0.28</Version>
 
     <PackageProjectUrl>https://github.com/McVaxius/FrenRider</PackageProjectUrl>
 
@@ -14,7 +14,9 @@
 
   </PropertyGroup>
 
-
+  <ItemGroup>
+    <PackageReference Include="ECommons" Version="2.2.0.2" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Include="images\**" CopyToOutputDirectory="PreserveNewest" />

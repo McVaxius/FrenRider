@@ -8,6 +8,7 @@ using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using FrenRider.Models;
+using ECommons.UIHelpers.AddonMasterImplementations;
 
 namespace FrenRider.Services;
 
@@ -191,26 +192,9 @@ public class PartyService
     {
         try
         {
-            var button = addon->YesButton;
-            if (button == null)
-            {
-                log.Warning($"Invite accept attempt #{attempt} for {inviterName}: Yes button is null");
-                return false;
-            }
-
-            if (!button->IsEnabled)
-            {
-                log.Warning($"Invite accept attempt #{attempt} for {inviterName}: Yes button is disabled");
-                return false;
-            }
-
-            // Use ClickLib pattern like AutoRetainer
-            var args = stackalloc AtkValue[1];
-            args[0].Type = FFXIVClientStructs.FFXIV.Component.GUI.ValueType.Int;
-            args[0].Int = 0;
-            addon->AtkUnitBase.FireCallback(1, args, true);
-            log.Information($"Invite accept attempt #{attempt} for {inviterName}: FireCallback sent");
-
+            // Use YesAlready's exact pattern
+            new AddonMaster.SelectYesno(&addon->AtkUnitBase).Yes();
+            log.Information($"Invite accept attempt #{attempt} for {inviterName}: AddonMaster.SelectYesno.Yes() called");
             return true;
         }
         catch (Exception ex)
