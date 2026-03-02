@@ -1,5 +1,8 @@
 # Fren Rider
-
+   ```
+   https://raw.githubusercontent.com/McVaxius/TheDumpsterFire/refs/heads/master/repo.json
+   ```
+   
 A native FFXIV Dalamud plugin for multiboxing support, converting the original [frenrider Lua script](https://github.com/McVaxius/dhogsbreakfeast/blob/main/Dungeons%20and%20Multiboxing/frenrider/frenrider_McVaxius.lua) into a fully-featured plugin.
 
 - Some things not done
