@@ -128,10 +128,22 @@ public class ConfigWindow : Window, IDisposable
         ImGui.TextColored(new Vector4(0.7f, 0.7f, 1f, 1), "ACCOUNT");
         if (accountAliasEdit != account.AccountAlias)
             accountAliasEdit = account.AccountAlias;
-        ImGui.SetNextItemWidth(-1);
-        if (ImGui.InputText("##AccountAlias", ref accountAliasEdit, 64))
+
+        if (configuration.KrangleEnabled)
         {
-            configManager.UpdateAccountAlias(accountAliasEdit);
+            var krangledAlias = Disp(accountAliasEdit);
+            ImGui.SetNextItemWidth(-1);
+            ImGui.InputText("##AccountAliasKrangled", ref krangledAlias, 64, ImGuiInputTextFlags.ReadOnly);
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("Disable Krangle to edit the account alias.");
+        }
+        else
+        {
+            ImGui.SetNextItemWidth(-1);
+            if (ImGui.InputText("##AccountAlias", ref accountAliasEdit, 64))
+            {
+                configManager.UpdateAccountAlias(accountAliasEdit);
+            }
         }
         HelpMarker("Human-readable alias for this account group. Linked to account ID internally.");
 
@@ -959,7 +971,7 @@ public class ConfigWindow : Window, IDisposable
         // --- Invite Whitelist ---
         ImGui.Text("Invite Whitelist");
         ImGui.SameLine();
-        HelpMarker("Players in this list will have their party invites automatically accepted.\nEnter names without the @Server part.");
+        HelpMarker("Players in this list will have their party invites automatically accepted when you're not in a group.\nWhen you join a party via whitelist invite, the inviter will automatically be set as your Fren.\nEnter names without the @Server part.");
         ImGui.Spacing();
 
         for (int i = 0; i < config.InviteWhitelist.Count; i++)

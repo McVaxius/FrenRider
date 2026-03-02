@@ -43,6 +43,7 @@ public sealed class Plugin : IDalamudPlugin
     public AutomationService AutomationService { get; init; }
     public FormationService FormationService { get; init; }
     public AutorotIpcService AutorotIpcService { get; init; }
+    public PartyService PartyService { get; init; }
     public string[] MountNames { get; private set; } = Array.Empty<string>();
 
     public readonly WindowSystem WindowSystem = new("FrenRider");
@@ -69,6 +70,8 @@ public sealed class Plugin : IDalamudPlugin
         AutomationService = new AutomationService(this, FrenTracker, ZoneService);
         FormationService = new FormationService(this, FrenTracker);
         AutorotIpcService = new AutorotIpcService(PluginInterface, Log);
+        PartyService = new PartyService(this, Log);
+        PartyService.Initialize();
 
         ConfigWindow = new ConfigWindow(this);
         MainWindow = new MainWindow(this);
@@ -125,6 +128,7 @@ public sealed class Plugin : IDalamudPlugin
         MainWindow.Dispose();
 
         AutorotIpcService.Dispose();
+        PartyService.Dispose();
 
         dtrEntry?.Remove();
 
@@ -221,6 +225,7 @@ public sealed class Plugin : IDalamudPlugin
         CombatService.Update();
         AutomationService.Update();
         FormationService.Update();
+        PartyService.Update();
     }
 
     public void SetupDtrBar()

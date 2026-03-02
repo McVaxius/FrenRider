@@ -1,5 +1,6 @@
 using System;
 using System.Numerics;
+using System.Reflection;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Windowing;
 using FrenRider.Models;
@@ -30,7 +31,8 @@ public class MainWindow : Window, IDisposable
         var config = plugin.ConfigManager.GetActiveConfig();
 
         // Header
-        ImGui.Text("Fren Rider v0.1.0");
+        var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0.0";
+        ImGui.Text($"Fren Rider v{version}");
         ImGui.Separator();
         ImGui.Spacing();
 
