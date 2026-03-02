@@ -26,7 +26,7 @@ public class PartyService
     private const int MaxCallbackAttempts = 8;
     private const int CallbackRetryMs = 250;
 
-    private static readonly Regex InvitePromptRegex = new("Join (?<name>.+?)'s party\\?", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+    private static readonly Regex InvitePromptRegex = new("Join (?<name>.+?)'?s party\\?", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     public PartyService(Plugin plugin, IPluginLog log, IGameGui gameGui)
     {
