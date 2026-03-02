@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
@@ -151,11 +152,43 @@ public class PartyService
 
     private unsafe void AcceptInvite(AddonSelectYesno* addon)
     {
-        var args = stackalloc AtkValue[1];
-        args[0].Type = FFXIVClientStructs.FFXIV.Component.GUI.ValueType.Int;
-        args[0].Int = 0; // 0 = Yes button
-        addon->AtkUnitBase.FireCallback(1, args, true);
+        // Use the proper button click method instead of generic callback
+        // Pattern from ClickLib: send CHANGE event to the YesButton component
+        var button = addon->YesButton;
+        if (button == null || !button->IsEnabled)
+        {
+            log.Warning("SelectYesno Yes button is null or not enabled");
+            return;
+        }
+
+        // Click the button using ReceiveEvent pattern
+        ClickButton(button, &addon->AtkUnitBase, 0);
     }
+
+    private unsafe void ClickButton(AtkComponentButton* button, AtkUnitBase* unitBase, uint which)
+    {
+        // EventType.CHANGE = 25
+        const ushort eventType = 25;
+        
+        // Create event data
+        var eventData = stackalloc void*[3];
+        eventData[0] = null;
+        eventData[1] = button->AtkComponentBase.OwnerNode;
+        eventData[2] = unitBase;
+        
+        // Create input data (empty)
+        var inputData = stackalloc void*[8];
+        for (int i = 0; i < 8; i++)
+            inputData[i] = null;
+        
+        // Get the ReceiveEvent function pointer and invoke it
+        var vtbl = unitBase->AtkEventListener.VirtualTable;
+        var receiveEventAddress = new IntPtr(vtbl->ReceiveEvent);
+        var receiveEvent = Marshal.GetDelegateForFunctionPointer<ReceiveEventDelegate>(receiveEventAddress);
+        receiveEvent(&unitBase->AtkEventListener, eventType, which, eventData, inputData);
+    }
+
+    private unsafe delegate IntPtr ReceiveEventDelegate(AtkEventListener* eventListener, ushort eventType, uint which, void* eventData, void* inputData);
 
     private static string NormalizeName(string raw)
     {
