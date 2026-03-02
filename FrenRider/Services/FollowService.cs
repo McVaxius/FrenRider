@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Numerics;
 using System.Text;
 using Dalamud.Game.ClientState.Conditions;
@@ -219,9 +220,10 @@ public class FollowService
         if (selfFlying)
         {
             // When player is flying, use /vnav flyto for flying navigation
-            var cmd = $"/vnav flyto {target.X:F2} {target.Y:F2} {target.Z:F2}";
+            var coords = FormatVector(target);
+            var cmd = $"/vnav flyto {coords}";
             SendCommand(cmd);
-            Plugin.Log.Information($"Using /vnav flyto for flying navigation to {target.X:F2}, {target.Y:F2}, {target.Z:F2}");
+            Plugin.Log.Information($"Using /vnav flyto for flying navigation to {coords}");
             return;
         }
 
@@ -263,10 +265,11 @@ public class FollowService
             ? ClingTypeNames[clingType]
             : "NavMesh";
 
+        var coords = FormatVector(target);
         var cmd = typeName switch
         {
-            "NavMesh" => $"/vnav moveto {target.X:F2} {target.Y:F2} {target.Z:F2}",
-            "Visland" => $"/visland moveto {target.X:F2} {target.Y:F2} {target.Z:F2}",
+            "NavMesh" => $"/vnav moveto {coords}",
+            "Visland" => $"/visland moveto {coords}",
             "BossMod Follow" => "/bmr follow",
             "Vanilla Follow" => "/follow",
             _ => null,
@@ -325,5 +328,10 @@ public class FollowService
         {
             Plugin.Log.Error($"Command failed [{command}]: {ex.Message}");
         }
+    }
+
+    private static string FormatVector(Vector3 value)
+    {
+        return string.Format(CultureInfo.InvariantCulture, "{0:F2} {1:F2} {2:F2}", value.X, value.Y, value.Z);
     }
 }
