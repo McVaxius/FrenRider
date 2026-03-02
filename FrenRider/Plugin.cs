@@ -25,6 +25,7 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static IPartyList PartyList { get; private set; } = null!;
     [PluginService] internal static ICondition Condition { get; private set; } = null!;
     [PluginService] internal static IChatGui ChatGui { get; private set; } = null!;
+    [PluginService] internal static IGameGui GameGui { get; private set; } = null!;
     [PluginService] internal static IDtrBar DtrBar { get; private set; } = null!;
     [PluginService] internal static IDataManager DataManager { get; private set; } = null!;
     [PluginService] internal static ITargetManager TargetManager { get; private set; } = null!;
@@ -70,7 +71,7 @@ public sealed class Plugin : IDalamudPlugin
         AutomationService = new AutomationService(this, FrenTracker, ZoneService);
         FormationService = new FormationService(this, FrenTracker);
         AutorotIpcService = new AutorotIpcService(PluginInterface, Log);
-        PartyService = new PartyService(this, Log);
+        PartyService = new PartyService(this, Log, GameGui);
         PartyService.Initialize();
 
         ConfigWindow = new ConfigWindow(this);

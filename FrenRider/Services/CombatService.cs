@@ -64,14 +64,16 @@ public class CombatService
         var inDuty = Plugin.Condition[ConditionFlag.BoundByDuty];
         var now = Environment.TickCount64;
 
-        // Aggressively ensure non-selected rotation plugins are disabled
-        // In duty: check every 2 seconds to handle config changes
-        // Out of duty: check every 5 seconds
-        var checkInterval = inDuty ? 2000 : 5000;
-        if (now - lastPluginCheckMs > checkInterval)
+        // Only disable other rotation plugins when NOT actively in combat/duty
+        // This prevents interference with active rotation
+        if (!inCombat && !inDuty)
         {
-            lastPluginCheckMs = now;
-            DisableOtherRotationPlugins(config);
+            var checkInterval = 5000;
+            if (now - lastPluginCheckMs > checkInterval)
+            {
+                lastPluginCheckMs = now;
+                DisableOtherRotationPlugins(config);
+            }
         }
 
         // Entered duty (activate rotation immediately)

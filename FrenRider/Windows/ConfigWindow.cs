@@ -775,15 +775,9 @@ public class ConfigWindow : Window, IDisposable
         ImGui.Text("XP / Repair");
         ImGui.Spacing();
 
-        var xpItem = config.XpItem;
-        ImGui.SetNextItemWidth(200);
-        if (ImGui.InputInt("XP Item ID (0=Off)", ref xpItem))
-        {
-            config.XpItem = xpItem;
-            configManager.SaveCurrentAccount();
-        }
-        ImGui.SameLine();
-        HelpMarker("Item ID to auto-equip for XP bonus.\nAzyma Earring = 41081.\nUse SimpleTweaks to see item IDs.\n0 = Disabled.");
+        // TODO(TBD): Reintroduce XP item auto-equip configuration once multi-item logic is finalized.
+        ImGui.TextColored(new Vector4(0.8f, 0.8f, 0.2f, 1f), "XP item automation temporarily disabled (TBD)");
+        HelpMarker("Previous XP item inputs are on hold until the multi-item system is designed.");
 
         var repair = config.Repair;
         ImGui.SetNextItemWidth(200);

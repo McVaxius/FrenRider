@@ -1,8 +1,13 @@
 using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
+using Dalamud.Memory;
 using Dalamud.Plugin.Services;
+using FFXIVClientStructs.FFXIV.Client.UI;
+using FFXIVClientStructs.FFXIV.Component.GUI;
+using FrenRider.Models;
 
 namespace FrenRider.Services;
 
@@ -10,13 +15,19 @@ public class PartyService
 {
     private readonly Plugin plugin;
     private readonly IPluginLog log;
+    private readonly IGameGui gameGui;
     private bool lastInParty;
     private string? lastInviterName;
+    private long lastPromptHandled;
+    private string? lastPromptInviter;
 
-    public PartyService(Plugin plugin, IPluginLog log)
+    private static readonly Regex InvitePromptRegex = new("Join (?<name>.+?)'s party\\?", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+    public PartyService(Plugin plugin, IPluginLog log, IGameGui gameGui)
     {
         this.plugin = plugin;
         this.log = log;
+        this.gameGui = gameGui;
     }
 
     public void Initialize()
@@ -47,6 +58,8 @@ public class PartyService
         }
 
         lastInParty = inParty;
+
+        CheckInviteDialog(config);
     }
 
     private void OnChatMessage(XivChatType type, int timestamp, ref SeString sender, ref SeString message, ref bool isHandled)
@@ -80,5 +93,88 @@ public class PartyService
             Plugin.CommandManager.ProcessCommand("/join");
             log.Information($"Auto-accepted party invite from whitelisted player: {inviterName}");
         }
+    }
+
+    private unsafe void CheckInviteDialog(CharacterConfig config)
+    {
+        if (config.InviteWhitelist.Count == 0)
+            return;
+
+        // Don't auto-accept if already in a party
+        if (Plugin.PartyList.Length > 0)
+            return;
+
+        nint addonPtr = gameGui.GetAddonByName("SelectYesno", 1);
+        if (addonPtr == nint.Zero)
+            return;
+
+        var addon = (AddonSelectYesno*)addonPtr;
+
+        if (!addon->AtkUnitBase.IsVisible)
+            return;
+
+        var promptNode = addon->PromptText;
+        if (promptNode == null)
+            return;
+
+        var textPtr = promptNode->NodeText.StringPtr;
+        if (textPtr == null)
+            return;
+
+        var promptSe = MemoryHelper.ReadSeStringNullTerminated(new IntPtr(textPtr));
+        var prompt = promptSe.TextValue;
+        if (string.IsNullOrEmpty(prompt))
+            return;
+
+        var match = InvitePromptRegex.Match(prompt.Trim());
+        if (!match.Success)
+            return;
+
+        var inviterRaw = match.Groups["name"].Value;
+        var normalizedInviter = NormalizeName(inviterRaw);
+        if (string.IsNullOrEmpty(normalizedInviter))
+            return;
+
+        if (!IsWhitelisted(config, normalizedInviter))
+            return;
+
+        var now = Environment.TickCount64;
+        if (lastPromptInviter == normalizedInviter && now - lastPromptHandled < 1000)
+            return;
+
+        AcceptInvite(addon);
+        lastPromptHandled = now;
+        lastPromptInviter = normalizedInviter;
+        lastInviterName = normalizedInviter;
+        log.Information($"Accepted SelectYesno invite from whitelisted player: {normalizedInviter}");
+    }
+
+    private unsafe void AcceptInvite(AddonSelectYesno* addon)
+    {
+        var args = stackalloc AtkValue[1];
+        args[0].Type = FFXIVClientStructs.FFXIV.Component.GUI.ValueType.Int;
+        args[0].Int = 0; // 0 = Yes button
+        addon->AtkUnitBase.FireCallback(1, args);
+    }
+
+    private static string NormalizeName(string raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw))
+            return string.Empty;
+
+        var trimmed = raw.Trim();
+        var tokens = trimmed.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (tokens.Length >= 2)
+        {
+            trimmed = $"{tokens[0]} {tokens[1]}";
+        }
+
+        return ConfigManager.FixNameCapitalization(trimmed);
+    }
+
+    private static bool IsWhitelisted(CharacterConfig config, string normalizedName)
+    {
+        return config.InviteWhitelist.Any(wl =>
+            NormalizeName(wl).Equals(normalizedName, StringComparison.OrdinalIgnoreCase));
     }
 }
