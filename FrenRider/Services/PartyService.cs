@@ -98,10 +98,14 @@ public class PartyService
         var inviterName = messageText.Split(new[] { " invites you to a party" }, StringSplitOptions.None)[0].Trim();
         
         // Check if inviter is on whitelist
-        if (config.InviteWhitelist.Any(wl =>
-            inviterName.Equals(wl, StringComparison.OrdinalIgnoreCase)))
+        var normalized = NormalizeName(inviterName);
+        if (config.InviteWhitelist.Any(wl => 
         {
-            var normalized = NormalizeName(inviterName);
+            var normalizedWl = NormalizeName(wl);
+            return normalized.Contains(normalizedWl, StringComparison.OrdinalIgnoreCase) ||
+                   normalizedWl.Contains(normalized, StringComparison.OrdinalIgnoreCase);
+        }))
+        {
             lastInviterName = normalized;
             log.Information($"Whitelisted party invite detected from: {normalized}. Waiting for SelectYesno dialog to accept.");
         }
@@ -116,110 +120,71 @@ public class PartyService
         if (Plugin.PartyList.Length > 0)
             return;
 
-        // Try multiple addon indices like ECommons AddonFinder does
-        for (int i = 1; true; i++)
+        // Just check index 1 - no need to spam multiple indices
+        nint addonPtr = gameGui.GetAddonByName("SelectYesno", 1);
+        if (addonPtr == 0)
+            return;
+
+        var addon = (AddonSelectYesno*)addonPtr;
+        if (!addon->AtkUnitBase.IsVisible)
+            return;
+
+        var promptNode = addon->PromptText;
+        if (promptNode == null)
+            return;
+
+        var textPtr = promptNode->NodeText.StringPtr;
+        if (textPtr == null)
+            return;
+
+        var promptSe = MemoryHelper.ReadSeStringNullTerminated(new IntPtr(textPtr));
+        var prompt = promptSe.TextValue;
+        if (string.IsNullOrEmpty(prompt))
+            return;
+
+        var match = InvitePromptRegex.Match(prompt.Trim());
+        if (!match.Success)
+            return;
+
+        var inviterRaw = match.Groups["name"].Value;
+        var normalizedInviter = NormalizeName(inviterRaw);
+        if (string.IsNullOrEmpty(normalizedInviter))
+            return;
+
+        if (!IsWhitelisted(config, normalizedInviter))
+            return;
+
+        var now = Environment.TickCount64;
+
+        if (lastPromptInviter != normalizedInviter)
         {
-            nint addonPtr = gameGui.GetAddonByName("SelectYesno", i);
-            if (addonPtr == 0)
+            lastPromptInviter = normalizedInviter;
+            lastPromptHandled = 0;
+            callbackAttempts = 0;
+            log.Information($"SelectYesno invite matched whitelist: {normalizedInviter}");
+        }
+
+        if (callbackAttempts >= MaxCallbackAttempts)
+        {
+            if (now - lastPromptHandled >= 2000)
             {
-                log.Debug($"SelectYesno addon not found at index {i}, stopping search");
-                break;
+                lastPromptHandled = now;
+                log.Warning($"Reached max callback attempts ({MaxCallbackAttempts}) for invite from {normalizedInviter}. Waiting for dialog state change.");
             }
+            return;
+        }
 
-            log.Debug($"Found SelectYesno addon at index {i}, checking visibility");
-            var addon = (AddonSelectYesno*)addonPtr;
-            if (!addon->AtkUnitBase.IsVisible)
-            {
-                log.Debug($"SelectYesno addon at index {i} not visible, continuing");
-                continue;
-            }
+        if (now - lastPromptHandled < CallbackRetryMs)
+            return;
 
-            log.Debug($"SelectYesno addon at index {i} is visible, checking prompt text");
-            var promptNode = addon->PromptText;
-            if (promptNode == null)
-            {
-                log.Warning($"SelectYesno addon at index {i} has no PromptText");
-                continue;
-            }
+        var accepted = AcceptInvite(addon, normalizedInviter, callbackAttempts + 1);
+        lastPromptHandled = now;
+        callbackAttempts++;
 
-            var textPtr = promptNode->NodeText.StringPtr;
-            if (textPtr == null)
-            {
-                log.Warning($"SelectYesno addon at index {i} has no text pointer");
-                continue;
-            }
-
-            var promptSe = MemoryHelper.ReadSeStringNullTerminated(new IntPtr(textPtr));
-            var prompt = promptSe.TextValue;
-            if (string.IsNullOrEmpty(prompt))
-            {
-                log.Warning($"SelectYesno addon at index {i} has empty prompt text");
-                continue;
-            }
-
-            log.Debug($"SelectYesno addon at index {i} prompt: {prompt}");
-
-            log.Debug($"SelectYesno addon at index {i} checking regex match against: '{prompt.Trim()}'");
-            var match = InvitePromptRegex.Match(prompt.Trim());
-            if (!match.Success)
-            {
-                log.Debug($"SelectYesno addon at index {i} regex match failed");
-                continue;
-            }
-
-            var inviterRaw = match.Groups["name"].Value;
-            log.Debug($"SelectYesno addon at index {i} regex matched, inviter raw: '{inviterRaw}'");
-            var normalizedInviter = NormalizeName(inviterRaw);
-            if (string.IsNullOrEmpty(normalizedInviter))
-            {
-                log.Warning($"SelectYesno addon at index {i} normalized inviter name is empty");
-                continue;
-            }
-
-            log.Debug($"SelectYesno addon at index {i} normalized inviter: '{normalizedInviter}', checking whitelist");
-            log.Debug($"Whitelist entries: [{string.Join(", ", config.InviteWhitelist)}]");
-            log.Debug($"Normalized whitelist entries: [{string.Join(", ", config.InviteWhitelist.Select(NormalizeName))}]");
-            if (!IsWhitelisted(config, normalizedInviter))
-            {
-                log.Debug($"SelectYesno addon at index {i} inviter '{normalizedInviter}' not in whitelist");
-                continue;
-            }
-
-            log.Information($"SelectYesno addon at index {i} inviter '{normalizedInviter}' is whitelisted, proceeding to accept");
-
-            var now = Environment.TickCount64;
-
-            if (lastPromptInviter != normalizedInviter)
-            {
-                lastPromptInviter = normalizedInviter;
-                lastPromptHandled = 0;
-                callbackAttempts = 0;
-                log.Information($"SelectYesno invite matched whitelist: {normalizedInviter}");
-            }
-
-            if (callbackAttempts >= MaxCallbackAttempts)
-            {
-                if (now - lastPromptHandled >= 2000)
-                {
-                    lastPromptHandled = now;
-                    log.Warning($"Reached max callback attempts ({MaxCallbackAttempts}) for invite from {normalizedInviter}. Waiting for dialog state change.");
-                }
-                return;
-            }
-
-            if (now - lastPromptHandled < CallbackRetryMs)
-                return;
-
-            var accepted = AcceptInvite(addon, normalizedInviter, callbackAttempts + 1);
-            lastPromptHandled = now;
-            callbackAttempts++;
-
-            if (accepted)
-            {
-                lastInviterName = normalizedInviter;
-                log.Information($"Issued accept attempt #{callbackAttempts} for whitelisted invite from: {normalizedInviter}");
-            }
-            return; // Found matching addon, exit loop
+        if (accepted)
+        {
+            lastInviterName = normalizedInviter;
+            log.Information($"Issued accept attempt #{callbackAttempts} for whitelisted invite from: {normalizedInviter}");
         }
     }
 
@@ -238,8 +203,6 @@ public class PartyService
             return false;
         }
     }
-
-    
 
     private static string NormalizeName(string raw)
     {
@@ -270,9 +233,14 @@ public class PartyService
         return result;
     }
 
-    private static bool IsWhitelisted(CharacterConfig config, string normalizedName)
+    private static bool IsWhitelisted(CharacterConfig config, string inviterName)
     {
-        return config.InviteWhitelist.Any(wl =>
-            NormalizeName(wl).Equals(normalizedName, StringComparison.OrdinalIgnoreCase));
+        return config.InviteWhitelist.Any(wl => 
+        {
+            var normalizedWl = NormalizeName(wl);
+            // Check if whitelist entry is contained within the inviter name (partial match)
+            return inviterName.Contains(normalizedWl, StringComparison.OrdinalIgnoreCase) ||
+                   normalizedWl.Contains(inviterName, StringComparison.OrdinalIgnoreCase);
+        });
     }
 }
