@@ -20,6 +20,10 @@ public class PartyService
     private string? lastInviterName;
     private long lastPromptHandled;
     private string? lastPromptInviter;
+    private int callbackAttempts;
+
+    private const int MaxCallbackAttempts = 8;
+    private const int CallbackRetryMs = 250;
 
     private static readonly Regex InvitePromptRegex = new("Join (?<name>.+?)'s party\\?", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
@@ -55,11 +59,19 @@ public class PartyService
             plugin.ConfigManager.SaveCurrentAccount();
             log.Information($"Auto-set fren to whitelisted inviter: {lastInviterName}");
             lastInviterName = null;
+            callbackAttempts = 0;
         }
 
         lastInParty = inParty;
 
-        CheckInviteDialog(config);
+        try
+        {
+            CheckInviteDialog(config);
+        }
+        catch (Exception ex)
+        {
+            log.Error(ex, "PartyService.CheckInviteDialog failed");
+        }
     }
 
     private void OnChatMessage(XivChatType type, int timestamp, ref SeString sender, ref SeString message, ref bool isHandled)
@@ -85,13 +97,12 @@ public class PartyService
         var inviterName = messageText.Split(new[] { " invites you to a party" }, StringSplitOptions.None)[0].Trim();
         
         // Check if inviter is on whitelist
-        if (config.InviteWhitelist.Any(wl => 
+        if (config.InviteWhitelist.Any(wl =>
             inviterName.Equals(wl, StringComparison.OrdinalIgnoreCase)))
         {
-            lastInviterName = inviterName;
-            // Auto-accept invite using /join command
-            Plugin.CommandManager.ProcessCommand("/join");
-            log.Information($"Auto-accepted party invite from whitelisted player: {inviterName}");
+            var normalized = NormalizeName(inviterName);
+            lastInviterName = normalized;
+            log.Information($"Whitelisted party invite detected from: {normalized}. Waiting for SelectYesno dialog to accept.");
         }
     }
 
@@ -139,40 +150,76 @@ public class PartyService
             return;
 
         var now = Environment.TickCount64;
-        if (lastPromptInviter == normalizedInviter && now - lastPromptHandled < 1000)
+
+        if (lastPromptInviter != normalizedInviter)
+        {
+            lastPromptInviter = normalizedInviter;
+            lastPromptHandled = 0;
+            callbackAttempts = 0;
+            log.Information($"SelectYesno invite matched whitelist: {normalizedInviter}");
+        }
+
+        if (callbackAttempts >= MaxCallbackAttempts)
+        {
+            if (now - lastPromptHandled >= 2000)
+            {
+                lastPromptHandled = now;
+                log.Warning($"Reached max callback attempts ({MaxCallbackAttempts}) for invite from {normalizedInviter}. Waiting for dialog state change.");
+            }
+            return;
+        }
+
+        if (now - lastPromptHandled < CallbackRetryMs)
             return;
 
-        AcceptInvite(addon);
+        var accepted = AcceptInvite(addon, normalizedInviter, callbackAttempts + 1);
         lastPromptHandled = now;
-        lastPromptInviter = normalizedInviter;
-        lastInviterName = normalizedInviter;
-        log.Information($"Accepted SelectYesno invite from whitelisted player: {normalizedInviter}");
+        callbackAttempts++;
+
+        if (accepted)
+        {
+            lastInviterName = normalizedInviter;
+            log.Information($"Issued accept attempt #{callbackAttempts} for whitelisted invite from: {normalizedInviter}");
+        }
     }
 
-    private unsafe void AcceptInvite(AddonSelectYesno* addon)
+    private unsafe bool AcceptInvite(AddonSelectYesno* addon, string inviterName, int attempt)
     {
-        // Use /callback command approach (same as SND plugin)
-        // Pattern: /callback SelectYesno true 0
-        log.Information($"AcceptInvite called - Addon visible: {addon->AtkUnitBase.IsVisible}");
-        
-        var button = addon->YesButton;
-        if (button == null)
+        try
         {
-            log.Warning("SelectYesno Yes button is null");
-            return;
-        }
-        
-        log.Information($"YesButton found - IsEnabled: {button->IsEnabled}");
-        if (!button->IsEnabled)
-        {
-            log.Warning("SelectYesno Yes button is not enabled");
-            return;
-        }
+            var button = addon->YesButton;
+            if (button == null)
+            {
+                log.Warning($"Invite accept attempt #{attempt} for {inviterName}: Yes button is null");
+                return false;
+            }
 
-        log.Information("Executing: /callback SelectYesno true 0");
-        Plugin.CommandManager.ProcessCommand("/callback SelectYesno true 0");
-        log.Information("Callback command sent");
+            if (!button->IsEnabled)
+            {
+                log.Warning($"Invite accept attempt #{attempt} for {inviterName}: Yes button is disabled");
+                return false;
+            }
+
+            var callbackHandled = Plugin.CommandManager.ProcessCommand("/callback SelectYesno true 0");
+            log.Information($"Invite accept attempt #{attempt} for {inviterName}: /callback handled={callbackHandled}");
+
+            // Fallback: direct FireCallback in case /callback command handler is unavailable.
+            var args = stackalloc AtkValue[1];
+            args[0].Type = FFXIVClientStructs.FFXIV.Component.GUI.ValueType.Int;
+            args[0].Int = 0;
+            addon->AtkUnitBase.FireCallback(1, args, true);
+            log.Information($"Invite accept attempt #{attempt} for {inviterName}: direct FireCallback sent");
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            log.Error(ex, $"Invite accept attempt #{attempt} for {inviterName} threw an exception");
+            return false;
+        }
     }
+
+    
 
     private static string NormalizeName(string raw)
     {
