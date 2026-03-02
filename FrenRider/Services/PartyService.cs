@@ -177,6 +177,8 @@ public class PartyService
             }
 
             log.Debug($"SelectYesno addon at index {i} normalized inviter: '{normalizedInviter}', checking whitelist");
+            log.Debug($"Whitelist entries: [{string.Join(", ", config.InviteWhitelist)}]");
+            log.Debug($"Normalized whitelist entries: [{string.Join(", ", config.InviteWhitelist.Select(NormalizeName))}]");
             if (!IsWhitelisted(config, normalizedInviter))
             {
                 log.Debug($"SelectYesno addon at index {i} inviter '{normalizedInviter}' not in whitelist");
