@@ -1,6 +1,8 @@
 using System;
+using System.Globalization;
 using System.Linq;
 using System.Numerics;
+using System.Text;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Windowing;
 using FrenRider.Models;
@@ -926,27 +928,29 @@ public class ConfigWindow : Window, IDisposable
         ImGui.Spacing();
         ImGui.Text("DTR Icons (max 3 characters)");
         ImGui.SameLine();
-        HelpMarker("Customize the glyphs used for enabled/disabled icon modes.\nSee https://na.finalfantasyxiv.com/lodestone/character/22423564/blog/4393835 for inspiration.");
-
-        var iconEnabled = configuration.DtrIconEnabled;
-        ImGui.SetNextItemWidth(80);
-        if (ImGui.InputText("Enabled Icon", ref iconEnabled, 8))
+        HelpMarker("Customize the glyphs used for enabled/disabled icon modes.");
+        ImGui.SameLine();
+        if (ImGui.SmallButton("Copy Icon Guide Link"))
         {
-            configuration.DtrIconEnabled = SanitizeIconInput(iconEnabled, "\uE03C");
+            ImGui.SetClipboardText(IconGuideUrl);
+            Plugin.Log.Info("Copied icon guide link to clipboard");
+        }
+        if (ImGui.IsItemHovered())
+            ImGui.SetTooltip("Copies the Lodestone blog link with suggested glyphs");
+
+        var enabledIcon = configuration.DtrIconEnabled;
+        if (DrawIconInputs("Enabled", ref enabledIcon, "\uE03C"))
+        {
+            configuration.DtrIconEnabled = enabledIcon;
             configuration.Save();
         }
-        ImGui.SameLine();
-        ImGui.TextDisabled("Shown when Fren Rider is enabled");
 
-        var iconDisabled = configuration.DtrIconDisabled;
-        ImGui.SetNextItemWidth(80);
-        if (ImGui.InputText("Disabled Icon", ref iconDisabled, 8))
+        var disabledIcon = configuration.DtrIconDisabled;
+        if (DrawIconInputs("Disabled", ref disabledIcon, "\uE03D"))
         {
-            configuration.DtrIconDisabled = SanitizeIconInput(iconDisabled, "\uE03D");
+            configuration.DtrIconDisabled = disabledIcon;
             configuration.Save();
         }
-        ImGui.SameLine();
-        ImGui.TextDisabled("Shown when Fren Rider is disabled");
 
         ImGui.Spacing();
         ImGui.Separator();
@@ -1123,6 +1127,31 @@ public class ConfigWindow : Window, IDisposable
             : "";
     }
 
+    private bool DrawIconInputs(string label, ref string value, string fallback)
+    {
+        var updated = false;
+        var glyph = value;
+        ImGui.SetNextItemWidth(80);
+        if (ImGui.InputText($"{label} Icon", ref glyph, 8))
+        {
+            value = SanitizeIconInput(glyph, fallback);
+            updated = true;
+        }
+        ImGui.SameLine();
+        ImGui.TextDisabled($"Shown when Fren Rider is {label.ToLowerInvariant()}");
+
+        var code = FormatIconCode(value);
+        ImGui.SetNextItemWidth(160);
+        if (ImGui.InputText($"{label} Icon Code", ref code, 64))
+        {
+            var parsed = ParseIconCode(code, value);
+            value = SanitizeIconInput(parsed, fallback);
+            updated = true;
+        }
+
+        return updated;
+    }
+
     private static string SanitizeIconInput(string value, string fallback)
     {
         if (string.IsNullOrWhiteSpace(value))
@@ -1131,6 +1160,51 @@ public class ConfigWindow : Window, IDisposable
         var trimmed = value.Trim();
         return trimmed.Length > 3 ? trimmed.Substring(0, 3) : trimmed;
     }
+
+    private static string FormatIconCode(string value)
+    {
+        if (string.IsNullOrEmpty(value)) return string.Empty;
+
+        var sb = new StringBuilder();
+        foreach (var rune in value.EnumerateRunes())
+        {
+            if (sb.Length > 0) sb.Append(' ');
+            sb.Append("\\u");
+            sb.Append(rune.Value.ToString("X4", CultureInfo.InvariantCulture));
+        }
+
+        return sb.ToString();
+    }
+
+    private static string ParseIconCode(string input, string fallback)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+            return fallback;
+
+        var parts = input.Split(new[] { ' ', ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
+        var sb = new StringBuilder();
+        foreach (var part in parts)
+        {
+            if (sb.Length >= 3) break;
+
+            var token = part.Trim();
+            if (token.StartsWith("\\u", StringComparison.OrdinalIgnoreCase))
+                token = token[2..];
+            else if (token.StartsWith("u", StringComparison.OrdinalIgnoreCase))
+                token = token[1..];
+            else if (token.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+                token = token[2..];
+
+            if (int.TryParse(token, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var codepoint))
+            {
+                sb.Append(char.ConvertFromUtf32(codepoint));
+            }
+        }
+
+        return sb.Length == 0 ? fallback : sb.ToString();
+    }
+
+    private const string IconGuideUrl = "https://na.finalfantasyxiv.com/lodestone/character/22423564/blog/4393835";
 
     private void SyncFrenNameInput()
     {

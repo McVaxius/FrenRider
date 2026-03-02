@@ -253,8 +253,8 @@ public sealed class Plugin : IDalamudPlugin
         var config = ConfigManager.GetActiveConfig();
 
         // DTR modes: 0=text-only, 1=icon+text, 2=icon-only
-        var iconEnabled = string.IsNullOrEmpty(Configuration.DtrIconEnabled) ? "\uE03C" : Configuration.DtrIconEnabled;
-        var iconDisabled = string.IsNullOrEmpty(Configuration.DtrIconDisabled) ? "\uE03D" : Configuration.DtrIconDisabled;
+        var iconEnabled = string.IsNullOrEmpty(Configuration.DtrIconEnabled) ? "\uE044" : Configuration.DtrIconEnabled;
+        var iconDisabled = string.IsNullOrEmpty(Configuration.DtrIconDisabled) ? "\uE04C" : Configuration.DtrIconDisabled;
         var glyph = config.Enabled ? iconEnabled : iconDisabled;
 
         switch (Configuration.DtrBarMode)
