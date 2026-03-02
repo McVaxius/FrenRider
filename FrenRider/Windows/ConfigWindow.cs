@@ -924,6 +924,31 @@ public class ConfigWindow : Window, IDisposable
         HelpMarker("DTR bar display mode:\nText Only: 'FR: On/Off'\nIcon+Text: '⚫ FR'\nIcon Only: '⚫'");
 
         ImGui.Spacing();
+        ImGui.Text("DTR Icons (max 3 characters)");
+        ImGui.SameLine();
+        HelpMarker("Customize the glyphs used for enabled/disabled icon modes.\nSee https://na.finalfantasyxiv.com/lodestone/character/22423564/blog/4393835 for inspiration.");
+
+        var iconEnabled = configuration.DtrIconEnabled;
+        ImGui.SetNextItemWidth(80);
+        if (ImGui.InputText("Enabled Icon", ref iconEnabled, 8))
+        {
+            configuration.DtrIconEnabled = SanitizeIconInput(iconEnabled, "\uE03C");
+            configuration.Save();
+        }
+        ImGui.SameLine();
+        ImGui.TextDisabled("Shown when Fren Rider is enabled");
+
+        var iconDisabled = configuration.DtrIconDisabled;
+        ImGui.SetNextItemWidth(80);
+        if (ImGui.InputText("Disabled Icon", ref iconDisabled, 8))
+        {
+            configuration.DtrIconDisabled = SanitizeIconInput(iconDisabled, "\uE03D");
+            configuration.Save();
+        }
+        ImGui.SameLine();
+        ImGui.TextDisabled("Shown when Fren Rider is disabled");
+
+        ImGui.Spacing();
         ImGui.Separator();
         ImGui.Spacing();
 
@@ -1096,6 +1121,15 @@ public class ConfigWindow : Window, IDisposable
         return !string.IsNullOrEmpty(charName) && !string.IsNullOrEmpty(worldName)
             ? $"{charName}@{worldName}"
             : "";
+    }
+
+    private static string SanitizeIconInput(string value, string fallback)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return fallback;
+
+        var trimmed = value.Trim();
+        return trimmed.Length > 3 ? trimmed.Substring(0, 3) : trimmed;
     }
 
     private void SyncFrenNameInput()
