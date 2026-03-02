@@ -80,14 +80,26 @@ public class MainWindow : Window, IDisposable
         }
         else
         {
-            ImGui.TextColored(new Vector4(0.4f, 1, 0.4f, 1), "Logged in.");
+            // Show logged-in character name
+            var localPlayer = Plugin.ObjectTable.LocalPlayer;
+            if (localPlayer != null)
+            {
+                var charName = localPlayer.Name.ToString();
+                var worldName = localPlayer.HomeWorld.Value.Name.ToString();
+                var fullName = $"{charName}@{worldName}";
+                ImGui.TextColored(new Vector4(0.4f, 1, 0.4f, 1), $"Logged in. [{Disp(fullName)}]");
+            }
+            else
+            {
+                ImGui.TextColored(new Vector4(0.4f, 1, 0.4f, 1), "Logged in.");
+            }
 
             // Account info
             var account = plugin.ConfigManager.GetCurrentAccount();
             if (account != null)
             {
                 ImGui.SameLine();
-                ImGui.TextDisabled($"[{account.AccountAlias}]");
+                ImGui.TextDisabled($"({Disp(account.AccountAlias)})");
             }
 
             // Party info (from FrenTracker)

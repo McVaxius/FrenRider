@@ -348,7 +348,7 @@ public class ConfigWindow : Window, IDisposable
             configManager.SaveCurrentAccount();
         }
         ImGui.SameLine();
-        HelpMarker("If enabled, summon your own mount and fly alongside fren instead of riding their multi-seater.\nUseful when you don't have access to the fren's mount or want separate mounts.");
+        HelpMarker("If enabled, you will summon your own mount instead of pillion riding.\nUseful for flying zones.\n\n⚠️ IMPORTANT: This feature requires you to be grouped with your fren.\nIt will not work properly if ungrouped (won't jump into air to follow).");
 
         // Mount Name (searchable dropdown from game data)
         ImGui.Text("Mount Name (if flying solo)");
@@ -912,14 +912,16 @@ public class ConfigWindow : Window, IDisposable
         ImGui.SameLine();
         HelpMarker("Show/hide the DTR bar entry (server info bar).");
 
-        var dtrIcon = configuration.DtrBarIconMode;
-        if (ImGui.Checkbox("DTR Bar Icon Mode", ref dtrIcon))
+        var dtrMode = configuration.DtrBarMode;
+        var dtrModes = new[] { "Text Only", "Icon+Text", "Icon Only" };
+        ImGui.SetNextItemWidth(150);
+        if (ImGui.Combo("DTR Bar Mode", ref dtrMode, dtrModes, dtrModes.Length))
         {
-            configuration.DtrBarIconMode = dtrIcon;
+            configuration.DtrBarMode = dtrMode;
             configuration.Save();
         }
         ImGui.SameLine();
-        HelpMarker("Use icons instead of text in the DTR bar entry.\nDTRicon0.png = enabled, DTRicon1.png = disabled.");
+        HelpMarker("DTR bar display mode:\nText Only: 'FR: On/Off'\nIcon+Text: '⚫ FR'\nIcon Only: '⚫'");
 
         ImGui.Spacing();
         ImGui.Separator();
@@ -1040,6 +1042,20 @@ public class ConfigWindow : Window, IDisposable
         ImGui.BulletText("/fr - Open main window (alias)");
         ImGui.BulletText("/fr on - Enable Fren Rider");
         ImGui.BulletText("/fr off - Disable Fren Rider");
+        ImGui.Spacing();
+        ImGui.Separator();
+        ImGui.Spacing();
+
+        ImGui.TextColored(new Vector4(1f, 0.8f, 0.4f, 1), "Required Dependencies:");
+        ImGui.BulletText("vnavmesh - Navigation and pathfinding");
+        ImGui.Spacing();
+
+        ImGui.TextColored(new Vector4(0.6f, 1f, 0.6f, 1), "Optional Plugins:");
+        ImGui.BulletText("Visland - Alternative navigation (if vnavmesh unavailable)");
+        ImGui.BulletText("BossMod / BossModReborn - Combat AI and following");
+        ImGui.BulletText("Rotation Solver Reborn - Combat rotation automation");
+        ImGui.BulletText("WRATH - Combat rotation automation");
+        ImGui.BulletText("Questionable - Quest automation integration");
         ImGui.Spacing();
         ImGui.Separator();
         ImGui.Spacing();

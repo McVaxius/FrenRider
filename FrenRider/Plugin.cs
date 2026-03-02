@@ -252,16 +252,21 @@ public sealed class Plugin : IDalamudPlugin
 
         var config = ConfigManager.GetActiveConfig();
 
-        if (Configuration.DtrBarIconMode)
+        // DTR modes: 0=text-only, 1=icon+text, 2=icon-only
+        switch (Configuration.DtrBarMode)
         {
-            // Compact icon-style indicators
-            var icon = config.Enabled ? "\uE03C" : "\uE03D";
-            dtrEntry.Text = new SeString(new TextPayload($"{icon} FR"));
-        }
-        else
-        {
-            var statusText = config.Enabled ? "FR: On" : "FR: Off";
-            dtrEntry.Text = new SeString(new TextPayload(statusText));
+            case 1: // icon+text
+                var icon1 = config.Enabled ? "\uE03C" : "\uE03D";
+                dtrEntry.Text = new SeString(new TextPayload($"{icon1} FR"));
+                break;
+            case 2: // icon-only
+                var icon2 = config.Enabled ? "\uE03C" : "\uE03D";
+                dtrEntry.Text = new SeString(new TextPayload(icon2));
+                break;
+            default: // text-only
+                var statusText = config.Enabled ? "FR: On" : "FR: Off";
+                dtrEntry.Text = new SeString(new TextPayload(statusText));
+                break;
         }
 
         dtrEntry.Tooltip = new SeString(new TextPayload(
