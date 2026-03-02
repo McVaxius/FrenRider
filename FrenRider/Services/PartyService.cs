@@ -116,29 +116,48 @@ public class PartyService
         if (Plugin.PartyList.Length > 0)
             return;
 
-        // Try multiple addon indices like AutoRetainer does
-        for (int i = 1; i < 100; i++)
+        // Try multiple addon indices like ECommons AddonFinder does
+        for (int i = 1; true; i++)
         {
             nint addonPtr = gameGui.GetAddonByName("SelectYesno", i);
-            if (addonPtr == nint.Zero)
-                continue;
+            if (addonPtr == 0)
+            {
+                log.Debug($"SelectYesno addon not found at index {i}, stopping search");
+                break;
+            }
 
+            log.Debug($"Found SelectYesno addon at index {i}, checking visibility");
             var addon = (AddonSelectYesno*)addonPtr;
             if (!addon->AtkUnitBase.IsVisible)
+            {
+                log.Debug($"SelectYesno addon at index {i} not visible, continuing");
                 continue;
+            }
 
+            log.Debug($"SelectYesno addon at index {i} is visible, checking prompt text");
             var promptNode = addon->PromptText;
             if (promptNode == null)
+            {
+                log.Warning($"SelectYesno addon at index {i} has no PromptText");
                 continue;
+            }
 
             var textPtr = promptNode->NodeText.StringPtr;
             if (textPtr == null)
+            {
+                log.Warning($"SelectYesno addon at index {i} has no text pointer");
                 continue;
+            }
 
             var promptSe = MemoryHelper.ReadSeStringNullTerminated(new IntPtr(textPtr));
             var prompt = promptSe.TextValue;
             if (string.IsNullOrEmpty(prompt))
+            {
+                log.Warning($"SelectYesno addon at index {i} has empty prompt text");
                 continue;
+            }
+
+            log.Debug($"SelectYesno addon at index {i} prompt: {prompt}");
 
             var match = InvitePromptRegex.Match(prompt.Trim());
             if (!match.Success)
