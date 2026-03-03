@@ -210,13 +210,16 @@ public class VideoPlaybackService : IDisposable
     {
         try
         {
-            // Always look in the same directory as the plugin DLL
+            // Look in the videos/ subfolder in the same directory as the plugin DLL
             var pluginDir = Plugin.PluginInterface.AssemblyLocation.DirectoryName ?? "";
-            var videoPath = Path.Combine(pluginDir, videoName);
+            var videosDir = Path.Combine(pluginDir, "videos");
+            var videoPath = Path.Combine(videosDir, videoName);
             
             log.Debug($"[FR] Looking for video: {videoName}");
             log.Debug($"[FR] Plugin directory: {pluginDir}");
+            log.Debug($"[FR] Videos directory: {videosDir}");
             log.Debug($"[FR] Full video path: {videoPath}");
+            log.Debug($"[FR] Videos directory exists: {Directory.Exists(videosDir)}");
             log.Debug($"[FR] Video file exists: {File.Exists(videoPath)}");
             
             return File.Exists(videoPath) ? videoPath : string.Empty;

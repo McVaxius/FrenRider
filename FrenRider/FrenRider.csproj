@@ -4,7 +4,7 @@
 
   <PropertyGroup>
 
-    <Version>0.0.0.39</Version>
+    <Version>0.0.0.40</Version>
 
     <PackageProjectUrl>https://github.com/McVaxius/FrenRider</PackageProjectUrl>
 
@@ -20,7 +20,7 @@
 
   <ItemGroup>
     <None Include="images\**" CopyToOutputDirectory="PreserveNewest" />
-    <Content Include="videos\*.mp4">
+    <Content Include="videos\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
@@ -45,7 +45,7 @@
 
       <PluginFiles Include="$(ProjectDir)$(AssemblyName).json" />
 
-      <PluginFiles Include="videos\*.mp4" />
+      <PluginFiles Include="videos\**" />
 
     </ItemGroup>
 

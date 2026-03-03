@@ -102,16 +102,17 @@ Create `videos/` folder in source and add video files:
 </Content>
 ```
 
-**Runtime Location**: Videos are located in the same directory as `FrenRider.dll`:
+**Runtime Location**: Videos are located in a `videos/` subfolder with the plugin DLL:
 ```
 PluginDirectory/
 ├── FrenRider.dll
 ├── FrenRider.json
-├── 1.mp4 (enable video)
-└── 2.mp4 (disable video)
+└── videos/
+    ├── 1.mp4 (enable video)
+    └── 2.mp4 (disable video)
 ```
 
-**No hardcoded paths** - videos are always found relative to the DLL location using `PluginInterface.AssemblyLocation.DirectoryName`.
+**No hardcoded paths** - videos are always found relative to the DLL location using `PluginInterface.AssemblyLocation.DirectoryName + "videos/"`.
 
 ## User Setup
 
