@@ -4,7 +4,7 @@
 
   <PropertyGroup>
 
-    <Version>0.0.0.38</Version>
+    <Version>0.0.0.39</Version>
 
     <PackageProjectUrl>https://github.com/McVaxius/FrenRider</PackageProjectUrl>
 
@@ -20,6 +20,9 @@
 
   <ItemGroup>
     <None Include="images\**" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="videos\*.mp4">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <Target Name="CopyPluginArtifacts" AfterTargets="Build">
@@ -41,6 +44,8 @@
       <PluginFiles Include="$(TargetPath)" />
 
       <PluginFiles Include="$(ProjectDir)$(AssemblyName).json" />
+
+      <PluginFiles Include="videos\*.mp4" />
 
     </ItemGroup>
 

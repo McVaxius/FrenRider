@@ -17,6 +17,15 @@ public class Configuration : IPluginConfiguration
     public bool KrangleEnabled { get; set; } = false;
     public float LeftPanelWidth { get; set; } = 240f;
 
+    // --- Video Notifications ---
+    public bool VideoNotificationsEnabled { get; set; } = false;
+    public int VideoWindowX { get; set; } = 100;
+    public int VideoWindowY { get; set; } = 100;
+    public int VideoWindowWidth { get; set; } = 640;
+    public int VideoWindowHeight { get; set; } = 480;
+    public bool VideoMuteAudio { get; set; } = true;
+    public string EmbeddedVideosFolder { get; set; } = "videos";
+
     // --- Account Tracking ---
     public string LastAccountId { get; set; } = "";
 

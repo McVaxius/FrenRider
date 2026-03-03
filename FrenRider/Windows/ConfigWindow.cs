@@ -904,6 +904,15 @@ public class ConfigWindow : Window, IDisposable
         ImGui.Text("UI Settings");
         ImGui.Spacing();
 
+        var videoNotificationsEnabled = configuration.VideoNotificationsEnabled;
+        if (ImGui.Checkbox("Video Notifications", ref videoNotificationsEnabled))
+        {
+            configuration.VideoNotificationsEnabled = videoNotificationsEnabled;
+            configuration.Save();
+        }
+        ImGui.SameLine();
+        HelpMarker("Play videos when Fren Rider is enabled/disabled.\nRequires VLC media player to be installed.\nVideos are embedded with the plugin distribution.");
+
         var movable = configuration.IsConfigWindowMovable;
         if (ImGui.Checkbox("Movable Config Window", ref movable))
         {

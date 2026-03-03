@@ -45,6 +45,7 @@ public sealed class Plugin : IDalamudPlugin
     public FormationService FormationService { get; init; }
     public AutorotIpcService AutorotIpcService { get; init; }
     public PartyService PartyService { get; init; }
+    public VideoPlaybackService VideoPlaybackService { get; init; }
     public string[] MountNames { get; private set; } = Array.Empty<string>();
 
     public readonly WindowSystem WindowSystem = new("FrenRider");
@@ -54,6 +55,7 @@ public sealed class Plugin : IDalamudPlugin
     private IDtrBarEntry? dtrEntry;
     private bool wasLoggedIn;
     private int loginDetectionDelay;
+    private bool wasPluginEnabled = false;
 
     public Plugin()
     {
@@ -73,6 +75,7 @@ public sealed class Plugin : IDalamudPlugin
         AutorotIpcService = new AutorotIpcService(PluginInterface, Log);
         PartyService = new PartyService(this, Log, GameGui);
         PartyService.Initialize();
+        VideoPlaybackService = new VideoPlaybackService(Configuration, Log, ChatGui);
 
         ConfigWindow = new ConfigWindow(this);
         MainWindow = new MainWindow(this);
@@ -130,6 +133,7 @@ public sealed class Plugin : IDalamudPlugin
 
         AutorotIpcService.Dispose();
         PartyService.Dispose();
+        VideoPlaybackService.Dispose();
 
         dtrEntry?.Remove();
 
@@ -151,6 +155,23 @@ public sealed class Plugin : IDalamudPlugin
             cfg.Enabled = arg == "on";
             ConfigManager.SaveCurrentAccount();
             Log.Information($"Fren Rider {(cfg.Enabled ? "enabled" : "disabled")} via /fr {arg}");
+        }
+        else if (arg == "testvideo")
+        {
+            Log.Information("[FR] Testing video availability...");
+            var available = VideoPlaybackService.CheckVideoAvailability();
+            Log.Information($"[FR] Videos available: {available}");
+            
+            var enablePath = VideoPlaybackService.GetEmbeddedVideoPath("1.mp4");
+            var disablePath = VideoPlaybackService.GetEmbeddedVideoPath("2.mp4");
+            Log.Information($"[FR] Enable video path: {enablePath}");
+            Log.Information($"[FR] Disable video path: {disablePath}");
+            
+            if (!string.IsNullOrEmpty(enablePath))
+            {
+                Log.Information("[FR] Playing test enable video...");
+                _ = VideoPlaybackService.PlayVideo(enablePath);
+            }
         }
         else
         {
@@ -218,6 +239,57 @@ public sealed class Plugin : IDalamudPlugin
 
         // Update fren tracking
         FrenTracker.Update();
+
+        // Check for plugin enable/disable state changes for video notifications
+        var config = ConfigManager.GetActiveConfig();
+        if (config != null)
+        {
+            if (Configuration.VideoNotificationsEnabled && config.Enabled != wasPluginEnabled)
+            {
+                Log.Debug($"[FR] Video notifications enabled, state changed: {wasPluginEnabled} -> {config.Enabled}");
+                
+                if (config.Enabled)
+                {
+                    // Plugin was just enabled - play enable video
+                    var enableVideoPath = VideoPlaybackService.GetEmbeddedVideoPath("1.mp4");
+                    Log.Debug($"[FR] Enable video path: {enableVideoPath}");
+                    if (!string.IsNullOrEmpty(enableVideoPath))
+                    {
+                        Log.Information("[FR] Playing enable video...");
+                        _ = VideoPlaybackService.PlayVideo(enableVideoPath);
+                    }
+                    else
+                    {
+                        Log.Warning("[FR] Enable video not found");
+                    }
+                }
+                else
+                {
+                    // Plugin was just disabled - play disable video
+                    var disableVideoPath = VideoPlaybackService.GetEmbeddedVideoPath("2.mp4");
+                    Log.Debug($"[FR] Disable video path: {disableVideoPath}");
+                    if (!string.IsNullOrEmpty(disableVideoPath))
+                    {
+                        Log.Information("[FR] Playing disable video...");
+                        _ = VideoPlaybackService.PlayVideo(disableVideoPath);
+                    }
+                    else
+                    {
+                        Log.Warning("[FR] Disable video not found");
+                    }
+                }
+                wasPluginEnabled = config.Enabled;
+            }
+            else if (!Configuration.VideoNotificationsEnabled)
+            {
+                // Reset tracking when video notifications are disabled (only when it changes from enabled to disabled)
+                if (wasPluginEnabled != config.Enabled)
+                {
+                    wasPluginEnabled = config.Enabled;
+                    Log.Debug("[FR] Video notifications disabled, resetting tracking");
+                }
+            }
+        }
 
         // Update zone detection, following, and mount system
         ZoneService.Update();
