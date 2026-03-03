@@ -230,7 +230,7 @@ public class PartyService
 
     private static bool IsWhitelisted(CharacterConfig config, string inviterName, out string matchedEntry)
     {
-        matchedEntry = null;
+        matchedEntry = string.Empty;
         foreach (var wl in config.InviteWhitelist)
         {
             var normalizedWl = NormalizeName(wl);
