@@ -171,7 +171,7 @@ public class VideoPlaybackService : IDisposable
         foreach (var path in possiblePaths)
         {
             var exists = File.Exists(path);
-            log.Debug($"[FR]   {path} - {'FOUND' if exists else 'NOT FOUND'}");
+            log.Debug($"[FR]   {path} - {(exists ? "FOUND" : "NOT FOUND")}");
             if (exists)
                 return path;
         }
