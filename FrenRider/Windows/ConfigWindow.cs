@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Numerics;
@@ -932,6 +933,24 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("Play videos when Fren Rider is enabled/disabled.\nRequires VLC media player to be installed.\nVideos are embedded with the plugin distribution.");
+        
+        // VLC availability warning
+        if (!plugin.VideoPlaybackService.IsVLCAvailable())
+        {
+            ImGui.Spacing();
+            ImGui.TextColored(new Vector4(1.0f, 0.4f, 0.4f, 1.0f), "⚠ VLC Not Found");
+            ImGui.SameLine();
+            if (ImGui.SmallButton("Download VLC"))
+            {
+                System.Diagnostics.Process.Start(new ProcessStartInfo 
+                { 
+                    FileName = "https://www.videolan.org/vlc/", 
+                    UseShellExecute = true 
+                });
+            }
+            ImGui.SameLine();
+            HelpMarker("VLC media player is required for video notifications.\nClick to download and install VLC.");
+        }
 
         var movable = configuration.IsConfigWindowMovable;
         if (ImGui.Checkbox("Movable Config Window", ref movable))
