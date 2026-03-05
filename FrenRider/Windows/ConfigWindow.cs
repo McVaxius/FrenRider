@@ -350,6 +350,26 @@ public class ConfigWindow : Window, IDisposable
             }
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip("Select from current party members");
+
+            // Add to Whitelist button
+            ImGui.SameLine();
+            var currentFren = config.FrenName;
+            var frenBase = currentFren.Split('@')[0].Trim();
+            var canAddWl = !string.IsNullOrEmpty(frenBase) && !config.InviteWhitelist.Contains(frenBase);
+            if (!canAddWl) ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 0.5f);
+            if (ImGui.SmallButton("WL+"))
+            {
+                if (canAddWl)
+                {
+                    config.InviteWhitelist.Add(ConfigManager.FixNameCapitalization(frenBase));
+                    configManager.SaveCurrentAccount();
+                }
+            }
+            if (!canAddWl) ImGui.PopStyleVar();
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip(canAddWl
+                    ? $"Add '{frenBase}' to Invite Whitelist"
+                    : string.IsNullOrEmpty(frenBase) ? "No fren name set" : $"'{frenBase}' already in whitelist");
         }
 
         ImGui.Spacing();

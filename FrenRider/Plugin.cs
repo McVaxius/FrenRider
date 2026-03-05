@@ -46,6 +46,7 @@ public sealed class Plugin : IDalamudPlugin
     public AutorotIpcService AutorotIpcService { get; init; }
     public PartyService PartyService { get; init; }
     public VideoPlaybackService VideoPlaybackService { get; init; }
+    public DutyInteractService DutyInteractService { get; init; }
     public string[] MountNames { get; private set; } = Array.Empty<string>();
 
     public readonly WindowSystem WindowSystem = new("FrenRider");
@@ -76,6 +77,7 @@ public sealed class Plugin : IDalamudPlugin
         PartyService = new PartyService(this, Log, GameGui);
         PartyService.Initialize();
         VideoPlaybackService = new VideoPlaybackService(Configuration, Log, ChatGui);
+        DutyInteractService = new DutyInteractService(this, FrenTracker, ZoneService);
 
         ConfigWindow = new ConfigWindow(this);
         MainWindow = new MainWindow(this);
@@ -299,6 +301,7 @@ public sealed class Plugin : IDalamudPlugin
         AutomationService.Update();
         FormationService.Update();
         PartyService.Update();
+        DutyInteractService.Update();
     }
 
     public void SetupDtrBar()

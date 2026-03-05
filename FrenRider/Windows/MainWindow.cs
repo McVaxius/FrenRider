@@ -243,6 +243,13 @@ public class MainWindow : Window, IDisposable
                 ImGui.TextColored(new Vector4(0.8f, 0.6f, 1f, 1), $"Formation: Slot {formation.AssignedSlot}");
             }
 
+            // Duty Interact status
+            var dutyInteract = plugin.DutyInteractService;
+            if (dutyInteract.IsActive)
+            {
+                ImGui.TextColored(new Vector4(1f, 0.8f, 0.4f, 1), $"Duty Seek: {dutyInteract.StateDetail}");
+            }
+
             // Zone info
             var zone = plugin.ZoneService;
             var zoneExtra = "";
