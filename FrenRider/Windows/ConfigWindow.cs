@@ -940,9 +940,18 @@ public class ConfigWindow : Window, IDisposable
             ImGui.Spacing();
             ImGui.TextColored(new Vector4(1.0f, 0.4f, 0.4f, 1.0f), "⚠ VLC Not Found");
             ImGui.SameLine();
-            if (ImGui.SmallButton("Download VLC"))
+            
+            // Make VLC text clickable
+            var vlcColor = new Vector4(0.4f, 0.8f, 1.0f, 1.0f); // Light blue
+            ImGui.TextColored(vlcColor, "VLC");
+            if (ImGui.IsItemHovered())
             {
-                System.Diagnostics.Process.Start(new ProcessStartInfo 
+                ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+                ImGui.SetTooltip("Click to download VLC media player");
+            }
+            if (ImGui.IsItemClicked())
+            {
+                Process.Start(new ProcessStartInfo 
                 { 
                     FileName = "https://www.videolan.org/vlc/", 
                     UseShellExecute = true 

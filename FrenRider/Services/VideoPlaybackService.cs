@@ -167,9 +167,12 @@ public class VideoPlaybackService : IDisposable
             "vlc.exe" // Assume it's in PATH
         };
 
+        log.Debug("[FR] Checking VLC paths:");
         foreach (var path in possiblePaths)
         {
-            if (File.Exists(path))
+            var exists = File.Exists(path);
+            log.Debug($"[FR]   {path} - {'FOUND' if exists else 'NOT FOUND'}");
+            if (exists)
                 return path;
         }
 
