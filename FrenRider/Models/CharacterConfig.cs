@@ -50,6 +50,7 @@ public class CharacterConfig
     public int RotationType { get; set; } = 0; // 0=Auto, 1=Manual, 2=none
 
     // --- Automation / Misc ---
+    public bool EnableAutoDiscard { get; set; } = false;
     public string FeedMeItem { get; set; } = "Boiled Egg";
     public bool FeedMeSearch { get; set; } = true;
     public int XpItem { get; set; } = 0;
@@ -112,6 +113,7 @@ public class CharacterConfig
             MaxAIDistance = MaxAIDistance,
             LimitPct = LimitPct,
             RotationType = RotationType,
+            EnableAutoDiscard = EnableAutoDiscard,
             FeedMeItem = FeedMeItem,
             FeedMeSearch = FeedMeSearch,
             XpItem = XpItem,

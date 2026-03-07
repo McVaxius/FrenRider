@@ -421,15 +421,31 @@ public class ConfigWindow : Window, IDisposable
             ImGui.EndCombo();
         }
 
-        // Force Gysahl
+        // Summon Chocobo
         var forceGysahl = config.ForceGysahl;
-        if (ImGui.Checkbox("Force Gysahl Green Usage", ref forceGysahl))
+        if (ImGui.Checkbox("Summon Chocobo", ref forceGysahl))
         {
             config.ForceGysahl = forceGysahl;
             configManager.SaveCurrentAccount();
         }
         ImGui.SameLine();
-        HelpMarker("Force use of Gysahl Greens to summon your chocobo companion.\nMay cause issues in towns.");
+        HelpMarker("Auto-summon chocobo companion using Gysahl Greens when timer is low.\nWill not summon in sanctuaries or duties.");
+
+        // Show greens count when enabled
+        if (config.ForceGysahl)
+        {
+            var greensCount = GameHelpers.GetInventoryItemCount(GameHelpers.GysahlGreensItemId);
+            var buddyTime = GameHelpers.GetBuddyTimeRemaining();
+            var mins = (int)(buddyTime / 60);
+            var secs = (int)(buddyTime % 60);
+            var timerText = buddyTime > 0 ? $"{mins}m{secs:D2}s" : "Not summoned";
+            var greensColor = greensCount > 0 ? new Vector4(0.3f, 1f, 0.3f, 1) : new Vector4(1f, 0.3f, 0.3f, 1);
+            ImGui.Text("      ");
+            ImGui.SameLine();
+            ImGui.TextColored(greensColor, $"Gysahl Greens: {greensCount}");
+            ImGui.SameLine();
+            ImGui.TextColored(new Vector4(0.5f, 0.5f, 0.5f, 1), $" | Timer: {timerText}");
+        }
 
         // Companion Stance (dropdown)
         var companionIdx = Array.IndexOf(CompanionStances, config.CompanionStrat);
@@ -442,6 +458,16 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("Chocobo companion battle stance.\nControls how your companion behaves in combat.");
+
+        // Auto Discard
+        var autoDiscard = config.EnableAutoDiscard;
+        if (ImGui.Checkbox("Auto Discard (/ays discard)", ref autoDiscard))
+        {
+            config.EnableAutoDiscard = autoDiscard;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Runs /ays discard every 30s while not in combat.\nRequires AutoRetainer plugin.");
 
         ImGui.Spacing();
         ImGui.Separator();

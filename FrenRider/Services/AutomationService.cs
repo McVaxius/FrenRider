@@ -17,6 +17,7 @@ public class AutomationService
     private long lastCompanionCheckMs;
     private long lastCompanionAttemptMs;
     private long companionStanceCooldownMs;
+    private long lastDiscardMs;
     private int idleListIndex;
 
     // Resolved food item ID (cached from name lookup or food search)
@@ -117,6 +118,19 @@ public class AutomationService
         {
             lastCompanionCheckMs = now;
             CheckCompanion(config);
+        }
+
+        // Auto-discard (every 30 seconds when not in combat)
+        if (config.EnableAutoDiscard && now - lastDiscardMs > 30000 && !inCombat)
+        {
+            var betweenAreas = Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.BetweenAreas] ||
+                               Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.BetweenAreas51];
+            if (!betweenAreas)
+            {
+                lastDiscardMs = now;
+                SendCommand("/ays discard");
+                Plugin.Log.Debug("Auto-discard: sent /ays discard");
+            }
         }
 
         // Deferred companion stance setting (after summoning, wait for spawn)
