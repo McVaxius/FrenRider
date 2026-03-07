@@ -18,6 +18,9 @@ public class FrenTracker
         this.plugin = plugin;
     }
 
+    /// <summary>Force the next Update() call to scan immediately (skip throttle).</summary>
+    public void ForceNextScan() => lastUpdateMs = 0;
+
     public void Update()
     {
         if (!Plugin.ClientState.IsLoggedIn)

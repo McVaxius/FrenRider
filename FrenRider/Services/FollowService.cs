@@ -30,6 +30,12 @@ public class FollowService
     private long lastOffsetChangeMs;
     private long lastFlyingAdjustMs;
 
+    // Stuck detection: record position every 5s, compare absolute XYZ sum delta
+    private Vector3 stuckCheckPosition;
+    private long stuckCheckTimeMs;
+    private const long StuckCheckIntervalMs = 5000;
+    private const float StuckDeltaThreshold = 10f;
+
     private static readonly string[] ClingTypeNames = { "NavMesh", "Visland", "BossMod Follow", "Vanilla Follow" };
 
     public FollowState State { get; private set; } = FollowState.Idle;
@@ -54,6 +60,10 @@ public class FollowService
             StateDetail = "Zone transition";
             lastNavTarget = default;
             socialOffset = default;
+            stuckCheckPosition = default;
+            stuckCheckTimeMs = 0;
+            // Force immediate fren scan on next frame (skip throttle)
+            tracker.ForceNextScan();
             return;
         }
 
@@ -200,30 +210,69 @@ public class FollowService
 
     private void NavigateToPosition(CharacterConfig config, Vector3 target)
     {
-        // Check if PLAYER is flying - use larger threshold for flying to reduce command spam
         var selfFlying = Plugin.Condition[ConditionFlag.InFlight];
-        var inDuty = Plugin.Condition[ConditionFlag.BoundByDuty];
-        
-        // Use larger thresholds to reduce navigation command spam:
-        // - Flying: 5.0 yalms (prevents spam while airborne)
-        // - Duty (ground): 2.5 yalms (prevents slowdowns in dungeons)
-        // - Overworld (ground): 1.0 yalms (tighter following)
-        var distanceThreshold = selfFlying ? 5.0f : (inDuty ? 2.5f : 1.0f);
-        
-        // Only re-issue nav command if target moved significantly
-        if (Vector3.Distance(target, lastNavTarget) < distanceThreshold && isNavigating)
-            return;
+        var localPlayer = Plugin.ObjectTable.LocalPlayer;
+        var now = Environment.TickCount64;
 
+        // First navigation after idle/zone change: always issue command
+        if (!isNavigating)
+        {
+            IssueNavCommand(config, target, selfFlying);
+            stuckCheckPosition = localPlayer?.Position ?? default;
+            stuckCheckTimeMs = now;
+            return;
+        }
+
+        // Already navigating - only re-pathfind if:
+        // 1. Reached end of current path segment (close to lastNavTarget)
+        // 2. Stuck (XYZ absolute sum delta < 10 over 5 seconds)
+
+        // Check if we reached the end of the current path segment
+        if (localPlayer != null)
+        {
+            var distToNavTarget = Vector3.Distance(localPlayer.Position, lastNavTarget);
+            var arrivedThreshold = selfFlying ? 5.0f : 2.0f;
+            if (distToNavTarget < arrivedThreshold)
+            {
+                // Arrived at nav target - re-pathfind to updated fren position
+                IssueNavCommand(config, target, selfFlying);
+                stuckCheckPosition = localPlayer.Position;
+                stuckCheckTimeMs = now;
+                return;
+            }
+
+            // Stuck detection: every 5 seconds check if we've barely moved
+            if (now - stuckCheckTimeMs >= StuckCheckIntervalMs)
+            {
+                var pos = localPlayer.Position;
+                var delta = Math.Abs(pos.X - stuckCheckPosition.X)
+                          + Math.Abs(pos.Y - stuckCheckPosition.Y)
+                          + Math.Abs(pos.Z - stuckCheckPosition.Z);
+
+                if (delta < StuckDeltaThreshold)
+                {
+                    // Stuck - re-pathfind
+                    Plugin.Log.Information($"[FR] Stuck detected (delta={delta:F1} < {StuckDeltaThreshold}), re-pathfinding");
+                    IssueNavCommand(config, target, selfFlying);
+                }
+
+                // Reset stuck check regardless
+                stuckCheckPosition = pos;
+                stuckCheckTimeMs = now;
+            }
+        }
+    }
+
+    private void IssueNavCommand(CharacterConfig config, Vector3 target, bool selfFlying)
+    {
         lastNavTarget = target;
         isNavigating = true;
 
         if (selfFlying)
         {
-            // When player is flying, use /vnav flyto for flying navigation
             var coords = FormatVector(target);
             var cmd = $"/vnav flyto {coords}";
             SendCommand(cmd);
-            Plugin.Log.Information($"Using /vnav flyto for flying navigation to {coords}");
             return;
         }
 
