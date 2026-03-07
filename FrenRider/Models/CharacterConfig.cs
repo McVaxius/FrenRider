@@ -62,10 +62,11 @@ public class CharacterConfig
     // --- Invite Whitelist ---
     public List<string> InviteWhitelist { get; set; } = new();
 
-    // --- Auto Leave Duty ---
-    public bool AutoLeaveDutyEnabled { get; set; } = false;
-    public bool AutoLeaveWhenAllLeft { get; set; } = true;
-    public bool AutoLeaveWhenDutyEnded { get; set; } = true;
+    // --- Exit Behaviour ---
+    public bool ExitIfExitExists { get; set; } = false;
+    public bool ExitAfterDutyEnds { get; set; } = true;
+    public int ExitAfterDutySeconds { get; set; } = 20;
+    public bool LeaveWhenAllLeft { get; set; } = false;
 
     // --- Autorot IPC ---
     public bool AutorotPushOnEnable { get; set; } = true;
@@ -122,9 +123,10 @@ public class CharacterConfig
             CbtEdse = CbtEdse,
             SpamPrinter = SpamPrinter,
             InviteWhitelist = new List<string>(InviteWhitelist),
-            AutoLeaveDutyEnabled = AutoLeaveDutyEnabled,
-            AutoLeaveWhenAllLeft = AutoLeaveWhenAllLeft,
-            AutoLeaveWhenDutyEnded = AutoLeaveWhenDutyEnded,
+            ExitIfExitExists = ExitIfExitExists,
+            ExitAfterDutyEnds = ExitAfterDutyEnds,
+            ExitAfterDutySeconds = ExitAfterDutySeconds,
+            LeaveWhenAllLeft = LeaveWhenAllLeft,
             AutorotPushOnEnable = AutorotPushOnEnable,
             Enabled = Enabled,
         };

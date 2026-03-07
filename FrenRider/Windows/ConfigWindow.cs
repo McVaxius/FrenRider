@@ -1091,35 +1091,46 @@ public class ConfigWindow : Window, IDisposable
         ImGui.Separator();
         ImGui.Spacing();
 
-        // --- Auto Leave Duty ---
-        ImGui.Text("Auto Leave Duty");
+        // --- Exit Behaviour ---
+        ImGui.Text("Exit Behaviour");
         ImGui.Spacing();
 
-        var autoLeave = config.AutoLeaveDutyEnabled;
-        if (ImGui.Checkbox("Enable Auto Leave", ref autoLeave))
+        var exitIfExit = config.ExitIfExitExists;
+        if (ImGui.Checkbox("Exit Map if Exit exists", ref exitIfExit))
         {
-            config.AutoLeaveDutyEnabled = autoLeave;
+            config.ExitIfExitExists = exitIfExit;
             configManager.SaveCurrentAccount();
         }
         ImGui.SameLine();
-        HelpMarker("Automatically leave a duty when certain conditions are met.");
+        HelpMarker("Interact with exit objects (Cairn of Return, etc.) when found in a duty.");
 
-        if (config.AutoLeaveDutyEnabled)
+        var exitAfterDuty = config.ExitAfterDutyEnds;
+        if (ImGui.Checkbox("Exit", ref exitAfterDuty))
         {
-            var allLeft = config.AutoLeaveWhenAllLeft;
-            if (ImGui.Checkbox("Leave when all others left", ref allLeft))
-            {
-                config.AutoLeaveWhenAllLeft = allLeft;
-                configManager.SaveCurrentAccount();
-            }
-
-            var dutyEnded = config.AutoLeaveWhenDutyEnded;
-            if (ImGui.Checkbox("Leave when duty ended", ref dutyEnded))
-            {
-                config.AutoLeaveWhenDutyEnded = dutyEnded;
-                configManager.SaveCurrentAccount();
-            }
+            config.ExitAfterDutyEnds = exitAfterDuty;
+            configManager.SaveCurrentAccount();
         }
+        ImGui.SameLine();
+        var exitSeconds = config.ExitAfterDutySeconds;
+        ImGui.SetNextItemWidth(60);
+        if (ImGui.InputInt("##exitSeconds", ref exitSeconds))
+        {
+            config.ExitAfterDutySeconds = Math.Max(1, exitSeconds);
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        ImGui.Text("Seconds after Duty ends");
+        ImGui.SameLine();
+        HelpMarker("Automatically leave the duty N seconds after it completes (uses DutyCompleted event).");
+
+        var leaveAllLeft = config.LeaveWhenAllLeft;
+        if (ImGui.Checkbox("Leave duty when all others left", ref leaveAllLeft))
+        {
+            config.LeaveWhenAllLeft = leaveAllLeft;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Leave the duty if you're the only one remaining in the party.");
 
         ImGui.Spacing();
         ImGui.Separator();

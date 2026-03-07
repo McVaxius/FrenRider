@@ -29,6 +29,7 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static IDtrBar DtrBar { get; private set; } = null!;
     [PluginService] internal static IDataManager DataManager { get; private set; } = null!;
     [PluginService] internal static ITargetManager TargetManager { get; private set; } = null!;
+    [PluginService] internal static IDutyState DutyState { get; private set; } = null!;
     [PluginService] internal static IPluginLog Log { get; private set; } = null!;
 
     private const string CommandName = "/frenrider";
@@ -138,6 +139,7 @@ public sealed class Plugin : IDalamudPlugin
         AutorotIpcService.Dispose();
         PartyService.Dispose();
         VideoPlaybackService.Dispose();
+        ExitBehaviourService.Dispose();
 
         dtrEntry?.Remove();
 
