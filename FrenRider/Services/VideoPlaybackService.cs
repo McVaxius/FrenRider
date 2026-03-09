@@ -16,6 +16,8 @@ public class VideoPlaybackService : IDisposable
     private Process? vlcProcess;
     private bool isPlaying = false;
     private string currentVideoPath = "";
+    private string? cachedVlcPath = null;
+    private bool vlcPathChecked = false;
 
     public bool IsPlaying => isPlaying;
     public string CurrentVideo => currentVideoPath;
@@ -159,6 +161,12 @@ public class VideoPlaybackService : IDisposable
     /// </summary>
     private string GetVLCPath()
     {
+        // Cache the result to avoid repeated filesystem checks and log spam
+        if (vlcPathChecked)
+            return cachedVlcPath ?? "";
+
+        vlcPathChecked = true;
+
         var possiblePaths = new[]
         {
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "VideoLAN", "VLC", "vlc.exe"),
@@ -167,15 +175,18 @@ public class VideoPlaybackService : IDisposable
             "vlc.exe" // Assume it's in PATH
         };
 
-        log.Debug("[FR] Checking VLC paths:");
         foreach (var path in possiblePaths)
         {
-            var exists = File.Exists(path);
-            log.Debug($"[FR]   {path} - {(exists ? "FOUND" : "NOT FOUND")}");
-            if (exists)
+            if (File.Exists(path))
+            {
+                log.Debug($"[FR] VLC found at: {path}");
+                cachedVlcPath = path;
                 return path;
+            }
         }
 
+        log.Debug("[FR] VLC not found in any standard location");
+        cachedVlcPath = "";
         return "";
     }
 
@@ -217,14 +228,7 @@ public class VideoPlaybackService : IDisposable
             var pluginDir = Plugin.PluginInterface.AssemblyLocation.DirectoryName ?? "";
             var videosDir = Path.Combine(pluginDir, "videos");
             var videoPath = Path.Combine(videosDir, videoName);
-            
-            log.Debug($"[FR] Looking for video: {videoName}");
-            log.Debug($"[FR] Plugin directory: {pluginDir}");
-            log.Debug($"[FR] Videos directory: {videosDir}");
-            log.Debug($"[FR] Full video path: {videoPath}");
-            log.Debug($"[FR] Videos directory exists: {Directory.Exists(videosDir)}");
-            log.Debug($"[FR] Video file exists: {File.Exists(videoPath)}");
-            
+
             return File.Exists(videoPath) ? videoPath : string.Empty;
         }
         catch (Exception ex)

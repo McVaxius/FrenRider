@@ -850,24 +850,6 @@ public class ConfigWindow : Window, IDisposable
         ImGui.Separator();
         ImGui.Spacing();
 
-        // --- Duty ---
-        ImGui.Text("Duty");
-        ImGui.Spacing();
-
-        var cbtEdse = config.CbtEdse;
-        ImGui.SetNextItemWidth(200);
-        if (ImGui.Combo("Enhanced Duty Start/End", ref cbtEdse, OnOff, OnOff.Length))
-        {
-            config.CbtEdse = cbtEdse;
-            configManager.SaveCurrentAccount();
-        }
-        ImGui.SameLine();
-        HelpMarker("CBT enhanced duty start/end.\nEnables special settings when entering/leaving duties.");
-
-        ImGui.Spacing();
-        ImGui.Separator();
-        ImGui.Spacing();
-
         // --- Idle Behavior ---
         ImGui.Text("Idle Behavior");
         ImGui.Spacing();
@@ -1130,7 +1112,26 @@ public class ConfigWindow : Window, IDisposable
             configManager.SaveCurrentAccount();
         }
         ImGui.SameLine();
-        HelpMarker("Leave the duty if you're the only one remaining in the party.");
+        HelpMarker("Leave the duty if no other party members are visible in the zone.");
+
+        var exitViaCBT = config.ExitViaCBT;
+        if (ImGui.Checkbox("Exit via CBT after", ref exitViaCBT))
+        {
+            config.ExitViaCBT = exitViaCBT;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        var cbtSeconds = config.ExitViaCBTSeconds;
+        ImGui.SetNextItemWidth(60);
+        if (ImGui.InputInt("##cbtSeconds", ref cbtSeconds))
+        {
+            config.ExitViaCBTSeconds = Math.Max(1, cbtSeconds);
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        ImGui.Text("seconds");
+        ImGui.SameLine();
+        HelpMarker("Use CBT (Automaton by Croizat) to auto-leave duty after N seconds.\nEnables Enhanced Duty Start/End + Autoleave in Automaton via IPC.");
 
         ImGui.Spacing();
         ImGui.Separator();
@@ -1185,6 +1186,7 @@ public class ConfigWindow : Window, IDisposable
         ImGui.BulletText("Rotation Solver Reborn - Combat rotation automation");
         ImGui.BulletText("WRATH - Combat rotation automation");
         ImGui.BulletText("Questionable - Quest automation integration");
+        ImGui.BulletText("Automaton (CBT) by Croizat - Enhanced duty start/end, auto-leave");
         ImGui.Spacing();
         ImGui.Separator();
         ImGui.Spacing();

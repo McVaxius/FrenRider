@@ -1,6 +1,9 @@
 using System;
+using Dalamud.Game.ClientState.Objects.Types;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
+using FFXIVClientStructs.Interop;
+using GameObject = FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject;
 
 namespace FrenRider.Services;
 
@@ -259,6 +262,45 @@ public static class GameHelpers
         catch (Exception ex)
         {
             Plugin.Log.Error($"NeedsRepair({conditionPercent}) failed: {ex.Message}");
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Interact with a targeted game object via TargetSystem.
+    /// Sets the Dalamud target first, then calls TargetSystem.InteractWithObject.
+    /// Ported from LootGoblin's proven interaction pattern.
+    /// </summary>
+    public static unsafe bool InteractWithObject(IGameObject obj)
+    {
+        try
+        {
+            Plugin.Log.Information($"[INTERACT] Starting interaction with {obj.Name.TextValue} (Address: {obj.Address:X})");
+
+            Plugin.TargetManager.Target = obj;
+
+            var ts = FFXIVClientStructs.FFXIV.Client.Game.Control.TargetSystem.Instance();
+            if (ts == null)
+            {
+                Plugin.Log.Error("[INTERACT] TargetSystem.Instance() returned null");
+                return false;
+            }
+
+            var gameObjPtr = (GameObject*)obj.Address;
+            if (gameObjPtr == null)
+            {
+                Plugin.Log.Error($"[INTERACT] Failed to cast GameObject* from address {obj.Address:X}");
+                return false;
+            }
+
+            Plugin.Log.Information($"[INTERACT] Calling TargetSystem.InteractWithObject for {obj.Name.TextValue}");
+            ts->InteractWithObject(gameObjPtr, true);
+            Plugin.Log.Information($"[INTERACT] InteractWithObject called successfully for {obj.Name.TextValue} at {obj.Position}");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log.Error($"[INTERACT] InteractWithObject failed: {ex.Message}\n{ex.StackTrace}");
             return false;
         }
     }

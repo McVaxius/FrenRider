@@ -122,9 +122,8 @@ public class DutyInteractService
                     lastInteractedEntityId = (uint)interactable.GameObjectId;
                     isNavigatingToInteractable = false;
 
-                    Plugin.TargetManager.Target = interactable;
-                    SendCommand("/interact");
                     Plugin.Log.Information($"[DutyInteract] Interacting with: {interactable.Name.TextValue}");
+                    GameHelpers.InteractWithObject(interactable);
                 }
             }
             else

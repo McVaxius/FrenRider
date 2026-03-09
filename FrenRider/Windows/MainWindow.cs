@@ -121,6 +121,49 @@ public class MainWindow : Window, IDisposable
                     ImGui.SameLine();
                     ImGui.TextDisabled($"({string.Join(", ", compParts)})");
                 }
+
+                // Individual party member details
+                var mountedCount = tracker.Party.FindAll(m => m.IsMounted).Count;
+                var visibleCount = tracker.Party.FindAll(m => m.IsVisible).Count;
+                ImGui.TextDisabled($"  {visibleCount}/{partyCount} visible, {mountedCount}/{partyCount} mounted");
+
+                foreach (var member in tracker.Party)
+                {
+                    var krangled = Disp(member.Name);
+                    var jobTag = !string.IsNullOrEmpty(member.ClassJobName) ? $"[{member.ClassJobName}]" : "[?]";
+                    var distTag = member.IsVisible ? $"{member.DistanceToPlayer:F0}y" : "N/A";
+
+                    ImGui.Text($"    {krangled} {jobTag}");
+                    ImGui.SameLine();
+                    if (member.IsVisible)
+                    {
+                        if (member.IsMounted)
+                            ImGui.TextColored(new Vector4(0.4f, 1f, 0.8f, 1), $"[Mounted] {distTag}");
+                        else
+                            ImGui.TextColored(new Vector4(0.5f, 0.5f, 0.5f, 1), $"[On Foot] {distTag}");
+                    }
+                    else
+                    {
+                        ImGui.TextColored(new Vector4(1f, 0.4f, 0.4f, 1), "[Not Visible]");
+                    }
+                }
+            }
+
+            // Chocobo companion info
+            var buddyTime = GameHelpers.GetBuddyTimeRemaining();
+            if (buddyTime > 0)
+            {
+                var minutes = (int)(buddyTime / 60);
+                var seconds = (int)(buddyTime % 60);
+                ImGui.TextColored(new Vector4(1f, 0.9f, 0.3f, 1), $"Chocobo: Active ({minutes}m {seconds}s remaining)");
+            }
+            else
+            {
+                var gysahlCount = GameHelpers.GetInventoryItemCount(GameHelpers.GysahlGreensItemId);
+                if (gysahlCount > 0)
+                    ImGui.TextDisabled($"Chocobo: Inactive ({gysahlCount} Gysahl Greens)");
+                else
+                    ImGui.TextDisabled("Chocobo: Inactive (no Gysahl Greens)");
             }
 
             // Fren tracking status
