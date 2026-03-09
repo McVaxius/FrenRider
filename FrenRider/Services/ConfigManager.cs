@@ -290,7 +290,6 @@ public class ConfigManager
                 target.XpItem = source.XpItem;
                 target.Repair = source.Repair;
                 target.TornClothes = source.TornClothes;
-                target.CbtEdse = source.CbtEdse;
                 target.SpamPrinter = source.SpamPrinter;
                 target.IdleAction = source.IdleAction;
                 target.IdleActionMode = source.IdleActionMode;

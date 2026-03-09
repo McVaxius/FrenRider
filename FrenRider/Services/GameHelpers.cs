@@ -2,6 +2,8 @@ using System;
 using Dalamud.Game.ClientState.Objects.Types;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
+using FFXIVClientStructs.FFXIV.Client.UI.Agent;
+using FFXIVClientStructs.FFXIV.Component.GUI;
 using FFXIVClientStructs.Interop;
 using GameObject = FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject;
 
@@ -262,6 +264,40 @@ public static class GameHelpers
         catch (Exception ex)
         {
             Plugin.Log.Error($"NeedsRepair({conditionPercent}) failed: {ex.Message}");
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Click Yes on SelectYesno dialog if visible.
+    /// Uses AtkUnitBase.FireCallback with proper AtkValue array.
+    /// </summary>
+    public static unsafe bool ClickYesIfVisible()
+    {
+        try
+        {
+            nint addonPtr = Plugin.GameGui.GetAddonByName("SelectYesno", 1);
+            if (addonPtr == 0)
+                return false;
+
+            var addon = (AtkUnitBase*)addonPtr;
+            if (!addon->IsVisible)
+                return false;
+
+            // Create AtkValue array for Yes button (index 0)
+            var atkValues = stackalloc AtkValue[2];
+            atkValues[0].Type = FFXIVClientStructs.FFXIV.Component.GUI.ValueType.Int;
+            atkValues[0].Int = 0; // Yes button index
+            atkValues[1].Type = FFXIVClientStructs.FFXIV.Component.GUI.ValueType.Int;
+            atkValues[1].Int = 0;
+
+            addon->FireCallback(2, atkValues);
+            Plugin.Log.Information("[YES/NO] Clicked Yes on SelectYesno dialog");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log.Error($"[YES/NO] ClickYesIfVisible failed: {ex.Message}");
             return false;
         }
     }

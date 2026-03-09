@@ -140,21 +140,7 @@ public class ExitBehaviourService : IDisposable
         if (Plugin.Condition[ConditionFlag.InCombat])
             return;
 
-        // Rule 1: Exit if exit object exists - path to it + interact (LootGoblin pattern)
-        if (config.ExitIfExitExists)
-        {
-            CheckExitObject();
-        }
-        else
-        {
-            // Clear exit target when feature is disabled
-            if (exitTarget != null)
-            {
-                Plugin.Log.Debug("[ExitBehaviour] Exit object feature disabled - clearing target");
-                exitTarget = null;
-                isNavigatingToExit = false;
-            }
-        }
+        // Exit object feature removed - no longer needed
 
         // Rule 2: Exit N seconds after duty ends
         if (config.ExitAfterDutyEnds && dutyCompleted && !dutyLeaveIssued)
@@ -463,6 +449,14 @@ public class ExitBehaviourService : IDisposable
         // Wait a moment for panel to open, then try to click Leave Duty
         System.Threading.Tasks.Task.Delay(500).ContinueWith(_ => {
             TryClickLeaveDutyButton();
+        });
+
+        // Also try clicking Yes on any confirmation dialog that appears
+        System.Threading.Tasks.Task.Delay(1000).ContinueWith(_ => {
+            if (GameHelpers.ClickYesIfVisible())
+            {
+                Plugin.Log.Information("[ExitBehaviour] Successfully clicked Yes on leave duty confirmation");
+            }
         });
 
         StateDetail = $"Leaving duty (attempt #{leaveAttemptCount})...";

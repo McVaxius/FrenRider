@@ -56,14 +56,12 @@ public class CharacterConfig
     public int XpItem { get; set; } = 0;
     public int Repair { get; set; } = 0; // 0=No, 1=Self, 2=Inn NPC
     public int TornClothes { get; set; } = 0;
-    public int CbtEdse { get; set; } = 0; // 0=off, 1=on
     public int SpamPrinter { get; set; } = 0; // 0=off, 1=on
 
     // --- Invite Whitelist ---
     public List<string> InviteWhitelist { get; set; } = new();
 
     // --- Exit Behaviour ---
-    public bool ExitIfExitExists { get; set; } = false;
     public bool ExitAfterDutyEnds { get; set; } = true;
     public int ExitAfterDutySeconds { get; set; } = 20;
     public bool LeaveWhenAllLeft { get; set; } = false;
@@ -122,10 +120,8 @@ public class CharacterConfig
             XpItem = XpItem,
             Repair = Repair,
             TornClothes = TornClothes,
-            CbtEdse = CbtEdse,
             SpamPrinter = SpamPrinter,
             InviteWhitelist = new List<string>(InviteWhitelist),
-            ExitIfExitExists = ExitIfExitExists,
             ExitAfterDutyEnds = ExitAfterDutyEnds,
             ExitAfterDutySeconds = ExitAfterDutySeconds,
             LeaveWhenAllLeft = LeaveWhenAllLeft,

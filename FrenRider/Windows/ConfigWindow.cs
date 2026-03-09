@@ -1077,19 +1077,23 @@ public class ConfigWindow : Window, IDisposable
         ImGui.Text("Exit Behaviour");
         ImGui.Spacing();
 
-        var exitIfExit = config.ExitIfExitExists;
-        if (ImGui.Checkbox("Exit Map if Exit exists", ref exitIfExit))
-        {
-            config.ExitIfExitExists = exitIfExit;
-            configManager.SaveCurrentAccount();
-        }
-        ImGui.SameLine();
-        HelpMarker("Interact with exit objects (Cairn of Return, etc.) when found in a duty.");
-
+        // Ensure only one exit method is enabled (mutually exclusive)
         var exitAfterDuty = config.ExitAfterDutyEnds;
-        if (ImGui.Checkbox("Exit", ref exitAfterDuty))
+        var leaveAllLeft = config.LeaveWhenAllLeft;
+        var exitViaCBT = config.ExitViaCBT;
+
+        // Exit after N seconds
+        if (ImGui.Checkbox("Exit after N seconds", ref exitAfterDuty))
         {
+            // If enabling this option, disable others
+            if (exitAfterDuty)
+            {
+                leaveAllLeft = false;
+                exitViaCBT = false;
+            }
             config.ExitAfterDutyEnds = exitAfterDuty;
+            config.LeaveWhenAllLeft = leaveAllLeft;
+            config.ExitViaCBT = exitViaCBT;
             configManager.SaveCurrentAccount();
         }
         ImGui.SameLine();
@@ -1101,22 +1105,38 @@ public class ConfigWindow : Window, IDisposable
             configManager.SaveCurrentAccount();
         }
         ImGui.SameLine();
-        ImGui.Text("Seconds after Duty ends");
+        ImGui.Text("seconds after duty ends");
         ImGui.SameLine();
         HelpMarker("Automatically leave the duty N seconds after it completes (uses DutyCompleted event).");
 
-        var leaveAllLeft = config.LeaveWhenAllLeft;
-        if (ImGui.Checkbox("Leave duty when all others left", ref leaveAllLeft))
+        // Leave when all others left
+        if (ImGui.Checkbox("Leave when all others left", ref leaveAllLeft))
         {
+            // If enabling this option, disable others
+            if (leaveAllLeft)
+            {
+                exitAfterDuty = false;
+                exitViaCBT = false;
+            }
+            config.ExitAfterDutyEnds = exitAfterDuty;
             config.LeaveWhenAllLeft = leaveAllLeft;
+            config.ExitViaCBT = exitViaCBT;
             configManager.SaveCurrentAccount();
         }
         ImGui.SameLine();
         HelpMarker("Leave the duty if no other party members are visible in the zone.");
 
-        var exitViaCBT = config.ExitViaCBT;
+        // CBT auto-leave
         if (ImGui.Checkbox("Exit via CBT after", ref exitViaCBT))
         {
+            // If enabling this option, disable others
+            if (exitViaCBT)
+            {
+                exitAfterDuty = false;
+                leaveAllLeft = false;
+            }
+            config.ExitAfterDutyEnds = exitAfterDuty;
+            config.LeaveWhenAllLeft = leaveAllLeft;
             config.ExitViaCBT = exitViaCBT;
             configManager.SaveCurrentAccount();
         }
