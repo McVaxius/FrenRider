@@ -40,7 +40,7 @@ public class ConfigWindow : Window, IDisposable
 
     public ConfigWindow(Plugin plugin) : base("Fren Rider Settings###FrenRiderConfig")
     {
-        Flags = ImGuiWindowFlags.NoCollapse;
+        Flags = ImGuiWindowFlags.None;
         Size = new Vector2(900, 550);
         SizeCondition = ImGuiCond.FirstUseEver;
 

@@ -55,6 +55,18 @@ public class MainWindow : Window, IDisposable
         if (ImGui.IsItemHovered())
             ImGui.SetTooltip("Show Fren Rider status in the server info bar.\nDisable if you don't want the DTR bar entry.");
 
+        // Krangle toggle
+        ImGui.SameLine();
+        var krangleEnabled = plugin.Configuration.KrangleEnabled;
+        if (ImGui.Checkbox("Krangle", ref krangleEnabled))
+        {
+            plugin.Configuration.KrangleEnabled = krangleEnabled;
+            plugin.Configuration.Save();
+            KrangleService.ClearCache();
+        }
+        if (ImGui.IsItemHovered())
+            ImGui.SetTooltip("Obfuscate names with military/exercise words.\nUseful for screenshots.");
+
         ImGui.Spacing();
         ImGui.Separator();
         ImGui.Spacing();
