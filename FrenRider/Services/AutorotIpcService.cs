@@ -72,6 +72,25 @@ public class AutorotIpcService : IDisposable
         TryIpcAction("BossModReborn.Presets.ForceClear");
     }
 
+    /// <summary>
+    /// Set Automaton (CBT) tweak state via IPC.
+    /// </summary>
+    public bool SetAutomatonTweakState(string tweak, bool enabled)
+    {
+        try
+        {
+            // Use simple action call for Automaton IPC - no return value needed
+            TryIpcAction<string, bool>("Automaton.SetTweakState", tweak, enabled);
+            log.Information($"[IPC] Set Automaton tweak {tweak}={enabled}");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            log.Error($"[IPC] Failed to set Automaton tweak {tweak}={enabled}: {ex.Message}");
+            return false;
+        }
+    }
+
     private bool TryCreatePreset(string name, string json)
     {
         // Try VBM first, then BMR
@@ -123,12 +142,39 @@ public class AutorotIpcService : IDisposable
         }
     }
 
+    private TResult? TryIpc<TArg1, TArg2, TResult>(string channel, TArg1 arg1, TArg2 arg2) where TResult : class
+    {
+        try
+        {
+            var subscriber = pluginInterface.GetIpcSubscriber<TArg1, TArg2, TResult>(channel);
+            return subscriber.InvokeFunc(arg1, arg2);
+        }
+        catch (Exception ex)
+        {
+            log.Debug($"IPC {channel} not available: {ex.Message}");
+            return null;
+        }
+    }
+
     private void TryIpcAction(string channel)
     {
         try
         {
             var subscriber = pluginInterface.GetIpcSubscriber<object?>(channel);
             subscriber.InvokeFunc();
+        }
+        catch (Exception ex)
+        {
+            log.Debug($"IPC {channel} not available: {ex.Message}");
+        }
+    }
+
+    private void TryIpcAction<TArg1, TArg2>(string channel, TArg1 arg1, TArg2 arg2)
+    {
+        try
+        {
+            var subscriber = pluginInterface.GetIpcSubscriber<TArg1, TArg2, object?>(channel);
+            subscriber.InvokeFunc(arg1, arg2);
         }
         catch (Exception ex)
         {

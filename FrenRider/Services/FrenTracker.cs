@@ -30,21 +30,24 @@ public class FrenTracker
             return;
         }
 
+        // Always scan party for display purposes, even if bot is disabled
+        // Only check config.Enabled for fren tracking
         var config = plugin.ConfigManager.GetActiveConfig();
-        if (!config.Enabled)
-        {
-            Fren = null;
-            Party.Clear();
-            return;
-        }
-
         var now = Environment.TickCount64;
         var intervalMs = (long)(config.UpdateInterval * 1000);
         if (now - lastUpdateMs < intervalMs) return;
         lastUpdateMs = now;
 
         ScanParty();
-        FindFren(config.FrenName);
+        
+        if (config.Enabled)
+        {
+            FindFren(config.FrenName);
+        }
+        else
+        {
+            Fren = null;
+        }
     }
 
     private void ScanParty()
@@ -54,6 +57,12 @@ public class FrenTracker
         if (localPlayer == null) return;
 
         var partyCount = Plugin.PartyList.Length;
+        
+        // Debug logging for party scanning
+        if (partyCount > 0)
+        {
+            Plugin.Log.Debug($"[FrenTracker] Scanning party: {partyCount} members in PartyList");
+        }
         for (var i = 0; i < partyCount; i++)
         {
             var member = Plugin.PartyList[i];

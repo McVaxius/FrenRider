@@ -43,11 +43,16 @@ public class ExitBehaviourService : IDisposable
     // CBT auto-leave tracking
     private bool cbtConfigured;
 
-    // Known exit object names (from LootGoblin treasure dungeon patterns)
+    // Known exit object names (expanded from LootGoblin patterns)
     private static readonly string[] ExitObjectNames =
     {
         "Cairn of Return",
         "Exit",
+        "Atomos",
+        "Teleportation Portal",
+        "Portal",
+        "Gate",
+        "Door",
     };
 
     private const float ExitScanRange = 50f;
@@ -140,6 +145,16 @@ public class ExitBehaviourService : IDisposable
         {
             CheckExitObject();
         }
+        else
+        {
+            // Clear exit target when feature is disabled
+            if (exitTarget != null)
+            {
+                Plugin.Log.Debug("[ExitBehaviour] Exit object feature disabled - clearing target");
+                exitTarget = null;
+                isNavigatingToExit = false;
+            }
+        }
 
         // Rule 2: Exit N seconds after duty ends
         if (config.ExitAfterDutyEnds && dutyCompleted && !dutyLeaveIssued)
@@ -154,7 +169,20 @@ public class ExitBehaviourService : IDisposable
             else
             {
                 StateDetail = $"Duty completed, leaving in {(config.ExitAfterDutySeconds - elapsed):F0}s...";
+                // Log every 10 seconds during countdown
+                if ((int)elapsed % 10 == 0 && elapsed > 0)
+                {
+                    Plugin.Log.Debug($"[ExitBehaviour] Duty leave countdown: {elapsed:F0}s elapsed, {config.ExitAfterDutySeconds - elapsed:F0}s remaining");
+                }
             }
+        }
+        else if (!config.ExitAfterDutyEnds && dutyCompleted)
+        {
+            // Clear duty completion state when feature is disabled
+            Plugin.Log.Debug("[ExitBehaviour] Exit after duty ends feature disabled - clearing completion state");
+            dutyCompleted = false;
+            dutyLeaveIssued = false;
+            leaveAttemptCount = 0;
         }
 
         // Rule 3: Leave when all others have left the zone
@@ -162,11 +190,26 @@ public class ExitBehaviourService : IDisposable
         {
             CheckPartyInZone();
         }
+        else
+        {
+            // Clear party check state when feature is disabled
+            if (lastPartyCheckTime > DateTime.MinValue)
+            {
+                Plugin.Log.Debug("[ExitBehaviour] Leave when all others left feature disabled - clearing check state");
+                lastPartyCheckTime = DateTime.MinValue;
+            }
+        }
 
         // Rule 4: Exit via CBT (Automaton) auto-leave
         if (config.ExitViaCBT && !cbtConfigured)
         {
             ConfigureCBTAutoLeave(config);
+        }
+        else if (!config.ExitViaCBT && cbtConfigured)
+        {
+            // Clear CBT state when feature is disabled
+            Plugin.Log.Debug("[ExitBehaviour] CBT auto-leave feature disabled - clearing configured state");
+            cbtConfigured = false;
         }
     }
 
@@ -262,17 +305,23 @@ public class ExitBehaviourService : IDisposable
         if ((now - lastExitScanTime).TotalSeconds < 2.0) return;
         lastExitScanTime = now;
 
+        Plugin.Log.Debug($"[ExitBehaviour] Scanning for exit objects in range {ExitScanRange}y...");
+
         IGameObject? nearest = null;
         float nearestDist = float.MaxValue;
+        int scannedObjects = 0;
+        int potentialExits = 0;
 
         foreach (var obj in Plugin.ObjectTable)
         {
             if (obj == null) continue;
             if (obj.ObjectKind != ObjectKind.EventObj) continue;
+            if (!obj.IsTargetable) continue;
 
+            scannedObjects++;
             var name = obj.Name.ToString();
-            if (string.IsNullOrEmpty(name)) continue;
-
+            
+            // Check for known exit names
             foreach (var exitName in ExitObjectNames)
             {
                 if (name.Contains(exitName, StringComparison.OrdinalIgnoreCase))
@@ -283,16 +332,24 @@ public class ExitBehaviourService : IDisposable
                         nearest = obj;
                         nearestDist = dist;
                     }
+                    potentialExits++;
+                    Plugin.Log.Debug($"[ExitBehaviour] Found potential exit '{name}' at {dist:F1}y");
                     break;
                 }
             }
         }
 
+        Plugin.Log.Debug($"[ExitBehaviour] Exit scan complete: {scannedObjects} EventObj scanned, {potentialExits} potential exits found");
+
         if (nearest != null)
         {
             exitTarget = nearest;
             isNavigatingToExit = false;
-            Plugin.Log.Information($"[ExitBehaviour] Found exit object '{nearest.Name.TextValue}' at {nearestDist:F1}y - will path to it");
+            Plugin.Log.Information($"[ExitBehaviour] Selected exit object '{nearest.Name.TextValue}' at {nearestDist:F1}y - will path to it");
+        }
+        else
+        {
+            Plugin.Log.Debug("[ExitBehaviour] No exit objects found in range");
         }
     }
 
@@ -309,6 +366,9 @@ public class ExitBehaviourService : IDisposable
         // Count party members actually visible in the zone (present in ObjectTable)
         // PartyList.Length counts ALL party members including those who left the instance
         var partyList = Plugin.PartyList;
+        
+        Plugin.Log.Debug($"[ExitBehaviour] Party check: Party list has {partyList.Length} members");
+
         if (partyList.Length <= 1)
         {
             // Solo or empty party - leave
@@ -319,6 +379,8 @@ public class ExitBehaviourService : IDisposable
 
         // Check how many party members are actually visible in the zone
         int membersInZone = 0;
+        var memberNames = new System.Collections.Generic.List<string>();
+        
         foreach (var member in partyList)
         {
             if (member == null) continue;
@@ -328,22 +390,22 @@ public class ExitBehaviourService : IDisposable
             var localName = localPlayer.Name.ToString();
             if (memberName == localName) continue;
 
+            memberNames.Add(memberName);
+
             // Check if this party member is visible in the ObjectTable (meaning they're in the same zone)
-            bool isVisible = false;
             foreach (var obj in Plugin.ObjectTable)
             {
                 if (obj == null) continue;
                 if (obj.ObjectKind != ObjectKind.Player) continue;
                 if (obj.Name.ToString() == memberName)
                 {
-                    isVisible = true;
+                    membersInZone++;
                     break;
                 }
             }
-
-            if (isVisible)
-                membersInZone++;
         }
+
+        Plugin.Log.Debug($"[ExitBehaviour] Party members in zone: {membersInZone}/{partyList.Length - 1} (checking: {string.Join(", ", memberNames)})");
 
         if (membersInZone == 0)
         {
@@ -352,30 +414,36 @@ public class ExitBehaviourService : IDisposable
         }
         else
         {
-            Plugin.Log.Debug($"[ExitBehaviour] Party check: {membersInZone} member(s) still in zone");
+            Plugin.Log.Debug($"[ExitBehaviour] Party check: {membersInZone} member(s) still in zone - not leaving");
         }
     }
 
     private void ConfigureCBTAutoLeave(CharacterConfig config)
     {
-        // Send IPC commands to configure Automaton (CBT) plugin auto-leave
-        // Automaton uses /at commands for configuration
+        // Configure Automaton (CBT) plugin via IPC
         Plugin.Log.Information($"[ExitBehaviour] Configuring CBT auto-leave: enabled, {config.ExitViaCBTSeconds}s delay");
 
         try
         {
+            var ipcService = new AutorotIpcService(Plugin.PluginInterface, Plugin.Log);
+            
             // Enable Enhanced Duty Start/End in Automaton
-            SendCommand("/at edse on");
-            // Enable auto-leave
-            SendCommand("/at autoleave on");
-            // Configure seconds
-            SendCommand($"/at autoleave {config.ExitViaCBTSeconds}");
-            cbtConfigured = true;
-            Plugin.Log.Information("[ExitBehaviour] CBT auto-leave configured successfully");
+            bool edseResult = ipcService.SetAutomatonTweakState("EnhancedDutyStartEnd", true);
+            Plugin.Log.Information($"[ExitBehaviour] Enhanced Duty Start/End set: {edseResult}");
+            
+            if (edseResult)
+            {
+                cbtConfigured = true;
+                Plugin.Log.Information("[ExitBehaviour] CBT auto-leave configured successfully");
+            }
+            else
+            {
+                Plugin.Log.Warning("[ExitBehaviour] Failed to configure CBT - Automaton plugin may not be available");
+            }
         }
         catch (Exception ex)
         {
-            Plugin.Log.Warning($"[ExitBehaviour] Failed to configure CBT auto-leave: {ex.Message}");
+            Plugin.Log.Error($"[ExitBehaviour] Failed to configure CBT auto-leave: {ex.Message}");
         }
     }
 
@@ -387,16 +455,47 @@ public class ExitBehaviourService : IDisposable
         lastLeaveAttemptTime = now;
         leaveAttemptCount++;
 
-        Plugin.Log.Information($"[ExitBehaviour] Leave duty attempt #{leaveAttemptCount}");
+        Plugin.Log.Information($"[ExitBehaviour] Leave duty attempt #{leaveAttemptCount} - opening duty panel");
 
-        // Try multiple approaches to leave
-        // Approach 1: /pdfinder leave (if pdfinder plugin is available)
-        SendCommand("/pdfinder leave");
+        // Open duty panel to access Leave Duty button
+        SendCommand("/dutyfinder");
 
-        // Approach 2: Direct /leaveduty (may work in some contexts)
-        SendCommand("/leaveduty");
+        // Wait a moment for panel to open, then try to click Leave Duty
+        System.Threading.Tasks.Task.Delay(500).ContinueWith(_ => {
+            TryClickLeaveDutyButton();
+        });
 
         StateDetail = $"Leaving duty (attempt #{leaveAttemptCount})...";
+    }
+
+    private unsafe void TryClickLeaveDutyButton()
+    {
+        try
+        {
+            // Try to find and click the Leave Duty button in the duty panel
+            // Using GameGui.GetAddonByName like LootGoblin pattern
+            var addonPtr = Plugin.GameGui.GetAddonByName("DutyFinder", 1);
+            if (addonPtr != 0)
+            {
+                Plugin.Log.Information("[ExitBehaviour] Duty panel is open - searching for Leave Duty button");
+                
+                // For now, try the old methods as fallback
+                // TODO: Implement proper button clicking via AtkUnitBase when needed
+                SendCommand("/pdfinder leave");
+                SendCommand("/leaveduty");
+            }
+            else
+            {
+                Plugin.Log.Debug("[ExitBehaviour] Duty panel not visible - trying direct commands");
+                // Fallback to direct commands
+                SendCommand("/pdfinder leave");
+                SendCommand("/leaveduty");
+            }
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log.Error($"[ExitBehaviour] Error trying to click Leave Duty button: {ex.Message}");
+        }
     }
 
     private static string FormatVector(Vector3 value)
