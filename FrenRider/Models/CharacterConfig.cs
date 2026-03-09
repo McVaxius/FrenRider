@@ -65,8 +65,6 @@ public class CharacterConfig
     public bool ExitAfterDutyEnds { get; set; } = true;
     public int ExitAfterDutySeconds { get; set; } = 20;
     public bool LeaveWhenAllLeft { get; set; } = false;
-    public bool ExitViaCBT { get; set; } = false;
-    public int ExitViaCBTSeconds { get; set; } = 10;
 
     // --- Autorot IPC ---
     public bool AutorotPushOnEnable { get; set; } = true;
@@ -125,8 +123,6 @@ public class CharacterConfig
             ExitAfterDutyEnds = ExitAfterDutyEnds,
             ExitAfterDutySeconds = ExitAfterDutySeconds,
             LeaveWhenAllLeft = LeaveWhenAllLeft,
-            ExitViaCBT = ExitViaCBT,
-            ExitViaCBTSeconds = ExitViaCBTSeconds,
             AutorotPushOnEnable = AutorotPushOnEnable,
             Enabled = Enabled,
         };

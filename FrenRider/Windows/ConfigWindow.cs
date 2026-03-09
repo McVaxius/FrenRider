@@ -1080,20 +1080,17 @@ public class ConfigWindow : Window, IDisposable
         // Ensure only one exit method is enabled (mutually exclusive)
         var exitAfterDuty = config.ExitAfterDutyEnds;
         var leaveAllLeft = config.LeaveWhenAllLeft;
-        var exitViaCBT = config.ExitViaCBT;
 
         // Exit after N seconds
         if (ImGui.Checkbox("Exit after N seconds", ref exitAfterDuty))
         {
-            // If enabling this option, disable others
+            // If enabling this option, disable the other
             if (exitAfterDuty)
             {
                 leaveAllLeft = false;
-                exitViaCBT = false;
             }
             config.ExitAfterDutyEnds = exitAfterDuty;
             config.LeaveWhenAllLeft = leaveAllLeft;
-            config.ExitViaCBT = exitViaCBT;
             configManager.SaveCurrentAccount();
         }
         ImGui.SameLine();
@@ -1112,46 +1109,17 @@ public class ConfigWindow : Window, IDisposable
         // Leave when all others left
         if (ImGui.Checkbox("Leave when all others left", ref leaveAllLeft))
         {
-            // If enabling this option, disable others
+            // If enabling this option, disable the other
             if (leaveAllLeft)
             {
                 exitAfterDuty = false;
-                exitViaCBT = false;
             }
             config.ExitAfterDutyEnds = exitAfterDuty;
             config.LeaveWhenAllLeft = leaveAllLeft;
-            config.ExitViaCBT = exitViaCBT;
             configManager.SaveCurrentAccount();
         }
         ImGui.SameLine();
         HelpMarker("Leave the duty if no other party members are visible in the zone.");
-
-        // CBT auto-leave
-        if (ImGui.Checkbox("Exit via CBT after", ref exitViaCBT))
-        {
-            // If enabling this option, disable others
-            if (exitViaCBT)
-            {
-                exitAfterDuty = false;
-                leaveAllLeft = false;
-            }
-            config.ExitAfterDutyEnds = exitAfterDuty;
-            config.LeaveWhenAllLeft = leaveAllLeft;
-            config.ExitViaCBT = exitViaCBT;
-            configManager.SaveCurrentAccount();
-        }
-        ImGui.SameLine();
-        var cbtSeconds = config.ExitViaCBTSeconds;
-        ImGui.SetNextItemWidth(60);
-        if (ImGui.InputInt("##cbtSeconds", ref cbtSeconds))
-        {
-            config.ExitViaCBTSeconds = Math.Max(1, cbtSeconds);
-            configManager.SaveCurrentAccount();
-        }
-        ImGui.SameLine();
-        ImGui.Text("seconds");
-        ImGui.SameLine();
-        HelpMarker("Use CBT (Automaton by Croizat) to auto-leave duty after N seconds.\nEnables Enhanced Duty Start/End + Autoleave in Automaton via IPC.");
 
         ImGui.Spacing();
         ImGui.Separator();

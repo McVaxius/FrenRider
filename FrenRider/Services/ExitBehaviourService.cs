@@ -40,9 +40,6 @@ public class ExitBehaviourService : IDisposable
     private DateTime lastLeaveAttemptTime = DateTime.MinValue;
     private int leaveAttemptCount;
 
-    // CBT auto-leave tracking
-    private bool cbtConfigured;
-
     // Known exit object names (expanded from LootGoblin patterns)
     private static readonly string[] ExitObjectNames =
     {
@@ -124,10 +121,6 @@ public class ExitBehaviourService : IDisposable
                 leaveAttemptCount = 0;
                 Plugin.Log.Debug("[ExitBehaviour] No longer in duty - reset completion state");
             }
-            if (cbtConfigured)
-            {
-                cbtConfigured = false;
-            }
             StateDetail = "";
             return;
         }
@@ -186,17 +179,7 @@ public class ExitBehaviourService : IDisposable
             }
         }
 
-        // Rule 4: Exit via CBT (Automaton) auto-leave
-        if (config.ExitViaCBT && !cbtConfigured)
-        {
-            ConfigureCBTAutoLeave(config);
-        }
-        else if (!config.ExitViaCBT && cbtConfigured)
-        {
-            // Clear CBT state when feature is disabled
-            Plugin.Log.Debug("[ExitBehaviour] CBT auto-leave feature disabled - clearing configured state");
-            cbtConfigured = false;
-        }
+        // CBT auto-leave feature removed
     }
 
     private void CheckExitObject()
@@ -404,35 +387,7 @@ public class ExitBehaviourService : IDisposable
         }
     }
 
-    private void ConfigureCBTAutoLeave(CharacterConfig config)
-    {
-        // Configure Automaton (CBT) plugin via IPC
-        Plugin.Log.Information($"[ExitBehaviour] Configuring CBT auto-leave: enabled, {config.ExitViaCBTSeconds}s delay");
-
-        try
-        {
-            var ipcService = new AutorotIpcService(Plugin.PluginInterface, Plugin.Log);
-            
-            // Enable Enhanced Duty Start/End in Automaton
-            bool edseResult = ipcService.SetAutomatonTweakState("EnhancedDutyStartEnd", true);
-            Plugin.Log.Information($"[ExitBehaviour] Enhanced Duty Start/End set: {edseResult}");
-            
-            if (edseResult)
-            {
-                cbtConfigured = true;
-                Plugin.Log.Information("[ExitBehaviour] CBT auto-leave configured successfully");
-            }
-            else
-            {
-                Plugin.Log.Warning("[ExitBehaviour] Failed to configure CBT - Automaton plugin may not be available");
-            }
-        }
-        catch (Exception ex)
-        {
-            Plugin.Log.Error($"[ExitBehaviour] Failed to configure CBT auto-leave: {ex.Message}");
-        }
-    }
-
+    
     private void LeaveDuty()
     {
         var now = DateTime.UtcNow;
