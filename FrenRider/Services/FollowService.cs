@@ -30,11 +30,11 @@ public class FollowService
     private long lastOffsetChangeMs;
     private long lastFlyingAdjustMs;
 
-    // Stuck detection: record position every 5s, compare absolute XYZ sum delta
+    // Stuck detection: record position every 5s, check per-axis movement < 2y
     private Vector3 stuckCheckPosition;
     private long stuckCheckTimeMs;
     private const long StuckCheckIntervalMs = 5000;
-    private const float StuckDeltaThreshold = 10f;
+    private const float StuckPerAxisThreshold = 2f;
 
     private static readonly string[] ClingTypeNames = { "NavMesh", "Visland", "BossMod Follow", "Vanilla Follow" };
 
@@ -241,18 +241,19 @@ public class FollowService
                 return;
             }
 
-            // Stuck detection: every 5 seconds check if we've barely moved
+            // Stuck detection: every 5 seconds check if we've barely moved on any axis
             if (now - stuckCheckTimeMs >= StuckCheckIntervalMs)
             {
                 var pos = localPlayer.Position;
-                var delta = Math.Abs(pos.X - stuckCheckPosition.X)
-                          + Math.Abs(pos.Y - stuckCheckPosition.Y)
-                          + Math.Abs(pos.Z - stuckCheckPosition.Z);
+                var dx = Math.Abs(pos.X - stuckCheckPosition.X);
+                var dy = Math.Abs(pos.Y - stuckCheckPosition.Y);
+                var dz = Math.Abs(pos.Z - stuckCheckPosition.Z);
 
-                if (delta < StuckDeltaThreshold)
+                if (dx < StuckPerAxisThreshold && dy < StuckPerAxisThreshold && dz < StuckPerAxisThreshold)
                 {
-                    // Stuck - re-pathfind
-                    Plugin.Log.Information($"[FR] Stuck detected (delta={delta:F1} < {StuckDeltaThreshold}), re-pathfinding");
+                    // Stuck - stop current navigation and re-pathfind
+                    Plugin.Log.Information($"[FR] Stuck detected (dX={dx:F1} dY={dy:F1} dZ={dz:F1}, all <{StuckPerAxisThreshold}y in {StuckCheckIntervalMs / 1000}s) - stopping + re-pathfinding");
+                    StopNavigation(config);
                     IssueNavCommand(config, target, selfFlying);
                 }
 

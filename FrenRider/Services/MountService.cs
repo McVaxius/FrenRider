@@ -143,14 +143,17 @@ public class MountService
         if (config.FlyYouFools)
         {
             // Fly You Fools: mount own mount
-            if (string.IsNullOrEmpty(mountName) || mountName == "Mount Roulette")
+            if (mountName == "Mount Roulette")
             {
-                // Mount Roulette - use Company Chocobo as fallback
+                // Mount Roulette requires /generalaction, not /mount
+                SendCommand("/generalaction \"Mount Roulette\"");
+            }
+            else if (string.IsNullOrEmpty(mountName))
+            {
                 SendCommand("/mount \"Company Chocobo\"");
             }
             else
             {
-                // Use /mount "Mount Name" with proper case sensitivity
                 SendCommand($"/mount \"{mountName}\"");
             }
             State = MountState.Mounting;

@@ -30,6 +30,8 @@ public class ExitBehaviourService : IDisposable
     private DateTime dutyCompletedTime;
     private bool dutyLeaveIssued;
     private bool wasBoundByDuty;
+    private DateTime dutyEnteredTime = DateTime.MinValue;
+    private const double DutyGracePeriodSeconds = 30.0;
 
     // Exit object navigation state
     private IGameObject? exitTarget;
@@ -89,8 +91,24 @@ public class ExitBehaviourService : IDisposable
         var config = plugin.ConfigManager.GetActiveConfig();
         if (!config.Enabled) return;
 
+        // Validate mutually exclusive exit options - if both are somehow checked, disable both
+        if (config.ExitAfterDutyEnds && config.LeaveWhenAllLeft)
+        {
+            Plugin.Log.Warning("[ExitBehaviour] Both exit options were enabled simultaneously - disabling both to prevent conflicts");
+            config.ExitAfterDutyEnds = false;
+            config.LeaveWhenAllLeft = false;
+            plugin.ConfigManager.SaveCurrentAccount();
+        }
+
         var inDuty = Plugin.Condition[ConditionFlag.BoundByDuty] ||
                      Plugin.Condition[ConditionFlag.BoundByDuty56];
+
+        // Track duty entry for grace period
+        if (inDuty && !wasBoundByDuty)
+        {
+            dutyEnteredTime = DateTime.Now;
+            Plugin.Log.Information($"[ExitBehaviour] Entered duty - {DutyGracePeriodSeconds}s grace period before exit checks");
+        }
 
         // Detect BoundByDuty transition (true→false) as duty end signal
         // This catches all duty types including treasure dungeons where DutyCompleted may not fire
@@ -132,6 +150,18 @@ public class ExitBehaviourService : IDisposable
         // Don't try to leave during combat
         if (Plugin.Condition[ConditionFlag.InCombat])
             return;
+
+        // Grace period: don't check exit conditions for first 30s after entering duty
+        // This prevents premature exits when party members haven't loaded in yet
+        if (dutyEnteredTime != DateTime.MinValue)
+        {
+            var sinceDutyEntry = (DateTime.Now - dutyEnteredTime).TotalSeconds;
+            if (sinceDutyEntry < DutyGracePeriodSeconds)
+            {
+                StateDetail = $"Grace period ({DutyGracePeriodSeconds - sinceDutyEntry:F0}s)...";
+                return;
+            }
+        }
 
         // Exit object feature removed - no longer needed
 
