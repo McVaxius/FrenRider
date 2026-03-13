@@ -153,6 +153,11 @@ public class MainWindow : Window, IDisposable
                             ImGui.TextColored(new Vector4(0.4f, 1f, 0.8f, 1), $"[Mounted] {distTag}");
                         else
                             ImGui.TextColored(new Vector4(0.5f, 0.5f, 0.5f, 1), $"[On Foot] {distTag}");
+                        
+                        // Show XYZ coordinates
+                        ImGui.SameLine();
+                        var xyz = $"({member.Position.X:F0}, {member.Position.Y:F0}, {member.Position.Z:F0})";
+                        ImGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1), xyz);
                     }
                     else
                     {
