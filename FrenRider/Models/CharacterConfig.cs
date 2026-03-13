@@ -61,6 +61,11 @@ public class CharacterConfig
     // --- Invite Whitelist ---
     public List<string> InviteWhitelist { get; set; } = new();
 
+    // --- Auto-Yes Dialogs ---
+    public bool RaiseOfferAutoAccept { get; set; } = true;
+    public bool TeleportOfferAutoAccept { get; set; } = true;
+    public bool PartyInviteAutoAccept { get; set; } = true;
+
     // --- Exit Behaviour ---
     public bool ExitAfterDutyEnds { get; set; } = true;
     public int ExitAfterDutySeconds { get; set; } = 20;
@@ -120,6 +125,9 @@ public class CharacterConfig
             TornClothes = TornClothes,
             SpamPrinter = SpamPrinter,
             InviteWhitelist = new List<string>(InviteWhitelist),
+            RaiseOfferAutoAccept = RaiseOfferAutoAccept,
+            TeleportOfferAutoAccept = TeleportOfferAutoAccept,
+            PartyInviteAutoAccept = PartyInviteAutoAccept,
             ExitAfterDutyEnds = ExitAfterDutyEnds,
             ExitAfterDutySeconds = ExitAfterDutySeconds,
             LeaveWhenAllLeft = LeaveWhenAllLeft,

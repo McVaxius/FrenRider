@@ -1073,6 +1073,46 @@ public class ConfigWindow : Window, IDisposable
         ImGui.Separator();
         ImGui.Spacing();
 
+        // --- Auto-Yes Dialogs ---
+        ImGui.Text("Auto-Yes Dialogs");
+        ImGui.SameLine();
+        HelpMarker("Automatically click Yes on specific dialog types when FrenRider is enabled.\nWorks alongside YesAlready - FrenRider pauses YesAlready and handles these dialogs itself.");
+        ImGui.Spacing();
+
+        // Raise offers
+        var raiseOffer = config.RaiseOfferAutoAccept;
+        if (ImGui.Checkbox("Raise offers", ref raiseOffer))
+        {
+            config.RaiseOfferAutoAccept = raiseOffer;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Automatically accept raise offers from other players.");
+
+        // Teleport offers
+        var teleportOffer = config.TeleportOfferAutoAccept;
+        if (ImGui.Checkbox("Teleport offers", ref teleportOffer))
+        {
+            config.TeleportOfferAutoAccept = teleportOffer;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Automatically accept teleport offers (e.g., Return, Teleport to).\nNote: Party invites are handled by the whitelist system below.");
+
+        // Party invites (backup to whitelist)
+        var partyInvite = config.PartyInviteAutoAccept;
+        if (ImGui.Checkbox("Party invites (backup)", ref partyInvite))
+        {
+            config.PartyInviteAutoAccept = partyInvite;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Backup auto-accept for party invites.\nPrimary invite handling uses the whitelist system above.");
+
+        ImGui.Spacing();
+        ImGui.Separator();
+        ImGui.Spacing();
+
         // --- Exit Behaviour ---
         ImGui.Text("Exit Behaviour");
         ImGui.Spacing();

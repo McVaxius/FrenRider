@@ -51,6 +51,7 @@ public sealed class Plugin : IDalamudPlugin
     public DutyInteractService DutyInteractService { get; init; }
     public ExitBehaviourService ExitBehaviourService { get; init; }
     public YesAlreadyIPC YesAlreadyIPC { get; init; }
+    public AutoYesService AutoYesService { get; init; }
     public string[] MountNames { get; private set; } = Array.Empty<string>();
 
     public readonly WindowSystem WindowSystem = new("FrenRider");
@@ -84,6 +85,7 @@ public sealed class Plugin : IDalamudPlugin
         DutyInteractService = new DutyInteractService(this, FrenTracker, ZoneService);
         ExitBehaviourService = new ExitBehaviourService(this, FrenTracker, ZoneService);
         YesAlreadyIPC = new YesAlreadyIPC(Log);
+        AutoYesService = new AutoYesService(this, GameGui, Condition, Log);
 
         ConfigWindow = new ConfigWindow(this);
         MainWindow = new MainWindow(this);
@@ -144,6 +146,7 @@ public sealed class Plugin : IDalamudPlugin
         VideoPlaybackService.Dispose();
         ExitBehaviourService.Dispose();
         YesAlreadyIPC.Dispose();
+        AutoYesService.Dispose();
 
         dtrEntry?.Remove();
 
@@ -263,6 +266,9 @@ public sealed class Plugin : IDalamudPlugin
             {
                 YesAlreadyIPC.Unpause();
             }
+            
+            // AutoYesService update
+            AutoYesService.Update();
 
             if (Configuration.VideoNotificationsEnabled && config.Enabled != wasPluginEnabled)
             {
