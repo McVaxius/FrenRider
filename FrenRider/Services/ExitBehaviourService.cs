@@ -31,6 +31,7 @@ public class ExitBehaviourService : IDisposable
     private bool dutyLeaveIssued;
     private bool wasBoundByDuty;
     private DateTime dutyEnteredTime = DateTime.MinValue;
+    private DateTime boundByDutyLostTime = DateTime.MinValue; // Debounce for BoundByDuty flicker
     private const double DutyGracePeriodSeconds = 30.0;
 
     // Exit object navigation state
@@ -112,15 +113,34 @@ public class ExitBehaviourService : IDisposable
 
         // Detect BoundByDuty transition (true→false) as duty end signal
         // This catches all duty types including treasure dungeons where DutyCompleted may not fire
+        // DEBOUNCE: BoundByDuty can flicker during loading screens within a duty,
+        // so only detect transition if we've been unbound for >2 seconds
         if (wasBoundByDuty && !inDuty)
         {
-            if (!dutyCompleted)
+            if (boundByDutyLostTime == DateTime.MinValue)
             {
-                dutyCompleted = true;
-                dutyCompletedTime = DateTime.Now;
-                dutyLeaveIssued = false;
-                Plugin.Log.Information("[ExitBehaviour] BoundByDuty transition detected (was bound, now free) - marking duty completed");
+                boundByDutyLostTime = DateTime.Now;
+                Plugin.Log.Debug("[ExitBehaviour] BoundByDuty dropped - starting 2s debounce");
             }
+            else if ((DateTime.Now - boundByDutyLostTime).TotalSeconds >= 2.0)
+            {
+                if (!dutyCompleted)
+                {
+                    dutyCompleted = true;
+                    dutyCompletedTime = DateTime.Now;
+                    dutyLeaveIssued = false;
+                    Plugin.Log.Information("[ExitBehaviour] BoundByDuty transition confirmed (was bound, now free for 2s) - marking duty completed");
+                }
+            }
+        }
+        else
+        {
+            // Reset debounce if BoundByDuty came back
+            if (boundByDutyLostTime != DateTime.MinValue && inDuty)
+            {
+                Plugin.Log.Debug("[ExitBehaviour] BoundByDuty restored during debounce - false alarm");
+            }
+            boundByDutyLostTime = DateTime.MinValue;
         }
         wasBoundByDuty = inDuty;
 
@@ -171,7 +191,9 @@ public class ExitBehaviourService : IDisposable
             var elapsed = (DateTime.Now - dutyCompletedTime).TotalSeconds;
             if (elapsed >= config.ExitAfterDutySeconds)
             {
-                Plugin.Log.Information($"[ExitBehaviour] Leaving duty - {config.ExitAfterDutySeconds}s elapsed since duty completed");
+                Plugin.Log.Information($"[ExitBehaviour] === LEAVE DUTY TRIGGERED ===");
+                Plugin.Log.Information($"[ExitBehaviour] Reason: ExitAfterDutyEnds={config.ExitAfterDutyEnds}, elapsed={elapsed:F1}s >= configured={config.ExitAfterDutySeconds}s");
+                Plugin.Log.Information($"[ExitBehaviour] DutyCompleted={dutyCompleted}, CompletedAt={dutyCompletedTime:HH:mm:ss}, InDuty={inDuty}");
                 LeaveDuty();
                 dutyLeaveIssued = true;
             }
@@ -426,7 +448,22 @@ public class ExitBehaviourService : IDisposable
         lastLeaveAttemptTime = now;
         leaveAttemptCount++;
 
-        Plugin.Log.Information($"[ExitBehaviour] Leave duty attempt #{leaveAttemptCount} - opening duty panel");
+        // Determine why we're leaving
+        var config = plugin.ConfigManager.GetActiveConfig();
+        string leaveReason = "Unknown";
+        
+        if (config.ExitAfterDutyEnds && dutyCompleted)
+        {
+            var elapsed = (DateTime.Now - dutyCompletedTime).TotalSeconds;
+            leaveReason = $"Exit after duty ends - {elapsed:F0}s elapsed (configured: {config.ExitAfterDutySeconds}s)";
+        }
+        else if (config.LeaveWhenAllLeft)
+        {
+            leaveReason = "Leave when all party members left";
+        }
+        
+        Plugin.Log.Information($"[ExitBehaviour] Leave duty attempt #{leaveAttemptCount} - REASON: {leaveReason}");
+        Plugin.Log.Information($"[ExitBehaviour] Opening duty panel to leave");
 
         // Open duty panel to access Leave Duty button
         SendCommand("/dutyfinder");
@@ -444,36 +481,21 @@ public class ExitBehaviourService : IDisposable
             }
         });
 
-        StateDetail = $"Leaving duty (attempt #{leaveAttemptCount})...";
+        StateDetail = $"Leaving duty (attempt #{leaveAttemptCount}) - {leaveReason}";
     }
 
     private unsafe void TryClickLeaveDutyButton()
     {
         try
         {
-            // Try to find and click the Leave Duty button in the duty panel
-            // Using GameGui.GetAddonByName like LootGoblin pattern
-            var addonPtr = Plugin.GameGui.GetAddonByName("DutyFinder", 1);
-            if (addonPtr != 0)
-            {
-                Plugin.Log.Information("[ExitBehaviour] Duty panel is open - searching for Leave Duty button");
-                
-                // For now, try the old methods as fallback
-                // TODO: Implement proper button clicking via AtkUnitBase when needed
-                SendCommand("/pdfinder leave");
-                SendCommand("/leaveduty");
-            }
-            else
-            {
-                Plugin.Log.Debug("[ExitBehaviour] Duty panel not visible - trying direct commands");
-                // Fallback to direct commands
-                SendCommand("/pdfinder leave");
-                SendCommand("/leaveduty");
-            }
+            // Use the proper game action command to leave a duty
+            // /gaction "Leave" is the actual game command that opens the leave confirmation
+            Plugin.Log.Information("[ExitBehaviour] Sending /gaction Leave to trigger duty exit dialog");
+            SendCommand("/gaction \"Leave\"");
         }
         catch (Exception ex)
         {
-            Plugin.Log.Error($"[ExitBehaviour] Error trying to click Leave Duty button: {ex.Message}");
+            Plugin.Log.Error($"[ExitBehaviour] Error trying to leave duty: {ex.Message}");
         }
     }
 

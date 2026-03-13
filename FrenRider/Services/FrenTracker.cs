@@ -9,6 +9,7 @@ public class FrenTracker
 {
     private readonly Plugin plugin;
     private long lastUpdateMs;
+    private long lastPartyScanLogMs;
 
     public FrenState? Fren { get; private set; }
     public List<PartyMemberState> Party { get; private set; } = new();
@@ -58,10 +59,15 @@ public class FrenTracker
 
         var partyCount = Plugin.PartyList.Length;
         
-        // Debug logging for party scanning
+        // Debug logging for party scanning - throttled to once per 10s to prevent spam
         if (partyCount > 0)
         {
-            Plugin.Log.Debug($"[FrenTracker] Scanning party: {partyCount} members in PartyList");
+            var logNow = Environment.TickCount64;
+            if (logNow - lastPartyScanLogMs >= 10000)
+            {
+                Plugin.Log.Debug($"[FrenTracker] Scanning party: {partyCount} members in PartyList");
+                lastPartyScanLogMs = logNow;
+            }
         }
         for (var i = 0; i < partyCount; i++)
         {

@@ -9,6 +9,7 @@ using Dalamud.IoC;
 using Dalamud.Plugin;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
+using FrenRider.IPC;
 using FrenRider.Services;
 using FrenRider.Windows;
 
@@ -49,6 +50,7 @@ public sealed class Plugin : IDalamudPlugin
     public VideoPlaybackService VideoPlaybackService { get; init; }
     public DutyInteractService DutyInteractService { get; init; }
     public ExitBehaviourService ExitBehaviourService { get; init; }
+    public YesAlreadyIPC YesAlreadyIPC { get; init; }
     public string[] MountNames { get; private set; } = Array.Empty<string>();
 
     public readonly WindowSystem WindowSystem = new("FrenRider");
@@ -81,6 +83,7 @@ public sealed class Plugin : IDalamudPlugin
         VideoPlaybackService = new VideoPlaybackService(Configuration, Log, ChatGui);
         DutyInteractService = new DutyInteractService(this, FrenTracker, ZoneService);
         ExitBehaviourService = new ExitBehaviourService(this, FrenTracker, ZoneService);
+        YesAlreadyIPC = new YesAlreadyIPC(Log);
 
         ConfigWindow = new ConfigWindow(this);
         MainWindow = new MainWindow(this);
@@ -140,6 +143,7 @@ public sealed class Plugin : IDalamudPlugin
         PartyService.Dispose();
         VideoPlaybackService.Dispose();
         ExitBehaviourService.Dispose();
+        YesAlreadyIPC.Dispose();
 
         dtrEntry?.Remove();
 
@@ -246,10 +250,20 @@ public sealed class Plugin : IDalamudPlugin
         // Update fren tracking
         FrenTracker.Update();
 
-        // Check for plugin enable/disable state changes for video notifications
+        // Check for plugin enable/disable state changes
         var config = ConfigManager.GetActiveConfig();
         if (config != null)
         {
+            // YesAlready pause/unpause on enable/disable
+            if (config.Enabled && !YesAlreadyIPC.IsPaused)
+            {
+                YesAlreadyIPC.Pause();
+            }
+            else if (!config.Enabled && YesAlreadyIPC.IsPaused)
+            {
+                YesAlreadyIPC.Unpause();
+            }
+
             if (Configuration.VideoNotificationsEnabled && config.Enabled != wasPluginEnabled)
             {
                 Log.Debug($"[FR] Video notifications enabled, state changed: {wasPluginEnabled} -> {config.Enabled}");
