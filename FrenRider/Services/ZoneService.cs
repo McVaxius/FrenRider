@@ -23,13 +23,19 @@ public class ZoneService
         561, 562, 563, 564, 565, // Palace of the Dead
         770, 771, 772, 773,     // Heaven-on-High
         1099, 1100, 1101, 1102, // Eureka Orthos
+        //Missing Pilgrim's Traverse here
+        //the above are unconfirmed could be anything.
     };
 
-    // Known foray territory IDs (Eureka, Bozja, Zadnor)
+    // Known foray territory IDs (Eureka, Bozja, Zadnor, Diadem, Moon Gw2, Occult Crescent)
     private static readonly HashSet<uint> ForayIds = new()
     {
-        732, 763, 795, 827, // Eureka zones
+        732, 763, 795, 827, // Eureka zones (Anemos, Pagos, Pyros, Hydatos)
+        759,           // Doman Enclave
         920, 975,           // Bozja Southern Front, Zadnor
+        939,                // The Diadem
+        1237,1238,1239,1240,// moon 1,2,3 (4 is coming with 7.51) im just guessing on 234 not like it matters
+        1252,1253,               // South Horn (Occult Crescent), North Horn with 7.5x guessing on north not like matters
     };
 
     private uint lastTerritoryId;
