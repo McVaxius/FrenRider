@@ -269,6 +269,15 @@ public class FollowService
         lastNavTarget = target;
         isNavigating = true;
 
+        // Foray zones: never fly, always use moveto (no flying in forays)
+        if (zoneService.CurrentZone == ZoneType.Foray)
+        {
+            var coords = FormatVector(target);
+            var cmd = $"/vnav moveto {coords}";
+            SendCommand(cmd);
+            return;
+        }
+
         if (selfFlying)
         {
             var coords = FormatVector(target);

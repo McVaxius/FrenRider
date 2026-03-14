@@ -175,7 +175,7 @@ public class MountService
                     Plugin.Log.Information($"Targeted fren: {fren.Name}");
                     
                     // Send pillion command
-                    SendCommand("/ridepillion <t> 2");
+                    SendCommand("/ridepillion <t> 1");
                     State = MountState.Mounting;
                     StateDetail = "Riding pillion on fren's mount";
                 }
