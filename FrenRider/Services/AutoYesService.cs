@@ -25,16 +25,24 @@ public class AutoYesService : IDisposable
     
     private readonly Dictionary<string, string> autoYesPatterns = new()
     {
+        //Misc stuff from yesalerady
+        {"misc1", "Use the teleporter?"},
+        {"misc2", "Return to the levemete"},
+//        {"misc2b", "Return to the starting point for the Praetorium?   ※You may be unable to re-enter ongoing battles."}, //haha this is bad
+        {"misc3", "Duty calls"},
+        {"misc4", "Are you interested"},    
+        {"misc5", "Move immediately to sealed area"},
+        
         // Raise offers
         {"raise", "Would you like to be raised"},
-        {"raise2", "Accept the raise"},
+        {"raise2", "Accept Raise"},
         
         // Teleport offers  
         {"teleport", "Accept Teleport to"},
         {"teleport2", "Teleport to the"},
         {"teleport3", "Would you like to teleport"},
         {"teleport4", "/Accept Teleport."},
-        {"return", "Return to the"},
+   //     {"return", "Return to the"},
         
         // Party invites (already handled by PartyService, but added as backup)
         {"party", "Would you like to join the party"},
