@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Numerics;
 using System.Reflection;
 using Dalamud.Bindings.ImGui;
@@ -33,6 +34,22 @@ public class MainWindow : Window, IDisposable
         // Header
         var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0.0";
         ImGui.Text($"Fren Rider v{version}");
+        
+        // Ko-fi donation button in upper right
+        ImGui.SameLine(ImGui.GetWindowWidth() - 120);
+        if (ImGui.SmallButton("\u2661 Ko-fi \u2661"))
+        {
+            System.Diagnostics.Process.Start(new ProcessStartInfo
+            {
+                FileName = "https://ko-fi.com/mcvaxius",
+                UseShellExecute = true
+            });
+        }
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip("Support development on Ko-fi");
+        }
+        
         ImGui.Separator();
         ImGui.Spacing();
 
