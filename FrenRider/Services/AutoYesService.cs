@@ -108,6 +108,8 @@ public class AutoYesService : IDisposable
             if (dialogText == lastHandledDialog && now - lastHandledTime < handleCooldown)
                 return;
                 
+            log.Debug($"[AutoYes] Dialog detected: {dialogText}");
+            
             // Check for auto-yes patterns
             string matchedKey = null;
             
@@ -116,6 +118,7 @@ public class AutoYesService : IDisposable
                 if (dialogText.Contains(kvp.Value, StringComparison.OrdinalIgnoreCase))
                 {
                     matchedKey = kvp.Key;
+                    log.Debug($"[AutoYes] Pattern matched: {kvp.Key} -> {kvp.Value}");
                     break;
                 }
             }
@@ -133,20 +136,31 @@ public class AutoYesService : IDisposable
                 // Handle raise offers
                 if (matchedKey.StartsWith("raise") && config.RaiseOfferAutoAccept)
                 {
+                    log.Debug($"[AutoYes] Accepting raise offer (config enabled)");
                     ClickYesAndLog(dialogText, "Raise offer");
                     return;
+                }
+                else if (matchedKey.StartsWith("raise"))
+                {
+                    log.Debug($"[AutoYes] Skipping raise offer (config disabled)");
                 }
                 
                 // Handle teleport offers
                 if ((matchedKey.StartsWith("teleport") || matchedKey.StartsWith("return")) && config.TeleportOfferAutoAccept)
                 {
+                    log.Debug($"[AutoYes] Accepting teleport offer (config enabled)");
                     ClickYesAndLog(dialogText, "Teleport offer");
                     return;
+                }
+                else if (matchedKey.StartsWith("teleport") || matchedKey.StartsWith("return"))
+                {
+                    log.Debug($"[AutoYes] Skipping teleport offer (config disabled)");
                 }
                 
                 // Fallback: if no specific config, handle all non-party dialogs
                 if (!matchedKey.StartsWith("party"))
                 {
+                    log.Debug($"[AutoYes] Accepting dialog (fallback)");
                     ClickYesAndLog(dialogText, autoYesPatterns[matchedKey]);
                     return;
                 }
