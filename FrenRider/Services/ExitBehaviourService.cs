@@ -492,21 +492,18 @@ public class ExitBehaviourService : IDisposable
     {
         try
         {
-            // Use xa docs pattern: Open ContentsFinderMenu with U key, then click Leave button (node 43)
-            Plugin.Log.Information("[ExitBehaviour] Opening ContentsFinderMenu with U key");
+            // Use xa docs callback pattern: Open ContentsFinderMenu directly, then click Leave button (node 43)
+            Plugin.Log.Information("[ExitBehaviour] Opening ContentsFinderMenu with callback");
             
-            // Try ECommons WindowsKeypress directly with VirtualKey
+            // Try direct callback to open ContentsFinderMenu (pattern from Character true 12)
             try
             {
-                // Convert VirtualKey.U to byte for WindowsKeypress
-                var keyCode = (byte)VirtualKey.U;
-                WindowsKeypress.SendKeypress(keyCode);
+                // Based on xa docs pattern - try different callback numbers to open ContentsFinderMenu
+                GameHelpers.FireAddonCallback("ContentsFinderMenu", true, 0);
             }
             catch (Exception ex)
             {
-                Plugin.Log.Error($"[ExitBehaviour] WindowsKeypress failed: {ex.Message}");
-                // Fallback to chat command
-                SendCommand("/keypress U");
+                Plugin.Log.Error($"[ExitBehaviour] ContentsFinderMenu callback failed: {ex.Message}");
             }
             
             // Wait a moment for the menu to open, then click Leave button
