@@ -1,11 +1,15 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Numerics;
 using System.Text;
 using Dalamud.Game.ClientState.Conditions;
+using Dalamud.Game.ClientState.Keys;
+using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.Types;
+using ECommons.Automation;
 using FFXIVClientStructs.FFXIV.Client.System.String;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FrenRider.Models;
@@ -488,14 +492,51 @@ public class ExitBehaviourService : IDisposable
     {
         try
         {
-            // Use the proper game action command to leave a duty
-            // /gaction "Leave" is the actual game command that opens the leave confirmation
-            Plugin.Log.Information("[ExitBehaviour] Sending /gaction Leave to trigger duty exit dialog");
-            SendCommand("/gaction \"Leave\"");
+            // Use xa docs pattern: Open ContentsFinderMenu with U key, then click Leave button (node 43)
+            Plugin.Log.Information("[ExitBehaviour] Opening ContentsFinderMenu with U key");
+            SendCommand("/keypress U");
+            
+            // Wait a moment for the menu to open, then click Leave button
+            System.Threading.Tasks.Task.Delay(500).ContinueWith(_ => {
+                TryClickLeaveButton();
+            });
         }
         catch (Exception ex)
         {
             Plugin.Log.Error($"[ExitBehaviour] Error trying to leave duty: {ex.Message}");
+        }
+    }
+
+    private unsafe void TryClickLeaveButton()
+    {
+        try
+        {
+            // Click Leave button using xa docs pattern: ClickAddonButton("ContentsFinderMenu", 43)
+            Plugin.Log.Information("[ExitBehaviour] Clicking Leave button on ContentsFinderMenu");
+            GameHelpers.FireAddonCallback("ContentsFinderMenu", true, 43);
+            
+            // Handle the confirmation dialog
+            System.Threading.Tasks.Task.Delay(500).ContinueWith(_ => {
+                HandleLeaveConfirmation();
+            });
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log.Error($"[ExitBehaviour] Error clicking Leave button: {ex.Message}");
+        }
+    }
+
+    private void HandleLeaveConfirmation()
+    {
+        try
+        {
+            // Click Yes on SelectYesno confirmation dialog
+            Plugin.Log.Information("[ExitBehaviour] Clicking Yes on leave confirmation dialog");
+            GameHelpers.ClickYesIfVisible();
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log.Error($"[ExitBehaviour] Error handling leave confirmation: {ex.Message}");
         }
     }
 
