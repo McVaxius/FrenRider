@@ -494,7 +494,20 @@ public class ExitBehaviourService : IDisposable
         {
             // Use xa docs pattern: Open ContentsFinderMenu with U key, then click Leave button (node 43)
             Plugin.Log.Information("[ExitBehaviour] Opening ContentsFinderMenu with U key");
-            SendCommand("/keypress U");
+            
+            // Try ECommons WindowsKeypress directly with VirtualKey
+            try
+            {
+                // Convert VirtualKey.U to byte for WindowsKeypress
+                var keyCode = (byte)VirtualKey.U;
+                WindowsKeypress.SendKeypress(keyCode);
+            }
+            catch (Exception ex)
+            {
+                Plugin.Log.Error($"[ExitBehaviour] WindowsKeypress failed: {ex.Message}");
+                // Fallback to chat command
+                SendCommand("/keypress U");
+            }
             
             // Wait a moment for the menu to open, then click Leave button
             System.Threading.Tasks.Task.Delay(500).ContinueWith(_ => {
