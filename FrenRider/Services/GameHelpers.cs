@@ -2,6 +2,7 @@ using System;
 using Dalamud.Game.ClientState.Objects.Types;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
+using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using FFXIVClientStructs.Interop;
@@ -389,6 +390,64 @@ public static class GameHelpers
         {
             Plugin.Log.Error($"UseRepairAction failed: {ex.Message}");
             return false;
+        }
+    }
+
+    /// <summary>
+    /// Check if a UI addon is currently visible.
+    /// Pattern from LootGoblin GameHelpers.
+    /// </summary>
+    public static unsafe bool IsAddonVisible(string addonName)
+    {
+        try
+        {
+            var addon = RaptureAtkUnitManager.Instance()->GetAddonByName(addonName);
+            return addon != null && addon->IsVisible;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Fire a callback on a named addon with variable arguments.
+    /// Pattern from LootGoblin GameHelpers.
+    /// SND equivalent: /callback AddonName true/false arg1 arg2 ...
+    /// </summary>
+    public static unsafe void FireAddonCallback(string addonName, bool updateState, params object[] args)
+    {
+        try
+        {
+            var addon = RaptureAtkUnitManager.Instance()->GetAddonByName(addonName);
+            if (addon == null || !addon->IsVisible)
+            {
+                Plugin.Log.Warning($"[Callback] Addon '{addonName}' not found or not visible");
+                return;
+            }
+
+            var atkValues = new AtkValue[args.Length];
+            for (int i = 0; i < args.Length; i++)
+            {
+                atkValues[i] = args[i] switch
+                {
+                    int intVal => new AtkValue { Type = FFXIVClientStructs.FFXIV.Component.GUI.ValueType.Int, Int = intVal },
+                    uint uintVal => new AtkValue { Type = FFXIVClientStructs.FFXIV.Component.GUI.ValueType.UInt, UInt = uintVal },
+                    bool boolVal => new AtkValue { Type = FFXIVClientStructs.FFXIV.Component.GUI.ValueType.Bool, Byte = (byte)(boolVal ? 1 : 0) },
+                    _ => new AtkValue { Type = FFXIVClientStructs.FFXIV.Component.GUI.ValueType.Int, Int = Convert.ToInt32(args[i]) },
+                };
+            }
+
+            fixed (AtkValue* ptr = atkValues)
+            {
+                addon->FireCallback((uint)atkValues.Length, ptr, updateState);
+            }
+
+            Plugin.Log.Information($"[Callback] Fired on '{addonName}' with {args.Length} args, updateState={updateState}");
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log.Error($"[Callback] Failed for '{addonName}': {ex.Message}");
         }
     }
 }

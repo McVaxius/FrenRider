@@ -29,6 +29,7 @@ public class DutyInteractService
     private DateTime lastScanTime = DateTime.MinValue;
     private DateTime lastNudgeTime = DateTime.MinValue;
     private DateTime lastInteractTime = DateTime.MinValue;
+    private DateTime lastCommenceClickTime = DateTime.MinValue;
     private uint? lastInteractedEntityId;
     private bool isNavigatingToInteractable;
 
@@ -53,6 +54,23 @@ public class DutyInteractService
         if (!config.Enabled)
         {
             Reset();
+            return;
+        }
+
+        // Handle ContentsFinderConfirm popup (duty commence dialog)
+        if (GameHelpers.IsAddonVisible("ContentsFinderConfirm"))
+        {
+            var current = DateTime.UtcNow;
+            if ((current - lastCommenceClickTime).TotalSeconds > 2) // Rate limit to prevent spam
+            {
+                lastCommenceClickTime = current;
+                IsActive = true;
+                StateDetail = "Clicking Commence on duty popup";
+                Plugin.Log.Information("[DutyInteract] Clicking Commence on ContentsFinderConfirm");
+                
+                // Fire commence callback - typically callback index 8 = Commence button
+                GameHelpers.FireAddonCallback("ContentsFinderConfirm", true, 8);
+            }
             return;
         }
 
