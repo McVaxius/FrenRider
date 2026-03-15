@@ -39,9 +39,9 @@ public class AutoYesService : IDisposable
         
         // Teleport offers  
         {"teleport", "Accept Teleport to"},
-        {"teleport2", "Teleport to the"},
+   //     {"teleport2", "Teleport to the"},
         {"teleport3", "Would you like to teleport"},
-        {"teleport4", "/Accept Teleport."},
+        {"teleport4", "Accept Teleport"},
    //     {"return", "Return to the"},
         
         // Party invites (already handled by PartyService, but added as backup)
