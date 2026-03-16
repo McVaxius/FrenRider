@@ -96,6 +96,13 @@ public sealed class Plugin : IDalamudPlugin
         // Hook into FrenRider enabled state changes
         ConfigManager.OnFrenRiderEnabledChanged += OnFrenRiderEnabledChanged;
 
+        // Check for AutoDuty on plugin load if FrenRider is already enabled
+        if (ConfigManager.GetActiveConfig().Enabled)
+        {
+            Log.Information("[FR] Plugin loaded with FrenRider already enabled - checking for AutoDuty");
+            OnFrenRiderEnabledChanged(true);
+        }
+
         ConfigWindow = new ConfigWindow(this);
         MainWindow = new MainWindow(this);
 
