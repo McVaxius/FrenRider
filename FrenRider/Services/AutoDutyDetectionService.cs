@@ -100,9 +100,9 @@ public class AutoDutyDetectionService
 
     private void ShowWarning()
     {
-        log.Debug($"[AutoDutyDetection] ShowWarning called - warningShown={warningShown}");
+        log.Debug($"[AutoDutyDetection] ShowWarning called - warningShown={warningShown}, enabled={plugin.ConfigManager.GetActiveConfig().Enabled}");
         
-        if (!warningShown)
+        if (!warningShown && plugin.ConfigManager.GetActiveConfig().Enabled)
         {
             warningShown = true;
             warningWindow.IsOpen = true;
@@ -111,6 +111,10 @@ public class AutoDutyDetectionService
         else if (warningShown)
         {
             log.Debug("[AutoDutyDetection] Warning already shown, not opening again");
+        }
+        else if (!plugin.ConfigManager.GetActiveConfig().Enabled)
+        {
+            log.Debug("[AutoDutyDetection] FrenRider is disabled, not showing AutoDuty warning");
         }
     }
 
