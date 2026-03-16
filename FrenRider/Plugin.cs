@@ -210,6 +210,12 @@ public sealed class Plugin : IDalamudPlugin
                 Log.Information("[FR] AutoDuty not detected - cannot show warning window");
             }
         }
+        else if (arg == "resetautoduty")
+        {
+            Log.Information("[FR] Resetting AutoDuty detection state");
+            AutoDutyDetectionService.ResetWarning();
+            Log.Information("[FR] AutoDuty detection state reset");
+        }
         else
         {
             MainWindow.Toggle();

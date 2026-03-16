@@ -87,9 +87,19 @@ public class AutoDutyDetectionService
             }
             else if (!autoDutyDetected && wasDetected)
             {
-                log.Information("[AutoDutyDetection] AutoDuty plugin no longer detected");
+                log.Information("[AutoDutyDetection] AutoDuty plugin no longer detected - resetting warning state");
                 warningShown = false;
                 warningWindow.Reset();
+                // Also close the window if it's open
+                if (warningWindow.IsOpen)
+                {
+                    warningWindow.IsOpen = false;
+                    log.Information("[AutoDutyDetection] Closed warning window since AutoDuty is no longer detected");
+                }
+            }
+            else if (autoDutyDetected && wasDetected)
+            {
+                log.Debug("[AutoDutyDetection] AutoDuty still detected - no state change");
             }
         }
         catch (Exception ex)
