@@ -156,4 +156,10 @@ public class AutoDutyDetectionService
         warningShown = false;
         ShowWarning();
     }
+
+    public void ForceCheck()
+    {
+        log.Information("[AutoDutyDetection] Force checking for AutoDuty");
+        CheckForAutoDuty();
+    }
 }
