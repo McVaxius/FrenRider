@@ -90,7 +90,7 @@ public class AutoDutyDetectionService
 
             log.Debug($"[AutoDutyDetection] Detection result: Installed={autoDutyInstalled}, Enabled={autoDutyEnabled}, Active={autoDutyActive}, Detected={autoDutyDetected}");
 
-            // Log state changes
+            // Log state changes and show warning if both conditions are met
             if (autoDutyDetected && !wasDetected)
             {
                 log.Warning("[AutoDutyDetection] AutoDuty plugin detected - showing warning");
@@ -110,7 +110,14 @@ public class AutoDutyDetectionService
             }
             else if (autoDutyDetected && wasDetected)
             {
-                log.Debug("[AutoDutyDetection] AutoDuty still detected - no state change");
+                log.Debug("[AutoDutyDetection] AutoDuty still detected - checking if warning should be shown");
+                
+                // Also show warning if FrenRider is enabled and AutoDuty is detected (even if no state change)
+                if (plugin.ConfigManager.GetActiveConfig().Enabled && !warningShown)
+                {
+                    log.Information("[AutoDutyDetection] FrenRider enabled + AutoDuty detected - showing warning (no state change)");
+                    ShowWarning();
+                }
             }
         }
         catch (Exception ex)
