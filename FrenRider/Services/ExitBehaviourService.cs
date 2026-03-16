@@ -474,16 +474,30 @@ public class ExitBehaviourService : IDisposable
 
         // Wait a moment for panel to open, then try to click Leave Duty
         System.Threading.Tasks.Task.Delay(500).ContinueWith(_ => {
-            TryClickLeaveDutyButton();
-        });
+            try
+            {
+                TryClickLeaveDutyButton();
+            }
+            catch (Exception ex)
+            {
+                Plugin.Log.Error($"[ExitBehaviour] ContinueWith exception in TryClickLeaveDutyButton: {ex.Message}");
+            }
+        }, System.Threading.Tasks.TaskContinuationOptions.OnlyOnRanToCompletion);
 
         // Also try clicking Yes on any confirmation dialog that appears
         System.Threading.Tasks.Task.Delay(1000).ContinueWith(_ => {
-            if (GameHelpers.ClickYesIfVisible())
+            try
             {
-                Plugin.Log.Information("[ExitBehaviour] Successfully clicked Yes on leave duty confirmation");
+                if (GameHelpers.ClickYesIfVisible())
+                {
+                    Plugin.Log.Information("[ExitBehaviour] Successfully clicked Yes on leave duty confirmation");
+                }
             }
-        });
+            catch (Exception ex)
+            {
+                Plugin.Log.Error($"[ExitBehaviour] ContinueWith exception in ClickYesIfVisible: {ex.Message}");
+            }
+        }, System.Threading.Tasks.TaskContinuationOptions.OnlyOnRanToCompletion);
 
         StateDetail = $"Leaving duty (attempt #{leaveAttemptCount}) - {leaveReason}";
     }
@@ -508,8 +522,15 @@ public class ExitBehaviourService : IDisposable
             
             // Wait a moment for the menu to open, then click Leave button
             System.Threading.Tasks.Task.Delay(500).ContinueWith(_ => {
-                TryClickLeaveButton();
-            });
+                try
+                {
+                    TryClickLeaveButton();
+                }
+                catch (Exception ex)
+                {
+                    Plugin.Log.Error($"[ExitBehaviour] ContinueWith exception in TryClickLeaveButton: {ex.Message}");
+                }
+            }, System.Threading.Tasks.TaskContinuationOptions.OnlyOnRanToCompletion);
         }
         catch (Exception ex)
         {
@@ -527,8 +548,15 @@ public class ExitBehaviourService : IDisposable
             
             // Handle the confirmation dialog
             System.Threading.Tasks.Task.Delay(500).ContinueWith(_ => {
-                HandleLeaveConfirmation();
-            });
+                try
+                {
+                    HandleLeaveConfirmation();
+                }
+                catch (Exception ex)
+                {
+                    Plugin.Log.Error($"[ExitBehaviour] ContinueWith exception in HandleLeaveConfirmation: {ex.Message}");
+                }
+            }, System.Threading.Tasks.TaskContinuationOptions.OnlyOnRanToCompletion);
         }
         catch (Exception ex)
         {
