@@ -196,9 +196,19 @@ public sealed class Plugin : IDalamudPlugin
         }
         else if (arg == "testautoduty")
         {
-            Log.Information("[FR] Testing AutoDuty warning window...");
-            AutoDutyDetectionService.ForceShowWarning();
-            Log.Information("[FR] AutoDuty warning window opened for testing");
+            Log.Information("[FR] Testing AutoDuty detection...");
+            var isDetected = AutoDutyDetectionService.IsAutoDutyDetected();
+            Log.Information($"[FR] AutoDuty detected: {isDetected}");
+            
+            if (isDetected)
+            {
+                Log.Information("[FR] AutoDuty detected - showing warning window");
+                AutoDutyDetectionService.ForceShowWarning();
+            }
+            else
+            {
+                Log.Information("[FR] AutoDuty not detected - cannot show warning window");
+            }
         }
         else
         {
