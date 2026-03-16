@@ -49,18 +49,29 @@ public class AutoDutyDetectionService
     {
         try
         {
-            // Method 1: Check if AutoDuty plugin is installed via PluginInterface
+            // Method 1: Check if AutoDuty plugin is installed AND enabled
             bool autoDutyInstalled = false;
+            bool autoDutyEnabled = false;
             try
             {
                 var installedPlugins = Plugin.PluginInterface.InstalledPlugins;
-                autoDutyInstalled = installedPlugins.Any(p => 
+                var autodutyPlugin = installedPlugins.FirstOrDefault(p => 
                     p.InternalName.Equals("AutoDuty", StringComparison.OrdinalIgnoreCase) ||
                     p.Name.Contains("AutoDuty", StringComparison.OrdinalIgnoreCase));
                 
-                if (autoDutyInstalled)
+                if (autodutyPlugin != null)
                 {
-                    log.Information("[AutoDutyDetection] AutoDuty plugin detected");
+                    autoDutyInstalled = true;
+                    autoDutyEnabled = autodutyPlugin.IsLoaded; // Check if actually loaded/enabled
+                    
+                    if (autoDutyEnabled)
+                    {
+                        log.Information("[AutoDutyDetection] AutoDuty plugin is enabled and running");
+                    }
+                    else
+                    {
+                        log.Information("[AutoDutyDetection] AutoDuty plugin is installed but disabled");
+                    }
                 }
             }
             catch (Exception ex)
@@ -75,9 +86,9 @@ public class AutoDutyDetectionService
             // This is a fallback method if plugin detection fails
             
             var wasDetected = autoDutyDetected;
-            autoDutyDetected = autoDutyInstalled || autoDutyActive;
+            autoDutyDetected = autoDutyEnabled || autoDutyActive; // Only detect if actually enabled
 
-            log.Debug($"[AutoDutyDetection] Detection result: Installed={autoDutyInstalled}, Active={autoDutyActive}, Detected={autoDutyDetected}");
+            log.Debug($"[AutoDutyDetection] Detection result: Installed={autoDutyInstalled}, Enabled={autoDutyEnabled}, Active={autoDutyActive}, Detected={autoDutyDetected}");
 
             // Log state changes
             if (autoDutyDetected && !wasDetected)
