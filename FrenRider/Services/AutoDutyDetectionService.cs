@@ -57,6 +57,11 @@ public class AutoDutyDetectionService
                 autoDutyInstalled = installedPlugins.Any(p => 
                     p.InternalName.Equals("AutoDuty", StringComparison.OrdinalIgnoreCase) ||
                     p.Name.Contains("AutoDuty", StringComparison.OrdinalIgnoreCase));
+                
+                if (autoDutyInstalled)
+                {
+                    log.Information("[AutoDutyDetection] AutoDuty plugin detected");
+                }
             }
             catch (Exception ex)
             {
@@ -71,6 +76,8 @@ public class AutoDutyDetectionService
             
             var wasDetected = autoDutyDetected;
             autoDutyDetected = autoDutyInstalled || autoDutyActive;
+
+            log.Debug($"[AutoDutyDetection] Detection result: Installed={autoDutyInstalled}, Active={autoDutyActive}, Detected={autoDutyDetected}");
 
             // Log state changes
             if (autoDutyDetected && !wasDetected)
@@ -93,11 +100,17 @@ public class AutoDutyDetectionService
 
     private void ShowWarning()
     {
-        if (!warningShown && plugin.ConfigManager.GetActiveConfig().Enabled)
+        log.Debug($"[AutoDutyDetection] ShowWarning called - warningShown={warningShown}");
+        
+        if (!warningShown)
         {
             warningShown = true;
             warningWindow.IsOpen = true;
             log.Warning("[AutoDutyDetection] AutoDuty warning window opened");
+        }
+        else if (warningShown)
+        {
+            log.Debug("[AutoDutyDetection] Warning already shown, not opening again");
         }
     }
 
@@ -110,5 +123,12 @@ public class AutoDutyDetectionService
     {
         warningShown = false;
         warningWindow.Reset();
+    }
+
+    public void ForceShowWarning()
+    {
+        log.Information("[AutoDutyDetection] Force showing warning window");
+        warningShown = false;
+        ShowWarning();
     }
 }

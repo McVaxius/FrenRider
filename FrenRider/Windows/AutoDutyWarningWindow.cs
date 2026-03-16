@@ -14,23 +14,28 @@ public class AutoDutyWarningWindow : Window
     private bool warningAcknowledged = false;
 
     public AutoDutyWarningWindow(Plugin plugin, IChatGui chatGui, IPluginLog log) 
-        : base("⚠️ AutoDuty Detected - Action Required", ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoMove)
+        : base("⚠️ AutoDuty Detected - Action Required", ImGuiWindowFlags.AlwaysAutoResize)
     {
         this.plugin = plugin;
         this.chatGui = chatGui;
         this.log = log;
         
-        // Center the window on screen
-        var viewport = ImGui.GetMainViewport();
-        var windowSize = new Vector2(400, 200);
-        Position = new Vector2(
-            (viewport.WorkSize.X - windowSize.X) / 2,
-            (viewport.WorkSize.Y - windowSize.Y) / 2
-        );
+        // Don't set position here - let ImGui handle it initially
+        RespectCloseHotkey = false;
     }
 
     public override void Draw()
     {
+        // Center the window when it first appears
+        if (ImGui.IsWindowAppearing())
+        {
+            var viewport = ImGui.GetMainViewport();
+            var posX = (viewport.WorkSize.X - 400) / 2;
+            var posY = (viewport.WorkSize.Y - 200) / 2;
+            ImGui.SetWindowPos(new Vector2(posX, posY));
+            log.Information($"[AutoDutyWarning] Window centered at: X={posX:F1}, Y={posY:F1}, Viewport: {viewport.WorkSize.X}x{viewport.WorkSize.Y}");
+        }
+
         ImGui.TextColored(new Vector4(1.0f, 0.3f, 0.3f, 1.0f), "⚠️ WARNING: AutoDuty Plugin Detected");
         ImGui.Spacing();
         
@@ -43,9 +48,10 @@ public class AutoDutyWarningWindow : Window
         ImGui.TextColored(new Vector4(0.8f, 0.8f, 0.8f, 1.0f), "FrenRider requires AutoDuty to be disabled for proper operation.");
         ImGui.Spacing();
 
-        // Disable AutoDuty button
+        // Disable AutoDuty button - centered
         var buttonWidth = 120;
-        ImGui.SetCursorPosX((400 - buttonWidth) / 2);
+        var windowWidth = 400;
+        ImGui.SetCursorPosX((windowWidth - buttonWidth) / 2);
         
         if (ImGui.Button("Disable AutoDuty", new Vector2(buttonWidth, 30)))
         {
@@ -66,11 +72,9 @@ public class AutoDutyWarningWindow : Window
         ImGui.Spacing();
         ImGui.TextColored(new Vector4(0.6f, 0.6f, 0.6f, 1.0f), "This window will close automatically after disabling AutoDuty.");
         
-        // Prevent closing with X button or ESC
-        if (ImGui.IsWindowHovered() && ImGui.IsKeyPressed(ImGuiKey.Escape))
-        {
-            // Don't allow ESC to close
-        }
+        // Debug: Log current window position
+        var currentPos = ImGui.GetWindowPos();
+        log.Debug($"[AutoDutyWarning] Current window position: X={currentPos.X:F1}, Y={currentPos.Y:F1}");
     }
 
     public override void OnClose()

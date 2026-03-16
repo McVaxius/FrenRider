@@ -194,6 +194,12 @@ public sealed class Plugin : IDalamudPlugin
                 _ = VideoPlaybackService.PlayVideo(enablePath);
             }
         }
+        else if (arg == "testautoduty")
+        {
+            Log.Information("[FR] Testing AutoDuty warning window...");
+            AutoDutyDetectionService.ForceShowWarning();
+            Log.Information("[FR] AutoDuty warning window opened for testing");
+        }
         else
         {
             MainWindow.Toggle();
