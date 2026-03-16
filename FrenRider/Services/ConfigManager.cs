@@ -20,6 +20,9 @@ public class ConfigManager
     public string CurrentAccountId { get; set; } = "";
     public string SelectedCharacterKey { get; set; } = ""; // "" = default config
 
+    // Event to notify when FrenRider enabled state changes
+    public event Action<bool>? OnFrenRiderEnabledChanged;
+
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         WriteIndented = true,
@@ -212,6 +215,23 @@ public class ConfigManager
     {
         if (!string.IsNullOrEmpty(CurrentAccountId))
             SaveAccount(CurrentAccountId);
+    }
+
+    public void SetFrenRiderEnabled(bool enabled)
+    {
+        var currentConfig = GetActiveConfig();
+        var wasEnabled = currentConfig.Enabled;
+        
+        if (wasEnabled != enabled)
+        {
+            currentConfig.Enabled = enabled;
+            SaveCurrentAccount();
+            
+            // Trigger the event
+            OnFrenRiderEnabledChanged?.Invoke(enabled);
+            
+            log.Information($"[ConfigManager] FrenRider enabled state changed: {wasEnabled} -> {enabled}");
+        }
     }
 
     public void ResetCharacterToDefault(string charKey)

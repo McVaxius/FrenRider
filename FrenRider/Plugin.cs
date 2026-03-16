@@ -93,6 +93,9 @@ public sealed class Plugin : IDalamudPlugin
         AutoDutyWarningWindow = new AutoDutyWarningWindow(this, ChatGui, Log);
         AutoDutyDetectionService = new AutoDutyDetectionService(this, ChatGui, Framework, Log, AutoDutyWarningWindow);
 
+        // Hook into FrenRider enabled state changes
+        ConfigManager.OnFrenRiderEnabledChanged += OnFrenRiderEnabledChanged;
+
         ConfigWindow = new ConfigWindow(this);
         MainWindow = new MainWindow(this);
 
@@ -162,6 +165,31 @@ public sealed class Plugin : IDalamudPlugin
         CommandManager.RemoveHandler(CommandName);
     }
 
+    private void OnFrenRiderEnabledChanged(bool enabled)
+    {
+        Log.Information($"[FR] FrenRider enabled state changed to: {enabled}");
+        
+        if (enabled)
+        {
+            // Trigger AutoDuty check when FrenRider is enabled
+            Log.Information("[FR] Triggering AutoDuty detection check");
+            
+            // Force a check immediately
+            var isDetected = AutoDutyDetectionService.IsAutoDutyDetected();
+            Log.Information($"[FR] AutoDuty detected: {isDetected}");
+            
+            if (isDetected)
+            {
+                Log.Information("[FR] AutoDuty detected - showing warning window");
+                AutoDutyDetectionService.ForceShowWarning();
+            }
+            else
+            {
+                Log.Information("[FR] AutoDuty not detected - no warning needed");
+            }
+        }
+    }
+
     private void OnCommand(string command, string args)
     {
         MainWindow.Toggle();
@@ -172,10 +200,8 @@ public sealed class Plugin : IDalamudPlugin
         var arg = args.Trim().ToLowerInvariant();
         if (arg == "on" || arg == "off")
         {
-            var cfg = ConfigManager.GetActiveConfig();
-            cfg.Enabled = arg == "on";
-            ConfigManager.SaveCurrentAccount();
-            Log.Information($"Fren Rider {(cfg.Enabled ? "enabled" : "disabled")} via /fr {arg}");
+            ConfigManager.SetFrenRiderEnabled(arg == "on");
+            Log.Information($"Fren Rider {(arg == "on" ? "enabled" : "disabled")} via /fr {arg}");
         }
         else if (arg == "testvideo")
         {

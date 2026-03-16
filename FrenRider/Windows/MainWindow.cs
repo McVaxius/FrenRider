@@ -57,8 +57,7 @@ public class MainWindow : Window, IDisposable
         var enabled = config.Enabled;
         if (ImGui.Checkbox("Enabled", ref enabled))
         {
-            config.Enabled = enabled;
-            plugin.ConfigManager.SaveCurrentAccount();
+            plugin.ConfigManager.SetFrenRiderEnabled(enabled);
         }
 
         // DTR bar toggle
