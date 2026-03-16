@@ -52,11 +52,13 @@ public sealed class Plugin : IDalamudPlugin
     public ExitBehaviourService ExitBehaviourService { get; init; }
     public YesAlreadyIPC YesAlreadyIPC { get; init; }
     public AutoYesService AutoYesService { get; init; }
+    public AutoDutyDetectionService AutoDutyDetectionService { get; init; }
     public string[] MountNames { get; private set; } = Array.Empty<string>();
 
     public readonly WindowSystem WindowSystem = new("FrenRider");
     private ConfigWindow ConfigWindow { get; init; }
     private MainWindow MainWindow { get; init; }
+    private AutoDutyWarningWindow AutoDutyWarningWindow { get; init; }
 
     private IDtrBarEntry? dtrEntry;
     private bool wasLoggedIn;
@@ -87,11 +89,16 @@ public sealed class Plugin : IDalamudPlugin
         YesAlreadyIPC = new YesAlreadyIPC(Log);
         AutoYesService = new AutoYesService(this, GameGui, Condition, Log);
 
+        // Initialize AutoDuty warning system
+        AutoDutyWarningWindow = new AutoDutyWarningWindow(this, ChatGui, Log);
+        AutoDutyDetectionService = new AutoDutyDetectionService(this, ChatGui, Framework, Log, AutoDutyWarningWindow);
+
         ConfigWindow = new ConfigWindow(this);
         MainWindow = new MainWindow(this);
 
         WindowSystem.AddWindow(ConfigWindow);
         WindowSystem.AddWindow(MainWindow);
+        WindowSystem.AddWindow(AutoDutyWarningWindow);
 
         CommandManager.AddHandler(CommandName, new CommandInfo(OnCommand)
         {
@@ -147,6 +154,7 @@ public sealed class Plugin : IDalamudPlugin
         ExitBehaviourService.Dispose();
         YesAlreadyIPC.Dispose();
         AutoYesService.Dispose();
+        AutoDutyDetectionService.Dispose();
 
         dtrEntry?.Remove();
 

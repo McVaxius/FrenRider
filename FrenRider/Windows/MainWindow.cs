@@ -327,6 +327,13 @@ public class MainWindow : Window, IDisposable
                 ImGui.TextColored(new Vector4(1f, 0.8f, 0.4f, 1), $"Duty Seek: {dutyInteract.StateDetail}");
             }
 
+            // AutoDuty detection warning
+            var autoDutyDetection = plugin.AutoDutyDetectionService;
+            if (autoDutyDetection.IsAutoDutyDetected())
+            {
+                ImGui.TextColored(new Vector4(1f, 0.2f, 0.2f, 1), "⚠️ AutoDuty Detected - May interfere with FrenRider");
+            }
+
             // Zone info
             var zone = plugin.ZoneService;
             var zoneExtra = "";
