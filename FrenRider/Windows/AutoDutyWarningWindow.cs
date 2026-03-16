@@ -11,6 +11,7 @@ public class AutoDutyWarningWindow : Window
     private readonly Plugin plugin;
     private readonly IChatGui chatGui;
     private readonly IPluginLog log;
+    private readonly ICommandManager commandManager;
     private bool warningAcknowledged = false;
 
     public AutoDutyWarningWindow(Plugin plugin, IChatGui chatGui, IPluginLog log) 
@@ -19,6 +20,7 @@ public class AutoDutyWarningWindow : Window
         this.plugin = plugin;
         this.chatGui = chatGui;
         this.log = log;
+        this.commandManager = Plugin.CommandManager;
         
         // Don't set position here - let ImGui handle it initially
         RespectCloseHotkey = false;
@@ -57,8 +59,8 @@ public class AutoDutyWarningWindow : Window
         {
             try
             {
-                // Send the command to disable AutoDuty
-                chatGui.Print("/xldisableplugin AutoDuty");
+                // Send the command to disable AutoDuty using CommandManager
+                commandManager?.ProcessCommand("/xldisableplugin AutoDuty");
                 log.Information("[AutoDutyWarning] Sent /xldisableplugin AutoDuty command");
                 warningAcknowledged = true;
                 IsOpen = false;
