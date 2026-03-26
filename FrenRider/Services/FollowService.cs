@@ -26,9 +26,14 @@ public class FollowService
 
     private Vector3 lastNavTarget;
     private bool isNavigating;
+    private int lastMovementClingType;
     private Vector3 socialOffset;
     private long lastOffsetChangeMs;
     private long lastFlyingAdjustMs;
+    private bool bossModFollowActive;
+    private string bossModFollowTarget = string.Empty;
+    private uint bossModFollowTerritoryId;
+    private int bossModFollowCombatMode = -1;
 
     // Stuck detection: record position every 5s, check per-axis movement < 2y
     private Vector3 stuckCheckPosition;
@@ -55,7 +60,7 @@ public class FollowService
         // Zone transition: stop navigation and reset
         if (zoneService.ZoneChanged)
         {
-            if (isNavigating) StopNavigation(config);
+            StopAllFollowing(config);
             State = FollowState.Idle;
             StateDetail = "Zone transition";
             lastNavTarget = default;
@@ -69,7 +74,7 @@ public class FollowService
 
         if (!config.Enabled)
         {
-            if (isNavigating) StopNavigation(config);
+            StopAllFollowing(config);
             State = FollowState.Idle;
             StateDetail = "Disabled";
             return;
@@ -78,7 +83,7 @@ public class FollowService
         var fren = tracker.Fren;
         if (fren == null || !fren.IsFound)
         {
-            if (isNavigating) StopNavigation(config);
+            StopAllFollowing(config);
             State = FollowState.Idle;
             StateDetail = "No fren found";
             return;
@@ -86,10 +91,16 @@ public class FollowService
 
         if (!fren.IsVisible)
         {
-            if (isNavigating) StopNavigation(config);
+            StopAllFollowing(config);
             State = FollowState.Idle;
             StateDetail = "Fren not visible";
             return;
+        }
+
+        var resolvedClingType = GetResolvedClingType(config);
+        if (resolvedClingType != 2 && bossModFollowActive)
+        {
+            StopBossModFollow();
         }
 
         // Combat check
@@ -98,7 +109,7 @@ public class FollowService
             // FollowInCombat: 0=No, 1=Yes, 2=Auto
             if (config.FollowInCombat == 0)
             {
-                if (isNavigating) StopNavigation(config);
+                StopAllFollowing(config);
                 State = FollowState.InCombat;
                 StateDetail = "Paused (in combat)";
                 return;
@@ -147,6 +158,9 @@ public class FollowService
         var formationTarget = plugin.FormationService.GetFormationTarget();
         if (formationTarget.HasValue)
         {
+            if (bossModFollowActive)
+                StopBossModFollow();
+
             var localPlayer = Plugin.ObjectTable.LocalPlayer;
             if (localPlayer != null)
             {
@@ -197,8 +211,21 @@ public class FollowService
             : config.MaxBistance;
     }
 
+    private int GetResolvedClingType(CharacterConfig config)
+    {
+        return zoneService.CurrentZone == ZoneType.Duty
+            ? config.ClingTypeDuty
+            : config.ClingType;
+    }
+
     private void NavigateToFren(CharacterConfig config, FrenTracker.FrenState fren)
     {
+        if (GetResolvedClingType(config) == 2)
+        {
+            EnsureBossModFollow(config, fren);
+            return;
+        }
+
         var target = fren.Position;
 
         // Apply social distancing offset
@@ -272,6 +299,7 @@ public class FollowService
         // Foray zones: never fly, always use moveto (no flying in forays)
         if (zoneService.CurrentZone == ZoneType.Foray)
         {
+            lastMovementClingType = 0;
             var coords = FormatVector(target);
             var cmd = $"/vnav moveto {coords}";
             SendCommand(cmd);
@@ -280,15 +308,15 @@ public class FollowService
 
         if (selfFlying)
         {
+            lastMovementClingType = 0;
             var coords = FormatVector(target);
             var cmd = $"/vnav flyto {coords}";
             SendCommand(cmd);
             return;
         }
 
-        var clingType = zoneService.CurrentZone == ZoneType.Duty
-            ? config.ClingTypeDuty
-            : config.ClingType;
+        var clingType = GetResolvedClingType(config);
+        lastMovementClingType = clingType;
 
         SendNavigationCommand(clingType, target);
     }
@@ -329,7 +357,6 @@ public class FollowService
         {
             "NavMesh" => $"/vnav moveto {coords}",
             "Visland" => $"/visland moveto {coords}",
-            "BossMod Follow" => "/bmr follow",
             "Vanilla Follow" => "/follow",
             _ => null,
         };
@@ -338,20 +365,76 @@ public class FollowService
             SendCommand(cmd);
     }
 
+    private void EnsureBossModFollow(CharacterConfig config, FrenTracker.FrenState fren)
+    {
+        var targetName = fren.Name.Trim();
+        if (string.IsNullOrWhiteSpace(targetName))
+            return;
+
+        var signatureMatches = bossModFollowActive
+            && string.Equals(bossModFollowTarget, targetName, StringComparison.Ordinal)
+            && bossModFollowTerritoryId == zoneService.TerritoryId
+            && bossModFollowCombatMode == config.FollowInCombat;
+
+        if (signatureMatches)
+            return;
+
+        if (bossModFollowActive)
+            StopBossModFollow();
+
+        if (isNavigating)
+            StopNavigation(config);
+
+        SendCommand($"/bmrai follow {targetName}");
+        SendCommand("/bmrai followoutofcombat on");
+
+        if (config.FollowInCombat == 0)
+        {
+            SendCommand("/bmrai followcombat off");
+            SendCommand("/bmrai followmodule off");
+        }
+        else
+        {
+            SendCommand("/bmrai followcombat on");
+            SendCommand("/bmrai followmodule on");
+        }
+
+        bossModFollowActive = true;
+        bossModFollowTarget = targetName;
+        bossModFollowTerritoryId = zoneService.TerritoryId;
+        bossModFollowCombatMode = config.FollowInCombat;
+        Plugin.Log.Information($"[FR] Activated BossMod follow for '{targetName}' in territory {zoneService.TerritoryId}");
+    }
+
+    private void StopBossModFollow()
+    {
+        if (!bossModFollowActive)
+            return;
+
+        SendCommand("/bmrai off");
+        bossModFollowActive = false;
+        bossModFollowTarget = string.Empty;
+        bossModFollowTerritoryId = 0;
+        bossModFollowCombatMode = -1;
+        Plugin.Log.Information("[FR] Stopped BossMod follow");
+    }
+
+    private void StopAllFollowing(CharacterConfig config)
+    {
+        StopBossModFollow();
+        if (isNavigating)
+            StopNavigation(config);
+    }
+
     private void StopNavigation(CharacterConfig config)
     {
         if (!isNavigating) return;
         isNavigating = false;
 
-        var clingType = zoneService.CurrentZone == ZoneType.Duty
-            ? config.ClingTypeDuty
-            : config.ClingType;
-
-        var cmd = clingType switch
+        var cmd = lastMovementClingType switch
         {
             0 => "/vnavmesh stop",
             1 => "/visland stop",
-            2 => "/bmrai follow off",
             3 => "/follow",
             _ => "/vnavmesh stop",
         };

@@ -151,10 +151,24 @@ public class AutoDutyDetectionService
         return autoDutyDetected;
     }
 
+    public bool ShouldShowMainWindowWarning()
+    {
+        return autoDutyDetected && plugin.ConfigManager.GetActiveConfig().Enabled && !warningWindow.IsOpen;
+    }
+
     public void ResetWarning()
     {
         warningShown = false;
         warningWindow.Reset();
+        warningWindow.IsOpen = false;
+    }
+
+    public void HandleFrenRiderDisabled()
+    {
+        log.Information("[AutoDutyDetection] FrenRider disabled - clearing warning lifecycle state");
+        warningShown = false;
+        warningWindow.Reset();
+        warningWindow.IsOpen = false;
     }
 
     public void ForceShowWarning()

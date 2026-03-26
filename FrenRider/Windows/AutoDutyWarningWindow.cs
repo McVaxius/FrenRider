@@ -73,10 +73,6 @@ public class AutoDutyWarningWindow : Window
 
         ImGui.Spacing();
         ImGui.TextColored(new Vector4(0.6f, 0.6f, 0.6f, 1.0f), "This window will close automatically after disabling AutoDuty.");
-        
-        // Debug: Log current window position
-        var currentPos = ImGui.GetWindowPos();
-        log.Debug($"[AutoDutyWarning] Current window position: X={currentPos.X:F1}, Y={currentPos.Y:F1}");
     }
 
     public override void OnClose()

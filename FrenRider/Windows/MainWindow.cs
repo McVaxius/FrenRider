@@ -328,9 +328,9 @@ public class MainWindow : Window, IDisposable
 
             // AutoDuty detection warning
             var autoDutyDetection = plugin.AutoDutyDetectionService;
-            if (autoDutyDetection.IsAutoDutyDetected())
+            if (autoDutyDetection.ShouldShowMainWindowWarning())
             {
-                ImGui.TextColored(new Vector4(1f, 0.2f, 0.2f, 1), "⚠️ AutoDuty Detected - May interfere with FrenRider");
+                ImGui.TextColored(new Vector4(1f, 0.2f, 0.2f, 1), "AutoDuty detected while FrenRider is enabled");
             }
 
             // Zone info

@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- AutoDuty warning lifecycle now clears correctly when FrenRider is disabled instead of re-forcing the popup path
+- BossMod follow now uses the reviewed `/bmrai follow <name>` command flow instead of the older mismatched follow syntax
+- Main-window AutoDuty warning is only shown while FrenRider is enabled and the blocking warning window is not already open
+- Duty area-transition recovery now resets zone-sensitive services after `BetweenAreas` loads, improving level-70 treasure dungeon waterfall recovery
+
+### Changed
+- BossMod follow is now treated as a stateful mode and only reissued when target, territory, or follow-combat settings change
+- AutoDuty warning window no longer emits per-frame position debug logging
+
 ### Phase 11 - Food Eating & Chocobo Summoning
 
 #### [0.10.1] - 2026-02-28

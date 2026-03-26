@@ -39,6 +39,7 @@ public class ZoneService
     };
 
     private uint lastTerritoryId;
+    private bool wasBetweenAreas;
 
     public ZoneType CurrentZone { get; private set; }
     public bool IsIndoors { get; private set; }
@@ -50,12 +51,18 @@ public class ZoneService
     public void Update()
     {
         TerritoryId = Plugin.ClientState.TerritoryType;
+        var inAreaTransition = Plugin.Condition[ConditionFlag.BetweenAreas] || Plugin.Condition[ConditionFlag.BetweenAreas51];
 
         // Detect zone transitions
-        ZoneChanged = TerritoryId != lastTerritoryId && lastTerritoryId != 0;
-        if (ZoneChanged)
+        var territoryChanged = TerritoryId != lastTerritoryId && lastTerritoryId != 0;
+        var areaTransitionRecovered = wasBetweenAreas && !inAreaTransition;
+        ZoneChanged = territoryChanged || areaTransitionRecovered;
+        if (territoryChanged)
             Plugin.Log.Information($"Zone changed: {lastTerritoryId} → {TerritoryId}");
+        else if (areaTransitionRecovered)
+            Plugin.Log.Information($"Area transition completed in territory {TerritoryId} - resetting zone-sensitive services");
         lastTerritoryId = TerritoryId;
+        wasBetweenAreas = inAreaTransition;
 
         // Zone type detection
         if (DeepDungeonIds.Contains(TerritoryId))

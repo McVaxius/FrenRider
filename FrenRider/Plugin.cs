@@ -183,21 +183,11 @@ public sealed class Plugin : IDalamudPlugin
             
             // Force an immediate detection check first
             AutoDutyDetectionService.ForceCheck();
-            
-            // Now check if AutoDuty is detected
-            var isDetected = AutoDutyDetectionService.IsAutoDutyDetected();
-            Log.Information($"[FR] AutoDuty detected: {isDetected}");
-            
-            if (isDetected)
-            {
-                Log.Information("[FR] AutoDuty detected - showing warning window");
-                // Always show warning when FrenRider is enabled and AutoDuty is detected
-                AutoDutyDetectionService.ForceShowWarning();
-            }
-            else
-            {
-                Log.Information("[FR] AutoDuty not detected - no warning needed");
-            }
+            Log.Information($"[FR] AutoDuty detected after enable check: {AutoDutyDetectionService.IsAutoDutyDetected()}");
+        }
+        else
+        {
+            AutoDutyDetectionService.HandleFrenRiderDisabled();
         }
     }
 
