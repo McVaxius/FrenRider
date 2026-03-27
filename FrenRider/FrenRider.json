@@ -3,7 +3,7 @@
   "Name": "Fren Rider",
   "Punchline": "Multiboxing follow and automation companion for FFXIV.",
   "Description": "Native Dalamud plugin for managing 2+ characters in various situations. Follow party members, auto-mount, combat integration, and more. Use /frenrider or /fr to open.",
-  "IconUrl": "images/icon.png",
+  "IconUrl": "https://raw.githubusercontent.com/McVaxius/FrenRider/refs/heads/master/FrenRider/images/icon.png",
   "ApplicableVersion": "any",
   "Tags": [
     "multibox",

@@ -4,7 +4,7 @@
 
   <PropertyGroup>
 
-    <Version>0.0.0.61</Version>
+    <Version>0.0.0.62</Version>
 
     <PackageProjectUrl>https://github.com/McVaxius/FrenRider</PackageProjectUrl>
 
@@ -48,13 +48,6 @@
       <PluginFiles Include="videos\**" />
 
     </ItemGroup>
-
-    <ItemGroup>
-
-      <DalamudPackagerFile Include="images\icon.png" />
-
-    </ItemGroup>
-
 
     <Copy SourceFiles="@(PluginFiles)"
 
