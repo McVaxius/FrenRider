@@ -184,6 +184,13 @@ public sealed class Plugin : IDalamudPlugin
             // Force an immediate detection check first
             AutoDutyDetectionService.ForceCheck();
             Log.Information($"[FR] AutoDuty detected after enable check: {AutoDutyDetectionService.IsAutoDutyDetected()}");
+
+            var config = ConfigManager.GetActiveConfig();
+            if (config.AutorotPushOnEnable)
+            {
+                Log.Information("[FR] Autorot push-on-enable is on - pushing presets now");
+                AutorotIpcService.CreatePresets(force: true);
+            }
         }
         else
         {

@@ -1180,7 +1180,7 @@ public class ConfigWindow : Window, IDisposable
 
         if (ImGui.Button("Push Presets Now"))
         {
-            plugin.AutorotIpcService.CreatePresets();
+            plugin.AutorotIpcService.CreatePresets(force: true);
         }
         ImGui.SameLine();
         ImGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1), plugin.AutorotIpcService.LastStatus);

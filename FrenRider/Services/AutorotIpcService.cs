@@ -24,26 +24,37 @@ public class AutorotIpcService : IDisposable
     }
 
     /// <summary>
-    /// Push the embedded autorot presets into BMR/VBM.
-    /// Tries both BossMod (VBM) and BossModReborn (BMR) IPC channels.
+    /// Push the embedded autorot presets into BossMod-compatible rotation plugins.
+    /// Tries the current BossMod IPC contract first, then legacy aliases if needed.
     /// </summary>
-    public void CreatePresets()
+    public void CreatePresets(bool force = false)
     {
-        if (presetsCreated) return;
+        if (presetsCreated && !force)
+        {
+            LastStatus = "Presets already pushed this session";
+            log.Debug("Skipping autorot preset push because presets were already created this session");
+            return;
+        }
 
-        var created = false;
-        created |= TryCreatePreset("FRENRIDER", FrenRiderPresetJson);
-        created |= TryCreatePreset("DD", DdPresetJson);
+        log.Information($"Starting autorot preset push (force={force})");
 
-        if (created)
+        var frenRiderCreated = TryCreatePreset("FRENRIDER", FrenRiderPresetJson);
+        var ddCreated = TryCreatePreset("DD", DdPresetJson);
+
+        if (frenRiderCreated && ddCreated)
         {
             presetsCreated = true;
             LastStatus = "Presets pushed to rotation plugin";
             log.Information("Autorot presets created successfully");
         }
+        else if (frenRiderCreated || ddCreated)
+        {
+            LastStatus = "Preset push partially succeeded";
+            log.Warning("Autorot preset push partially succeeded");
+        }
         else
         {
-            LastStatus = "No rotation plugin responded to IPC";
+            LastStatus = "No compatible BossMod preset IPC responded";
             log.Warning("Failed to create autorot presets - no rotation plugin IPC available");
         }
     }
@@ -51,16 +62,41 @@ public class AutorotIpcService : IDisposable
     /// <summary>
     /// Force-activate a preset by name via IPC.
     /// </summary>
-    public void ForcePreset(string presetJson)
+    public void ForcePreset(string presetName)
     {
-        var result = TryIpc<string, string>("BossMod.Presets.ForceSet", presetJson);
-        if (result == null)
-            result = TryIpc<string, string>("BossModReborn.Presets.ForceSet", presetJson);
+        if (string.IsNullOrWhiteSpace(presetName))
+            return;
 
-        if (result != null && result.Length == 0)
-            log.Information("Preset force-set via IPC");
-        else if (result != null)
-            log.Warning($"Preset force-set returned: {result}");
+        var result = TryBoolIpc("BossMod.Presets.SetActive", presetName);
+        if (result.HasValue)
+        {
+            if (result.Value)
+                log.Information($"Preset '{presetName}' set active via BossMod IPC");
+            else
+                log.Warning($"BossMod.Presets.SetActive returned false for preset '{presetName}'");
+            return;
+        }
+
+        result = TryBoolIpc("BossModReborn.Presets.SetActive", presetName);
+        if (result.HasValue)
+        {
+            if (result.Value)
+                log.Information($"Preset '{presetName}' set active via BossModReborn IPC");
+            else
+                log.Warning($"BossModReborn.Presets.SetActive returned false for preset '{presetName}'");
+            return;
+        }
+
+        var legacyResult = TryStringIpc("BossMod.Presets.ForceSet", presetName);
+        if (legacyResult != null)
+        {
+            LogLegacyPresetResult("BossMod.Presets.ForceSet", presetName, legacyResult);
+            return;
+        }
+
+        legacyResult = TryStringIpc("BossModReborn.Presets.ForceSet", presetName);
+        if (legacyResult != null)
+            LogLegacyPresetResult("BossModReborn.Presets.ForceSet", presetName, legacyResult);
     }
 
     /// <summary>
@@ -68,6 +104,14 @@ public class AutorotIpcService : IDisposable
     /// </summary>
     public void ClearForcedPreset()
     {
+        var result = TryBoolIpc("BossMod.Presets.ClearActive");
+        if (result.HasValue)
+            return;
+
+        result = TryBoolIpc("BossModReborn.Presets.ClearActive");
+        if (result.HasValue)
+            return;
+
         TryIpcAction("BossMod.Presets.ForceClear");
         TryIpcAction("BossModReborn.Presets.ForceClear");
     }
@@ -93,46 +137,55 @@ public class AutorotIpcService : IDisposable
 
     private bool TryCreatePreset(string name, string json)
     {
-        // Try VBM first, then BMR
-        var result = TryIpc<string, string>("BossMod.Presets.Create", json);
-        if (result != null)
+        var result = TryBoolIpc("BossMod.Presets.Create", json, true);
+        if (result.HasValue)
         {
-            if (result.Length == 0)
+            if (result.Value)
             {
-                log.Information($"Preset '{name}' created via BossMod (VBM) IPC");
+                log.Information($"Preset '{name}' created via BossMod-compatible IPC");
                 return true;
             }
-            else
-            {
-                log.Debug($"BossMod.Presets.Create for '{name}': {result}");
-                // Non-empty result may mean preset already exists, which is fine
-                return true;
-            }
+
+            log.Warning($"BossMod.Presets.Create returned false for preset '{name}'");
+            return false;
         }
 
-        result = TryIpc<string, string>("BossModReborn.Presets.Create", json);
-        if (result != null)
+        var legacyResult = TryStringIpc("BossMod.Presets.Create", json);
+        if (legacyResult != null)
         {
-            if (result.Length == 0)
-            {
-                log.Information($"Preset '{name}' created via BossModReborn (BMR) IPC");
-                return true;
-            }
-            else
-            {
-                log.Debug($"BossModReborn.Presets.Create for '{name}': {result}");
-                return true;
-            }
+            LogLegacyPresetResult("BossMod.Presets.Create", name, legacyResult);
+            return true;
+        }
+
+        legacyResult = TryStringIpc("BossModReborn.Presets.Create", json);
+        if (legacyResult != null)
+        {
+            LogLegacyPresetResult("BossModReborn.Presets.Create", name, legacyResult);
+            return true;
         }
 
         return false;
     }
 
-    private TResult? TryIpc<TArg, TResult>(string channel, TArg arg) where TResult : class
+    private bool? TryBoolIpc(string channel)
     {
         try
         {
-            var subscriber = pluginInterface.GetIpcSubscriber<TArg, TResult>(channel);
+            var subscriber = pluginInterface.GetIpcSubscriber<bool>(channel);
+            return subscriber.InvokeFunc();
+        }
+        catch (Exception ex)
+        {
+            log.Debug($"IPC {channel} not available: {ex.Message}");
+            return null;
+        }
+    }
+
+    private bool? TryBoolIpc<TArg>(string channel, TArg arg)
+    {
+        try
+        {
+            var subscriber = pluginInterface.GetIpcSubscriber<TArg, bool>(channel);
             return subscriber.InvokeFunc(arg);
         }
         catch (Exception ex)
@@ -142,12 +195,26 @@ public class AutorotIpcService : IDisposable
         }
     }
 
-    private TResult? TryIpc<TArg1, TArg2, TResult>(string channel, TArg1 arg1, TArg2 arg2) where TResult : class
+    private bool? TryBoolIpc<TArg1, TArg2>(string channel, TArg1 arg1, TArg2 arg2)
     {
         try
         {
-            var subscriber = pluginInterface.GetIpcSubscriber<TArg1, TArg2, TResult>(channel);
+            var subscriber = pluginInterface.GetIpcSubscriber<TArg1, TArg2, bool>(channel);
             return subscriber.InvokeFunc(arg1, arg2);
+        }
+        catch (Exception ex)
+        {
+            log.Debug($"IPC {channel} not available: {ex.Message}");
+            return null;
+        }
+    }
+
+    private string? TryStringIpc<TArg>(string channel, TArg arg)
+    {
+        try
+        {
+            var subscriber = pluginInterface.GetIpcSubscriber<TArg, string>(channel);
+            return subscriber.InvokeFunc(arg);
         }
         catch (Exception ex)
         {
@@ -180,6 +247,14 @@ public class AutorotIpcService : IDisposable
         {
             log.Debug($"IPC {channel} not available: {ex.Message}");
         }
+    }
+
+    private void LogLegacyPresetResult(string channel, string presetName, string result)
+    {
+        if (result.Length == 0)
+            log.Information($"Preset '{presetName}' handled via legacy IPC channel {channel}");
+        else
+            log.Warning($"Legacy IPC {channel} returned '{result}' for preset '{presetName}'");
     }
 
     public void Dispose()
