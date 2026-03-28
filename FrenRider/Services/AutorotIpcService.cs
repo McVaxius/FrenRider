@@ -38,8 +38,8 @@ public class AutorotIpcService : IDisposable
 
         log.Information($"Starting autorot preset push (force={force})");
 
-        var frenRiderCreated = TryCreatePreset("FRENRIDER", FrenRiderPresetJson);
-        var ddCreated = TryCreatePreset("DD", DdPresetJson);
+        var frenRiderCreated = TryCreatePreset("FRENRIDER", FrenRiderPresetJson, force);
+        var ddCreated = TryCreatePreset("DD", DdPresetJson, force);
 
         if (frenRiderCreated && ddCreated)
         {
@@ -135,14 +135,45 @@ public class AutorotIpcService : IDisposable
         }
     }
 
-    private bool TryCreatePreset(string name, string json)
+    private bool TryCreatePreset(string name, string json, bool forceRecreate)
     {
+        string? previouslyActivePreset = null;
+
+        if (forceRecreate)
+        {
+            var existingPreset = TryStringIpc("BossMod.Presets.Get", name);
+            if (existingPreset != null)
+            {
+                previouslyActivePreset = TryStringIpc("BossMod.Presets.GetActive");
+
+                var deleteResult = TryBoolIpc("BossMod.Presets.Delete", name);
+                if (deleteResult.HasValue)
+                {
+                    if (deleteResult.Value)
+                        log.Information($"Preset '{name}' deleted before recreate via BossMod-compatible IPC");
+                    else
+                        log.Warning($"BossMod.Presets.Delete returned false for preset '{name}' before recreate");
+                }
+            }
+        }
+
         var result = TryBoolIpc("BossMod.Presets.Create", json, true);
         if (result.HasValue)
         {
             if (result.Value)
             {
                 log.Information($"Preset '{name}' created via BossMod-compatible IPC");
+
+                if (!string.IsNullOrEmpty(previouslyActivePreset) &&
+                    string.Equals(previouslyActivePreset, name, StringComparison.OrdinalIgnoreCase))
+                {
+                    var reactivateResult = TryBoolIpc("BossMod.Presets.SetActive", name);
+                    if (reactivateResult == true)
+                        log.Information($"Preset '{name}' restored as active after recreate");
+                    else if (reactivateResult == false)
+                        log.Warning($"BossMod.Presets.SetActive returned false while restoring preset '{name}' after recreate");
+                }
+
                 return true;
             }
 
@@ -215,6 +246,20 @@ public class AutorotIpcService : IDisposable
         {
             var subscriber = pluginInterface.GetIpcSubscriber<TArg, string>(channel);
             return subscriber.InvokeFunc(arg);
+        }
+        catch (Exception ex)
+        {
+            log.Debug($"IPC {channel} not available: {ex.Message}");
+            return null;
+        }
+    }
+
+    private string? TryStringIpc(string channel)
+    {
+        try
+        {
+            var subscriber = pluginInterface.GetIpcSubscriber<string>(channel);
+            return subscriber.InvokeFunc();
         }
         catch (Exception ex)
         {
