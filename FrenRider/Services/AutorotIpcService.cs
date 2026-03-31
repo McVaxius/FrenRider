@@ -11,6 +11,36 @@ namespace FrenRider.Services;
 /// </summary>
 public class AutorotIpcService : IDisposable
 {
+    public enum RsrStateCommandType : byte
+    {
+        Off,
+        Auto,
+        TargetOnly,
+        Manual,
+        AutoDuty,
+        Henched,
+        PvP,
+    }
+
+    public enum RsrOtherCommandType : byte
+    {
+        Settings,
+        Rotations,
+        DutyRotations,
+        DoActions,
+        ToggleActions,
+        NextAction,
+    }
+
+    public enum RsrTargetHostileType : byte
+    {
+        AllTargetsCanAttack,
+        TargetsHaveTarget,
+        AllTargetsWhenSoloInDuty,
+        AllTargetsWhenSolo,
+        SoloDeepDungeonSmart,
+    }
+
     private readonly IDalamudPluginInterface pluginInterface;
     private readonly IPluginLog log;
     private bool presetsCreated;
@@ -114,6 +144,48 @@ public class AutorotIpcService : IDisposable
 
         TryIpcAction("BossMod.Presets.ForceClear");
         TryIpcAction("BossModReborn.Presets.ForceClear");
+    }
+
+    public bool TrySetRsrMode(RsrStateCommandType mode)
+    {
+        try
+        {
+            var subscriber = pluginInterface.GetIpcSubscriber<RsrStateCommandType, object>("RotationSolverReborn.ChangeOperatingMode");
+            subscriber.InvokeAction(mode);
+            log.Debug($"RSR mode set via IPC: {mode}");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            log.Debug($"RSR mode IPC unavailable for {mode}: {ex.Message}");
+            return false;
+        }
+    }
+
+    public bool TrySetRsrHostileType(RsrTargetHostileType hostileType)
+    {
+        return TrySetRsrSetting("HostileType", hostileType.ToString());
+    }
+
+    public bool TrySetRsrSupportTargeting(bool enabled)
+    {
+        return TrySetRsrSetting("FriendlyPartyNpcHealRaise3", enabled ? "true" : "false");
+    }
+
+    private bool TrySetRsrSetting(string settingName, string value)
+    {
+        try
+        {
+            var subscriber = pluginInterface.GetIpcSubscriber<RsrOtherCommandType, string, object>("RotationSolverReborn.OtherCommand");
+            subscriber.InvokeAction(RsrOtherCommandType.Settings, $"{settingName} {value}");
+            log.Debug($"RSR setting applied via IPC: {settingName}={value}");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            log.Debug($"RSR setting IPC unavailable for {settingName}={value}: {ex.Message}");
+            return false;
+        }
     }
 
     /// <summary>
@@ -274,6 +346,19 @@ public class AutorotIpcService : IDisposable
         {
             var subscriber = pluginInterface.GetIpcSubscriber<object?>(channel);
             subscriber.InvokeFunc();
+        }
+        catch (Exception ex)
+        {
+            log.Debug($"IPC {channel} not available: {ex.Message}");
+        }
+    }
+
+    private void TryIpcAction<TArg>(string channel, TArg arg)
+    {
+        try
+        {
+            var subscriber = pluginInterface.GetIpcSubscriber<TArg, object?>(channel);
+            subscriber.InvokeFunc(arg);
         }
         catch (Exception ex)
         {

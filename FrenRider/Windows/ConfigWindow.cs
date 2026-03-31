@@ -28,7 +28,7 @@ public class ConfigWindow : Window, IDisposable
     private static readonly string[] CompanionStances = { "Free Stance", "Defender Stance", "Attacker Stance", "Healer Stance", "Follow" };
     private static readonly string[] ClingTypes = { "NavMesh", "Visland", "BossMod Follow", "Vanilla Follow" };
     private static readonly string[] RotationPlugins = { "BMR", "VBM", "RSR", "WRATH" };
-    private static readonly string[] RotationTypes = { "Auto", "Manual", "none" };
+    private static readonly string[] RotationTypes = { "Auto", "Manual", "none", "Auto (Support)", "Previously Engaged Targets" };
     private static readonly string[] BossModAIOptions = { "on", "off" };
     private static readonly string[] Positionals = { "Front", "Rear", "Any", "Auto" };
     private static readonly string[] FollowInCombatOptions = { "No", "Yes", "Auto" };
@@ -714,16 +714,16 @@ public class ConfigWindow : Window, IDisposable
         ImGui.Text("Behavior");
         ImGui.Spacing();
 
-        // Rotation Type (dropdown)
+        // RSR Rotation Type (dropdown)
         var rotType = config.RotationType;
         ImGui.SetNextItemWidth(200);
-        if (ImGui.Combo("Rotation Type", ref rotType, RotationTypes, RotationTypes.Length))
+        if (ImGui.Combo("RSR Rotation Type", ref rotType, RotationTypes, RotationTypes.Length))
         {
             config.RotationType = rotType;
             configManager.SaveCurrentAccount();
         }
         ImGui.SameLine();
-        HelpMarker("RSR rotation mode.\nAuto: Fully automated rotation\nManual: Manual trigger\nnone: Don't change setting");
+        HelpMarker("RSR operating mode when RSR is the selected rotation plugin.\nAuto: Full auto with standard hostile targeting.\nManual: Manual targeting mode.\nnone: Don't let FrenRider change the current rotation state.\nAuto (Support): Uses RSR's plugin-managed support mode and support-oriented targeting settings.\nPreviously Engaged Targets: Auto with RSR hostile targeting forced to previously engaged targets.");
 
         // BossMod AI (dropdown)
         var bossModAI = config.BossModAI;

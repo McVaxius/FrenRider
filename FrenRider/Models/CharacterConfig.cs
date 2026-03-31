@@ -47,7 +47,7 @@ public class CharacterConfig
     public int PositionalInCombat { get; set; } = 3; // 0=Front, 1=Rear, 2=Any, 3=Auto
     public float MaxAIDistance { get; set; } = 424242f;
     public float LimitPct { get; set; } = -1f;
-    public int RotationType { get; set; } = 0; // 0=Auto, 1=Manual, 2=none
+    public int RotationType { get; set; } = 0; // 0=Auto, 1=Manual, 2=none, 3=Auto (Support), 4=Previously Engaged Targets
 
     // --- Automation / Misc ---
     public bool EnableAutoDiscard { get; set; } = false;

@@ -14,6 +14,12 @@ public enum CombatState
 
 public class CombatService
 {
+    private const int RotationTypeAuto = 0;
+    private const int RotationTypeManual = 1;
+    private const int RotationTypeNone = 2;
+    private const int RotationTypeAutoSupport = 3;
+    private const int RotationTypePreviouslyEngagedTargets = 4;
+
     private readonly Plugin plugin;
     private readonly FrenTracker tracker;
     private readonly ZoneService zoneService;
@@ -82,7 +88,7 @@ public class CombatService
             wasInDuty = true;
             Plugin.Log.Information("Entered duty - activating rotation");
 
-            if (config.RotationType != 2) // 2 = none
+            if (!IsRotationDisabled(config))
             {
                 ActivateRotation(config);
             }
@@ -113,7 +119,7 @@ public class CombatService
             State = CombatState.EnteringCombat;
 
             // Only activate if not already active from duty entry
-            if (!inDuty && config.RotationType != 2)
+            if (!inDuty && !IsRotationDisabled(config))
             {
                 ActivateRotation(config);
             }
@@ -193,20 +199,24 @@ public class CombatService
         switch (pluginName)
         {
             case "RSR":
-                SendCommand("/rotation auto on");
+                var rsrModeName = ApplyRsrMode(config);
                 if (!string.IsNullOrEmpty(preset) && preset != "FRENRIDER")
                     SendCommand($"/rotation settings preset {preset}");
+                StateDetail = $"{pluginName} {rsrModeName}" + (string.IsNullOrEmpty(preset) ? "" : $" [{preset}]");
                 break;
             case "WRATH":
                 SendCommand("/wrath auto on");
                 if (!string.IsNullOrEmpty(preset))
                     SendCommand($"/wrath settings preset {preset}");
+                StateDetail = $"{pluginName} active" + (string.IsNullOrEmpty(preset) ? "" : $" [{preset}]");
                 break;
             case "BMR":
                 SendCommand("/bmrai on");
+                StateDetail = $"{pluginName} active" + (string.IsNullOrEmpty(preset) ? "" : $" [{preset}]");
                 break;
             case "VBM":
                 SendCommand("/vbmai on");
+                StateDetail = $"{pluginName} active" + (string.IsNullOrEmpty(preset) ? "" : $" [{preset}]");
                 break;
         }
 
@@ -214,8 +224,6 @@ public class CombatService
         SetPositional(config, pluginName);
 
         State = CombatState.InCombat;
-        StateDetail = $"{pluginName} active" + (string.IsNullOrEmpty(preset) ? "" : $" [{preset}]");
-
         Plugin.Log.Information($"Combat: Activated {pluginName} with preset '{preset}'");
     }
 
@@ -232,7 +240,8 @@ public class CombatService
         switch (pluginName)
         {
             case "RSR":
-                SendCommand("/rotation auto off");
+                if (!plugin.AutorotIpcService.TrySetRsrMode(AutorotIpcService.RsrStateCommandType.Off))
+                    SendCommand("/rotation cancel");
                 break;
             case "WRATH":
                 SendCommand("/wrath auto off");
@@ -250,6 +259,37 @@ public class CombatService
         ActivePreset = "";
 
         Plugin.Log.Information($"Combat: Deactivated {pluginName}");
+    }
+
+    private string ApplyRsrMode(CharacterConfig config)
+    {
+        switch (config.RotationType)
+        {
+            case RotationTypeManual:
+                if (!plugin.AutorotIpcService.TrySetRsrMode(AutorotIpcService.RsrStateCommandType.Manual))
+                    SendCommand("/rotation manual");
+                return "Manual";
+
+            case RotationTypeAutoSupport:
+                plugin.AutorotIpcService.TrySetRsrHostileType(AutorotIpcService.RsrTargetHostileType.TargetsHaveTarget);
+                plugin.AutorotIpcService.TrySetRsrSupportTargeting(true);
+                if (!plugin.AutorotIpcService.TrySetRsrMode(AutorotIpcService.RsrStateCommandType.Henched))
+                    SendCommand("/rotation auto on");
+                return "Auto (Support)";
+
+            case RotationTypePreviouslyEngagedTargets:
+                plugin.AutorotIpcService.TrySetRsrHostileType(AutorotIpcService.RsrTargetHostileType.TargetsHaveTarget);
+                if (!plugin.AutorotIpcService.TrySetRsrMode(AutorotIpcService.RsrStateCommandType.Auto))
+                    SendCommand("/rotation auto on");
+                return "Previously Engaged Targets";
+
+            case RotationTypeAuto:
+            default:
+                plugin.AutorotIpcService.TrySetRsrHostileType(AutorotIpcService.RsrTargetHostileType.AllTargetsCanAttack);
+                if (!plugin.AutorotIpcService.TrySetRsrMode(AutorotIpcService.RsrStateCommandType.Auto))
+                    SendCommand("/rotation auto on");
+                return "Auto";
+        }
     }
 
     private string GetPresetForZone(CharacterConfig config)
@@ -352,5 +392,10 @@ public class CombatService
         {
             Plugin.Log.Error($"Combat command failed [{command}]: {ex.Message}");
         }
+    }
+
+    private static bool IsRotationDisabled(CharacterConfig config)
+    {
+        return config.RotationType == RotationTypeNone;
     }
 }
