@@ -68,7 +68,8 @@ public class CombatService
         {
             ResetCombatSettingsRefreshTracking();
             lastObservedCombatSettingsSignature = string.Empty;
-            if (wasInCombat) DeactivateRotation(config);
+            //if (wasInCombat) DeactivateRotation(config);
+			Plugin.Log.Information($"Combat: stopped FrenRider GHOST IN THE MACHINE 5 attemting to deactivate rotations after combat like an idiot");
             State = CombatState.OutOfCombat;
             StateDetail = "Disabled";
             wasInCombat = false;
@@ -95,7 +96,8 @@ public class CombatService
             wasInDuty = false;
             wasInCombat = false;
             State = CombatState.LeavingCombat;
-            DeactivateRotation(config);
+            //DeactivateRotation(config);
+            //SendCommand("/rotation cancel"); //why is this here ? GHOST IN THE MACHINE6 another attemp to deactivate rotations once we leave duties. sigh
             Plugin.Log.Information("Left duty - deactivating rotation");
         }
         // Entered combat (while already in duty or not)
@@ -120,7 +122,8 @@ public class CombatService
             if (!inDuty)
             {
                 State = CombatState.LeavingCombat;
-                DeactivateRotation(config);
+                //DeactivateRotation(config);
+                //SendCommand("/rotation cancel"); //why is this here ? GHOST IN THE MACHINE7
             }
             else
             {
@@ -206,10 +209,12 @@ public class CombatService
         {
             case "RSR":
                 if (!plugin.AutorotIpcService.TrySetRsrMode(AutorotIpcService.RsrStateCommandType.Off))
-                    SendCommand("/rotation cancel");
+                    //SendCommand("/rotation cancel"); //why is this here ? GHOST IN THE MACHINE3
+					Plugin.Log.Information($"Combat: stopped {pluginName} GHOST IN THE MACHINE 3 rotation cancel");
                 break;
             case "WRATH":
-                SendCommand("/wrath auto off");
+					//SendCommand("/wrath auto off"); //why is this here ? GHOST IN THE MACHINE4
+					Plugin.Log.Information($"Combat: stopped {pluginName} GHOST IN THE MACHINE 4 wrath auto off");
                 break;
             case "BMR":
             case "VBM":
@@ -427,17 +432,25 @@ public class CombatService
     private void ApplyBossModSafetyState(string pluginName, string selectedPreset, string reason)
     {
         EnsureBossModAiEnabled();
-
         switch (pluginName)
         {
             case "BMR":
+				SendCommand($"/rotation cancel");  //ghost in the machine 8. disabling RSR when we switch to bmr
+				SendCommand($"/wrath Auto off");  //ghost in the machine 8. disabling WRATH when we switch to bmr
                 SendBmrPresetCommand(selectedPreset, reason);
                 break;
             case "VBM":
+				SendCommand($"/rotation cancel");  //ghost in the machine 8. disabling RSR when we switch to vbm
+				SendCommand($"/wrath Auto off");  //ghost in the machine 8. disabling WRATH when we switch to vbm
                 SendVbmPresetCommand(selectedPreset, reason);
                 break;
             case "RSR":
+				SendCommand($"/rotation Auto");  //ghost in the machine 8. disabling RSR when we switch to WRATH
+                SendBmrPresetCommand(BossModPassivePresetName, $"{reason} because selected plugin is {pluginName}");
+                SendVbmPresetCommand(BossModPassivePresetName, $"{reason} because selected plugin is {pluginName}");
+                break;
             case "WRATH":
+				SendCommand($"/rotation cancel");  //ghost in the machine 8. disabling RSR when we switch to WRATH
                 SendBmrPresetCommand(BossModPassivePresetName, $"{reason} because selected plugin is {pluginName}");
                 SendVbmPresetCommand(BossModPassivePresetName, $"{reason} because selected plugin is {pluginName}");
                 break;
@@ -496,10 +509,12 @@ public class CombatService
             switch (otherPluginName)
             {
                 case "RSR":
-                    SendCommand("/rotation cancel");
+                    //SendCommand("/rotation cancel"); //ghost in the machine 1
+					Plugin.Log.Information($"Combat: stopped {pluginName} GHOST IN THE MACHINE 1 rotation cancel");
                     break;
                 case "WRATH":
-                    SendCommand("/wrath auto off");
+                    //SendCommand("/wrath auto off"); //ghost in the machine 2
+					Plugin.Log.Information($"Combat: stopped {pluginName} GHOST IN THE MACHINE 2 rotation cancel");
                     break;
             }
         }
