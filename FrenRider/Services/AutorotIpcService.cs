@@ -97,36 +97,48 @@ public class AutorotIpcService : IDisposable
         if (string.IsNullOrWhiteSpace(presetName))
             return;
 
+        var handled = false;
+
         var result = TryBoolIpc("BossMod.Presets.SetActive", presetName);
         if (result.HasValue)
         {
             if (result.Value)
+            {
                 log.Information($"Preset '{presetName}' set active via BossMod IPC");
+                handled = true;
+            }
             else
                 log.Warning($"BossMod.Presets.SetActive returned false for preset '{presetName}'");
-            return;
         }
 
         result = TryBoolIpc("BossModReborn.Presets.SetActive", presetName);
         if (result.HasValue)
         {
             if (result.Value)
+            {
                 log.Information($"Preset '{presetName}' set active via BossModReborn IPC");
+                handled = true;
+            }
             else
                 log.Warning($"BossModReborn.Presets.SetActive returned false for preset '{presetName}'");
-            return;
         }
 
         var legacyResult = TryStringIpc("BossMod.Presets.ForceSet", presetName);
         if (legacyResult != null)
         {
             LogLegacyPresetResult("BossMod.Presets.ForceSet", presetName, legacyResult);
-            return;
+            handled = true;
         }
 
         legacyResult = TryStringIpc("BossModReborn.Presets.ForceSet", presetName);
         if (legacyResult != null)
+        {
             LogLegacyPresetResult("BossModReborn.Presets.ForceSet", presetName, legacyResult);
+            handled = true;
+        }
+
+        if (!handled)
+            log.Warning($"No BossMod-compatible preset IPC responded while setting preset '{presetName}'");
     }
 
     /// <summary>

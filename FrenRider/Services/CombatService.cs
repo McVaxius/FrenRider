@@ -1,5 +1,8 @@
 using System;
+using System.Text;
 using Dalamud.Game.ClientState.Conditions;
+using FFXIVClientStructs.FFXIV.Client.System.String;
+using FFXIVClientStructs.FFXIV.Client.UI;
 using FrenRider.Models;
 
 namespace FrenRider.Services;
@@ -14,6 +17,7 @@ public enum CombatState
 
 public class CombatService
 {
+    private const string BossModPassivePresetName = "AutoDuty Passive";
     private const int RotationTypeAuto = 0;
     private const int RotationTypeManual = 1;
     private const int RotationTypeNone = 2;
@@ -27,10 +31,13 @@ public class CombatService
     private bool wasInCombat;
     private bool wasInDuty;
     private long lastRotationToggleMs;
-    private long lastPluginCheckMs;
     private int lastActivePluginIdx = -1;
+    private long pendingCombatSettingsRefreshMs;
+    private string lastObservedCombatSettingsSignature = string.Empty;
+    private string pendingCombatSettingsSignature = string.Empty;
 
     private static readonly string[] RotationPluginNames = { "BMR", "VBM", "RSR", "WRATH" };
+    private const long CombatSettingsRefreshDebounceMs = 400;
 
     public CombatState State { get; private set; } = CombatState.OutOfCombat;
     public string StateDetail { get; private set; } = "";
@@ -46,19 +53,21 @@ public class CombatService
     public void Update()
     {
         var config = plugin.ConfigManager.GetActiveConfig();
+        var inCombat = Plugin.Condition[ConditionFlag.InCombat];
+        var inDuty = Plugin.Condition[ConditionFlag.BoundByDuty];
+        var now = Environment.TickCount64;
 
         // Zone transition: deactivate rotation and reset
         if (zoneService.ZoneChanged)
         {
-            if (wasInCombat) DeactivateRotation(config);
-            State = CombatState.OutOfCombat;
-            StateDetail = "Zone transition";
-            wasInCombat = false;
+            HandleZoneTransition(config, inCombat, inDuty);
             return;
         }
 
         if (!config.Enabled)
         {
+            ResetCombatSettingsRefreshTracking();
+            lastObservedCombatSettingsSignature = string.Empty;
             if (wasInCombat) DeactivateRotation(config);
             State = CombatState.OutOfCombat;
             StateDetail = "Disabled";
@@ -66,21 +75,7 @@ public class CombatService
             return;
         }
 
-        var inCombat = Plugin.Condition[ConditionFlag.InCombat];
-        var inDuty = Plugin.Condition[ConditionFlag.BoundByDuty];
-        var now = Environment.TickCount64;
-
-        // Only disable other rotation plugins when NOT actively in combat/duty
-        // This prevents interference with active rotation
-        if (!inCombat && !inDuty)
-        {
-            var checkInterval = 5000;
-            if (now - lastPluginCheckMs > checkInterval)
-            {
-                lastPluginCheckMs = now;
-                DisableOtherRotationPlugins(config);
-            }
-        }
+        TrackCombatSettingsChanges(config, now);
 
         // Entered duty (activate rotation immediately)
         if (inDuty && !wasInDuty)
@@ -93,10 +88,6 @@ public class CombatService
                 ActivateRotation(config);
             }
 
-            if (config.BossModAI == 0) // 0 = on
-            {
-                ToggleBossModAI(true);
-            }
         }
         // Left duty (deactivate rotation)
         else if (!inDuty && wasInDuty)
@@ -106,11 +97,6 @@ public class CombatService
             State = CombatState.LeavingCombat;
             DeactivateRotation(config);
             Plugin.Log.Information("Left duty - deactivating rotation");
-
-            if (config.BossModAI == 0)
-            {
-                ToggleBossModAI(false);
-            }
         }
         // Entered combat (while already in duty or not)
         else if (inCombat && !wasInCombat)
@@ -124,10 +110,6 @@ public class CombatService
                 ActivateRotation(config);
             }
 
-            if (!inDuty && config.BossModAI == 0)
-            {
-                ToggleBossModAI(true);
-            }
         }
         // Left combat (but stay active if in duty)
         else if (!inCombat && wasInCombat)
@@ -139,11 +121,6 @@ public class CombatService
             {
                 State = CombatState.LeavingCombat;
                 DeactivateRotation(config);
-
-                if (config.BossModAI == 0)
-                {
-                    ToggleBossModAI(false);
-                }
             }
             else
             {
@@ -169,12 +146,14 @@ public class CombatService
             StateDetail = "";
             ActivePreset = "";
         }
+
+        TryApplyPendingCombatSettingsRefresh(config, now, inCombat, inDuty);
     }
 
-    private void ActivateRotation(CharacterConfig config)
+    private void ActivateRotation(CharacterConfig config, bool ignoreCooldown = false)
     {
         var now = Environment.TickCount64;
-        if (now - lastRotationToggleMs < 2000) return; // Cooldown
+        if (!ignoreCooldown && now - lastRotationToggleMs < 2000) return; // Cooldown
         lastRotationToggleMs = now;
 
         // Select preset based on zone type
@@ -182,40 +161,32 @@ public class CombatService
         ActivePreset = preset;
 
         // Select rotation plugin (different for foray)
-        var pluginIdx = zoneService.CurrentZone == ZoneType.Foray
-            ? config.RotationPluginForay
-            : config.RotationPlugin;
-
-        lastActivePluginIdx = pluginIdx;
-
-        var pluginName = pluginIdx >= 0 && pluginIdx < RotationPluginNames.Length
-            ? RotationPluginNames[pluginIdx]
-            : "RSR";
+        var pluginName = GetSelectedRotationPluginName(config);
+        lastActivePluginIdx = Array.IndexOf(RotationPluginNames, pluginName);
 
         // Disable other rotation plugins first
         DisableOtherRotationPlugins(config);
+        ApplyBossModSafetyState(pluginName, preset, "activation");
 
         // Send activation commands
         switch (pluginName)
         {
             case "RSR":
                 var rsrModeName = ApplyRsrMode(config);
-                if (!string.IsNullOrEmpty(preset) && preset != "FRENRIDER")
-                    SendCommand($"/rotation settings preset {preset}");
+                if (ShouldApplyPreset(preset) && !string.Equals(preset, "FRENRIDER", StringComparison.OrdinalIgnoreCase))
+                    SendCommand($"/rotation settings preset {FormatCommandArgument(preset)}");
                 StateDetail = $"{pluginName} {rsrModeName}" + (string.IsNullOrEmpty(preset) ? "" : $" [{preset}]");
                 break;
             case "WRATH":
                 SendCommand("/wrath auto on");
-                if (!string.IsNullOrEmpty(preset))
-                    SendCommand($"/wrath settings preset {preset}");
+                if (ShouldApplyPreset(preset))
+                    SendCommand($"/wrath settings preset {FormatCommandArgument(preset)}");
                 StateDetail = $"{pluginName} active" + (string.IsNullOrEmpty(preset) ? "" : $" [{preset}]");
                 break;
             case "BMR":
-                SendCommand("/bmrai on");
                 StateDetail = $"{pluginName} active" + (string.IsNullOrEmpty(preset) ? "" : $" [{preset}]");
                 break;
             case "VBM":
-                SendCommand("/vbmai on");
                 StateDetail = $"{pluginName} active" + (string.IsNullOrEmpty(preset) ? "" : $" [{preset}]");
                 break;
         }
@@ -229,13 +200,7 @@ public class CombatService
 
     private void DeactivateRotation(CharacterConfig config)
     {
-        var pluginIdx = zoneService.CurrentZone == ZoneType.Foray
-            ? config.RotationPluginForay
-            : config.RotationPlugin;
-
-        var pluginName = pluginIdx >= 0 && pluginIdx < RotationPluginNames.Length
-            ? RotationPluginNames[pluginIdx]
-            : "RSR";
+        var pluginName = GetLastActiveRotationPluginName(config);
 
         switch (pluginName)
         {
@@ -247,16 +212,14 @@ public class CombatService
                 SendCommand("/wrath auto off");
                 break;
             case "BMR":
-                SendCommand("/bmrai off");
-                break;
             case "VBM":
-                SendCommand("/vbmai off");
                 break;
         }
 
         State = CombatState.OutOfCombat;
         StateDetail = "";
         ActivePreset = "";
+        lastActivePluginIdx = -1;
 
         Plugin.Log.Information($"Combat: Deactivated {pluginName}");
     }
@@ -325,49 +288,218 @@ public class CombatService
         }
     }
 
-    private void ToggleBossModAI(bool enable)
+    private void ApplyPassiveRotationSettings(CharacterConfig config, string reason)
     {
-        var state = enable ? "on" : "off";
-        SendCommand($"/bmrai {state}");
+        if (IsRotationDisabled(config))
+            return;
+
+        var pluginName = GetSelectedRotationPluginName(config);
+        var preset = GetPresetForZone(config);
+        ActivePreset = preset;
+        ApplyBossModSafetyState(pluginName, preset, reason);
+
+        switch (pluginName)
+        {
+            case "RSR":
+                if (ShouldApplyPreset(preset) && !string.Equals(preset, "FRENRIDER", StringComparison.OrdinalIgnoreCase))
+                    SendCommand($"/rotation settings preset {FormatCommandArgument(preset)}");
+                SetPositional(config, pluginName);
+                break;
+            case "WRATH":
+                if (ShouldApplyPreset(preset))
+                    SendCommand($"/wrath settings preset {FormatCommandArgument(preset)}");
+                SetPositional(config, pluginName);
+                break;
+            case "BMR":
+            case "VBM":
+                break;
+        }
+
+        Plugin.Log.Information($"Combat: Reapplied {pluginName} settings after {reason} with preset '{preset}'");
     }
 
-    private void DisableOtherRotationPlugins(CharacterConfig config)
+    private void HandleZoneTransition(CharacterConfig config, bool inCombat, bool inDuty)
     {
-        // Disable all rotation plugins except the currently selected one
+        ResetCombatSettingsRefreshTracking();
+
+        State = CombatState.OutOfCombat;
+        StateDetail = "Zone transition";
+        ActivePreset = "";
+        wasInCombat = inCombat;
+        wasInDuty = inDuty;
+
+        if (!config.Enabled)
+            return;
+
+        if (IsRotationDisabled(config))
+        {
+            StateDetail = "Zone transition (rotation disabled)";
+            return;
+        }
+
+        if (inDuty || inCombat)
+            ActivateRotation(config, ignoreCooldown: true);
+        else
+            ApplyPassiveRotationSettings(config, "territory change");
+
+        lastObservedCombatSettingsSignature = BuildCombatSettingsSignature(config);
+    }
+
+    private void TrackCombatSettingsChanges(CharacterConfig config, long now)
+    {
+        var signature = BuildCombatSettingsSignature(config);
+        if (signature == lastObservedCombatSettingsSignature)
+            return;
+
+        lastObservedCombatSettingsSignature = signature;
+        pendingCombatSettingsSignature = signature;
+        pendingCombatSettingsRefreshMs = now + CombatSettingsRefreshDebounceMs;
+    }
+
+    private void TryApplyPendingCombatSettingsRefresh(CharacterConfig config, long now, bool inCombat, bool inDuty)
+    {
+        if (pendingCombatSettingsRefreshMs == 0 || now < pendingCombatSettingsRefreshMs)
+            return;
+
+        var signature = BuildCombatSettingsSignature(config);
+        if (signature != pendingCombatSettingsSignature)
+            return;
+
+        ResetCombatSettingsRefreshTracking();
+        lastObservedCombatSettingsSignature = signature;
+
+        if (IsRotationDisabled(config))
+        {
+            if (lastActivePluginIdx >= 0)
+                DeactivateRotation(config);
+            return;
+        }
+
+        if (inDuty || inCombat)
+            ActivateRotation(config, ignoreCooldown: true);
+        else
+            ApplyPassiveRotationSettings(config, "Combat / AI config change");
+    }
+
+    private void ResetCombatSettingsRefreshTracking()
+    {
+        pendingCombatSettingsRefreshMs = 0;
+        pendingCombatSettingsSignature = string.Empty;
+    }
+
+    private string BuildCombatSettingsSignature(CharacterConfig config)
+    {
+        return string.Join("|",
+            config.AutoRotationType,
+            config.AutoRotationTypeDD,
+            config.AutoRotationTypeFATE,
+            config.RotationPlugin,
+            config.RotationPluginForay,
+            config.BossModAI,
+            config.PositionalInCombat,
+            config.MaxAIDistance,
+            config.LimitPct,
+            config.RotationType,
+            zoneService.CurrentZone,
+            zoneService.InFate,
+            GetPresetForZone(config),
+            GetSelectedRotationPluginName(config));
+    }
+
+    private string GetLastActiveRotationPluginName(CharacterConfig config)
+    {
+        return lastActivePluginIdx >= 0 && lastActivePluginIdx < RotationPluginNames.Length
+            ? RotationPluginNames[lastActivePluginIdx]
+            : GetSelectedRotationPluginName(config);
+    }
+
+    private string GetSelectedRotationPluginName(CharacterConfig config)
+    {
         var pluginIdx = zoneService.CurrentZone == ZoneType.Foray
             ? config.RotationPluginForay
             : config.RotationPlugin;
 
-        var activePluginName = (pluginIdx >= 0 && pluginIdx < RotationPluginNames.Length)
+        return pluginIdx >= 0 && pluginIdx < RotationPluginNames.Length
             ? RotationPluginNames[pluginIdx]
-            : "none";
+            : "RSR";
+    }
+
+    private void ApplyBossModSafetyState(string pluginName, string selectedPreset, string reason)
+    {
+        EnsureBossModAiEnabled();
+
+        switch (pluginName)
+        {
+            case "BMR":
+                SendBmrPresetCommand(selectedPreset, reason);
+                break;
+            case "VBM":
+                SendVbmPresetCommand(selectedPreset, reason);
+                break;
+            case "RSR":
+            case "WRATH":
+                SendBmrPresetCommand(BossModPassivePresetName, $"{reason} because selected plugin is {pluginName}");
+                SendVbmPresetCommand(BossModPassivePresetName, $"{reason} because selected plugin is {pluginName}");
+                break;
+        }
+    }
+
+    private void SendBmrPresetCommand(string presetName, string reason)
+    {
+        if (!ShouldApplyPreset(presetName))
+            return;
+
+        SendCommand($"/bmrai setpresetname {presetName}");
+        Plugin.Log.Information($"Combat: Sent BMR preset command for '{presetName}' after {reason}");
+    }
+
+    private void SendVbmPresetCommand(string presetName, string reason)
+    {
+        if (!ShouldApplyPreset(presetName))
+            return;
+
+        SendCommand($"/vbm ar set {presetName}");
+        Plugin.Log.Information($"Combat: Sent VBM preset command for '{presetName}' after {reason}");
+    }
+
+    private void EnsureBossModAiEnabled()
+    {
+        SendCommand("/bmrai on");
+    }
+
+    private void DisableOtherRotationPlugins(CharacterConfig config)
+    {
+        // Only disable conflicting rotation engines. BossMod AI stays enabled for avoidance/movement.
+        var pluginName = GetSelectedRotationPluginName(config);
+        var pluginIdx = Array.IndexOf(RotationPluginNames, pluginName);
+        var activePluginName = pluginIdx >= 0 ? pluginName : "none";
 
         Plugin.Log.Debug($"DisableOtherRotationPlugins: pluginIdx={pluginIdx}, activePlugin={activePluginName}, isForay={zoneService.CurrentZone == ZoneType.Foray}");
 
         for (var i = 0; i < RotationPluginNames.Length; i++)
         {
-            var pluginName = RotationPluginNames[i];
+            var otherPluginName = RotationPluginNames[i];
             
             if (i == pluginIdx)
             {
-                Plugin.Log.Debug($"  Skipping {pluginName} (index {i}) - this is the active plugin");
+                Plugin.Log.Debug($"  Skipping {otherPluginName} (index {i}) - this is the active plugin");
                 continue; // Skip the active plugin
             }
 
-            Plugin.Log.Debug($"  Disabling {pluginName} (index {i})");
-            switch (pluginName)
+            if (otherPluginName is "BMR" or "VBM")
+            {
+                Plugin.Log.Debug($"  Leaving {otherPluginName} enabled for avoidance / movement");
+                continue;
+            }
+
+            Plugin.Log.Debug($"  Disabling {otherPluginName} (index {i})");
+            switch (otherPluginName)
             {
                 case "RSR":
                     SendCommand("/rotation cancel");
                     break;
                 case "WRATH":
                     SendCommand("/wrath auto off");
-                    break;
-                case "BMR":
-                    SendCommand("/bmrai off");
-                    break;
-                case "VBM":
-                    SendCommand("/vbmai off");
                     break;
             }
         }
@@ -381,12 +513,20 @@ public class CombatService
         // Future: check target's HP % and send /ac "Limit Break" when below threshold
     }
 
-    private static void SendCommand(string command)
+    private static unsafe void SendCommand(string command)
     {
         try
         {
-            if (!Plugin.CommandManager.ProcessCommand(command))
-                Plugin.Log.Warning($"Combat command not handled: {command}");
+            var uiModule = UIModule.Instance();
+            if (uiModule == null)
+            {
+                Plugin.Log.Error($"Combat command failed [{command}]: UIModule is null");
+                return;
+            }
+
+            var bytes = Encoding.UTF8.GetBytes(command);
+            var utf8String = Utf8String.FromSequence(bytes);
+            uiModule->ProcessChatBoxEntry(utf8String, nint.Zero);
         }
         catch (Exception ex)
         {
@@ -394,8 +534,24 @@ public class CombatService
         }
     }
 
+    private static bool ShouldApplyPreset(string value)
+    {
+        return !string.IsNullOrWhiteSpace(value) &&
+            !string.Equals(value, "none", StringComparison.OrdinalIgnoreCase);
+    }
+
     private static bool IsRotationDisabled(CharacterConfig config)
     {
         return config.RotationType == RotationTypeNone;
+    }
+
+    private static string FormatCommandArgument(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return value;
+
+        return value.IndexOfAny([' ', '\t', '"']) >= 0
+            ? $"\"{value.Replace("\"", "\\\"")}\""
+            : value;
     }
 }

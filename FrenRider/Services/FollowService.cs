@@ -411,7 +411,9 @@ public class FollowService
         if (!bossModFollowActive)
             return;
 
-        SendCommand("/bmrai off");
+        SendCommand("/bmrai followoutofcombat off");
+        SendCommand("/bmrai followcombat off");
+        SendCommand("/bmrai followmodule off");
         bossModFollowActive = false;
         bossModFollowTarget = string.Empty;
         bossModFollowTerritoryId = 0;

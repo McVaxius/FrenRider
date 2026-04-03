@@ -681,33 +681,33 @@ public class ConfigWindow : Window, IDisposable
 
         var autoRot = config.AutoRotationType;
         ImGui.SetNextItemWidth(200);
-        if (ImGui.InputText("Auto Rotation Preset", ref autoRot, 32))
+        if (ImGui.InputText("BM Rotation Preset", ref autoRot, 32))
         {
             config.AutoRotationType = autoRot;
             configManager.SaveCurrentAccount();
         }
         ImGui.SameLine();
-        HelpMarker("Name of the auto-rotation preset for general content.\nMust match a preset name in your rotation plugin.\nUse 'none' to not change the preset.");
+        HelpMarker("Name of the auto-rotation preset for general content.\nMust match a preset name in your rotation plugin.\nUse 'none' to not change the preset.\nsome valid types are FRENRIDER, DD, FATE, Autoduty Passive, AutoDuty.");
 
         var autoRotDD = config.AutoRotationTypeDD;
         ImGui.SetNextItemWidth(200);
-        if (ImGui.InputText("Auto Rotation Preset (DD)", ref autoRotDD, 32))
+        if (ImGui.InputText("BM Rotation Preset (DD)", ref autoRotDD, 32))
         {
             config.AutoRotationTypeDD = autoRotDD;
             configManager.SaveCurrentAccount();
         }
         ImGui.SameLine();
-        HelpMarker("Preset name for Deep Dungeon content.");
+        HelpMarker("Preset name for Deep Dungeon content.\nsome valid types are FRENRIDER, DD, FATE, Autoduty Passive, AutoDuty.");
 
         var autoRotFATE = config.AutoRotationTypeFATE;
         ImGui.SetNextItemWidth(200);
-        if (ImGui.InputText("Auto Rotation Preset (FATE)", ref autoRotFATE, 32))
+        if (ImGui.InputText("BM Rotation Preset (FATE)", ref autoRotFATE, 32))
         {
             config.AutoRotationTypeFATE = autoRotFATE;
             configManager.SaveCurrentAccount();
         }
         ImGui.SameLine();
-        HelpMarker("Preset name for FATE content.");
+        HelpMarker("Preset name for FATE content.\nsome valid types are FRENRIDER, DD, FATE, Autoduty Passive, AutoDuty.");
 
         ImGui.Spacing();
         ImGui.Separator();
