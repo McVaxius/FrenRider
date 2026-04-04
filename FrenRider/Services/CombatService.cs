@@ -69,7 +69,8 @@ public class CombatService
             ResetCombatSettingsRefreshTracking();
             lastObservedCombatSettingsSignature = string.Empty;
             //if (wasInCombat) DeactivateRotation(config);
-			Plugin.Log.Information($"Combat: stopped FrenRider GHOST IN THE MACHINE 5 attemting to deactivate rotations after combat like an idiot");
+			//Plugin.Log.Information($"Combat: stopped FrenRider GHOST IN THE MACHINE 5 attemting to deactivate rotations after combat like an idiot");
+			//debug/code review this is called every frame and could be an issue
             State = CombatState.OutOfCombat;
             StateDetail = "Disabled";
             wasInCombat = false;
