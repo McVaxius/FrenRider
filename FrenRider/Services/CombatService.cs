@@ -433,6 +433,7 @@ public class CombatService
     private void ApplyBossModSafetyState(string pluginName, string selectedPreset, string reason)
     {
         EnsureBossModAiEnabled();
+		SendCommand($"/xldisableplugin AutoDuty");  //The real ghost in the machine is gone finally.
         switch (pluginName)
         {
             case "BMR":

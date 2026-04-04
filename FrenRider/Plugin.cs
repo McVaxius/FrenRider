@@ -64,6 +64,7 @@ public sealed class Plugin : IDalamudPlugin
     private bool wasLoggedIn;
     private int loginDetectionDelay;
     private bool wasPluginEnabled = false;
+//	private readonly ICommandManager commandManager;
 
     public Plugin()
     {
@@ -88,7 +89,7 @@ public sealed class Plugin : IDalamudPlugin
         ExitBehaviourService = new ExitBehaviourService(this, FrenTracker, ZoneService);
         YesAlreadyIPC = new YesAlreadyIPC(Log);
         AutoYesService = new AutoYesService(this, GameGui, Condition, Log);
-
+		
         // Initialize AutoDuty warning system
         AutoDutyWarningWindow = new AutoDutyWarningWindow(this, ChatGui, Log);
         AutoDutyDetectionService = new AutoDutyDetectionService(this, ChatGui, Framework, Log, AutoDutyWarningWindow);
@@ -99,8 +100,10 @@ public sealed class Plugin : IDalamudPlugin
         // Check for AutoDuty on plugin load if FrenRider is already enabled
         if (ConfigManager.GetActiveConfig().Enabled)
         {
-            Log.Information("[FR] Plugin loaded with FrenRider already enabled - checking for AutoDuty");
+            Log.Information("[FrenRider] Plugin loaded with FrenRider already enabled - checking for AutoDuty");
             OnFrenRiderEnabledChanged(true);
+			//instead we stil just kill it outright.
+			//commandManager?.ProcessCommand("/xldisableplugin AutoDuty");
         }
 
         ConfigWindow = new ConfigWindow(this);
@@ -174,21 +177,24 @@ public sealed class Plugin : IDalamudPlugin
 
     private void OnFrenRiderEnabledChanged(bool enabled)
     {
-        Log.Information($"[FR] FrenRider enabled state changed to: {enabled}");
+        Log.Information($"[FrenRider] FrenRider enabled state changed to: {enabled}");
         
         if (enabled)
         {
-            // Trigger AutoDuty check when FrenRider is enabled
-            Log.Information("[FR] Triggering AutoDuty detection check");
+           // Trigger AutoDuty check when FrenRider is enabled
+            Log.Information("[FrenRider] Triggering AutoDuty detection check");
             
             // Force an immediate detection check first
             AutoDutyDetectionService.ForceCheck();
-            Log.Information($"[FR] AutoDuty detected after enable check: {AutoDutyDetectionService.IsAutoDutyDetected()}");
+            Log.Information($"[FrenRider] AutoDuty detected after enable check: {AutoDutyDetectionService.IsAutoDutyDetected()}");
+ 			//instead we stil just kill it outright.
+			//commandManager?.ProcessCommand("/xldisableplugin AutoDuty");
+			//commandManager?.ProcessCommand("/echo hi");
 
             var config = ConfigManager.GetActiveConfig();
             if (config.AutorotPushOnEnable)
             {
-                Log.Information("[FR] Autorot push-on-enable is on - pushing presets now");
+                Log.Information("[FrenRider] Autorot push-on-enable is on - pushing presets now");
                 AutorotIpcService.CreatePresets(force: true);
             }
         }
@@ -213,42 +219,42 @@ public sealed class Plugin : IDalamudPlugin
         }
         else if (arg == "testvideo")
         {
-            Log.Information("[FR] Testing video availability...");
+            Log.Information("[FrenRider] Testing video availability...");
             var available = VideoPlaybackService.CheckVideoAvailability();
-            Log.Information($"[FR] Videos available: {available}");
+            Log.Information($"[FrenRider] Videos available: {available}");
             
             var enablePath = VideoPlaybackService.GetEmbeddedVideoPath("1.mp4");
             var disablePath = VideoPlaybackService.GetEmbeddedVideoPath("2.mp4");
-            Log.Information($"[FR] Enable video path: {enablePath}");
-            Log.Information($"[FR] Disable video path: {disablePath}");
+            Log.Information($"[FrenRider] Enable video path: {enablePath}");
+            Log.Information($"[FrenRider] Disable video path: {disablePath}");
             
             if (!string.IsNullOrEmpty(enablePath))
             {
-                Log.Information("[FR] Playing test enable video...");
+                Log.Information("[FrenRider] Playing test enable video...");
                 _ = VideoPlaybackService.PlayVideo(enablePath);
             }
         }
         else if (arg == "testautoduty")
         {
-            Log.Information("[FR] Testing AutoDuty detection...");
+            Log.Information("[FrenRider] Testing AutoDuty detection...");
             var isDetected = AutoDutyDetectionService.IsAutoDutyDetected();
-            Log.Information($"[FR] AutoDuty detected: {isDetected}");
+            Log.Information($"[FrenRider] AutoDuty detected: {isDetected}");
             
             if (isDetected)
             {
-                Log.Information("[FR] AutoDuty detected - showing warning window");
+                Log.Information("[FrenRider] AutoDuty detected - showing warning window");
                 AutoDutyDetectionService.ForceShowWarning();
             }
             else
             {
-                Log.Information("[FR] AutoDuty not detected - cannot show warning window");
+                Log.Information("[FrenRider] AutoDuty not detected - cannot show warning window");
             }
         }
         else if (arg == "resetautoduty")
         {
-            Log.Information("[FR] Resetting AutoDuty detection state");
+            Log.Information("[FrenRider] Resetting AutoDuty detection state");
             AutoDutyDetectionService.ResetWarning();
-            Log.Information("[FR] AutoDuty detection state reset");
+            Log.Information("[FrenRider] AutoDuty detection state reset");
         }
         else
         {
@@ -336,36 +342,36 @@ public sealed class Plugin : IDalamudPlugin
 
             if (Configuration.VideoNotificationsEnabled && config.Enabled != wasPluginEnabled)
             {
-                Log.Debug($"[FR] Video notifications enabled, state changed: {wasPluginEnabled} -> {config.Enabled}");
+                Log.Debug($"[FrenRider] Video notifications enabled, state changed: {wasPluginEnabled} -> {config.Enabled}");
                 
                 if (config.Enabled)
                 {
                     // Plugin was just enabled - play enable video
                     var enableVideoPath = VideoPlaybackService.GetEmbeddedVideoPath("1.mp4");
-                    Log.Debug($"[FR] Enable video path: {enableVideoPath}");
+                    Log.Debug($"[FrenRider] Enable video path: {enableVideoPath}");
                     if (!string.IsNullOrEmpty(enableVideoPath))
                     {
-                        Log.Information("[FR] Playing enable video...");
+                        Log.Information("[FrenRider] Playing enable video...");
                         _ = VideoPlaybackService.PlayVideo(enableVideoPath);
                     }
                     else
                     {
-                        Log.Warning("[FR] Enable video not found");
+                        Log.Warning("[FrenRider] Enable video not found");
                     }
                 }
                 else
                 {
                     // Plugin was just disabled - play disable video
                     var disableVideoPath = VideoPlaybackService.GetEmbeddedVideoPath("2.mp4");
-                    Log.Debug($"[FR] Disable video path: {disableVideoPath}");
+                    Log.Debug($"[FrenRider] Disable video path: {disableVideoPath}");
                     if (!string.IsNullOrEmpty(disableVideoPath))
                     {
-                        Log.Information("[FR] Playing disable video...");
+                        Log.Information("[FrenRider] Playing disable video...");
                         _ = VideoPlaybackService.PlayVideo(disableVideoPath);
                     }
                     else
                     {
-                        Log.Warning("[FR] Disable video not found");
+                        Log.Warning("[FrenRider] Disable video not found");
                     }
                 }
                 wasPluginEnabled = config.Enabled;
@@ -376,7 +382,7 @@ public sealed class Plugin : IDalamudPlugin
                 if (wasPluginEnabled != config.Enabled)
                 {
                     wasPluginEnabled = config.Enabled;
-                    Log.Debug("[FR] Video notifications disabled, resetting tracking");
+                    Log.Debug("[FrenRider] Video notifications disabled, resetting tracking");
                 }
             }
         }

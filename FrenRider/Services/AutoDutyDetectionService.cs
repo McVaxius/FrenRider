@@ -42,7 +42,8 @@ public class AutoDutyDetectionService
             return;
         
         lastCheck = now;
-        CheckForAutoDuty();
+		
+        //CheckForAutoDuty(); //this is implemented in a completely bad and unstable way.
     }
 
     private void CheckForAutoDuty()
@@ -180,7 +181,7 @@ public class AutoDutyDetectionService
 
     public void ForceCheck()
     {
-        log.Information("[AutoDutyDetection] Force checking for AutoDuty");
-        CheckForAutoDuty();
+        log.Information("[AutoDutyDetection] Force checking for AutoDuty"); //no i don't believe we will.
+        //CheckForAutoDuty();
     }
 }
