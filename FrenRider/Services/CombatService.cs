@@ -433,7 +433,21 @@ public class CombatService
     private void ApplyBossModSafetyState(string pluginName, string selectedPreset, string reason)
     {
         EnsureBossModAiEnabled();
+		Plugin.Log.Information($"[FrenRider] GHOST IN THE MACHINE CLEANUP");
 		SendCommand($"/xldisableplugin AutoDuty");  //The real ghost in the machine is gone finally.
+		//a few more hehe. turn off all the default stoppers
+		SendCommand($"/rotation Settings KeyBoardNoise false");
+		//SendCommand($"/bmrai setpresetname AutoDuty Passive");
+		//SendCommand($"/vbm ar set AutoDuty Passive");
+		SendCommand($"/rotation Settings AutoOffBetweenArea False");
+		SendCommand($"/rotation Settings AutoOffCutScene False");
+		SendCommand($"/rotation Settings AutoOffSwitchClass False");
+		SendCommand($"/rotation Settings AutoOffWhenDead False");
+		SendCommand($"/rotation Settings AutoOffWhenDutyCompleted False");
+		SendCommand($"/rotation Settings AutoOffAfterCombatTime 6942069");
+		SendCommand($"/rotation Settings ToggleAuto False");
+		SendCommand($"/rotation Settings ToggleManual False");
+		//SendCommand($"/rotation Auto");
         switch (pluginName)
         {
             case "BMR":
