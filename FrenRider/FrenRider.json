@@ -1,6 +1,7 @@
 {
   "Author": "DhogGPT",
   "Name": "Fren Rider",
+  "DalamudApiLevel": 14,
   "InternalName": "FrenRider",
   "Punchline": "Multiboxing follow and automation companion for FFXIV.",
   "Description": "Native Dalamud plugin for managing 2+ characters in various situations. Follow party members, auto-mount, combat integration, and more. Use /frenrider or /fr to open.",
@@ -13,5 +14,5 @@
     "party",
     "mount"
   ],
-  "AssemblyVersion": "1.0.0.12"
+  "AssemblyVersion": "1.0.0.13"
 }
