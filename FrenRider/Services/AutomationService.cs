@@ -59,6 +59,16 @@ public class AutomationService
             return;
         }
 
+        if (plugin.AdsIntegrationService.ShouldPauseDutySystems)
+        {
+            idleTickCounter = 0;
+            IsIdle = false;
+            LastIdleAction = plugin.AdsIntegrationService.IsHandoffPending
+                ? "ADS handoff pending"
+                : "ADS active";
+            return;
+        }
+
         // Zone transition reset
         if (zoneService.ZoneChanged)
         {

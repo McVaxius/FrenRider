@@ -57,6 +57,15 @@ public class DutyInteractService
             return;
         }
 
+        if (plugin.AdsIntegrationService.ShouldPauseDutySystems)
+        {
+            Reset();
+            StateDetail = plugin.AdsIntegrationService.IsHandoffPending
+                ? "ADS handoff pending"
+                : "ADS active";
+            return;
+        }
+
         // Handle ContentsFinderConfirm popup (duty commence dialog)
         if (GameHelpers.IsAddonVisible("ContentsFinderConfirm"))
         {

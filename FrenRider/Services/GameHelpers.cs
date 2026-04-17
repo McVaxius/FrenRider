@@ -1,6 +1,10 @@
 using System;
+using System.Numerics;
+using System.Runtime.InteropServices;
 using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
@@ -15,6 +19,8 @@ namespace FrenRider.Services;
 /// </summary>
 public static class GameHelpers
 {
+    private const string BossModUseActionLocationSignature = "E8 ?? ?? ?? ?? 3C 01 0F 85 ?? ?? ?? ?? EB 46";
+
     // Well Fed status ID
     public const uint WellFedStatusId = 48;
 
@@ -33,6 +39,18 @@ public static class GameHelpers
         (44178, "Moqecka"),
         (46003, "Mate Cookie"),
     };
+
+    private unsafe delegate bool UseActionLocationDelegate(
+        ActionManager* actionManager,
+        ActionType actionType,
+        uint actionId,
+        ulong targetId,
+        Vector3* targetPosition,
+        uint itemLocation);
+
+    private static UseActionLocationDelegate? useActionLocation;
+    private static nint useActionLocationAddress;
+    private static bool useActionLocationScanAttempted;
 
     /// <summary>
     /// Get the count of an item in the player's inventory (NQ + HQ).
@@ -138,6 +156,48 @@ public static class GameHelpers
         catch (Exception ex)
         {
             Plugin.Log.Error($"UseItem({itemId}) failed: {ex.Message}");
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Resolves the BossMod-derived UseActionLocation client seam on demand.
+    /// FrenRider does not detour it today; this is just the low-level call surface.
+    /// </summary>
+    public static unsafe bool TryUseActionLocation(
+        ActionType actionType,
+        uint actionId,
+        ulong targetId = 0xE0000000,
+        Vector3? targetPosition = null,
+        uint itemLocation = 0xFFFF)
+    {
+        try
+        {
+            var actionManager = ActionManager.Instance();
+            if (actionManager == null)
+            {
+                Plugin.Log.Warning($"TryUseActionLocation({actionType}, {actionId}): ActionManager is null");
+                return false;
+            }
+
+            var actionDelegate = ResolveUseActionLocation();
+            if (actionDelegate == null)
+            {
+                Plugin.Log.Warning($"TryUseActionLocation({actionType}, {actionId}): BossMod-derived UseActionLocation signature was unavailable");
+                return false;
+            }
+
+            if (targetPosition.HasValue)
+            {
+                var position = targetPosition.Value;
+                return actionDelegate(actionManager, actionType, actionId, targetId, &position, itemLocation);
+            }
+
+            return actionDelegate(actionManager, actionType, actionId, targetId, null, itemLocation);
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log.Error($"TryUseActionLocation({actionType}, {actionId}) failed: {ex.Message}");
             return false;
         }
     }
@@ -448,6 +508,57 @@ public static class GameHelpers
         catch (Exception ex)
         {
             Plugin.Log.Error($"[Callback] Failed for '{addonName}': {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Get remaining time for the current duty in seconds, or 0 if unavailable.
+    /// Mirrors the EventFramework lookup already used elsewhere in this workspace.
+    /// </summary>
+    public static unsafe float GetDutyRemainingTime()
+    {
+        try
+        {
+            var eventFramework = EventFramework.Instance();
+            if (eventFramework == null)
+                return 0f;
+
+            var instanceContentDirector = eventFramework->GetInstanceContentDirector();
+            if (instanceContentDirector == null || !instanceContentDirector->HasTimer())
+                return 0f;
+
+            return instanceContentDirector->ContentTimeLeft;
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log.Error($"GetDutyRemainingTime failed: {ex.Message}");
+            return 0f;
+        }
+    }
+
+    private static unsafe UseActionLocationDelegate? ResolveUseActionLocation()
+    {
+        if (useActionLocation is not null)
+            return useActionLocation;
+
+        if (useActionLocationScanAttempted)
+            return null;
+
+        useActionLocationScanAttempted = true;
+        try
+        {
+            useActionLocationAddress = Plugin.SigScanner.ScanText(BossModUseActionLocationSignature);
+            if (useActionLocationAddress == nint.Zero)
+                return null;
+
+            useActionLocation = Marshal.GetDelegateForFunctionPointer<UseActionLocationDelegate>(useActionLocationAddress);
+            Plugin.Log.Information($"[FrenRider] Resolved UseActionLocation seam from BossMod signature at 0x{useActionLocationAddress:X}");
+            return useActionLocation;
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log.Warning($"[FrenRider] Failed to resolve BossMod-derived UseActionLocation signature: {ex.Message}");
+            return null;
         }
     }
 }

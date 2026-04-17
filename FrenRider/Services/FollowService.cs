@@ -34,6 +34,8 @@ public class FollowService
     private string bossModFollowTarget = string.Empty;
     private uint bossModFollowTerritoryId;
     private int bossModFollowCombatMode = -1;
+    private bool bossModFollowFrenFlying;
+    private bool bossModFollowSelfFlying;
 
     // Stuck detection: record position every 5s, check per-axis movement < 2y
     private Vector3 stuckCheckPosition;
@@ -80,6 +82,16 @@ public class FollowService
             return;
         }
 
+        if (plugin.AdsIntegrationService.ShouldPauseDutySystems)
+        {
+            StopAllFollowing(config);
+            State = FollowState.Idle;
+            StateDetail = plugin.AdsIntegrationService.IsHandoffPending
+                ? "ADS handoff pending"
+                : "ADS active";
+            return;
+        }
+
         var fren = tracker.Fren;
         if (fren == null || !fren.IsFound)
         {
@@ -120,6 +132,11 @@ public class FollowService
         var distance = fren.Distance;
         var maxDist = GetMaxDistance(config);
         var clingDist = GetEffectiveClingDistance(config);
+        var selfMounted = Plugin.Condition[ConditionFlag.Mounted];
+        var selfFlying = Plugin.Condition[ConditionFlag.InFlight];
+        var frenFlying = fren.IsFlying;
+        var now = Environment.TickCount64;
+        var shouldMaintainMountedFlightFollow = config.FlyYouFools && fren.IsMounted && selfMounted && (frenFlying || selfFlying);
 
         // Too far — stop
         if (distance > maxDist)
@@ -131,7 +148,7 @@ public class FollowService
         }
 
         // In range — stop
-        if (distance <= clingDist)
+        if (distance <= clingDist && !shouldMaintainMountedFlightFollow)
         {
             if (isNavigating) StopNavigation(config);
             State = FollowState.InRange;
@@ -141,11 +158,6 @@ public class FollowService
 
         // Flying follow: if fren is flying and we're mounted but NOT already flying, send jump
         // This matches SND: "if Svc.Condition[77] then flying_adjust = flying_adjust + 1"
-        var selfMounted = Plugin.Condition[ConditionFlag.Mounted];
-        var selfFlying = Plugin.Condition[ConditionFlag.InFlight];
-        var frenFlying = fren.IsFlying;
-        var now = Environment.TickCount64;
-        
         if (selfMounted && frenFlying && !selfFlying && now - lastFlyingAdjustMs > 1000)
         {
             // Send jump command to initiate flight (only if not already flying)
@@ -374,7 +386,9 @@ public class FollowService
         var signatureMatches = bossModFollowActive
             && string.Equals(bossModFollowTarget, targetName, StringComparison.Ordinal)
             && bossModFollowTerritoryId == zoneService.TerritoryId
-            && bossModFollowCombatMode == config.FollowInCombat;
+            && bossModFollowCombatMode == config.FollowInCombat
+            && bossModFollowFrenFlying == fren.IsFlying
+            && bossModFollowSelfFlying == Plugin.Condition[ConditionFlag.InFlight];
 
         if (signatureMatches)
             return;
@@ -403,6 +417,8 @@ public class FollowService
         bossModFollowTarget = targetName;
         bossModFollowTerritoryId = zoneService.TerritoryId;
         bossModFollowCombatMode = config.FollowInCombat;
+        bossModFollowFrenFlying = fren.IsFlying;
+        bossModFollowSelfFlying = Plugin.Condition[ConditionFlag.InFlight];
         Plugin.Log.Information($"[FR] Activated BossMod follow for '{targetName}' in territory {zoneService.TerritoryId}");
     }
 
@@ -418,6 +434,8 @@ public class FollowService
         bossModFollowTarget = string.Empty;
         bossModFollowTerritoryId = 0;
         bossModFollowCombatMode = -1;
+        bossModFollowFrenFlying = false;
+        bossModFollowSelfFlying = false;
         Plugin.Log.Information("[FR] Stopped BossMod follow");
     }
 

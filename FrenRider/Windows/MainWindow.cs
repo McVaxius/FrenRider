@@ -333,6 +333,12 @@ public class MainWindow : Window, IDisposable
                 ImGui.TextColored(new Vector4(1f, 0.2f, 0.2f, 1), "AutoDuty detected while FrenRider is enabled");
             }
 
+            var adsIntegration = plugin.AdsIntegrationService;
+            var adsColor = adsIntegration.AdsLoaded
+                ? (adsIntegration.ShouldPauseDutySystems ? new Vector4(0.4f, 1f, 0.5f, 1f) : new Vector4(0.9f, 0.8f, 0.3f, 1f))
+                : new Vector4(0.8f, 0.5f, 0.5f, 1f);
+            ImGui.TextColored(adsColor, $"ADS: {adsIntegration.StatusText}");
+
             // Zone info
             var zone = plugin.ZoneService;
             var zoneExtra = "";

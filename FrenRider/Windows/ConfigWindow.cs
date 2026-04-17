@@ -32,6 +32,8 @@ public class ConfigWindow : Window, IDisposable
     private static readonly string[] BossModAIOptions = { "on", "off" };
     private static readonly string[] Positionals = { "Front", "Rear", "Any", "Auto" };
     private static readonly string[] FollowInCombatOptions = { "No", "Yes", "Auto" };
+    private static readonly string[] AdsMaturityOptions = { "0 - Not Cleared", "1 - 1P Unsync Cleared", "2 - 1P Duty Support", "3 - 4P Sync Cleared" };
+    private static readonly string[] AdsPresetOptions = { "No preset push (stub)", "Pilot Default (stub)", "Treasure (stub)" };
     private static readonly string[] LootTypes = { "unchanged", "need", "greed", "pass" };
     private static readonly string[] OnOff = { "Off", "On" };
     private static readonly string[] RepairOptions = { "No", "Self Repair", "Inn NPC" };
@@ -268,6 +270,12 @@ public class ConfigWindow : Window, IDisposable
             {
                 currentTab = "Combat";
                 DrawCombatTab(config);
+                ImGui.EndTabItem();
+            }
+            if (ImGui.BeginTabItem("ADS"))
+            {
+                currentTab = "Ads";
+                DrawAdsTab(config);
                 ImGui.EndTabItem();
             }
             if (ImGui.BeginTabItem("Misc"))
@@ -766,6 +774,68 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("Target HP percentage to use Limit Break.\n-1 = Disabled.\nAutomatically uses LB3 if available, otherwise LB2.");
+    }
+
+    private void DrawAdsTab(CharacterConfig config)
+    {
+        ImGui.Spacing();
+
+        ImGui.Text("ADS Duty Handoff");
+        ImGui.SameLine();
+        HelpMarker("Let ADS take over supported 4-player duties after FrenRider gets you inside.\nFrenRider will pause its local duty systems while ADS owns the run.");
+
+        var useAdsIfAvailable = config.UseAdsIfAvailable;
+        if (ImGui.Checkbox("Use ADS if available", ref useAdsIfAvailable))
+        {
+            config.UseAdsIfAvailable = useAdsIfAvailable;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("If ADS is loaded and the current duty meets the maturity threshold, FrenRider will send /ads inside once the duty is ready.");
+
+        var adsMaturityThreshold = Math.Clamp(config.AdsMaturityThreshold, 0, AdsMaturityOptions.Length - 1);
+        ImGui.SetNextItemWidth(240);
+        if (ImGui.Combo("ADS Maturity Threshold", ref adsMaturityThreshold, AdsMaturityOptions, AdsMaturityOptions.Length))
+        {
+            config.AdsMaturityThreshold = adsMaturityThreshold;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("0 = not cleared, 1 = unsync cleared, 2 = duty support cleared, 3 = proven 4-player sync clear.\nDefault is 3.");
+
+        var adsEnableChestOpening = config.AdsEnableChestOpening;
+        if (ImGui.Checkbox("Ask ADS to open chests (stub)", ref adsEnableChestOpening))
+        {
+            config.AdsEnableChestOpening = adsEnableChestOpening;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Recorded for the ADS handoff profile, but FrenRider does not push this setting into ADS yet.");
+
+        var adsPresetSelection = Math.Clamp(config.AdsPresetSelection, 0, AdsPresetOptions.Length - 1);
+        ImGui.SetNextItemWidth(240);
+        if (ImGui.Combo("ADS Preset", ref adsPresetSelection, AdsPresetOptions, AdsPresetOptions.Length))
+        {
+            config.AdsPresetSelection = adsPresetSelection;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Placeholder for future ADS preset coordination. Stored now so the config shape is stable.");
+
+        if (plugin.AdsIntegrationService is not null)
+        {
+            ImGui.Spacing();
+            ImGui.Separator();
+            ImGui.Spacing();
+
+            var adsStatus = plugin.AdsIntegrationService.StatusText;
+            var adsColor = plugin.AdsIntegrationService.IsControllingDuty
+                ? new Vector4(0.35f, 0.9f, 0.35f, 1f)
+                : plugin.AdsIntegrationService.IsHandoffPending
+                    ? new Vector4(0.95f, 0.8f, 0.3f, 1f)
+                    : new Vector4(0.7f, 0.7f, 0.7f, 1f);
+            ImGui.TextColored(adsColor, $"ADS Status: {adsStatus}");
+        }
     }
 
     private void DrawMiscTab(CharacterConfig config)

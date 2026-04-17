@@ -35,6 +35,7 @@ public class CombatService
     private long pendingCombatSettingsRefreshMs;
     private string lastObservedCombatSettingsSignature = string.Empty;
     private string pendingCombatSettingsSignature = string.Empty;
+    private bool mountedRotationSuppressed;
 
     private static readonly string[] RotationPluginNames = { "BMR", "VBM", "RSR", "WRATH" };
     private const long CombatSettingsRefreshDebounceMs = 400;
@@ -55,17 +56,12 @@ public class CombatService
         var config = plugin.ConfigManager.GetActiveConfig();
         var inCombat = Plugin.Condition[ConditionFlag.InCombat];
         var inDuty = Plugin.Condition[ConditionFlag.BoundByDuty];
+        var mountedOrMounting = Plugin.Condition[ConditionFlag.Mounted] || Plugin.Condition[ConditionFlag.Mounting71];
         var now = Environment.TickCount64;
-
-        // Zone transition: deactivate rotation and reset
-        if (zoneService.ZoneChanged)
-        {
-            HandleZoneTransition(config, inCombat, inDuty);
-            return;
-        }
 
         if (!config.Enabled)
         {
+            RestoreMountedRotationLifecycle(config, inCombat, inDuty, "plugin disabled", reapplySelection: false);
             ResetCombatSettingsRefreshTracking();
             lastObservedCombatSettingsSignature = string.Empty;
             //if (wasInCombat) DeactivateRotation(config);
@@ -74,6 +70,30 @@ public class CombatService
             State = CombatState.OutOfCombat;
             StateDetail = "Disabled";
             wasInCombat = false;
+            return;
+        }
+
+        if (HandleMountedRotationLifecycle(config, mountedOrMounting, inCombat, inDuty))
+            return;
+
+        // Zone transition: deactivate rotation and reset
+        if (zoneService.ZoneChanged)
+        {
+            HandleZoneTransition(config, inCombat, inDuty);
+            return;
+        }
+
+        if (plugin.AdsIntegrationService.ShouldPauseDutySystems)
+        {
+            ResetCombatSettingsRefreshTracking();
+            lastObservedCombatSettingsSignature = string.Empty;
+            State = CombatState.OutOfCombat;
+            StateDetail = plugin.AdsIntegrationService.IsHandoffPending
+                ? "ADS handoff pending"
+                : "ADS active";
+            ActivePreset = "";
+            wasInCombat = inCombat;
+            wasInDuty = inDuty;
             return;
         }
 
@@ -322,6 +342,78 @@ public class CombatService
         }
 
         Plugin.Log.Information($"Combat: Reapplied {pluginName} settings after {reason} with preset '{preset}'");
+    }
+
+    private bool HandleMountedRotationLifecycle(CharacterConfig config, bool mountedOrMounting, bool inCombat, bool inDuty)
+    {
+        if (inDuty)
+        {
+            RestoreMountedRotationLifecycle(config, inCombat, inDuty, "duty entry");
+            return false;
+        }
+
+        if (!mountedOrMounting)
+        {
+            RestoreMountedRotationLifecycle(config, inCombat, inDuty, "dismount");
+            return false;
+        }
+
+        SuppressMountedRotationLifecycle();
+        ResetCombatSettingsRefreshTracking();
+        lastObservedCombatSettingsSignature = string.Empty;
+        State = CombatState.OutOfCombat;
+        StateDetail = "Mounted - rotations suppressed";
+        ActivePreset = "";
+        wasInCombat = inCombat;
+        wasInDuty = inDuty;
+        return true;
+    }
+
+    private void SuppressMountedRotationLifecycle()
+    {
+        if (mountedRotationSuppressed)
+            return;
+
+        SendCommand("/vbmai off");
+        SendCommand("/bmrai off");
+        SendCommand("/rotation cancel");
+        SendCommand("/wrath auto off");
+        mountedRotationSuppressed = true;
+        Plugin.Log.Information("[FrenRider] Mounted rotation suppression enabled.");
+    }
+
+    private void RestoreMountedRotationLifecycle(CharacterConfig config, bool inCombat, bool inDuty, string reason, bool reapplySelection = true)
+    {
+        if (!mountedRotationSuppressed)
+            return;
+
+        var pluginName = GetSelectedRotationPluginName(config);
+
+        SendCommand("/bmrai on");
+        switch (pluginName)
+        {
+            case "VBM":
+                SendCommand("/vbmai on");
+                break;
+            case "RSR":
+                SendCommand("/rotation auto");
+                break;
+            case "WRATH":
+                SendCommand("/wrath auto on");
+                break;
+        }
+
+        mountedRotationSuppressed = false;
+        lastRotationToggleMs = 0;
+        Plugin.Log.Information($"[FrenRider] Mounted rotation suppression cleared after {reason}.");
+
+        if (!reapplySelection || IsRotationDisabled(config))
+            return;
+
+        if (inDuty || inCombat)
+            ActivateRotation(config, ignoreCooldown: true);
+        else
+            ApplyPassiveRotationSettings(config, $"mounted lifecycle restore ({reason})");
     }
 
     private void HandleZoneTransition(CharacterConfig config, bool inCombat, bool inDuty)

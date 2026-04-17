@@ -29,6 +29,8 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static IGameGui GameGui { get; private set; } = null!;
     [PluginService] internal static IDtrBar DtrBar { get; private set; } = null!;
     [PluginService] internal static IDataManager DataManager { get; private set; } = null!;
+    [PluginService] internal static ISigScanner SigScanner { get; private set; } = null!;
+    [PluginService] internal static IGameInteropProvider GameInteropProvider { get; private set; } = null!;
     [PluginService] internal static ITargetManager TargetManager { get; private set; } = null!;
     [PluginService] internal static IDutyState DutyState { get; private set; } = null!;
     [PluginService] internal static IPluginLog Log { get; private set; } = null!;
@@ -40,6 +42,7 @@ public sealed class Plugin : IDalamudPlugin
     public ConfigManager ConfigManager { get; init; }
     public FrenTracker FrenTracker { get; init; }
     public ZoneService ZoneService { get; init; }
+    public AdsIntegrationService AdsIntegrationService { get; init; }
     public FollowService FollowService { get; init; }
     public MountService MountService { get; init; }
     public CombatService CombatService { get; init; }
@@ -76,6 +79,7 @@ public sealed class Plugin : IDalamudPlugin
 
         FrenTracker = new FrenTracker(this);
         ZoneService = new ZoneService();
+        AdsIntegrationService = new AdsIntegrationService(this, ZoneService);
         FollowService = new FollowService(this, FrenTracker, ZoneService);
         MountService = new MountService(this, FrenTracker, ZoneService);
         CombatService = new CombatService(this, FrenTracker, ZoneService);
@@ -389,6 +393,7 @@ public sealed class Plugin : IDalamudPlugin
 
         // Update zone detection, following, and mount system
         ZoneService.Update();
+        AdsIntegrationService.Update();
         FollowService.Update();
         MountService.Update();
         CombatService.Update();

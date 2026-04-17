@@ -47,6 +47,15 @@ public class MountService
             return;
         }
 
+        if (plugin.AdsIntegrationService.ShouldPauseDutySystems)
+        {
+            State = MountState.Idle;
+            StateDetail = plugin.AdsIntegrationService.IsHandoffPending
+                ? "ADS handoff pending"
+                : "ADS active";
+            return;
+        }
+
         var fren = tracker.Fren;
         if (fren == null || !fren.IsFound || !fren.IsVisible)
         {

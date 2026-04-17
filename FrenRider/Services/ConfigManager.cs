@@ -303,6 +303,12 @@ public class ConfigManager
                 target.LimitPct = source.LimitPct;
                 target.RotationType = source.RotationType;
                 break;
+            case "Ads":
+                target.UseAdsIfAvailable = source.UseAdsIfAvailable;
+                target.AdsMaturityThreshold = source.AdsMaturityThreshold;
+                target.AdsEnableChestOpening = source.AdsEnableChestOpening;
+                target.AdsPresetSelection = source.AdsPresetSelection;
+                break;
             case "Misc":
                 target.FulfType = source.FulfType;
                 target.FeedMeItem = source.FeedMeItem;

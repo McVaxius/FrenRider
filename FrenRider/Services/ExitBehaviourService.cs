@@ -96,6 +96,14 @@ public class ExitBehaviourService : IDisposable
         var config = plugin.ConfigManager.GetActiveConfig();
         if (!config.Enabled) return;
 
+        if (plugin.AdsIntegrationService.ShouldPauseDutySystems)
+        {
+            StateDetail = plugin.AdsIntegrationService.IsHandoffPending
+                ? "ADS handoff pending"
+                : "ADS active";
+            return;
+        }
+
         // Validate mutually exclusive exit options - if both are somehow checked, disable both
         if (config.ExitAfterDutyEnds && config.LeaveWhenAllLeft)
         {
