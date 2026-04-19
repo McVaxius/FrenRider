@@ -62,7 +62,7 @@ public class FollowService
         // Zone transition: stop navigation and reset
         if (zoneService.ZoneChanged)
         {
-            StopAllFollowing(config);
+            StopAllFollowing(config, "zone transition");
             State = FollowState.Idle;
             StateDetail = "Zone transition";
             lastNavTarget = default;
@@ -76,7 +76,7 @@ public class FollowService
 
         if (!config.Enabled)
         {
-            StopAllFollowing(config);
+            StopAllFollowing(config, "disabled");
             State = FollowState.Idle;
             StateDetail = "Disabled";
             return;
@@ -84,7 +84,9 @@ public class FollowService
 
         if (plugin.AdsIntegrationService.ShouldPauseDutySystems)
         {
-            StopAllFollowing(config);
+            StopAllFollowing(config, plugin.AdsIntegrationService.IsHandoffPending
+                ? "ADS handoff pending"
+                : "ADS active");
             State = FollowState.Idle;
             StateDetail = plugin.AdsIntegrationService.IsHandoffPending
                 ? "ADS handoff pending"
@@ -95,7 +97,7 @@ public class FollowService
         var fren = tracker.Fren;
         if (fren == null || !fren.IsFound)
         {
-            StopAllFollowing(config);
+            StopAllFollowing(config, "no fren found");
             State = FollowState.Idle;
             StateDetail = "No fren found";
             return;
@@ -103,7 +105,7 @@ public class FollowService
 
         if (!fren.IsVisible)
         {
-            StopAllFollowing(config);
+            StopAllFollowing(config, "fren not visible");
             State = FollowState.Idle;
             StateDetail = "Fren not visible";
             return;
@@ -121,7 +123,7 @@ public class FollowService
             // FollowInCombat: 0=No, 1=Yes, 2=Auto
             if (config.FollowInCombat == 0)
             {
-                StopAllFollowing(config);
+                StopAllFollowing(config, "combat pause");
                 State = FollowState.InCombat;
                 StateDetail = "Paused (in combat)";
                 return;
@@ -141,7 +143,7 @@ public class FollowService
         // Too far — stop
         if (distance > maxDist)
         {
-            if (isNavigating) StopNavigation(config);
+            if (isNavigating) StopNavigation(config, $"too far ({distance:F1}y > {maxDist:F0}y max)");
             State = FollowState.TooFar;
             StateDetail = $"Too far ({distance:F1}y > {maxDist:F0}y max)";
             return;
@@ -150,7 +152,7 @@ public class FollowService
         // In range — stop
         if (distance <= clingDist && !shouldMaintainMountedFlightFollow)
         {
-            if (isNavigating) StopNavigation(config);
+            if (isNavigating) StopNavigation(config, $"in range ({distance:F1}y <= {clingDist:F1}y)");
             State = FollowState.InRange;
             StateDetail = $"In range ({distance:F1}y)";
             return;
@@ -179,7 +181,7 @@ public class FollowService
                 var formDist = Vector3.Distance(localPlayer.Position, formationTarget.Value);
                 if (formDist <= 1.5f)
                 {
-                    if (isNavigating) StopNavigation(config);
+                    if (isNavigating) StopNavigation(config, $"formation in range ({formDist:F1}y)");
                     State = FollowState.InRange;
                     StateDetail = $"Formation slot {plugin.FormationService.AssignedSlot} ({formDist:F1}y)";
                     return;
@@ -256,7 +258,7 @@ public class FollowService
         // First navigation after idle/zone change: always issue command
         if (!isNavigating)
         {
-            IssueNavCommand(config, target, selfFlying);
+            IssueNavCommand(config, target, selfFlying, "initial navigation");
             stuckCheckPosition = localPlayer?.Position ?? default;
             stuckCheckTimeMs = now;
             return;
@@ -274,7 +276,11 @@ public class FollowService
             if (distToNavTarget < arrivedThreshold)
             {
                 // Arrived at nav target - re-pathfind to updated fren position
-                IssueNavCommand(config, target, selfFlying);
+                IssueNavCommand(
+                    config,
+                    target,
+                    selfFlying,
+                    $"repath after reaching last target (dist={distToNavTarget:F1}y threshold={arrivedThreshold:F1}y)");
                 stuckCheckPosition = localPlayer.Position;
                 stuckCheckTimeMs = now;
                 return;
@@ -291,9 +297,12 @@ public class FollowService
                 if (dx < StuckPerAxisThreshold && dy < StuckPerAxisThreshold && dz < StuckPerAxisThreshold)
                 {
                     // Stuck - stop current navigation and re-pathfind
-                    Plugin.Log.Information($"[FR] Stuck detected (dX={dx:F1} dY={dy:F1} dZ={dz:F1}, all <{StuckPerAxisThreshold}y in {StuckCheckIntervalMs / 1000}s) - stopping + re-pathfinding");
-                    StopNavigation(config);
-                    IssueNavCommand(config, target, selfFlying);
+                    var stuckReason =
+                        $"stuck repath (dX={dx:F1} dY={dy:F1} dZ={dz:F1}, all <{StuckPerAxisThreshold}y in {StuckCheckIntervalMs / 1000}s)";
+                    Plugin.Log.Information(
+                        $"[FR][Pathing] {stuckReason}; local={FormatVector(pos)}; lastTarget={FormatVector(lastNavTarget)}; nextTarget={FormatVector(target)}");
+                    StopNavigation(config, stuckReason);
+                    IssueNavCommand(config, target, selfFlying, stuckReason);
                 }
 
                 // Reset stuck check regardless
@@ -303,8 +312,9 @@ public class FollowService
         }
     }
 
-    private void IssueNavCommand(CharacterConfig config, Vector3 target, bool selfFlying)
+    private void IssueNavCommand(CharacterConfig config, Vector3 target, bool selfFlying, string reason)
     {
+        var previousTarget = lastNavTarget;
         lastNavTarget = target;
         isNavigating = true;
 
@@ -314,6 +324,7 @@ public class FollowService
             lastMovementClingType = 0;
             var coords = FormatVector(target);
             var cmd = $"/vnav moveto {coords}";
+            LogNavCommand(reason, lastMovementClingType, cmd, target, previousTarget, selfFlying);
             SendCommand(cmd);
             return;
         }
@@ -323,6 +334,7 @@ public class FollowService
             lastMovementClingType = 0;
             var coords = FormatVector(target);
             var cmd = $"/vnav flyto {coords}";
+            LogNavCommand(reason, lastMovementClingType, cmd, target, previousTarget, selfFlying);
             SendCommand(cmd);
             return;
         }
@@ -330,7 +342,7 @@ public class FollowService
         var clingType = GetResolvedClingType(config);
         lastMovementClingType = clingType;
 
-        SendNavigationCommand(clingType, target);
+        SendNavigationCommand(clingType, target, reason, previousTarget, selfFlying);
     }
 
     private bool ShouldApplySocialDistancing(CharacterConfig config)
@@ -358,11 +370,9 @@ public class FollowService
         return new Vector3(target.X + socialOffset.X, target.Y, target.Z + socialOffset.Z);
     }
 
-    private void SendNavigationCommand(int clingType, Vector3 target)
+    private void SendNavigationCommand(int clingType, Vector3 target, string reason, Vector3 previousTarget, bool selfFlying)
     {
-        var typeName = clingType >= 0 && clingType < ClingTypeNames.Length
-            ? ClingTypeNames[clingType]
-            : "NavMesh";
+        var typeName = DescribeMovementMode(clingType);
 
         var coords = FormatVector(target);
         var cmd = typeName switch
@@ -374,7 +384,10 @@ public class FollowService
         };
 
         if (cmd != null)
+        {
+            LogNavCommand(reason, clingType, cmd, target, previousTarget, selfFlying);
             SendCommand(cmd);
+        }
     }
 
     private void EnsureBossModFollow(CharacterConfig config, FrenTracker.FrenState fren)
@@ -397,7 +410,7 @@ public class FollowService
             StopBossModFollow();
 
         if (isNavigating)
-            StopNavigation(config);
+            StopNavigation(config, "switching to BossMod follow");
 
         SendCommand($"/bmrai follow {targetName}");
         SendCommand("/bmrai followoutofcombat on");
@@ -439,17 +452,16 @@ public class FollowService
         Plugin.Log.Information("[FR] Stopped BossMod follow");
     }
 
-    private void StopAllFollowing(CharacterConfig config)
+    private void StopAllFollowing(CharacterConfig config, string reason)
     {
         StopBossModFollow();
         if (isNavigating)
-            StopNavigation(config);
+            StopNavigation(config, reason);
     }
 
-    private void StopNavigation(CharacterConfig config)
+    private void StopNavigation(CharacterConfig config, string reason)
     {
         if (!isNavigating) return;
-        isNavigating = false;
 
         var cmd = lastMovementClingType switch
         {
@@ -459,7 +471,28 @@ public class FollowService
             _ => "/vnavmesh stop",
         };
 
+        Plugin.Log.Information(
+            $"[FR][Pathing] StopNavigation reason={reason}; mode={DescribeMovementMode(lastMovementClingType)}; territory={zoneService.TerritoryId}; cmd={cmd}; lastTarget={FormatVector(lastNavTarget)}");
+        isNavigating = false;
         SendCommand(cmd);
+    }
+
+    private void LogNavCommand(string reason, int clingType, string command, Vector3 target, Vector3 previousTarget, bool selfFlying)
+    {
+        var localPlayer = Plugin.ObjectTable.LocalPlayer;
+        var localPosition = localPlayer?.Position ?? default;
+        var localToTarget = localPlayer != null ? Vector3.Distance(localPosition, target) : -1f;
+        var targetDelta = Vector3.Distance(previousTarget, target);
+
+        Plugin.Log.Information(
+            $"[FR][Pathing] IssueNav reason={reason}; mode={DescribeMovementMode(clingType)}; territory={zoneService.TerritoryId}; selfFlying={selfFlying}; cmd={command}; local={FormatVector(localPosition)}; target={FormatVector(target)}; previousTarget={FormatVector(previousTarget)}; localToTarget={localToTarget:F1}; targetDelta={targetDelta:F1}");
+    }
+
+    private static string DescribeMovementMode(int clingType)
+    {
+        return clingType >= 0 && clingType < ClingTypeNames.Length
+            ? ClingTypeNames[clingType]
+            : $"Unknown({clingType})";
     }
 
     /// <summary>
