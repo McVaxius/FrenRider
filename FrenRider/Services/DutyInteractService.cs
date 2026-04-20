@@ -169,11 +169,20 @@ public class DutyInteractService
         {
             isNavigatingToInteractable = false;
             StateDetail = "Scanning for interactables...";
+            var boundByDuty = Plugin.Condition[ConditionFlag.BoundByDuty]
+                              || Plugin.Condition[ConditionFlag.BoundByDuty56];
 
             // Nothing found and pathing stopped - nudge forward
             if (pathingStopped && (now - lastNudgeTime).TotalSeconds > 5)
             {
                 lastNudgeTime = now;
+                if (!boundByDuty)
+                {
+                    StateDetail = "No interactables found; not bound by duty";
+                    Plugin.Log.Information("[DutyInteract] Skipping forward nudge because BoundByDuty is false.");
+                    return;
+                }
+
                 NudgeForward();
             }
         }
