@@ -539,6 +539,8 @@ public class CombatService
 		SendCommand($"/rotation Settings AutoOffAfterCombatTime 6942069");
 		SendCommand($"/rotation Settings ToggleAuto False");
 		SendCommand($"/rotation Settings ToggleManual False");
+		SendCommand("/rotation Settings DummyBoss False");
+        SendCommand("/rotation Settings DisableTargetDummys True");
 		//SendCommand($"/rotation Auto");
         switch (pluginName)
         {
