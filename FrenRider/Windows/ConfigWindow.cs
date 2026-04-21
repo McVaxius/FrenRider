@@ -475,7 +475,7 @@ public class ConfigWindow : Window, IDisposable
             configManager.SaveCurrentAccount();
         }
         ImGui.SameLine();
-        HelpMarker("Runs /ays discard every 30s while not in combat.\nRequires AutoRetainer plugin.");
+        HelpMarker("Runs /ays discard every 30s only while mounted and in a safe idle window.\nFrenRider defers discard during combat, cutscenes, and area transitions.\nRequires AutoRetainer plugin.");
 
         ImGui.Spacing();
         ImGui.Separator();
@@ -782,26 +782,43 @@ public class ConfigWindow : Window, IDisposable
 
         ImGui.Text("ADS Duty Handoff");
         ImGui.SameLine();
-        HelpMarker("Let ADS take over supported 4-player duties after FrenRider gets you inside.\nFrenRider will pause its local duty systems while ADS owns the run.");
+        HelpMarker("Per-duty-family ADS handoff.\nFrenRider keeps local duty logic running until /ads inside succeeds, then pauses only while ADS truly owns the run.");
 
-        var useAdsIfAvailable = config.UseAdsIfAvailable;
-        if (ImGui.Checkbox("Use ADS if available", ref useAdsIfAvailable))
+        if (!config.AdsDutyFamilySettingsMigrated)
         {
-            config.UseAdsIfAvailable = useAdsIfAvailable;
-            configManager.SaveCurrentAccount();
+            ImGui.TextDisabled($"Legacy seed active: {(config.UseAdsIfAvailable ? "global handoff on" : "global handoff off")} at threshold {Math.Clamp(config.AdsMaturityThreshold, 0, 3)}.");
+            ImGui.SameLine();
+            if (ImGui.SmallButton("Seed family rows from legacy values"))
+            {
+                config.EnsureAdsDutyFamilySettingsInitialized();
+                configManager.SaveCurrentAccount();
+            }
         }
-        ImGui.SameLine();
-        HelpMarker("If ADS is loaded and the current duty meets the maturity threshold, FrenRider will send /ads inside once the duty is ready.");
 
-        var adsMaturityThreshold = Math.Clamp(config.AdsMaturityThreshold, 0, AdsMaturityOptions.Length - 1);
-        ImGui.SetNextItemWidth(240);
-        if (ImGui.Combo("ADS Maturity Threshold", ref adsMaturityThreshold, AdsMaturityOptions, AdsMaturityOptions.Length))
-        {
-            config.AdsMaturityThreshold = adsMaturityThreshold;
-            configManager.SaveCurrentAccount();
-        }
+        ImGui.Spacing();
+        ImGui.Text("Duty Families");
         ImGui.SameLine();
-        HelpMarker("0 = not cleared, 1 = unsync cleared, 2 = duty support cleared, 3 = proven 4-player sync clear.\nDefault is 3.");
+        HelpMarker("Each family has its own enable toggle and maturity threshold.\n0 = not cleared, 1 = unsync cleared, 2 = duty support cleared, 3 = proven sync clear.");
+
+        foreach (var entry in AdsDutyCategoryCatalog.Entries)
+        {
+            var settings = config.GetAdsDutyFamilySettings(entry.Category);
+            var enabled = settings.Enabled;
+            if (ImGui.Checkbox($"{entry.Label}##AdsFamily{entry.Category}", ref enabled))
+            {
+                config.SetAdsDutyFamilySettings(entry.Category, enabled, settings.MaturityThreshold);
+                configManager.SaveCurrentAccount();
+            }
+
+            ImGui.SameLine();
+            var threshold = Math.Clamp(settings.MaturityThreshold, 0, AdsMaturityOptions.Length - 1);
+            ImGui.SetNextItemWidth(240);
+            if (ImGui.Combo($"##AdsFamilyThreshold{entry.Category}", ref threshold, AdsMaturityOptions, AdsMaturityOptions.Length))
+            {
+                config.SetAdsDutyFamilySettings(entry.Category, enabled, threshold);
+                configManager.SaveCurrentAccount();
+            }
+        }
 
         var adsEnableChestOpening = config.AdsEnableChestOpening;
         if (ImGui.Checkbox("Ask ADS to open chests (stub)", ref adsEnableChestOpening))

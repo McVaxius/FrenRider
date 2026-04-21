@@ -130,16 +130,18 @@ public class AutomationService
             CheckCompanion(config);
         }
 
-        // Auto-discard (every 30 seconds when not in combat)
-        if (config.EnableAutoDiscard && now - lastDiscardMs > 30000 && !inCombat)
+        // Auto-discard (every 30 seconds, but only during mounted-safe idle windows)
+        if (config.EnableAutoDiscard && now - lastDiscardMs > 30000)
         {
-            var betweenAreas = Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.BetweenAreas] ||
-                               Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.BetweenAreas51];
-            if (!betweenAreas)
+            if (GameHelpers.CanAutoDiscardNow(out var discardReason))
             {
                 lastDiscardMs = now;
                 SendCommand("/ays discard");
                 Plugin.Log.Debug("Auto-discard: sent /ays discard");
+            }
+            else
+            {
+                Plugin.Log.Debug($"Auto-discard deferred: {discardReason}");
             }
         }
 

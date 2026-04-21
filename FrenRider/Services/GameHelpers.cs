@@ -160,6 +160,41 @@ public static class GameHelpers
         }
     }
 
+    public static bool CanAutoDiscardNow(out string reason)
+    {
+        if (!Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.Mounted])
+        {
+            reason = "not mounted";
+            return false;
+        }
+
+        if (Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.InCombat])
+        {
+            reason = "in combat";
+            return false;
+        }
+
+        if (Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.BetweenAreas]
+            || Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.BetweenAreas51])
+        {
+            reason = "between areas";
+            return false;
+        }
+
+        if (Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.OccupiedInQuestEvent]
+            || Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.OccupiedInCutSceneEvent]
+            || Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.Occupied33]
+            || Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.Occupied39]
+            || Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.WatchingCutscene])
+        {
+            reason = "occupied or in cutscene";
+            return false;
+        }
+
+        reason = "ready";
+        return true;
+    }
+
     /// <summary>
     /// Resolves the BossMod-derived UseActionLocation client seam on demand.
     /// FrenRider does not detour it today; this is just the low-level call surface.

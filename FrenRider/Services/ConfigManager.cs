@@ -306,6 +306,23 @@ public class ConfigManager
             case "Ads":
                 target.UseAdsIfAvailable = source.UseAdsIfAvailable;
                 target.AdsMaturityThreshold = source.AdsMaturityThreshold;
+                target.AdsDutyFamilySettingsMigrated = source.AdsDutyFamilySettingsMigrated;
+                target.AdsSoloEnabled = source.AdsSoloEnabled;
+                target.AdsSoloMaturityThreshold = source.AdsSoloMaturityThreshold;
+                target.AdsFourManEnabled = source.AdsFourManEnabled;
+                target.AdsFourManMaturityThreshold = source.AdsFourManMaturityThreshold;
+                target.AdsEightManEnabled = source.AdsEightManEnabled;
+                target.AdsEightManMaturityThreshold = source.AdsEightManMaturityThreshold;
+                target.AdsAllianceEnabled = source.AdsAllianceEnabled;
+                target.AdsAllianceMaturityThreshold = source.AdsAllianceMaturityThreshold;
+                target.AdsGuildHestEnabled = source.AdsGuildHestEnabled;
+                target.AdsGuildHestMaturityThreshold = source.AdsGuildHestMaturityThreshold;
+                target.AdsDeepDungeonEnabled = source.AdsDeepDungeonEnabled;
+                target.AdsDeepDungeonMaturityThreshold = source.AdsDeepDungeonMaturityThreshold;
+                target.AdsTreasureDungeonEnabled = source.AdsTreasureDungeonEnabled;
+                target.AdsTreasureDungeonMaturityThreshold = source.AdsTreasureDungeonMaturityThreshold;
+                target.AdsOtherEnabled = source.AdsOtherEnabled;
+                target.AdsOtherMaturityThreshold = source.AdsOtherMaturityThreshold;
                 target.AdsEnableChestOpening = source.AdsEnableChestOpening;
                 target.AdsPresetSelection = source.AdsPresetSelection;
                 break;

@@ -50,6 +50,23 @@ public class CharacterConfig
     public int RotationType { get; set; } = 0; // 0=Auto, 1=Manual, 2=none, 3=Auto (Support), 4=Previously Engaged Targets
     public bool UseAdsIfAvailable { get; set; } = false;
     public int AdsMaturityThreshold { get; set; } = 3; // 0=Not Cleared, 1=1P Unsync, 2=1P Duty Support, 3=4P Sync
+    public bool AdsDutyFamilySettingsMigrated { get; set; } = false;
+    public bool AdsSoloEnabled { get; set; } = false;
+    public int AdsSoloMaturityThreshold { get; set; } = 3;
+    public bool AdsFourManEnabled { get; set; } = false;
+    public int AdsFourManMaturityThreshold { get; set; } = 3;
+    public bool AdsEightManEnabled { get; set; } = false;
+    public int AdsEightManMaturityThreshold { get; set; } = 3;
+    public bool AdsAllianceEnabled { get; set; } = false;
+    public int AdsAllianceMaturityThreshold { get; set; } = 3;
+    public bool AdsGuildHestEnabled { get; set; } = false;
+    public int AdsGuildHestMaturityThreshold { get; set; } = 3;
+    public bool AdsDeepDungeonEnabled { get; set; } = false;
+    public int AdsDeepDungeonMaturityThreshold { get; set; } = 3;
+    public bool AdsTreasureDungeonEnabled { get; set; } = false;
+    public int AdsTreasureDungeonMaturityThreshold { get; set; } = 3;
+    public bool AdsOtherEnabled { get; set; } = false;
+    public int AdsOtherMaturityThreshold { get; set; } = 3;
     public bool AdsEnableChestOpening { get; set; } = true;
     public int AdsPresetSelection { get; set; } = 0; // Local stub only until FrenRider can push richer ADS config
 
@@ -123,6 +140,23 @@ public class CharacterConfig
             RotationType = RotationType,
             UseAdsIfAvailable = UseAdsIfAvailable,
             AdsMaturityThreshold = AdsMaturityThreshold,
+            AdsDutyFamilySettingsMigrated = AdsDutyFamilySettingsMigrated,
+            AdsSoloEnabled = AdsSoloEnabled,
+            AdsSoloMaturityThreshold = AdsSoloMaturityThreshold,
+            AdsFourManEnabled = AdsFourManEnabled,
+            AdsFourManMaturityThreshold = AdsFourManMaturityThreshold,
+            AdsEightManEnabled = AdsEightManEnabled,
+            AdsEightManMaturityThreshold = AdsEightManMaturityThreshold,
+            AdsAllianceEnabled = AdsAllianceEnabled,
+            AdsAllianceMaturityThreshold = AdsAllianceMaturityThreshold,
+            AdsGuildHestEnabled = AdsGuildHestEnabled,
+            AdsGuildHestMaturityThreshold = AdsGuildHestMaturityThreshold,
+            AdsDeepDungeonEnabled = AdsDeepDungeonEnabled,
+            AdsDeepDungeonMaturityThreshold = AdsDeepDungeonMaturityThreshold,
+            AdsTreasureDungeonEnabled = AdsTreasureDungeonEnabled,
+            AdsTreasureDungeonMaturityThreshold = AdsTreasureDungeonMaturityThreshold,
+            AdsOtherEnabled = AdsOtherEnabled,
+            AdsOtherMaturityThreshold = AdsOtherMaturityThreshold,
             AdsEnableChestOpening = AdsEnableChestOpening,
             AdsPresetSelection = AdsPresetSelection,
             EnableAutoDiscard = EnableAutoDiscard,
@@ -142,5 +176,88 @@ public class CharacterConfig
             AutorotPushOnEnable = AutorotPushOnEnable,
             Enabled = Enabled,
         };
+    }
+
+    public void EnsureAdsDutyFamilySettingsInitialized()
+    {
+        if (AdsDutyFamilySettingsMigrated)
+            return;
+
+        AdsSoloEnabled = UseAdsIfAvailable;
+        AdsSoloMaturityThreshold = AdsMaturityThreshold;
+        AdsFourManEnabled = UseAdsIfAvailable;
+        AdsFourManMaturityThreshold = AdsMaturityThreshold;
+        AdsEightManEnabled = UseAdsIfAvailable;
+        AdsEightManMaturityThreshold = AdsMaturityThreshold;
+        AdsAllianceEnabled = UseAdsIfAvailable;
+        AdsAllianceMaturityThreshold = AdsMaturityThreshold;
+        AdsGuildHestEnabled = UseAdsIfAvailable;
+        AdsGuildHestMaturityThreshold = AdsMaturityThreshold;
+        AdsDeepDungeonEnabled = UseAdsIfAvailable;
+        AdsDeepDungeonMaturityThreshold = AdsMaturityThreshold;
+        AdsTreasureDungeonEnabled = UseAdsIfAvailable;
+        AdsTreasureDungeonMaturityThreshold = AdsMaturityThreshold;
+        AdsOtherEnabled = UseAdsIfAvailable;
+        AdsOtherMaturityThreshold = AdsMaturityThreshold;
+        AdsDutyFamilySettingsMigrated = true;
+    }
+
+    public AdsDutyFamilySettings GetAdsDutyFamilySettings(AdsDutyCategory category)
+    {
+        if (!AdsDutyFamilySettingsMigrated)
+            return new AdsDutyFamilySettings(UseAdsIfAvailable, Math.Clamp(AdsMaturityThreshold, 0, 3));
+
+        return category switch
+        {
+            AdsDutyCategory.Solo => new AdsDutyFamilySettings(AdsSoloEnabled, Math.Clamp(AdsSoloMaturityThreshold, 0, 3)),
+            AdsDutyCategory.FourMan => new AdsDutyFamilySettings(AdsFourManEnabled, Math.Clamp(AdsFourManMaturityThreshold, 0, 3)),
+            AdsDutyCategory.EightMan => new AdsDutyFamilySettings(AdsEightManEnabled, Math.Clamp(AdsEightManMaturityThreshold, 0, 3)),
+            AdsDutyCategory.Alliance => new AdsDutyFamilySettings(AdsAllianceEnabled, Math.Clamp(AdsAllianceMaturityThreshold, 0, 3)),
+            AdsDutyCategory.GuildHest => new AdsDutyFamilySettings(AdsGuildHestEnabled, Math.Clamp(AdsGuildHestMaturityThreshold, 0, 3)),
+            AdsDutyCategory.DeepDungeon => new AdsDutyFamilySettings(AdsDeepDungeonEnabled, Math.Clamp(AdsDeepDungeonMaturityThreshold, 0, 3)),
+            AdsDutyCategory.TreasureDungeon => new AdsDutyFamilySettings(AdsTreasureDungeonEnabled, Math.Clamp(AdsTreasureDungeonMaturityThreshold, 0, 3)),
+            _ => new AdsDutyFamilySettings(AdsOtherEnabled, Math.Clamp(AdsOtherMaturityThreshold, 0, 3)),
+        };
+    }
+
+    public void SetAdsDutyFamilySettings(AdsDutyCategory category, bool enabled, int maturityThreshold)
+    {
+        EnsureAdsDutyFamilySettingsInitialized();
+        var clampedThreshold = Math.Clamp(maturityThreshold, 0, 3);
+        switch (category)
+        {
+            case AdsDutyCategory.Solo:
+                AdsSoloEnabled = enabled;
+                AdsSoloMaturityThreshold = clampedThreshold;
+                break;
+            case AdsDutyCategory.FourMan:
+                AdsFourManEnabled = enabled;
+                AdsFourManMaturityThreshold = clampedThreshold;
+                break;
+            case AdsDutyCategory.EightMan:
+                AdsEightManEnabled = enabled;
+                AdsEightManMaturityThreshold = clampedThreshold;
+                break;
+            case AdsDutyCategory.Alliance:
+                AdsAllianceEnabled = enabled;
+                AdsAllianceMaturityThreshold = clampedThreshold;
+                break;
+            case AdsDutyCategory.GuildHest:
+                AdsGuildHestEnabled = enabled;
+                AdsGuildHestMaturityThreshold = clampedThreshold;
+                break;
+            case AdsDutyCategory.DeepDungeon:
+                AdsDeepDungeonEnabled = enabled;
+                AdsDeepDungeonMaturityThreshold = clampedThreshold;
+                break;
+            case AdsDutyCategory.TreasureDungeon:
+                AdsTreasureDungeonEnabled = enabled;
+                AdsTreasureDungeonMaturityThreshold = clampedThreshold;
+                break;
+            default:
+                AdsOtherEnabled = enabled;
+                AdsOtherMaturityThreshold = clampedThreshold;
+                break;
+        }
     }
 }

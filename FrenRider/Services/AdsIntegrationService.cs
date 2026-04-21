@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dalamud.Game;
+using Dalamud.Game.ClientState.Conditions;
 using FrenRider.Models;
 using Lumina.Excel.Sheets;
 
@@ -22,15 +23,6 @@ public sealed class AdsIntegrationService
         "the stone vigil",
         "the aurum vale",
         "castrum meridianum",
-    ];
-
-    private static readonly HashSet<string> LaterWaveDutyNames =
-    [
-        "sastasha",
-        "copperbell mines",
-        "haukke manor",
-        "the keeper of the lake",
-        "the praetorium",
     ];
 
     private static readonly Dictionary<string, int> ClearanceMaturityByDutyName = new(StringComparer.OrdinalIgnoreCase)
@@ -58,6 +50,16 @@ public sealed class AdsIntegrationService
         ["brayflox's longstop"] = 1,
     };
 
+    private static readonly HashSet<uint> TreasureDutyTerritoryIds =
+    [
+        558,
+        712,
+        725,
+        879,
+        1000,
+        1209,
+    ];
+
     private readonly Plugin plugin;
     private readonly ZoneService zoneService;
     private readonly Dictionary<uint, AdsDutyCatalogEntry> entriesByTerritory = [];
@@ -72,20 +74,20 @@ public sealed class AdsIntegrationService
         this.plugin = plugin;
         this.zoneService = zoneService;
         BuildCatalog();
-        StatusText = "ADS disabled.";
+        StatusText = "ADS handoff off; FrenRider local duty logic active.";
     }
 
     public bool AdsLoaded { get; private set; }
     public bool IsHandoffPending { get; private set; }
     public bool IsControllingDuty { get; private set; }
-    public bool ShouldPauseDutySystems => IsHandoffPending || IsControllingDuty;
+    public bool ShouldPauseDutySystems => IsControllingDuty;
     public string StatusText { get; private set; }
 
     public void Update()
     {
         var config = plugin.ConfigManager.GetActiveConfig();
-        var inDuty = Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.BoundByDuty]
-            || Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.BoundByDuty56];
+        var inDuty = Plugin.Condition[ConditionFlag.BoundByDuty]
+            || Plugin.Condition[ConditionFlag.BoundByDuty56];
         var territoryTypeId = zoneService.TerritoryId;
 
         AdsLoaded = IsAdsLoaded();
@@ -102,19 +104,19 @@ public sealed class AdsIntegrationService
 
         if (config == null || !config.Enabled)
         {
-            StatusText = AdsLoaded ? "ADS available, FrenRider disabled." : "ADS not loaded.";
-            return;
-        }
-
-        if (!config.UseAdsIfAvailable)
-        {
-            StatusText = AdsLoaded ? "ADS loaded but local handoff is off." : "ADS handoff off and ADS not loaded.";
+            IsControllingDuty = false;
+            IsHandoffPending = false;
+            StatusText = AdsLoaded ? "FrenRider disabled." : "ADS not loaded.";
             return;
         }
 
         if (!inDuty)
         {
-            StatusText = BuildReadinessStatus(config, null, "waiting for duty");
+            IsControllingDuty = false;
+            IsHandoffPending = false;
+            StatusText = AdsLoaded
+                ? "ADS loaded; waiting for duty. FrenRider local logic active."
+                : "ADS not loaded. FrenRider local logic active.";
             return;
         }
 
@@ -124,34 +126,36 @@ public sealed class AdsIntegrationService
 
         if (!readiness.CanUseAds)
         {
-            StatusText = BuildReadinessStatus(config, readiness, readiness.Reason);
+            StatusText = BuildReadinessStatus(readiness, readiness.Reason);
             return;
         }
 
         if (adsInsideSent)
         {
-            StatusText = BuildReadinessStatus(config, readiness, "ADS owns the local duty handoff");
+            StatusText = BuildReadinessStatus(readiness, "ADS owns the duty handoff");
             return;
         }
 
         if (!IsReadyToStartAdsInsideDuty(territoryTypeId))
         {
-            StatusText = BuildReadinessStatus(config, readiness, "waiting for duty start seam");
+            StatusText = BuildReadinessStatus(readiness, "waiting for duty start seam");
             return;
         }
 
         if (!Plugin.CommandManager.ProcessCommand("/ads inside"))
         {
             IsHandoffPending = false;
-            StatusText = BuildReadinessStatus(config, readiness, "failed to send /ads inside");
+            IsControllingDuty = false;
+            StatusText = BuildReadinessStatus(readiness, "failed to send /ads inside; FrenRider local duty logic stays active");
             return;
         }
 
         adsInsideSent = true;
         IsHandoffPending = false;
         IsControllingDuty = true;
-        StatusText = BuildReadinessStatus(config, readiness, "sent /ads inside");
-        Plugin.Log.Information($"[FrenRider][ADS] Sent /ads inside for {readiness.Entry!.EnglishName} with maturity {readiness.Entry.MaturityLevel} and threshold {Math.Clamp(config.AdsMaturityThreshold, 0, 3)}.");
+        StatusText = BuildReadinessStatus(readiness, "sent /ads inside");
+        Plugin.Log.Information(
+            $"[FrenRider][ADS] Sent /ads inside for {readiness.Entry!.EnglishName} ({AdsDutyCategoryCatalog.GetLabel(readiness.Entry.Category)}) with maturity {readiness.Entry.MaturityLevel} and threshold {readiness.FamilySettings.MaturityThreshold}.");
     }
 
     private void BuildCatalog()
@@ -163,7 +167,7 @@ public sealed class AdsIntegrationService
 
         foreach (var row in contentFinderSheet)
         {
-            if (row.ContentType.ValueNullable is null || row.ContentType.Value.RowId != 2)
+            if (row.ContentType.ValueNullable is null)
                 continue;
 
             if (row.TerritoryType.ValueNullable is null || row.ContentMemberType.ValueNullable is null)
@@ -173,59 +177,81 @@ public sealed class AdsIntegrationService
                 + row.ContentMemberType.Value.HealersPerParty
                 + row.ContentMemberType.Value.MeleesPerParty
                 + row.ContentMemberType.Value.RangedPerParty;
-            if (partySize != 4)
-                continue;
-
             var englishRow = englishSheet?.GetRow(row.RowId) ?? row;
             var englishName = NormalizeName(englishRow.Name.ToString());
             if (string.IsNullOrWhiteSpace(englishName))
                 continue;
 
+            var category = ClassifyDutyCategory(
+                row.TerritoryType.Value.RowId,
+                row.ContentType.Value.RowId,
+                row.ContentMemberType.Value.RowId,
+                partySize,
+                NormalizeName(row.ContentType.Value.Name.ToString()));
             var lowered = englishName.ToLowerInvariant();
+            var maturity = PilotDutyNames.Contains(lowered)
+                ? Math.Max(ClearanceMaturityByDutyName.GetValueOrDefault(englishName, 0), 3)
+                : ClearanceMaturityByDutyName.GetValueOrDefault(englishName, 0);
+
             entriesByTerritory[row.TerritoryType.Value.RowId] = new AdsDutyCatalogEntry(
                 row.TerritoryType.Value.RowId,
                 englishName,
-                PilotDutyNames.Contains(lowered) || LaterWaveDutyNames.Contains(lowered),
-                PilotDutyNames.Contains(lowered),
-                ClearanceMaturityByDutyName.GetValueOrDefault(englishName, 0));
+                category,
+                maturity);
+        }
+
+        foreach (var territoryId in TreasureDutyTerritoryIds)
+        {
+            if (entriesByTerritory.ContainsKey(territoryId))
+                continue;
+
+            entriesByTerritory[territoryId] = new AdsDutyCatalogEntry(
+                territoryId,
+                $"Treasure Duty {territoryId}",
+                AdsDutyCategory.TreasureDungeon,
+                3);
         }
     }
 
     private AdsDutyReadiness ResolveReadiness(CharacterConfig config, uint territoryTypeId)
     {
-        var threshold = Math.Clamp(config.AdsMaturityThreshold, 0, 3);
         if (!AdsLoaded)
-            return new AdsDutyReadiness(null, false, "ADS is not loaded");
+            return new AdsDutyReadiness(null, default, false, "ADS is not loaded");
 
         if (!entriesByTerritory.TryGetValue(territoryTypeId, out var entry))
-            return new AdsDutyReadiness(null, false, $"territory {territoryTypeId} is not in the mirrored ADS catalog");
+            return new AdsDutyReadiness(null, default, false, $"territory {territoryTypeId} is not in the mirrored ADS catalog; FrenRider local duty logic stays active");
 
-        if (!entry.SupportsPassiveObservation)
-            return new AdsDutyReadiness(entry, false, $"{entry.EnglishName} is not marked ADS-supported");
+        var familySettings = config.GetAdsDutyFamilySettings(entry.Category);
+        if (!familySettings.Enabled)
+            return new AdsDutyReadiness(entry, familySettings, false, $"{AdsDutyCategoryCatalog.GetLabel(entry.Category)} handoff is off; FrenRider local duty logic stays active");
 
-        if (entry.MaturityLevel < threshold)
-            return new AdsDutyReadiness(entry, false, $"{entry.EnglishName} is maturity {entry.MaturityLevel}, below threshold {threshold}");
+        if (entry.MaturityLevel < familySettings.MaturityThreshold)
+        {
+            return new AdsDutyReadiness(
+                entry,
+                familySettings,
+                false,
+                $"{entry.EnglishName} is maturity {entry.MaturityLevel}, below threshold {familySettings.MaturityThreshold}; FrenRider local duty logic stays active");
+        }
 
-        return new AdsDutyReadiness(entry, true, "ready");
+        return new AdsDutyReadiness(entry, familySettings, true, "ready");
     }
 
-    private string BuildReadinessStatus(CharacterConfig config, AdsDutyReadiness? readiness, string trailingStatus)
+    private static string BuildReadinessStatus(AdsDutyReadiness readiness, string trailingStatus)
     {
-        if (!AdsLoaded)
-            return "ADS not loaded.";
+        if (readiness.Entry is null)
+            return readiness.CanUseAds
+                ? "ADS loaded; ready."
+                : $"ADS loaded; {trailingStatus}.";
 
-        if (readiness?.Entry is null)
-            return $"ADS loaded; {trailingStatus}.";
-
-        var threshold = Math.Clamp(config.AdsMaturityThreshold, 0, 3);
-        var supportText = readiness.Entry.SupportsActiveExecution ? "active" : "passive";
-        return $"{readiness.Entry.EnglishName}: M{readiness.Entry.MaturityLevel}/T{threshold}, {supportText}, {trailingStatus}.";
+        var categoryLabel = AdsDutyCategoryCatalog.GetLabel(readiness.Entry.Category);
+        return $"{categoryLabel} {readiness.Entry.EnglishName}: M{readiness.Entry.MaturityLevel}/T{readiness.FamilySettings.MaturityThreshold}, {trailingStatus}.";
     }
 
     private bool IsReadyToStartAdsInsideDuty(uint territoryTypeId)
     {
-        if (Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.BetweenAreas]
-            || Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.BetweenAreas51])
+        if (Plugin.Condition[ConditionFlag.BetweenAreas]
+            || Plugin.Condition[ConditionFlag.BetweenAreas51])
         {
             return false;
         }
@@ -265,6 +291,56 @@ public sealed class AdsIntegrationService
         return true;
     }
 
+    private static AdsDutyCategory ClassifyDutyCategory(
+        uint territoryTypeId,
+        uint contentTypeRowId,
+        uint contentMemberTypeRowId,
+        int partySize,
+        string contentTypeName)
+    {
+        if (TreasureDutyTerritoryIds.Contains(territoryTypeId))
+            return AdsDutyCategory.TreasureDungeon;
+
+        var normalizedType = NormalizeName(contentTypeName).ToLowerInvariant();
+        if (normalizedType.Contains("guild hest", StringComparison.Ordinal)
+            || normalizedType.Contains("guildhest", StringComparison.Ordinal))
+        {
+            return AdsDutyCategory.GuildHest;
+        }
+
+        if (normalizedType.Contains("deep dungeon", StringComparison.Ordinal))
+            return AdsDutyCategory.DeepDungeon;
+
+        if (normalizedType.Contains("treasure", StringComparison.Ordinal))
+            return AdsDutyCategory.TreasureDungeon;
+
+        if (normalizedType.Contains("alliance", StringComparison.Ordinal) || partySize >= 24)
+            return AdsDutyCategory.Alliance;
+
+        if (partySize <= 1)
+            return AdsDutyCategory.Solo;
+
+        if (partySize == 4)
+            return AdsDutyCategory.FourMan;
+
+        if (partySize == 8)
+            return AdsDutyCategory.EightMan;
+
+        return contentTypeRowId switch
+        {
+            5 => AdsDutyCategory.GuildHest,
+            21 => AdsDutyCategory.DeepDungeon,
+            _ => contentMemberTypeRowId switch
+            {
+                3 => AdsDutyCategory.Solo,
+                4 => AdsDutyCategory.FourMan,
+                5 => AdsDutyCategory.EightMan,
+                6 => AdsDutyCategory.Alliance,
+                _ => AdsDutyCategory.Other,
+            },
+        };
+    }
+
     private static string NormalizeName(string name)
         => string.Join(' ', name.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
 
@@ -288,12 +364,12 @@ public sealed class AdsIntegrationService
     private sealed record AdsDutyCatalogEntry(
         uint TerritoryTypeId,
         string EnglishName,
-        bool SupportsPassiveObservation,
-        bool SupportsActiveExecution,
+        AdsDutyCategory Category,
         int MaturityLevel);
 
     private sealed record AdsDutyReadiness(
         AdsDutyCatalogEntry? Entry,
+        AdsDutyFamilySettings FamilySettings,
         bool CanUseAds,
         string Reason);
 }
