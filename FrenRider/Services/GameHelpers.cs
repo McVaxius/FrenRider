@@ -1,6 +1,5 @@
 using System;
 using System.Numerics;
-using System.Runtime.InteropServices;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game;
@@ -19,8 +18,6 @@ namespace FrenRider.Services;
 /// </summary>
 public static class GameHelpers
 {
-    private const string BossModUseActionLocationSignature = "E8 ?? ?? ?? ?? 3C 01 0F 85 ?? ?? ?? ?? EB 46";
-
     // Well Fed status ID
     public const uint WellFedStatusId = 48;
 
@@ -39,18 +36,6 @@ public static class GameHelpers
         (44178, "Moqecka"),
         (46003, "Mate Cookie"),
     };
-
-    private unsafe delegate bool UseActionLocationDelegate(
-        ActionManager* actionManager,
-        ActionType actionType,
-        uint actionId,
-        ulong targetId,
-        Vector3* targetPosition,
-        uint itemLocation);
-
-    private static UseActionLocationDelegate? useActionLocation;
-    private static nint useActionLocationAddress;
-    private static bool useActionLocationScanAttempted;
 
     /// <summary>
     /// Get the count of an item in the player's inventory (NQ + HQ).
@@ -196,8 +181,8 @@ public static class GameHelpers
     }
 
     /// <summary>
-    /// Resolves the BossMod-derived UseActionLocation client seam on demand.
-    /// FrenRider does not detour it today; this is just the low-level call surface.
+    /// Uses the API15 ClientStructs UseActionLocation wrapper. FrenRider does not detour it today;
+    /// this is just the low-level call surface.
     /// </summary>
     public static unsafe bool TryUseActionLocation(
         ActionType actionType,
@@ -215,20 +200,13 @@ public static class GameHelpers
                 return false;
             }
 
-            var actionDelegate = ResolveUseActionLocation();
-            if (actionDelegate == null)
-            {
-                Plugin.Log.Warning($"TryUseActionLocation({actionType}, {actionId}): BossMod-derived UseActionLocation signature was unavailable");
-                return false;
-            }
-
             if (targetPosition.HasValue)
             {
                 var position = targetPosition.Value;
-                return actionDelegate(actionManager, actionType, actionId, targetId, &position, itemLocation);
+                return actionManager->UseActionLocation(actionType, actionId, targetId, &position, itemLocation);
             }
 
-            return actionDelegate(actionManager, actionType, actionId, targetId, null, itemLocation);
+            return actionManager->UseActionLocation(actionType, actionId, targetId, null, itemLocation);
         }
         catch (Exception ex)
         {
@@ -571,29 +549,4 @@ public static class GameHelpers
         }
     }
 
-    private static unsafe UseActionLocationDelegate? ResolveUseActionLocation()
-    {
-        if (useActionLocation is not null)
-            return useActionLocation;
-
-        if (useActionLocationScanAttempted)
-            return null;
-
-        useActionLocationScanAttempted = true;
-        try
-        {
-            useActionLocationAddress = Plugin.SigScanner.ScanText(BossModUseActionLocationSignature);
-            if (useActionLocationAddress == nint.Zero)
-                return null;
-
-            useActionLocation = Marshal.GetDelegateForFunctionPointer<UseActionLocationDelegate>(useActionLocationAddress);
-            Plugin.Log.Information($"[FrenRider] Resolved UseActionLocation seam from BossMod signature at 0x{useActionLocationAddress:X}");
-            return useActionLocation;
-        }
-        catch (Exception ex)
-        {
-            Plugin.Log.Warning($"[FrenRider] Failed to resolve BossMod-derived UseActionLocation signature: {ex.Message}");
-            return null;
-        }
-    }
 }
