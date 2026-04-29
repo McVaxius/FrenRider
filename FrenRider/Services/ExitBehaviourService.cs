@@ -435,7 +435,7 @@ public class ExitBehaviourService : IDisposable
             foreach (var obj in Plugin.ObjectTable)
             {
                 if (obj == null) continue;
-                if (obj.ObjectKind != ObjectKind.Player) continue;
+                if (obj.ObjectKind != ObjectKind.Pc) continue;
                 if (obj.Name.ToString() == memberName)
                 {
                     membersInZone++;

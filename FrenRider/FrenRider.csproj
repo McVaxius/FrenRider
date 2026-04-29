@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<Project Sdk="Dalamud.NET.Sdk/14.0.2">
+<Project Sdk="Dalamud.NET.Sdk/15.0.0">
 
   <PropertyGroup>
 
-    <Version>1.0.1.6</Version>
-    <FileVersion>1.0.1.6</FileVersion>
-    <AssemblyVersion>1.0.1.6</AssemblyVersion>
+    <Version>1.0.1.7</Version>
+    <FileVersion>1.0.1.7</FileVersion>
+    <AssemblyVersion>1.0.1.7</AssemblyVersion>
 
     <PackageProjectUrl>https://github.com/McVaxius/FrenRider</PackageProjectUrl>
 
