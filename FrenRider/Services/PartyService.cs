@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Dalamud.Game.Chat;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Memory;
@@ -37,12 +38,12 @@ public class PartyService
 
     public void Initialize()
     {
-        Plugin.ChatGui.ChatMessage += OnChatMessage;
+        Plugin.ChatGui.ChatMessageUnhandled += OnChatMessage;
     }
 
     public void Dispose()
     {
-        Plugin.ChatGui.ChatMessage -= OnChatMessage;
+        Plugin.ChatGui.ChatMessageUnhandled -= OnChatMessage;
     }
 
     public void Update()
@@ -75,7 +76,13 @@ public class PartyService
         }
     }
 
+    private void OnChatMessage(IChatMessage message)
+        => HandleChatMessage(message.LogKind, message.Message);
+
     private void OnChatMessage(XivChatType type, int timestamp, ref SeString sender, ref SeString message, ref bool isHandled)
+        => HandleChatMessage(type, message);
+
+    private void HandleChatMessage(XivChatType type, SeString message)
     {
         var config = plugin.ConfigManager.GetActiveConfig();
         if (!config.Enabled || config.InviteWhitelist.Count == 0)
@@ -129,7 +136,7 @@ public class PartyService
             return;
 
         var textPtr = promptNode->NodeText.StringPtr;
-        if (textPtr == null)
+        if (!textPtr.HasValue)
             return;
 
         var promptSe = MemoryHelper.ReadSeStringNullTerminated(new IntPtr(textPtr));

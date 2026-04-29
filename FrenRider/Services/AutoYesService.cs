@@ -105,7 +105,7 @@ public class AutoYesService : IDisposable
                 return;
                 
             var textPtr = promptNode->NodeText.StringPtr;
-            if (textPtr == null)
+            if (!textPtr.HasValue)
                 return;
                 
             var promptSe = MemoryHelper.ReadSeStringNullTerminated(new IntPtr(textPtr));

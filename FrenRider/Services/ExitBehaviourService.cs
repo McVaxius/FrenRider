@@ -80,7 +80,13 @@ public class ExitBehaviourService : IDisposable
         Plugin.DutyState.DutyCompleted -= OnDutyCompleted;
     }
 
+    private void OnDutyCompleted(Dalamud.Game.DutyState.IDutyStateEventArgs args)
+        => OnDutyCompleted(args.TerritoryType.RowId);
+
     private void OnDutyCompleted(object? sender, ushort territoryId)
+        => OnDutyCompleted((uint)territoryId);
+
+    private void OnDutyCompleted(uint territoryId)
     {
         dutyCompleted = true;
         dutyCompletedTime = DateTime.Now;
