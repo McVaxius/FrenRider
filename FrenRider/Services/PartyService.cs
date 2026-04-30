@@ -79,9 +79,6 @@ public class PartyService
     private void OnChatMessage(IChatMessage message)
         => HandleChatMessage(message.LogKind, message.Message);
 
-    private void OnChatMessage(XivChatType type, int timestamp, ref SeString sender, ref SeString message, ref bool isHandled)
-        => HandleChatMessage(type, message);
-
     private void HandleChatMessage(XivChatType type, SeString message)
     {
         var config = plugin.ConfigManager.GetActiveConfig();
