@@ -185,7 +185,7 @@ public static class GameHelpers
     public static bool IsMountedOrRiding()
     {
         return Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.Mounted]
-            || Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.RidingPillion];
+            || Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.Mounting71];
     }
 
     /// <summary>

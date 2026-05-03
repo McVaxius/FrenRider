@@ -13,7 +13,7 @@ public enum MountState
     Idle,           // Not doing anything mount-related
     WaitingToMount, // Fren mounted, waiting for proximity before mounting
     Mounting,       // In the process of mounting
-    Mounted,        // On own mount or riding pillion
+    Mounted,        // On own mount (FlyYouFools mode)
     Dismounting,    // Fren dismounted, dismounting self
 }
 
@@ -65,18 +65,14 @@ public class MountService
             return;
         }
 
-        var selfOnMountOrPillion = Plugin.Condition[ConditionFlag.Mounted]
-            || Plugin.Condition[ConditionFlag.RidingPillion];
-        var selfMountBusy = selfOnMountOrPillion
-            || Plugin.Condition[ConditionFlag.Mounting71];
-        var selfRidingPillion = Plugin.Condition[ConditionFlag.RidingPillion];
+        var selfMounted = Plugin.Condition[ConditionFlag.Mounted] || Plugin.Condition[ConditionFlag.Mounting71];
         var selfFlying = Plugin.Condition[ConditionFlag.InFlight];
         var inCombat = Plugin.Condition[ConditionFlag.InCombat];
         var now = Environment.TickCount64;
 
         // DISMOUNT LOGIC: If fren is not mounted and FlyYouFools is enabled, dismount
         // This matches SND: "if IsPartyMemberMounted(fren) == false and fly_you_fools == true"
-        if (!fren.IsMounted && config.FlyYouFools && selfOnMountOrPillion)
+        if (!fren.IsMounted && config.FlyYouFools && selfMounted)
         {
             if (now >= mountCooldownMs)
             {
@@ -93,7 +89,7 @@ public class MountService
         }
 
         // MOUNT LOGIC: If fren is mounted, mount up or ride pillion
-        if (fren.IsMounted && !selfMountBusy && !inCombat)
+        if (fren.IsMounted && !selfMounted && !inCombat)
         {
             if (!wasFrenMounted)
             {
@@ -128,21 +124,12 @@ public class MountService
         }
 
         // Update ongoing state
-        if (fren.IsMounted && selfOnMountOrPillion)
+        if (fren.IsMounted && selfMounted)
         {
             State = MountState.Mounted;
-            StateDetail = selfRidingPillion
-                ? "Riding pillion on fren's mount"
-                : selfFlying
-                    ? "Flying alongside fren"
-                    : "Mounted alongside fren";
+            StateDetail = selfFlying ? "Flying alongside fren" : "Mounted alongside fren";
         }
-        else if (fren.IsMounted && selfMountBusy)
-        {
-            State = MountState.Mounting;
-            StateDetail = "Mounting...";
-        }
-        else if (fren.IsMounted && !selfMountBusy && config.FlyYouFools)
+        else if (fren.IsMounted && !selfMounted && config.FlyYouFools)
         {
             // We should be mounted but aren't - waiting for cooldown
             State = MountState.WaitingToMount;

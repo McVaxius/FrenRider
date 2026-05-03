@@ -18,8 +18,6 @@ public class AutomationService
     private long lastCompanionAttemptMs;
     private long companionStanceCooldownMs;
     private long lastDiscardMs;
-    private long lastDiscardDeferLogMs;
-    private string lastDiscardDeferReason = "";
     private int idleListIndex;
 
     // Resolved food item ID (cached from name lookup or food search)
@@ -86,24 +84,6 @@ public class AutomationService
         var inDuty = Plugin.Condition[ConditionFlag.BoundByDuty];
         var now = Environment.TickCount64;
 
-        // Auto-discard (every 10 seconds, but only during mounted-safe idle windows)
-        if (config.EnableAutoDiscard && now - lastDiscardMs > 10000)
-        {
-            if (GameHelpers.CanAutoDiscardNow(out var discardReason))
-            {
-                lastDiscardMs = now;
-                lastDiscardDeferReason = "";
-                if (SendCommand("/ays discard"))
-                    Plugin.Log.Debug("Auto-discard: sent /ays discard");
-            }
-            else if (discardReason != lastDiscardDeferReason || now - lastDiscardDeferLogMs > 10000)
-            {
-                lastDiscardDeferReason = discardReason;
-                lastDiscardDeferLogMs = now;
-                Plugin.Log.Debug($"Auto-discard deferred: {discardReason}");
-            }
-        }
-
         // Don't idle if in combat or mounted
         if (inCombat || mounted)
         {
@@ -148,6 +128,21 @@ public class AutomationService
         {
             lastCompanionCheckMs = now;
             CheckCompanion(config);
+        }
+
+        // Auto-discard (every 30 seconds, but only during mounted-safe idle windows)
+        if (config.EnableAutoDiscard && now - lastDiscardMs > 10000)
+        {
+            if (GameHelpers.CanAutoDiscardNow(out var discardReason))
+            {
+                lastDiscardMs = now;
+                if (SendCommand("/ays discard"))
+                    Plugin.Log.Debug("Auto-discard: sent /ays discard");
+            }
+            else
+            {
+                Plugin.Log.Debug($"Auto-discard deferred: {discardReason}");
+            }
         }
 
         // Deferred companion stance setting (after summoning, wait for spawn)
