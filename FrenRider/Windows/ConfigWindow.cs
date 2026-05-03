@@ -979,8 +979,7 @@ public class ConfigWindow : Window, IDisposable
 
             if (config.IdleListMode == 1)
             {
-                ImGui.TextColored(new Vector4(1, 1, 0.4f, 1), "Custom list editor planned for future update.");
-                ImGui.TextWrapped("Tip: You can use commands like /snd run scriptname or /simulationf motion");
+                DrawCustomIdleListEditor(config);
             }
         }
 
@@ -1271,6 +1270,63 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         ImGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1), plugin.AutorotIpcService.LastStatus);
+    }
+
+    private void DrawCustomIdleListEditor(CharacterConfig config)
+    {
+        if (config.EnsureCustomIdleListSeeded())
+            configManager.SaveCurrentAccount();
+
+        ImGui.Spacing();
+        if (ImGui.SmallButton("[+]##IdleCustomAdd"))
+        {
+            var commands = CharacterConfig.CloneCustomIdleList(config.CustomIdleList)
+                .Concat(new[] { CharacterConfig.DefaultCustomIdleCommand })
+                .ToArray();
+            config.CustomIdleList = commands;
+            configManager.SaveCurrentAccount();
+        }
+        if (ImGui.IsItemHovered())
+            ImGui.SetTooltip("Add command");
+
+        var list = CharacterConfig.CloneCustomIdleList(config.CustomIdleList);
+        for (var i = 0; i < list.Length; i++)
+        {
+            ImGui.PushID($"IdleCustom{i}");
+
+            var canRemove = list.Length > 1;
+            if (!canRemove)
+                ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 0.5f);
+
+            var removeClicked = ImGui.SmallButton("[-]") && canRemove;
+            if (!canRemove)
+                ImGui.PopStyleVar();
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip(canRemove ? "Remove command" : "At least one command required");
+
+            if (removeClicked)
+            {
+                config.CustomIdleList = list
+                    .Where((_, index) => index != i)
+                    .DefaultIfEmpty(CharacterConfig.DefaultCustomIdleCommand)
+                    .ToArray();
+                configManager.SaveCurrentAccount();
+                ImGui.PopID();
+                break;
+            }
+
+            ImGui.SameLine();
+            var command = list[i] ?? "";
+            ImGui.SetNextItemWidth(Math.Max(200f, ImGui.GetContentRegionAvail().X));
+            if (ImGui.InputText("##IdleCustomCommand", ref command, 256))
+            {
+                list[i] = command;
+                config.CustomIdleList = list;
+                configManager.SaveCurrentAccount();
+            }
+
+            ImGui.PopID();
+        }
     }
 
     private void DrawAboutTab()

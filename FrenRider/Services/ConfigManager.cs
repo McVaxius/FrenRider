@@ -337,7 +337,7 @@ public class ConfigManager
                 target.IdleAction = source.IdleAction;
                 target.IdleActionMode = source.IdleActionMode;
                 target.IdleListMode = source.IdleListMode;
-                target.CustomIdleList = (string[])source.CustomIdleList.Clone();
+                target.CustomIdleList = CharacterConfig.CloneCustomIdleList(source.CustomIdleList);
                 target.IdleTicksBeforeAction = source.IdleTicksBeforeAction;
                 break;
         }

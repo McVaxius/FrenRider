@@ -1,10 +1,12 @@
 using System;
 using System.Numerics;
+using System.Text;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
+using FFXIVClientStructs.FFXIV.Client.System.String;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Component.GUI;
@@ -147,9 +149,9 @@ public static class GameHelpers
 
     public static bool CanAutoDiscardNow(out string reason)
     {
-        if (!Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.Mounted])
+        if (!IsMountedOrRiding())
         {
-            reason = "not mounted";
+            reason = "not mounted or riding";
             return false;
         }
 
@@ -178,6 +180,12 @@ public static class GameHelpers
 
         reason = "ready";
         return true;
+    }
+
+    public static bool IsMountedOrRiding()
+    {
+        return Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.Mounted]
+            || Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.Mounting71];
     }
 
     /// <summary>
@@ -484,31 +492,181 @@ public static class GameHelpers
     }
 
     /// <summary>
+    /// Send a slash command through the game chat path.
+    /// </summary>
+    public static unsafe bool SendChatCommand(string command, string logPrefix)
+    {
+        try
+        {
+            var uiModule = UIModule.Instance();
+            if (uiModule == null)
+            {
+                Plugin.Log.Error($"{logPrefix} command failed [{command}]: UIModule null");
+                return false;
+            }
+
+            var bytes = Encoding.UTF8.GetBytes(command);
+            var utf8String = Utf8String.FromSequence(bytes);
+            uiModule->ProcessChatBoxEntry(utf8String, nint.Zero);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log.Error($"{logPrefix} command failed [{command}]: {ex.Message}");
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Click a verified button node on a visible addon.
+    /// </summary>
+    public static bool ClickAddonButton(string addonName, int nodeListIndex)
+    {
+        return ClickAddonButton(addonName, nodeListIndex, out _);
+    }
+
+    /// <summary>
+    /// Click a verified button node on a visible addon, returning a short reason when no click fires.
+    /// </summary>
+    public static bool ClickAddonButton(string addonName, int nodeListIndex, out string failureReason)
+    {
+        var diagnostic = TryClickAddonButtonDetailed(addonName, nodeListIndex);
+        failureReason = diagnostic.FailureReason;
+        return diagnostic.Result;
+    }
+
+    public sealed class AddonButtonClickDiagnostic
+    {
+        public int NodeListIndex { get; set; }
+        public bool AddonVisible { get; set; }
+        public int NodeCount { get; set; } = -1;
+        public bool NodePresent { get; set; }
+        public bool EventPresent { get; set; }
+        public string EventParam { get; set; } = "n/a";
+        public bool Result { get; set; }
+        public string FailureReason { get; set; } = "";
+
+        public string ToLogString()
+        {
+            var failure = string.IsNullOrEmpty(FailureReason) ? "none" : FailureReason;
+            return $"addonVisible={BoolText(AddonVisible)}; nodeCount={NodeCount}; node{NodeListIndex}Present={BoolText(NodePresent)}; eventPresent={BoolText(EventPresent)}; eventParam={EventParam}; result={BoolText(Result)}; failureReason={failure}";
+        }
+
+        private static string BoolText(bool value) => value ? "true" : "false";
+    }
+
+    public static unsafe AddonButtonClickDiagnostic TryClickAddonButtonDetailed(string addonName, int nodeListIndex)
+    {
+        var diagnostic = new AddonButtonClickDiagnostic
+        {
+            NodeListIndex = nodeListIndex,
+        };
+
+        try
+        {
+            if (nodeListIndex < 0)
+            {
+                diagnostic.FailureReason = "node index out of range";
+                return diagnostic;
+            }
+
+            var unitManager = RaptureAtkUnitManager.Instance();
+            if (unitManager == null)
+            {
+                diagnostic.FailureReason = "unit manager not found";
+                return diagnostic;
+            }
+
+            var addon = unitManager->GetAddonByName(addonName);
+            if (addon == null)
+            {
+                diagnostic.FailureReason = "addon not found";
+                return diagnostic;
+            }
+
+            diagnostic.AddonVisible = addon->IsVisible;
+            diagnostic.NodeCount = (int)addon->UldManager.NodeListCount;
+
+            if (!addon->IsVisible)
+            {
+                diagnostic.FailureReason = "addon hidden";
+                return diagnostic;
+            }
+
+            if (nodeListIndex >= diagnostic.NodeCount)
+            {
+                diagnostic.FailureReason = "node index out of range";
+                return diagnostic;
+            }
+
+            var node = addon->UldManager.NodeList[nodeListIndex];
+            diagnostic.NodePresent = node != null;
+            if (node == null)
+            {
+                diagnostic.FailureReason = "node null";
+                return diagnostic;
+            }
+
+            var evt = node->AtkEventManager.Event;
+            diagnostic.EventPresent = evt != null;
+            if (evt == null)
+            {
+                diagnostic.FailureReason = "event null";
+                return diagnostic;
+            }
+
+            diagnostic.EventParam = evt->Param.ToString();
+            addon->ReceiveEvent((AtkEventType)25, (int)evt->Param, evt);
+            diagnostic.Result = true;
+            return diagnostic;
+        }
+        catch (Exception ex)
+        {
+            diagnostic.FailureReason = $"exception: {ex.Message}";
+            Plugin.Log.Error($"ClickAddonButton({addonName}, {nodeListIndex}) failed: {ex.Message}");
+            return diagnostic;
+        }
+    }
+
+    /// <summary>
     /// Fire a callback on a named addon with variable arguments.
     /// Pattern from LootGoblin GameHelpers.
     /// SND equivalent: /callback AddonName true/false arg1 arg2 ...
     /// </summary>
-    public static unsafe void FireAddonCallback(string addonName, bool updateState, params object[] args)
+    public static unsafe bool TryFireAddonCallback(string addonName, bool updateState, out string failureReason, params object[] args)
     {
+        failureReason = "";
+
         try
         {
-            var addon = RaptureAtkUnitManager.Instance()->GetAddonByName(addonName);
-            if (addon == null || !addon->IsVisible)
+            var unitManager = RaptureAtkUnitManager.Instance();
+            if (unitManager == null)
             {
-                Plugin.Log.Warning($"[Callback] Addon '{addonName}' not found or not visible");
-                return;
+                failureReason = "addon not found";
+                return false;
+            }
+
+            var addon = unitManager->GetAddonByName(addonName);
+            if (addon == null)
+            {
+                failureReason = "addon not found";
+                return false;
+            }
+
+            if (!addon->IsVisible)
+            {
+                failureReason = "addon hidden";
+                return false;
             }
 
             var atkValues = new AtkValue[args.Length];
             for (int i = 0; i < args.Length; i++)
             {
-                atkValues[i] = args[i] switch
+                if (!TryCreateAtkValue(args[i], out atkValues[i]))
                 {
-                    int intVal => new AtkValue { Type = FFXIVClientStructs.FFXIV.Component.GUI.AtkValueType.Int, Int = intVal },
-                    uint uintVal => new AtkValue { Type = FFXIVClientStructs.FFXIV.Component.GUI.AtkValueType.UInt, UInt = uintVal },
-                    bool boolVal => new AtkValue { Type = FFXIVClientStructs.FFXIV.Component.GUI.AtkValueType.Bool, Byte = (byte)(boolVal ? 1 : 0) },
-                    _ => new AtkValue { Type = FFXIVClientStructs.FFXIV.Component.GUI.AtkValueType.Int, Int = Convert.ToInt32(args[i]) },
-                };
+                    failureReason = "unsupported arg type";
+                    return false;
+                }
             }
 
             fixed (AtkValue* ptr = atkValues)
@@ -516,12 +674,44 @@ public static class GameHelpers
                 addon->FireCallback((uint)atkValues.Length, ptr, updateState);
             }
 
-            Plugin.Log.Information($"[Callback] Fired on '{addonName}' with {args.Length} args, updateState={updateState}");
+            return true;
         }
         catch (Exception ex)
         {
+            failureReason = $"exception: {ex.Message}";
             Plugin.Log.Error($"[Callback] Failed for '{addonName}': {ex.Message}");
+            return false;
         }
+    }
+
+    public static unsafe void FireAddonCallback(string addonName, bool updateState, params object[] args)
+    {
+        if (TryFireAddonCallback(addonName, updateState, out var failureReason, args))
+        {
+            Plugin.Log.Information($"[Callback] Fired on '{addonName}' with {args.Length} args, updateState={updateState}");
+            return;
+        }
+
+        if (failureReason is "addon not found" or "addon hidden")
+        {
+            Plugin.Log.Warning($"[Callback] Addon '{addonName}' not found or not visible");
+            return;
+        }
+
+        Plugin.Log.Error($"[Callback] Failed for '{addonName}': {failureReason}");
+    }
+
+    private static bool TryCreateAtkValue(object arg, out AtkValue atkValue)
+    {
+        atkValue = arg switch
+        {
+            int intVal => new AtkValue { Type = AtkValueType.Int, Int = intVal },
+            uint uintVal => new AtkValue { Type = AtkValueType.UInt, UInt = uintVal },
+            bool boolVal => new AtkValue { Type = AtkValueType.Bool, Byte = (byte)(boolVal ? 1 : 0) },
+            _ => default,
+        };
+
+        return arg is int or uint or bool;
     }
 
     /// <summary>

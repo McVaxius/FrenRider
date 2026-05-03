@@ -136,8 +136,8 @@ public class AutomationService
             if (GameHelpers.CanAutoDiscardNow(out var discardReason))
             {
                 lastDiscardMs = now;
-                SendCommand("/ays discard");
-                Plugin.Log.Debug("Auto-discard: sent /ays discard");
+                if (SendCommand("/ays discard"))
+                    Plugin.Log.Debug("Auto-discard: sent /ays discard");
             }
             else
             {
@@ -163,9 +163,14 @@ public class AutomationService
                 action = config.IdleAction;
                 break;
             case 1: // Action from list
-                var list = config.IdleListMode == 1 && config.CustomIdleList.Length > 0
-                    ? config.CustomIdleList
-                    : DefaultIdleList;
+                var list = DefaultIdleList;
+                if (config.IdleListMode == 1)
+                {
+                    if (config.EnsureCustomIdleListSeeded())
+                        plugin.ConfigManager.SaveCurrentAccount();
+
+                    list = CharacterConfig.GetExecutableCustomIdleCommands(config.CustomIdleList);
+                }
 
                 if (list.Length == 0) return;
                 action = list[idleListIndex % list.Length];
@@ -464,16 +469,8 @@ public class AutomationService
         resolvedFoodItemName = "";
     }
 
-    private static void SendCommand(string command)
+    private static bool SendCommand(string command)
     {
-        try
-        {
-            if (!Plugin.CommandManager.ProcessCommand(command))
-                Plugin.Log.Warning($"Automation command not handled: {command}");
-        }
-        catch (Exception ex)
-        {
-            Plugin.Log.Error($"Automation command failed [{command}]: {ex.Message}");
-        }
+        return GameHelpers.SendChatCommand(command, "Automation");
     }
 }

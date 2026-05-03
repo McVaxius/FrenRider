@@ -54,6 +54,8 @@ public class AutoYesService : IDisposable
     private string lastHandledDialog = "";
     private DateTime lastHandledTime = DateTime.MinValue;
     private readonly TimeSpan handleCooldown = TimeSpan.FromSeconds(2); // Don't spam same dialog
+    private DateTime lastTeleportNotificationDiagnosticTime = DateTime.MinValue;
+    private readonly TimeSpan teleportNotificationDiagnosticCooldown = TimeSpan.FromSeconds(2);
     
     public AutoYesService(Plugin plugin, IGameGui gameGui, ICondition condition, IPluginLog log)
     {
@@ -94,11 +96,17 @@ public class AutoYesService : IDisposable
         {
             nint addonPtr = gameGui.GetAddonByName("SelectYesno", 1);
             if (addonPtr == 0)
+            {
+                TryExpandMinimizedTeleportOffer(config, now);
                 return;
+            }
                 
             var addon = (AddonSelectYesno*)addonPtr;
             if (!addon->AtkUnitBase.IsVisible)
+            {
+                TryExpandMinimizedTeleportOffer(config, now);
                 return;
+            }
                 
             var promptNode = addon->PromptText;
             if (promptNode == null)
@@ -120,7 +128,7 @@ public class AutoYesService : IDisposable
             log.Debug($"[AutoYes] Dialog detected: {dialogText}");
             
             // Check for auto-yes patterns
-            string matchedKey = null;
+            string? matchedKey = null;
             
             foreach (var kvp in autoYesPatterns)
             {
@@ -175,6 +183,38 @@ public class AutoYesService : IDisposable
                 }
             }
         }
+    }
+
+    private void TryExpandMinimizedTeleportOffer(CharacterConfig config, DateTime now)
+    {
+        if (config == null || !config.Enabled || !config.TeleportOfferAutoAccept)
+            return;
+
+        if (GameHelpers.IsAddonVisible("SelectYesno"))
+            return;
+
+        if (!GameHelpers.IsAddonVisible("_NotificationTelepo"))
+            return;
+
+        if (now - lastTeleportNotificationDiagnosticTime < teleportNotificationDiagnosticCooldown)
+            return;
+
+        lastTeleportNotificationDiagnosticTime = now;
+
+        const string addonName = "_Notification";
+        const bool updateState = true;
+        const int callbackIndex = 0;
+        const int callbackAction = 16;
+
+        var callbackDispatched = GameHelpers.TryFireAddonCallback(
+            addonName,
+            updateState,
+            out var callbackFailureReason,
+            callbackIndex,
+            callbackAction);
+
+        var callbackFailure = string.IsNullOrEmpty(callbackFailureReason) ? "none" : callbackFailureReason;
+        log.Debug($"[AutoYes] _NotificationTelepo detected; SelectYesno visible=false; callback addon=_Notification; updateState=true; args=[Int=0, Int=16]; callback dispatched={callbackDispatched.ToString().ToLowerInvariant()}; callbackFailureReason={callbackFailure}");
     }
     
     private unsafe void ClickYesAndLog(string dialogText, string dialogType)

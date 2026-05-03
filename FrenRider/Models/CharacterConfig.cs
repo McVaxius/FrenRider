@@ -7,6 +7,8 @@ namespace FrenRider.Models;
 [Serializable]
 public class CharacterConfig
 {
+    public const string DefaultCustomIdleCommand = "/smile motion";
+
     // --- Party / Friend ---
     public string FrenName { get; set; } = "";
     public bool FlyYouFools { get; set; } = false;
@@ -18,7 +20,7 @@ public class CharacterConfig
     public string IdleAction { get; set; } = "/tomescroll";
     public int IdleActionMode { get; set; } = 0; // 0 = specific action, 1 = action from list
     public int IdleListMode { get; set; } = 0; // 0 = default list, 1 = custom list
-    public string[] CustomIdleList { get; set; } = Array.Empty<string>();
+    public string[] CustomIdleList { get; set; } = new[] { DefaultCustomIdleCommand };
     public int IdleTicksBeforeAction { get; set; } = 10;
 
     // --- Distance / Following ---
@@ -112,7 +114,7 @@ public class CharacterConfig
             IdleAction = IdleAction,
             IdleActionMode = IdleActionMode,
             IdleListMode = IdleListMode,
-            CustomIdleList = (string[])CustomIdleList.Clone(),
+            CustomIdleList = CloneCustomIdleList(CustomIdleList),
             IdleTicksBeforeAction = IdleTicksBeforeAction,
             Cling = Cling,
             ClingType = ClingType,
@@ -176,6 +178,32 @@ public class CharacterConfig
             AutorotPushOnEnable = AutorotPushOnEnable,
             Enabled = Enabled,
         };
+    }
+
+    public bool EnsureCustomIdleListSeeded()
+    {
+        if (CustomIdleList != null && CustomIdleList.Length > 0)
+            return false;
+
+        CustomIdleList = new[] { DefaultCustomIdleCommand };
+        return true;
+    }
+
+    public static string[] CloneCustomIdleList(string[]? customIdleList)
+    {
+        return customIdleList?.ToArray() ?? new[] { DefaultCustomIdleCommand };
+    }
+
+    public static string[] GetExecutableCustomIdleCommands(string[]? customIdleList)
+    {
+        var commands = customIdleList?
+            .Where(command => !string.IsNullOrWhiteSpace(command))
+            .Select(command => command.Trim())
+            .ToArray() ?? Array.Empty<string>();
+
+        return commands.Length > 0
+            ? commands
+            : new[] { DefaultCustomIdleCommand };
     }
 
     public void EnsureAdsDutyFamilySettingsInitialized()
