@@ -839,6 +839,15 @@ public class ConfigWindow : Window, IDisposable
         ImGui.SameLine();
         HelpMarker("Placeholder for future ADS preset coordination. Stored now so the config shape is stable.");
 
+        var useAdsLeaveAfterAdsDuty = config.UseAdsLeaveAfterAdsDuty;
+        if (ImGui.Checkbox("Send /ads leave after ADS duty completion", ref useAdsLeaveAfterAdsDuty))
+        {
+            config.UseAdsLeaveAfterAdsDuty = useAdsLeaveAfterAdsDuty;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Optional cleanup only. FrenRider still uses its own Leave Duty flow after the configured exit delay.");
+
         if (plugin.AdsIntegrationService is not null)
         {
             ImGui.Spacing();

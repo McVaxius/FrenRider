@@ -68,6 +68,7 @@ public sealed class AdsIntegrationService
     private DateTime lastPraetoriumReadyWaitLogUtc = DateTime.MinValue;
     private uint trackedDutyTerritoryId;
     private bool adsInsideSent;
+    private bool exitReleasedForCurrentDuty;
 
     public AdsIntegrationService(Plugin plugin, ZoneService zoneService)
     {
@@ -80,6 +81,7 @@ public sealed class AdsIntegrationService
     public bool AdsLoaded { get; private set; }
     public bool IsHandoffPending { get; private set; }
     public bool IsControllingDuty { get; private set; }
+    public bool HadAdsControlThisDuty { get; private set; }
     public bool ShouldPauseDutySystems => IsControllingDuty;
     public string StatusText { get; private set; }
 
@@ -97,6 +99,8 @@ public sealed class AdsIntegrationService
             trackedDutyTerritoryId = territoryTypeId;
             dutyEnteredUtc = inDuty ? DateTime.UtcNow : DateTime.MinValue;
             adsInsideSent = false;
+            exitReleasedForCurrentDuty = false;
+            HadAdsControlThisDuty = false;
             IsControllingDuty = false;
             IsHandoffPending = false;
             lastPraetoriumReadyWaitLogUtc = DateTime.MinValue;
@@ -121,12 +125,18 @@ public sealed class AdsIntegrationService
         }
 
         var readiness = ResolveReadiness(config, territoryTypeId);
-        IsHandoffPending = readiness.CanUseAds && !adsInsideSent;
-        IsControllingDuty = readiness.CanUseAds && adsInsideSent;
+        IsHandoffPending = readiness.CanUseAds && !adsInsideSent && !exitReleasedForCurrentDuty;
+        IsControllingDuty = readiness.CanUseAds && adsInsideSent && !exitReleasedForCurrentDuty;
 
         if (!readiness.CanUseAds)
         {
             StatusText = BuildReadinessStatus(readiness, readiness.Reason);
+            return;
+        }
+
+        if (exitReleasedForCurrentDuty)
+        {
+            StatusText = BuildReadinessStatus(readiness, "ADS handoff complete; FrenRider exit owns duty leave");
             return;
         }
 
@@ -151,11 +161,24 @@ public sealed class AdsIntegrationService
         }
 
         adsInsideSent = true;
+        HadAdsControlThisDuty = true;
         IsHandoffPending = false;
         IsControllingDuty = true;
         StatusText = BuildReadinessStatus(readiness, "sent /ads inside");
         Plugin.Log.Information(
             $"[FrenRider][ADS] Sent /ads inside for {readiness.Entry!.EnglishName} ({AdsDutyCategoryCatalog.GetLabel(readiness.Entry.Category)}) with maturity {readiness.Entry.MaturityLevel} and threshold {readiness.FamilySettings.MaturityThreshold}.");
+    }
+
+    public void ReleaseDutyControlForExit(string reason)
+    {
+        if (!adsInsideSent && !HadAdsControlThisDuty)
+            return;
+
+        exitReleasedForCurrentDuty = true;
+        IsControllingDuty = false;
+        IsHandoffPending = false;
+        StatusText = $"ADS handoff complete; FrenRider exit owns duty leave ({reason}).";
+        Plugin.Log.Information($"[FrenRider][ADS] Released ADS duty pause for FrenRider exit: {reason}");
     }
 
     private void BuildCatalog()

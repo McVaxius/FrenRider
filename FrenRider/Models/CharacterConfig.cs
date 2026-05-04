@@ -71,6 +71,7 @@ public class CharacterConfig
     public int AdsOtherMaturityThreshold { get; set; } = 3;
     public bool AdsEnableChestOpening { get; set; } = true;
     public int AdsPresetSelection { get; set; } = 0; // Local stub only until FrenRider can push richer ADS config
+    public bool UseAdsLeaveAfterAdsDuty { get; set; } = false;
 
     // --- Automation / Misc ---
     public bool EnableAutoDiscard { get; set; } = false;
@@ -161,6 +162,7 @@ public class CharacterConfig
             AdsOtherMaturityThreshold = AdsOtherMaturityThreshold,
             AdsEnableChestOpening = AdsEnableChestOpening,
             AdsPresetSelection = AdsPresetSelection,
+            UseAdsLeaveAfterAdsDuty = UseAdsLeaveAfterAdsDuty,
             EnableAutoDiscard = EnableAutoDiscard,
             FeedMeItem = FeedMeItem,
             FeedMeSearch = FeedMeSearch,

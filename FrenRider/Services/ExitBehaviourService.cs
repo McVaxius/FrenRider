@@ -37,6 +37,7 @@ public class ExitBehaviourService : IDisposable
     private DateTime dutyEnteredTime = DateTime.MinValue;
     private DateTime boundByDutyLostTime = DateTime.MinValue; // Debounce for BoundByDuty flicker
     private const double DutyGracePeriodSeconds = 30.0;
+    private bool adsLeaveIssuedForDuty;
 
     // Exit object navigation state
     private IGameObject? exitTarget;
@@ -88,6 +89,7 @@ public class ExitBehaviourService : IDisposable
         dutyCompleted = true;
         dutyCompletedTime = DateTime.Now;
         dutyLeaveIssued = false;
+        plugin.AdsIntegrationService.ReleaseDutyControlForExit($"DutyCompleted territory {territoryId}");
         Plugin.Log.Information($"[ExitBehaviour] Duty completed in territory {territoryId}");
     }
 
@@ -123,6 +125,7 @@ public class ExitBehaviourService : IDisposable
         if (inDuty && !wasBoundByDuty)
         {
             dutyEnteredTime = DateTime.Now;
+            adsLeaveIssuedForDuty = false;
             Plugin.Log.Information($"[ExitBehaviour] Entered duty - {DutyGracePeriodSeconds}s grace period before exit checks");
         }
 
@@ -144,6 +147,7 @@ public class ExitBehaviourService : IDisposable
                     dutyCompleted = true;
                     dutyCompletedTime = DateTime.Now;
                     dutyLeaveIssued = false;
+                    plugin.AdsIntegrationService.ReleaseDutyControlForExit("BoundByDuty dropped");
                     Plugin.Log.Information("[ExitBehaviour] BoundByDuty transition confirmed (was bound, now free for 2s) - marking duty completed");
                 }
             }
@@ -171,6 +175,7 @@ public class ExitBehaviourService : IDisposable
             {
                 dutyCompleted = false;
                 dutyLeaveIssued = false;
+                adsLeaveIssuedForDuty = false;
                 leaveAttemptCount = 0;
                 Plugin.Log.Debug("[ExitBehaviour] No longer in duty - reset completion state");
             }
@@ -209,6 +214,7 @@ public class ExitBehaviourService : IDisposable
                 Plugin.Log.Information($"[ExitBehaviour] === LEAVE DUTY TRIGGERED ===");
                 Plugin.Log.Information($"[ExitBehaviour] Reason: ExitAfterDutyEnds={config.ExitAfterDutyEnds}, elapsed={elapsed:F1}s >= configured={config.ExitAfterDutySeconds}s");
                 Plugin.Log.Information($"[ExitBehaviour] DutyCompleted={dutyCompleted}, CompletedAt={dutyCompletedTime:HH:mm:ss}, InDuty={inDuty}");
+                TrySendOptionalAdsLeave(config);
                 LeaveDuty();
                 dutyLeaveIssued = true;
             }
@@ -228,6 +234,7 @@ public class ExitBehaviourService : IDisposable
             Plugin.Log.Debug("[ExitBehaviour] Exit after duty ends feature disabled - clearing completion state");
             dutyCompleted = false;
             dutyLeaveIssued = false;
+            adsLeaveIssuedForDuty = false;
             leaveAttemptCount = 0;
         }
 
@@ -452,6 +459,20 @@ public class ExitBehaviourService : IDisposable
         {
             Plugin.Log.Debug($"[ExitBehaviour] Party check: {membersInZone} member(s) still in zone - not leaving");
         }
+    }
+
+    private void TrySendOptionalAdsLeave(CharacterConfig config)
+    {
+        if (!config.UseAdsLeaveAfterAdsDuty ||
+            !plugin.AdsIntegrationService.HadAdsControlThisDuty ||
+            adsLeaveIssuedForDuty)
+        {
+            return;
+        }
+
+        adsLeaveIssuedForDuty = true;
+        Plugin.Log.Information("[ExitBehaviour] Optional ADS cleanup enabled - sending /ads leave once before FrenRider leave.");
+        SendCommand("/ads leave");
     }
 
     
