@@ -267,6 +267,7 @@ public class ConfigManager
 
         switch (tabName)
         {
+            case "Profile":
             case "Party":
                 target.FrenName = source.FrenName;
                 target.FlyYouFools = source.FlyYouFools;
@@ -274,7 +275,9 @@ public class ConfigManager
                 target.ForceGysahl = source.ForceGysahl;
                 target.CompanionStrat = source.CompanionStrat;
                 target.UpdateInterval = source.UpdateInterval;
+                target.EnableAutoDiscard = source.EnableAutoDiscard;
                 break;
+            case "Follow":
             case "Distance":
                 target.Cling = source.Cling;
                 target.ClingType = source.ClingType;
@@ -303,6 +306,7 @@ public class ConfigManager
                 target.LimitPct = source.LimitPct;
                 target.RotationType = source.RotationType;
                 break;
+            case "Duty":
             case "Ads":
                 target.UseAdsIfAvailable = source.UseAdsIfAvailable;
                 target.AdsMaturityThreshold = source.AdsMaturityThreshold;
@@ -325,9 +329,19 @@ public class ConfigManager
                 target.AdsOtherMaturityThreshold = source.AdsOtherMaturityThreshold;
                 target.AdsEnableChestOpening = source.AdsEnableChestOpening;
                 target.AdsPresetSelection = source.AdsPresetSelection;
+                target.UseAdsLeaveAfterAdsDuty = source.UseAdsLeaveAfterAdsDuty;
+                target.InviteWhitelist = new List<string>(source.InviteWhitelist);
+                target.RaiseOfferAutoAccept = source.RaiseOfferAutoAccept;
+                target.TeleportOfferAutoAccept = source.TeleportOfferAutoAccept;
+                target.PartyInviteAutoAccept = source.PartyInviteAutoAccept;
+                target.ExitAfterDutyEnds = source.ExitAfterDutyEnds;
+                target.ExitAfterDutySeconds = source.ExitAfterDutySeconds;
+                target.LeaveWhenAllLeft = source.LeaveWhenAllLeft;
                 break;
+            case "Automation":
             case "Misc":
                 target.FulfType = source.FulfType;
+                target.EnableAutoDiscard = source.EnableAutoDiscard;
                 target.FeedMeItem = source.FeedMeItem;
                 target.FeedMeSearch = source.FeedMeSearch;
                 target.XpItem = source.XpItem;
@@ -339,6 +353,7 @@ public class ConfigManager
                 target.IdleListMode = source.IdleListMode;
                 target.CustomIdleList = CharacterConfig.CloneCustomIdleList(source.CustomIdleList);
                 target.IdleTicksBeforeAction = source.IdleTicksBeforeAction;
+                target.AutorotPushOnEnable = source.AutorotPushOnEnable;
                 break;
         }
 

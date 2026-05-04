@@ -17,7 +17,7 @@ public class ConfigWindow : Window, IDisposable
     private readonly Configuration configuration;
     private readonly ConfigManager configManager;
 
-    private string currentTab = "Party";
+    private string currentTab = "Profile";
     private string accountAliasEdit = "";
     private string frenNameInput = "";
     private bool frenNameFocused = false;
@@ -254,40 +254,40 @@ public class ConfigWindow : Window, IDisposable
 
         if (ImGui.BeginTabBar("FrenRiderTabs"))
         {
-            if (ImGui.BeginTabItem("Party / Friend"))
+            if (ImGui.BeginTabItem("Profile"))
             {
-                currentTab = "Party";
+                currentTab = "Profile";
                 DrawPartyTab(config);
                 ImGui.EndTabItem();
             }
-            if (ImGui.BeginTabItem("Distance / Following"))
+            if (ImGui.BeginTabItem("Follow"))
             {
-                currentTab = "Distance";
+                currentTab = "Follow";
                 DrawDistanceTab(config);
                 ImGui.EndTabItem();
             }
-            if (ImGui.BeginTabItem("Combat / AI"))
+            if (ImGui.BeginTabItem("Combat"))
             {
                 currentTab = "Combat";
                 DrawCombatTab(config);
                 ImGui.EndTabItem();
             }
-            if (ImGui.BeginTabItem("ADS"))
+            if (ImGui.BeginTabItem("Duty / ADS / Exit"))
             {
-                currentTab = "Ads";
-                DrawAdsTab(config);
+                currentTab = "Duty";
+                DrawDutyAdsExitTab(config);
                 ImGui.EndTabItem();
             }
-            if (ImGui.BeginTabItem("Misc"))
+            if (ImGui.BeginTabItem("Automation"))
             {
-                currentTab = "Misc";
-                DrawMiscTab(config);
+                currentTab = "Automation";
+                DrawAutomationTab(config);
                 ImGui.EndTabItem();
             }
-            if (ImGui.BeginTabItem("About"))
+            if (ImGui.BeginTabItem("UI / About"))
             {
-                currentTab = "About";
-                DrawAboutTab();
+                currentTab = "UI";
+                DrawUiAboutTab();
                 ImGui.EndTabItem();
             }
             ImGui.EndTabBar();
@@ -862,6 +862,390 @@ public class ConfigWindow : Window, IDisposable
                     : new Vector4(0.7f, 0.7f, 0.7f, 1f);
             ImGui.TextColored(adsColor, $"ADS Status: {adsStatus}");
         }
+    }
+
+    private void DrawDutyAdsExitTab(CharacterConfig config)
+    {
+        UiHelpers.SectionHeader("ADS Handoff");
+        DrawAdsTab(config);
+
+        UiHelpers.SectionHeader("Auto-Yes Dialogs");
+        DrawAutoYesSection(config);
+
+        UiHelpers.SectionHeader("Invite Whitelist");
+        DrawInviteWhitelistSection(config);
+
+        UiHelpers.SectionHeader("Exit Behavior");
+        DrawExitBehaviourSection(config);
+    }
+
+    private void DrawAutomationTab(CharacterConfig config)
+    {
+        UiHelpers.SectionHeader("Loot");
+        DrawLootSection(config);
+
+        UiHelpers.SectionHeader("Food");
+        DrawFoodSection(config);
+
+        UiHelpers.SectionHeader("Repair");
+        DrawRepairSection(config);
+
+        UiHelpers.SectionHeader("Idle Behavior");
+        DrawIdleBehaviorSection(config);
+
+        UiHelpers.SectionHeader("Maintenance");
+        DrawAutoDiscardSection(config);
+        DrawAutorotSection(config);
+
+        UiHelpers.SectionHeader("Debug");
+        DrawDebugLoggingSection(config);
+    }
+
+    private void DrawUiAboutTab()
+    {
+        UiHelpers.SectionHeader("UI");
+        DrawUiSettingsSection();
+
+        UiHelpers.SectionHeader("About");
+        DrawAboutTab();
+    }
+
+    private void DrawLootSection(CharacterConfig config)
+    {
+        var fulfIdx = Array.IndexOf(LootTypes, config.FulfType);
+        if (fulfIdx < 0) fulfIdx = 0;
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.Combo("Loot Type", ref fulfIdx, LootTypes, LootTypes.Length))
+        {
+            config.FulfType = LootTypes[fulfIdx];
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("How loot is handled if LazyLoot is installed.\n'unchanged' = Don't modify loot settings.");
+    }
+
+    private void DrawFoodSection(CharacterConfig config)
+    {
+        var feedMeItem = config.FeedMeItem;
+        ImGui.SetNextItemWidth(300);
+        if (ImGui.InputText("Food Item Name", ref feedMeItem, 64))
+        {
+            config.FeedMeItem = feedMeItem;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Name of food to auto-consume.");
+
+        var feedMeSearch = config.FeedMeSearch;
+        if (ImGui.Checkbox("Search for Food if Depleted", ref feedMeSearch))
+        {
+            config.FeedMeSearch = feedMeSearch;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("If configured food runs out, search inventory for any food starting from lowest item ID.");
+    }
+
+    private void DrawRepairSection(CharacterConfig config)
+    {
+        ImGui.TextColored(new Vector4(0.8f, 0.8f, 0.2f, 1f), "XP item automation temporarily disabled (TBD)");
+        HelpMarker("Previous XP item inputs are on hold until the multi-item system is designed.");
+
+        var repair = config.Repair;
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.Combo("Repair", ref repair, RepairOptions, RepairOptions.Length))
+        {
+            config.Repair = repair;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Auto-repair method.\nNo: Don't auto-repair\nSelf Repair: Use dark matter\nInn NPC: Use inn repair NPC.");
+
+        var tornClothes = config.TornClothes;
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.InputInt("Repair At % Durability", ref tornClothes))
+        {
+            config.TornClothes = tornClothes;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Trigger repair when gear durability falls below this percentage.");
+    }
+
+    private void DrawIdleBehaviorSection(CharacterConfig config)
+    {
+        var idleMode = config.IdleActionMode;
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.Combo("Idle Mode", ref idleMode, IdleActionModes, IdleActionModes.Length))
+        {
+            config.IdleActionMode = idleMode;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("What to do when idle.\nSpecific Action: execute one command\nAction From List: rotate through a list");
+
+        if (config.IdleActionMode == 0)
+        {
+            var idleAction = config.IdleAction;
+            ImGui.SetNextItemWidth(300);
+            if (ImGui.InputText("Idle Command", ref idleAction, 64))
+            {
+                config.IdleAction = idleAction;
+                configManager.SaveCurrentAccount();
+            }
+            ImGui.SameLine();
+            HelpMarker("Slash command to execute when idle.\nExamples: /tomescroll, /dance, /snd run scriptname");
+        }
+        else
+        {
+            var listMode = config.IdleListMode;
+            ImGui.SetNextItemWidth(200);
+            if (ImGui.Combo("List Source", ref listMode, IdleListModes, IdleListModes.Length))
+            {
+                config.IdleListMode = listMode;
+                configManager.SaveCurrentAccount();
+            }
+            ImGui.SameLine();
+            HelpMarker("Default List: built-in emotes\nCustom List: your own command list");
+
+            if (config.IdleListMode == 1)
+                DrawCustomIdleListEditor(config);
+        }
+
+        var idleTicks = config.IdleTicksBeforeAction;
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.InputInt("Idle Ticks Before Action", ref idleTicks))
+        {
+            config.IdleTicksBeforeAction = idleTicks;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Number of update ticks before idle action triggers.");
+    }
+
+    private void DrawAutoDiscardSection(CharacterConfig config)
+    {
+        var autoDiscard = config.EnableAutoDiscard;
+        if (ImGui.Checkbox("Auto Discard (/ays discard)", ref autoDiscard))
+        {
+            config.EnableAutoDiscard = autoDiscard;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Runs /ays discard while mounted and in a safe idle window.\nRequires AutoRetainer plugin.");
+    }
+
+    private void DrawAutorotSection(CharacterConfig config)
+    {
+        var pushOnEnable = config.AutorotPushOnEnable;
+        if (ImGui.Checkbox("Push autorot presets on enable", ref pushOnEnable))
+        {
+            config.AutorotPushOnEnable = pushOnEnable;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Automatically push FRENRIDER and DD presets into BMR/VBM via IPC when the plugin is enabled.");
+
+        if (ImGui.Button("Push Presets Now"))
+            plugin.AutorotIpcService.CreatePresets(force: true);
+        ImGui.SameLine();
+        ImGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1), plugin.AutorotIpcService.LastStatus);
+    }
+
+    private void DrawDebugLoggingSection(CharacterConfig config)
+    {
+        var spamPrinter = config.SpamPrinter;
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.Combo("Echo Messages", ref spamPrinter, OnOff, OnOff.Length))
+        {
+            config.SpamPrinter = spamPrinter;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Print status messages to game chat.\nUseful for debugging but fills chat quickly.");
+    }
+
+    private void DrawInviteWhitelistSection(CharacterConfig config)
+    {
+        ImGui.Text("Trusted inviters");
+        HelpMarker("Players in this list will have party invites automatically accepted when you are not in a group.\nNames should omit the @Server part.");
+        ImGui.Spacing();
+
+        for (int i = 0; i < config.InviteWhitelist.Count; i++)
+        {
+            var entry = config.InviteWhitelist[i];
+            ImGui.Text($"  {Disp(entry)}");
+            ImGui.SameLine();
+            if (ImGui.SmallButton($"X##wlDuty{i}"))
+            {
+                config.InviteWhitelist.RemoveAt(i);
+                configManager.SaveCurrentAccount();
+                break;
+            }
+        }
+
+        ImGui.SetNextItemWidth(220);
+        if (ImGui.InputText("##WhitelistAddDuty", ref whitelistInput, 64, ImGuiInputTextFlags.EnterReturnsTrue))
+            AddWhitelistEntry(config);
+
+        ImGui.SameLine();
+        if (ImGui.SmallButton("Add##WhitelistDuty"))
+            AddWhitelistEntry(config);
+    }
+
+    private void DrawAutoYesSection(CharacterConfig config)
+    {
+        var raiseOffer = config.RaiseOfferAutoAccept;
+        if (ImGui.Checkbox("Raise offers", ref raiseOffer))
+        {
+            config.RaiseOfferAutoAccept = raiseOffer;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Automatically accept raise offers from other players.");
+
+        var teleportOffer = config.TeleportOfferAutoAccept;
+        if (ImGui.Checkbox("Teleport offers", ref teleportOffer))
+        {
+            config.TeleportOfferAutoAccept = teleportOffer;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Automatically accept teleport offers.");
+
+        var partyInvite = config.PartyInviteAutoAccept;
+        if (ImGui.Checkbox("Party invites (backup)", ref partyInvite))
+        {
+            config.PartyInviteAutoAccept = partyInvite;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Backup auto-accept for party invites. Primary invite handling uses the whitelist.");
+    }
+
+    private void DrawExitBehaviourSection(CharacterConfig config)
+    {
+        var exitAfterDuty = config.ExitAfterDutyEnds;
+        var leaveAllLeft = config.LeaveWhenAllLeft;
+
+        if (ImGui.Checkbox("Exit after N seconds", ref exitAfterDuty))
+        {
+            if (exitAfterDuty)
+                leaveAllLeft = false;
+
+            config.ExitAfterDutyEnds = exitAfterDuty;
+            config.LeaveWhenAllLeft = leaveAllLeft;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        var exitSeconds = config.ExitAfterDutySeconds;
+        ImGui.SetNextItemWidth(70);
+        if (ImGui.InputInt("##exitSecondsDuty", ref exitSeconds))
+        {
+            config.ExitAfterDutySeconds = Math.Max(1, exitSeconds);
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        ImGui.Text("seconds after duty ends");
+        ImGui.SameLine();
+        HelpMarker("Automatically leave the duty N seconds after it completes.");
+
+        if (ImGui.Checkbox("Leave when all others left", ref leaveAllLeft))
+        {
+            if (leaveAllLeft)
+                exitAfterDuty = false;
+
+            config.ExitAfterDutyEnds = exitAfterDuty;
+            config.LeaveWhenAllLeft = leaveAllLeft;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Leave the duty if no other party members are visible in the zone.");
+    }
+
+    private void DrawUiSettingsSection()
+    {
+        var videoNotificationsEnabled = configuration.VideoNotificationsEnabled;
+        if (ImGui.Checkbox("Video Notifications", ref videoNotificationsEnabled))
+        {
+            configuration.VideoNotificationsEnabled = videoNotificationsEnabled;
+            configuration.Save();
+        }
+        ImGui.SameLine();
+        HelpMarker("Play videos when Fren Rider is enabled or disabled.\nRequires VLC media player.");
+
+        if (!plugin.VideoPlaybackService.IsVLCAvailable())
+        {
+            ImGui.TextColored(new Vector4(1.0f, 0.4f, 0.4f, 1.0f), "VLC not found");
+            ImGui.SameLine();
+            if (ImGui.SmallButton("Download VLC"))
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "https://www.videolan.org/vlc/",
+                    UseShellExecute = true
+                });
+            }
+        }
+
+        var movable = configuration.IsConfigWindowMovable;
+        if (ImGui.Checkbox("Movable Config Window", ref movable))
+        {
+            configuration.IsConfigWindowMovable = movable;
+            configuration.Save();
+        }
+
+        var dtrEnabled = configuration.DtrBarEnabled;
+        if (ImGui.Checkbox("DTR Bar Enabled", ref dtrEnabled))
+        {
+            configuration.DtrBarEnabled = dtrEnabled;
+            configuration.Save();
+        }
+        ImGui.SameLine();
+        HelpMarker("Show or hide the DTR bar entry.");
+
+        var dtrMode = configuration.DtrBarMode;
+        var dtrModes = new[] { "Text Only", "Icon+Text", "Icon Only" };
+        ImGui.SetNextItemWidth(150);
+        if (ImGui.Combo("DTR Bar Mode", ref dtrMode, dtrModes, dtrModes.Length))
+        {
+            configuration.DtrBarMode = dtrMode;
+            configuration.Save();
+        }
+
+        ImGui.Spacing();
+        ImGui.Text("DTR Icons (max 3 characters)");
+        ImGui.SameLine();
+        if (ImGui.SmallButton("Copy Icon Guide Link"))
+        {
+            ImGui.SetClipboardText(IconGuideUrl);
+            Plugin.Log.Info("Copied icon guide link to clipboard");
+        }
+
+        var enabledIcon = configuration.DtrIconEnabled;
+        if (DrawIconInputs("Enabled", ref enabledIcon, "\uE03C"))
+        {
+            configuration.DtrIconEnabled = enabledIcon;
+            configuration.Save();
+        }
+
+        var disabledIcon = configuration.DtrIconDisabled;
+        if (DrawIconInputs("Disabled", ref disabledIcon, "\uE03D"))
+        {
+            configuration.DtrIconDisabled = disabledIcon;
+            configuration.Save();
+        }
+    }
+
+    private void AddWhitelistEntry(CharacterConfig config)
+    {
+        var trimmed = whitelistInput.Trim();
+        if (!string.IsNullOrEmpty(trimmed) && !config.InviteWhitelist.Contains(trimmed))
+        {
+            config.InviteWhitelist.Add(ConfigManager.FixNameCapitalization(trimmed));
+            configManager.SaveCurrentAccount();
+        }
+        whitelistInput = "";
     }
 
     private void DrawMiscTab(CharacterConfig config)

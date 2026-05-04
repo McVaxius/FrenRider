@@ -14,11 +14,13 @@ public class MainWindow : Window, IDisposable
     private readonly Plugin plugin;
 
     public MainWindow(Plugin plugin)
-        : base("Fren Rider##MainWindow", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse)
+        : base("Fren Rider##MainWindow")
     {
+        Size = new Vector2(650, 560);
+        SizeCondition = ImGuiCond.FirstUseEver;
         SizeConstraints = new WindowSizeConstraints
         {
-            MinimumSize = new Vector2(350, 280),
+            MinimumSize = new Vector2(460, 360),
             MaximumSize = new Vector2(float.MaxValue, float.MaxValue)
         };
 
@@ -31,47 +33,44 @@ public class MainWindow : Window, IDisposable
     {
         var config = plugin.ConfigManager.GetActiveConfig();
 
-        // Header
-        var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0.0";
-        ImGui.Text($"Fren Rider v{version}");
-        
-        // Ko-fi donation button in upper right
-        ImGui.SameLine(ImGui.GetWindowWidth() - 120);
-        if (ImGui.SmallButton("\u2661 Ko-fi \u2661"))
-        {
-            System.Diagnostics.Process.Start(new ProcessStartInfo
-            {
-                FileName = "https://ko-fi.com/mcvaxius",
-                UseShellExecute = true
-            });
-        }
-        if (ImGui.IsItemHovered())
-        {
-            ImGui.SetTooltip("Support development on Ko-fi");
-        }
-        
+        DrawTopBar(config);
         ImGui.Separator();
-        ImGui.Spacing();
 
-        // Enable / Disable toggle
-        var enabled = config.Enabled;
-        if (ImGui.Checkbox("Enabled", ref enabled))
+        if (ImGui.BeginChild("##FrenRiderOperatorScroll", Vector2.Zero, false))
         {
-            plugin.ConfigManager.SetFrenRiderEnabled(enabled);
+            DrawWarnings();
+            DrawOperatorProfile(config);
+            DrawPartySummary();
+            DrawAutomationStack();
+            DrawDutyPanel();
+            DrawDebugDetails(config);
         }
+        ImGui.EndChild();
+    }
 
-        // DTR bar toggle
+    private void DrawTopBar(CharacterConfig config)
+    {
+        var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0.0";
+        ImGui.TextUnformatted($"Fren Rider v{version}");
+
+        ImGui.SameLine();
+        UiHelpers.StatusPill(config.Enabled ? "Enabled" : "Disabled", config.Enabled ? UiHelpers.Green : UiHelpers.Grey);
+
+        ImGui.SameLine();
+        var enabled = config.Enabled;
+        if (ImGui.Checkbox("Run", ref enabled))
+            plugin.ConfigManager.SetFrenRiderEnabled(enabled);
+
         ImGui.SameLine();
         var dtrEnabled = plugin.Configuration.DtrBarEnabled;
-        if (ImGui.Checkbox("DTR Bar", ref dtrEnabled))
+        if (ImGui.Checkbox("DTR", ref dtrEnabled))
         {
             plugin.Configuration.DtrBarEnabled = dtrEnabled;
             plugin.Configuration.Save();
         }
         if (ImGui.IsItemHovered())
-            ImGui.SetTooltip("Show Fren Rider status in the server info bar.\nDisable if you don't want the DTR bar entry.");
+            ImGui.SetTooltip("Show Fren Rider status in the server info bar.");
 
-        // Krangle toggle
         ImGui.SameLine();
         var krangleEnabled = plugin.Configuration.KrangleEnabled;
         if (ImGui.Checkbox("Krangle", ref krangleEnabled))
@@ -81,294 +80,247 @@ public class MainWindow : Window, IDisposable
             KrangleService.ClearCache();
         }
         if (ImGui.IsItemHovered())
-            ImGui.SetTooltip("Obfuscate names with military/exercise words.\nUseful for screenshots.");
+            ImGui.SetTooltip("Obfuscate character names in FrenRider UI.");
 
-        ImGui.Spacing();
-        ImGui.Separator();
-        ImGui.Spacing();
-
-        // Fren Name (read-only, pulled from config)
-        ImGui.Text("Fren:");
-        ImGui.SameLine();
-        var frenName = config.FrenName;
-        if (string.IsNullOrEmpty(frenName))
-            ImGui.TextColored(new Vector4(0.5f, 0.5f, 0.5f, 1), "(not set - configure in Settings)");
-        else
-            ImGui.TextColored(new Vector4(0.8f, 0.9f, 1f, 1), Disp(frenName));
-
-        ImGui.Spacing();
-
-        // Status Display
-        ImGui.Separator();
-        ImGui.Spacing();
-        ImGui.Text("Status:");
-        ImGui.Spacing();
-
-        if (!Plugin.ClientState.IsLoggedIn)
-        {
-            ImGui.TextColored(new Vector4(1, 0.4f, 0.4f, 1), "Not logged in.");
-        }
-        else
-        {
-            // Show logged-in character name
-            var localPlayer = Plugin.ObjectTable.LocalPlayer;
-            if (localPlayer != null)
-            {
-                var charName = localPlayer.Name.ToString();
-                var worldName = localPlayer.HomeWorld.Value.Name.ToString();
-                var fullName = $"{charName}@{worldName}";
-                ImGui.TextColored(new Vector4(0.4f, 1, 0.4f, 1), $"Logged in. [{Disp(fullName)}]");
-            }
-            else
-            {
-                ImGui.TextColored(new Vector4(0.4f, 1, 0.4f, 1), "Logged in.");
-            }
-
-            // Account info
-            var account = plugin.ConfigManager.GetCurrentAccount();
-            if (account != null)
-            {
-                ImGui.SameLine();
-                ImGui.TextDisabled($"({Disp(account.AccountAlias)})");
-            }
-
-            // Party info (from FrenTracker)
-            var tracker = plugin.FrenTracker;
-            var partyCount = tracker.Party.Count;
-            ImGui.Text($"Party Members: {partyCount}");
-
-            if (partyCount > 0)
-            {
-                // Party composition summary
-                var comp = tracker.GetPartyComposition();
-                var compParts = new System.Collections.Generic.List<string>();
-                foreach (var kvp in comp)
-                    compParts.Add($"{kvp.Value} {kvp.Key}");
-                if (compParts.Count > 0)
-                {
-                    ImGui.SameLine();
-                    ImGui.TextDisabled($"({string.Join(", ", compParts)})");
-                }
-
-                // Individual party member details
-                var mountedCount = tracker.Party.FindAll(m => m.IsMounted).Count;
-                var visibleCount = tracker.Party.FindAll(m => m.IsVisible).Count;
-                ImGui.TextDisabled($"  {visibleCount}/{partyCount} visible, {mountedCount}/{partyCount} mounted");
-
-                foreach (var member in tracker.Party)
-                {
-                    var krangled = Disp(member.Name);
-                    var jobTag = !string.IsNullOrEmpty(member.ClassJobName) ? $"[{member.ClassJobName}]" : "[?]";
-                    var distTag = member.IsVisible ? $"{member.DistanceToPlayer:F0}y" : "N/A";
-
-                    ImGui.Text($"    {krangled} {jobTag}");
-                    ImGui.SameLine();
-                    if (member.IsVisible)
-                    {
-                        if (member.IsMounted)
-                            ImGui.TextColored(new Vector4(0.4f, 1f, 0.8f, 1), $"[Mounted] {distTag}");
-                        else
-                            ImGui.TextColored(new Vector4(0.5f, 0.5f, 0.5f, 1), $"[On Foot] {distTag}");
-                        
-                        // Show XYZ coordinates
-                        ImGui.SameLine();
-                        var xyz = $"({member.Position.X:F0}, {member.Position.Y:F0}, {member.Position.Z:F0})";
-                        ImGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1), xyz);
-                    }
-                    else
-                    {
-                        ImGui.TextColored(new Vector4(1f, 0.4f, 0.4f, 1), "[Not Visible]");
-                    }
-                }
-            }
-
-            // Chocobo companion info
-            var buddyTime = GameHelpers.GetBuddyTimeRemaining();
-            if (buddyTime > 0)
-            {
-                var minutes = (int)(buddyTime / 60);
-                var seconds = (int)(buddyTime % 60);
-                ImGui.TextColored(new Vector4(1f, 0.9f, 0.3f, 1), $"Chocobo: Active ({minutes}m {seconds}s remaining)");
-            }
-            else
-            {
-                var gysahlCount = GameHelpers.GetInventoryItemCount(GameHelpers.GysahlGreensItemId);
-                if (gysahlCount > 0)
-                    ImGui.TextDisabled($"Chocobo: Inactive ({gysahlCount} Gysahl Greens)");
-                else
-                    ImGui.TextDisabled("Chocobo: Inactive (no Gysahl Greens)");
-            }
-
-            // Fren tracking status
-            var fren = tracker.Fren;
-            if (string.IsNullOrEmpty(frenName))
-            {
-                ImGui.TextColored(new Vector4(1, 1, 0.4f, 1), "No fren configured.");
-            }
-            else if (fren == null)
-            {
-                ImGui.TextColored(new Vector4(0.5f, 0.5f, 0.5f, 1), "Tracking inactive.");
-            }
-            else if (fren.IsFound && fren.IsVisible)
-            {
-                var dispName = Disp(fren.Name);
-                var jobInfo = !string.IsNullOrEmpty(fren.ClassJobName) ? $" [{fren.ClassJobName}]" : "";
-                var partyInfo = fren.InParty ? "" : " (not in party)";
-                ImGui.TextColored(new Vector4(0.4f, 1, 0.4f, 1), $"Fren: {dispName}{jobInfo}{partyInfo}");
-                ImGui.Text($"Distance: {fren.Distance:F1}y");
-                ImGui.SameLine();
-                ImGui.TextDisabled($"({fren.Position.X:F0}, {fren.Position.Y:F0}, {fren.Position.Z:F0})");
-            }
-            else if (fren.IsFound)
-            {
-                ImGui.TextColored(new Vector4(1, 1, 0.4f, 1), $"Fren {Disp(fren.Name)} in party but not visible.");
-            }
-            else
-            {
-                ImGui.TextColored(new Vector4(1, 0.4f, 0.4f, 1), "Fren not found.");
-            }
-
-            // Follow state
-            var follow = plugin.FollowService;
-            var stateColor = follow.State switch
-            {
-                FollowState.Following => new Vector4(0.4f, 0.8f, 1f, 1),
-                FollowState.InRange => new Vector4(0.4f, 1f, 0.4f, 1),
-                FollowState.TooFar => new Vector4(1f, 0.6f, 0.2f, 1),
-                FollowState.InCombat => new Vector4(1f, 0.4f, 0.4f, 1),
-                _ => new Vector4(0.5f, 0.5f, 0.5f, 1),
-            };
-            ImGui.TextColored(stateColor, $"Follow: {follow.State}");
-            ImGui.SameLine();
-            ImGui.TextDisabled($"- {follow.StateDetail}");
-
-            // Mount state
-            var mount = plugin.MountService;
-            if (mount.State != MountState.Idle || (fren != null && fren.IsFound && fren.IsMounted))
-            {
-                var mountColor = mount.State switch
-                {
-                    MountState.Mounted => new Vector4(0.4f, 1f, 0.8f, 1),
-                    MountState.Mounting or MountState.WaitingToMount => new Vector4(1f, 1f, 0.4f, 1),
-                    MountState.Dismounting => new Vector4(1f, 0.6f, 0.4f, 1),
-                    _ => new Vector4(0.5f, 0.5f, 0.5f, 1),
-                };
-                var mountText = mount.State != MountState.Idle
-                    ? $"Mount: {mount.State} - {mount.StateDetail}"
-                    : $"Fren mounted (ID {fren!.MountId})";
-                ImGui.TextColored(mountColor, mountText);
-            }
-
-            // Combat state
-            var combat = plugin.CombatService;
-            if (combat.State != CombatState.OutOfCombat)
-            {
-                var combatColor = combat.State switch
-                {
-                    CombatState.InCombat => new Vector4(1f, 0.3f, 0.3f, 1),
-                    CombatState.EnteringCombat => new Vector4(1f, 0.6f, 0.2f, 1),
-                    CombatState.LeavingCombat => new Vector4(0.6f, 0.6f, 0.6f, 1),
-                    _ => new Vector4(0.5f, 0.5f, 0.5f, 1),
-                };
-                ImGui.TextColored(combatColor, $"Combat: {combat.State}");
-                if (!string.IsNullOrEmpty(combat.StateDetail))
-                {
-                    ImGui.SameLine();
-                    ImGui.TextDisabled($"- {combat.StateDetail}");
-                }
-            }
-
-            // Idle / Automation status
-            var auto = plugin.AutomationService;
-            if (auto.IsIdle)
-            {
-                ImGui.TextColored(new Vector4(0.6f, 0.8f, 1f, 1), "Idle");
-                if (!string.IsNullOrEmpty(auto.LastIdleAction))
-                {
-                    ImGui.SameLine();
-                    ImGui.TextDisabled($"- Last: {auto.LastIdleAction}");
-                }
-            }
-
-            // Food status
-            if (!string.IsNullOrEmpty(auto.FoodStatus))
-            {
-                var foodColor = auto.FoodStatus.StartsWith("Well Fed")
-                    ? new Vector4(0.4f, 1f, 0.4f, 1)
-                    : auto.FoodStatus.Contains("Ate") || auto.FoodStatus.Contains("Switched")
-                        ? new Vector4(1f, 0.9f, 0.4f, 1)
-                        : new Vector4(1f, 0.5f, 0.3f, 1);
-                ImGui.TextColored(foodColor, $"Food: {auto.FoodStatus}");
-            }
-
-            // Companion status
-            if (!string.IsNullOrEmpty(auto.CompanionStatus))
-            {
-                var compColor = auto.CompanionStatus.StartsWith("Companion:")
-                    ? new Vector4(0.4f, 1f, 0.8f, 1)
-                    : auto.CompanionStatus.Contains("Summoning")
-                        ? new Vector4(1f, 1f, 0.4f, 1)
-                        : new Vector4(0.8f, 0.6f, 0.4f, 1);
-                ImGui.TextColored(compColor, auto.CompanionStatus);
-            }
-
-            // Formation info
-            var formation = plugin.FormationService;
-            if (formation.IsActive)
-            {
-                ImGui.TextColored(new Vector4(0.8f, 0.6f, 1f, 1), $"Formation: Slot {formation.AssignedSlot}");
-            }
-
-            // Duty Interact status
-            var dutyInteract = plugin.DutyInteractService;
-            if (dutyInteract.IsActive)
-            {
-                ImGui.TextColored(new Vector4(1f, 0.8f, 0.4f, 1), $"Duty Seek: {dutyInteract.StateDetail}");
-            }
-
-            // AutoDuty detection warning
-            var autoDutyDetection = plugin.AutoDutyDetectionService;
-            if (autoDutyDetection.ShouldShowMainWindowWarning())
-            {
-                ImGui.TextColored(new Vector4(1f, 0.2f, 0.2f, 1), "AutoDuty detected while FrenRider is enabled");
-            }
-
-            var adsIntegration = plugin.AdsIntegrationService;
-            var adsColor = adsIntegration.AdsLoaded
-                ? (adsIntegration.ShouldPauseDutySystems ? new Vector4(0.4f, 1f, 0.5f, 1f) : new Vector4(0.9f, 0.8f, 0.3f, 1f))
-                : new Vector4(0.8f, 0.5f, 0.5f, 1f);
-            ImGui.TextColored(adsColor, $"ADS: {adsIntegration.StatusText}");
-
-            // Zone info
-            var zone = plugin.ZoneService;
-            var zoneExtra = "";
-            if (zone.InFate) zoneExtra += $", FATE {zone.CurrentFateId}";
-            if (zone.IsIndoors) zoneExtra += ", indoors";
-            ImGui.Text($"Zone: {zone.CurrentZone}");
-            ImGui.SameLine();
-            ImGui.TextDisabled($"(ID {zone.TerritoryId}{zoneExtra})");
-        }
-
-        ImGui.Spacing();
-        ImGui.Separator();
-        ImGui.Spacing();
-
-        // Buttons
-        if (ImGui.Button("Open Settings"))
-        {
+        if (ImGui.Button("Settings"))
             plugin.ToggleConfigUi();
+
+        ImGui.SameLine();
+        if (ImGui.Button("Ko-fi"))
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "https://ko-fi.com/mcvaxius",
+                UseShellExecute = true
+            });
         }
 
         ImGui.SameLine();
-
         if (ImGui.Button("Close"))
-        {
             IsOpen = false;
+    }
+
+    private void DrawWarnings()
+    {
+        if (!Plugin.ClientState.IsLoggedIn)
+            UiHelpers.WarningStrip("Not logged in. FrenRider waits until a character is loaded.");
+
+        if (plugin.AutoDutyDetectionService.ShouldShowMainWindowWarning())
+            UiHelpers.WarningStrip("AutoDuty detected while FrenRider is enabled.");
+    }
+
+    private void DrawOperatorProfile(CharacterConfig config)
+    {
+        UiHelpers.SectionHeader("Operator");
+
+        UiHelpers.AlignedRow("Character", GetLocalCharacterText(), Plugin.ClientState.IsLoggedIn ? UiHelpers.Green : UiHelpers.Red);
+
+        var account = plugin.ConfigManager.GetCurrentAccount();
+        UiHelpers.AlignedRow("Account", account != null ? Disp(account.AccountAlias) : "No account loaded", account != null ? null : UiHelpers.Yellow);
+
+        var frenName = string.IsNullOrWhiteSpace(config.FrenName)
+            ? "No fren configured"
+            : Disp(config.FrenName);
+        UiHelpers.AlignedRow("Fren", frenName, string.IsNullOrWhiteSpace(config.FrenName) ? UiHelpers.Yellow : UiHelpers.Blue);
+
+        DrawFrenStatus(config);
+    }
+
+    private void DrawFrenStatus(CharacterConfig config)
+    {
+        var tracker = plugin.FrenTracker;
+        var fren = tracker.Fren;
+        if (string.IsNullOrWhiteSpace(config.FrenName))
+            return;
+
+        if (fren == null)
+        {
+            UiHelpers.AlignedRow("Tracking", "Inactive", UiHelpers.Grey);
+            return;
+        }
+
+        if (fren.IsFound && fren.IsVisible)
+        {
+            var jobInfo = string.IsNullOrWhiteSpace(fren.ClassJobName) ? "" : $" [{fren.ClassJobName}]";
+            var partyInfo = fren.InParty ? "in party" : "not in party";
+            UiHelpers.AlignedRow("Tracking", $"{Disp(fren.Name)}{jobInfo}, {partyInfo}, {fren.Distance:F1}y", UiHelpers.Green);
+            UiHelpers.AlignedRow("Position", $"{fren.Position.X:F0}, {fren.Position.Y:F0}, {fren.Position.Z:F0}");
+            return;
+        }
+
+        if (fren.IsFound)
+            UiHelpers.AlignedRow("Tracking", $"{Disp(fren.Name)} in party but not visible", UiHelpers.Yellow);
+        else
+            UiHelpers.AlignedRow("Tracking", "Fren not found", UiHelpers.Red);
+    }
+
+    private void DrawPartySummary()
+    {
+        UiHelpers.SectionHeader("Party");
+
+        var tracker = plugin.FrenTracker;
+        var partyCount = tracker.Party.Count;
+        var visibleCount = tracker.Party.FindAll(m => m.IsVisible).Count;
+        var mountedCount = tracker.Party.FindAll(m => m.IsMounted).Count;
+
+        UiHelpers.AlignedRow("Members", $"{partyCount} total, {visibleCount} visible, {mountedCount} mounted");
+
+        var composition = tracker.GetPartyComposition();
+        if (composition.Count > 0)
+        {
+            var parts = new System.Collections.Generic.List<string>();
+            foreach (var kvp in composition)
+                parts.Add($"{kvp.Value} {kvp.Key}");
+            UiHelpers.AlignedRow("Jobs", string.Join(", ", parts));
+        }
+
+        foreach (var member in tracker.Party)
+        {
+            var jobTag = string.IsNullOrWhiteSpace(member.ClassJobName) ? "?" : member.ClassJobName;
+            var status = member.IsVisible
+                ? $"{jobTag}, {(member.IsMounted ? "mounted" : "on foot")}, {member.DistanceToPlayer:F0}y"
+                : $"{jobTag}, not visible";
+            UiHelpers.AlignedRow(Disp(member.Name), status, member.IsVisible ? null : UiHelpers.Red, 170f);
         }
     }
+
+    private void DrawAutomationStack()
+    {
+        UiHelpers.SectionHeader("Automation");
+
+        var follow = plugin.FollowService;
+        UiHelpers.AlignedRow("Follow", $"{follow.State} - {follow.StateDetail}", GetFollowColor(follow.State));
+
+        var mount = plugin.MountService;
+        var mountDetail = string.IsNullOrWhiteSpace(mount.StateDetail) ? mount.State.ToString() : $"{mount.State} - {mount.StateDetail}";
+        UiHelpers.AlignedRow("Mount", mountDetail, GetMountColor(mount.State));
+
+        var combat = plugin.CombatService;
+        var combatDetail = string.IsNullOrWhiteSpace(combat.StateDetail) ? combat.State.ToString() : $"{combat.State} - {combat.StateDetail}";
+        UiHelpers.AlignedRow("Combat", combatDetail, GetCombatColor(combat.State));
+
+        var auto = plugin.AutomationService;
+        var idleText = auto.IsIdle
+            ? string.IsNullOrWhiteSpace(auto.LastIdleAction) ? "Idle" : $"Idle; last {auto.LastIdleAction}"
+            : "Active checks running";
+        UiHelpers.AlignedRow("Idle", idleText, auto.IsIdle ? UiHelpers.Blue : null);
+
+        if (!string.IsNullOrWhiteSpace(auto.FoodStatus))
+            UiHelpers.AlignedRow("Food", auto.FoodStatus, auto.FoodStatus.StartsWith("Well Fed", StringComparison.OrdinalIgnoreCase) ? UiHelpers.Green : UiHelpers.Yellow);
+
+        DrawCompanionStatus(auto);
+
+        var formation = plugin.FormationService;
+        if (formation.IsActive)
+            UiHelpers.AlignedRow("Formation", $"Slot {formation.AssignedSlot}", UiHelpers.Blue);
+    }
+
+    private void DrawCompanionStatus(AutomationService auto)
+    {
+        if (!string.IsNullOrWhiteSpace(auto.CompanionStatus))
+        {
+            UiHelpers.AlignedRow("Companion", auto.CompanionStatus, UiHelpers.Green);
+            return;
+        }
+
+        var buddyTime = GameHelpers.GetBuddyTimeRemaining();
+        if (buddyTime > 0)
+        {
+            var minutes = (int)(buddyTime / 60);
+            var seconds = (int)(buddyTime % 60);
+            UiHelpers.AlignedRow("Companion", $"Active, {minutes}m {seconds:D2}s remaining", UiHelpers.Green);
+            return;
+        }
+
+        var gysahlCount = GameHelpers.GetInventoryItemCount(GameHelpers.GysahlGreensItemId);
+        UiHelpers.AlignedRow("Companion", gysahlCount > 0 ? $"Inactive, {gysahlCount} Gysahl Greens" : "Inactive, no Gysahl Greens", UiHelpers.Grey);
+    }
+
+    private void DrawDutyPanel()
+    {
+        UiHelpers.SectionHeader("Duty / ADS / Exit");
+
+        var zone = plugin.ZoneService;
+        var zoneExtra = "";
+        if (zone.InFate) zoneExtra += $", FATE {zone.CurrentFateId}";
+        if (zone.IsIndoors) zoneExtra += ", indoors";
+        UiHelpers.AlignedRow("Zone", $"{zone.CurrentZone} (territory {zone.TerritoryId}{zoneExtra})");
+
+        var ads = plugin.AdsIntegrationService;
+        var adsColor = ads.IsControllingDuty
+            ? UiHelpers.Green
+            : ads.IsHandoffPending
+                ? UiHelpers.Yellow
+                : ads.AdsLoaded
+                    ? UiHelpers.Blue
+                    : UiHelpers.Grey;
+        UiHelpers.AlignedRow("ADS", ads.StatusText, adsColor);
+
+        var exit = plugin.ExitBehaviourService;
+        if (!string.IsNullOrWhiteSpace(exit.StateDetail))
+            UiHelpers.AlignedRow("Exit", exit.StateDetail, UiHelpers.Yellow);
+        else
+            UiHelpers.AlignedRow("Exit", "Waiting for duty-end rule", UiHelpers.Grey);
+
+        var dutyInteract = plugin.DutyInteractService;
+        if (dutyInteract.IsActive)
+            UiHelpers.AlignedRow("Duty interact", dutyInteract.StateDetail, UiHelpers.Yellow);
+    }
+
+    private void DrawDebugDetails(CharacterConfig config)
+    {
+        UiHelpers.SectionHeader("Details");
+
+        if (!ImGui.CollapsingHeader("Compact debug", ImGuiTreeNodeFlags.DefaultOpen))
+            return;
+
+        UiHelpers.AlignedRow("Config", $"Run={config.Enabled}, FlyYouFools={config.FlyYouFools}, FollowMode={config.ClingType}/{config.ClingTypeDuty}");
+        UiHelpers.AlignedRow("Distances", $"Cling={config.Cling:F1}, Max={config.MaxBistance:F0}, ForayMax={config.MaxBistanceForay:F0}");
+        UiHelpers.AlignedRow("ADS flags", $"Loaded={plugin.AdsIntegrationService.AdsLoaded}, Pending={plugin.AdsIntegrationService.IsHandoffPending}, Controlling={plugin.AdsIntegrationService.IsControllingDuty}");
+    }
+
+    private string GetLocalCharacterText()
+    {
+        if (!Plugin.ClientState.IsLoggedIn)
+            return "Not logged in";
+
+        var player = Plugin.ObjectTable.LocalPlayer;
+        if (player == null)
+            return "Logged in, local player unavailable";
+
+        var charName = player.Name.ToString();
+        var worldName = player.HomeWorld.Value.Name.ToString();
+        return Disp($"{charName}@{worldName}");
+    }
+
+    private static Vector4 GetFollowColor(FollowState state)
+        => state switch
+        {
+            FollowState.Following => UiHelpers.Blue,
+            FollowState.InRange => UiHelpers.Green,
+            FollowState.TooFar => UiHelpers.Orange,
+            FollowState.InCombat => UiHelpers.Red,
+            _ => UiHelpers.Grey,
+        };
+
+    private static Vector4 GetMountColor(MountState state)
+        => state switch
+        {
+            MountState.Mounted => UiHelpers.Green,
+            MountState.Mounting or MountState.WaitingToMount => UiHelpers.Yellow,
+            MountState.Dismounting => UiHelpers.Orange,
+            _ => UiHelpers.Grey,
+        };
+
+    private static Vector4 GetCombatColor(CombatState state)
+        => state switch
+        {
+            CombatState.InCombat => UiHelpers.Red,
+            CombatState.EnteringCombat => UiHelpers.Orange,
+            CombatState.LeavingCombat => UiHelpers.Grey,
+            _ => UiHelpers.Grey,
+        };
 
     private string Disp(string name)
-    {
-        return plugin.Configuration.KrangleEnabled ? KrangleService.KrangleName(name) : name;
-    }
+        => plugin.Configuration.KrangleEnabled ? KrangleService.KrangleName(name) : name;
 }
