@@ -839,15 +839,6 @@ public class ConfigWindow : Window, IDisposable
         ImGui.SameLine();
         HelpMarker("Placeholder for future ADS preset coordination. Stored now so the config shape is stable.");
 
-        var useAdsLeaveAfterAdsDuty = config.UseAdsLeaveAfterAdsDuty;
-        if (ImGui.Checkbox("Send /ads leave after ADS duty completion", ref useAdsLeaveAfterAdsDuty))
-        {
-            config.UseAdsLeaveAfterAdsDuty = useAdsLeaveAfterAdsDuty;
-            configManager.SaveCurrentAccount();
-        }
-        ImGui.SameLine();
-        HelpMarker("Optional cleanup only. FrenRider still uses its own Leave Duty flow after the configured exit delay.");
-
         if (plugin.AdsIntegrationService is not null)
         {
             ImGui.Spacing();
@@ -1125,18 +1116,40 @@ public class ConfigWindow : Window, IDisposable
 
     private void DrawExitBehaviourSection(CharacterConfig config)
     {
-        var exitAfterDuty = config.ExitAfterDutyEnds;
-        var leaveAllLeft = config.LeaveWhenAllLeft;
+        if (config.NormalizeExitMethodSelection())
+            configManager.SaveCurrentAccount();
 
-        if (ImGui.Checkbox("Exit after N seconds", ref exitAfterDuty))
+        if (ImGui.RadioButton("FrenRider Exit method", !config.UseAdsLeaveAfterAdsDuty))
         {
-            if (exitAfterDuty)
-                leaveAllLeft = false;
-
-            config.ExitAfterDutyEnds = exitAfterDuty;
-            config.LeaveWhenAllLeft = leaveAllLeft;
+            config.UseAdsLeaveAfterAdsDuty = false;
+            if (!config.ExitAfterDutyEnds && !config.LeaveWhenAllLeft)
+                config.ExitAfterDutyEnds = true;
+            config.NormalizeExitMethodSelection();
             configManager.SaveCurrentAccount();
         }
+        ImGui.SameLine();
+        HelpMarker("Use FrenRider's local Leave Duty flow after the configured duty-end condition.");
+
+        if (!config.UseAdsLeaveAfterAdsDuty)
+        {
+            ImGui.Indent();
+            DrawFrenRiderExitMethodOptions(config);
+            ImGui.Unindent();
+        }
+
+        ImGui.Spacing();
+        if (ImGui.RadioButton("ADS Exit Method", config.UseAdsLeaveAfterAdsDuty))
+        {
+            config.UseAdsLeaveAfterAdsDuty = true;
+            config.ExitAfterDutyEnds = false;
+            config.LeaveWhenAllLeft = false;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Send /ads leave after the configured duty-end delay. FrenRider does not also run its own Leave Duty flow.");
+
+        ImGui.Spacing();
+        ImGui.Text("Duty-end delay");
         ImGui.SameLine();
         var exitSeconds = config.ExitAfterDutySeconds;
         ImGui.SetNextItemWidth(70);
@@ -1147,20 +1160,43 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         ImGui.Text("seconds after duty ends");
+    }
+
+    private void DrawFrenRiderExitMethodOptions(CharacterConfig config)
+    {
+        var method = config.ExitAfterDutyEnds
+            ? 0
+            : config.LeaveWhenAllLeft
+                ? 1
+                : 2;
+
+        if (ImGui.RadioButton("Exit after N seconds", method == 0))
+        {
+            config.UseAdsLeaveAfterAdsDuty = false;
+            config.ExitAfterDutyEnds = true;
+            config.LeaveWhenAllLeft = false;
+            configManager.SaveCurrentAccount();
+        }
         ImGui.SameLine();
         HelpMarker("Automatically leave the duty N seconds after it completes.");
 
-        if (ImGui.Checkbox("Leave when all others left", ref leaveAllLeft))
+        if (ImGui.RadioButton("Leave when all others left", method == 1))
         {
-            if (leaveAllLeft)
-                exitAfterDuty = false;
-
-            config.ExitAfterDutyEnds = exitAfterDuty;
-            config.LeaveWhenAllLeft = leaveAllLeft;
+            config.UseAdsLeaveAfterAdsDuty = false;
+            config.ExitAfterDutyEnds = false;
+            config.LeaveWhenAllLeft = true;
             configManager.SaveCurrentAccount();
         }
         ImGui.SameLine();
         HelpMarker("Leave the duty if no other party members are visible in the zone.");
+
+        if (ImGui.RadioButton("No automatic exit", method == 2))
+        {
+            config.UseAdsLeaveAfterAdsDuty = false;
+            config.ExitAfterDutyEnds = false;
+            config.LeaveWhenAllLeft = false;
+            configManager.SaveCurrentAccount();
+        }
     }
 
     private void DrawUiSettingsSection()
@@ -1595,50 +1631,7 @@ public class ConfigWindow : Window, IDisposable
         // --- Exit Behaviour ---
         ImGui.Text("Exit Behaviour");
         ImGui.Spacing();
-
-        // Ensure only one exit method is enabled (mutually exclusive)
-        var exitAfterDuty = config.ExitAfterDutyEnds;
-        var leaveAllLeft = config.LeaveWhenAllLeft;
-
-        // Exit after N seconds
-        if (ImGui.Checkbox("Exit after N seconds", ref exitAfterDuty))
-        {
-            // If enabling this option, disable the other
-            if (exitAfterDuty)
-            {
-                leaveAllLeft = false;
-            }
-            config.ExitAfterDutyEnds = exitAfterDuty;
-            config.LeaveWhenAllLeft = leaveAllLeft;
-            configManager.SaveCurrentAccount();
-        }
-        ImGui.SameLine();
-        var exitSeconds = config.ExitAfterDutySeconds;
-        ImGui.SetNextItemWidth(60);
-        if (ImGui.InputInt("##exitSeconds", ref exitSeconds))
-        {
-            config.ExitAfterDutySeconds = Math.Max(1, exitSeconds);
-            configManager.SaveCurrentAccount();
-        }
-        ImGui.SameLine();
-        ImGui.Text("seconds after duty ends");
-        ImGui.SameLine();
-        HelpMarker("Automatically leave the duty N seconds after it completes (uses DutyCompleted event).");
-
-        // Leave when all others left
-        if (ImGui.Checkbox("Leave when all others left", ref leaveAllLeft))
-        {
-            // If enabling this option, disable the other
-            if (leaveAllLeft)
-            {
-                exitAfterDuty = false;
-            }
-            config.ExitAfterDutyEnds = exitAfterDuty;
-            config.LeaveWhenAllLeft = leaveAllLeft;
-            configManager.SaveCurrentAccount();
-        }
-        ImGui.SameLine();
-        HelpMarker("Leave the duty if no other party members are visible in the zone.");
+        DrawExitBehaviourSection(config);
 
         ImGui.Spacing();
         ImGui.Separator();

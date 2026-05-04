@@ -290,4 +290,34 @@ public class CharacterConfig
                 break;
         }
     }
+
+    public bool NormalizeExitMethodSelection()
+    {
+        var changed = false;
+
+        if (UseAdsLeaveAfterAdsDuty)
+        {
+            if (ExitAfterDutyEnds)
+            {
+                ExitAfterDutyEnds = false;
+                changed = true;
+            }
+
+            if (LeaveWhenAllLeft)
+            {
+                LeaveWhenAllLeft = false;
+                changed = true;
+            }
+
+            return changed;
+        }
+
+        if (ExitAfterDutyEnds && LeaveWhenAllLeft)
+        {
+            LeaveWhenAllLeft = false;
+            changed = true;
+        }
+
+        return changed;
+    }
 }

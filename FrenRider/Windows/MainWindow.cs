@@ -42,7 +42,7 @@ public class MainWindow : Window, IDisposable
             DrawOperatorProfile(config);
             DrawPartySummary();
             DrawAutomationStack();
-            DrawDutyPanel();
+            DrawDutyPanel(config);
             DrawDebugDetails(config);
         }
         ImGui.EndChild();
@@ -236,7 +236,7 @@ public class MainWindow : Window, IDisposable
         UiHelpers.AlignedRow("Companion", gysahlCount > 0 ? $"Inactive, {gysahlCount} Gysahl Greens" : "Inactive, no Gysahl Greens", UiHelpers.Grey);
     }
 
-    private void DrawDutyPanel()
+    private void DrawDutyPanel(CharacterConfig config)
     {
         UiHelpers.SectionHeader("Duty / ADS / Exit");
 
@@ -255,6 +255,15 @@ public class MainWindow : Window, IDisposable
                     ? UiHelpers.Blue
                     : UiHelpers.Grey;
         UiHelpers.AlignedRow("ADS", ads.StatusText, adsColor);
+
+        var exitMethod = config.UseAdsLeaveAfterAdsDuty
+            ? $"ADS Exit Method ({config.ExitAfterDutySeconds}s)"
+            : config.ExitAfterDutyEnds
+                ? $"FrenRider: leave after {config.ExitAfterDutySeconds}s"
+                : config.LeaveWhenAllLeft
+                    ? "FrenRider: leave when party leaves"
+                    : "No automatic exit";
+        UiHelpers.AlignedRow("Exit method", exitMethod, config.UseAdsLeaveAfterAdsDuty ? UiHelpers.Blue : UiHelpers.Grey);
 
         var exit = plugin.ExitBehaviourService;
         if (!string.IsNullOrWhiteSpace(exit.StateDetail))

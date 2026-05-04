@@ -109,12 +109,9 @@ public class ExitBehaviourService : IDisposable
             return;
         }
 
-        // Validate mutually exclusive exit options - if both are somehow checked, disable both
-        if (config.ExitAfterDutyEnds && config.LeaveWhenAllLeft)
+        if (config.NormalizeExitMethodSelection())
         {
-            Plugin.Log.Warning("[ExitBehaviour] Both exit options were enabled simultaneously - disabling both to prevent conflicts");
-            config.ExitAfterDutyEnds = false;
-            config.LeaveWhenAllLeft = false;
+            Plugin.Log.Warning("[ExitBehaviour] Normalized mutually exclusive exit method settings");
             plugin.ConfigManager.SaveCurrentAccount();
         }
 
@@ -205,8 +202,23 @@ public class ExitBehaviourService : IDisposable
 
         // Exit object feature removed - no longer needed
 
+        if (config.UseAdsLeaveAfterAdsDuty && dutyCompleted && !dutyLeaveIssued)
+        {
+            var elapsed = (DateTime.Now - dutyCompletedTime).TotalSeconds;
+            if (elapsed >= config.ExitAfterDutySeconds)
+            {
+                Plugin.Log.Information("[ExitBehaviour] === ADS EXIT TRIGGERED ===");
+                Plugin.Log.Information($"[ExitBehaviour] Reason: ADS exit method, elapsed={elapsed:F1}s >= configured={config.ExitAfterDutySeconds}s");
+                SendAdsLeaveForExit();
+                dutyLeaveIssued = true;
+            }
+            else
+            {
+                StateDetail = $"Duty completed, ADS leaving in {(config.ExitAfterDutySeconds - elapsed):F0}s...";
+            }
+        }
         // Rule 2: Exit N seconds after duty ends
-        if (config.ExitAfterDutyEnds && dutyCompleted && !dutyLeaveIssued)
+        else if (config.ExitAfterDutyEnds && dutyCompleted && !dutyLeaveIssued)
         {
             var elapsed = (DateTime.Now - dutyCompletedTime).TotalSeconds;
             if (elapsed >= config.ExitAfterDutySeconds)
@@ -214,7 +226,6 @@ public class ExitBehaviourService : IDisposable
                 Plugin.Log.Information($"[ExitBehaviour] === LEAVE DUTY TRIGGERED ===");
                 Plugin.Log.Information($"[ExitBehaviour] Reason: ExitAfterDutyEnds={config.ExitAfterDutyEnds}, elapsed={elapsed:F1}s >= configured={config.ExitAfterDutySeconds}s");
                 Plugin.Log.Information($"[ExitBehaviour] DutyCompleted={dutyCompleted}, CompletedAt={dutyCompletedTime:HH:mm:ss}, InDuty={inDuty}");
-                TrySendOptionalAdsLeave(config);
                 LeaveDuty();
                 dutyLeaveIssued = true;
             }
@@ -228,7 +239,7 @@ public class ExitBehaviourService : IDisposable
                 }
             }
         }
-        else if (!config.ExitAfterDutyEnds && dutyCompleted)
+        else if (!config.ExitAfterDutyEnds && !config.UseAdsLeaveAfterAdsDuty && dutyCompleted)
         {
             // Clear duty completion state when feature is disabled
             Plugin.Log.Debug("[ExitBehaviour] Exit after duty ends feature disabled - clearing completion state");
@@ -461,17 +472,15 @@ public class ExitBehaviourService : IDisposable
         }
     }
 
-    private void TrySendOptionalAdsLeave(CharacterConfig config)
+    private void SendAdsLeaveForExit()
     {
-        if (!config.UseAdsLeaveAfterAdsDuty ||
-            !plugin.AdsIntegrationService.HadAdsControlThisDuty ||
-            adsLeaveIssuedForDuty)
+        if (adsLeaveIssuedForDuty)
         {
             return;
         }
 
         adsLeaveIssuedForDuty = true;
-        Plugin.Log.Information("[ExitBehaviour] Optional ADS cleanup enabled - sending /ads leave once before FrenRider leave.");
+        Plugin.Log.Information("[ExitBehaviour] ADS exit method enabled - sending /ads leave once.");
         SendCommand("/ads leave");
     }
 
