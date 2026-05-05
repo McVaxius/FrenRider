@@ -148,6 +148,8 @@ public sealed class Plugin : IDalamudPlugin
             loginDetectionDelay = 3;
         }
 
+        var loadedVersion = typeof(Plugin).Assembly.GetName().Version?.ToString() ?? "unknown";
+        Log.Information($"[FrenRider] Loaded version {loadedVersion} from {PluginInterface.AssemblyLocation.FullName}");
         Log.Information("===Fren Rider loaded!===");
     }
 

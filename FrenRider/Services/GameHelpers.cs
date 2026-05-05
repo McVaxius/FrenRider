@@ -340,7 +340,7 @@ public static class GameHelpers
                 if (item == null || item->ItemId == 0) continue;
 
                 // InventoryItem.Condition is scaled 0..30000, where 30000 is 100%.
-                if (item->Condition <= thresholdRaw)
+                if (item->Condition < thresholdRaw)
                     return true;
             }
 

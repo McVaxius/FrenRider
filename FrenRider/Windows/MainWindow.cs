@@ -209,7 +209,7 @@ public class MainWindow : Window, IDisposable
             UiHelpers.AlignedRow("Food", auto.FoodStatus, auto.FoodStatus.StartsWith("Well Fed", StringComparison.OrdinalIgnoreCase) ? UiHelpers.Green : UiHelpers.Yellow);
 
         if (!string.IsNullOrWhiteSpace(auto.RepairStatus))
-            UiHelpers.AlignedRow("Repair", auto.RepairStatus, auto.RepairStatus.StartsWith("Sent", StringComparison.OrdinalIgnoreCase) ? UiHelpers.Green : UiHelpers.Yellow);
+            UiHelpers.AlignedRow("Repair", auto.RepairStatus, GetRepairColor(auto.RepairStatus));
 
         DrawCompanionStatus(auto);
 
@@ -237,6 +237,18 @@ public class MainWindow : Window, IDisposable
 
         var gysahlCount = GameHelpers.GetInventoryItemCount(GameHelpers.GysahlGreensItemId);
         UiHelpers.AlignedRow("Companion", gysahlCount > 0 ? $"Inactive, {gysahlCount} Gysahl Greens" : "Inactive, no Gysahl Greens", UiHelpers.Grey);
+    }
+
+    private static Vector4? GetRepairColor(string status)
+    {
+        if (status.StartsWith("Sent", StringComparison.OrdinalIgnoreCase) ||
+            status.StartsWith("Repair complete", StringComparison.OrdinalIgnoreCase) ||
+            status.StartsWith("No equipped gear below", StringComparison.OrdinalIgnoreCase))
+        {
+            return UiHelpers.Green;
+        }
+
+        return UiHelpers.Yellow;
     }
 
     private void DrawDutyPanel(CharacterConfig config)

@@ -6,6 +6,21 @@ namespace FrenRider.Services;
 
 public class AutomationService
 {
+    private const long RepairIdleCheckMs = 30000;
+    private const long RepairActiveCheckMs = 5000;
+    private const long RepairRetryMs = 10000;
+    private const long RepairStopSettleMs = 1000;
+    private const long RepairBlockedLogMs = 15000;
+    private const string AdsStopCommand = "/ads stop";
+    private const string AdsSelfRepairCommand = "/ads selfrepair";
+
+    private enum RepairFlowState
+    {
+        Idle,
+        WaitingForAdsStopSettle,
+        WaitingForDurability,
+    }
+
     private readonly Plugin plugin;
     private readonly FrenTracker tracker;
     private readonly ZoneService zoneService;
@@ -21,7 +36,12 @@ public class AutomationService
     private long lastDiscardDeferLogMs;
     private long lastRepairCheckMs;
     private long lastRepairAttemptMs;
+    private long repairNextActionMs;
+    private long lastRepairBlockedLogMs;
     private string lastDiscardDeferReason = "";
+    private string lastRepairBlockedReason = "";
+    private RepairFlowState repairFlowState;
+    private int repairRequestAttempts;
     private int idleListIndex;
 
     // Resolved food item ID (cached from name lookup or food search)
@@ -61,6 +81,7 @@ public class AutomationService
         {
             idleTickCounter = 0;
             IsIdle = false;
+            CancelRepairFlow("");
             return;
         }
 
@@ -81,6 +102,7 @@ public class AutomationService
             IsIdle = false;
             LastIdleAction = "";
             foodIdResolved = false; // Re-resolve food on zone change
+            CancelRepairFlow("Repair reset: zone transition.");
             return;
         }
 
@@ -107,6 +129,8 @@ public class AutomationService
             }
         }
 
+        CheckRepair(config, now);
+
         // Don't idle if in combat or mounted
         if (inCombat || mounted)
         {
@@ -114,8 +138,6 @@ public class AutomationService
             IsIdle = false;
             return;
         }
-
-        CheckRepair(config, now);
 
         // Check if following is idle (in range of fren, not moving)
         var follow = plugin.FollowService;
@@ -447,63 +469,180 @@ public class AutomationService
         {
             config.Repair = 0;
             plugin.ConfigManager.SaveCurrentAccount();
+            ResetRepairFlow();
             RepairStatus = "Legacy NPC repair disabled.";
             return;
         }
 
         if (config.Repair != 1)
         {
-            RepairStatus = "";
+            CancelRepairFlow("");
             return;
         }
-
-        if (now - lastRepairCheckMs < 30000)
-            return;
-
-        lastRepairCheckMs = now;
 
         var threshold = Math.Clamp(config.TornClothes, 0, 100);
         if (threshold <= 0)
         {
+            ResetRepairFlow();
             RepairStatus = "Self repair enabled; threshold is 0%.";
             return;
         }
 
         if (!plugin.AdsIntegrationService.AdsLoaded)
         {
+            ResetRepairFlow();
             RepairStatus = "Waiting: ADS not loaded.";
+            return;
+        }
+
+        if (repairFlowState == RepairFlowState.WaitingForAdsStopSettle)
+        {
+            ContinueRepairAfterAdsStop(now, threshold);
+            return;
+        }
+
+        var checkInterval = repairFlowState == RepairFlowState.Idle
+            ? RepairIdleCheckMs
+            : RepairActiveCheckMs;
+        if (now - lastRepairCheckMs < checkInterval)
+            return;
+
+        lastRepairCheckMs = now;
+
+        var needsRepair = GameHelpers.NeedsRepair(threshold);
+        if (!needsRepair)
+        {
+            if (repairFlowState != RepairFlowState.Idle)
+            {
+                CompleteRepairFlow(threshold);
+            }
+            else
+            {
+                RepairStatus = $"No equipped gear below {threshold}%.";
+            }
             return;
         }
 
         if (!CanSelfRepairNow(out var deferReason))
         {
             RepairStatus = $"Deferred: {deferReason}.";
+            LogRepairBlocked(now, deferReason);
+            return;
+        }
+
+        if (repairFlowState == RepairFlowState.Idle)
+        {
+            IssueRepairRequest(now, threshold, $"equipped gear below {threshold}%");
+            return;
+        }
+
+        var elapsedSinceRequest = now - lastRepairAttemptMs;
+        if (elapsedSinceRequest < RepairRetryMs)
+        {
+            RepairStatus = $"Repair in progress below {threshold}%; retry in {(RepairRetryMs - elapsedSinceRequest + 999) / 1000}s.";
+            return;
+        }
+
+        IssueRepairRequest(now, threshold, $"still below {threshold}% after {elapsedSinceRequest / 1000}s");
+    }
+
+    private void IssueRepairRequest(long now, int threshold, string reason)
+    {
+        repairRequestAttempts++;
+        lastRepairAttemptMs = now;
+        repairNextActionMs = now + RepairStopSettleMs;
+        repairFlowState = RepairFlowState.WaitingForAdsStopSettle;
+
+        if (repairRequestAttempts == 1)
+        {
+            Plugin.Log.Information($"[FrenRider][Repair] Sending ADS self-repair request ({reason}).");
+        }
+        else
+        {
+            Plugin.Log.Warning($"[FrenRider][Repair] Retrying ADS self-repair request attempt {repairRequestAttempts} ({reason}).");
+        }
+
+        if (SendCommand(AdsStopCommand))
+        {
+            RepairStatus = $"Stopping ADS before self repair below {threshold}%.";
+            return;
+        }
+
+        repairFlowState = RepairFlowState.WaitingForDurability;
+        RepairStatus = "Failed to send /ads stop before self repair.";
+        Plugin.Log.Warning("[FrenRider][Repair] ADS stop command failed before self repair.");
+    }
+
+    private void ContinueRepairAfterAdsStop(long now, int threshold)
+    {
+        if (now < repairNextActionMs)
+        {
+            RepairStatus = $"Stopping ADS before self repair below {threshold}%.";
             return;
         }
 
         if (!GameHelpers.NeedsRepair(threshold))
         {
-            RepairStatus = $"No equipped gear below {threshold}%.";
+            CompleteRepairFlow(threshold);
             return;
         }
 
-        if (now - lastRepairAttemptMs < 120000)
+        if (!CanSelfRepairNow(out var deferReason))
         {
-            RepairStatus = $"Repair due below {threshold}%; waiting for cooldown.";
+            RepairStatus = $"Deferred: {deferReason}.";
+            LogRepairBlocked(now, deferReason);
             return;
         }
 
-        lastRepairAttemptMs = now;
-        if (SendCommand("/ads selfrepair"))
+        repairFlowState = RepairFlowState.WaitingForDurability;
+        if (SendCommand(AdsSelfRepairCommand))
         {
             RepairStatus = $"Sent /ads selfrepair below {threshold}%.";
-            Plugin.Log.Information($"Self repair requested through ADS (threshold {threshold}%).");
+            Plugin.Log.Information($"[FrenRider][Repair] ADS self repair requested (threshold {threshold}%).");
+            return;
         }
-        else
+
+        RepairStatus = "Failed to send /ads selfrepair.";
+        Plugin.Log.Warning("[FrenRider][Repair] Self repair command failed: /ads selfrepair");
+    }
+
+    private void CompleteRepairFlow(int threshold)
+    {
+        ResetRepairFlow();
+        RepairStatus = $"Repair complete; no equipped gear below {threshold}%.";
+        Plugin.Log.Information($"[FrenRider][Repair] Repair complete; equipped gear is no longer below {threshold}%.");
+    }
+
+    private void CancelRepairFlow(string status)
+    {
+        if (repairFlowState != RepairFlowState.Idle)
+            Plugin.Log.Information("[FrenRider][Repair] Clearing active repair flow.");
+
+        ResetRepairFlow();
+        RepairStatus = status;
+    }
+
+    private void ResetRepairFlow()
+    {
+        repairFlowState = RepairFlowState.Idle;
+        repairNextActionMs = 0;
+        lastRepairAttemptMs = 0;
+        lastRepairBlockedLogMs = 0;
+        lastRepairBlockedReason = "";
+        repairRequestAttempts = 0;
+    }
+
+    private void LogRepairBlocked(long now, string reason)
+    {
+        if (string.Equals(lastRepairBlockedReason, reason, StringComparison.OrdinalIgnoreCase) &&
+            now - lastRepairBlockedLogMs < RepairBlockedLogMs)
         {
-            RepairStatus = "Failed to send /ads selfrepair.";
-            Plugin.Log.Warning("Self repair command failed: /ads selfrepair");
+            return;
         }
+
+        lastRepairBlockedReason = reason;
+        lastRepairBlockedLogMs = now;
+        Plugin.Log.Information($"[FrenRider][Repair] Repair request held while {reason}; rechecking durability instead of sending another repair command.");
     }
 
     private static bool CanSelfRepairNow(out string reason)
@@ -524,6 +663,19 @@ public class AutomationService
         if (player.IsCasting)
         {
             reason = "casting";
+            return false;
+        }
+
+        if (Plugin.Condition[ConditionFlag.InCombat])
+        {
+            reason = "in combat";
+            return false;
+        }
+
+        if (Plugin.Condition[ConditionFlag.BoundByDuty] ||
+            Plugin.Condition[ConditionFlag.BoundByDuty56])
+        {
+            reason = "in duty";
             return false;
         }
 
@@ -551,6 +703,18 @@ public class AutomationService
             return false;
         }
 
+        if (GameHelpers.IsAddonVisible("ContentsFinderConfirm"))
+        {
+            reason = "duty confirm popup";
+            return false;
+        }
+
+        if (GameHelpers.IsAddonVisible("SelectYesno"))
+        {
+            reason = "SelectYesno dialog";
+            return false;
+        }
+
         reason = "ready";
         return true;
     }
@@ -563,11 +727,20 @@ public class AutomationService
         if (config.Repair != 1)
             return;
 
+        var now = Environment.TickCount64;
         var threshold = Math.Clamp(config.TornClothes, 0, 100);
-        if (threshold > 0 && GameHelpers.NeedsRepair(threshold))
+        if (threshold <= 0)
+            return;
+
+        if (repairFlowState != RepairFlowState.Idle)
+            return;
+
+        if (!plugin.AdsIntegrationService.AdsLoaded)
+            return;
+
+        if (CanSelfRepairNow(out _) && GameHelpers.NeedsRepair(threshold))
         {
-            Plugin.Log.Information($"Triggering ADS self repair (condition <= {threshold}%).");
-            SendCommand("/ads selfrepair");
+            IssueRepairRequest(now, threshold, $"manual trigger below {threshold}%");
         }
     }
 
