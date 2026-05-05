@@ -36,7 +36,6 @@ public class ConfigWindow : Window, IDisposable
     private static readonly string[] AdsPresetOptions = { "No preset push (stub)", "Pilot Default (stub)", "Treasure (stub)" };
     private static readonly string[] LootTypes = { "unchanged", "need", "greed", "pass" };
     private static readonly string[] OnOff = { "Off", "On" };
-    private static readonly string[] RepairOptions = { "No", "Self Repair", "Inn NPC" };
     private static readonly string[] IdleActionModes = { "Specific Action", "Action From List" };
     private static readonly string[] IdleListModes = { "Default List", "Custom List" };
 
@@ -939,24 +938,26 @@ public class ConfigWindow : Window, IDisposable
 
     private void DrawRepairSection(CharacterConfig config)
     {
-        ImGui.TextColored(new Vector4(0.8f, 0.8f, 0.2f, 1f), "XP item automation temporarily disabled (TBD)");
-        HelpMarker("Previous XP item inputs are on hold until the multi-item system is designed.");
-
-        var repair = config.Repair;
-        ImGui.SetNextItemWidth(200);
-        if (ImGui.Combo("Repair", ref repair, RepairOptions, RepairOptions.Length))
+        if (config.Repair == 2)
         {
-            config.Repair = repair;
+            config.Repair = 0;
+            configManager.SaveCurrentAccount();
+        }
+
+        var selfRepair = config.Repair == 1;
+        if (ImGui.Checkbox("Self Repair", ref selfRepair))
+        {
+            config.Repair = selfRepair ? 1 : 0;
             configManager.SaveCurrentAccount();
         }
         ImGui.SameLine();
-        HelpMarker("Auto-repair method.\nNo: Don't auto-repair\nSelf Repair: Use dark matter\nInn NPC: Use inn repair NPC.");
+        HelpMarker("When enabled, FrenRider checks equipped gear durability and sends /ads selfrepair when any equipped item is below the threshold. ADS owns the actual repair window automation.");
 
-        var tornClothes = config.TornClothes;
+        var tornClothes = Math.Clamp(config.TornClothes, 0, 100);
         ImGui.SetNextItemWidth(200);
         if (ImGui.InputInt("Repair At % Durability", ref tornClothes))
         {
-            config.TornClothes = tornClothes;
+            config.TornClothes = Math.Clamp(tornClothes, 0, 100);
             configManager.SaveCurrentAccount();
         }
         ImGui.SameLine();
@@ -1334,33 +1335,11 @@ public class ConfigWindow : Window, IDisposable
         ImGui.Separator();
         ImGui.Spacing();
 
-        // --- XP / Repair ---
-        ImGui.Text("XP / Repair");
+        // --- Repair ---
+        ImGui.Text("Repair");
         ImGui.Spacing();
 
-        // TODO(TBD): Reintroduce XP item auto-equip configuration once multi-item logic is finalized.
-        ImGui.TextColored(new Vector4(0.8f, 0.8f, 0.2f, 1f), "XP item automation temporarily disabled (TBD)");
-        HelpMarker("Previous XP item inputs are on hold until the multi-item system is designed.");
-
-        var repair = config.Repair;
-        ImGui.SetNextItemWidth(200);
-        if (ImGui.Combo("Repair", ref repair, RepairOptions, RepairOptions.Length))
-        {
-            config.Repair = repair;
-            configManager.SaveCurrentAccount();
-        }
-        ImGui.SameLine();
-        HelpMarker("Auto-repair method.\nNo: Don't auto-repair\nSelf Repair: Use dark matter\nInn NPC: Use inn repair NPC (only if parked at inn)");
-
-        var tornClothes = config.TornClothes;
-        ImGui.SetNextItemWidth(200);
-        if (ImGui.InputInt("Repair At % Durability", ref tornClothes))
-        {
-            config.TornClothes = tornClothes;
-            configManager.SaveCurrentAccount();
-        }
-        ImGui.SameLine();
-        HelpMarker("Trigger repair when gear durability falls below this percentage.");
+        DrawRepairSection(config);
 
         ImGui.Spacing();
         ImGui.Separator();

@@ -324,6 +324,9 @@ public static class GameHelpers
     {
         try
         {
+            var thresholdPercent = Math.Clamp(conditionPercent, 0, 100);
+            var thresholdRaw = (uint)(thresholdPercent * 300);
+
             var im = InventoryManager.Instance();
             if (im == null) return false;
 
@@ -336,8 +339,8 @@ public static class GameHelpers
                 var item = equippedContainer->GetInventorySlot(i);
                 if (item == null || item->ItemId == 0) continue;
 
-                // Check condition (durability)
-                if (item->Condition < conditionPercent)
+                // InventoryItem.Condition is scaled 0..30000, where 30000 is 100%.
+                if (item->Condition <= thresholdRaw)
                     return true;
             }
 

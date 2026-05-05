@@ -19,6 +19,8 @@ public class AutomationService
     private long companionStanceCooldownMs;
     private long lastDiscardMs;
     private long lastDiscardDeferLogMs;
+    private long lastRepairCheckMs;
+    private long lastRepairAttemptMs;
     private string lastDiscardDeferReason = "";
     private int idleListIndex;
 
@@ -43,6 +45,7 @@ public class AutomationService
     public bool IsIdle { get; private set; }
     public string FoodStatus { get; private set; } = "";
     public string CompanionStatus { get; private set; } = "";
+    public string RepairStatus { get; private set; } = "";
 
     public AutomationService(Plugin plugin, FrenTracker tracker, ZoneService zoneService)
     {
@@ -111,6 +114,8 @@ public class AutomationService
             IsIdle = false;
             return;
         }
+
+        CheckRepair(config, now);
 
         // Check if following is idle (in range of fren, not moving)
         var follow = plugin.FollowService;
@@ -436,31 +441,133 @@ public class AutomationService
         SendCommand(stanceCmd);
     }
 
+    private void CheckRepair(CharacterConfig config, long now)
+    {
+        if (config.Repair == 2)
+        {
+            config.Repair = 0;
+            plugin.ConfigManager.SaveCurrentAccount();
+            RepairStatus = "Legacy NPC repair disabled.";
+            return;
+        }
+
+        if (config.Repair != 1)
+        {
+            RepairStatus = "";
+            return;
+        }
+
+        if (now - lastRepairCheckMs < 30000)
+            return;
+
+        lastRepairCheckMs = now;
+
+        var threshold = Math.Clamp(config.TornClothes, 0, 100);
+        if (threshold <= 0)
+        {
+            RepairStatus = "Self repair enabled; threshold is 0%.";
+            return;
+        }
+
+        if (!plugin.AdsIntegrationService.AdsLoaded)
+        {
+            RepairStatus = "Waiting: ADS not loaded.";
+            return;
+        }
+
+        if (!CanSelfRepairNow(out var deferReason))
+        {
+            RepairStatus = $"Deferred: {deferReason}.";
+            return;
+        }
+
+        if (!GameHelpers.NeedsRepair(threshold))
+        {
+            RepairStatus = $"No equipped gear below {threshold}%.";
+            return;
+        }
+
+        if (now - lastRepairAttemptMs < 120000)
+        {
+            RepairStatus = $"Repair due below {threshold}%; waiting for cooldown.";
+            return;
+        }
+
+        lastRepairAttemptMs = now;
+        if (SendCommand("/ads selfrepair"))
+        {
+            RepairStatus = $"Sent /ads selfrepair below {threshold}%.";
+            Plugin.Log.Information($"Self repair requested through ADS (threshold {threshold}%).");
+        }
+        else
+        {
+            RepairStatus = "Failed to send /ads selfrepair.";
+            Plugin.Log.Warning("Self repair command failed: /ads selfrepair");
+        }
+    }
+
+    private static bool CanSelfRepairNow(out string reason)
+    {
+        var player = Plugin.ObjectTable.LocalPlayer;
+        if (player == null)
+        {
+            reason = "local player unavailable";
+            return false;
+        }
+
+        if (!GameHelpers.IsPlayerAlive())
+        {
+            reason = "player dead";
+            return false;
+        }
+
+        if (player.IsCasting)
+        {
+            reason = "casting";
+            return false;
+        }
+
+        if (Plugin.Condition[ConditionFlag.BetweenAreas] ||
+            Plugin.Condition[ConditionFlag.BetweenAreas51])
+        {
+            reason = "between areas";
+            return false;
+        }
+
+        if (Plugin.Condition[ConditionFlag.Mounted] ||
+            Plugin.Condition[ConditionFlag.RidingPillion])
+        {
+            reason = "mounted or riding";
+            return false;
+        }
+
+        if (Plugin.Condition[ConditionFlag.OccupiedInQuestEvent] ||
+            Plugin.Condition[ConditionFlag.OccupiedInCutSceneEvent] ||
+            Plugin.Condition[ConditionFlag.Occupied33] ||
+            Plugin.Condition[ConditionFlag.Occupied39] ||
+            Plugin.Condition[ConditionFlag.WatchingCutscene])
+        {
+            reason = "occupied or in cutscene";
+            return false;
+        }
+
+        reason = "ready";
+        return true;
+    }
+
     /// <summary>
-    /// Trigger repair based on config (0=No, 1=Self, 2=Inn NPC).
+    /// Trigger repair based on config (0=No, 1=Self). FrenRider always delegates repair to ADS.
     /// </summary>
     public void TriggerRepair(CharacterConfig config)
     {
-        switch (config.Repair)
+        if (config.Repair != 1)
+            return;
+
+        var threshold = Math.Clamp(config.TornClothes, 0, 100);
+        if (threshold > 0 && GameHelpers.NeedsRepair(threshold))
         {
-            case 1: // Self repair with dark matter
-                if (GameHelpers.NeedsRepair(config.TornClothes))
-                {
-                    Plugin.Log.Information($"Triggering self repair (condition < {config.TornClothes}%)");
-                    var result = GameHelpers.UseRepairAction();
-                    if (result)
-                    {
-                        Plugin.Log.Information("Self repair action used successfully");
-                    }
-                    else
-                    {
-                        Plugin.Log.Warning("Self repair action failed");
-                    }
-                }
-                break;
-            case 2: // NPC repair (would need to interact with mender NPC)
-                Plugin.Log.Information("NPC repair not yet implemented - requires navigation to mender and ATK interaction");
-                break;
+            Plugin.Log.Information($"Triggering ADS self repair (condition <= {threshold}%).");
+            SendCommand("/ads selfrepair");
         }
     }
 

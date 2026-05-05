@@ -208,6 +208,9 @@ public class MainWindow : Window, IDisposable
         if (!string.IsNullOrWhiteSpace(auto.FoodStatus))
             UiHelpers.AlignedRow("Food", auto.FoodStatus, auto.FoodStatus.StartsWith("Well Fed", StringComparison.OrdinalIgnoreCase) ? UiHelpers.Green : UiHelpers.Yellow);
 
+        if (!string.IsNullOrWhiteSpace(auto.RepairStatus))
+            UiHelpers.AlignedRow("Repair", auto.RepairStatus, auto.RepairStatus.StartsWith("Sent", StringComparison.OrdinalIgnoreCase) ? UiHelpers.Green : UiHelpers.Yellow);
+
         DrawCompanionStatus(auto);
 
         var formation = plugin.FormationService;
