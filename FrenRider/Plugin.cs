@@ -396,6 +396,7 @@ public sealed class Plugin : IDalamudPlugin
         // Update zone detection, following, and mount system
         ZoneService.Update();
         AdsIntegrationService.Update();
+        AutomationService.UpdateRepairGate();
         FollowService.Update();
         MountService.Update();
         CombatService.Update();

@@ -56,6 +56,13 @@ public class MountService
             return;
         }
 
+        if (plugin.AutomationService.IsRepairFlowActive)
+        {
+            State = MountState.Idle;
+            StateDetail = "Repair active";
+            return;
+        }
+
         var fren = tracker.Fren;
         if (fren == null || !fren.IsFound || !fren.IsVisible)
         {

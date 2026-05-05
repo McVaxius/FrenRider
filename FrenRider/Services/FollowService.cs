@@ -94,6 +94,14 @@ public class FollowService
             return;
         }
 
+        if (plugin.AutomationService.IsRepairFlowActive)
+        {
+            StopAllFollowing(config, "repair active");
+            State = FollowState.Idle;
+            StateDetail = "Repair active";
+            return;
+        }
+
         var fren = tracker.Fren;
         if (fren == null || !fren.IsFound)
         {
