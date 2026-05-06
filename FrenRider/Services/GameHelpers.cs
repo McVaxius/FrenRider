@@ -188,6 +188,60 @@ public static class GameHelpers
             || Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.RidingPillion];
     }
 
+    public static unsafe bool CanUseMountActionNow(out string reason)
+    {
+        if (Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.Mounted]
+            || Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.RidingPillion])
+        {
+            reason = "already mounted";
+            return false;
+        }
+
+        if (Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.Mounting71])
+        {
+            reason = "already mounting";
+            return false;
+        }
+
+        if (Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.InCombat])
+        {
+            reason = "in combat";
+            return false;
+        }
+
+        if (Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.BetweenAreas]
+            || Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.BetweenAreas51])
+        {
+            reason = "between areas";
+            return false;
+        }
+
+        try
+        {
+            var am = ActionManager.Instance();
+            if (am == null)
+            {
+                reason = "ActionManager unavailable";
+                return false;
+            }
+
+            var status = am->GetActionStatus(ActionType.GeneralAction, 9);
+            if (status != 0)
+            {
+                reason = $"mount action unavailable (status={status})";
+                return false;
+            }
+        }
+        catch (Exception ex)
+        {
+            reason = $"mount action check failed: {ex.Message}";
+            return false;
+        }
+
+        reason = "ready";
+        return true;
+    }
+
     /// <summary>
     /// Uses the API15 ClientStructs UseActionLocation wrapper. FrenRider does not detour it today;
     /// this is just the low-level call surface.

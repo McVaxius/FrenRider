@@ -300,6 +300,7 @@ public class ConfigManager
                 target.AutoRotationTypeFATE = source.AutoRotationTypeFATE;
                 target.RotationPlugin = source.RotationPlugin;
                 target.RotationPluginForay = source.RotationPluginForay;
+                target.ForceBossModPresetRegardlessOfRotation = source.ForceBossModPresetRegardlessOfRotation;
                 target.BossModAI = source.BossModAI;
                 target.PositionalInCombat = source.PositionalInCombat;
                 target.MaxAIDistance = source.MaxAIDistance;

@@ -45,6 +45,7 @@ public class CharacterConfig
     public string AutoRotationTypeFATE { get; set; } = "FATE";
     public int RotationPlugin { get; set; } = 2; // 0=BMR, 1=VBM, 2=RSR, 3=WRATH
     public int RotationPluginForay { get; set; } = 3; // 0=BMR, 1=VBM, 2=RSR, 3=WRATH
+    public bool ForceBossModPresetRegardlessOfRotation { get; set; } = false;
     public int BossModAI { get; set; } = 0; // 0=on, 1=off
     public int PositionalInCombat { get; set; } = 3; // 0=Front, 1=Rear, 2=Any, 3=Auto
     public float MaxAIDistance { get; set; } = 424242f;
@@ -136,6 +137,7 @@ public class CharacterConfig
             AutoRotationTypeFATE = AutoRotationTypeFATE,
             RotationPlugin = RotationPlugin,
             RotationPluginForay = RotationPluginForay,
+            ForceBossModPresetRegardlessOfRotation = ForceBossModPresetRegardlessOfRotation,
             BossModAI = BossModAI,
             PositionalInCombat = PositionalInCombat,
             MaxAIDistance = MaxAIDistance,

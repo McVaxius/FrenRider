@@ -190,7 +190,7 @@ public class CombatService
 
         // Disable other rotation plugins first
         DisableOtherRotationPlugins(config);
-        ApplyBossModSafetyState(pluginName, preset, "activation");
+        ApplyBossModSafetyState(config, pluginName, preset, "activation");
 
         // Send activation commands
         switch (pluginName)
@@ -322,7 +322,7 @@ public class CombatService
         var pluginName = GetSelectedRotationPluginName(config);
         var preset = GetPresetForZone(config);
         ActivePreset = preset;
-        ApplyBossModSafetyState(pluginName, preset, reason);
+        ApplyBossModSafetyState(config, pluginName, preset, reason);
 
         switch (pluginName)
         {
@@ -494,6 +494,7 @@ public class CombatService
             config.RotationPlugin,
             config.RotationPluginForay,
             config.BossModAI,
+            config.ForceBossModPresetRegardlessOfRotation,
             config.PositionalInCombat,
             config.MaxAIDistance,
             config.LimitPct,
@@ -522,7 +523,7 @@ public class CombatService
             : "RSR";
     }
 
-    private void ApplyBossModSafetyState(string pluginName, string selectedPreset, string reason)
+    private void ApplyBossModSafetyState(CharacterConfig config, string pluginName, string selectedPreset, string reason)
     {
         EnsureBossModAiEnabled();
 		Plugin.Log.Information($"[FrenRider] GHOST IN THE MACHINE CLEANUP");
@@ -542,6 +543,10 @@ public class CombatService
 		SendCommand("/rotation Settings DummyBoss False");
         SendCommand("/rotation Settings DisableTargetDummys True");
 		//SendCommand($"/rotation Auto");
+        var bossModSafetyPreset = config.ForceBossModPresetRegardlessOfRotation
+            ? selectedPreset
+            : BossModPassivePresetName;
+
         switch (pluginName)
         {
             case "BMR":
@@ -556,13 +561,13 @@ public class CombatService
                 break;
             case "RSR":
 				SendCommand($"/rotation Auto");  //ghost in the machine 8. disabling RSR when we switch to WRATH
-                SendBmrPresetCommand(BossModPassivePresetName, $"{reason} because selected plugin is {pluginName}");
-                SendVbmPresetCommand(BossModPassivePresetName, $"{reason} because selected plugin is {pluginName}");
+                SendBmrPresetCommand(bossModSafetyPreset, $"{reason} because selected plugin is {pluginName}");
+                SendVbmPresetCommand(bossModSafetyPreset, $"{reason} because selected plugin is {pluginName}");
                 break;
             case "WRATH":
 				SendCommand($"/rotation cancel");  //ghost in the machine 8. disabling RSR when we switch to WRATH
-                SendBmrPresetCommand(BossModPassivePresetName, $"{reason} because selected plugin is {pluginName}");
-                SendVbmPresetCommand(BossModPassivePresetName, $"{reason} because selected plugin is {pluginName}");
+                SendBmrPresetCommand(bossModSafetyPreset, $"{reason} because selected plugin is {pluginName}");
+                SendVbmPresetCommand(bossModSafetyPreset, $"{reason} because selected plugin is {pluginName}");
                 break;
         }
     }

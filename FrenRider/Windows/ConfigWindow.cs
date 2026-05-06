@@ -716,6 +716,15 @@ public class ConfigWindow : Window, IDisposable
         ImGui.SameLine();
         HelpMarker("Preset name for FATE content.\nsome valid types are FRENRIDER, DD, FATE, Autoduty Passive, AutoDuty.");
 
+        var forceBossModPreset = config.ForceBossModPresetRegardlessOfRotation;
+        if (ImGui.Checkbox("Force BossMod preset regardless of rotation", ref forceBossModPreset))
+        {
+            config.ForceBossModPresetRegardlessOfRotation = forceBossModPreset;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("When RSR or WRATH is selected, force BMR/VBM to the zone preset instead of AutoDuty Passive.");
+
         ImGui.Spacing();
         ImGui.Separator();
         ImGui.Text("Behavior");

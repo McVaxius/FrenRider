@@ -7,8 +7,10 @@ using System.Numerics;
 using System.Text;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.Enums;
+using Dalamud.Game.ClientState.Objects.Types;
 using FFXIVClientStructs.FFXIV.Client.System.String;
 using FFXIVClientStructs.FFXIV.Client.UI;
+using FrenRider.Models;
 
 namespace FrenRider.Services;
 
@@ -19,9 +21,21 @@ public class DutyInteractService
     private readonly ZoneService zoneService;
 
     private const float FrenLostDistance = 50f;
-    private const float InteractScanRange = 10f;
+    private const float InteractScanRange = 50f;
+    private const float MountAttemptDistance = 3f;
     private const float NudgeDistance = 3f;
     private const float InteractRange = 2.5f;
+    private const float InteractableStuckDistance = 1f;
+    private const double MountAttemptIntervalSeconds = 15;
+    private const double InteractableRepathCheckSeconds = 5;
+    private static readonly string[] BuiltInInteractableKeywords =
+    {
+        "chest",
+        "coffer",
+        "treasure",
+        "treasure chest",
+        "treasure coffer",
+    };
 
     private List<string> interactableKeywords = new();
     private string listFilePath = "";
@@ -30,7 +44,11 @@ public class DutyInteractService
     private DateTime lastNudgeTime = DateTime.MinValue;
     private DateTime lastInteractTime = DateTime.MinValue;
     private DateTime lastCommenceClickTime = DateTime.MinValue;
+    private DateTime lastMountAttemptTime = DateTime.MinValue;
+    private DateTime lastInteractableRepathCheckTime = DateTime.MinValue;
     private uint? lastInteractedEntityId;
+    private ulong? navigatingInteractableGameObjectId;
+    private Vector3 interactableRepathCheckPosition;
     private bool isNavigatingToInteractable;
 
     public string StateDetail { get; private set; } = "";
@@ -142,12 +160,14 @@ public class DutyInteractService
 
             if (dist <= InteractRange)
             {
+                if (isNavigatingToInteractable)
+                    StopInteractableNavigation($"close enough to interact ({dist:F1}y <= {InteractRange:F1}y)");
+
                 // Close enough to interact
-                if ((now - lastInteractTime).TotalSeconds > 3 && interactable.GameObjectId != lastInteractedEntityId)
+                if ((now - lastInteractTime).TotalSeconds > 3)
                 {
                     lastInteractTime = now;
                     lastInteractedEntityId = (uint)interactable.GameObjectId;
-                    isNavigatingToInteractable = false;
 
                     Plugin.Log.Information($"[DutyInteract] Interacting with: {interactable.Name.TextValue}");
                     GameHelpers.InteractWithObject(interactable);
@@ -156,13 +176,19 @@ public class DutyInteractService
             else
             {
                 // Navigate to it
-                if (!isNavigatingToInteractable)
+                if (TryMountTowardInteractable(config, interactable, dist, now))
                 {
-                    isNavigatingToInteractable = true;
-                    Plugin.Log.Information($"[DutyInteract] Navigating to: {interactable.Name.TextValue} ({dist:F1}y)");
+                    StateDetail = $"Mounting for: {interactable.Name.TextValue} ({dist:F1}y)";
+                    return;
                 }
-                var coords = FormatVector(interactable.Position);
-                SendCommand($"/vnav moveto {coords}");
+
+                if (Plugin.Condition[ConditionFlag.Mounting71])
+                {
+                    StateDetail = $"Mounting for: {interactable.Name.TextValue} ({dist:F1}y)";
+                    return;
+                }
+
+                NavigateToInteractable(interactable, localPlayer.Position, dist, now);
             }
         }
         else
@@ -188,32 +214,27 @@ public class DutyInteractService
         }
     }
 
-    private Dalamud.Game.ClientState.Objects.Types.IGameObject? FindNearestInteractable()
+    private IGameObject? FindNearestInteractable()
     {
-        if (interactableKeywords.Count == 0) return null;
-
         var localPlayer = Plugin.ObjectTable.LocalPlayer;
         if (localPlayer == null) return null;
 
-        Dalamud.Game.ClientState.Objects.Types.IGameObject? nearest = null;
+        IGameObject? nearest = null;
         var nearestDist = float.MaxValue;
 
         foreach (var obj in Plugin.ObjectTable)
         {
             if (obj == null) continue;
-            if (obj.ObjectKind != ObjectKind.EventObj) continue;
+            if (!obj.IsTargetable) continue;
+            if (obj.ObjectKind != ObjectKind.EventObj && obj.ObjectKind != ObjectKind.Treasure) continue;
 
             var name = obj.Name.TextValue;
-            if (string.IsNullOrEmpty(name)) continue;
+            if (obj.ObjectKind != ObjectKind.Treasure && !MatchesInteractableKeyword(name)) continue;
 
             var dist = Vector3.Distance(localPlayer.Position, obj.Position);
             if (dist > InteractScanRange) continue;
 
-            // Check if name matches any keyword (partial, case-insensitive)
-            var matches = interactableKeywords.Any(kw =>
-                name.Contains(kw, StringComparison.OrdinalIgnoreCase));
-
-            if (matches && dist < nearestDist)
+            if (dist < nearestDist)
             {
                 nearest = obj;
                 nearestDist = dist;
@@ -221,6 +242,110 @@ public class DutyInteractService
         }
 
         return nearest;
+    }
+
+    private bool MatchesInteractableKeyword(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return false;
+
+        foreach (var keyword in BuiltInInteractableKeywords)
+        {
+            if (name.Contains(keyword, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+
+        return interactableKeywords.Any(kw =>
+            name.Contains(kw, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private bool TryMountTowardInteractable(CharacterConfig config, IGameObject interactable, float distance, DateTime now)
+    {
+        if (distance <= MountAttemptDistance)
+            return false;
+
+        if ((now - lastMountAttemptTime).TotalSeconds < MountAttemptIntervalSeconds)
+            return false;
+
+        lastMountAttemptTime = now;
+
+        if (!GameHelpers.CanUseMountActionNow(out var reason))
+        {
+            Plugin.Log.Debug($"[DutyInteract] Skipping mount for {interactable.Name.TextValue}: {reason}");
+            return false;
+        }
+
+        var command = GetMountCommand(config.FoolFlier);
+        Plugin.Log.Information($"[DutyInteract] Trying mount for far interactable {interactable.Name.TextValue} ({distance:F1}y): {command}");
+        SendCommand(command);
+        return true;
+    }
+
+    private void NavigateToInteractable(IGameObject interactable, Vector3 localPosition, float distance, DateTime now)
+    {
+        var gameObjectId = interactable.GameObjectId;
+        if (isNavigatingToInteractable && navigatingInteractableGameObjectId != gameObjectId)
+            StopInteractableNavigation($"switching target to {interactable.Name.TextValue}");
+
+        if (!isNavigatingToInteractable)
+        {
+            isNavigatingToInteractable = true;
+            navigatingInteractableGameObjectId = gameObjectId;
+            interactableRepathCheckPosition = localPosition;
+            lastInteractableRepathCheckTime = now;
+            IssueInteractableNavCommand(interactable, $"initial navigation ({distance:F1}y)");
+            return;
+        }
+
+        if ((now - lastInteractableRepathCheckTime).TotalSeconds < InteractableRepathCheckSeconds)
+            return;
+
+        var moved = Vector3.Distance(localPosition, interactableRepathCheckPosition);
+        if (moved < InteractableStuckDistance)
+        {
+            var reason = $"stuck repath (moved {moved:F1}y < {InteractableStuckDistance:F1}y in {InteractableRepathCheckSeconds:F0}s)";
+            StopInteractableNavigation(reason);
+            isNavigatingToInteractable = true;
+            navigatingInteractableGameObjectId = gameObjectId;
+            interactableRepathCheckPosition = localPosition;
+            lastInteractableRepathCheckTime = now;
+            IssueInteractableNavCommand(interactable, reason);
+            return;
+        }
+
+        interactableRepathCheckPosition = localPosition;
+        lastInteractableRepathCheckTime = now;
+    }
+
+    private void IssueInteractableNavCommand(IGameObject interactable, string reason)
+    {
+        var coords = FormatVector(interactable.Position);
+        var command = $"/vnav moveto {coords}";
+        StateDetail = $"Moving to: {interactable.Name.TextValue}";
+        Plugin.Log.Information($"[DutyInteract] Navigating to {interactable.Name.TextValue}: reason={reason}; cmd={command}");
+        SendCommand(command);
+    }
+
+    private void StopInteractableNavigation(string reason)
+    {
+        if (!isNavigatingToInteractable)
+            return;
+
+        Plugin.Log.Information($"[DutyInteract] Stopping interactable navigation: {reason}");
+        SendCommand("/vnavmesh stop");
+        isNavigatingToInteractable = false;
+        navigatingInteractableGameObjectId = null;
+    }
+
+    private static string GetMountCommand(string mountName)
+    {
+        if (string.Equals(mountName, "Mount Roulette", StringComparison.OrdinalIgnoreCase))
+            return "/generalaction \"Mount Roulette\"";
+
+        if (string.IsNullOrWhiteSpace(mountName))
+            return "/mount \"Company Chocobo\"";
+
+        return $"/mount \"{mountName}\"";
     }
 
     private void NudgeForward()
@@ -248,6 +373,7 @@ public class DutyInteractService
         if (IsActive)
         {
             isNavigatingToInteractable = false;
+            navigatingInteractableGameObjectId = null;
             lastInteractedEntityId = null;
         }
         IsActive = false;
