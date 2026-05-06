@@ -36,6 +36,7 @@ public class CombatService
     private string lastObservedCombatSettingsSignature = string.Empty;
     private string pendingCombatSettingsSignature = string.Empty;
     private bool mountedRotationSuppressed;
+    private bool wrathAutoActive;
 
     private static readonly string[] RotationPluginNames = { "BMR", "VBM", "RSR", "WRATH" };
     private const long CombatSettingsRefreshDebounceMs = 400;
@@ -61,6 +62,7 @@ public class CombatService
 
         if (!config.Enabled)
         {
+            SetWrathAuto(false, "plugin disabled");
             RestoreMountedRotationLifecycle(config, inCombat, inDuty, "plugin disabled", reapplySelection: false);
             ResetCombatSettingsRefreshTracking();
             lastObservedCombatSettingsSignature = string.Empty;
@@ -202,10 +204,8 @@ public class CombatService
                 StateDetail = $"{pluginName} {rsrModeName}" + (string.IsNullOrEmpty(preset) ? "" : $" [{preset}]");
                 break;
             case "WRATH":
-                SendCommand("/wrath auto on");
-                if (ShouldApplyPreset(preset))
-                    SendCommand($"/wrath settings preset {FormatCommandArgument(preset)}");
-                StateDetail = $"{pluginName} active" + (string.IsNullOrEmpty(preset) ? "" : $" [{preset}]");
+                SetWrathAuto(true, "activation");
+                StateDetail = $"{pluginName} auto";
                 break;
             case "BMR":
                 StateDetail = $"{pluginName} active" + (string.IsNullOrEmpty(preset) ? "" : $" [{preset}]");
@@ -234,8 +234,7 @@ public class CombatService
 					Plugin.Log.Information($"Combat: stopped {pluginName} GHOST IN THE MACHINE 3 rotation cancel");
                 break;
             case "WRATH":
-					//SendCommand("/wrath auto off"); //why is this here ? GHOST IN THE MACHINE4
-					Plugin.Log.Information($"Combat: stopped {pluginName} GHOST IN THE MACHINE 4 wrath auto off");
+                SetWrathAuto(false, "deactivation");
                 break;
             case "BMR":
             case "VBM":
@@ -306,11 +305,10 @@ public class CombatService
             _ => "auto",
         };
 
-        // RSR and WRATH support positional commands
-        if (pluginName is "RSR" or "WRATH")
+        // FrenRider only manages Wrath auto state; leave Wrath targeting/settings manual.
+        if (pluginName is "RSR")
         {
-            var cmd = pluginName == "RSR" ? "/rotation" : "/wrath";
-            SendCommand($"{cmd} settings positional {positional}");
+            SendCommand($"/rotation settings positional {positional}");
         }
     }
 
@@ -320,6 +318,7 @@ public class CombatService
             return;
 
         var pluginName = GetSelectedRotationPluginName(config);
+        lastActivePluginIdx = Array.IndexOf(RotationPluginNames, pluginName);
         var preset = GetPresetForZone(config);
         ActivePreset = preset;
         ApplyBossModSafetyState(config, pluginName, preset, reason);
@@ -332,9 +331,7 @@ public class CombatService
                 SetPositional(config, pluginName);
                 break;
             case "WRATH":
-                if (ShouldApplyPreset(preset))
-                    SendCommand($"/wrath settings preset {FormatCommandArgument(preset)}");
-                SetPositional(config, pluginName);
+                SetWrathAuto(true, reason);
                 break;
             case "BMR":
             case "VBM":
@@ -377,7 +374,7 @@ public class CombatService
         SendCommand("/vbmai off");
         SendCommand("/bmrai off");
         SendCommand("/rotation cancel");
-        SendCommand("/wrath auto off");
+        SetWrathAuto(false, "mounted rotation suppression");
         mountedRotationSuppressed = true;
         Plugin.Log.Information("[FrenRider] Mounted rotation suppression enabled.");
     }
@@ -399,7 +396,8 @@ public class CombatService
                 SendCommand("/rotation auto");
                 break;
             case "WRATH":
-                SendCommand("/wrath auto on");
+                if (reapplySelection && !IsRotationDisabled(config))
+                    SetWrathAuto(true, $"mounted lifecycle restore ({reason})");
                 break;
         }
 
@@ -551,15 +549,16 @@ public class CombatService
         {
             case "BMR":
 				SendCommand($"/rotation cancel");  //ghost in the machine 8. disabling RSR when we switch to bmr
-				SendCommand($"/wrath Auto off");  //ghost in the machine 8. disabling WRATH when we switch to bmr
+                SetWrathAuto(false, $"{reason} because selected plugin is {pluginName}");
                 SendBmrPresetCommand(selectedPreset, reason);
                 break;
             case "VBM":
 				SendCommand($"/rotation cancel");  //ghost in the machine 8. disabling RSR when we switch to vbm
-				SendCommand($"/wrath Auto off");  //ghost in the machine 8. disabling WRATH when we switch to vbm
+                SetWrathAuto(false, $"{reason} because selected plugin is {pluginName}");
                 SendVbmPresetCommand(selectedPreset, reason);
                 break;
             case "RSR":
+                SetWrathAuto(false, $"{reason} because selected plugin is {pluginName}");
 				SendCommand($"/rotation Auto");  //ghost in the machine 8. disabling RSR when we switch to WRATH
                 SendBmrPresetCommand(bossModSafetyPreset, $"{reason} because selected plugin is {pluginName}");
                 SendVbmPresetCommand(bossModSafetyPreset, $"{reason} because selected plugin is {pluginName}");
@@ -628,11 +627,20 @@ public class CombatService
 					Plugin.Log.Information($"Combat: stopped {pluginName} GHOST IN THE MACHINE 1 rotation cancel");
                     break;
                 case "WRATH":
-                    //SendCommand("/wrath auto off"); //ghost in the machine 2
-					Plugin.Log.Information($"Combat: stopped {pluginName} GHOST IN THE MACHINE 2 rotation cancel");
+                    SetWrathAuto(false, $"selected rotation plugin is {pluginName}");
                     break;
             }
         }
+    }
+
+    private void SetWrathAuto(bool enabled, string reason)
+    {
+        if (wrathAutoActive == enabled)
+            return;
+
+        SendCommand(enabled ? "/wrath auto on" : "/wrath auto off");
+        wrathAutoActive = enabled;
+        Plugin.Log.Information($"Combat: Wrath auto {(enabled ? "on" : "off")} after {reason}");
     }
 
     private void CheckLimitBreak(CharacterConfig config)
