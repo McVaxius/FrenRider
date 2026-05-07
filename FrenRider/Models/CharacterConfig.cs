@@ -35,7 +35,8 @@ public class CharacterConfig
     public float MaxBistanceForay { get; set; } = 100f;
     public float DDDistance { get; set; } = 100f;
     public int FollowInCombat { get; set; } = 2; // 0=No, 1=Yes, 2=Auto
-    public float FDistance { get; set; } = 0f;
+    public float FDistance { get; set; } = 0f; // Reserved for future autosync FATE; not applied to follow distance.
+    public bool AutoSyncFate { get; set; } = true;
     public bool Formation { get; set; } = false;
     public int HClingReset { get; set; } = 10;
 
@@ -130,6 +131,7 @@ public class CharacterConfig
             DDDistance = DDDistance,
             FollowInCombat = FollowInCombat,
             FDistance = FDistance,
+            AutoSyncFate = AutoSyncFate,
             Formation = Formation,
             HClingReset = HClingReset,
             AutoRotationType = AutoRotationType,

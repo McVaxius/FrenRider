@@ -619,7 +619,21 @@ public class ConfigWindow : Window, IDisposable
             configManager.SaveCurrentAccount();
         }
         ImGui.SameLine();
-        HelpMarker("Extra distance padding during FATEs.\nAllows more spread-out positioning.");
+        HelpMarker("Reserved for future autosync FATE behavior.\nCurrent follow distance does not change on FATE join or leave.");
+
+        var autoSyncFate = config.AutoSyncFate;
+        if (ImGui.Checkbox("Auto Sync FATE", ref autoSyncFate))
+        {
+            config.AutoSyncFate = autoSyncFate;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        if (ImGui.SmallButton("DISABLE PANDORA's BOX"))
+        {
+            GameHelpers.SendChatCommand("/xldisableplugin Pandora's Box", "[FR][FATE-SYNC]");
+        }
+        ImGui.SameLine();
+        HelpMarker("Runs /levelsync on after joining a FATE.\nDefers while mounted or riding pillion.");
 
         ImGui.Spacing();
         ImGui.Separator();

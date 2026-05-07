@@ -9,7 +9,6 @@ using Dalamud.IoC;
 using Dalamud.Plugin;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
-using ECommons;
 using FrenRider.IPC;
 using FrenRider.Services;
 using FrenRider.Windows;
@@ -54,11 +53,9 @@ public sealed class Plugin : IDalamudPlugin
     public VideoPlaybackService VideoPlaybackService { get; init; }
     public DutyInteractService DutyInteractService { get; init; }
     public ExitBehaviourService ExitBehaviourService { get; init; }
-    public FateSyncService FateSyncService { get; init; }
     public YesAlreadyIPC YesAlreadyIPC { get; init; }
     public AutoYesService AutoYesService { get; init; }
     public AutoDutyDetectionService AutoDutyDetectionService { get; init; }
-    public bool ECommonsAvailable { get; private set; }
     public string[] MountNames { get; private set; } = Array.Empty<string>();
 
     public readonly WindowSystem WindowSystem = new("FrenRider");
@@ -74,18 +71,6 @@ public sealed class Plugin : IDalamudPlugin
 
     public Plugin()
     {
-        try
-        {
-            ECommonsMain.Init(PluginInterface, this);
-            ECommonsAvailable = true;
-            Log.Information("[FrenRider] ECommons initialized");
-        }
-        catch (Exception ex)
-        {
-            ECommonsAvailable = false;
-            Log.Warning(ex, "[FrenRider] ECommons init failed; flying stuck escape disabled");
-        }
-
         Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
         ConfigManager = new ConfigManager(PluginInterface, Log);
 
@@ -106,7 +91,6 @@ public sealed class Plugin : IDalamudPlugin
         VideoPlaybackService = new VideoPlaybackService(Configuration, Log, ChatGui);
         DutyInteractService = new DutyInteractService(this, FrenTracker, ZoneService);
         ExitBehaviourService = new ExitBehaviourService(this, FrenTracker, ZoneService);
-        FateSyncService = new FateSyncService(this, ZoneService);
         YesAlreadyIPC = new YesAlreadyIPC(Log);
         AutoYesService = new AutoYesService(this, GameGui, Condition, Log);
 		
@@ -171,8 +155,6 @@ public sealed class Plugin : IDalamudPlugin
 
     public void Dispose()
     {
-        FollowService.Dispose();
-
         Framework.Update -= OnFrameworkUpdate;
         ClientState.Login -= OnLoginEvent;
 
@@ -197,20 +179,6 @@ public sealed class Plugin : IDalamudPlugin
 
         CommandManager.RemoveHandler(AliasCommandName);
         CommandManager.RemoveHandler(CommandName);
-
-        if (ECommonsAvailable)
-        {
-            try
-            {
-                ECommonsMain.Dispose();
-            }
-            catch (Exception ex)
-            {
-                Log.Warning(ex, "[FrenRider] ECommons dispose failed");
-            }
-
-            ECommonsAvailable = false;
-        }
     }
 
     private void OnFrenRiderEnabledChanged(bool enabled)
@@ -238,7 +206,6 @@ public sealed class Plugin : IDalamudPlugin
         }
         else
         {
-            FollowService.CancelFlyingStuckRecovery("disabled");
             AutoDutyDetectionService.HandleFrenRiderDisabled();
         }
     }
@@ -428,7 +395,6 @@ public sealed class Plugin : IDalamudPlugin
 
         // Update zone detection, following, and mount system
         ZoneService.Update();
-        FateSyncService.Update();
         AdsIntegrationService.Update();
         AutomationService.UpdateRepairGate();
         FollowService.Update();
@@ -451,7 +417,8 @@ public sealed class Plugin : IDalamudPlugin
             dtrEntry.OnClick = (_) =>
             {
                 var cfg = ConfigManager.GetActiveConfig();
-                ConfigManager.SetFrenRiderEnabled(!cfg.Enabled);
+                cfg.Enabled = !cfg.Enabled;
+                ConfigManager.SaveCurrentAccount();
             };
         }
         catch (Exception ex)

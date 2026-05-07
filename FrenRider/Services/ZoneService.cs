@@ -46,6 +46,8 @@ public class ZoneService
     public uint TerritoryId { get; private set; }
     public bool InFate { get; private set; }
     public ushort CurrentFateId { get; private set; }
+    public ushort PreviousFateId { get; private set; }
+    public bool FateChanged { get; private set; }
     public bool ZoneChanged { get; private set; }
 
     public void Update()
@@ -86,12 +88,17 @@ public class ZoneService
             IsIndoors = false;
         }
 
-        // FATE detection via FFXIVClientStructs
+        // FATE detection via FFXIVClientStructs. FATE state is diagnostic only for follow.
         UpdateFateStatus();
     }
 
     private void UpdateFateStatus()
     {
+        var wasInFate = InFate;
+        var previousFateId = CurrentFateId;
+        var nextInFate = false;
+        ushort nextFateId = 0;
+
         try
         {
             unsafe
@@ -102,20 +109,23 @@ public class ZoneService
                     var fateId = fm->GetCurrentFateId();
                     if (fateId != 0)
                     {
-                        if (!InFate)
-                            Plugin.Log.Information($"Joined FATE (ID {fateId})");
-                        InFate = true;
-                        CurrentFateId = fateId;
-                        return;
+                        nextInFate = true;
+                        nextFateId = fateId;
                     }
                 }
             }
         }
         catch { /* FateManager access failed */ }
 
-        if (InFate)
-            Plugin.Log.Information("Left FATE");
-        InFate = false;
-        CurrentFateId = 0;
+        FateChanged = wasInFate != nextInFate || previousFateId != nextFateId;
+        if (!FateChanged)
+            return;
+
+        PreviousFateId = previousFateId;
+        InFate = nextInFate;
+        CurrentFateId = nextFateId;
+
+        Plugin.Log.Information(
+            $"[FR][FATE] FateChanged inFate={InFate}; previousId={PreviousFateId}; currentId={CurrentFateId}; territory={TerritoryId}; zone={CurrentZone}");
     }
 }

@@ -36,6 +36,7 @@ public class CombatService
     private string lastObservedCombatSettingsSignature = string.Empty;
     private string pendingCombatSettingsSignature = string.Empty;
     private bool mountedRotationSuppressed;
+    private string mountedSuppressedPluginName = string.Empty;
     private bool wrathAutoActive;
 
     private static readonly string[] RotationPluginNames = { "BMR", "VBM", "RSR", "WRATH" };
@@ -74,6 +75,8 @@ public class CombatService
             wasInCombat = false;
             return;
         }
+
+        LogFateCombatDecisionIfChanged(config, inCombat, inDuty, mountedOrMounting);
 
         if (HandleMountedRotationLifecycle(config, mountedOrMounting, inCombat, inDuty))
             return;
@@ -355,7 +358,7 @@ public class CombatService
             return false;
         }
 
-        SuppressMountedRotationLifecycle();
+        SuppressMountedRotationLifecycle(config);
         ResetCombatSettingsRefreshTracking();
         lastObservedCombatSettingsSignature = string.Empty;
         State = CombatState.OutOfCombat;
@@ -366,17 +369,32 @@ public class CombatService
         return true;
     }
 
-    private void SuppressMountedRotationLifecycle()
+    private void SuppressMountedRotationLifecycle(CharacterConfig config)
     {
         if (mountedRotationSuppressed)
             return;
 
-        SendCommand("/vbmai off");
-        SendCommand("/bmrai off");
-        SendCommand("/rotation cancel");
-        SetWrathAuto(false, "mounted rotation suppression");
+        var pluginName = GetSelectedRotationPluginName(config);
+        mountedSuppressedPluginName = pluginName;
+
+        switch (pluginName)
+        {
+            case "BMR":
+                SendCommand("/bmrai off");
+                break;
+            case "VBM":
+                SendCommand("/vbmai off");
+                break;
+            case "RSR":
+                SendCommand("/rotation cancel");
+                break;
+            case "WRATH":
+                SetWrathAuto(false, "mounted rotation suppression");
+                break;
+        }
+
         mountedRotationSuppressed = true;
-        Plugin.Log.Information("[FrenRider] Mounted rotation suppression enabled.");
+        Plugin.Log.Information($"[FrenRider] Mounted rotation suppression enabled for {pluginName} to protect mounted follow.");
     }
 
     private void RestoreMountedRotationLifecycle(CharacterConfig config, bool inCombat, bool inDuty, string reason, bool reapplySelection = true)
@@ -384,11 +402,15 @@ public class CombatService
         if (!mountedRotationSuppressed)
             return;
 
-        var pluginName = GetSelectedRotationPluginName(config);
+        var pluginName = string.IsNullOrWhiteSpace(mountedSuppressedPluginName)
+            ? GetSelectedRotationPluginName(config)
+            : mountedSuppressedPluginName;
 
-        SendCommand("/bmrai on");
         switch (pluginName)
         {
+            case "BMR":
+                SendCommand("/bmrai on");
+                break;
             case "VBM":
                 SendCommand("/vbmai on");
                 break;
@@ -402,8 +424,9 @@ public class CombatService
         }
 
         mountedRotationSuppressed = false;
+        mountedSuppressedPluginName = string.Empty;
         lastRotationToggleMs = 0;
-        Plugin.Log.Information($"[FrenRider] Mounted rotation suppression cleared after {reason}.");
+        Plugin.Log.Information($"[FrenRider] Mounted rotation suppression cleared for {pluginName} after {reason}.");
 
         if (!reapplySelection || IsRotationDisabled(config))
             return;
@@ -481,6 +504,20 @@ public class CombatService
     {
         pendingCombatSettingsRefreshMs = 0;
         pendingCombatSettingsSignature = string.Empty;
+    }
+
+    private void LogFateCombatDecisionIfChanged(CharacterConfig config, bool inCombat, bool inDuty, bool mountedOrMounting)
+    {
+        if (!zoneService.FateChanged)
+            return;
+
+        var fateText = zoneService.InFate
+            ? $"entered:{zoneService.CurrentFateId}"
+            : $"left:{zoneService.PreviousFateId}";
+        var pluginName = GetSelectedRotationPluginName(config);
+        var preset = GetPresetForZone(config);
+        Plugin.Log.Information(
+            $"[FR][FATE] CombatDecision fate={fateText}; territory={zoneService.TerritoryId}; inCombat={inCombat}; inDuty={inDuty}; mountedOrMounting={mountedOrMounting}; plugin={pluginName}; preset={preset}; state={State}");
     }
 
     private string BuildCombatSettingsSignature(CharacterConfig config)

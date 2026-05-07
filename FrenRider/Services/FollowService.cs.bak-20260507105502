@@ -3,8 +3,6 @@ using System.Globalization;
 using System.Numerics;
 using System.Text;
 using Dalamud.Game.ClientState.Conditions;
-using Dalamud.Game.ClientState.Keys;
-using ECommons.Automation;
 using FFXIVClientStructs.FFXIV.Client.System.String;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FrenRider.Models;
@@ -18,13 +16,6 @@ public enum FollowState
     InRange,    // Within cling distance, stopped
     TooFar,     // Beyond max distance, stopped
     InCombat,   // In combat, follow paused based on config
-}
-
-internal enum FlyingStuckRecoveryPhase
-{
-    None,
-    Ascending,
-    Automoving,
 }
 
 public class FollowService
@@ -45,27 +36,12 @@ public class FollowService
     private int bossModFollowCombatMode = -1;
     private bool bossModFollowFrenFlying;
     private bool bossModFollowSelfFlying;
-    private bool lastNavigationWasFlying;
-    private bool lastNavigationWasFrenFollow;
 
     // Stuck detection: record position every 5s, check per-axis movement < 2y
     private Vector3 stuckCheckPosition;
     private long stuckCheckTimeMs;
     private const long StuckCheckIntervalMs = 5000;
     private const float StuckPerAxisThreshold = 2f;
-
-    private Vector3 flyingStuckBaselinePosition;
-    private long flyingStuckBaselineTimeMs;
-    private FlyingStuckRecoveryPhase flyingStuckRecoveryPhase;
-    private long flyingStuckRecoveryPhaseStartMs;
-    private bool flyingStuckAscendHeld;
-    private bool flyingStuckAutomoveOn;
-    private bool flyingStuckLoggedEcommonsUnavailable;
-
-    private const long FlyingStuckWindowMs = 10000;
-    private const long FlyingStuckAscendMs = 10000;
-    private const long FlyingStuckAutomoveMs = 10000;
-    private const float FlyingStuckPerAxisThreshold = 0.5f;
 
     private static readonly string[] ClingTypeNames = { "NavMesh", "Visland", "BossMod Follow", "Vanilla Follow" };
 
@@ -77,30 +53,6 @@ public class FollowService
         this.plugin = plugin;
         this.tracker = tracker;
         this.zoneService = zoneService;
-    }
-
-    public void Dispose()
-    {
-        CancelFlyingStuckRecovery("plugin dispose");
-    }
-
-    public void CancelFlyingStuckRecovery(string reason)
-    {
-        if (flyingStuckRecoveryPhase == FlyingStuckRecoveryPhase.None
-            && !flyingStuckAscendHeld
-            && !flyingStuckAutomoveOn)
-        {
-            ResetFlyingStuckTracking();
-            return;
-        }
-
-        ReleaseAscendKey($"{reason} cleanup");
-        SendAutomoveOff($"{reason} cleanup", force: true);
-
-        Plugin.Log.Information($"[FR][FlyingStuck] Recovery canceled: {reason}");
-        flyingStuckRecoveryPhase = FlyingStuckRecoveryPhase.None;
-        flyingStuckRecoveryPhaseStartMs = 0;
-        ResetFlyingStuckTracking();
     }
 
     public void Update()
@@ -117,8 +69,6 @@ public class FollowService
             socialOffset = default;
             stuckCheckPosition = default;
             stuckCheckTimeMs = 0;
-            ResetFlyingStuckTracking();
-            LogFateFollowDecisionIfChanged(config, tracker.Fren, "zone transition");
             // Force immediate fren scan on next frame (skip throttle)
             tracker.ForceNextScan();
             return;
@@ -129,7 +79,6 @@ public class FollowService
             StopAllFollowing(config, "disabled");
             State = FollowState.Idle;
             StateDetail = "Disabled";
-            LogFateFollowDecisionIfChanged(config, tracker.Fren, "disabled");
             return;
         }
 
@@ -142,7 +91,6 @@ public class FollowService
             StateDetail = plugin.AdsIntegrationService.IsHandoffPending
                 ? "ADS handoff pending"
                 : "ADS active";
-            LogFateFollowDecisionIfChanged(config, tracker.Fren, StateDetail);
             return;
         }
 
@@ -151,7 +99,6 @@ public class FollowService
             StopAllFollowing(config, "repair active");
             State = FollowState.Idle;
             StateDetail = "Repair active";
-            LogFateFollowDecisionIfChanged(config, tracker.Fren, "repair active");
             return;
         }
 
@@ -161,7 +108,6 @@ public class FollowService
             StopAllFollowing(config, "no fren found");
             State = FollowState.Idle;
             StateDetail = "No fren found";
-            LogFateFollowDecisionIfChanged(config, fren, "no fren found");
             return;
         }
 
@@ -170,7 +116,6 @@ public class FollowService
             StopAllFollowing(config, "fren not visible");
             State = FollowState.Idle;
             StateDetail = "Fren not visible";
-            LogFateFollowDecisionIfChanged(config, fren, "fren not visible");
             return;
         }
 
@@ -189,7 +134,6 @@ public class FollowService
                 StopAllFollowing(config, "combat pause");
                 State = FollowState.InCombat;
                 StateDetail = "Paused (in combat)";
-                LogFateFollowDecisionIfChanged(config, fren, "combat pause");
                 return;
             }
             // 1=Yes or 2=Auto: continue following
@@ -207,37 +151,19 @@ public class FollowService
         // Too far — stop
         if (distance > maxDist)
         {
-            CancelFlyingStuckRecovery("too far");
             if (isNavigating) StopNavigation(config, $"too far ({distance:F1}y > {maxDist:F0}y max)");
             State = FollowState.TooFar;
             StateDetail = $"Too far ({distance:F1}y > {maxDist:F0}y max)";
-            LogFateFollowDecisionIfChanged(config, fren, StateDetail);
             return;
         }
 
         // In range — stop
         if (distance <= clingDist && !shouldMaintainMountedFlightFollow)
         {
-            CancelFlyingStuckRecovery("in range");
             if (isNavigating) StopNavigation(config, $"in range ({distance:F1}y <= {clingDist:F1}y)");
             State = FollowState.InRange;
             StateDetail = $"In range ({distance:F1}y)";
-            LogFateFollowDecisionIfChanged(config, fren, StateDetail);
             return;
-        }
-
-        if (flyingStuckRecoveryPhase != FlyingStuckRecoveryPhase.None)
-        {
-            if (!IsFlyingStuckRecoveryAllowed(config, selfMounted, selfFlying))
-            {
-                CancelFlyingStuckRecovery("flight follow no longer eligible");
-            }
-            else if (UpdateFlyingStuckRecovery(now))
-            {
-                State = FollowState.Following;
-                LogFateFollowDecisionIfChanged(config, fren, "none");
-                return;
-            }
         }
 
         // Flying follow: if fren is flying and we're mounted but NOT already flying, send jump
@@ -254,7 +180,6 @@ public class FollowService
         var formationTarget = plugin.FormationService.GetFormationTarget();
         if (formationTarget.HasValue)
         {
-            CancelFlyingStuckRecovery("formation follow active");
             if (bossModFollowActive)
                 StopBossModFollow();
 
@@ -267,13 +192,11 @@ public class FollowService
                     if (isNavigating) StopNavigation(config, $"formation in range ({formDist:F1}y)");
                     State = FollowState.InRange;
                     StateDetail = $"Formation slot {plugin.FormationService.AssignedSlot} ({formDist:F1}y)";
-                    LogFateFollowDecisionIfChanged(config, fren, StateDetail);
                     return;
                 }
 
                 State = FollowState.Following;
                 StateDetail = $"Formation slot {plugin.FormationService.AssignedSlot} ({formDist:F1}y)";
-                LogFateFollowDecisionIfChanged(config, fren, "none");
                 NavigateToPosition(config, formationTarget.Value);
                 return;
             }
@@ -282,7 +205,6 @@ public class FollowService
         // Follow
         State = FollowState.Following;
         StateDetail = $"Following ({distance:F1}y, cling {clingDist:F1}y)";
-        LogFateFollowDecisionIfChanged(config, fren, "none");
         NavigateToFren(config, fren);
     }
 
@@ -293,8 +215,9 @@ public class FollowService
         if (zoneService.CurrentZone == ZoneType.DeepDungeon)
             cling += config.DDDistance;
 
-        // FDistance is reserved for future autosync FATE work; FATE join/leave must not
-        // change follow stop/start decisions in this pass.
+        // FATE extra distance
+        if (zoneService.InFate && config.FDistance > 0)
+            cling += config.FDistance;
 
         // Add social distancing offset so we stop farther away
         if (ShouldApplySocialDistancing(config))
@@ -321,7 +244,6 @@ public class FollowService
     {
         if (GetResolvedClingType(config) == 2)
         {
-            CancelFlyingStuckRecovery("BossMod follow active");
             EnsureBossModFollow(config, fren);
             return;
         }
@@ -332,10 +254,10 @@ public class FollowService
         if (ShouldApplySocialDistancing(config))
             target = ApplySocialDistancing(config, target);
 
-        NavigateToPosition(config, target, isFrenFollowTarget: true);
+        NavigateToPosition(config, target);
     }
 
-    private void NavigateToPosition(CharacterConfig config, Vector3 target, bool isFrenFollowTarget = false)
+    private void NavigateToPosition(CharacterConfig config, Vector3 target)
     {
         var selfFlying = Plugin.Condition[ConditionFlag.InFlight];
         var localPlayer = Plugin.ObjectTable.LocalPlayer;
@@ -344,10 +266,9 @@ public class FollowService
         // First navigation after idle/zone change: always issue command
         if (!isNavigating)
         {
-            IssueNavCommand(config, target, selfFlying, "initial navigation", isFrenFollowTarget);
+            IssueNavCommand(config, target, selfFlying, "initial navigation");
             stuckCheckPosition = localPlayer?.Position ?? default;
             stuckCheckTimeMs = now;
-            ResetFlyingStuckTrackingIfIneligible(config, localPlayer?.Position ?? default, selfFlying, isFrenFollowTarget, now);
             return;
         }
 
@@ -367,16 +288,11 @@ public class FollowService
                     config,
                     target,
                     selfFlying,
-                    $"repath after reaching last target (dist={distToNavTarget:F1}y threshold={arrivedThreshold:F1}y)",
-                    isFrenFollowTarget);
+                    $"repath after reaching last target (dist={distToNavTarget:F1}y threshold={arrivedThreshold:F1}y)");
                 stuckCheckPosition = localPlayer.Position;
                 stuckCheckTimeMs = now;
-                ResetFlyingStuckTrackingIfIneligible(config, localPlayer.Position, selfFlying, isFrenFollowTarget, now);
                 return;
             }
-
-            if (UpdateFlyingStuckDetection(config, localPlayer.Position, target, selfFlying, isFrenFollowTarget, now))
-                return;
 
             // Stuck detection: every 5 seconds check if we've barely moved on any axis
             if (now - stuckCheckTimeMs >= StuckCheckIntervalMs)
@@ -394,7 +310,7 @@ public class FollowService
                     Plugin.Log.Information(
                         $"[FR][Pathing] {stuckReason}; local={FormatVector(pos)}; lastTarget={FormatVector(lastNavTarget)}; nextTarget={FormatVector(target)}");
                     StopNavigation(config, stuckReason);
-                    IssueNavCommand(config, target, selfFlying, stuckReason, isFrenFollowTarget);
+                    IssueNavCommand(config, target, selfFlying, stuckReason);
                 }
 
                 // Reset stuck check regardless
@@ -404,18 +320,16 @@ public class FollowService
         }
     }
 
-    private void IssueNavCommand(CharacterConfig config, Vector3 target, bool selfFlying, string reason, bool isFrenFollowTarget)
+    private void IssueNavCommand(CharacterConfig config, Vector3 target, bool selfFlying, string reason)
     {
         var previousTarget = lastNavTarget;
         lastNavTarget = target;
         isNavigating = true;
-        lastNavigationWasFrenFollow = isFrenFollowTarget;
 
         // Foray zones: never fly, always use moveto (no flying in forays)
         if (zoneService.CurrentZone == ZoneType.Foray)
         {
             lastMovementClingType = 0;
-            lastNavigationWasFlying = false;
             var coords = FormatVector(target);
             var cmd = $"/vnav moveto {coords}";
             LogNavCommand(reason, lastMovementClingType, cmd, target, previousTarget, selfFlying);
@@ -426,7 +340,6 @@ public class FollowService
         if (selfFlying)
         {
             lastMovementClingType = 0;
-            lastNavigationWasFlying = true;
             var coords = FormatVector(target);
             var cmd = $"/vnav flyto {coords}";
             LogNavCommand(reason, lastMovementClingType, cmd, target, previousTarget, selfFlying);
@@ -436,273 +349,8 @@ public class FollowService
 
         var clingType = GetResolvedClingType(config);
         lastMovementClingType = clingType;
-        lastNavigationWasFlying = false;
 
         SendNavigationCommand(clingType, target, reason, previousTarget, selfFlying);
-    }
-
-    private bool UpdateFlyingStuckDetection(
-        CharacterConfig config,
-        Vector3 position,
-        Vector3 target,
-        bool selfFlying,
-        bool isFrenFollowTarget,
-        long now)
-    {
-        if (!ShouldTrackFlyingStuck(config, selfFlying, isFrenFollowTarget))
-        {
-            ResetFlyingStuckTracking();
-            return false;
-        }
-
-        if (flyingStuckBaselineTimeMs == 0)
-        {
-            ResetFlyingStuckTracking(position, now);
-            return false;
-        }
-
-        var dx = Math.Abs(position.X - flyingStuckBaselinePosition.X);
-        var dy = Math.Abs(position.Y - flyingStuckBaselinePosition.Y);
-        var dz = Math.Abs(position.Z - flyingStuckBaselinePosition.Z);
-
-        if (dx >= FlyingStuckPerAxisThreshold
-            || dy >= FlyingStuckPerAxisThreshold
-            || dz >= FlyingStuckPerAxisThreshold)
-        {
-            ResetFlyingStuckTracking(position, now);
-            return false;
-        }
-
-        if (now - flyingStuckBaselineTimeMs < FlyingStuckWindowMs)
-            return false;
-
-        var reason =
-            $"flying stuck escape (dX={dx:F1} dY={dy:F1} dZ={dz:F1}, all <{FlyingStuckPerAxisThreshold}y in {FlyingStuckWindowMs / 1000}s)";
-        Plugin.Log.Warning(
-            $"[FR][FlyingStuck] {reason}; local={FormatVector(position)}; lastTarget={FormatVector(lastNavTarget)}; nextTarget={FormatVector(target)}");
-
-        StopNavigation(config, reason);
-        StartFlyingStuckRecovery(now);
-        ResetFlyingStuckTracking(position, now);
-        return true;
-    }
-
-    private bool UpdateFlyingStuckRecovery(long now)
-    {
-        var elapsed = now - flyingStuckRecoveryPhaseStartMs;
-        switch (flyingStuckRecoveryPhase)
-        {
-            case FlyingStuckRecoveryPhase.Ascending:
-                if (elapsed < FlyingStuckAscendMs)
-                {
-                    StateDetail = $"Flying stuck escape: ascend ({Math.Max(0, (FlyingStuckAscendMs - elapsed) / 1000)}s)";
-                    return true;
-                }
-
-                ReleaseAscendKey("ascend phase complete");
-                SendAutomoveOn("forward phase start");
-                flyingStuckRecoveryPhase = FlyingStuckRecoveryPhase.Automoving;
-                flyingStuckRecoveryPhaseStartMs = now;
-                StateDetail = $"Flying stuck escape: automove ({FlyingStuckAutomoveMs / 1000}s)";
-                return true;
-
-            case FlyingStuckRecoveryPhase.Automoving:
-                if (elapsed < FlyingStuckAutomoveMs)
-                {
-                    StateDetail = $"Flying stuck escape: automove ({Math.Max(0, (FlyingStuckAutomoveMs - elapsed) / 1000)}s)";
-                    return true;
-                }
-
-                SendAutomoveOff("forward phase complete", force: true);
-                flyingStuckRecoveryPhase = FlyingStuckRecoveryPhase.None;
-                flyingStuckRecoveryPhaseStartMs = 0;
-                ResetFlyingStuckTracking(Plugin.ObjectTable.LocalPlayer?.Position ?? default, now);
-                Plugin.Log.Information("[FR][FlyingStuck] Recovery complete; normal pathfinding will resume.");
-                return false;
-
-            default:
-                return false;
-        }
-    }
-
-    private void StartFlyingStuckRecovery(long now)
-    {
-        if (!plugin.ECommonsAvailable)
-        {
-            LogEcommonsUnavailableOnce();
-            return;
-        }
-
-        flyingStuckRecoveryPhase = FlyingStuckRecoveryPhase.Ascending;
-        flyingStuckRecoveryPhaseStartMs = now;
-        SendAutomoveOff("recovery start", force: true);
-        if (!HoldAscendKey("recovery start"))
-        {
-            flyingStuckRecoveryPhase = FlyingStuckRecoveryPhase.None;
-            flyingStuckRecoveryPhaseStartMs = 0;
-            ResetFlyingStuckTracking(Plugin.ObjectTable.LocalPlayer?.Position ?? default, now);
-        }
-    }
-
-    private bool ShouldTrackFlyingStuck(CharacterConfig config, bool selfFlying, bool isFrenFollowTarget)
-    {
-        if (!plugin.ECommonsAvailable)
-        {
-            LogEcommonsUnavailableOnce();
-            return false;
-        }
-
-        return config.Enabled
-            && isFrenFollowTarget
-            && isNavigating
-            && lastNavigationWasFrenFollow
-            && lastNavigationWasFlying
-            && lastMovementClingType == 0
-            && selfFlying
-            && Plugin.Condition[ConditionFlag.Mounted]
-            && !IsLoadingOrBetweenAreas()
-            && !plugin.AdsIntegrationService.ShouldPauseDutySystems
-            && !plugin.AutomationService.IsRepairFlowActive
-            && GetResolvedClingType(config) != 2
-            && zoneService.CurrentZone != ZoneType.Foray;
-    }
-
-    private bool IsFlyingStuckRecoveryAllowed(CharacterConfig config, bool selfMounted, bool selfFlying)
-    {
-        return plugin.ECommonsAvailable
-            && config.Enabled
-            && selfMounted
-            && selfFlying
-            && !IsLoadingOrBetweenAreas()
-            && !plugin.AdsIntegrationService.ShouldPauseDutySystems
-            && !plugin.AutomationService.IsRepairFlowActive;
-    }
-
-    private static bool IsLoadingOrBetweenAreas()
-    {
-        return Plugin.Condition[ConditionFlag.BetweenAreas]
-            || Plugin.Condition[ConditionFlag.BetweenAreas51];
-    }
-
-    private void ResetFlyingStuckTrackingIfIneligible(
-        CharacterConfig config,
-        Vector3 position,
-        bool selfFlying,
-        bool isFrenFollowTarget,
-        long now)
-    {
-        if (ShouldTrackFlyingStuck(config, selfFlying, isFrenFollowTarget))
-            ResetFlyingStuckTracking(position, now);
-        else
-            ResetFlyingStuckTracking();
-    }
-
-    private void ResetFlyingStuckTracking()
-    {
-        flyingStuckBaselinePosition = default;
-        flyingStuckBaselineTimeMs = 0;
-    }
-
-    private void ResetFlyingStuckTracking(Vector3 position, long now)
-    {
-        flyingStuckBaselinePosition = position;
-        flyingStuckBaselineTimeMs = now;
-    }
-
-    private bool HoldAscendKey(string reason)
-    {
-        try
-        {
-            var sent = WindowsKeypress.SendKeyHold(VirtualKey.SPACE, Array.Empty<VirtualKey>());
-            flyingStuckAscendHeld = sent;
-            if (sent)
-                Plugin.Log.Information($"[FR][FlyingStuck] Holding ascend: {reason}");
-            else
-                Plugin.Log.Warning($"[FR][FlyingStuck] Failed to hold ascend: {reason}");
-            return sent;
-        }
-        catch (Exception ex)
-        {
-            flyingStuckAscendHeld = false;
-            Plugin.Log.Warning(ex, $"[FR][FlyingStuck] Failed to hold ascend: {reason}");
-            return false;
-        }
-    }
-
-    private void ReleaseAscendKey(string reason)
-    {
-        if (!flyingStuckAscendHeld)
-            return;
-
-        try
-        {
-            WindowsKeypress.SendKeyRelease(VirtualKey.SPACE, Array.Empty<VirtualKey>());
-            Plugin.Log.Information($"[FR][FlyingStuck] Released ascend: {reason}");
-        }
-        catch (Exception ex)
-        {
-            Plugin.Log.Warning(ex, $"[FR][FlyingStuck] Failed to release ascend: {reason}");
-        }
-        finally
-        {
-            flyingStuckAscendHeld = false;
-        }
-    }
-
-    private void SendAutomoveOn(string reason)
-    {
-        if (flyingStuckAutomoveOn)
-            return;
-
-        SendCommand("/automove on");
-        flyingStuckAutomoveOn = true;
-        Plugin.Log.Information($"[FR][FlyingStuck] Automove on: {reason}");
-    }
-
-    private void SendAutomoveOff(string reason, bool force)
-    {
-        if (!force && !flyingStuckAutomoveOn)
-            return;
-
-        SendCommand("/automove off");
-        flyingStuckAutomoveOn = false;
-        Plugin.Log.Information($"[FR][FlyingStuck] Automove off: {reason}");
-    }
-
-    private void LogEcommonsUnavailableOnce()
-    {
-        if (flyingStuckLoggedEcommonsUnavailable)
-            return;
-
-        flyingStuckLoggedEcommonsUnavailable = true;
-        Plugin.Log.Warning("[FR][FlyingStuck] ECommons is unavailable; flying stuck escape disabled.");
-    }
-
-    private void LogFateFollowDecisionIfChanged(CharacterConfig config, FrenTracker.FrenState? fren, string stopReason)
-    {
-        if (!zoneService.FateChanged)
-            return;
-
-        var distance = fren?.Distance;
-        var cling = GetEffectiveClingDistance(config);
-        var maxDistance = GetMaxDistance(config);
-        var followMode = DescribeMovementMode(GetResolvedClingType(config));
-        var inCombat = Plugin.Condition[ConditionFlag.InCombat];
-        var selfMounted = Plugin.Condition[ConditionFlag.Mounted];
-        var selfFlying = Plugin.Condition[ConditionFlag.InFlight];
-        var fateText = zoneService.InFate
-            ? $"entered:{zoneService.CurrentFateId}"
-            : $"left:{zoneService.PreviousFateId}";
-
-        Plugin.Log.Information(
-            $"[FR][FATE] FollowDecision fate={fateText}; territory={zoneService.TerritoryId}; distance={FormatNullableDistance(distance)}; cling={cling:F1}; max={maxDistance:F1}; combat={inCombat}; selfMounted={selfMounted}; selfFlying={selfFlying}; frenMounted={fren?.IsMounted}; frenFlying={fren?.IsFlying}; mode={followMode}; state={State}; stopReason={stopReason}");
-    }
-
-    private static string FormatNullableDistance(float? distance)
-    {
-        return distance.HasValue
-            ? $"{distance.Value:F1}"
-            : "unknown";
     }
 
     private bool ShouldApplySocialDistancing(CharacterConfig config)
@@ -814,7 +462,6 @@ public class FollowService
 
     private void StopAllFollowing(CharacterConfig config, string reason)
     {
-        CancelFlyingStuckRecovery(reason);
         StopBossModFollow();
         if (isNavigating)
             StopNavigation(config, reason);
@@ -835,8 +482,6 @@ public class FollowService
         Plugin.Log.Information(
             $"[FR][Pathing] StopNavigation reason={reason}; mode={DescribeMovementMode(lastMovementClingType)}; territory={zoneService.TerritoryId}; cmd={cmd}; lastTarget={FormatVector(lastNavTarget)}");
         isNavigating = false;
-        lastNavigationWasFlying = false;
-        lastNavigationWasFrenFollow = false;
         SendCommand(cmd);
     }
 

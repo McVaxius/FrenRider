@@ -47,6 +47,19 @@ public class ExitBehaviourService : IDisposable
     private DateTime lastPartyCheckTime = DateTime.MinValue;
     private DateTime lastLeaveAttemptTime = DateTime.MinValue;
     private int leaveAttemptCount;
+    private LeaveDutyStep leaveDutyStep = LeaveDutyStep.None;
+    private DateTime leaveDutyStepDueAt = DateTime.MinValue;
+    private string pendingLeaveReason = "";
+    private int leaveConfirmationAttemptCount;
+    private const int MaxLeaveConfirmationAttempts = 3;
+
+    private enum LeaveDutyStep
+    {
+        None,
+        OpenContentsFinderMenu,
+        ClickLeaveButton,
+        ConfirmLeave,
+    }
 
     // Known exit object names (expanded from LootGoblin patterns)
     private static readonly string[] ExitObjectNames =
@@ -78,6 +91,7 @@ public class ExitBehaviourService : IDisposable
 
     public void Dispose()
     {
+        CancelLeaveDutySequence("dispose");
         Plugin.DutyState.DutyCompleted -= OnDutyCompleted;
     }
 
@@ -99,7 +113,11 @@ public class ExitBehaviourService : IDisposable
     public void Update()
     {
         var config = plugin.ConfigManager.GetActiveConfig();
-        if (!config.Enabled) return;
+        if (!config.Enabled)
+        {
+            CancelLeaveDutySequence("plugin disabled");
+            return;
+        }
 
         if (plugin.AdsIntegrationService.ShouldPauseDutySystems)
         {
@@ -163,6 +181,7 @@ public class ExitBehaviourService : IDisposable
         // Reset state when no longer in duty
         if (!inDuty)
         {
+            CancelLeaveDutySequence("not in duty");
             if (exitTarget != null || isNavigatingToExit)
             {
                 exitTarget = null;
@@ -182,7 +201,12 @@ public class ExitBehaviourService : IDisposable
 
         // Don't try to leave during loading screens
         if (Plugin.Condition[ConditionFlag.BetweenAreas] || Plugin.Condition[ConditionFlag.BetweenAreas51])
+        {
+            CancelLeaveDutySequence("between areas");
             return;
+        }
+
+        TickLeaveDutySequence();
 
         // Don't try to leave during combat
         if (Plugin.Condition[ConditionFlag.InCombat])
@@ -484,7 +508,6 @@ public class ExitBehaviourService : IDisposable
         SendCommand("/ads leave");
     }
 
-    
     private void LeaveDuty()
     {
         var now = DateTime.UtcNow;
@@ -512,38 +535,62 @@ public class ExitBehaviourService : IDisposable
 
         // Open duty panel to access Leave Duty button
         SendCommand("/dutyfinder");
-
-        // Wait a moment for panel to open, then try to click Leave Duty
-        System.Threading.Tasks.Task.Delay(500).ContinueWith(_ => {
-            try
-            {
-                TryClickLeaveDutyButton();
-            }
-            catch (Exception ex)
-            {
-                Plugin.Log.Error($"[ExitBehaviour] ContinueWith exception in TryClickLeaveDutyButton: {ex.Message}");
-            }
-        }, System.Threading.Tasks.TaskContinuationOptions.OnlyOnRanToCompletion);
-
-        // Also try clicking Yes on any confirmation dialog that appears
-        System.Threading.Tasks.Task.Delay(1000).ContinueWith(_ => {
-            try
-            {
-                if (GameHelpers.ClickYesIfVisible())
-                {
-                    Plugin.Log.Information("[ExitBehaviour] Successfully clicked Yes on leave duty confirmation");
-                }
-            }
-            catch (Exception ex)
-            {
-                Plugin.Log.Error($"[ExitBehaviour] ContinueWith exception in ClickYesIfVisible: {ex.Message}");
-            }
-        }, System.Threading.Tasks.TaskContinuationOptions.OnlyOnRanToCompletion);
+        leaveConfirmationAttemptCount = 0;
+        ScheduleLeaveDutyStep(LeaveDutyStep.OpenContentsFinderMenu, TimeSpan.FromMilliseconds(500), leaveReason);
 
         StateDetail = $"Leaving duty (attempt #{leaveAttemptCount}) - {leaveReason}";
     }
 
-    private unsafe void TryClickLeaveDutyButton()
+    private void TickLeaveDutySequence()
+    {
+        if (leaveDutyStep == LeaveDutyStep.None || DateTime.UtcNow < leaveDutyStepDueAt)
+            return;
+
+        var step = leaveDutyStep;
+        leaveDutyStep = LeaveDutyStep.None;
+
+        try
+        {
+            switch (step)
+            {
+                case LeaveDutyStep.OpenContentsFinderMenu:
+                    TryClickLeaveDutyButton();
+                    break;
+                case LeaveDutyStep.ClickLeaveButton:
+                    TryClickLeaveButton();
+                    break;
+                case LeaveDutyStep.ConfirmLeave:
+                    HandleLeaveConfirmation();
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log.Error($"[ExitBehaviour] Leave duty sequence step {step} failed: {ex.Message}");
+            CancelLeaveDutySequence("step exception");
+        }
+    }
+
+    private void ScheduleLeaveDutyStep(LeaveDutyStep step, TimeSpan delay, string leaveReason)
+    {
+        leaveDutyStep = step;
+        leaveDutyStepDueAt = DateTime.UtcNow + delay;
+        pendingLeaveReason = leaveReason;
+    }
+
+    private void CancelLeaveDutySequence(string reason)
+    {
+        if (leaveDutyStep == LeaveDutyStep.None)
+            return;
+
+        Plugin.Log.Debug($"[ExitBehaviour] Cancelling leave duty sequence: {reason}");
+        leaveDutyStep = LeaveDutyStep.None;
+        leaveDutyStepDueAt = DateTime.MinValue;
+        pendingLeaveReason = "";
+        leaveConfirmationAttemptCount = 0;
+    }
+
+    private void TryClickLeaveDutyButton()
     {
         try
         {
@@ -560,18 +607,8 @@ public class ExitBehaviourService : IDisposable
             {
                 Plugin.Log.Error($"[ExitBehaviour] ContentsFinderMenu callback failed: {ex.Message}");
             }
-            
-            // Wait a moment for the menu to open, then click Leave button
-            System.Threading.Tasks.Task.Delay(500).ContinueWith(_ => {
-                try
-                {
-                    TryClickLeaveButton();
-                }
-                catch (Exception ex)
-                {
-                    Plugin.Log.Error($"[ExitBehaviour] ContinueWith exception in TryClickLeaveButton: {ex.Message}");
-                }
-            }, System.Threading.Tasks.TaskContinuationOptions.OnlyOnRanToCompletion);
+
+            ScheduleLeaveDutyStep(LeaveDutyStep.ClickLeaveButton, TimeSpan.FromMilliseconds(500), pendingLeaveReason);
         }
         catch (Exception ex)
         {
@@ -579,29 +616,19 @@ public class ExitBehaviourService : IDisposable
         }
     }
 
-    private unsafe void TryClickLeaveButton()
+    private void TryClickLeaveButton()
     {
         try
         {
             // Click Leave button using xa docs pattern: ClickAddonButton("ContentsFinderMenu", 43)
             Plugin.Log.Information("[ExitBehaviour] Clicking Leave button on ContentsFinderMenu");
             GameHelpers.FireAddonCallback("ContentsFinderMenu", true, 43);
-            
-            // Handle the confirmation dialog
-            System.Threading.Tasks.Task.Delay(500).ContinueWith(_ => {
-                try
-                {
-                    HandleLeaveConfirmation();
-                }
-                catch (Exception ex)
-                {
-                    Plugin.Log.Error($"[ExitBehaviour] ContinueWith exception in HandleLeaveConfirmation: {ex.Message}");
-                }
-            }, System.Threading.Tasks.TaskContinuationOptions.OnlyOnRanToCompletion);
+            ScheduleLeaveDutyStep(LeaveDutyStep.ConfirmLeave, TimeSpan.FromMilliseconds(500), pendingLeaveReason);
         }
         catch (Exception ex)
         {
             Plugin.Log.Error($"[ExitBehaviour] Error clicking Leave button: {ex.Message}");
+            ScheduleLeaveDutyStep(LeaveDutyStep.ConfirmLeave, TimeSpan.FromMilliseconds(500), pendingLeaveReason);
         }
     }
 
@@ -611,7 +638,20 @@ public class ExitBehaviourService : IDisposable
         {
             // Click Yes on SelectYesno confirmation dialog
             Plugin.Log.Information("[ExitBehaviour] Clicking Yes on leave confirmation dialog");
-            GameHelpers.ClickYesIfVisible();
+            leaveConfirmationAttemptCount++;
+            if (GameHelpers.ClickYesIfVisible())
+            {
+                Plugin.Log.Information("[ExitBehaviour] Successfully clicked Yes on leave duty confirmation");
+                return;
+            }
+
+            if (leaveConfirmationAttemptCount < MaxLeaveConfirmationAttempts)
+            {
+                ScheduleLeaveDutyStep(LeaveDutyStep.ConfirmLeave, TimeSpan.FromMilliseconds(500), pendingLeaveReason);
+                return;
+            }
+
+            Plugin.Log.Debug("[ExitBehaviour] Leave confirmation was not visible after retry window");
         }
         catch (Exception ex)
         {
