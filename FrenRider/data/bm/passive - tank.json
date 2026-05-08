@@ -1,0 +1,43 @@
+{
+  "Name": "passive - tank",
+  "Modules": {
+    "BossMod.Autorotation.MiscAI.StayCloseToTarget": [
+      {
+        "Track": "range",
+        "Option": "10.3"
+      }
+    ],
+    "BossMod.Autorotation.MiscAI.StayWithinLeylines": [
+      {
+        "Track": "Use Between The Lines",
+        "Option": "Yes"
+      },
+      {
+        "Track": "Use Retrace",
+        "Option": "Yes"
+      }
+    ],
+    "BossMod.Autorotation.MiscAI.GoToPositional": [
+      {
+        "Track": "Positional",
+        "Option": "Front"
+      }
+    ],
+    "BossMod.Autorotation.MiscAI.StayCloseToPartyRole": [
+      {
+        "Track": "range",
+        "Option": "20"
+      }
+    ],
+    "BossMod.Autorotation.MiscAI.NormalMovement": [
+      {
+        "Track": "Destination",
+        "Option": "Pathfind"
+      },
+      {
+        "Track": "Range",
+        "Option": "MaxRange"
+      }
+    ]
+  }
+}

@@ -41,6 +41,7 @@ public class CharacterConfig
     public int HClingReset { get; set; } = 10;
 
     // --- Combat / AI ---
+    public bool ConfigureRotationPresetManually { get; set; } = false;
     public string AutoRotationType { get; set; } = "FRENRIDER";
     public string AutoRotationTypeDD { get; set; } = "DD";
     public string AutoRotationTypeFATE { get; set; } = "FATE";
@@ -134,6 +135,7 @@ public class CharacterConfig
             AutoSyncFate = AutoSyncFate,
             Formation = Formation,
             HClingReset = HClingReset,
+            ConfigureRotationPresetManually = ConfigureRotationPresetManually,
             AutoRotationType = AutoRotationType,
             AutoRotationTypeDD = AutoRotationTypeDD,
             AutoRotationTypeFATE = AutoRotationTypeFATE,

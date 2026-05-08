@@ -17,7 +17,6 @@ public enum CombatState
 
 public class CombatService
 {
-    private const string BossModPassivePresetName = "AutoDuty Passive";
     private const int RotationTypeAuto = 0;
     private const int RotationTypeManual = 1;
     private const int RotationTypeNone = 2;
@@ -38,9 +37,14 @@ public class CombatService
     private bool mountedRotationSuppressed;
     private string mountedSuppressedPluginName = string.Empty;
     private bool wrathAutoActive;
+    private uint lastWarnedManagedPresetJobId = uint.MaxValue;
+    private bool warnedMissingManagedPresetJob;
 
     private static readonly string[] RotationPluginNames = { "BMR", "VBM", "RSR", "WRATH" };
     private const long CombatSettingsRefreshDebounceMs = 400;
+    private const string ManagedPresetRoleTank = "TANK";
+    private const string ManagedPresetRoleMelee = "MELEE";
+    private const string ManagedPresetRoleRanged = "RANGED";
 
     public CombatState State { get; private set; } = CombatState.OutOfCombat;
     public string StateDetail { get; private set; } = "";
@@ -185,36 +189,37 @@ public class CombatService
         if (!ignoreCooldown && now - lastRotationToggleMs < 2000) return; // Cooldown
         lastRotationToggleMs = now;
 
-        // Select preset based on zone type
-        var preset = GetPresetForZone(config);
-        ActivePreset = preset;
-
         // Select rotation plugin (different for foray)
         var pluginName = GetSelectedRotationPluginName(config);
         lastActivePluginIdx = Array.IndexOf(RotationPluginNames, pluginName);
+        var bossModPreset = GetBossModPresetForPlugin(config, pluginName);
+        var manualPreset = GetManualPresetForZone(config);
+        ActivePreset = bossModPreset;
 
         // Disable other rotation plugins first
         DisableOtherRotationPlugins(config);
-        ApplyBossModSafetyState(config, pluginName, preset, "activation");
+        ApplyBossModSafetyState(pluginName, bossModPreset, "activation");
 
         // Send activation commands
         switch (pluginName)
         {
             case "RSR":
                 var rsrModeName = ApplyRsrMode(config);
-                if (ShouldApplyPreset(preset) && !string.Equals(preset, "FRENRIDER", StringComparison.OrdinalIgnoreCase))
-                    SendCommand($"/rotation settings preset {FormatCommandArgument(preset)}");
-                StateDetail = $"{pluginName} {rsrModeName}" + (string.IsNullOrEmpty(preset) ? "" : $" [{preset}]");
+                if (config.ConfigureRotationPresetManually &&
+                    ShouldApplyPreset(manualPreset) &&
+                    !string.Equals(manualPreset, "FRENRIDER", StringComparison.OrdinalIgnoreCase))
+                    SendCommand($"/rotation settings preset {FormatCommandArgument(manualPreset)}");
+                StateDetail = $"{pluginName} {rsrModeName}" + (string.IsNullOrEmpty(bossModPreset) ? "" : $" [{bossModPreset}]");
                 break;
             case "WRATH":
                 SetWrathAuto(true, "activation");
-                StateDetail = $"{pluginName} auto";
+                StateDetail = $"{pluginName} auto" + (string.IsNullOrEmpty(bossModPreset) ? "" : $" [{bossModPreset}]");
                 break;
             case "BMR":
-                StateDetail = $"{pluginName} active" + (string.IsNullOrEmpty(preset) ? "" : $" [{preset}]");
+                StateDetail = $"{pluginName} active" + (string.IsNullOrEmpty(bossModPreset) ? "" : $" [{bossModPreset}]");
                 break;
             case "VBM":
-                StateDetail = $"{pluginName} active" + (string.IsNullOrEmpty(preset) ? "" : $" [{preset}]");
+                StateDetail = $"{pluginName} active" + (string.IsNullOrEmpty(bossModPreset) ? "" : $" [{bossModPreset}]");
                 break;
         }
 
@@ -222,7 +227,7 @@ public class CombatService
         SetPositional(config, pluginName);
 
         State = CombatState.InCombat;
-        Plugin.Log.Information($"Combat: Activated {pluginName} with preset '{preset}'");
+        Plugin.Log.Information($"Combat: Activated {pluginName} with BossMod preset '{bossModPreset}'");
     }
 
     private void DeactivateRotation(CharacterConfig config)
@@ -283,7 +288,7 @@ public class CombatService
         }
     }
 
-    private string GetPresetForZone(CharacterConfig config)
+    private string GetManualPresetForZone(CharacterConfig config)
     {
         if (zoneService.InFate)
             return config.AutoRotationTypeFATE;
@@ -293,6 +298,92 @@ public class CombatService
             ZoneType.DeepDungeon => config.AutoRotationTypeDD,
             _ => config.AutoRotationType,
         };
+    }
+
+    private string GetBossModPresetForPlugin(CharacterConfig config, string pluginName)
+    {
+        var managedPreset = GetManagedBossModPreset(pluginName);
+        if (!config.ConfigureRotationPresetManually)
+            return managedPreset;
+
+        var manualPreset = GetManualPresetForZone(config);
+        return pluginName switch
+        {
+            "BMR" or "VBM" => manualPreset,
+            "RSR" or "WRATH" when config.ForceBossModPresetRegardlessOfRotation => manualPreset,
+            _ => managedPreset,
+        };
+    }
+
+    private string GetManagedBossModPreset(string pluginName)
+    {
+        var role = GetManagedPresetRole();
+        return pluginName is "BMR" or "VBM"
+            ? $"FRENRIDER - {role}"
+            : $"passive - {role.ToLowerInvariant()}";
+    }
+
+    private string GetManagedPresetRole()
+    {
+        var jobId = GetCurrentClassJobId();
+        if (!jobId.HasValue)
+            return ManagedPresetRoleRanged;
+
+        return jobId.Value switch
+        {
+            1 or 3 or 19 or 21 or 32 or 37 => ManagedPresetRoleTank,
+            2 or 4 or 20 or 22 or 29 or 30 or 34 or 39 or 41 => ManagedPresetRoleMelee,
+            5 or 6 or 7 or 23 or 24 or 25 or 26 or 27 or 28 or 31 or 33 or 35 or 36 or 38 or 40 or 42 => ManagedPresetRoleRanged,
+            _ => WarnUnknownClassJob(jobId.Value),
+        };
+    }
+
+    private uint? GetCurrentClassJobId()
+    {
+        try
+        {
+            var player = Plugin.ObjectTable.LocalPlayer;
+            if (player == null)
+            {
+                WarnMissingClassJob("local player unavailable");
+                return null;
+            }
+
+            var jobId = player.ClassJob.RowId;
+            if (jobId == 0)
+            {
+                WarnMissingClassJob("class job row is 0");
+                return null;
+            }
+
+            warnedMissingManagedPresetJob = false;
+            return jobId;
+        }
+        catch (Exception ex)
+        {
+            WarnMissingClassJob(ex.Message);
+            return null;
+        }
+    }
+
+    private string WarnUnknownClassJob(uint jobId)
+    {
+        if (lastWarnedManagedPresetJobId != jobId)
+        {
+            Plugin.Log.Warning($"Combat: unknown class job row {jobId}; using ranged BossMod preset");
+            lastWarnedManagedPresetJobId = jobId;
+        }
+
+        return ManagedPresetRoleRanged;
+    }
+
+    private void WarnMissingClassJob(string reason)
+    {
+        if (warnedMissingManagedPresetJob)
+            return;
+
+        Plugin.Log.Warning($"Combat: cannot resolve current class job ({reason}); using ranged BossMod preset");
+        warnedMissingManagedPresetJob = true;
     }
 
     private void SetPositional(CharacterConfig config, string pluginName)
@@ -322,15 +413,18 @@ public class CombatService
 
         var pluginName = GetSelectedRotationPluginName(config);
         lastActivePluginIdx = Array.IndexOf(RotationPluginNames, pluginName);
-        var preset = GetPresetForZone(config);
-        ActivePreset = preset;
-        ApplyBossModSafetyState(config, pluginName, preset, reason);
+        var bossModPreset = GetBossModPresetForPlugin(config, pluginName);
+        var manualPreset = GetManualPresetForZone(config);
+        ActivePreset = bossModPreset;
+        ApplyBossModSafetyState(pluginName, bossModPreset, reason);
 
         switch (pluginName)
         {
             case "RSR":
-                if (ShouldApplyPreset(preset) && !string.Equals(preset, "FRENRIDER", StringComparison.OrdinalIgnoreCase))
-                    SendCommand($"/rotation settings preset {FormatCommandArgument(preset)}");
+                if (config.ConfigureRotationPresetManually &&
+                    ShouldApplyPreset(manualPreset) &&
+                    !string.Equals(manualPreset, "FRENRIDER", StringComparison.OrdinalIgnoreCase))
+                    SendCommand($"/rotation settings preset {FormatCommandArgument(manualPreset)}");
                 SetPositional(config, pluginName);
                 break;
             case "WRATH":
@@ -341,7 +435,20 @@ public class CombatService
                 break;
         }
 
-        Plugin.Log.Information($"Combat: Reapplied {pluginName} settings after {reason} with preset '{preset}'");
+        Plugin.Log.Information($"Combat: Reapplied {pluginName} settings after {reason} with BossMod preset '{bossModPreset}'");
+    }
+
+    public void ApplyPresetSelection(string reason, bool installPresets = true)
+    {
+        var config = plugin.ConfigManager.GetActiveConfig();
+        if (IsRotationDisabled(config))
+            return;
+
+        var pluginName = GetSelectedRotationPluginName(config);
+        lastActivePluginIdx = Array.IndexOf(RotationPluginNames, pluginName);
+        var bossModPreset = GetBossModPresetForPlugin(config, pluginName);
+        ActivePreset = bossModPreset;
+        ApplyBossModPreset(bossModPreset, reason, installPresets);
     }
 
     private bool HandleMountedRotationLifecycle(CharacterConfig config, bool mountedOrMounting, bool inCombat, bool inDuty)
@@ -515,28 +622,35 @@ public class CombatService
             ? $"entered:{zoneService.CurrentFateId}"
             : $"left:{zoneService.PreviousFateId}";
         var pluginName = GetSelectedRotationPluginName(config);
-        var preset = GetPresetForZone(config);
+        var preset = GetBossModPresetForPlugin(config, pluginName);
         Plugin.Log.Information(
             $"[FR][FATE] CombatDecision fate={fateText}; territory={zoneService.TerritoryId}; inCombat={inCombat}; inDuty={inDuty}; mountedOrMounting={mountedOrMounting}; plugin={pluginName}; preset={preset}; state={State}");
     }
 
     private string BuildCombatSettingsSignature(CharacterConfig config)
     {
+        var manualPresetSignature = config.ConfigureRotationPresetManually
+            ? string.Join(",",
+                config.AutoRotationType,
+                config.AutoRotationTypeDD,
+                config.AutoRotationTypeFATE,
+                config.ForceBossModPresetRegardlessOfRotation,
+                GetManualPresetForZone(config))
+            : string.Empty;
+
         return string.Join("|",
-            config.AutoRotationType,
-            config.AutoRotationTypeDD,
-            config.AutoRotationTypeFATE,
+            config.ConfigureRotationPresetManually,
+            manualPresetSignature,
             config.RotationPlugin,
             config.RotationPluginForay,
             config.BossModAI,
-            config.ForceBossModPresetRegardlessOfRotation,
             config.PositionalInCombat,
             config.MaxAIDistance,
             config.LimitPct,
             config.RotationType,
             zoneService.CurrentZone,
             zoneService.InFate,
-            GetPresetForZone(config),
+            GetBossModPresetForPlugin(config, GetSelectedRotationPluginName(config)),
             GetSelectedRotationPluginName(config));
     }
 
@@ -558,15 +672,13 @@ public class CombatService
             : "RSR";
     }
 
-    private void ApplyBossModSafetyState(CharacterConfig config, string pluginName, string selectedPreset, string reason)
+    private void ApplyBossModSafetyState(string pluginName, string selectedPreset, string reason)
     {
         EnsureBossModAiEnabled();
 		Plugin.Log.Information($"[FrenRider] GHOST IN THE MACHINE CLEANUP");
 		SendCommand($"/xldisableplugin AutoDuty");  //The real ghost in the machine is gone finally.
 		//a few more hehe. turn off all the default stoppers
 		SendCommand($"/rotation Settings KeyBoardNoise false");
-		//SendCommand($"/bmrai setpresetname AutoDuty Passive");
-		//SendCommand($"/vbm ar set AutoDuty Passive");
 		SendCommand($"/rotation Settings AutoOffBetweenArea False");
 		SendCommand($"/rotation Settings AutoOffCutScene False");
 		SendCommand($"/rotation Settings AutoOffSwitchClass False");
@@ -575,37 +687,40 @@ public class CombatService
 		SendCommand($"/rotation Settings AutoOffAfterCombatTime 6942069");
 		SendCommand($"/rotation Settings ToggleAuto False");
 		SendCommand($"/rotation Settings ToggleManual False");
-		SendCommand("/rotation Settings DummyBoss False");
+        SendCommand("/rotation Settings DummyBoss False");
         SendCommand("/rotation Settings DisableTargetDummys True");
-		//SendCommand($"/rotation Auto");
-        var bossModSafetyPreset = config.ForceBossModPresetRegardlessOfRotation
-            ? selectedPreset
-            : BossModPassivePresetName;
+        ApplyBossModPreset(selectedPreset, reason);
 
         switch (pluginName)
         {
             case "BMR":
 				SendCommand($"/rotation cancel");  //ghost in the machine 8. disabling RSR when we switch to bmr
                 SetWrathAuto(false, $"{reason} because selected plugin is {pluginName}");
-                SendBmrPresetCommand(selectedPreset, reason);
                 break;
             case "VBM":
 				SendCommand($"/rotation cancel");  //ghost in the machine 8. disabling RSR when we switch to vbm
                 SetWrathAuto(false, $"{reason} because selected plugin is {pluginName}");
-                SendVbmPresetCommand(selectedPreset, reason);
                 break;
             case "RSR":
                 SetWrathAuto(false, $"{reason} because selected plugin is {pluginName}");
 				SendCommand($"/rotation Auto");  //ghost in the machine 8. disabling RSR when we switch to WRATH
-                SendBmrPresetCommand(bossModSafetyPreset, $"{reason} because selected plugin is {pluginName}");
-                SendVbmPresetCommand(bossModSafetyPreset, $"{reason} because selected plugin is {pluginName}");
                 break;
             case "WRATH":
 				SendCommand($"/rotation cancel");  //ghost in the machine 8. disabling RSR when we switch to WRATH
-                SendBmrPresetCommand(bossModSafetyPreset, $"{reason} because selected plugin is {pluginName}");
-                SendVbmPresetCommand(bossModSafetyPreset, $"{reason} because selected plugin is {pluginName}");
                 break;
         }
+    }
+
+    private void ApplyBossModPreset(string presetName, string reason, bool installPresets = true)
+    {
+        if (!ShouldApplyPreset(presetName))
+            return;
+
+        if (installPresets)
+            plugin.AutorotIpcService.CreatePresets(force: true);
+        plugin.AutorotIpcService.ForcePreset(presetName);
+        SendBmrPresetCommand(presetName, reason);
+        SendVbmPresetCommand(presetName, reason);
     }
 
     private void SendBmrPresetCommand(string presetName, string reason)

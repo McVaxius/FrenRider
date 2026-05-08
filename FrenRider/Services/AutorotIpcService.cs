@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text.Json;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Ipc;
 using Dalamud.Plugin.Services;
@@ -7,7 +10,7 @@ namespace FrenRider.Services;
 
 /// <summary>
 /// Manages IPC communication with BMR/VBM to create and activate autorotation presets.
-/// Embeds FRENRIDER and DD preset JSONs and pushes them via IPC when requested.
+/// Loads FrenRider preset JSONs from data\bm and pushes them via IPC when requested.
 /// </summary>
 public class AutorotIpcService : IDisposable
 {
@@ -43,7 +46,16 @@ public class AutorotIpcService : IDisposable
 
     private readonly IDalamudPluginInterface pluginInterface;
     private readonly IPluginLog log;
-    private bool presetsCreated;
+
+    private static readonly string[] PresetFileNames =
+    {
+        "FRENRIDER - TANK.json",
+        "FRENRIDER - MELEE.json",
+        "FRENRIDER - RANGED.json",
+        "passive - tank.json",
+        "passive - melee.json",
+        "passive - ranged.json",
+    };
 
     public string LastStatus { get; private set; } = "";
 
@@ -54,33 +66,37 @@ public class AutorotIpcService : IDisposable
     }
 
     /// <summary>
-    /// Push the embedded autorot presets into BossMod-compatible rotation plugins.
+    /// Push the packaged autorot presets into BossMod-compatible rotation plugins.
     /// Tries the current BossMod IPC contract first, then legacy aliases if needed.
     /// </summary>
     public void CreatePresets(bool force = false)
     {
-        if (presetsCreated && !force)
+        log.Information($"Starting autorot preset push (force={force})");
+
+        var presets = LoadPresetFiles();
+        if (presets.Count == 0)
         {
-            LastStatus = "Presets already pushed this session";
-            log.Debug("Skipping autorot preset push because presets were already created this session");
+            LastStatus = "No packaged presets found";
+            log.Warning("Failed to create autorot presets - no packaged presets found");
             return;
         }
 
-        log.Information($"Starting autorot preset push (force={force})");
-
-        var frenRiderCreated = TryCreatePreset("FRENRIDER", FrenRiderPresetJson, force);
-        var ddCreated = TryCreatePreset("DD", DdPresetJson, force);
-
-        if (frenRiderCreated && ddCreated)
+        var created = 0;
+        foreach (var preset in presets)
         {
-            presetsCreated = true;
-            LastStatus = "Presets pushed to rotation plugin";
-            log.Information("Autorot presets created successfully");
+            if (TryCreatePreset(preset.Name, preset.Json, forceRecreate: true))
+                created++;
         }
-        else if (frenRiderCreated || ddCreated)
+
+        if (created == PresetFileNames.Length)
         {
-            LastStatus = "Preset push partially succeeded";
-            log.Warning("Autorot preset push partially succeeded");
+            LastStatus = "Six BossMod presets pushed";
+            log.Information("All packaged autorot presets created successfully");
+        }
+        else if (created > 0)
+        {
+            LastStatus = $"Preset push partially succeeded ({created}/{PresetFileNames.Length})";
+            log.Warning($"Autorot preset push partially succeeded ({created}/{PresetFileNames.Length})");
         }
         else
         {
@@ -217,6 +233,63 @@ public class AutorotIpcService : IDisposable
             log.Error($"[IPC] Failed to set Automaton tweak {tweak}={enabled}: {ex.Message}");
             return false;
         }
+    }
+
+    private IReadOnlyList<AutorotPreset> LoadPresetFiles()
+    {
+        var presetDir = GetPresetDirectory();
+        if (!Directory.Exists(presetDir))
+        {
+            log.Warning($"BossMod preset directory not found: {presetDir}");
+            return Array.Empty<AutorotPreset>();
+        }
+
+        var presets = new List<AutorotPreset>(PresetFileNames.Length);
+        foreach (var fileName in PresetFileNames)
+        {
+            var path = Path.Combine(presetDir, fileName);
+            if (!File.Exists(path))
+            {
+                log.Warning($"Packaged BossMod preset missing: {path}");
+                continue;
+            }
+
+            try
+            {
+                var json = File.ReadAllText(path);
+                var name = ReadPresetName(json);
+                if (string.IsNullOrWhiteSpace(name))
+                {
+                    log.Warning($"Packaged BossMod preset has no Name property: {path}");
+                    continue;
+                }
+
+                presets.Add(new AutorotPreset(name, json));
+            }
+            catch (Exception ex)
+            {
+                log.Warning(ex, $"Failed to read packaged BossMod preset: {path}");
+            }
+        }
+
+        return presets;
+    }
+
+    private string GetPresetDirectory()
+    {
+        var assemblyDir = Path.GetDirectoryName(pluginInterface.AssemblyLocation.FullName);
+        if (!string.IsNullOrWhiteSpace(assemblyDir))
+            return Path.Combine(assemblyDir, "data", "bm");
+
+        return Path.Combine(AppContext.BaseDirectory, "data", "bm");
+    }
+
+    private static string? ReadPresetName(string json)
+    {
+        using var doc = JsonDocument.Parse(json);
+        return doc.RootElement.TryGetProperty("Name", out var nameElement)
+            ? nameElement.GetString()
+            : null;
     }
 
     private bool TryCreatePreset(string name, string json, bool forceRecreate)
@@ -404,13 +477,5 @@ public class AutorotIpcService : IDisposable
         // Nothing to clean up - presets persist in BMR/VBM
     }
 
-    // ===== Embedded Preset JSONs =====
-
-    private const string FrenRiderPresetJson = """
-{"Name":"FRENRIDER","Modules":{"BossMod.Autorotation.xan.BLM":[{"Track":"Targeting","Option":"Auto"},{"Track":"AOE","Option":"AOE"}],"BossMod.Autorotation.xan.SMN":[{"Track":"Targeting","Option":"Auto"},{"Track":"AOE","Option":"AOE"}],"BossMod.Autorotation.xan.PCT":[{"Track":"Targeting","Option":"Auto"},{"Track":"AOE","Option":"AOE"}],"BossMod.Autorotation.xan.RDM":[{"Track":"Targeting","Option":"Auto"},{"Track":"AOE","Option":"AOE"}],"BossMod.Autorotation.xan.AST":[{"Track":"Targeting","Option":"Auto"},{"Track":"AOE","Option":"AOE"}],"BossMod.Autorotation.xan.SGE":[{"Track":"Targeting","Option":"Auto"},{"Track":"AOE","Option":"AOE"}],"BossMod.Autorotation.xan.WHM":[{"Track":"Targeting","Option":"Auto"},{"Track":"AOE","Option":"AOE"}],"BossMod.Autorotation.xan.DRG":[{"Track":"Targeting","Option":"Auto"},{"Track":"AOE","Option":"AOE"}],"BossMod.Autorotation.xan.MNK":[{"Track":"Targeting","Option":"Auto"},{"Track":"AOE","Option":"AOE"}],"BossMod.Autorotation.xan.NIN":[{"Track":"Targeting","Option":"Auto"},{"Track":"AOE","Option":"AOE"}],"BossMod.Autorotation.xan.RPR":[{"Track":"Targeting","Option":"Auto"},{"Track":"AOE","Option":"AOE"}],"BossMod.Autorotation.xan.SAM":[{"Track":"Targeting","Option":"Auto"},{"Track":"AOE","Option":"AOE"}],"BossMod.Autorotation.xan.VPR":[{"Track":"Targeting","Option":"Auto"},{"Track":"AOE","Option":"AOE"}],"BossMod.Autorotation.xan.DNC":[{"Track":"Targeting","Option":"Auto"},{"Track":"AOE","Option":"AOE"}],"BossMod.Autorotation.xan.MCH":[{"Track":"Targeting","Option":"Auto"},{"Track":"AOE","Option":"AOE"}],"BossMod.Autorotation.xan.DRK":[{"Track":"Targeting","Option":"Auto"},{"Track":"AOE","Option":"AOE"}],"BossMod.Autorotation.xan.GNB":[{"Track":"Targeting","Option":"Auto"},{"Track":"AOE","Option":"AOE"}],"BossMod.Autorotation.VeynWAR":[{"Track":"AOE","Option":"AutoFinishCombo"},{"Track":"Burst","Option":"Spend"},{"Track":"Potion","Option":"Manual"},{"Track":"Infuriate","Option":"ForceIfNoNC"},{"Track":"IR","Option":"Automatic"},{"Track":"Upheaval","Option":"Automatic"},{"Track":"PR","Option":"Automatic"},{"Track":"Onslaught","Option":"Force"},{"Track":"Tomahawk","Option":"Opener"},{"Track":"Wrath","Option":"Automatic"}],"BossMod.Autorotation.xan.TankAI":[{"Track":"Stance","Option":"Disabled"},{"Track":"Personal mits","Option":"Disabled"},{"Track":"Invuln","Option":"Disabled"}],"BossMod.Autorotation.VeynBRD":[],"BossMod.Autorotation.xan.HealerAI":[{"Track":"Raise","Option":"Slowcast"},{"Track":"RaiseTargets","Option":"Everyone"},{"Track":"Esuna2","Option":"Enabled"}],"BossMod.Autorotation.xan.MeleeAI":[],"BossMod.Autorotation.xan.RangedAI":[],"BossMod.Autorotation.akechi.AkechiPLD":[{"Track":"Dash","Option":"Delay"}],"BossMod.Autorotation.xan.SCH":[],"BossMod.Autorotation.xan.PhantomAI":[{"Track":"Chemist","Option":"InCombat"}],"BossMod.Autorotation.xan.Caster":[{"Track":"Raise","Option":"Slowcast"}],"BossMod.Autorotation.xan.BozjaAI":[],"BossMod.Autorotation.MiscAI.NormalMovement":[{"Track":"Cast","Option":"Leeway"},{"Track":"Destination","Option":"Pathfind"},{"Track":"SpecialModes","Option":"Automatic"}]}}
-""";
-
-    private const string DdPresetJson = """
-{"Name":"DD","Modules":{"BossMod.Autorotation.xan.BLM":[{"Track":"Targeting","Option":"Auto"},{"Track":"AOE","Option":"AOE"}],"BossMod.Autorotation.xan.SMN":[{"Track":"Targeting","Option":"Auto"},{"Track":"AOE","Option":"AOE"},{"Track":"Buffs","Option":"Auto"}],"BossMod.Autorotation.xan.PCT":[{"Track":"Targeting","Option":"Auto"},{"Track":"AOE","Option":"AOE"},{"Track":"Buffs","Option":"Auto"}],"BossMod.Autorotation.xan.RDM":[{"Track":"Targeting","Option":"Auto"},{"Track":"AOE","Option":"AOE"},{"Track":"Buffs","Option":"Auto"}],"BossMod.Autorotation.xan.AST":[{"Track":"Targeting","Option":"Auto"},{"Track":"AOE","Option":"AOE"},{"Track":"Buffs","Option":"Auto"}],"BossMod.Autorotation.xan.SGE":[{"Track":"Targeting","Option":"Auto"},{"Track":"AOE","Option":"AOE"},{"Track":"Buffs","Option":"Auto"}],"BossMod.Autorotation.xan.WHM":[{"Track":"Targeting","Option":"Auto"},{"Track":"AOE","Option":"AOE"},{"Track":"Buffs","Option":"Auto"}],"BossMod.Autorotation.xan.DRG":[{"Track":"Targeting","Option":"Auto"},{"Track":"AOE","Option":"AOE"},{"Track":"Buffs","Option":"Auto"}],"BossMod.Autorotation.xan.MNK":[{"Track":"Targeting","Option":"Auto"},{"Track":"AOE","Option":"AOE"}],"BossMod.Autorotation.xan.NIN":[{"Track":"Targeting","Option":"Auto"},{"Track":"AOE","Option":"AOE"},{"Track":"Buffs","Option":"Auto"}],"BossMod.Autorotation.xan.RPR":[{"Track":"Targeting","Option":"Auto"},{"Track":"AOE","Option":"AOE"},{"Track":"Buffs","Option":"Auto"}],"BossMod.Autorotation.xan.SAM":[{"Track":"Targeting","Option":"Auto"},{"Track":"AOE","Option":"AOE"},{"Track":"Buffs","Option":"Auto"}],"BossMod.Autorotation.xan.VPR":[{"Track":"Targeting","Option":"Auto"},{"Track":"AOE","Option":"AOE"},{"Track":"Buffs","Option":"Auto"}],"BossMod.Autorotation.xan.DNC":[{"Track":"Targeting","Option":"Auto"},{"Track":"AOE","Option":"AOE"},{"Track":"Buffs","Option":"Auto"}],"BossMod.Autorotation.xan.MCH":[{"Track":"Targeting","Option":"Auto"},{"Track":"AOE","Option":"AOE"},{"Track":"Buffs","Option":"Auto"}],"BossMod.Autorotation.xan.DRK":[{"Track":"Targeting","Option":"Auto"},{"Track":"AOE","Option":"AOE"},{"Track":"Buffs","Option":"Auto"}],"BossMod.Autorotation.xan.GNB":[{"Track":"Targeting","Option":"Auto"},{"Track":"AOE","Option":"AOE"},{"Track":"Buffs","Option":"Auto"}],"BossMod.Autorotation.VeynWAR":[{"Track":"AOE","Option":"AutoFinishCombo"},{"Track":"Burst","Option":"Spend"},{"Track":"Potion","Option":"Manual"},{"Track":"Infuriate","Option":"ForceIfNoNC"},{"Track":"IR","Option":"Automatic"},{"Track":"Upheaval","Option":"Automatic"},{"Track":"PR","Option":"Automatic"},{"Track":"Onslaught","Option":"Force"},{"Track":"Tomahawk","Option":"Opener"},{"Track":"Wrath","Option":"Automatic"}],"BossMod.Autorotation.xan.TankAI":[],"BossMod.Autorotation.xan.DeepDungeonAI":[{"Track":"Kite enemies","Option":"Disabled"}],"BossMod.Autorotation.xan.HealerAI":[{"Track":"Raise","Option":"Raise without requiring Swiftcast to be available"},{"Track":"RaiseTargets","Option":"Any dead player"}],"BossMod.Autorotation.xan.MeleeAI":[],"BossMod.Autorotation.xan.RangedAI":[],"BossMod.Autorotation.VeynBRD":[],"BossMod.Autorotation.akechi.AkechiPLD":[],"BossMod.Autorotation.xan.SCH":[],"BossMod.Autorotation.xan.Caster":[{"Track":"Raise","Option":"Allow raising without Swiftcast (not applicable to RDM)"},{"Track":"RaiseTargets","Option":"Any dead player"}],"BossMod.Autorotation.MiscAI.NormalMovement":[{"Track":"Cast","Option":"Leeway"}]}}
-""";
+    private sealed record AutorotPreset(string Name, string Json);
 }

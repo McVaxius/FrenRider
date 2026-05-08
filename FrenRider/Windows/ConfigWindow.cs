@@ -700,44 +700,60 @@ public class ConfigWindow : Window, IDisposable
         ImGui.Text("Presets");
         ImGui.Spacing();
 
-        var autoRot = config.AutoRotationType;
-        ImGui.SetNextItemWidth(200);
-        if (ImGui.InputText("BM Rotation Preset", ref autoRot, 32))
+        var manualPresetConfig = config.ConfigureRotationPresetManually;
+        if (ImGui.Checkbox("Configure rotation preset manually", ref manualPresetConfig))
         {
-            config.AutoRotationType = autoRot;
+            config.ConfigureRotationPresetManually = manualPresetConfig;
             configManager.SaveCurrentAccount();
         }
         ImGui.SameLine();
-        HelpMarker("Name of the auto-rotation preset for general content.\nMust match a preset name in your rotation plugin.\nUse 'none' to not change the preset.\nsome valid types are FRENRIDER, DD, FATE, Autoduty Passive, AutoDuty.");
+        HelpMarker("Off: FrenRider chooses the BossMod preset from current job and selected rotation plugin.\nOn: use the preset name fields below.");
 
-        var autoRotDD = config.AutoRotationTypeDD;
-        ImGui.SetNextItemWidth(200);
-        if (ImGui.InputText("BM Rotation Preset (DD)", ref autoRotDD, 32))
+        if (config.ConfigureRotationPresetManually)
         {
-            config.AutoRotationTypeDD = autoRotDD;
-            configManager.SaveCurrentAccount();
-        }
-        ImGui.SameLine();
-        HelpMarker("Preset name for Deep Dungeon content.\nsome valid types are FRENRIDER, DD, FATE, Autoduty Passive, AutoDuty.");
+            var autoRot = config.AutoRotationType;
+            ImGui.SetNextItemWidth(200);
+            if (ImGui.InputText("BM Rotation Preset", ref autoRot, 32))
+            {
+                config.AutoRotationType = autoRot;
+                configManager.SaveCurrentAccount();
+            }
+            ImGui.SameLine();
+            HelpMarker("Name of the auto-rotation preset for general content.\nMust match a preset name in your rotation plugin.\nUse 'none' to not change the preset.");
 
-        var autoRotFATE = config.AutoRotationTypeFATE;
-        ImGui.SetNextItemWidth(200);
-        if (ImGui.InputText("BM Rotation Preset (FATE)", ref autoRotFATE, 32))
-        {
-            config.AutoRotationTypeFATE = autoRotFATE;
-            configManager.SaveCurrentAccount();
-        }
-        ImGui.SameLine();
-        HelpMarker("Preset name for FATE content.\nsome valid types are FRENRIDER, DD, FATE, Autoduty Passive, AutoDuty.");
+            var autoRotDD = config.AutoRotationTypeDD;
+            ImGui.SetNextItemWidth(200);
+            if (ImGui.InputText("BM Rotation Preset (DD)", ref autoRotDD, 32))
+            {
+                config.AutoRotationTypeDD = autoRotDD;
+                configManager.SaveCurrentAccount();
+            }
+            ImGui.SameLine();
+            HelpMarker("Preset name for Deep Dungeon content.\nUse 'none' to not change the preset.");
 
-        var forceBossModPreset = config.ForceBossModPresetRegardlessOfRotation;
-        if (ImGui.Checkbox("Force BossMod preset regardless of rotation", ref forceBossModPreset))
-        {
-            config.ForceBossModPresetRegardlessOfRotation = forceBossModPreset;
-            configManager.SaveCurrentAccount();
+            var autoRotFATE = config.AutoRotationTypeFATE;
+            ImGui.SetNextItemWidth(200);
+            if (ImGui.InputText("BM Rotation Preset (FATE)", ref autoRotFATE, 32))
+            {
+                config.AutoRotationTypeFATE = autoRotFATE;
+                configManager.SaveCurrentAccount();
+            }
+            ImGui.SameLine();
+            HelpMarker("Preset name for FATE content.\nUse 'none' to not change the preset.");
+
+            var forceBossModPreset = config.ForceBossModPresetRegardlessOfRotation;
+            if (ImGui.Checkbox("Force BossMod preset regardless of rotation", ref forceBossModPreset))
+            {
+                config.ForceBossModPresetRegardlessOfRotation = forceBossModPreset;
+                configManager.SaveCurrentAccount();
+            }
+            ImGui.SameLine();
+            HelpMarker("When RSR or WRATH is selected, also force BMR/VBM to the configured zone preset.");
         }
-        ImGui.SameLine();
-        HelpMarker("When RSR or WRATH is selected, force BMR/VBM to the zone preset instead of AutoDuty Passive.");
+        else
+        {
+            ImGui.TextDisabled("Managed presets: BMR/VBM use FRENRIDER role presets; RSR/WRATH use passive role presets.");
+        }
 
         ImGui.Spacing();
         ImGui.Separator();
@@ -1052,14 +1068,7 @@ public class ConfigWindow : Window, IDisposable
 
     private void DrawAutorotSection(CharacterConfig config)
     {
-        var pushOnEnable = config.AutorotPushOnEnable;
-        if (ImGui.Checkbox("Push autorot presets on enable", ref pushOnEnable))
-        {
-            config.AutorotPushOnEnable = pushOnEnable;
-            configManager.SaveCurrentAccount();
-        }
-        ImGui.SameLine();
-        HelpMarker("Automatically push FRENRIDER and DD presets into BMR/VBM via IPC when the plugin is enabled.");
+        ImGui.TextDisabled("FrenRider installs BossMod presets whenever it is enabled.");
 
         if (ImGui.Button("Push Presets Now"))
             plugin.AutorotIpcService.CreatePresets(force: true);
@@ -1643,14 +1652,7 @@ public class ConfigWindow : Window, IDisposable
         ImGui.Text("Autorot Presets");
         ImGui.Spacing();
 
-        var pushOnEnable = config.AutorotPushOnEnable;
-        if (ImGui.Checkbox("Push presets on enable", ref pushOnEnable))
-        {
-            config.AutorotPushOnEnable = pushOnEnable;
-            configManager.SaveCurrentAccount();
-        }
-        ImGui.SameLine();
-        HelpMarker("Automatically push FRENRIDER and DD presets\ninto BMR/VBM via IPC when the plugin is enabled.");
+        ImGui.TextDisabled("FrenRider installs BossMod presets whenever it is enabled.");
 
         if (ImGui.Button("Push Presets Now"))
         {

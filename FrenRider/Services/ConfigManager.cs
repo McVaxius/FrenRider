@@ -295,6 +295,7 @@ public class ConfigManager
                 target.HClingReset = source.HClingReset;
                 break;
             case "Combat":
+                target.ConfigureRotationPresetManually = source.ConfigureRotationPresetManually;
                 target.AutoRotationType = source.AutoRotationType;
                 target.AutoRotationTypeDD = source.AutoRotationTypeDD;
                 target.AutoRotationTypeFATE = source.AutoRotationTypeFATE;

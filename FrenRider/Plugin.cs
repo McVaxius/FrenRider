@@ -229,12 +229,9 @@ public sealed class Plugin : IDalamudPlugin
 			//commandManager?.ProcessCommand("/xldisableplugin AutoDuty");
 			//commandManager?.ProcessCommand("/echo hi");
 
-            var config = ConfigManager.GetActiveConfig();
-            if (config.AutorotPushOnEnable)
-            {
-                Log.Information("[FrenRider] Autorot push-on-enable is on - pushing presets now");
-                AutorotIpcService.CreatePresets(force: true);
-            }
+            Log.Information("[FrenRider] Installing BossMod presets and applying current preset selection");
+            AutorotIpcService.CreatePresets(force: true);
+            CombatService.ApplyPresetSelection("FrenRider enabled", installPresets: false);
         }
         else
         {
