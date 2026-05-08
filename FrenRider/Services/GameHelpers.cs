@@ -425,6 +425,8 @@ public static class GameHelpers
 
             // Create AtkValue array for Yes button (index 0)
             var atkValues = stackalloc AtkValue[2];
+            atkValues[0] = default;
+            atkValues[1] = default;
             atkValues[0].Type = FFXIVClientStructs.FFXIV.Component.GUI.AtkValueType.Int;
             atkValues[0].Int = 0; // Yes button index
             atkValues[1].Type = FFXIVClientStructs.FFXIV.Component.GUI.AtkValueType.Int;
@@ -760,15 +762,24 @@ public static class GameHelpers
 
     private static bool TryCreateAtkValue(object arg, out AtkValue atkValue)
     {
-        atkValue = arg switch
+        atkValue = default;
+        switch (arg)
         {
-            int intVal => new AtkValue { Type = AtkValueType.Int, Int = intVal },
-            uint uintVal => new AtkValue { Type = AtkValueType.UInt, UInt = uintVal },
-            bool boolVal => new AtkValue { Type = AtkValueType.Bool, Byte = (byte)(boolVal ? 1 : 0) },
-            _ => default,
-        };
-
-        return arg is int or uint or bool;
+            case int intVal:
+                atkValue.Type = AtkValueType.Int;
+                atkValue.Int = intVal;
+                return true;
+            case uint uintVal:
+                atkValue.Type = AtkValueType.UInt;
+                atkValue.UInt = uintVal;
+                return true;
+            case bool boolVal:
+                atkValue.Type = AtkValueType.Bool;
+                atkValue.Byte = (byte)(boolVal ? 1 : 0);
+                return true;
+            default:
+                return false;
+        }
     }
 
     /// <summary>

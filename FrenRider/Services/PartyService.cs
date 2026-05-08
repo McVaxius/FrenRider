@@ -9,7 +9,6 @@ using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using FrenRider.Models;
-using ECommons.UIHelpers.AddonMasterImplementations;
 
 namespace FrenRider.Services;
 
@@ -191,9 +190,20 @@ public class PartyService
     {
         try
         {
-            // Use YesAlready's exact pattern
-            new AddonMaster.SelectYesno(&addon->AtkUnitBase).Yes();
-            log.Information($"Invite accept attempt #{attempt} for {inviterName}: AddonMaster.SelectYesno.Yes() called");
+            var unitBase = &addon->AtkUnitBase;
+            if (unitBase == null || !unitBase->IsVisible)
+                return false;
+
+            var atkValues = stackalloc AtkValue[2];
+            atkValues[0] = default;
+            atkValues[1] = default;
+            atkValues[0].Type = AtkValueType.Int;
+            atkValues[0].Int = 0;
+            atkValues[1].Type = AtkValueType.Int;
+            atkValues[1].Int = 0;
+
+            unitBase->FireCallback(2, atkValues);
+            log.Information($"Invite accept attempt #{attempt} for {inviterName}: SelectYesno direct Yes callback fired");
             return true;
         }
         catch (Exception ex)
