@@ -49,29 +49,11 @@ public static class GameHelpers
             var im = InventoryManager.Instance();
             if (im == null) return 0;
             // NQ count + HQ count (isHq = true adds 1000000 offset internally)
-            return GetInventoryItemCount(itemId, false) + GetInventoryItemCount(itemId, true);
+            return im->GetInventoryItemCount(itemId) + im->GetInventoryItemCount(itemId, true);
         }
         catch (Exception ex)
         {
             Plugin.Log.Error($"GetInventoryItemCount({itemId}) failed: {ex.Message}");
-            return 0;
-        }
-    }
-
-    /// <summary>
-    /// Get the exact NQ or HQ count of an item in the player's inventory.
-    /// </summary>
-    public static unsafe int GetInventoryItemCount(uint itemId, bool highQuality)
-    {
-        try
-        {
-            var im = InventoryManager.Instance();
-            if (im == null) return 0;
-            return im->GetInventoryItemCount(itemId, highQuality);
-        }
-        catch (Exception ex)
-        {
-            Plugin.Log.Error($"GetInventoryItemCount({itemId}, HQ={highQuality}) failed: {ex.Message}");
             return 0;
         }
     }
@@ -111,13 +93,6 @@ public static class GameHelpers
     /// Mirrors AutoDuty's approach: uses extraParam 65535 and checks for casting/occupied state.
     /// </summary>
     public static unsafe bool UseItem(uint itemId)
-        => UseItem(itemId, highQuality: false);
-
-    /// <summary>
-    /// Use an item from inventory by item ID, optionally as HQ.
-    /// HQ item actions use the base item row with the HQ action ID offset.
-    /// </summary>
-    public static unsafe bool UseItem(uint itemId, bool highQuality)
     {
         try
         {
@@ -152,24 +127,22 @@ public static class GameHelpers
                 return false;
             }
 
-            var actionItemId = highQuality ? itemId + 1_000_000u : itemId;
-
             // Check if the action is ready
-            var status = am->GetActionStatus(ActionType.Item, actionItemId);
+            var status = am->GetActionStatus(ActionType.Item, itemId);
             if (status != 0)
             {
-                Plugin.Log.Debug($"UseItem({itemId}, HQ={highQuality}): ActionStatus={status}, not ready");
+                Plugin.Log.Debug($"UseItem({itemId}): ActionStatus={status}, not ready");
                 return false;
             }
 
             // Use item with extraParam 65535 (required for item usage)
-            var result = am->UseAction(ActionType.Item, actionItemId, extraParam: 65535);
-            Plugin.Log.Information($"UseItem({itemId}, HQ={highQuality}): UseAction result={result}");
+            var result = am->UseAction(ActionType.Item, itemId, extraParam: 65535);
+            Plugin.Log.Information($"UseItem({itemId}): UseAction result={result}");
             return result;
         }
         catch (Exception ex)
         {
-            Plugin.Log.Error($"UseItem({itemId}, HQ={highQuality}) failed: {ex.Message}");
+            Plugin.Log.Error($"UseItem({itemId}) failed: {ex.Message}");
             return false;
         }
     }
@@ -350,78 +323,42 @@ public static class GameHelpers
     /// Returns 0 if not found.
     /// </summary>
     public static uint LookupFoodItemId(string foodName)
-        => LookupFoodItem(foodName).Id;
-
-    /// <summary>
-    /// Look up a food item by exact name using Lumina meal rows.
-    /// </summary>
-    public static (uint Id, string Name) LookupFoodItem(string foodName)
     {
-        if (string.IsNullOrWhiteSpace(foodName)) return (0, "");
+        if (string.IsNullOrWhiteSpace(foodName)) return 0;
 
         try
         {
             var sheet = Plugin.DataManager.GetExcelSheet<Lumina.Excel.Sheets.Item>();
-            if (sheet == null) return (0, "");
+            if (sheet == null) return 0;
 
-            var trimmedName = foodName.Trim();
+            var lowerName = foodName.ToLowerInvariant();
             foreach (var row in sheet)
             {
-                if (row.ItemUICategory.RowId != 46) continue;
-
                 var name = row.Name.ToString();
-                if (!string.IsNullOrEmpty(name) && name.Equals(trimmedName, StringComparison.OrdinalIgnoreCase))
-                    return (row.RowId, name);
+                if (!string.IsNullOrEmpty(name) && name.Equals(foodName, StringComparison.OrdinalIgnoreCase))
+                    return row.RowId;
             }
         }
         catch (Exception ex)
         {
             Plugin.Log.Error($"LookupFoodItemId(\"{foodName}\") failed: {ex.Message}");
         }
-        return (0, "");
-    }
-
-    /// <summary>
-    /// Look up any item display name by item ID.
-    /// </summary>
-    public static string LookupItemName(uint itemId)
-    {
-        if (itemId == 0) return "";
-
-        try
-        {
-            var sheet = Plugin.DataManager.GetExcelSheet<Lumina.Excel.Sheets.Item>();
-            if (sheet == null) return "";
-
-            if (sheet.TryGetRow(itemId, out var item))
-                return item.Name.ToString();
-        }
-        catch (Exception ex)
-        {
-            Plugin.Log.Error($"LookupItemName({itemId}) failed: {ex.Message}");
-        }
-
-        return "";
+        return 0;
     }
 
     /// <summary>
     /// Search inventory for the best available food from the food list.
-    /// Returns item ID, name, exact quality, and count, or zero values if none found.
+    /// Returns (itemId, itemName) or (0, "") if none found.
     /// </summary>
-    public static (uint Id, string Name, bool HighQuality, int Count) FindBestAvailableFood()
+    public static (uint Id, string Name) FindBestAvailableFood()
     {
         // Search from end (highest priority) to start
         for (var i = FoodList.Length - 1; i >= 0; i--)
         {
-            var nqCount = GetInventoryItemCount(FoodList[i].Id, highQuality: false);
-            if (nqCount > 0)
-                return (FoodList[i].Id, FoodList[i].Name, false, nqCount);
-
-            var hqCount = GetInventoryItemCount(FoodList[i].Id, highQuality: true);
-            if (hqCount > 0)
-                return (FoodList[i].Id, FoodList[i].Name, true, hqCount);
+            if (GetInventoryItemCount(FoodList[i].Id) > 0)
+                return FoodList[i];
         }
-        return (0, "", false, 0);
+        return (0, "");
     }
 
     /// <summary>

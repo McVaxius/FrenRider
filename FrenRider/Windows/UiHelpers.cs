@@ -1,11 +1,14 @@
 using System;
 using System.Numerics;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface.Utility;
 
 namespace FrenRider.Windows;
 
 internal static class UiHelpers
 {
+    private const float MinWrapWidth = 80f;
+
     public static readonly Vector4 Green = new(0.35f, 0.9f, 0.45f, 1f);
     public static readonly Vector4 Blue = new(0.35f, 0.7f, 1f, 1f);
     public static readonly Vector4 Yellow = new(1f, 0.82f, 0.28f, 1f);
@@ -13,6 +16,12 @@ internal static class UiHelpers
     public static readonly Vector4 Red = new(1f, 0.35f, 0.35f, 1f);
     public static readonly Vector4 Grey = new(0.62f, 0.62f, 0.62f, 1f);
     public static readonly Vector4 Muted = new(0.48f, 0.48f, 0.48f, 1f);
+
+    public static float Scale(float value)
+        => value * Math.Max(0.01f, ImGuiHelpers.GlobalScale);
+
+    public static Vector2 Scale(Vector2 value)
+        => value * Math.Max(0.01f, ImGuiHelpers.GlobalScale);
 
     public static void SectionHeader(string label)
     {
@@ -41,24 +50,28 @@ internal static class UiHelpers
 
     public static void AlignedRow(string label, string value, Vector4? valueColor = null, float labelWidth = 138f)
     {
+        var rowStartX = ImGui.GetCursorPosX();
+        var scaledLabelWidth = Scale(labelWidth);
+        var itemSpacing = ImGui.GetStyle().ItemSpacing.X;
         var labelTextWidth = ImGui.CalcTextSize(label).X;
-        if (labelTextWidth + ImGui.GetStyle().ItemSpacing.X > labelWidth)
+        if (labelTextWidth + itemSpacing > scaledLabelWidth)
         {
             ImGui.TextDisabled(label);
-            ImGui.Indent(Math.Min(labelWidth, ImGui.GetContentRegionAvail().X * 0.35f));
+            ImGui.SetCursorPosX(rowStartX + Math.Min(scaledLabelWidth, ImGui.GetContentRegionAvail().X * 0.35f));
             SafeWrappedText(value, valueColor);
-            ImGui.Unindent();
+            ImGui.SetCursorPosX(rowStartX);
             return;
         }
 
         ImGui.TextDisabled(label);
-        ImGui.SameLine(labelWidth);
+        ImGui.SameLine(rowStartX + scaledLabelWidth);
         SafeWrappedText(value, valueColor);
+        ImGui.SetCursorPosX(rowStartX);
     }
 
     public static void SafeWrappedText(string text, Vector4? color = null)
     {
-        ImGui.PushTextWrapPos(ImGui.GetCursorPosX() + Math.Max(80f, ImGui.GetContentRegionAvail().X));
+        ImGui.PushTextWrapPos(ImGui.GetCursorPosX() + Math.Max(Scale(MinWrapWidth), ImGui.GetContentRegionAvail().X));
         if (color.HasValue)
             ImGui.TextColored(color.Value, text);
         else

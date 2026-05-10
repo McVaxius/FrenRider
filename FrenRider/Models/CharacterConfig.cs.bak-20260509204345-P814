@@ -78,9 +78,7 @@ public class CharacterConfig
 
     // --- Automation / Misc ---
     public bool EnableAutoDiscard { get; set; } = false;
-    public int FeedMeItemId { get; set; } = 0;
     public string FeedMeItem { get; set; } = "Boiled Egg";
-    public bool FeedMeUseHighQuality { get; set; } = false;
     public bool FeedMeSearch { get; set; } = true;
     public int XpItem { get; set; } = 0;
     public int Repair { get; set; } = 0; // 0=No, 1=Self, 2=Inn NPC
@@ -172,9 +170,7 @@ public class CharacterConfig
             AdsPresetSelection = AdsPresetSelection,
             UseAdsLeaveAfterAdsDuty = UseAdsLeaveAfterAdsDuty,
             EnableAutoDiscard = EnableAutoDiscard,
-            FeedMeItemId = FeedMeItemId,
             FeedMeItem = FeedMeItem,
-            FeedMeUseHighQuality = FeedMeUseHighQuality,
             FeedMeSearch = FeedMeSearch,
             XpItem = XpItem,
             Repair = Repair,

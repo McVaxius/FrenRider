@@ -344,9 +344,7 @@ public class ConfigManager
             case "Misc":
                 target.FulfType = source.FulfType;
                 target.EnableAutoDiscard = source.EnableAutoDiscard;
-                target.FeedMeItemId = source.FeedMeItemId;
                 target.FeedMeItem = source.FeedMeItem;
-                target.FeedMeUseHighQuality = source.FeedMeUseHighQuality;
                 target.FeedMeSearch = source.FeedMeSearch;
                 target.XpItem = source.XpItem;
                 target.Repair = source.Repair;

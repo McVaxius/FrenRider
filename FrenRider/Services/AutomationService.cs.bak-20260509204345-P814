@@ -43,11 +43,7 @@ public class AutomationService
     // Resolved food item ID (cached from name lookup or food search)
     private uint resolvedFoodItemId;
     private string resolvedFoodItemName = "";
-    private bool resolvedFoodUseHighQuality;
     private bool foodIdResolved;
-    private int cachedFeedMeItemId = int.MinValue;
-    private string cachedFeedMeItem = "";
-    private bool cachedFeedMeUseHighQuality;
 
     private static readonly string[] DefaultIdleList = new[]
     {
@@ -102,7 +98,7 @@ public class AutomationService
             idleTickCounter = 0;
             IsIdle = false;
             LastIdleAction = "";
-            InvalidateFoodCache(); // Re-resolve food on zone change
+            foodIdResolved = false; // Re-resolve food on zone change
             CancelRepairFlow("Repair reset: zone transition.");
             return;
         }
@@ -258,13 +254,8 @@ public class AutomationService
     /// </summary>
     private void CheckFood(CharacterConfig config)
     {
-        if (config.FeedMeItemId <= 0 && string.IsNullOrWhiteSpace(config.FeedMeItem)) return;
+        if (string.IsNullOrWhiteSpace(config.FeedMeItem)) return;
         if (!GameHelpers.IsPlayerAlive()) return;
-
-        if (BackfillLegacyFoodConfig(config))
-            InvalidateFoodCache();
-
-        InvalidateFoodCacheIfConfigChanged(config);
 
         // Resolve food item ID from name if not yet done
         if (!foodIdResolved)
@@ -283,12 +274,12 @@ public class AutomationService
 
         if (wellFedRemaining > 90f)
         {
-            FoodStatus = $"Well Fed: {wellFedRemaining:F0}s ({resolvedFoodItemName} [{QualityLabel(resolvedFoodUseHighQuality)}])";
+            FoodStatus = $"Well Fed: {wellFedRemaining:F0}s ({resolvedFoodItemName})";
             return;
         }
 
         // Need to eat — check if we have the food in inventory
-        var count = GameHelpers.GetInventoryItemCount(resolvedFoodItemId, resolvedFoodUseHighQuality);
+        var count = GameHelpers.GetInventoryItemCount(resolvedFoodItemId);
         if (count > 0)
         {
             // Not in duty or not in combat — safe to eat (matches Lua: Condition[34]==false or Condition[26]==false)
@@ -306,18 +297,17 @@ public class AutomationService
                 }
 
                 lastFoodAttemptMs = now;
-                var qualityLabel = QualityLabel(resolvedFoodUseHighQuality);
-                Plugin.Log.Information($"Eating food: {resolvedFoodItemName} [{qualityLabel}] (ID={resolvedFoodItemId}, count={count}, wellFed={wellFedRemaining:F1}s)");
-                var result = GameHelpers.UseItem(resolvedFoodItemId, resolvedFoodUseHighQuality);
+                Plugin.Log.Information($"Eating food: {resolvedFoodItemName} (ID={resolvedFoodItemId}, count={count}, wellFed={wellFedRemaining:F1}s)");
+                var result = GameHelpers.UseItem(resolvedFoodItemId);
                 if (result)
                 {
-                    FoodStatus = $"Ate {resolvedFoodItemName} [{qualityLabel}] ({count - 1} left)";
+                    FoodStatus = $"Ate {resolvedFoodItemName} ({count - 1} left)";
                     // Success - don't check again for 30 seconds to let buff apply
                     lastFoodCheckMs = now + 20000; // Add 20s to the next check time
                 }
                 else
                 {
-                    FoodStatus = $"Failed to eat {resolvedFoodItemName} [{qualityLabel}]";
+                    FoodStatus = $"Failed to eat {resolvedFoodItemName}";
                 }
             }
             else
@@ -330,15 +320,13 @@ public class AutomationService
             // Out of this food — try food search if enabled
             if (config.FeedMeSearch)
             {
-                var (foundId, foundName, foundHighQuality, foundCount) = GameHelpers.FindBestAvailableFood();
+                var (foundId, foundName) = GameHelpers.FindBestAvailableFood();
                 if (foundId > 0)
                 {
-                    var qualityLabel = QualityLabel(foundHighQuality);
-                    Plugin.Log.Information($"Food search: switched from {resolvedFoodItemName} [{QualityLabel(resolvedFoodUseHighQuality)}] to {foundName} [{qualityLabel}] (ID={foundId}, count={foundCount})");
+                    Plugin.Log.Information($"Food search: switched from {resolvedFoodItemName} to {foundName} (ID={foundId})");
                     resolvedFoodItemId = foundId;
                     resolvedFoodItemName = foundName;
-                    resolvedFoodUseHighQuality = foundHighQuality;
-                    FoodStatus = $"Switched to {foundName} [{qualityLabel}]";
+                    FoodStatus = $"Switched to {foundName}";
                 }
                 else
                 {
@@ -349,7 +337,7 @@ public class AutomationService
             }
             else
             {
-                FoodStatus = $"Out of {resolvedFoodItemName} [{QualityLabel(resolvedFoodUseHighQuality)}]";
+                FoodStatus = $"Out of {resolvedFoodItemName}";
             }
         }
     }
@@ -361,29 +349,6 @@ public class AutomationService
     private void ResolveFoodItemId(CharacterConfig config)
     {
         foodIdResolved = true;
-        resolvedFoodItemId = 0;
-        resolvedFoodItemName = "";
-        resolvedFoodUseHighQuality = config.FeedMeUseHighQuality;
-
-        if (config.FeedMeItemId > 0)
-        {
-            resolvedFoodItemId = (uint)config.FeedMeItemId;
-            resolvedFoodItemName = !string.IsNullOrWhiteSpace(config.FeedMeItem)
-                ? config.FeedMeItem.Trim()
-                : GameHelpers.LookupItemName((uint)config.FeedMeItemId);
-            if (string.IsNullOrWhiteSpace(resolvedFoodItemName))
-                resolvedFoodItemName = $"Item {config.FeedMeItemId}";
-
-            if (string.IsNullOrWhiteSpace(config.FeedMeItem) && !resolvedFoodItemName.StartsWith("Item ", StringComparison.Ordinal))
-            {
-                config.FeedMeItem = resolvedFoodItemName;
-                plugin.ConfigManager.SaveCurrentAccount();
-            }
-
-            Plugin.Log.Information($"Food resolved from config ID: {resolvedFoodItemName} [{QualityLabel(resolvedFoodUseHighQuality)}] -> ID {resolvedFoodItemId}");
-            return;
-        }
-
         var foodName = config.FeedMeItem.Trim();
 
         // Check known food list first (fast path)
@@ -393,31 +358,30 @@ public class AutomationService
             {
                 resolvedFoodItemId = id;
                 resolvedFoodItemName = name;
-                Plugin.Log.Information($"Food resolved from known list: {name} [{QualityLabel(resolvedFoodUseHighQuality)}] -> ID {id}");
+                Plugin.Log.Information($"Food resolved from known list: {name} -> ID {id}");
                 return;
             }
         }
 
         // Lumina lookup
-        var (itemId, itemName) = GameHelpers.LookupFoodItem(foodName);
+        var itemId = GameHelpers.LookupFoodItemId(foodName);
         if (itemId > 0)
         {
             resolvedFoodItemId = itemId;
-            resolvedFoodItemName = itemName;
-            Plugin.Log.Information($"Food resolved from Lumina: {itemName} [{QualityLabel(resolvedFoodUseHighQuality)}] -> ID {itemId}");
+            resolvedFoodItemName = foodName;
+            Plugin.Log.Information($"Food resolved from Lumina: {foodName} -> ID {itemId}");
             return;
         }
 
         // If food search is enabled, try to find anything
         if (config.FeedMeSearch)
         {
-            var (foundId, foundName, foundHighQuality, foundCount) = GameHelpers.FindBestAvailableFood();
+            var (foundId, foundName) = GameHelpers.FindBestAvailableFood();
             if (foundId > 0)
             {
                 resolvedFoodItemId = foundId;
                 resolvedFoodItemName = foundName;
-                resolvedFoodUseHighQuality = foundHighQuality;
-                Plugin.Log.Information($"Food search found: {foundName} [{QualityLabel(foundHighQuality)}] -> ID {foundId} (count={foundCount})");
+                Plugin.Log.Information($"Food search found: {foundName} -> ID {foundId}");
                 return;
             }
         }
@@ -426,43 +390,6 @@ public class AutomationService
         resolvedFoodItemId = 0;
         resolvedFoodItemName = "";
     }
-
-    private bool BackfillLegacyFoodConfig(CharacterConfig config)
-    {
-        if (config.FeedMeItemId > 0) return false;
-        if (string.IsNullOrWhiteSpace(config.FeedMeItem)) return false;
-
-        var (itemId, itemName) = GameHelpers.LookupFoodItem(config.FeedMeItem);
-        if (itemId == 0) return false;
-
-        config.FeedMeItemId = (int)itemId;
-        config.FeedMeItem = itemName;
-        plugin.ConfigManager.SaveCurrentAccount();
-        Plugin.Log.Information($"Backfilled legacy food config: {itemName} -> ID {itemId}");
-        return true;
-    }
-
-    private void InvalidateFoodCacheIfConfigChanged(CharacterConfig config)
-    {
-        var foodName = config.FeedMeItem ?? "";
-        if (cachedFeedMeItemId == config.FeedMeItemId
-            && string.Equals(cachedFeedMeItem, foodName, StringComparison.Ordinal)
-            && cachedFeedMeUseHighQuality == config.FeedMeUseHighQuality)
-        {
-            return;
-        }
-
-        cachedFeedMeItemId = config.FeedMeItemId;
-        cachedFeedMeItem = foodName;
-        cachedFeedMeUseHighQuality = config.FeedMeUseHighQuality;
-        foodIdResolved = false;
-        resolvedFoodItemId = 0;
-        resolvedFoodItemName = "";
-        resolvedFoodUseHighQuality = config.FeedMeUseHighQuality;
-    }
-
-    private static string QualityLabel(bool highQuality)
-        => highQuality ? "HQ" : "NQ";
 
     /// <summary>
     /// Check if we need to summon chocobo companion. Mirrors Lua logic:
@@ -811,10 +738,6 @@ public class AutomationService
         foodIdResolved = false;
         resolvedFoodItemId = 0;
         resolvedFoodItemName = "";
-        resolvedFoodUseHighQuality = false;
-        cachedFeedMeItemId = int.MinValue;
-        cachedFeedMeItem = "";
-        cachedFeedMeUseHighQuality = false;
     }
 
     private static bool SendCommand(string command)

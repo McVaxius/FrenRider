@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
@@ -9,7 +8,6 @@ using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Windowing;
 using FrenRider.Models;
 using FrenRider.Services;
-using Lumina.Excel.Sheets;
 
 namespace FrenRider.Windows;
 
@@ -24,11 +22,8 @@ public class ConfigWindow : Window, IDisposable
     private string frenNameInput = "";
     private bool frenNameFocused = false;
     private string mountSearch = "";
-    private string foodSearch = "";
     private bool isDraggingSplitter = false;
     private string whitelistInput = "";
-    private readonly List<(uint Id, string Name)> foodItems = new();
-    private bool foodItemsLoaded = false;
 
     private static readonly string[] CompanionStances = { "Free Stance", "Defender Stance", "Attacker Stance", "Healer Stance", "Follow" };
     private static readonly string[] ClingTypes = { "NavMesh", "Visland", "BossMod Follow", "Vanilla Follow" };
@@ -56,35 +51,6 @@ public class ConfigWindow : Window, IDisposable
     }
 
     public void Dispose() { }
-
-    private void EnsureFoodItemsLoaded()
-    {
-        if (foodItemsLoaded) return;
-        foodItemsLoaded = true;
-
-        try
-        {
-            var itemSheet = Plugin.DataManager.GetExcelSheet<Item>();
-            if (itemSheet == null) return;
-
-            foreach (var item in itemSheet)
-            {
-                if (item.RowId == 0) continue;
-                if (item.ItemUICategory.RowId != 46) continue;
-
-                var name = item.Name.ToString();
-                if (string.IsNullOrWhiteSpace(name)) continue;
-
-                foodItems.Add((item.RowId, name));
-            }
-
-            Plugin.Log.Information($"[ConfigWindow] Loaded {foodItems.Count} food items from Lumina");
-        }
-        catch (Exception ex)
-        {
-            Plugin.Log.Error($"[ConfigWindow] Failed to load food items: {ex.Message}");
-        }
-    }
 
     public override void PreDraw()
     {
@@ -989,45 +955,15 @@ public class ConfigWindow : Window, IDisposable
 
     private void DrawFoodSection(CharacterConfig config)
     {
-        EnsureFoodItemsLoaded();
-        BackfillLegacyFoodSelection(config);
-
-        var foodId = config.FeedMeItemId;
-        var foodName = config.FeedMeItem;
-        if (DrawItemSearchDropdown("Food", ref foodSearch, foodItems, ref foodId, ref foodName))
+        var feedMeItem = config.FeedMeItem;
+        ImGui.SetNextItemWidth(300);
+        if (ImGui.InputText("Food Item Name", ref feedMeItem, 64))
         {
-            config.FeedMeItemId = foodId;
-            config.FeedMeItem = foodName;
-            plugin.AutomationService.InvalidateFoodCache();
+            config.FeedMeItem = feedMeItem;
             configManager.SaveCurrentAccount();
         }
-
-        if (config.FeedMeItemId > 0)
-        {
-            ImGui.Text($"  Selected: {config.FeedMeItem} {(config.FeedMeUseHighQuality ? "[HQ]" : "[NQ]")} (ID: {config.FeedMeItemId})");
-
-            var useFoodHq = config.FeedMeUseHighQuality;
-            if (ImGui.Checkbox("Use HQ food", ref useFoodHq))
-            {
-                config.FeedMeUseHighQuality = useFoodHq;
-                plugin.AutomationService.InvalidateFoodCache();
-                configManager.SaveCurrentAccount();
-            }
-
-            if (ImGui.SmallButton("Clear Food"))
-            {
-                config.FeedMeItemId = 0;
-                config.FeedMeItem = "";
-                config.FeedMeUseHighQuality = false;
-                foodSearch = "";
-                plugin.AutomationService.InvalidateFoodCache();
-                configManager.SaveCurrentAccount();
-            }
-        }
-        else
-        {
-            ImGui.TextDisabled("  No food selected. Food is optional.");
-        }
+        ImGui.SameLine();
+        HelpMarker("Name of food to auto-consume.");
 
         var feedMeSearch = config.FeedMeSearch;
         if (ImGui.Checkbox("Search for Food if Depleted", ref feedMeSearch))
@@ -1037,87 +973,6 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("If configured food runs out, search inventory for any food starting from lowest item ID.");
-    }
-
-    private void BackfillLegacyFoodSelection(CharacterConfig config)
-    {
-        if (config.FeedMeItemId > 0)
-        {
-            if (!string.IsNullOrWhiteSpace(config.FeedMeItem)) return;
-
-            var selected = foodItems.FirstOrDefault(item => item.Id == (uint)config.FeedMeItemId);
-            if (selected.Id == 0) return;
-
-            config.FeedMeItem = selected.Name;
-            plugin.AutomationService.InvalidateFoodCache();
-            configManager.SaveCurrentAccount();
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(config.FeedMeItem)) return;
-
-        var match = foodItems.FirstOrDefault(item =>
-            item.Name.Equals(config.FeedMeItem.Trim(), StringComparison.OrdinalIgnoreCase));
-        if (match.Id == 0) return;
-
-        config.FeedMeItemId = (int)match.Id;
-        config.FeedMeItem = match.Name;
-        plugin.AutomationService.InvalidateFoodCache();
-        configManager.SaveCurrentAccount();
-    }
-
-    private static bool DrawItemSearchDropdown(string label, ref string search, List<(uint Id, string Name)> items, ref int selectedId, ref string selectedName)
-    {
-        var changed = false;
-        var displayText = selectedId > 0 ? $"{selectedName} ({selectedId})" : $"Select {label}...";
-
-        ImGui.SetNextItemWidth(400);
-        if (ImGui.BeginCombo($"##{label}Select", displayText))
-        {
-            ImGui.SetNextItemWidth(380);
-            ImGui.InputText($"Search##{label}", ref search, 128);
-
-            ImGui.Separator();
-
-            var maxResults = 20;
-            var shown = 0;
-
-            if (!string.IsNullOrWhiteSpace(search) && search.Length >= 2)
-            {
-                var searchLower = search.ToLowerInvariant();
-                var isNumeric = uint.TryParse(search, out _);
-
-                for (var i = 0; i < items.Count && shown < maxResults; i++)
-                {
-                    var item = items[i];
-                    var match = isNumeric
-                        ? item.Id.ToString().Contains(search, StringComparison.Ordinal)
-                        : item.Name.ToLowerInvariant().Contains(searchLower);
-
-                    if (!match) continue;
-                    shown++;
-
-                    var isSelected = (int)item.Id == selectedId;
-                    if (ImGui.Selectable($"{item.Name} ({item.Id})##{label}{i}", isSelected))
-                    {
-                        selectedId = (int)item.Id;
-                        selectedName = item.Name;
-                        changed = true;
-                    }
-                }
-
-                if (shown == 0)
-                    ImGui.TextDisabled("No results. Try a different search term.");
-            }
-            else
-            {
-                ImGui.TextDisabled("Type at least 2 characters to search...");
-            }
-
-            ImGui.EndCombo();
-        }
-
-        return changed;
     }
 
     private void DrawRepairSection(CharacterConfig config)
