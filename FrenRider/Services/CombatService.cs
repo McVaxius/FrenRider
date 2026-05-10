@@ -689,6 +689,8 @@ public class CombatService
 		SendCommand($"/rotation Settings ToggleManual False");
         SendCommand("/rotation Settings DummyBoss False");
         SendCommand("/rotation Settings DisableTargetDummys True");
+        SendCommand("/rotation Settings BmrSafetyCheckAuto True");
+        SendCommand("/rotation Settings BmrSafetyCheckIntercept True");
         ApplyBossModPreset(selectedPreset, reason);
 
         switch (pluginName)
