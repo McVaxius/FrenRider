@@ -213,20 +213,7 @@
         "Option": "Automatic"
       }
     ],
-    "BossMod.Autorotation.xan.TankAI": [
-      {
-        "Track": "Stance",
-        "Option": "Disabled"
-      },
-      {
-        "Track": "Personal mits",
-        "Option": "Disabled"
-      },
-      {
-        "Track": "Invuln",
-        "Option": "Disabled"
-      }
-    ],
+    "BossMod.Autorotation.xan.TankAI": [],
     "BossMod.Autorotation.VeynBRD": [],
     "BossMod.Autorotation.xan.HealerAI": [
       {
