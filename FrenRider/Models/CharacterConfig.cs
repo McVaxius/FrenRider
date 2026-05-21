@@ -86,9 +86,10 @@ public class CharacterConfig
     public bool FeedMeUseHighQuality { get; set; } = false;
     public bool FeedMeSearch { get; set; } = true;
     public int XpItem { get; set; } = 0;
-    public int Repair { get; set; } = 0; // 0=No, 1=Self, 2=Inn NPC
-    public int TornClothes { get; set; } = 0;
+    public int Repair { get; set; } = 0; // 0=Disabled, 1=Self, 2=NPC no-inn
+    public int TornClothes { get; set; } = 75;
     public int SpamPrinter { get; set; } = 0; // 0=off, 1=on
+    public bool DebugMode { get; set; } = false;
 
     // --- Invite Whitelist ---
     public List<string> InviteWhitelist { get; set; } = new();
@@ -186,6 +187,7 @@ public class CharacterConfig
             Repair = Repair,
             TornClothes = TornClothes,
             SpamPrinter = SpamPrinter,
+            DebugMode = DebugMode,
             InviteWhitelist = new List<string>(InviteWhitelist),
             RaiseOfferAutoAccept = RaiseOfferAutoAccept,
             TeleportOfferAutoAccept = TeleportOfferAutoAccept,

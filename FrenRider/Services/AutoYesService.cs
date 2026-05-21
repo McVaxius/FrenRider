@@ -79,6 +79,9 @@ public class AutoYesService : IDisposable
         var config = plugin.ConfigManager.GetActiveConfig();
         if (config == null || !config.Enabled)
             return;
+
+        if (plugin.AutomationService.IsRepairFlowActive)
+            return;
             
         // Rate limit checks
         var now = DateTime.Now;

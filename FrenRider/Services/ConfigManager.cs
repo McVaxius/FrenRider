@@ -355,6 +355,7 @@ public class ConfigManager
                 target.Repair = source.Repair;
                 target.TornClothes = source.TornClothes;
                 target.SpamPrinter = source.SpamPrinter;
+                target.DebugMode = source.DebugMode;
                 target.IdleAction = source.IdleAction;
                 target.IdleActionMode = source.IdleActionMode;
                 target.IdleListMode = source.IdleListMode;

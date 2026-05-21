@@ -27,6 +27,9 @@ public sealed class FateSyncService
         if (!config.AutoSyncFate)
             return;
 
+        if (plugin.AutomationService.IsRepairFlowActive)
+            return;
+
         if (!Plugin.ClientState.IsLoggedIn || Plugin.ObjectTable.LocalPlayer == null)
             return;
 

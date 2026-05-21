@@ -80,6 +80,18 @@ public class CombatService
             return;
         }
 
+        if (plugin.AutomationService.IsRepairFlowActive)
+        {
+            ResetCombatSettingsRefreshTracking();
+            lastObservedCombatSettingsSignature = string.Empty;
+            State = CombatState.OutOfCombat;
+            StateDetail = "Repair active";
+            ActivePreset = "";
+            wasInCombat = inCombat;
+            wasInDuty = inDuty;
+            return;
+        }
+
         LogFateCombatDecisionIfChanged(config, inCombat, inDuty, mountedOrMounting);
 
         if (HandleMountedRotationLifecycle(config, mountedOrMounting, inCombat, inDuty))

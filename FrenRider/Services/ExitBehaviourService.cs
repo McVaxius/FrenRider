@@ -119,6 +119,12 @@ public class ExitBehaviourService : IDisposable
             return;
         }
 
+        if (plugin.AutomationService.IsRepairFlowActive)
+        {
+            StateDetail = "Repair active";
+            return;
+        }
+
         if (plugin.AdsIntegrationService.ShouldPauseDutySystems)
         {
             StateDetail = plugin.AdsIntegrationService.IsHandoffPending

@@ -11,6 +11,7 @@ using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using FFXIVClientStructs.Interop;
+using DalamudObjectKind = Dalamud.Game.ClientState.Objects.Enums.ObjectKind;
 using GameObject = FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject;
 
 namespace FrenRider.Services;
@@ -20,6 +21,9 @@ namespace FrenRider.Services;
 /// </summary>
 public static class GameHelpers
 {
+    private const float AetheryteSanctuaryFallbackDistance = 50.0f;
+    private const float AetheryteSanctuaryFallbackDistanceSquared = AetheryteSanctuaryFallbackDistance * AetheryteSanctuaryFallbackDistance;
+
     // Well Fed status ID
     public const uint WellFedStatusId = 48;
 
@@ -327,6 +331,7 @@ public static class GameHelpers
     /// Check if the player is in a sanctuary (rest area where you can't summon companion).
     /// Uses ActionManager to check if Mount general action is available — if not, we're in sanctuary.
     /// General Action ID 9 = Mount.
+    /// Also allows ADS NPC no-inn repair near Aetheryte/Aethernet objects.
     /// </summary>
     public static unsafe bool IsInSanctuary()
     {
@@ -337,12 +342,48 @@ public static class GameHelpers
 
             // If mount action is available (status 0), we're NOT in sanctuary
             var status = am->GetActionStatus(ActionType.GeneralAction, 9);
-            return status != 0;
+            return status != 0 || IsNearAetheryteOrAethernet();
         }
         catch
         {
             return true;
         }
+    }
+
+    private static bool IsNearAetheryteOrAethernet()
+    {
+        try
+        {
+            var player = Plugin.ObjectTable.LocalPlayer;
+            if (player == null) return false;
+
+            var playerPosition = player.Position;
+            foreach (var obj in Plugin.ObjectTable)
+            {
+                if (obj == null || !IsAetheryteOrAethernet(obj))
+                    continue;
+
+                if (Vector3.DistanceSquared(playerPosition, obj.Position) <= AetheryteSanctuaryFallbackDistanceSquared)
+                    return true;
+            }
+        }
+        catch
+        {
+            // Keep old sanctuary heuristic behavior if object-table proximity cannot be read.
+        }
+
+        return false;
+    }
+
+    private static bool IsAetheryteOrAethernet(IGameObject obj)
+    {
+        if (obj.ObjectKind == DalamudObjectKind.Aetheryte)
+            return true;
+
+        var name = obj.Name.TextValue;
+        return !string.IsNullOrEmpty(name) &&
+               (name.Contains("Aetheryte", StringComparison.OrdinalIgnoreCase) ||
+                name.Contains("Aethernet", StringComparison.OrdinalIgnoreCase));
     }
 
     /// <summary>

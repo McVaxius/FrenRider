@@ -7,14 +7,17 @@ namespace FrenRider.Services;
 public class AutomationService
 {
     private const long RepairIdleCheckMs = 30000;
-    private const long RepairActiveCheckMs = 5000;
-    private const long RepairRetryMs = 10000;
+    private const long RepairActiveCheckMs = 1000;
+    private const long RepairRetryMs = 30000;
+    private const long RepairStartGraceMs = 5000;
+    private const long RepairTimeoutMs = 180000;
     private const long RepairBlockedLogMs = 15000;
-    private const string AdsSelfRepairCommand = "/ads selfrepair";
 
     private enum RepairFlowState
     {
         Idle,
+        WaitingForAdsStart,
+        WaitingForAdsCompletion,
         WaitingForDurability,
     }
 
@@ -37,6 +40,7 @@ public class AutomationService
     private string lastDiscardDeferReason = "";
     private string lastRepairBlockedReason = "";
     private RepairFlowState repairFlowState;
+    private bool adsRepairUtilityObserved;
     private int repairRequestAttempts;
     private int idleListIndex;
 
@@ -565,16 +569,8 @@ public class AutomationService
 
     private void CheckRepair(CharacterConfig config, long now)
     {
-        if (config.Repair == 2)
-        {
-            config.Repair = 0;
-            plugin.ConfigManager.SaveCurrentAccount();
-            ResetRepairFlow();
-            RepairStatus = "Legacy NPC repair disabled.";
-            return;
-        }
-
-        if (config.Repair != 1)
+        var repairMode = ResolveAdsRepairMode(config);
+        if (string.IsNullOrWhiteSpace(repairMode))
         {
             CancelRepairFlow("");
             return;
@@ -584,11 +580,12 @@ public class AutomationService
         if (threshold <= 0)
         {
             ResetRepairFlow();
-            RepairStatus = "Self repair enabled; threshold is 0%.";
+            RepairStatus = $"{GetRepairModeLabel(repairMode)} repair enabled; threshold is 0%.";
             return;
         }
 
-        if (!plugin.AdsIntegrationService.AdsLoaded)
+        var adsStatus = plugin.AdsRepairIpcService.Refresh();
+        if (!adsStatus.IsAvailable)
         {
             ResetRepairFlow();
             RepairStatus = "Waiting: ADS not loaded.";
@@ -619,51 +616,101 @@ public class AutomationService
 
         if (repairFlowState == RepairFlowState.Idle)
         {
-            IssueRepairRequest(now, threshold, $"equipped gear below {threshold}%");
+            if (!CanStartRepairNow(repairMode, out var deferReason))
+            {
+                RepairStatus = $"{GetRepairModeLabel(repairMode)} repair needed below {threshold}%; waiting while {deferReason}.";
+                LogRepairBlocked(now, deferReason);
+                return;
+            }
+
+            IssueRepairRequest(now, repairMode, threshold, $"equipped gear below {threshold}%");
             return;
         }
 
+        TrackActiveRepair(now, repairMode, threshold);
+    }
+
+    private void TrackActiveRepair(long now, string repairMode, int threshold)
+    {
         var elapsedSinceRequest = now - lastRepairAttemptMs;
+        if (elapsedSinceRequest > RepairTimeoutMs)
+        {
+            var timeoutStatus = plugin.AdsRepairIpcService.Refresh(force: true);
+            RepairStatus = $"Repair timed out after {RepairTimeoutMs / 1000}s; ADS: {GetAdsRepairStatusText(timeoutStatus)}";
+            Plugin.Log.Warning($"[FrenRider][Repair] {RepairStatus}");
+            ResetRepairFlow(preserveStatus: true);
+            return;
+        }
+
+        var adsStatus = plugin.AdsRepairIpcService.Refresh(force: true);
+        if (!adsStatus.StatusReadable)
+        {
+            RepairStatus = $"{GetRepairModeLabel(repairMode)} repair requested; waiting for ADS status.";
+            return;
+        }
+
+        if (adsStatus.IsRepairRunning)
+        {
+            adsRepairUtilityObserved = true;
+            repairFlowState = RepairFlowState.WaitingForAdsCompletion;
+            var detail = string.IsNullOrWhiteSpace(adsStatus.UtilityStatus)
+                ? "ADS repair running"
+                : adsStatus.UtilityStatus;
+            RepairStatus = $"{GetRepairModeLabel(repairMode)} repair running; FrenRider paused. ADS: {detail}";
+            return;
+        }
+
+        if (!adsRepairUtilityObserved && elapsedSinceRequest < RepairStartGraceMs)
+        {
+            repairFlowState = RepairFlowState.WaitingForAdsStart;
+            RepairStatus = $"{GetRepairModeLabel(repairMode)} repair requested; waiting for ADS to start.";
+            return;
+        }
+
+        repairFlowState = RepairFlowState.WaitingForDurability;
         if (elapsedSinceRequest < RepairRetryMs)
         {
-            RepairStatus = $"Repair in progress below {threshold}%; retry in {(RepairRetryMs - elapsedSinceRequest + 999) / 1000}s.";
+            RepairStatus = $"{GetRepairModeLabel(repairMode)} repair still needed below {threshold}%; retry in {(RepairRetryMs - elapsedSinceRequest + 999) / 1000}s. ADS: {GetAdsRepairStatusText(adsStatus)}";
             return;
         }
 
-        if (!CanSelfRepairNow(out var deferReason))
+        if (!CanStartRepairNow(repairMode, out var deferReason))
         {
-            RepairStatus = $"Repair in progress below {threshold}%; waiting while {deferReason}.";
+            RepairStatus = $"{GetRepairModeLabel(repairMode)} repair still needed below {threshold}%; waiting while {deferReason}. ADS: {GetAdsRepairStatusText(adsStatus)}";
             LogRepairBlocked(now, deferReason);
             return;
         }
 
-        IssueRepairRequest(now, threshold, $"still below {threshold}% after {elapsedSinceRequest / 1000}s");
+        IssueRepairRequest(now, repairMode, threshold, $"still below {threshold}% after {elapsedSinceRequest / 1000}s");
     }
 
-    private void IssueRepairRequest(long now, int threshold, string reason)
+    private void IssueRepairRequest(long now, string repairMode, int threshold, string reason)
     {
         repairRequestAttempts++;
         lastRepairAttemptMs = now;
-        repairFlowState = RepairFlowState.WaitingForDurability;
+        repairFlowState = RepairFlowState.WaitingForAdsStart;
+        adsRepairUtilityObserved = false;
+        var modeLabel = GetRepairModeLabel(repairMode);
 
         if (repairRequestAttempts == 1)
         {
-            Plugin.Log.Information($"[FrenRider][Repair] Sending /ads selfrepair ({reason}).");
+            Plugin.Log.Information($"[FrenRider][Repair] Requesting ADS {repairMode} repair via IPC ({reason}).");
         }
         else
         {
-            Plugin.Log.Warning($"[FrenRider][Repair] Retrying /ads selfrepair attempt {repairRequestAttempts} ({reason}).");
+            Plugin.Log.Warning($"[FrenRider][Repair] Retrying ADS {repairMode} repair attempt {repairRequestAttempts} via IPC ({reason}).");
         }
 
-        if (SendCommand(AdsSelfRepairCommand))
+        if (plugin.AdsRepairIpcService.StartRepair(repairMode, out var failure))
         {
-            RepairStatus = $"Sent /ads selfrepair below {threshold}%; FrenRider paused.";
-            Plugin.Log.Information($"[FrenRider][Repair] ADS self repair requested (threshold {threshold}%).");
+            RepairStatus = $"{modeLabel} repair requested below {threshold}%; FrenRider paused.";
+            Plugin.Log.Information($"[FrenRider][Repair] ADS {repairMode} repair requested (threshold {threshold}%).");
             return;
         }
 
-        RepairStatus = "Failed to send /ads selfrepair; will retry if durability stays low.";
-        Plugin.Log.Warning("[FrenRider][Repair] Self repair command failed: /ads selfrepair");
+        RepairStatus = $"ADS did not accept {modeLabel} repair: {failure}";
+        Plugin.Log.Warning($"[FrenRider][Repair] ADS did not accept {repairMode} repair: {failure}");
+        ResetRepairFlow(preserveStatus: true);
     }
 
     private void CompleteRepairFlow(int threshold)
@@ -682,13 +729,16 @@ public class AutomationService
         RepairStatus = status;
     }
 
-    private void ResetRepairFlow()
+    private void ResetRepairFlow(bool preserveStatus = false)
     {
         repairFlowState = RepairFlowState.Idle;
         lastRepairAttemptMs = 0;
         lastRepairBlockedLogMs = 0;
         lastRepairBlockedReason = "";
+        adsRepairUtilityObserved = false;
         repairRequestAttempts = 0;
+        if (!preserveStatus)
+            plugin.AdsRepairIpcService.Refresh();
     }
 
     private void LogRepairBlocked(long now, string reason)
@@ -704,7 +754,7 @@ public class AutomationService
         Plugin.Log.Information($"[FrenRider][Repair] Repair request held while {reason}; rechecking durability instead of sending another repair command.");
     }
 
-    private static bool CanSelfRepairNow(out string reason)
+    private static bool CanStartRepairNow(string repairMode, out string reason)
     {
         var player = Plugin.ObjectTable.LocalPlayer;
         if (player == null)
@@ -745,13 +795,6 @@ public class AutomationService
             return false;
         }
 
-        if (Plugin.Condition[ConditionFlag.Mounted] ||
-            Plugin.Condition[ConditionFlag.RidingPillion])
-        {
-            reason = "mounted or riding";
-            return false;
-        }
-
         if (Plugin.Condition[ConditionFlag.OccupiedInQuestEvent] ||
             Plugin.Condition[ConditionFlag.OccupiedInCutSceneEvent] ||
             Plugin.Condition[ConditionFlag.Occupied33] ||
@@ -774,16 +817,23 @@ public class AutomationService
             return false;
         }
 
+        if (repairMode == "npc-no-inn" && !GameHelpers.IsInSanctuary())
+        {
+            reason = "outside sanctuary";
+            return false;
+        }
+
         reason = "ready";
         return true;
     }
 
     /// <summary>
-    /// Trigger repair based on config (0=No, 1=Self). FrenRider always delegates repair to ADS.
+    /// Trigger repair based on config (0=Disabled, 1=Self, 2=NPC no-inn). FrenRider always delegates repair to ADS.
     /// </summary>
     public void TriggerRepair(CharacterConfig config)
     {
-        if (config.Repair != 1)
+        var repairMode = ResolveAdsRepairMode(config);
+        if (string.IsNullOrWhiteSpace(repairMode))
             return;
 
         var now = Environment.TickCount64;
@@ -794,13 +844,46 @@ public class AutomationService
         if (repairFlowState != RepairFlowState.Idle)
             return;
 
-        if (!plugin.AdsIntegrationService.AdsLoaded)
+        var adsStatus = plugin.AdsRepairIpcService.Refresh();
+        if (!adsStatus.IsAvailable)
+            return;
+
+        if (!CanStartRepairNow(repairMode, out _))
             return;
 
         if (GameHelpers.NeedsRepair(threshold))
         {
-            IssueRepairRequest(now, threshold, $"manual trigger below {threshold}%");
+            IssueRepairRequest(now, repairMode, threshold, $"manual trigger below {threshold}%");
         }
+    }
+
+    private static string ResolveAdsRepairMode(CharacterConfig config)
+        => config.Repair switch
+        {
+            1 => "self",
+            2 => "npc-no-inn",
+            _ => string.Empty,
+        };
+
+    private static string GetRepairModeLabel(string repairMode)
+        => repairMode switch
+        {
+            "npc-no-inn" => "NPC no-inn",
+            "self" => "Self",
+            _ => "ADS",
+        };
+
+    private static string GetAdsRepairStatusText(AdsRepairStatusSnapshot status)
+    {
+        if (!string.IsNullOrWhiteSpace(status.UtilityLastFailure))
+            return status.UtilityLastFailure;
+
+        if (!string.IsNullOrWhiteSpace(status.UtilityLastSuccess))
+            return status.UtilityLastSuccess;
+
+        return string.IsNullOrWhiteSpace(status.UtilityStatus)
+            ? "No ADS utility status."
+            : status.UtilityStatus;
     }
 
     /// <summary>

@@ -43,6 +43,7 @@ public class ConfigWindow : Window, IDisposable
     private static readonly string[] OnOff = { "Off", "On" };
     private static readonly string[] IdleActionModes = { "Specific Action", "Action From List" };
     private static readonly string[] IdleListModes = { "Default List", "Custom List" };
+    private static readonly string[] RepairModes = { "Disabled", "Self", "NPC no-inn" };
 
     public ConfigWindow(Plugin plugin) : base("Fren Rider Settings###FrenRiderConfig")
     {
@@ -1176,20 +1177,15 @@ public class ConfigWindow : Window, IDisposable
 
     private void DrawRepairSection(CharacterConfig config)
     {
-        if (config.Repair == 2)
+        var repairMode = Math.Clamp(config.Repair, 0, RepairModes.Length - 1);
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.Combo("Repair Mode", ref repairMode, RepairModes, RepairModes.Length))
         {
-            config.Repair = 0;
-            configManager.SaveCurrentAccount();
-        }
-
-        var selfRepair = config.Repair == 1;
-        if (ImGui.Checkbox("Self Repair", ref selfRepair))
-        {
-            config.Repair = selfRepair ? 1 : 0;
+            config.Repair = repairMode;
             configManager.SaveCurrentAccount();
         }
         ImGui.SameLine();
-        HelpMarker("When enabled, FrenRider checks equipped gear durability and sends /ads selfrepair when any equipped item is below the threshold. ADS owns the actual repair window automation.");
+        HelpMarker("0 = disabled.\n1 = ADS self repair.\n2 = ADS NPC repair without inn fallback.");
 
         var tornClothes = Math.Clamp(config.TornClothes, 0, 100);
         ImGui.SetNextItemWidth(200);
@@ -1286,6 +1282,39 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("Print status messages to game chat.\nUseful for debugging but fills chat quickly.");
+
+        if (config.DebugMode)
+        {
+            ImGui.Spacing();
+            if (ImGui.Button("Test ADS NPC No-Inn Repair"))
+                TestAdsNpcNoInnRepair();
+        }
+    }
+
+    private void TestAdsNpcNoInnRepair()
+    {
+        if (!plugin.AdsRepairIpcService.CheckAvailability())
+        {
+            plugin.ReportToChatAndLog("FrenRider repair test failed: ADS not loaded.", isError: true);
+            return;
+        }
+
+        if (!GameHelpers.IsInSanctuary())
+        {
+            plugin.ReportToChatAndLog("FrenRider repair test failed: NPC no-inn repair requires sanctuary.", isError: true);
+            return;
+        }
+
+        if (plugin.AdsRepairIpcService.StartRepair("npc-no-inn", out var failure))
+        {
+            plugin.ReportToChatAndLog("FrenRider repair test accepted: ADS NPC no-inn repair requested.");
+            return;
+        }
+
+        var detail = string.IsNullOrWhiteSpace(failure)
+            ? "ADS did not return a failure reason."
+            : failure;
+        plugin.ReportToChatAndLog($"FrenRider repair test failed: ADS rejected NPC no-inn repair: {detail}", isError: true);
     }
 
     private void DrawInviteWhitelistSection(CharacterConfig config)
@@ -1640,15 +1669,7 @@ public class ConfigWindow : Window, IDisposable
         ImGui.Text("Debug / Logging");
         ImGui.Spacing();
 
-        var spamPrinter = config.SpamPrinter;
-        ImGui.SetNextItemWidth(200);
-        if (ImGui.Combo("Echo Messages", ref spamPrinter, OnOff, OnOff.Length))
-        {
-            config.SpamPrinter = spamPrinter;
-            configManager.SaveCurrentAccount();
-        }
-        ImGui.SameLine();
-        HelpMarker("Print status messages to game chat.\nUseful for debugging but fills chat quickly.");
+        DrawDebugLoggingSection(config);
 
         ImGui.Spacing();
         ImGui.Separator();
@@ -1932,6 +1953,7 @@ public class ConfigWindow : Window, IDisposable
         ImGui.BulletText("/fr - Open main window (alias)");
         ImGui.BulletText("/fr on - Enable Fren Rider");
         ImGui.BulletText("/fr off - Disable Fren Rider");
+        ImGui.BulletText("/fr debug - Toggle debug controls");
         ImGui.Spacing();
         ImGui.Separator();
         ImGui.Spacing();

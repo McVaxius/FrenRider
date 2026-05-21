@@ -44,6 +44,7 @@ public sealed class Plugin : IDalamudPlugin
     public FrenTracker FrenTracker { get; init; }
     public ZoneService ZoneService { get; init; }
     public AdsIntegrationService AdsIntegrationService { get; init; }
+    public AdsRepairIpcService AdsRepairIpcService { get; init; }
     public AdsReflectionIpcService AdsReflectionIpcService { get; init; }
     public FollowService FollowService { get; init; }
     public MountService MountService { get; init; }
@@ -96,6 +97,7 @@ public sealed class Plugin : IDalamudPlugin
         FrenTracker = new FrenTracker(this);
         ZoneService = new ZoneService();
         AdsIntegrationService = new AdsIntegrationService(this, ZoneService);
+        AdsRepairIpcService = new AdsRepairIpcService(PluginInterface, Log);
         AdsReflectionIpcService = new AdsReflectionIpcService(this, PluginInterface, Log);
         FollowService = new FollowService(this, FrenTracker, ZoneService);
         MountService = new MountService(this, FrenTracker, ZoneService);
@@ -142,7 +144,7 @@ public sealed class Plugin : IDalamudPlugin
 
         CommandManager.AddHandler(AliasCommandName, new CommandInfo(OnAliasCommand)
         {
-            HelpMessage = "Fren Rider: /fr [on|off] to toggle, or /fr to open UI."
+            HelpMessage = "Fren Rider: /fr [on|off|debug] to toggle, or /fr to open UI."
         });
 
         PluginInterface.UiBuilder.Draw += WindowSystem.Draw;
@@ -188,6 +190,7 @@ public sealed class Plugin : IDalamudPlugin
         MainWindow.Dispose();
 
         AutorotIpcService.Dispose();
+        AdsRepairIpcService.Dispose();
         AdsReflectionIpcService.Dispose();
         PartyService.Dispose();
         VideoPlaybackService.Dispose();
@@ -255,6 +258,13 @@ public sealed class Plugin : IDalamudPlugin
         {
             ConfigManager.SetFrenRiderEnabled(arg == "on");
             Log.Information($"Fren Rider {(arg == "on" ? "enabled" : "disabled")} via /fr {arg}");
+        }
+        else if (arg == "debug")
+        {
+            var config = ConfigManager.GetActiveConfig();
+            config.DebugMode = !config.DebugMode;
+            ConfigManager.SaveCurrentAccount();
+            ReportToChatAndLog($"FrenRider debug controls: {(config.DebugMode ? "ON" : "OFF")}");
         }
         else if (arg == "testvideo")
         {
@@ -376,9 +386,6 @@ public sealed class Plugin : IDalamudPlugin
                 YesAlreadyIPC.Unpause();
             }
             
-            // AutoYesService update
-            AutoYesService.Update();
-
             if (Configuration.VideoNotificationsEnabled && config.Enabled != wasPluginEnabled)
             {
                 Log.Debug($"[FrenRider] Video notifications enabled, state changed: {wasPluginEnabled} -> {config.Enabled}");
@@ -426,12 +433,14 @@ public sealed class Plugin : IDalamudPlugin
             }
         }
 
-        // Update zone detection, following, and mount system
+        // Update zone detection, ADS coordination, and repair gate first.
         ZoneService.Update();
-        FateSyncService.Update();
         AdsIntegrationService.Update();
         AdsReflectionIpcService.Update();
         AutomationService.UpdateRepairGate();
+
+        AutoYesService.Update();
+        FateSyncService.Update();
         FollowService.Update();
         MountService.Update();
         CombatService.Update();
@@ -529,6 +538,19 @@ public sealed class Plugin : IDalamudPlugin
         var config = ConfigManager.GetActiveConfig();
         if (config.SpamPrinter == 1)
             Log.Debug($"[SPAM] {message}");
+    }
+
+    public void ReportToChatAndLog(string message, bool isError = false)
+    {
+        if (isError)
+        {
+            ChatGui.PrintError(message);
+            Log.Warning(message);
+            return;
+        }
+
+        ChatGui.Print(message);
+        Log.Information(message);
     }
 
     public void ToggleConfigUi() => ConfigWindow.Toggle();

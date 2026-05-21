@@ -75,6 +75,13 @@ public class DutyInteractService
             return;
         }
 
+        if (plugin.AutomationService.IsRepairFlowActive)
+        {
+            Reset();
+            StateDetail = "Repair active";
+            return;
+        }
+
         if (plugin.AdsIntegrationService.ShouldPauseDutySystems)
         {
             Reset();

@@ -51,6 +51,9 @@ public class PartyService
         if (!config.Enabled || config.InviteWhitelist.Count == 0)
             return;
 
+        if (plugin.AutomationService.IsRepairFlowActive)
+            return;
+
         var inParty = Plugin.PartyList.Length > 0;
 
         // If we just joined a party and we had a whitelisted inviter, set them as fren
@@ -82,6 +85,9 @@ public class PartyService
     {
         var config = plugin.ConfigManager.GetActiveConfig();
         if (!config.Enabled || config.InviteWhitelist.Count == 0)
+            return;
+
+        if (plugin.AutomationService.IsRepairFlowActive)
             return;
 
         // Don't auto-accept if already in a party
