@@ -846,6 +846,60 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("Target HP percentage to use Limit Break.\n-1 = Disabled.\nAutomatically uses LB3 if available, otherwise LB2.");
+
+        DrawHacksSection(config);
+    }
+
+    private void DrawHacksSection(CharacterConfig config)
+    {
+        ImGui.Spacing();
+        ImGui.Separator();
+        ImGui.Text("Hacks");
+        ImGui.Spacing();
+
+        var reduceRange = config.BmrReduceActivationRangeForOutdoorAreas;
+        if (ImGui.Checkbox("BMR reduce activation range for outdoor areas", ref reduceRange))
+        {
+            config.BmrReduceActivationRangeForOutdoorAreas = reduceRange;
+            configManager.SaveCurrentAccount();
+            plugin.AdsReflectionIpcService.QueueImmediateUpdate();
+        }
+        ImGui.SameLine();
+        HelpMarker($"When enabled, FrenRider asks ADS to set BMR MaxLoadDistance to {AdsReflectionIpcService.ReducedOutdoorMaxLoadDistance:0}.");
+
+        var disableHunts = config.BmrDisableHuntModules;
+        if (ImGui.Checkbox("BMR Disable Hunt Modules", ref disableHunts))
+        {
+            config.BmrDisableHuntModules = disableHunts;
+            configManager.SaveCurrentAccount();
+            plugin.AdsReflectionIpcService.QueueImmediateUpdate();
+        }
+        ImGui.SameLine();
+        HelpMarker("When enabled, FrenRider asks ADS to disable BMR hunt modules.");
+
+        var disableQueen = config.BmrDisableQueenLunatender;
+        if (ImGui.Checkbox("BMR Disable Queen Lunatender", ref disableQueen))
+        {
+            config.BmrDisableQueenLunatender = disableQueen;
+            configManager.SaveCurrentAccount();
+            plugin.AdsReflectionIpcService.QueueImmediateUpdate();
+        }
+        ImGui.SameLine();
+        HelpMarker("When enabled, FrenRider asks ADS to disable the BMR Queen Lunatender module.");
+
+        var reflection = plugin.AdsReflectionIpcService;
+        var statusColor = !reflection.IsAdsAvailable && reflection.HasPendingActions
+            ? UiHelpers.Yellow
+            : reflection.StatusText.Contains("unavailable", StringComparison.OrdinalIgnoreCase)
+                ? UiHelpers.Yellow
+                : UiHelpers.Green;
+        ImGui.TextColored(statusColor, $"ADS reflection: {reflection.StatusText}");
+
+        if (reflection.NextAttemptAtUtc is { } nextAttempt && nextAttempt > DateTime.UtcNow)
+        {
+            var seconds = Math.Max(0, (int)Math.Ceiling((nextAttempt - DateTime.UtcNow).TotalSeconds));
+            ImGui.TextColored(UiHelpers.Grey, $"  Next retry/reassert in {seconds}s.");
+        }
     }
 
     private void DrawAdsTab(CharacterConfig config)

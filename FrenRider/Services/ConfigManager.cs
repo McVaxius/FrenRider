@@ -307,6 +307,9 @@ public class ConfigManager
                 target.MaxAIDistance = source.MaxAIDistance;
                 target.LimitPct = source.LimitPct;
                 target.RotationType = source.RotationType;
+                target.BmrReduceActivationRangeForOutdoorAreas = source.BmrReduceActivationRangeForOutdoorAreas;
+                target.BmrDisableHuntModules = source.BmrDisableHuntModules;
+                target.BmrDisableQueenLunatender = source.BmrDisableQueenLunatender;
                 break;
             case "Duty":
             case "Ads":

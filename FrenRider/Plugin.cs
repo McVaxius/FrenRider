@@ -44,6 +44,7 @@ public sealed class Plugin : IDalamudPlugin
     public FrenTracker FrenTracker { get; init; }
     public ZoneService ZoneService { get; init; }
     public AdsIntegrationService AdsIntegrationService { get; init; }
+    public AdsReflectionIpcService AdsReflectionIpcService { get; init; }
     public FollowService FollowService { get; init; }
     public MountService MountService { get; init; }
     public CombatService CombatService { get; init; }
@@ -95,6 +96,7 @@ public sealed class Plugin : IDalamudPlugin
         FrenTracker = new FrenTracker(this);
         ZoneService = new ZoneService();
         AdsIntegrationService = new AdsIntegrationService(this, ZoneService);
+        AdsReflectionIpcService = new AdsReflectionIpcService(this, PluginInterface, Log);
         FollowService = new FollowService(this, FrenTracker, ZoneService);
         MountService = new MountService(this, FrenTracker, ZoneService);
         CombatService = new CombatService(this, FrenTracker, ZoneService);
@@ -186,6 +188,7 @@ public sealed class Plugin : IDalamudPlugin
         MainWindow.Dispose();
 
         AutorotIpcService.Dispose();
+        AdsReflectionIpcService.Dispose();
         PartyService.Dispose();
         VideoPlaybackService.Dispose();
         ExitBehaviourService.Dispose();
@@ -427,6 +430,7 @@ public sealed class Plugin : IDalamudPlugin
         ZoneService.Update();
         FateSyncService.Update();
         AdsIntegrationService.Update();
+        AdsReflectionIpcService.Update();
         AutomationService.UpdateRepairGate();
         FollowService.Update();
         MountService.Update();

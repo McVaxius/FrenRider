@@ -53,6 +53,9 @@ public class CharacterConfig
     public float MaxAIDistance { get; set; } = 424242f;
     public float LimitPct { get; set; } = -1f;
     public int RotationType { get; set; } = 0; // 0=Auto, 1=Manual, 2=none, 3=Auto (Support), 4=Previously Engaged Targets
+    public bool BmrReduceActivationRangeForOutdoorAreas { get; set; } = false;
+    public bool BmrDisableHuntModules { get; set; } = false;
+    public bool BmrDisableQueenLunatender { get; set; } = false;
     public bool UseAdsIfAvailable { get; set; } = false;
     public int AdsMaturityThreshold { get; set; } = 3; // 0=Not Cleared, 1=1P Unsync, 2=1P Duty Support, 3=4P Sync
     public bool AdsDutyFamilySettingsMigrated { get; set; } = false;
@@ -149,6 +152,9 @@ public class CharacterConfig
             MaxAIDistance = MaxAIDistance,
             LimitPct = LimitPct,
             RotationType = RotationType,
+            BmrReduceActivationRangeForOutdoorAreas = BmrReduceActivationRangeForOutdoorAreas,
+            BmrDisableHuntModules = BmrDisableHuntModules,
+            BmrDisableQueenLunatender = BmrDisableQueenLunatender,
             UseAdsIfAvailable = UseAdsIfAvailable,
             AdsMaturityThreshold = AdsMaturityThreshold,
             AdsDutyFamilySettingsMigrated = AdsDutyFamilySettingsMigrated,
