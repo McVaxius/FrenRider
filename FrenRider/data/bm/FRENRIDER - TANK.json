@@ -213,7 +213,12 @@
         "Option": "Automatic"
       }
     ],
-    "BossMod.Autorotation.xan.TankAI": [],
+    "BossMod.Autorotation.xan.TankAI": [
+      {
+        "Track": "Interject2",
+        "Option": "Enabled"
+      }
+    ],
     "BossMod.Autorotation.VeynBRD": [],
     "BossMod.Autorotation.xan.HealerAI": [
       {

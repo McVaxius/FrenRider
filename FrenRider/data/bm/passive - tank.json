@@ -29,7 +29,12 @@
         "Option": "20"
       }
     ],
-    "BossMod.Autorotation.xan.TankAI": [],
+    "BossMod.Autorotation.xan.TankAI": [
+      {
+        "Track": "Interject2",
+        "Option": "Enabled"
+      }
+    ],
     "BossMod.Autorotation.MiscAI.NormalMovement": [
       {
         "Track": "Destination",
