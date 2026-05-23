@@ -795,6 +795,12 @@ public class AutomationService
             return false;
         }
 
+        if (GameHelpers.TryGetMountedOrRidingOrMountingBlocker(out var mountBlocker))
+        {
+            reason = mountBlocker;
+            return false;
+        }
+
         if (Plugin.Condition[ConditionFlag.OccupiedInQuestEvent] ||
             Plugin.Condition[ConditionFlag.OccupiedInCutSceneEvent] ||
             Plugin.Condition[ConditionFlag.Occupied33] ||

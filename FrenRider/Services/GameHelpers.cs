@@ -219,6 +219,36 @@ public static class GameHelpers
             || Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.RidingPillion];
     }
 
+    public static bool IsMountedOrRidingOrMounting()
+    {
+        return IsMountedOrRiding()
+            || Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.Mounting71];
+    }
+
+    public static bool TryGetMountedOrRidingOrMountingBlocker(out string reason)
+    {
+        if (Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.Mounting71])
+        {
+            reason = "mounting";
+            return true;
+        }
+
+        if (Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.RidingPillion])
+        {
+            reason = "riding pillion";
+            return true;
+        }
+
+        if (Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.Mounted])
+        {
+            reason = "mounted";
+            return true;
+        }
+
+        reason = string.Empty;
+        return false;
+    }
+
     public static unsafe bool CanUseMountActionNow(out string reason)
     {
         if (Plugin.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.Mounted]
