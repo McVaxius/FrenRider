@@ -19,7 +19,7 @@ namespace FrenRider.Services;
 /// <summary>
 /// Handles automatic exit behaviour based on configurable rules:
 /// 1. Exit if an exit object (Cairn of Return, etc.) exists in the zone - path to it + interact
-/// 2. Exit N seconds after duty ends (via IDutyState.DutyCompleted + BoundByDuty transition)
+/// 2. Exit N seconds after duty ends (via IDutyState.DutyCompleted)
 /// 3. Leave duty when all other party members have left the zone
 /// 4. Exit via CBT (Automaton) auto-leave after N seconds
 /// </summary>
@@ -35,7 +35,6 @@ public class ExitBehaviourService : IDisposable
     private bool dutyLeaveIssued;
     private bool wasBoundByDuty;
     private DateTime dutyEnteredTime = DateTime.MinValue;
-    private DateTime boundByDutyLostTime = DateTime.MinValue; // Debounce for BoundByDuty flicker
     private const double DutyGracePeriodSeconds = 30.0;
     private bool adsLeaveIssuedForDuty;
 
@@ -107,15 +106,68 @@ public class ExitBehaviourService : IDisposable
         Plugin.Log.Information($"[ExitBehaviour] Duty completed in territory {territoryId}");
     }
 
+    private void ResetOutsideDutyState()
+    {
+        var hadState = dutyCompleted
+                       || dutyLeaveIssued
+                       || adsLeaveIssuedForDuty
+                       || leaveAttemptCount > 0
+                       || exitTarget != null
+                       || isNavigatingToExit
+                       || leaveDutyStep != LeaveDutyStep.None
+                       || lastPartyCheckTime > DateTime.MinValue;
+
+        CancelLeaveDutySequence("not in duty");
+        if (isNavigatingToExit)
+            SendCommand("/vnav stop");
+
+        dutyCompleted = false;
+        dutyCompletedTime = DateTime.MinValue;
+        dutyLeaveIssued = false;
+        adsLeaveIssuedForDuty = false;
+        leaveAttemptCount = 0;
+        dutyEnteredTime = DateTime.MinValue;
+        lastExitInteractTime = DateTime.MinValue;
+        lastExitScanTime = DateTime.MinValue;
+        lastPartyCheckTime = DateTime.MinValue;
+        lastLeaveAttemptTime = DateTime.MinValue;
+        leaveConfirmationAttemptCount = 0;
+        pendingLeaveReason = "";
+        exitTarget = null;
+        isNavigatingToExit = false;
+        wasBoundByDuty = false;
+        StateDetail = "";
+
+        if (hadState)
+            Plugin.Log.Debug("[ExitBehaviour] No longer in duty - reset exit state");
+    }
+
     /// <summary>
     /// Called every framework tick. Evaluates exit rules and takes action if needed.
     /// </summary>
     public void Update()
     {
         var config = plugin.ConfigManager.GetActiveConfig();
+        var inDuty = Plugin.Condition[ConditionFlag.BoundByDuty] ||
+                     Plugin.Condition[ConditionFlag.BoundByDuty56];
+
         if (!config.Enabled)
         {
             CancelLeaveDutySequence("plugin disabled");
+            if (!inDuty)
+                ResetOutsideDutyState();
+            return;
+        }
+
+        if (config.NormalizeExitMethodSelection())
+        {
+            Plugin.Log.Warning("[ExitBehaviour] Normalized mutually exclusive exit method settings");
+            plugin.ConfigManager.SaveCurrentAccount();
+        }
+
+        if (!inDuty)
+        {
+            ResetOutsideDutyState();
             return;
         }
 
@@ -133,15 +185,6 @@ public class ExitBehaviourService : IDisposable
             return;
         }
 
-        if (config.NormalizeExitMethodSelection())
-        {
-            Plugin.Log.Warning("[ExitBehaviour] Normalized mutually exclusive exit method settings");
-            plugin.ConfigManager.SaveCurrentAccount();
-        }
-
-        var inDuty = Plugin.Condition[ConditionFlag.BoundByDuty] ||
-                     Plugin.Condition[ConditionFlag.BoundByDuty56];
-
         // Track duty entry for grace period
         if (inDuty && !wasBoundByDuty)
         {
@@ -149,61 +192,7 @@ public class ExitBehaviourService : IDisposable
             adsLeaveIssuedForDuty = false;
             Plugin.Log.Information($"[ExitBehaviour] Entered duty - {DutyGracePeriodSeconds}s grace period before exit checks");
         }
-
-        // Detect BoundByDuty transition (true→false) as duty end signal
-        // This catches all duty types including treasure dungeons where DutyCompleted may not fire
-        // DEBOUNCE: BoundByDuty can flicker during loading screens within a duty,
-        // so only detect transition if we've been unbound for >2 seconds
-        if (wasBoundByDuty && !inDuty)
-        {
-            if (boundByDutyLostTime == DateTime.MinValue)
-            {
-                boundByDutyLostTime = DateTime.Now;
-                Plugin.Log.Debug("[ExitBehaviour] BoundByDuty dropped - starting 2s debounce");
-            }
-            else if ((DateTime.Now - boundByDutyLostTime).TotalSeconds >= 2.0)
-            {
-                if (!dutyCompleted)
-                {
-                    dutyCompleted = true;
-                    dutyCompletedTime = DateTime.Now;
-                    dutyLeaveIssued = false;
-                    plugin.AdsIntegrationService.ReleaseDutyControlForExit("BoundByDuty dropped");
-                    Plugin.Log.Information("[ExitBehaviour] BoundByDuty transition confirmed (was bound, now free for 2s) - marking duty completed");
-                }
-            }
-        }
-        else
-        {
-            // Reset debounce if BoundByDuty came back
-            if (boundByDutyLostTime != DateTime.MinValue && inDuty)
-            {
-                Plugin.Log.Debug("[ExitBehaviour] BoundByDuty restored during debounce - false alarm");
-            }
-            boundByDutyLostTime = DateTime.MinValue;
-        }
-        wasBoundByDuty = inDuty;
-
-        // Reset state when no longer in duty
-        if (!inDuty)
-        {
-            CancelLeaveDutySequence("not in duty");
-            if (exitTarget != null || isNavigatingToExit)
-            {
-                exitTarget = null;
-                isNavigatingToExit = false;
-            }
-            if (dutyCompleted && dutyLeaveIssued)
-            {
-                dutyCompleted = false;
-                dutyLeaveIssued = false;
-                adsLeaveIssuedForDuty = false;
-                leaveAttemptCount = 0;
-                Plugin.Log.Debug("[ExitBehaviour] No longer in duty - reset completion state");
-            }
-            StateDetail = "";
-            return;
-        }
+        wasBoundByDuty = true;
 
         // Don't try to leave during loading screens
         if (Plugin.Condition[ConditionFlag.BetweenAreas] || Plugin.Condition[ConditionFlag.BetweenAreas51])
