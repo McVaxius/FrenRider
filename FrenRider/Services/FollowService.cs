@@ -202,7 +202,6 @@ public class FollowService
         var selfFlying = Plugin.Condition[ConditionFlag.InFlight];
         var frenFlying = fren.IsFlying;
         var now = Environment.TickCount64;
-        var shouldMaintainMountedFlightFollow = config.FlyYouFools && fren.IsMounted && selfMounted && (frenFlying || selfFlying);
 
         // Too far — stop
         if (distance > maxDist)
@@ -216,7 +215,7 @@ public class FollowService
         }
 
         // In range — stop
-        if (distance <= clingDist && !shouldMaintainMountedFlightFollow)
+        if (distance <= clingDist)
         {
             CancelFlyingStuckRecovery("in range");
             if (isNavigating) StopNavigation(config, $"in range ({distance:F1}y <= {clingDist:F1}y)");
