@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Dalamud.Game.Command;
+using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.Gui.Dtr;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
@@ -72,6 +74,9 @@ public sealed class Plugin : IDalamudPlugin
     private bool wasLoggedIn;
     private int loginDetectionDelay;
     private bool wasPluginEnabled = false;
+    private DateTime nextFrameworkHitchLogUtc = DateTime.MinValue;
+    private double lastSlowUpdateMs;
+    private string lastSlowUpdateSource = "none";
 //	private readonly ICommandManager commandManager;
 
     public Plugin()
@@ -347,108 +352,166 @@ public sealed class Plugin : IDalamudPlugin
 
     private void OnFrameworkUpdate(IFramework fw)
     {
-        // Delayed login detection (LocalPlayer may not be ready immediately)
-        if (ClientState.IsLoggedIn && !wasLoggedIn)
+        var updateStopwatch = Stopwatch.StartNew();
+        var slowestSection = "none";
+        var slowestMs = 0d;
+
+        void Measure(string section, Action action)
         {
-            wasLoggedIn = true;
-            loginDetectionDelay = 3; // Wait a few frames for LocalPlayer to be ready
+            var sectionStopwatch = Stopwatch.StartNew();
+            action();
+            sectionStopwatch.Stop();
+
+            var elapsedMs = sectionStopwatch.Elapsed.TotalMilliseconds;
+            if (elapsedMs > slowestMs)
+            {
+                slowestMs = elapsedMs;
+                slowestSection = section;
+            }
         }
-        else if (!ClientState.IsLoggedIn && wasLoggedIn)
+
+        try
         {
-            wasLoggedIn = false;
-            loginDetectionDelay = 0;
-        }
+            Measure("dtr", UpdateDtrBar);
+            Measure("zone", ZoneService.Update);
 
-        if (loginDetectionDelay > 0)
+            if (IsAreaTransitionActive())
+                return;
+
+            // Delayed login detection (LocalPlayer may not be ready immediately)
+            if (ClientState.IsLoggedIn && !wasLoggedIn)
+            {
+                wasLoggedIn = true;
+                loginDetectionDelay = 3; // Wait a few frames for LocalPlayer to be ready
+            }
+            else if (!ClientState.IsLoggedIn && wasLoggedIn)
+            {
+                wasLoggedIn = false;
+                loginDetectionDelay = 0;
+            }
+
+            if (loginDetectionDelay > 0)
+            {
+                loginDetectionDelay--;
+                if (loginDetectionDelay == 0)
+                    Measure("login", OnLogin);
+            }
+
+            // Update fren tracking
+            Measure("fren-tracker", FrenTracker.Update);
+
+            // Check for plugin enable/disable state changes
+            var config = ConfigManager.GetActiveConfig();
+            if (config != null)
+            {
+                Measure("config-state", () =>
+                {
+                    // YesAlready pause/unpause on enable/disable
+                    if (config.Enabled && !YesAlreadyIPC.IsPaused)
+                    {
+                        YesAlreadyIPC.Pause();
+                    }
+                    else if (!config.Enabled && YesAlreadyIPC.IsPaused)
+                    {
+                        YesAlreadyIPC.Unpause();
+                    }
+
+                    if (Configuration.VideoNotificationsEnabled && config.Enabled != wasPluginEnabled)
+                    {
+                        Log.Debug($"[FrenRider] Video notifications enabled, state changed: {wasPluginEnabled} -> {config.Enabled}");
+
+                        if (config.Enabled)
+                        {
+                            // Plugin was just enabled - play enable video
+                            var enableVideoPath = VideoPlaybackService.GetEmbeddedVideoPath("1.mp4");
+                            Log.Debug($"[FrenRider] Enable video path: {enableVideoPath}");
+                            if (!string.IsNullOrEmpty(enableVideoPath))
+                            {
+                                Log.Information("[FrenRider] Playing enable video...");
+                                _ = VideoPlaybackService.PlayVideo(enableVideoPath);
+                            }
+                            else
+                            {
+                                Log.Warning("[FrenRider] Enable video not found");
+                            }
+                        }
+                        else
+                        {
+                            // Plugin was just disabled - play disable video
+                            var disableVideoPath = VideoPlaybackService.GetEmbeddedVideoPath("2.mp4");
+                            Log.Debug($"[FrenRider] Disable video path: {disableVideoPath}");
+                            if (!string.IsNullOrEmpty(disableVideoPath))
+                            {
+                                Log.Information("[FrenRider] Playing disable video...");
+                                _ = VideoPlaybackService.PlayVideo(disableVideoPath);
+                            }
+                            else
+                            {
+                                Log.Warning("[FrenRider] Disable video not found");
+                            }
+                        }
+                        wasPluginEnabled = config.Enabled;
+                    }
+                    else if (!Configuration.VideoNotificationsEnabled)
+                    {
+                        // Reset tracking when video notifications are disabled (only when it changes from enabled to disabled)
+                        if (wasPluginEnabled != config.Enabled)
+                        {
+                            wasPluginEnabled = config.Enabled;
+                            Log.Debug("[FrenRider] Video notifications disabled, resetting tracking");
+                        }
+                    }
+                });
+            }
+
+            // Update ADS coordination and repair gate before movement/combat services.
+            Measure("ads-integration", AdsIntegrationService.Update);
+            Measure("ads-reflection", () => AdsReflectionIpcService.Update());
+            Measure("repair-gate", AutomationService.UpdateRepairGate);
+
+            Measure("auto-yes", AutoYesService.Update);
+            Measure("fate-sync", FateSyncService.Update);
+            Measure("follow", FollowService.Update);
+            Measure("mount", MountService.Update);
+            Measure("combat", CombatService.Update);
+            Measure("automation", AutomationService.Update);
+            Measure("formation", FormationService.Update);
+            Measure("party", PartyService.Update);
+            Measure("duty-interact", DutyInteractService.Update);
+            Measure("exit", ExitBehaviourService.Update);
+        }
+        finally
         {
-            loginDetectionDelay--;
-            if (loginDetectionDelay == 0)
-                OnLogin();
+            updateStopwatch.Stop();
+            ReportFrameworkHitch(updateStopwatch.Elapsed.TotalMilliseconds, slowestSection, slowestMs);
         }
+    }
 
-        // Update DTR bar
-        UpdateDtrBar();
+    private static bool IsAreaTransitionActive()
+        => Condition[ConditionFlag.BetweenAreas] || Condition[ConditionFlag.BetweenAreas51];
 
-        // Update fren tracking
-        FrenTracker.Update();
+    private void ReportFrameworkHitch(double elapsedMs, string slowestSection, double slowestMs)
+    {
+        lastSlowUpdateMs = elapsedMs;
+        lastSlowUpdateSource = slowestSection;
+        if (elapsedMs < 100d)
+            return;
 
-        // Check for plugin enable/disable state changes
+        var now = DateTime.UtcNow;
+        if (now < nextFrameworkHitchLogUtc)
+            return;
+
+        nextFrameworkHitchLogUtc = now.AddSeconds(5);
         var config = ConfigManager.GetActiveConfig();
-        if (config != null)
-        {
-            // YesAlready pause/unpause on enable/disable
-            if (config.Enabled && !YesAlreadyIPC.IsPaused)
-            {
-                YesAlreadyIPC.Pause();
-            }
-            else if (!config.Enabled && YesAlreadyIPC.IsPaused)
-            {
-                YesAlreadyIPC.Unpause();
-            }
-            
-            if (Configuration.VideoNotificationsEnabled && config.Enabled != wasPluginEnabled)
-            {
-                Log.Debug($"[FrenRider] Video notifications enabled, state changed: {wasPluginEnabled} -> {config.Enabled}");
-                
-                if (config.Enabled)
-                {
-                    // Plugin was just enabled - play enable video
-                    var enableVideoPath = VideoPlaybackService.GetEmbeddedVideoPath("1.mp4");
-                    Log.Debug($"[FrenRider] Enable video path: {enableVideoPath}");
-                    if (!string.IsNullOrEmpty(enableVideoPath))
-                    {
-                        Log.Information("[FrenRider] Playing enable video...");
-                        _ = VideoPlaybackService.PlayVideo(enableVideoPath);
-                    }
-                    else
-                    {
-                        Log.Warning("[FrenRider] Enable video not found");
-                    }
-                }
-                else
-                {
-                    // Plugin was just disabled - play disable video
-                    var disableVideoPath = VideoPlaybackService.GetEmbeddedVideoPath("2.mp4");
-                    Log.Debug($"[FrenRider] Disable video path: {disableVideoPath}");
-                    if (!string.IsNullOrEmpty(disableVideoPath))
-                    {
-                        Log.Information("[FrenRider] Playing disable video...");
-                        _ = VideoPlaybackService.PlayVideo(disableVideoPath);
-                    }
-                    else
-                    {
-                        Log.Warning("[FrenRider] Disable video not found");
-                    }
-                }
-                wasPluginEnabled = config.Enabled;
-            }
-            else if (!Configuration.VideoNotificationsEnabled)
-            {
-                // Reset tracking when video notifications are disabled (only when it changes from enabled to disabled)
-                if (wasPluginEnabled != config.Enabled)
-                {
-                    wasPluginEnabled = config.Enabled;
-                    Log.Debug("[FrenRider] Video notifications disabled, resetting tracking");
-                }
-            }
-        }
-
-        // Update zone detection, ADS coordination, and repair gate first.
-        ZoneService.Update();
-        AdsIntegrationService.Update();
-        AdsReflectionIpcService.Update();
-        AutomationService.UpdateRepairGate();
-
-        AutoYesService.Update();
-        FateSyncService.Update();
-        FollowService.Update();
-        MountService.Update();
-        CombatService.Update();
-        AutomationService.Update();
-        FormationService.Update();
-        PartyService.Update();
-        DutyInteractService.Update();
-        ExitBehaviourService.Update();
+        Log.Warning(
+            "[FrenRider][HITCH] framework update slow elapsedMs={ElapsedMs:0.0}; slowSection={SlowSection}; slowSectionMs={SlowSectionMs:0.0}; transition={Transition}; enabled={Enabled}; zone={Zone}; territory={Territory}.",
+            elapsedMs,
+            slowestSection,
+            slowestMs,
+            IsAreaTransitionActive(),
+            config?.Enabled ?? false,
+            ZoneService.CurrentZone,
+            ZoneService.TerritoryId);
     }
 
     public void SetupDtrBar()
