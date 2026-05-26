@@ -32,6 +32,7 @@ public class FollowService
     private readonly Plugin plugin;
     private readonly FrenTracker tracker;
     private readonly ZoneService zoneService;
+    private readonly VNavStateService vnavState;
 
     private Vector3 lastNavTarget;
     private bool isNavigating;
@@ -47,12 +48,20 @@ public class FollowService
     private bool bossModFollowSelfFlying;
     private bool lastNavigationWasFlying;
     private bool lastNavigationWasFrenFollow;
+    private long lastNavCommandMs;
+    private long lastFlyingIdleReissueMs;
+    private Vector3 flyingIdleSamplePosition;
+    private long flyingIdleSampleTimeMs;
 
     // Stuck detection: record position every 5s, check per-axis movement < 2y
     private Vector3 stuckCheckPosition;
     private long stuckCheckTimeMs;
     private const long StuckCheckIntervalMs = 5000;
     private const float StuckPerAxisThreshold = 2f;
+    private const long FlyingIdleNavCommandGraceMs = 750;
+    private const long FlyingIdleReissueThrottleMs = 1000;
+    private const long FlyingIdleMovementSampleMs = 500;
+    private const float FlyingIdleMovementThreshold = 0.25f;
 
     private Vector3 flyingStuckBaselinePosition;
     private long flyingStuckBaselineTimeMs;
@@ -77,6 +86,7 @@ public class FollowService
         this.plugin = plugin;
         this.tracker = tracker;
         this.zoneService = zoneService;
+        vnavState = new VNavStateService(Plugin.PluginInterface, Plugin.Log);
     }
 
     public void Dispose()
@@ -118,6 +128,7 @@ public class FollowService
             stuckCheckPosition = default;
             stuckCheckTimeMs = 0;
             ResetFlyingStuckTracking();
+            ResetFlyingIdleSampler();
             LogFateFollowDecisionIfChanged(config, tracker.Fren, "zone transition");
             // Force immediate fren scan on next frame (skip throttle)
             tracker.ForceNextScan();
@@ -357,6 +368,9 @@ public class FollowService
         // Check if we reached the end of the current path segment
         if (localPlayer != null)
         {
+            if (TryReissueIdleFlyingFrenFollow(config, localPlayer.Position, target, selfFlying, isFrenFollowTarget, now))
+                return;
+
             var distToNavTarget = Vector3.Distance(localPlayer.Position, lastNavTarget);
             var arrivedThreshold = selfFlying ? 5.0f : 2.0f;
             if (distToNavTarget < arrivedThreshold)
@@ -403,12 +417,97 @@ public class FollowService
         }
     }
 
+    private bool TryReissueIdleFlyingFrenFollow(
+        CharacterConfig config,
+        Vector3 localPosition,
+        Vector3 target,
+        bool selfFlying,
+        bool isFrenFollowTarget,
+        long now)
+    {
+        if (!ShouldCheckFlyingIdleReissue(config, selfFlying, isFrenFollowTarget, now))
+        {
+            ResetFlyingIdleSampler();
+            return false;
+        }
+
+        if (!vnavState.TryGetState(out var pathRunning, out var pathfindInProgress))
+            return false;
+
+        if (pathRunning || pathfindInProgress)
+        {
+            ResetFlyingIdleSampler();
+            return false;
+        }
+
+        if (!IsFlyingIdlePositionStable(localPosition, now))
+            return false;
+
+        lastFlyingIdleReissueMs = now;
+        Plugin.Log.Information(
+            $"[FR][Pathing] Flying vnav idle while following fren; reissuing flyto. local={FormatVector(localPosition)}; target={FormatVector(target)}");
+        IssueNavCommand(config, target, selfFlying, "flying vnav idle reissue", isFrenFollowTarget);
+        stuckCheckPosition = localPosition;
+        stuckCheckTimeMs = now;
+        ResetFlyingStuckTracking(localPosition, now);
+        return true;
+    }
+
+    private bool ShouldCheckFlyingIdleReissue(
+        CharacterConfig config,
+        bool selfFlying,
+        bool isFrenFollowTarget,
+        long now)
+    {
+        return config.Enabled
+            && isFrenFollowTarget
+            && isNavigating
+            && lastNavigationWasFrenFollow
+            && lastNavigationWasFlying
+            && lastMovementClingType == 0
+            && selfFlying
+            && Plugin.Condition[ConditionFlag.Mounted]
+            && !IsLoadingOrBetweenAreas()
+            && !plugin.AdsIntegrationService.ShouldPauseDutySystems
+            && !plugin.AutomationService.IsRepairFlowActive
+            && GetResolvedClingType(config) != 2
+            && zoneService.CurrentZone != ZoneType.Foray
+            && now - lastNavCommandMs >= FlyingIdleNavCommandGraceMs
+            && now - lastFlyingIdleReissueMs >= FlyingIdleReissueThrottleMs;
+    }
+
+    private bool IsFlyingIdlePositionStable(Vector3 localPosition, long now)
+    {
+        if (flyingIdleSampleTimeMs == 0)
+        {
+            flyingIdleSamplePosition = localPosition;
+            flyingIdleSampleTimeMs = now;
+            return false;
+        }
+
+        if (now - flyingIdleSampleTimeMs < FlyingIdleMovementSampleMs)
+            return false;
+
+        var moved = Vector3.Distance(localPosition, flyingIdleSamplePosition);
+        flyingIdleSamplePosition = localPosition;
+        flyingIdleSampleTimeMs = now;
+        return moved < FlyingIdleMovementThreshold;
+    }
+
+    private void ResetFlyingIdleSampler()
+    {
+        flyingIdleSamplePosition = default;
+        flyingIdleSampleTimeMs = 0;
+    }
+
     private void IssueNavCommand(CharacterConfig config, Vector3 target, bool selfFlying, string reason, bool isFrenFollowTarget)
     {
         var previousTarget = lastNavTarget;
         lastNavTarget = target;
         isNavigating = true;
         lastNavigationWasFrenFollow = isFrenFollowTarget;
+        lastNavCommandMs = Environment.TickCount64;
+        ResetFlyingIdleSampler();
 
         // Foray zones: never fly, always use moveto (no flying in forays)
         if (zoneService.CurrentZone == ZoneType.Foray)
@@ -836,6 +935,7 @@ public class FollowService
         isNavigating = false;
         lastNavigationWasFlying = false;
         lastNavigationWasFrenFollow = false;
+        ResetFlyingIdleSampler();
         SendCommand(cmd);
     }
 
