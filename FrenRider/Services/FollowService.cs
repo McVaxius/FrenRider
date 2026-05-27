@@ -52,15 +52,19 @@ public class FollowService
     private long lastFlyingIdleReissueMs;
     private Vector3 flyingIdleSamplePosition;
     private long flyingIdleSampleTimeMs;
+    private bool flyingTakeoffPending;
+    private long flyingTakeoffGroundNavHoldUntilMs;
 
     // Stuck detection: record position every 5s, check per-axis movement < 2y
     private Vector3 stuckCheckPosition;
     private long stuckCheckTimeMs;
     private const long StuckCheckIntervalMs = 5000;
     private const float StuckPerAxisThreshold = 2f;
-    private const long FlyingIdleNavCommandGraceMs = 750;
-    private const long FlyingIdleReissueThrottleMs = 1000;
-    private const long FlyingIdleMovementSampleMs = 500;
+    private const long FlyingTakeoffJumpThrottleMs = 1000;
+    private const long FlyingTakeoffGroundNavHoldMs = 1200;
+    private const long FlyingIdleNavCommandGraceMs = 250;
+    private const long FlyingIdleReissueThrottleMs = 500;
+    private const long FlyingIdleMovementSampleMs = 150;
     private const float FlyingIdleMovementThreshold = 0.25f;
 
     private Vector3 flyingStuckBaselinePosition;
@@ -213,11 +217,14 @@ public class FollowService
         var selfFlying = Plugin.Condition[ConditionFlag.InFlight];
         var frenFlying = fren.IsFlying;
         var now = Environment.TickCount64;
+        if (!selfMounted || !frenFlying)
+            ResetFlyingTakeoffState();
 
         // Too far — stop
         if (distance > maxDist)
         {
             CancelFlyingStuckRecovery("too far");
+            ResetFlyingTakeoffState();
             if (isNavigating) StopNavigation(config, $"too far ({distance:F1}y > {maxDist:F0}y max)");
             State = FollowState.TooFar;
             StateDetail = $"Too far ({distance:F1}y > {maxDist:F0}y max)";
@@ -229,6 +236,7 @@ public class FollowService
         if (distance <= clingDist)
         {
             CancelFlyingStuckRecovery("in range");
+            ResetFlyingTakeoffState();
             if (isNavigating) StopNavigation(config, $"in range ({distance:F1}y <= {clingDist:F1}y)");
             State = FollowState.InRange;
             StateDetail = $"In range ({distance:F1}y)";
@@ -250,20 +258,13 @@ public class FollowService
             }
         }
 
-        // Flying follow: if fren is flying and we're mounted but NOT already flying, send jump
-        // This matches SND: "if Svc.Condition[77] then flying_adjust = flying_adjust + 1"
-        if (selfMounted && frenFlying && !selfFlying && now - lastFlyingAdjustMs > 1000)
-        {
-            // Send jump command to initiate flight (only if not already flying)
-            SendCommand("/gaction jump");
-            lastFlyingAdjustMs = now;
-            Plugin.Log.Information("Flying follow: sent jump command to initiate flight");
-        }
+        TryStartFlyingTakeoff(config, selfMounted, selfFlying, frenFlying, now);
 
         // Formation mode: override target with formation position
         var formationTarget = plugin.FormationService.GetFormationTarget();
         if (formationTarget.HasValue)
         {
+            ResetFlyingTakeoffState();
             CancelFlyingStuckRecovery("formation follow active");
             if (bossModFollowActive)
                 StopBossModFollow();
@@ -331,6 +332,7 @@ public class FollowService
     {
         if (GetResolvedClingType(config) == 2)
         {
+            ResetFlyingTakeoffState();
             CancelFlyingStuckRecovery("BossMod follow active");
             EnsureBossModFollow(config, fren);
             return;
@@ -350,6 +352,12 @@ public class FollowService
         var selfFlying = Plugin.Condition[ConditionFlag.InFlight];
         var localPlayer = Plugin.ObjectTable.LocalPlayer;
         var now = Environment.TickCount64;
+
+        if (TryIssueImmediateFlytoAfterTakeoff(config, target, selfFlying, isFrenFollowTarget, localPlayer?.Position ?? default, now))
+            return;
+
+        if (ShouldHoldGroundRepathForTakeoff(isFrenFollowTarget, selfFlying, now))
+            return;
 
         // First navigation after idle/zone change: always issue command
         if (!isNavigating)
@@ -415,6 +423,78 @@ public class FollowService
                 stuckCheckTimeMs = now;
             }
         }
+    }
+
+    private void TryStartFlyingTakeoff(
+        CharacterConfig config,
+        bool selfMounted,
+        bool selfFlying,
+        bool frenFlying,
+        long now)
+    {
+        if (!selfMounted || !frenFlying || selfFlying)
+            return;
+
+        if (now - lastFlyingAdjustMs <= FlyingTakeoffJumpThrottleMs)
+            return;
+
+        SendCommand("/gaction jump");
+        lastFlyingAdjustMs = now;
+        flyingTakeoffPending = true;
+        flyingTakeoffGroundNavHoldUntilMs = now + FlyingTakeoffGroundNavHoldMs;
+
+        var stoppedGroundVnav = false;
+        if (isNavigating && lastMovementClingType == 0 && !lastNavigationWasFlying)
+        {
+            StopNavigation(config, "flying takeoff");
+            stoppedGroundVnav = true;
+        }
+
+        Plugin.Log.Information(
+            $"[FR][Pathing] Flying follow takeoff: sent /gaction jump; stoppedGroundVnav={stoppedGroundVnav}; holdGroundRepathMs={FlyingTakeoffGroundNavHoldMs}");
+    }
+
+    private bool TryIssueImmediateFlytoAfterTakeoff(
+        CharacterConfig config,
+        Vector3 target,
+        bool selfFlying,
+        bool isFrenFollowTarget,
+        Vector3 localPosition,
+        long now)
+    {
+        if (!isFrenFollowTarget || !selfFlying)
+            return false;
+
+        if (!flyingTakeoffPending && (!isNavigating || lastNavigationWasFlying))
+            return false;
+
+        flyingTakeoffPending = false;
+        flyingTakeoffGroundNavHoldUntilMs = 0;
+        IssueNavCommand(config, target, true, "fren follow takeoff complete", isFrenFollowTarget);
+        stuckCheckPosition = localPosition;
+        stuckCheckTimeMs = now;
+        ResetFlyingStuckTracking(localPosition, now);
+        Plugin.Log.Information(
+            $"[FR][Pathing] Flying follow takeoff complete; issued immediate flyto. local={FormatVector(localPosition)}; target={FormatVector(target)}");
+        return true;
+    }
+
+    private bool ShouldHoldGroundRepathForTakeoff(bool isFrenFollowTarget, bool selfFlying, long now)
+    {
+        if (!isFrenFollowTarget || selfFlying || !flyingTakeoffPending)
+            return false;
+
+        if (now >= flyingTakeoffGroundNavHoldUntilMs)
+            return false;
+
+        ResetFlyingIdleSampler();
+        return true;
+    }
+
+    private void ResetFlyingTakeoffState()
+    {
+        flyingTakeoffPending = false;
+        flyingTakeoffGroundNavHoldUntilMs = 0;
     }
 
     private bool TryReissueIdleFlyingFrenFollow(
@@ -913,6 +993,7 @@ public class FollowService
     private void StopAllFollowing(CharacterConfig config, string reason)
     {
         CancelFlyingStuckRecovery(reason);
+        ResetFlyingTakeoffState();
         StopBossModFollow();
         if (isNavigating)
             StopNavigation(config, reason);

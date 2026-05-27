@@ -51,11 +51,14 @@ public class AutoYesService : IDisposable
     
     private DateTime lastCheckTime = DateTime.MinValue;
     private readonly TimeSpan checkInterval = TimeSpan.FromMilliseconds(500); // Check every 500ms
+    private DateTime lastTeleportCheckTime = DateTime.MinValue;
+    private readonly TimeSpan teleportCheckInterval = TimeSpan.FromMilliseconds(100);
+    private readonly TimeSpan teleportHandleCooldown = TimeSpan.FromMilliseconds(250);
     private string lastHandledDialog = "";
     private DateTime lastHandledTime = DateTime.MinValue;
     private readonly TimeSpan handleCooldown = TimeSpan.FromSeconds(2); // Don't spam same dialog
     private DateTime lastTeleportNotificationDiagnosticTime = DateTime.MinValue;
-    private readonly TimeSpan teleportNotificationDiagnosticCooldown = TimeSpan.FromSeconds(2);
+    private readonly TimeSpan teleportNotificationDiagnosticCooldown = TimeSpan.FromMilliseconds(250);
     
     public AutoYesService(Plugin plugin, IGameGui gameGui, ICondition condition, IPluginLog log)
     {
@@ -83,46 +86,36 @@ public class AutoYesService : IDisposable
         if (plugin.AutomationService.IsRepairFlowActive)
             return;
             
-        // Rate limit checks
         var now = DateTime.Now;
-        if (now - lastCheckTime < checkInterval)
-            return;
-        lastCheckTime = now;
-        
+
         // Don't interfere during cutscenes or in combat
         if (condition[ConditionFlag.OccupiedInCutSceneEvent] || 
             condition[ConditionFlag.WatchingCutscene] ||
             condition[ConditionFlag.InCombat])
             return;
-            
+
+        if (now - lastTeleportCheckTime >= teleportCheckInterval)
+        {
+            lastTeleportCheckTime = now;
+            unsafe
+            {
+                if (TryHandleTeleportOfferFast(config, now))
+                    return;
+            }
+        }
+
+        // Rate limit generic dialog checks.
+        if (now - lastCheckTime < checkInterval)
+            return;
+        lastCheckTime = now;
+
         unsafe
         {
-            nint addonPtr = gameGui.GetAddonByName("SelectYesno", 1);
-            if (addonPtr == 0)
+            if (!TryReadSelectYesnoPrompt(out var dialogText))
             {
                 TryExpandMinimizedTeleportOffer(config, now);
                 return;
             }
-                
-            var addon = (AddonSelectYesno*)addonPtr;
-            if (!addon->AtkUnitBase.IsVisible)
-            {
-                TryExpandMinimizedTeleportOffer(config, now);
-                return;
-            }
-                
-            var promptNode = addon->PromptText;
-            if (promptNode == null)
-                return;
-                
-            var textPtr = promptNode->NodeText.StringPtr;
-            if (!textPtr.HasValue)
-                return;
-                
-            var promptSe = MemoryHelper.ReadSeStringNullTerminated(new IntPtr(textPtr));
-            var dialogText = promptSe.TextValue;
-            if (string.IsNullOrEmpty(dialogText))
-                return;
                 
             // Check if we recently handled this same dialog
             if (dialogText == lastHandledDialog && now - lastHandledTime < handleCooldown)
@@ -188,19 +181,70 @@ public class AutoYesService : IDisposable
         }
     }
 
-    private void TryExpandMinimizedTeleportOffer(CharacterConfig config, DateTime now)
+    private unsafe bool TryHandleTeleportOfferFast(CharacterConfig config, DateTime now)
     {
         if (config == null || !config.Enabled || !config.TeleportOfferAutoAccept)
-            return;
+            return false;
+
+        if (TryReadSelectYesnoPrompt(out var dialogText))
+        {
+            if (!IsTeleportOfferText(dialogText))
+                return false;
+
+            if (dialogText == lastHandledDialog && now - lastHandledTime < teleportHandleCooldown)
+                return true;
+
+            log.Debug("[AutoYes] Fast teleport offer matched");
+            ClickYesAndLog(dialogText, "Teleport offer");
+            return true;
+        }
+
+        return TryExpandMinimizedTeleportOffer(config, now);
+    }
+
+    private bool IsTeleportOfferText(string dialogText)
+        => autoYesPatterns
+            .Where(kvp => kvp.Key.StartsWith("teleport") || kvp.Key.StartsWith("return"))
+            .Any(kvp => dialogText.Contains(kvp.Value, StringComparison.OrdinalIgnoreCase));
+
+    private unsafe bool TryReadSelectYesnoPrompt(out string dialogText)
+    {
+        dialogText = string.Empty;
+
+        nint addonPtr = gameGui.GetAddonByName("SelectYesno", 1);
+        if (addonPtr == 0)
+            return false;
+
+        var addon = (AddonSelectYesno*)addonPtr;
+        if (!addon->AtkUnitBase.IsVisible)
+            return false;
+
+        var promptNode = addon->PromptText;
+        if (promptNode == null)
+            return false;
+
+        var textPtr = promptNode->NodeText.StringPtr;
+        if (!textPtr.HasValue)
+            return false;
+
+        var promptSe = MemoryHelper.ReadSeStringNullTerminated(new IntPtr(textPtr));
+        dialogText = promptSe.TextValue;
+        return !string.IsNullOrEmpty(dialogText);
+    }
+
+    private bool TryExpandMinimizedTeleportOffer(CharacterConfig config, DateTime now)
+    {
+        if (config == null || !config.Enabled || !config.TeleportOfferAutoAccept)
+            return false;
 
         if (GameHelpers.IsAddonVisible("SelectYesno"))
-            return;
+            return false;
 
         if (!GameHelpers.IsAddonVisible("_NotificationTelepo"))
-            return;
+            return false;
 
         if (now - lastTeleportNotificationDiagnosticTime < teleportNotificationDiagnosticCooldown)
-            return;
+            return true;
 
         lastTeleportNotificationDiagnosticTime = now;
 
@@ -218,6 +262,7 @@ public class AutoYesService : IDisposable
 
         var callbackFailure = string.IsNullOrEmpty(callbackFailureReason) ? "none" : callbackFailureReason;
         log.Debug($"[AutoYes] _NotificationTelepo detected; SelectYesno visible=false; callback addon=_Notification; updateState=true; args=[Int=0, Int=16]; callback dispatched={callbackDispatched.ToString().ToLowerInvariant()}; callbackFailureReason={callbackFailure}");
+        return true;
     }
     
     private unsafe void ClickYesAndLog(string dialogText, string dialogType)
