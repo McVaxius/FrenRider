@@ -703,6 +703,8 @@ public class CombatService
         SendCommand("/rotation Settings DisableTargetDummys True");
         SendCommand("/rotation Settings BmrSafetyCheckAuto True");
         SendCommand("/rotation Settings BmrSafetyCheckIntercept True");
+        SendCommand("/bmrai forbidmovement off");
+        SendCommand("/vbmai forbidmovement off");
         ApplyBossModPreset(selectedPreset, reason);
 
         switch (pluginName)
