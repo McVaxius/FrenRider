@@ -83,7 +83,8 @@ public class AutoYesService : IDisposable
         if (config == null || !config.Enabled)
             return;
 
-        if (plugin.AutomationService.IsRepairFlowActive)
+        if (plugin.AutomationService.IsRepairFlowActive
+            || plugin.AdsRepairIpcService.ShouldSuppressGenericYesNo())
             return;
             
         var now = DateTime.Now;

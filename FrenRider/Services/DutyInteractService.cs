@@ -82,6 +82,13 @@ public class DutyInteractService
             return;
         }
 
+        if (plugin.AdsRepairIpcService.ShouldSuppressGenericYesNo())
+        {
+            Reset();
+            StateDetail = "ADS repair active";
+            return;
+        }
+
         if (plugin.AdsIntegrationService.ShouldPauseDutySystems)
         {
             Reset();

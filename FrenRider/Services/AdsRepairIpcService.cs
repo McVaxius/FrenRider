@@ -12,6 +12,7 @@ public sealed class AdsRepairStatusSnapshot
     public bool IsAvailable { get; init; }
     public bool StatusReadable { get; init; }
     public bool UtilityRunning { get; init; }
+    public bool UtilitySuppressesGenericYesNo { get; init; }
     public string UtilityTask { get; init; } = string.Empty;
     public string UtilityMode { get; init; } = string.Empty;
     public string UtilityStatus { get; init; } = string.Empty;
@@ -24,6 +25,9 @@ public sealed class AdsRepairStatusSnapshot
         => UtilityRunning
            && (UtilityMode is "self" or "npc-no-inn" or "npc"
                || UtilityTask.Contains("repair", StringComparison.OrdinalIgnoreCase));
+
+    public bool SuppressesGenericYesNo
+        => StatusReadable && UtilitySuppressesGenericYesNo;
 }
 
 public sealed class AdsRepairIpcService : IDisposable
@@ -52,6 +56,9 @@ public sealed class AdsRepairIpcService : IDisposable
         IsAdsAvailable = adsAvailabilityCache.IsLoaded(force: true);
         return IsAdsAvailable;
     }
+
+    public bool ShouldSuppressGenericYesNo()
+        => Refresh().SuppressesGenericYesNo;
 
     public AdsRepairStatusSnapshot Refresh(bool force = false)
     {
@@ -89,6 +96,7 @@ public sealed class AdsRepairIpcService : IDisposable
                 IsAvailable = true,
                 StatusReadable = true,
                 UtilityRunning = GetBool(root, "utilityRunning"),
+                UtilitySuppressesGenericYesNo = GetBool(root, "utilitySuppressesGenericYesNo"),
                 UtilityTask = GetString(root, "utilityTask"),
                 UtilityMode = GetString(root, "utilityMode"),
                 UtilityStatus = GetString(root, "utilityStatus"),

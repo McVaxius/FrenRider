@@ -177,6 +177,12 @@ public class ExitBehaviourService : IDisposable
             return;
         }
 
+        if (plugin.AdsRepairIpcService.ShouldSuppressGenericYesNo())
+        {
+            StateDetail = "ADS repair active";
+            return;
+        }
+
         if (plugin.AdsIntegrationService.ShouldPauseDutySystems)
         {
             StateDetail = plugin.AdsIntegrationService.IsHandoffPending
