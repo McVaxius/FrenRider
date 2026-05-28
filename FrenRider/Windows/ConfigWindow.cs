@@ -43,7 +43,7 @@ public class ConfigWindow : Window, IDisposable
     private static readonly string[] OnOff = { "Off", "On" };
     private static readonly string[] IdleActionModes = { "Specific Action", "Action From List" };
     private static readonly string[] IdleListModes = { "Default List", "Custom List" };
-    private static readonly string[] RepairModes = { "Disabled", "Self", "NPC no-inn" };
+    private static readonly string[] RepairModes = { "Disabled", "Self", "NPC no-inn", "NPC No Inn + No TP" };
 
     public ConfigWindow(Plugin plugin) : base("Fren Rider Settings###FrenRiderConfig")
     {
@@ -1185,7 +1185,7 @@ public class ConfigWindow : Window, IDisposable
             configManager.SaveCurrentAccount();
         }
         ImGui.SameLine();
-        HelpMarker("0 = disabled.\n1 = ADS self repair.\n2 = ADS NPC repair without inn fallback.");
+        HelpMarker("0 = disabled.\n1 = ADS self repair.\n2 = ADS NPC repair without inn fallback.\n3 = ADS NPC repair only when a mender is within 120y.");
 
         var tornClothes = Math.Clamp(config.TornClothes, 0, 100);
         ImGui.SetNextItemWidth(200);

@@ -838,7 +838,8 @@ public class AutomationService
     }
 
     /// <summary>
-    /// Trigger repair based on config (0=Disabled, 1=Self, 2=NPC no-inn). FrenRider always delegates repair to ADS.
+    /// Trigger repair based on config (0=Disabled, 1=Self, 2=NPC no-inn, 3=NPC no-inn/no-teleport).
+    /// FrenRider always delegates repair to ADS.
     /// </summary>
     public void TriggerRepair(CharacterConfig config)
     {
@@ -872,6 +873,7 @@ public class AutomationService
         {
             1 => "self",
             2 => "npc-no-inn",
+            3 => "npc-no-teleport-no-inn",
             _ => string.Empty,
         };
 
@@ -879,6 +881,7 @@ public class AutomationService
         => repairMode switch
         {
             "npc-no-inn" => "NPC no-inn",
+            "npc-no-teleport-no-inn" => "NPC no-inn/no-teleport",
             "self" => "Self",
             _ => "ADS",
         };
