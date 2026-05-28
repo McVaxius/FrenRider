@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using FrenRider.Models;
@@ -10,10 +11,11 @@ public sealed class AdsReflectionIpcService : IDisposable
 {
     public const float ReducedOutdoorMaxLoadDistance = 35f;
 
+    private static readonly TimeSpan ReassertDelay = TimeSpan.FromSeconds(30);
+
     private readonly Plugin plugin;
     private readonly IDalamudPluginInterface pluginInterface;
     private readonly IPluginLog log;
-    private readonly AdsAvailabilityCache adsAvailabilityCache;
 
     private DateTime nextAttemptUtc = DateTime.MinValue;
     private int consecutiveFailures;
@@ -23,15 +25,12 @@ public sealed class AdsReflectionIpcService : IDisposable
     private bool lastDesiredRange;
     private bool lastDesiredHunts;
     private bool lastDesiredQueen;
-    private bool lastAdsAvailable;
-    private bool lastApplyFailed;
 
     public AdsReflectionIpcService(Plugin plugin, IDalamudPluginInterface pluginInterface, IPluginLog log)
     {
         this.plugin = plugin;
         this.pluginInterface = pluginInterface;
         this.log = log;
-        adsAvailabilityCache = new AdsAvailabilityCache(pluginInterface, log, "[ADS.Reflection]");
         StatusText = "ADS reflection idle.";
     }
 
@@ -75,7 +74,6 @@ public sealed class AdsReflectionIpcService : IDisposable
         if (!HasPendingActions)
         {
             consecutiveFailures = 0;
-            lastApplyFailed = false;
             nextAttemptUtc = DateTime.MaxValue;
             StatusText = "No ADS reflection hacks enabled.";
             return;
@@ -85,30 +83,16 @@ public sealed class AdsReflectionIpcService : IDisposable
         if (!force && now < nextAttemptUtc)
             return;
 
-        IsAdsAvailable = adsAvailabilityCache.IsLoaded(force);
-        var adsReloadDetected = IsAdsAvailable && !lastAdsAvailable;
-        lastAdsAvailable = IsAdsAvailable;
+        IsAdsAvailable = IsAdsLoaded();
         if (!IsAdsAvailable)
         {
-            lastApplyFailed = true;
             ScheduleFailure(now, "ADS unavailable; reflection hacks pending.");
-            return;
-        }
-
-        force = force || adsReloadDetected || lastApplyFailed;
-        if (!force
-            && rangeApplied == desiredRange
-            && huntsApplied == desiredHunts
-            && queenApplied == desiredQueen)
-        {
-            nextAttemptUtc = DateTime.MaxValue;
-            StatusText = "ADS reflection applied; no reassert pending.";
             return;
         }
 
         var failures = new List<string>();
 
-        if (desiredRange && (!rangeApplied || force))
+        if (desiredRange)
         {
             if (TrySetMaxLoadDistance(ReducedOutdoorMaxLoadDistance, out var error))
                 rangeApplied = true;
@@ -123,7 +107,7 @@ public sealed class AdsReflectionIpcService : IDisposable
                 failures.Add($"range reset ({error})");
         }
 
-        if (desiredHunts && (!huntsApplied || force))
+        if (desiredHunts)
         {
             if (TrySetHuntsDisabled(true, out var error))
                 huntsApplied = true;
@@ -138,7 +122,7 @@ public sealed class AdsReflectionIpcService : IDisposable
                 failures.Add($"hunts reset ({error})");
         }
 
-        if (desiredQueen && (!queenApplied || force))
+        if (desiredQueen)
         {
             if (TrySetQueenLunatenderDisabled(true, out var error))
                 queenApplied = true;
@@ -155,19 +139,17 @@ public sealed class AdsReflectionIpcService : IDisposable
 
         if (failures.Count > 0)
         {
-            lastApplyFailed = true;
             ScheduleFailure(now, $"ADS unavailable/pending: {string.Join(", ", failures)}.");
             return;
         }
 
         consecutiveFailures = 0;
-        lastApplyFailed = false;
         LastSuccessAtUtc = now;
 
         if (desiredRange || desiredHunts || desiredQueen)
         {
-            nextAttemptUtc = DateTime.MaxValue;
-            StatusText = "ADS reflection applied; waiting for desired-state change or ADS reload.";
+            nextAttemptUtc = now + ReassertDelay;
+            StatusText = $"ADS reflection applied; reasserting every {ReassertDelay.TotalSeconds:0}s.";
         }
         else
         {
@@ -279,4 +261,20 @@ public sealed class AdsReflectionIpcService : IDisposable
         }
     }
 
+    private bool IsAdsLoaded()
+    {
+        try
+        {
+            return pluginInterface.InstalledPlugins.Any(installedPlugin =>
+                installedPlugin.IsLoaded
+                && (string.Equals(installedPlugin.InternalName, "ADS", StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(installedPlugin.Name, "AI Duty Solver", StringComparison.OrdinalIgnoreCase)
+                    || installedPlugin.Name.Contains("ADS", StringComparison.OrdinalIgnoreCase)));
+        }
+        catch (Exception ex)
+        {
+            log.Debug($"[ADS.Reflection] Failed to inspect ADS availability: {ex.Message}");
+            return false;
+        }
+    }
 }

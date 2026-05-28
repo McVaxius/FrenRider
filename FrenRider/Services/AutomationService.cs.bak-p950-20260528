@@ -572,17 +572,23 @@ public class AutomationService
         var repairMode = ResolveAdsRepairMode(config);
         if (string.IsNullOrWhiteSpace(repairMode))
         {
-            if (repairFlowState != RepairFlowState.Idle || !string.IsNullOrWhiteSpace(RepairStatus))
-                CancelRepairFlow("");
+            CancelRepairFlow("");
             return;
         }
 
         var threshold = Math.Clamp(config.TornClothes, 0, 100);
         if (threshold <= 0)
         {
-            if (repairFlowState != RepairFlowState.Idle)
-                ResetRepairFlow();
+            ResetRepairFlow();
             RepairStatus = $"{GetRepairModeLabel(repairMode)} repair enabled; threshold is 0%.";
+            return;
+        }
+
+        var adsStatus = plugin.AdsRepairIpcService.Refresh();
+        if (!adsStatus.IsAvailable)
+        {
+            ResetRepairFlow();
+            RepairStatus = "Waiting: ADS not loaded.";
             return;
         }
 
@@ -593,14 +599,6 @@ public class AutomationService
             return;
 
         lastRepairCheckMs = now;
-
-        var adsStatus = plugin.AdsRepairIpcService.Refresh(force: repairFlowState != RepairFlowState.Idle);
-        if (!adsStatus.IsAvailable)
-        {
-            ResetRepairFlow();
-            RepairStatus = "Waiting: ADS not loaded.";
-            return;
-        }
 
         var needsRepair = GameHelpers.NeedsRepair(threshold);
         if (!needsRepair)
@@ -629,10 +627,10 @@ public class AutomationService
             return;
         }
 
-        TrackActiveRepair(now, repairMode, threshold, adsStatus);
+        TrackActiveRepair(now, repairMode, threshold);
     }
 
-    private void TrackActiveRepair(long now, string repairMode, int threshold, AdsRepairStatusSnapshot adsStatus)
+    private void TrackActiveRepair(long now, string repairMode, int threshold)
     {
         var elapsedSinceRequest = now - lastRepairAttemptMs;
         if (elapsedSinceRequest > RepairTimeoutMs)
@@ -644,6 +642,7 @@ public class AutomationService
             return;
         }
 
+        var adsStatus = plugin.AdsRepairIpcService.Refresh(force: true);
         if (!adsStatus.StatusReadable)
         {
             RepairStatus = $"{GetRepairModeLabel(repairMode)} repair requested; waiting for ADS status.";
@@ -730,7 +729,7 @@ public class AutomationService
         RepairStatus = status;
     }
 
-    private void ResetRepairFlow(bool preserveStatus = false, bool refreshAdsStatus = false)
+    private void ResetRepairFlow(bool preserveStatus = false)
     {
         repairFlowState = RepairFlowState.Idle;
         lastRepairAttemptMs = 0;
@@ -739,10 +738,7 @@ public class AutomationService
         adsRepairUtilityObserved = false;
         repairRequestAttempts = 0;
         if (!preserveStatus)
-        {
-            if (refreshAdsStatus)
-                plugin.AdsRepairIpcService.Refresh();
-        }
+            plugin.AdsRepairIpcService.Refresh();
     }
 
     private void LogRepairBlocked(long now, string reason)

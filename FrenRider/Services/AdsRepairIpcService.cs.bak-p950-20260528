@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Text.Json;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
@@ -30,14 +31,12 @@ public sealed class AdsRepairIpcService : IDisposable
 {
     private readonly IDalamudPluginInterface pluginInterface;
     private readonly IPluginLog log;
-    private readonly AdsAvailabilityCache adsAvailabilityCache;
     private DateTime lastRefreshUtc = DateTime.MinValue;
 
     public AdsRepairIpcService(IDalamudPluginInterface pluginInterface, IPluginLog log)
     {
         this.pluginInterface = pluginInterface;
         this.log = log;
-        adsAvailabilityCache = new AdsAvailabilityCache(pluginInterface, log, "[FrenRider][Repair]");
     }
 
     public AdsRepairStatusSnapshot Current { get; private set; } = AdsRepairStatusSnapshot.Empty;
@@ -49,7 +48,7 @@ public sealed class AdsRepairIpcService : IDisposable
 
     public bool CheckAvailability()
     {
-        IsAdsAvailable = adsAvailabilityCache.IsLoaded(force: true);
+        IsAdsAvailable = IsAdsLoaded();
         return IsAdsAvailable;
     }
 
@@ -60,7 +59,7 @@ public sealed class AdsRepairIpcService : IDisposable
             return Current;
 
         lastRefreshUtc = now;
-        IsAdsAvailable = adsAvailabilityCache.IsLoaded(force);
+        IsAdsAvailable = IsAdsLoaded();
         if (!IsAdsAvailable)
         {
             Current = AdsRepairStatusSnapshot.Empty;
@@ -115,7 +114,7 @@ public sealed class AdsRepairIpcService : IDisposable
     public bool StartRepair(string mode, out string failure)
     {
         failure = string.Empty;
-        IsAdsAvailable = adsAvailabilityCache.IsLoaded(force: true);
+        IsAdsAvailable = IsAdsLoaded();
         if (!IsAdsAvailable)
         {
             failure = "ADS not loaded.";
@@ -135,6 +134,23 @@ public sealed class AdsRepairIpcService : IDisposable
         {
             failure = ex.Message;
             log.Debug($"[FrenRider][Repair] Failed to start ADS repair via IPC: {ex.Message}");
+            return false;
+        }
+    }
+
+    private bool IsAdsLoaded()
+    {
+        try
+        {
+            return pluginInterface.InstalledPlugins.Any(installedPlugin =>
+                installedPlugin.IsLoaded
+                && (string.Equals(installedPlugin.InternalName, "ADS", StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(installedPlugin.Name, "AI Duty Solver", StringComparison.OrdinalIgnoreCase)
+                    || installedPlugin.Name.Contains("ADS", StringComparison.OrdinalIgnoreCase)));
+        }
+        catch (Exception ex)
+        {
+            log.Warning($"[FrenRider][Repair] Failed to inspect installed plugins: {ex.Message}");
             return false;
         }
     }

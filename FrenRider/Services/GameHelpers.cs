@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
 using Dalamud.Game.ClientState.Objects.Types;
@@ -29,6 +30,10 @@ public static class GameHelpers
 
     // Gysahl Greens item ID
     public const uint GysahlGreensItemId = 4868;
+    private static readonly object ItemLookupLock = new();
+    private static readonly Dictionary<uint, string> ItemNameCache = new();
+    private static readonly Dictionary<string, (uint Id, string Name)> FoodLookupByName = new(StringComparer.OrdinalIgnoreCase);
+    private static bool foodLookupLoaded;
 
     // Known food items in order of priority (least to most preferred) — matches Lua food_list
     public static readonly (uint Id, string Name)[] FoodList =
@@ -432,17 +437,13 @@ public static class GameHelpers
 
         try
         {
-            var sheet = Plugin.DataManager.GetExcelSheet<Lumina.Excel.Sheets.Item>();
-            if (sheet == null) return (0, "");
-
             var trimmedName = foodName.Trim();
-            foreach (var row in sheet)
+            lock (ItemLookupLock)
             {
-                if (row.ItemUICategory.RowId != 46) continue;
-
-                var name = row.Name.ToString();
-                if (!string.IsNullOrEmpty(name) && name.Equals(trimmedName, StringComparison.OrdinalIgnoreCase))
-                    return (row.RowId, name);
+                EnsureFoodLookupLoadedLocked();
+                return FoodLookupByName.TryGetValue(trimmedName, out var food)
+                    ? food
+                    : (0, "");
             }
         }
         catch (Exception ex)
@@ -450,6 +451,31 @@ public static class GameHelpers
             Plugin.Log.Error($"LookupFoodItemId(\"{foodName}\") failed: {ex.Message}");
         }
         return (0, "");
+    }
+
+    private static void EnsureFoodLookupLoadedLocked()
+    {
+        if (foodLookupLoaded)
+            return;
+
+        var sheet = Plugin.DataManager.GetExcelSheet<Lumina.Excel.Sheets.Item>();
+        if (sheet == null)
+            return;
+
+        foreach (var row in sheet)
+        {
+            if (row.ItemUICategory.RowId != 46)
+                continue;
+
+            var name = row.Name.ToString();
+            if (!string.IsNullOrEmpty(name) && !FoodLookupByName.ContainsKey(name))
+            {
+                FoodLookupByName[name] = (row.RowId, name);
+                ItemNameCache.TryAdd(row.RowId, name);
+            }
+        }
+
+        foodLookupLoaded = true;
     }
 
     /// <summary>
@@ -461,11 +487,24 @@ public static class GameHelpers
 
         try
         {
-            var sheet = Plugin.DataManager.GetExcelSheet<Lumina.Excel.Sheets.Item>();
-            if (sheet == null) return "";
+            lock (ItemLookupLock)
+            {
+                if (ItemNameCache.TryGetValue(itemId, out var cachedName))
+                    return cachedName;
 
-            if (sheet.TryGetRow(itemId, out var item))
-                return item.Name.ToString();
+                var sheet = Plugin.DataManager.GetExcelSheet<Lumina.Excel.Sheets.Item>();
+                if (sheet == null)
+                    return "";
+
+                if (sheet.TryGetRow(itemId, out var item))
+                {
+                    var name = item.Name.ToString();
+                    ItemNameCache[itemId] = name;
+                    return name;
+                }
+
+                ItemNameCache[itemId] = "";
+            }
         }
         catch (Exception ex)
         {

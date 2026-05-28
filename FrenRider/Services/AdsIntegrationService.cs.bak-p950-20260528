@@ -63,7 +63,6 @@ public sealed class AdsIntegrationService
     private readonly Plugin plugin;
     private readonly ZoneService zoneService;
     private readonly Dictionary<uint, AdsDutyCatalogEntry> entriesByTerritory = [];
-    private readonly AdsAvailabilityCache adsAvailabilityCache;
 
     private DateTime dutyEnteredUtc = DateTime.MinValue;
     private DateTime lastPraetoriumReadyWaitLogUtc = DateTime.MinValue;
@@ -75,7 +74,6 @@ public sealed class AdsIntegrationService
     {
         this.plugin = plugin;
         this.zoneService = zoneService;
-        adsAvailabilityCache = new AdsAvailabilityCache(Plugin.PluginInterface, Plugin.Log, "[FrenRider][ADS]");
         BuildCatalog();
         StatusText = "ADS handoff off; FrenRider local duty logic active.";
     }
@@ -94,7 +92,7 @@ public sealed class AdsIntegrationService
             || Plugin.Condition[ConditionFlag.BoundByDuty56];
         var territoryTypeId = zoneService.TerritoryId;
 
-        AdsLoaded = adsAvailabilityCache.IsLoaded();
+        AdsLoaded = IsAdsLoaded();
 
         if (territoryTypeId != trackedDutyTerritoryId || !inDuty)
         {
@@ -368,6 +366,23 @@ public sealed class AdsIntegrationService
 
     private static string NormalizeName(string name)
         => string.Join(' ', name.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
+
+    private static bool IsAdsLoaded()
+    {
+        try
+        {
+            return Plugin.PluginInterface.InstalledPlugins.Any(plugin =>
+                plugin.IsLoaded
+                && (string.Equals(plugin.InternalName, "ADS", StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(plugin.Name, "AI Duty Solver", StringComparison.OrdinalIgnoreCase)
+                    || plugin.Name.Contains("ADS", StringComparison.OrdinalIgnoreCase)));
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log.Warning($"[FrenRider][ADS] Failed to inspect installed plugins: {ex.Message}");
+            return false;
+        }
+    }
 
     private sealed record AdsDutyCatalogEntry(
         uint TerritoryTypeId,

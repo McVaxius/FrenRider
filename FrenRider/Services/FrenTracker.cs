@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using Dalamud.Game.ClientState.Objects.Types;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 
 namespace FrenRider.Services;
@@ -13,6 +14,8 @@ public class FrenTracker
 
     public FrenState? Fren { get; private set; }
     public List<PartyMemberState> Party { get; private set; } = new();
+    private readonly List<IGameObject> objectSnapshot = [];
+    private readonly Dictionary<string, IGameObject> objectSnapshotByName = new(StringComparer.Ordinal);
 
     public FrenTracker(Plugin plugin)
     {
@@ -28,6 +31,8 @@ public class FrenTracker
         {
             Fren = null;
             Party.Clear();
+            objectSnapshot.Clear();
+            objectSnapshotByName.Clear();
             return;
         }
 
@@ -39,6 +44,7 @@ public class FrenTracker
         if (now - lastUpdateMs < intervalMs) return;
         lastUpdateMs = now;
 
+        CaptureObjectSnapshot();
         ScanParty();
         
         if (config.Enabled)
@@ -48,6 +54,23 @@ public class FrenTracker
         else
         {
             Fren = null;
+        }
+    }
+
+    private void CaptureObjectSnapshot()
+    {
+        objectSnapshot.Clear();
+        objectSnapshotByName.Clear();
+
+        foreach (var obj in Plugin.ObjectTable)
+        {
+            if (obj == null)
+                continue;
+
+            objectSnapshot.Add(obj);
+            var name = obj.Name.ToString();
+            if (!string.IsNullOrEmpty(name) && !objectSnapshotByName.ContainsKey(name))
+                objectSnapshotByName[name] = obj;
         }
     }
 
@@ -99,29 +122,24 @@ public class FrenTracker
                 PartyIndex = i,
             };
 
-            // Find in ObjectTable for position data
-            foreach (var obj in Plugin.ObjectTable)
+            // Find in same-frame ObjectTable snapshot for position data
+            if (objectSnapshotByName.TryGetValue(memberName, out var obj))
             {
-                if (obj != null && obj.Name.ToString() == memberName)
+                info.Position = obj.Position;
+                info.DistanceToPlayer = Vector3.Distance(localPlayer.Position, obj.Position);
+                info.IsVisible = true;
+
+                // Mount detection via FFXIVClientStructs
+                try
                 {
-                    info.Position = obj.Position;
-                    info.DistanceToPlayer = Vector3.Distance(localPlayer.Position, obj.Position);
-                    info.IsVisible = true;
-
-                    // Mount detection via FFXIVClientStructs
-                    try
+                    unsafe
                     {
-                        unsafe
-                        {
-                            var chara = (Character*)obj.Address;
-                            info.IsMounted = chara->IsMounted();
-                            info.MountId = chara->Mount.MountId;
-                        }
+                        var chara = (Character*)obj.Address;
+                        info.IsMounted = chara->IsMounted();
+                        info.MountId = chara->Mount.MountId;
                     }
-                    catch { /* Mount data inaccessible */ }
-
-                    break;
                 }
+                catch { /* Mount data inaccessible */ }
             }
 
             Party.Add(info);
@@ -158,16 +176,12 @@ public class FrenTracker
             {
                 // Check if fren is flying by looking at their GameObject
                 var frenFlying = false;
-                foreach (var obj in Plugin.ObjectTable)
+                if (objectSnapshotByName.TryGetValue(member.Name, out var obj))
                 {
-                    if (obj != null && obj.Name.ToString() == member.Name)
-                    {
-                        // Check if the object has InFlight condition
-                        // Note: We can't directly check other player's conditions, so we check position height
-                        // If mounted and Y position is significantly higher than ground, likely flying
-                        frenFlying = member.IsMounted && obj.Position.Y > localPlayer.Position.Y + 2.0f;
-                        break;
-                    }
+                    // Check if the object has InFlight condition
+                    // Note: We can't directly check other player's conditions, so we check position height
+                    // If mounted and Y position is significantly higher than ground, likely flying
+                    frenFlying = member.IsMounted && obj.Position.Y > localPlayer.Position.Y + 2.0f;
                 }
                 
                 Fren = new FrenState
@@ -191,7 +205,7 @@ public class FrenTracker
         }
 
         // Not in party - scan ObjectTable for nearby player by partial name
-        foreach (var obj in Plugin.ObjectTable)
+        foreach (var obj in objectSnapshot)
         {
             if (obj == null) continue;
             var objName = obj.Name.ToString();

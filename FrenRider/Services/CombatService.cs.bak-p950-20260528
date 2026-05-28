@@ -34,8 +34,6 @@ public class CombatService
     private long pendingCombatSettingsRefreshMs;
     private string lastObservedCombatSettingsSignature = string.Empty;
     private string pendingCombatSettingsSignature = string.Empty;
-    private string lastBossModDefaultSettingsSignature = string.Empty;
-    private string lastBossModMovementUnlockSignature = string.Empty;
     private bool mountedRotationSuppressed;
     private string mountedSuppressedPluginName = string.Empty;
     private bool wrathAutoActive;
@@ -73,8 +71,6 @@ public class CombatService
             RestoreMountedRotationLifecycle(config, inCombat, inDuty, "plugin disabled", reapplySelection: false);
             ResetCombatSettingsRefreshTracking();
             lastObservedCombatSettingsSignature = string.Empty;
-            lastBossModDefaultSettingsSignature = string.Empty;
-            lastBossModMovementUnlockSignature = string.Empty;
             //if (wasInCombat) DeactivateRotation(config);
 			//Plugin.Log.Information($"Combat: stopped FrenRider GHOST IN THE MACHINE 5 attemting to deactivate rotations after combat like an idiot");
 			//debug/code review this is called every frame and could be an issue
@@ -691,8 +687,24 @@ public class CombatService
     private void ApplyBossModSafetyState(string pluginName, string selectedPreset, string reason)
     {
         EnsureBossModAiEnabled();
-        ApplyBossModDefaultSettingsOnce(pluginName, selectedPreset, reason);
-        ApplyBossModMovementUnlockOnce(pluginName, selectedPreset, reason);
+		Plugin.Log.Information($"[FrenRider] GHOST IN THE MACHINE CLEANUP");
+		SendCommand($"/xldisableplugin AutoDuty");  //The real ghost in the machine is gone finally.
+		//a few more hehe. turn off all the default stoppers
+		SendCommand($"/rotation Settings KeyBoardNoise false");
+		SendCommand($"/rotation Settings AutoOffBetweenArea False");
+		SendCommand($"/rotation Settings AutoOffCutScene False");
+		SendCommand($"/rotation Settings AutoOffSwitchClass False");
+		SendCommand($"/rotation Settings AutoOffWhenDead False");
+		SendCommand($"/rotation Settings AutoOffWhenDutyCompleted False");
+		SendCommand($"/rotation Settings AutoOffAfterCombatTime 6942069");
+		SendCommand($"/rotation Settings ToggleAuto False");
+		SendCommand($"/rotation Settings ToggleManual False");
+        SendCommand("/rotation Settings DummyBoss False");
+        SendCommand("/rotation Settings DisableTargetDummys True");
+        SendCommand("/rotation Settings BmrSafetyCheckAuto True");
+        SendCommand("/rotation Settings BmrSafetyCheckIntercept True");
+        SendCommand("/bmrai forbidmovement off");
+        SendCommand("/vbmai forbidmovement off");
         ApplyBossModPreset(selectedPreset, reason);
 
         switch (pluginName)
@@ -714,45 +726,6 @@ public class CombatService
                 break;
         }
     }
-
-    private void ApplyBossModDefaultSettingsOnce(string pluginName, string selectedPreset, string reason)
-    {
-        var signature = BuildBossModSafetySignature(pluginName, selectedPreset);
-        if (string.Equals(signature, lastBossModDefaultSettingsSignature, StringComparison.Ordinal))
-            return;
-
-        lastBossModDefaultSettingsSignature = signature;
-        Plugin.Log.Information($"[FrenRider] Applying BossMod/rotation defaults after {reason}.");
-        SendCommand($"/xldisableplugin AutoDuty");
-        SendCommand($"/rotation Settings KeyBoardNoise false");
-        SendCommand($"/rotation Settings AutoOffBetweenArea False");
-        SendCommand($"/rotation Settings AutoOffCutScene False");
-        SendCommand($"/rotation Settings AutoOffSwitchClass False");
-        SendCommand($"/rotation Settings AutoOffWhenDead False");
-        SendCommand($"/rotation Settings AutoOffWhenDutyCompleted False");
-        SendCommand($"/rotation Settings AutoOffAfterCombatTime 6942069");
-        SendCommand($"/rotation Settings ToggleAuto False");
-        SendCommand($"/rotation Settings ToggleManual False");
-        SendCommand("/rotation Settings DummyBoss False");
-        SendCommand("/rotation Settings DisableTargetDummys True");
-        SendCommand("/rotation Settings BmrSafetyCheckAuto True");
-        SendCommand("/rotation Settings BmrSafetyCheckIntercept True");
-    }
-
-    private void ApplyBossModMovementUnlockOnce(string pluginName, string selectedPreset, string reason)
-    {
-        var signature = BuildBossModSafetySignature(pluginName, selectedPreset);
-        if (string.Equals(signature, lastBossModMovementUnlockSignature, StringComparison.Ordinal))
-            return;
-
-        lastBossModMovementUnlockSignature = signature;
-        SendCommand("/bmrai forbidmovement off");
-        SendCommand("/vbmai forbidmovement off");
-        Plugin.Log.Information($"[FrenRider] Sent one-shot BossMod movement unlock after {reason}.");
-    }
-
-    private string BuildBossModSafetySignature(string pluginName, string selectedPreset)
-        => string.Join("|", pluginName, selectedPreset, zoneService.TerritoryId, zoneService.CurrentZone);
 
     private void ApplyBossModPreset(string presetName, string reason, bool installPresets = true)
     {
