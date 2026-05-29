@@ -738,6 +738,7 @@ public class CombatService
         SendCommand("/rotation Settings BmrSafetyCheckAuto True");
         SendCommand("/rotation Settings BmrSafetyCheckIntercept True");
         SendCommand("/bmrai followoutofcombat off");
+        SendCommand("/cbt disable AutoFollow");
 		
     }
 
