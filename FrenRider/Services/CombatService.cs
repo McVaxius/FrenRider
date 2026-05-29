@@ -737,6 +737,8 @@ public class CombatService
         SendCommand("/rotation Settings DisableTargetDummys True");
         SendCommand("/rotation Settings BmrSafetyCheckAuto True");
         SendCommand("/rotation Settings BmrSafetyCheckIntercept True");
+        SendCommand("/bmrai followoutofcombat off");
+		
     }
 
     private void ApplyBossModMovementUnlockOnce(string pluginName, string selectedPreset, string reason)
