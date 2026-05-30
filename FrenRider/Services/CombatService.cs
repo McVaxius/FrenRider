@@ -467,6 +467,14 @@ public class CombatService
         ApplyBossModPreset(bossModPreset, reason, installPresets);
     }
 
+    public void ApplyBossModFollowStartupDefaults()
+    {
+        SendCommand("/bmrai followoutofcombat off");
+        SendCommand("/cbt disable AutoFollow");
+        SendCommand("/bmrai followcombat off");
+        SendCommand("/vbmai follow Slot1");
+    }
+
     private bool HandleMountedRotationLifecycle(CharacterConfig config, bool mountedOrMounting, bool inCombat, bool inDuty)
     {
         if (inDuty)
@@ -737,11 +745,6 @@ public class CombatService
         SendCommand("/rotation Settings DisableTargetDummys True");
         SendCommand("/rotation Settings BmrSafetyCheckAuto True");
         SendCommand("/rotation Settings BmrSafetyCheckIntercept True");
-        SendCommand("/bmrai followoutofcombat off");
-        SendCommand("/cbt disable AutoFollow");
-        SendCommand("/bmrai followcombat off");
-        SendCommand("/vbmai follow Slot1");
-		
     }
 
     private void ApplyBossModMovementUnlockOnce(string pluginName, string selectedPreset, string reason)

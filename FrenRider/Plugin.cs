@@ -236,9 +236,12 @@ public sealed class Plugin : IDalamudPlugin
             // Force an immediate detection check first
             AutoDutyDetectionService.ForceCheck();
             Log.Information($"[FrenRider] AutoDuty detected after enable check: {AutoDutyDetectionService.IsAutoDutyDetected()}");
- 			//instead we stil just kill it outright.
+			//instead we stil just kill it outright.
 			//commandManager?.ProcessCommand("/xldisableplugin AutoDuty");
 			//commandManager?.ProcessCommand("/echo hi");
+
+            Log.Information("[FrenRider] Applying one-time BossMod follow defaults on enable");
+            CombatService.ApplyBossModFollowStartupDefaults();
 
             Log.Information("[FrenRider] Installing BossMod presets and applying current preset selection");
             AutorotIpcService.CreatePresets(force: true);
