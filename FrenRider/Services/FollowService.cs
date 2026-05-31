@@ -951,7 +951,7 @@ public class FollowService
             StopNavigation(config, "switching to BossMod follow");
 
         SendCommand($"/bmrai follow {targetName}");
-        //SendCommand("/bmrai followoutofcombat on");
+        SendCommand("/bmrai followoutofcombat on");
 
         if (config.FollowInCombat == 0)
         {
