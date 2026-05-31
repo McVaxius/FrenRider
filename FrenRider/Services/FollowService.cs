@@ -214,7 +214,7 @@ public class FollowService
         var maxDist = GetMaxDistance(config);
         var clingDist = GetEffectiveClingDistance(config);
         var selfMounted = Plugin.Condition[ConditionFlag.Mounted];
-        var selfFlying = Plugin.Condition[ConditionFlag.InFlight];
+        var selfFlying = IsSelfFlightNavActive();
         var frenFlying = fren.IsFlying;
         var now = Environment.TickCount64;
         if (!selfMounted || !frenFlying)
@@ -349,7 +349,7 @@ public class FollowService
 
     private void NavigateToPosition(CharacterConfig config, Vector3 target, bool isFrenFollowTarget = false)
     {
-        var selfFlying = Plugin.Condition[ConditionFlag.InFlight];
+        var selfFlying = IsSelfFlightNavActive();
         var localPlayer = Plugin.ObjectTable.LocalPlayer;
         var now = Environment.TickCount64;
 
@@ -497,6 +497,12 @@ public class FollowService
         flyingTakeoffGroundNavHoldUntilMs = 0;
     }
 
+    private static bool IsSelfFlightNavActive()
+    {
+        return Plugin.Condition[ConditionFlag.InFlight]
+            || Plugin.Condition[ConditionFlag.Diving];
+    }
+
     private bool TryReissueIdleFlyingFrenFollow(
         CharacterConfig config,
         Vector3 localPosition,
@@ -546,7 +552,7 @@ public class FollowService
             && lastNavigationWasFlying
             && lastMovementClingType == 0
             && selfFlying
-            && Plugin.Condition[ConditionFlag.Mounted]
+            && (Plugin.Condition[ConditionFlag.Mounted] || Plugin.Condition[ConditionFlag.Diving])
             && !IsLoadingOrBetweenAreas()
             && !plugin.AdsIntegrationService.ShouldPauseDutySystems
             && !plugin.AutomationService.IsRepairFlowActive
@@ -737,7 +743,7 @@ public class FollowService
             && lastNavigationWasFlying
             && lastMovementClingType == 0
             && selfFlying
-            && Plugin.Condition[ConditionFlag.Mounted]
+            && (Plugin.Condition[ConditionFlag.Mounted] || Plugin.Condition[ConditionFlag.Diving])
             && !IsLoadingOrBetweenAreas()
             && !plugin.AdsIntegrationService.ShouldPauseDutySystems
             && !plugin.AutomationService.IsRepairFlowActive
@@ -749,7 +755,7 @@ public class FollowService
     {
         return plugin.ECommonsAvailable
             && config.Enabled
-            && selfMounted
+            && (selfMounted || Plugin.Condition[ConditionFlag.Diving])
             && selfFlying
             && !IsLoadingOrBetweenAreas()
             && !plugin.AdsIntegrationService.ShouldPauseDutySystems
@@ -867,7 +873,7 @@ public class FollowService
         var followMode = DescribeMovementMode(GetResolvedClingType(config));
         var inCombat = Plugin.Condition[ConditionFlag.InCombat];
         var selfMounted = Plugin.Condition[ConditionFlag.Mounted];
-        var selfFlying = Plugin.Condition[ConditionFlag.InFlight];
+        var selfFlying = IsSelfFlightNavActive();
         var fateText = zoneService.InFate
             ? $"entered:{zoneService.CurrentFateId}"
             : $"left:{zoneService.PreviousFateId}";
@@ -939,7 +945,7 @@ public class FollowService
             && bossModFollowTerritoryId == zoneService.TerritoryId
             && bossModFollowCombatMode == config.FollowInCombat
             && bossModFollowFrenFlying == fren.IsFlying
-            && bossModFollowSelfFlying == Plugin.Condition[ConditionFlag.InFlight];
+            && bossModFollowSelfFlying == IsSelfFlightNavActive();
 
         if (signatureMatches)
             return;
@@ -969,7 +975,7 @@ public class FollowService
         bossModFollowTerritoryId = zoneService.TerritoryId;
         bossModFollowCombatMode = config.FollowInCombat;
         bossModFollowFrenFlying = fren.IsFlying;
-        bossModFollowSelfFlying = Plugin.Condition[ConditionFlag.InFlight];
+        bossModFollowSelfFlying = IsSelfFlightNavActive();
         Plugin.Log.Information($"[FR] Activated BossMod follow for '{targetName}' in territory {zoneService.TerritoryId}");
     }
 
