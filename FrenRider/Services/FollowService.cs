@@ -58,8 +58,14 @@ public class FollowService
     // Stuck detection: record position every 5s, check per-axis movement < 2y
     private Vector3 stuckCheckPosition;
     private long stuckCheckTimeMs;
+    private Vector3 stuckFollowJumpBaselinePosition;
+    private long stuckFollowJumpBaselineTimeMs;
+    private long lastStuckFollowJumpMs;
     private const long StuckCheckIntervalMs = 5000;
     private const float StuckPerAxisThreshold = 2f;
+    private const long StuckFollowJumpWindowMs = 10000;
+    private const long StuckFollowJumpThrottleMs = 15000;
+    private const float StuckFollowJumpMovementThreshold = 0.75f;
     private const long FlyingTakeoffJumpThrottleMs = 1000;
     private const long FlyingTakeoffGroundNavHoldMs = 1200;
     private const long FlyingIdleNavCommandGraceMs = 250;
@@ -132,6 +138,7 @@ public class FollowService
             stuckCheckPosition = default;
             stuckCheckTimeMs = 0;
             ResetFlyingStuckTracking();
+            ResetStuckFollowJumpTracking();
             ResetFlyingIdleSampler();
             LogFateFollowDecisionIfChanged(config, tracker.Fren, "zone transition");
             // Force immediate fren scan on next frame (skip throttle)
@@ -224,6 +231,7 @@ public class FollowService
         if (distance > maxDist)
         {
             CancelFlyingStuckRecovery("too far");
+            ResetStuckFollowJumpTracking();
             ResetFlyingTakeoffState();
             if (isNavigating) StopNavigation(config, $"too far ({distance:F1}y > {maxDist:F0}y max)");
             State = FollowState.TooFar;
@@ -236,6 +244,7 @@ public class FollowService
         if (distance <= clingDist)
         {
             CancelFlyingStuckRecovery("in range");
+            ResetStuckFollowJumpTracking();
             ResetFlyingTakeoffState();
             if (isNavigating) StopNavigation(config, $"in range ({distance:F1}y <= {clingDist:F1}y)");
             State = FollowState.InRange;
@@ -266,6 +275,7 @@ public class FollowService
         {
             ResetFlyingTakeoffState();
             CancelFlyingStuckRecovery("formation follow active");
+            ResetStuckFollowJumpTracking();
             if (bossModFollowActive)
                 StopBossModFollow();
 
@@ -291,6 +301,11 @@ public class FollowService
         }
 
         // Follow
+        if (resolvedClingType == 2)
+            ResetStuckFollowJumpTracking();
+        else
+            UpdateStuckFollowJump(config, fren, distance, clingDist, maxDist, selfFlying, now);
+
         State = FollowState.Following;
         StateDetail = $"Following ({distance:F1}y, cling {clingDist:F1}y)";
         LogFateFollowDecisionIfChanged(config, fren, "none");
@@ -328,12 +343,89 @@ public class FollowService
             : config.ClingType;
     }
 
+    private void UpdateStuckFollowJump(
+        CharacterConfig config,
+        FrenTracker.FrenState fren,
+        float distance,
+        float clingDist,
+        float maxDist,
+        bool selfFlying,
+        long now)
+    {
+        var localPlayer = Plugin.ObjectTable.LocalPlayer;
+        if (localPlayer == null
+            || !ShouldTrackStuckFollowJump(config, fren, distance, clingDist, maxDist, selfFlying))
+        {
+            ResetStuckFollowJumpTracking();
+            return;
+        }
+
+        var position = localPlayer.Position;
+        if (stuckFollowJumpBaselineTimeMs == 0)
+        {
+            ResetStuckFollowJumpTracking(position, now);
+            return;
+        }
+
+        var moved = Vector3.Distance(position, stuckFollowJumpBaselinePosition);
+        if (moved >= StuckFollowJumpMovementThreshold)
+        {
+            ResetStuckFollowJumpTracking(position, now);
+            return;
+        }
+
+        if (now - stuckFollowJumpBaselineTimeMs < StuckFollowJumpWindowMs)
+            return;
+
+        if (lastStuckFollowJumpMs != 0 && now - lastStuckFollowJumpMs < StuckFollowJumpThrottleMs)
+            return;
+
+        SendCommand("/gaction jump");
+        lastStuckFollowJumpMs = now;
+        Plugin.Log.Information(
+            $"[FR][Pathing] Stuck follow jump sent after local movement stayed under {StuckFollowJumpMovementThreshold:F2}y for {StuckFollowJumpWindowMs / 1000}s; distance={distance:F1}y cling={clingDist:F1}y max={maxDist:F1}y local={FormatVector(position)} fren={FormatVector(fren.Position)}.");
+        ResetStuckFollowJumpTracking(position, now);
+    }
+
+    private bool ShouldTrackStuckFollowJump(
+        CharacterConfig config,
+        FrenTracker.FrenState fren,
+        float distance,
+        float clingDist,
+        float maxDist,
+        bool selfFlying)
+    {
+        return config.Enabled
+            && fren.IsFound
+            && fren.IsVisible
+            && distance > clingDist
+            && distance <= maxDist
+            && !selfFlying
+            && !IsLoadingOrBetweenAreas()
+            && !plugin.AdsIntegrationService.ShouldPauseDutySystems
+            && !plugin.AutomationService.IsRepairFlowActive
+            && GetResolvedClingType(config) != 2;
+    }
+
+    private void ResetStuckFollowJumpTracking()
+    {
+        stuckFollowJumpBaselinePosition = default;
+        stuckFollowJumpBaselineTimeMs = 0;
+    }
+
+    private void ResetStuckFollowJumpTracking(Vector3 position, long now)
+    {
+        stuckFollowJumpBaselinePosition = position;
+        stuckFollowJumpBaselineTimeMs = now;
+    }
+
     private void NavigateToFren(CharacterConfig config, FrenTracker.FrenState fren)
     {
         if (GetResolvedClingType(config) == 2)
         {
             ResetFlyingTakeoffState();
             CancelFlyingStuckRecovery("BossMod follow active");
+            ResetStuckFollowJumpTracking();
             EnsureBossModFollow(config, fren);
             return;
         }
@@ -1000,6 +1092,7 @@ public class FollowService
     {
         CancelFlyingStuckRecovery(reason);
         ResetFlyingTakeoffState();
+        ResetStuckFollowJumpTracking();
         StopBossModFollow();
         if (isNavigating)
             StopNavigation(config, reason);
