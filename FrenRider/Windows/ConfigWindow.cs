@@ -38,7 +38,6 @@ public class ConfigWindow : Window, IDisposable
     private static readonly string[] Positionals = { "Front", "Rear", "Any", "Auto" };
     private static readonly string[] FollowInCombatOptions = { "No", "Yes", "Auto" };
     private static readonly string[] AdsMaturityOptions = { "0 - Not Cleared", "1 - 1P Unsync Cleared", "2 - 1P Duty Support", "3 - 4P Sync Cleared" };
-    private static readonly string[] AdsPresetOptions = { "No preset push (stub)", "Pilot Default (stub)", "Treasure (stub)" };
     private static readonly string[] LootTypes = { "unchanged", "need", "greed", "pass" };
     private static readonly string[] OnOff = { "Off", "On" };
     private static readonly string[] IdleActionModes = { "Specific Action", "Action From List" };
@@ -947,24 +946,8 @@ public class ConfigWindow : Window, IDisposable
             }
         }
 
-        var adsEnableChestOpening = config.AdsEnableChestOpening;
-        if (ImGui.Checkbox("Ask ADS to open chests (stub)", ref adsEnableChestOpening))
-        {
-            config.AdsEnableChestOpening = adsEnableChestOpening;
-            configManager.SaveCurrentAccount();
-        }
-        ImGui.SameLine();
-        HelpMarker("Recorded for the ADS handoff profile, but FrenRider does not push this setting into ADS yet.");
-
-        var adsPresetSelection = Math.Clamp(config.AdsPresetSelection, 0, AdsPresetOptions.Length - 1);
-        ImGui.SetNextItemWidth(240);
-        if (ImGui.Combo("ADS Preset", ref adsPresetSelection, AdsPresetOptions, AdsPresetOptions.Length))
-        {
-            config.AdsPresetSelection = adsPresetSelection;
-            configManager.SaveCurrentAccount();
-        }
-        ImGui.SameLine();
-        HelpMarker("Placeholder for future ADS preset coordination. Stored now so the config shape is stable.");
+        if (ImGui.Button("OPEN ADS LOOT OPTIONS"))
+            OpenAdsLootOptions();
 
         if (plugin.AdsIntegrationService is not null)
         {
@@ -979,6 +962,22 @@ public class ConfigWindow : Window, IDisposable
                     ? new Vector4(0.95f, 0.8f, 0.3f, 1f)
                     : new Vector4(0.7f, 0.7f, 0.7f, 1f);
             ImGui.TextColored(adsColor, $"ADS Status: {adsStatus}");
+        }
+    }
+
+    private static void OpenAdsLootOptions()
+    {
+        try
+        {
+            if (Plugin.PluginInterface.GetIpcSubscriber<bool>("ADS.ToggleLootUi").InvokeFunc())
+                return;
+
+            Plugin.Log.Warning("[FrenRider][ADS] ADS.ToggleLootUi returned false; not falling back to /ads loot.");
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log.Debug($"[FrenRider][ADS] ADS.ToggleLootUi unavailable: {ex.Message}");
+            GameHelpers.SendChatCommand("/ads loot", "[FrenRider][ADS]");
         }
     }
 
