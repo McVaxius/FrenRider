@@ -12,8 +12,6 @@ public class CharacterConfig
     // --- Party / Friend ---
     public string FrenName { get; set; } = "";
     public bool FlyYouFools { get; set; } = false;
-    public bool TryTeleportToFrenWhenOutOfZone { get; set; } = false;
-    public int TeleportToFrenDelaySeconds { get; set; } = 30;
     public string FoolFlier { get; set; } = "Company Chocobo";
     public string FulfType { get; set; } = "unchanged";
     public bool ForceGysahl { get; set; } = false;
@@ -118,8 +116,6 @@ public class CharacterConfig
         {
             FrenName = FrenName,
             FlyYouFools = FlyYouFools,
-            TryTeleportToFrenWhenOutOfZone = TryTeleportToFrenWhenOutOfZone,
-            TeleportToFrenDelaySeconds = TeleportToFrenDelaySeconds,
             FoolFlier = FoolFlier,
             FulfType = FulfType,
             ForceGysahl = ForceGysahl,

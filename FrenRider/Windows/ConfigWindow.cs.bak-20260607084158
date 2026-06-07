@@ -426,33 +426,6 @@ public class ConfigWindow : Window, IDisposable
         ImGui.SameLine();
         HelpMarker("If enabled, you will summon your own mount instead of pillion riding.\nUseful for flying zones.\n\n⚠️ IMPORTANT: This feature requires you to be grouped with your fren.\nIt will not work properly if ungrouped (won't jump into air to follow).");
 
-        var tryTeleport = config.TryTeleportToFrenWhenOutOfZone;
-        if (ImGui.Checkbox("Try Teleport to Fren When Out of Zone", ref tryTeleport))
-        {
-            config.TryTeleportToFrenWhenOutOfZone = tryTeleport;
-            configManager.SaveCurrentAccount();
-        }
-        ImGui.SameLine();
-        HelpMarker("When enabled, FrenRider waits after your configured fren is still in party but no longer visible, then asks Lifestream to teleport to a random unlocked aetheryte in that zone.");
-
-        var teleportDelay = config.TeleportToFrenDelaySeconds;
-        var clampedTeleportDelay = Math.Clamp(teleportDelay, 5, 300);
-        if (teleportDelay != clampedTeleportDelay)
-        {
-            teleportDelay = clampedTeleportDelay;
-            config.TeleportToFrenDelaySeconds = clampedTeleportDelay;
-            configManager.SaveCurrentAccount();
-        }
-
-        ImGui.SetNextItemWidth(120);
-        if (ImGui.InputInt("Teleport Delay (seconds)", ref teleportDelay))
-        {
-            config.TeleportToFrenDelaySeconds = Math.Clamp(teleportDelay, 5, 300);
-            configManager.SaveCurrentAccount();
-        }
-        ImGui.SameLine();
-        HelpMarker("Delay before opening the party window and teleporting. Allowed range: 5-300 seconds. Default: 30.");
-
         // Mount Name (searchable dropdown from game data)
         ImGui.Text("Mount Name (if flying solo)");
         ImGui.SameLine();

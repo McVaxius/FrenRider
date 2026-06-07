@@ -271,8 +271,6 @@ public class ConfigManager
             case "Party":
                 target.FrenName = source.FrenName;
                 target.FlyYouFools = source.FlyYouFools;
-                target.TryTeleportToFrenWhenOutOfZone = source.TryTeleportToFrenWhenOutOfZone;
-                target.TeleportToFrenDelaySeconds = source.TeleportToFrenDelaySeconds;
                 target.FoolFlier = source.FoolFlier;
                 target.ForceGysahl = source.ForceGysahl;
                 target.CompanionStrat = source.CompanionStrat;

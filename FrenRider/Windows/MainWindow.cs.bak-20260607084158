@@ -205,9 +205,6 @@ public class MainWindow : Window, IDisposable
             : "Active checks running";
         UiHelpers.AlignedRow("Idle", idleText, auto.IsIdle ? UiHelpers.Blue : null);
 
-        var teleport = plugin.FrenTeleportService;
-        UiHelpers.AlignedRow("Fren teleport", teleport.StatusText, GetTeleportColor(teleport.State));
-
         if (!string.IsNullOrWhiteSpace(auto.FoodStatus))
             UiHelpers.AlignedRow("Food", auto.FoodStatus, auto.FoodStatus.StartsWith("Well Fed", StringComparison.OrdinalIgnoreCase) ? UiHelpers.Green : UiHelpers.Yellow);
 
@@ -345,16 +342,6 @@ public class MainWindow : Window, IDisposable
             CombatState.InCombat => UiHelpers.Red,
             CombatState.EnteringCombat => UiHelpers.Orange,
             CombatState.LeavingCombat => UiHelpers.Grey,
-            _ => UiHelpers.Grey,
-        };
-
-    private static Vector4 GetTeleportColor(FrenTeleportState state)
-        => state switch
-        {
-            FrenTeleportState.Waiting or FrenTeleportState.ReadingParty => UiHelpers.Yellow,
-            FrenTeleportState.TeleportIssued => UiHelpers.Green,
-            FrenTeleportState.Cooldown => UiHelpers.Orange,
-            FrenTeleportState.Blocked => UiHelpers.Red,
             _ => UiHelpers.Grey,
         };
 

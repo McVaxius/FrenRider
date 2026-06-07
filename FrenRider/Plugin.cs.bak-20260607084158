@@ -45,7 +45,6 @@ public sealed class Plugin : IDalamudPlugin
     public ConfigManager ConfigManager { get; init; }
     public FrenTracker FrenTracker { get; init; }
     public ZoneService ZoneService { get; init; }
-    public FrenTeleportService FrenTeleportService { get; init; }
     public AdsIntegrationService AdsIntegrationService { get; init; }
     public AdsRepairIpcService AdsRepairIpcService { get; init; }
     public AdsReflectionIpcService AdsReflectionIpcService { get; init; }
@@ -102,7 +101,6 @@ public sealed class Plugin : IDalamudPlugin
 
         FrenTracker = new FrenTracker(this);
         ZoneService = new ZoneService();
-        FrenTeleportService = new FrenTeleportService(this, FrenTracker, ZoneService);
         AdsIntegrationService = new AdsIntegrationService(this, ZoneService);
         AdsRepairIpcService = new AdsRepairIpcService(PluginInterface, Log);
         AdsReflectionIpcService = new AdsReflectionIpcService(this, PluginInterface, Log);
@@ -381,10 +379,7 @@ public sealed class Plugin : IDalamudPlugin
             Measure("zone", ZoneService.Update);
 
             if (IsAreaTransitionActive())
-            {
-                FrenTeleportService.ResetForAreaTransition();
                 return;
-            }
 
             // Delayed login detection (LocalPlayer may not be ready immediately)
             if (ClientState.IsLoggedIn && !wasLoggedIn)
@@ -477,7 +472,6 @@ public sealed class Plugin : IDalamudPlugin
             Measure("ads-reflection", () => AdsReflectionIpcService.Update());
             Measure("repair-gate", AutomationService.UpdateRepairGate);
 
-            Measure("fren-teleport", FrenTeleportService.Update);
             Measure("auto-yes", AutoYesService.Update);
             Measure("fate-sync", FateSyncService.Update);
             Measure("follow", FollowService.Update);
