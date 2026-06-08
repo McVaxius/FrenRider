@@ -54,6 +54,9 @@ public class FollowService
     private long flyingIdleSampleTimeMs;
     private bool flyingTakeoffPending;
     private long flyingTakeoffGroundNavHoldUntilMs;
+    private bool chaseSettingsInitialized;
+    private bool lastChaseEnabled;
+    private float lastChaseDistance;
 
     // Stuck detection: record position every 5s, check per-axis movement < 2y
     private Vector3 stuckCheckPosition;
@@ -90,6 +93,8 @@ public class FollowService
 
     public FollowState State { get; private set; } = FollowState.Idle;
     public string StateDetail { get; private set; } = "";
+    public bool IsFarChaseRequested { get; private set; }
+    public float FarChaseXzDistance { get; private set; }
 
     public FollowService(Plugin plugin, FrenTracker tracker, ZoneService zoneService)
     {
@@ -102,6 +107,25 @@ public class FollowService
     public void Dispose()
     {
         CancelFlyingStuckRecovery("plugin dispose");
+    }
+
+    public void ResetForAreaTransition()
+    {
+        var config = plugin.ConfigManager.GetActiveConfig();
+        PreemptFarChase("area transition");
+        StopAllFollowing(config, "area transition");
+        State = FollowState.Idle;
+        StateDetail = "Area transition";
+    }
+
+    public void PreemptFarChase(string reason)
+    {
+        if (!IsFarChaseRequested)
+            return;
+
+        var config = plugin.ConfigManager.GetActiveConfig();
+        StopAllFollowing(config, $"far chase preempted: {reason}");
+        SetFarChaseRequested(false, reason);
     }
 
     public void CancelFlyingStuckRecovery(string reason)
@@ -126,10 +150,20 @@ public class FollowService
     public void Update()
     {
         var config = plugin.ConfigManager.GetActiveConfig();
+        var chaseDistance = GetChaseDistance(config);
+        if (ChaseSettingsChanged(config.MountUpToChaseFren, chaseDistance))
+        {
+            PreemptFarChase("settings changed");
+            StopAllFollowing(config, "far chase settings changed");
+            State = FollowState.Idle;
+            StateDetail = "Far chase settings changed";
+            return;
+        }
 
         // Zone transition: stop navigation and reset
         if (zoneService.ZoneChanged)
         {
+            SetFarChaseRequested(false, "zone transition");
             StopAllFollowing(config, "zone transition");
             State = FollowState.Idle;
             StateDetail = "Zone transition";
@@ -148,6 +182,7 @@ public class FollowService
 
         if (!config.Enabled)
         {
+            SetFarChaseRequested(false, "disabled");
             StopAllFollowing(config, "disabled");
             State = FollowState.Idle;
             StateDetail = "Disabled";
@@ -155,8 +190,12 @@ public class FollowService
             return;
         }
 
-        if (plugin.AdsIntegrationService.ShouldPauseDutySystems)
+        if (plugin.AdsIntegrationService.ShouldPauseDutySystems
+            || plugin.AdsIntegrationService.IsHandoffPending)
         {
+            SetFarChaseRequested(false, plugin.AdsIntegrationService.IsHandoffPending
+                ? "ADS handoff pending"
+                : "ADS active");
             StopAllFollowing(config, plugin.AdsIntegrationService.IsHandoffPending
                 ? "ADS handoff pending"
                 : "ADS active");
@@ -170,6 +209,7 @@ public class FollowService
 
         if (plugin.AutomationService.IsRepairFlowActive)
         {
+            SetFarChaseRequested(false, "repair active");
             StopAllFollowing(config, "repair active");
             State = FollowState.Idle;
             StateDetail = "Repair active";
@@ -177,9 +217,30 @@ public class FollowService
             return;
         }
 
+        if (Plugin.Condition[ConditionFlag.Unconscious])
+        {
+            SetFarChaseRequested(false, "unconscious");
+            StopAllFollowing(config, "unconscious");
+            State = FollowState.Idle;
+            StateDetail = "Unconscious";
+            LogFateFollowDecisionIfChanged(config, tracker.Fren, "unconscious");
+            return;
+        }
+
+        if (HasTeleportOrDialogActivity())
+        {
+            SetFarChaseRequested(false, "teleport or dialog active");
+            StopAllFollowing(config, "teleport or dialog active");
+            State = FollowState.Idle;
+            StateDetail = "Teleport or dialog active";
+            LogFateFollowDecisionIfChanged(config, tracker.Fren, "teleport or dialog active");
+            return;
+        }
+
         var fren = tracker.Fren;
         if (fren == null || !fren.IsFound)
         {
+            SetFarChaseRequested(false, "no fren found");
             StopAllFollowing(config, "no fren found");
             State = FollowState.Idle;
             StateDetail = "No fren found";
@@ -189,6 +250,7 @@ public class FollowService
 
         if (!fren.IsVisible)
         {
+            SetFarChaseRequested(false, "fren not visible");
             StopAllFollowing(config, "fren not visible");
             State = FollowState.Idle;
             StateDetail = "Fren not visible";
@@ -196,15 +258,10 @@ public class FollowService
             return;
         }
 
-        var resolvedClingType = GetResolvedClingType(config);
-        if (resolvedClingType != 2 && bossModFollowActive)
-        {
-            StopBossModFollow();
-        }
-
         // Combat check
         if (Plugin.Condition[ConditionFlag.InCombat])
         {
+            PreemptFarChase("combat");
             // FollowInCombat: 0=No, 1=Yes, 2=Auto
             if (config.FollowInCombat == 0)
             {
@@ -220,16 +277,33 @@ public class FollowService
         var distance = fren.Distance;
         var maxDist = GetMaxDistance(config);
         var clingDist = GetEffectiveClingDistance(config);
-        var selfMounted = Plugin.Condition[ConditionFlag.Mounted];
+        var localPlayer = Plugin.ObjectTable.LocalPlayer;
+        FarChaseXzDistance = localPlayer == null
+            ? 0f
+            : GetXzDistance(localPlayer.Position, fren.Position);
+
+        UpdateFarChaseRequest(config, fren, FarChaseXzDistance, distance, maxDist);
+
+        var resolvedClingType = GetMovementClingType(config);
+        if (resolvedClingType != 2 && bossModFollowActive)
+        {
+            StopBossModFollow();
+        }
+
+        var selfRidingPillion = Plugin.Condition[ConditionFlag.RidingPillion];
+        var selfMounted = Plugin.Condition[ConditionFlag.Mounted]
+            && (!IsFarChaseRequested || !selfRidingPillion);
+        var selfMounting = Plugin.Condition[ConditionFlag.Mounting71];
         var selfFlying = IsSelfFlightNavActive();
         var frenFlying = fren.IsFlying;
         var now = Environment.TickCount64;
-        if (!selfMounted || !frenFlying)
+        if (!selfMounted || (!frenFlying && !IsFarChaseRequested))
             ResetFlyingTakeoffState();
 
         // Too far — stop
         if (distance > maxDist)
         {
+            SetFarChaseRequested(false, "beyond max follow distance");
             CancelFlyingStuckRecovery("too far");
             ResetStuckFollowJumpTracking();
             ResetFlyingTakeoffState();
@@ -243,6 +317,7 @@ public class FollowService
         // In range — stop
         if (distance <= clingDist)
         {
+            SetFarChaseRequested(false, "in range");
             CancelFlyingStuckRecovery("in range");
             ResetStuckFollowJumpTracking();
             ResetFlyingTakeoffState();
@@ -250,6 +325,21 @@ public class FollowService
             State = FollowState.InRange;
             StateDetail = $"In range ({distance:F1}y)";
             LogFateFollowDecisionIfChanged(config, fren, StateDetail);
+            return;
+        }
+
+        if (IsFarChaseRequested && !selfMounted)
+        {
+            CancelFlyingStuckRecovery("far chase waiting for mount");
+            ResetStuckFollowJumpTracking();
+            ResetFlyingTakeoffState();
+            if (isNavigating || bossModFollowActive)
+                StopAllFollowing(config, "far chase waiting for own mount");
+            State = FollowState.Following;
+            StateDetail = selfMounting
+                ? $"Far chase: mounting ({FarChaseXzDistance:F1}y XZ)"
+                : $"Far chase: requesting mount ({FarChaseXzDistance:F1}y XZ)";
+            LogFateFollowDecisionIfChanged(config, fren, "none");
             return;
         }
 
@@ -267,7 +357,7 @@ public class FollowService
             }
         }
 
-        TryStartFlyingTakeoff(config, selfMounted, selfFlying, frenFlying, now);
+        TryStartFlyingTakeoff(config, selfMounted, selfFlying, frenFlying || IsFarChaseRequested, now);
 
         // Formation mode: override target with formation position
         var formationTarget = plugin.FormationService.GetFormationTarget();
@@ -279,10 +369,10 @@ public class FollowService
             if (bossModFollowActive)
                 StopBossModFollow();
 
-            var localPlayer = Plugin.ObjectTable.LocalPlayer;
-            if (localPlayer != null)
+            var formationLocalPlayer = Plugin.ObjectTable.LocalPlayer;
+            if (formationLocalPlayer != null)
             {
-                var formDist = Vector3.Distance(localPlayer.Position, formationTarget.Value);
+                var formDist = Vector3.Distance(formationLocalPlayer.Position, formationTarget.Value);
                 if (formDist <= 1.5f)
                 {
                     if (isNavigating) StopNavigation(config, $"formation in range ({formDist:F1}y)");
@@ -307,12 +397,14 @@ public class FollowService
             UpdateStuckFollowJump(config, fren, distance, clingDist, maxDist, selfFlying, now);
 
         State = FollowState.Following;
-        StateDetail = $"Following ({distance:F1}y, cling {clingDist:F1}y)";
+        StateDetail = IsFarChaseRequested
+            ? $"Far chase ({FarChaseXzDistance:F1}y XZ, max {maxDist:F0}y)"
+            : $"Following ({distance:F1}y, cling {clingDist:F1}y)";
         LogFateFollowDecisionIfChanged(config, fren, "none");
         NavigateToFren(config, fren);
     }
 
-    private float GetEffectiveClingDistance(CharacterConfig config)
+    public float GetEffectiveClingDistance(CharacterConfig config)
     {
         var cling = config.Cling;
 
@@ -341,6 +433,87 @@ public class FollowService
         return zoneService.CurrentZone == ZoneType.Duty
             ? config.ClingTypeDuty
             : config.ClingType;
+    }
+
+    private int GetMovementClingType(CharacterConfig config)
+        => IsFarChaseRequested ? 0 : GetResolvedClingType(config);
+
+    private bool ChaseSettingsChanged(bool enabled, float distance)
+    {
+        if (!chaseSettingsInitialized)
+        {
+            chaseSettingsInitialized = true;
+            lastChaseEnabled = enabled;
+            lastChaseDistance = distance;
+            return false;
+        }
+
+        if (lastChaseEnabled == enabled && lastChaseDistance.Equals(distance))
+            return false;
+
+        lastChaseEnabled = enabled;
+        lastChaseDistance = distance;
+        return true;
+    }
+
+    private void UpdateFarChaseRequest(
+        CharacterConfig config,
+        FrenTracker.FrenState fren,
+        float xzDistance,
+        float distance,
+        float maxDistance)
+    {
+        var requested = config.Enabled
+            && config.MountUpToChaseFren
+            && zoneService.CurrentZone == ZoneType.Overworld
+            && !Plugin.Condition[ConditionFlag.BoundByDuty]
+            && !Plugin.Condition[ConditionFlag.BoundByDuty56]
+            && !Plugin.Condition[ConditionFlag.InCombat]
+            && !Plugin.Condition[ConditionFlag.Unconscious]
+            && !config.Formation
+            && fren.IsFound
+            && fren.IsVisible
+            && distance <= maxDistance
+            && xzDistance > GetChaseDistance(config);
+
+        if (requested == IsFarChaseRequested)
+            return;
+
+        StopAllFollowing(config, requested ? "starting far chase" : "ending far chase");
+        SetFarChaseRequested(requested, requested ? "horizontal threshold exceeded" : "horizontal threshold reached");
+    }
+
+    private void SetFarChaseRequested(bool requested, string reason)
+    {
+        if (IsFarChaseRequested == requested)
+            return;
+
+        IsFarChaseRequested = requested;
+        Plugin.Log.Information(
+            $"[FR][FarChase] {(requested ? "Started" : "Stopped")}: {reason}; xz={FarChaseXzDistance:F1}y");
+    }
+
+    private bool HasTeleportOrDialogActivity()
+    {
+        var teleportState = plugin.FrenTeleportService.State;
+        return teleportState is FrenTeleportState.Waiting
+                or FrenTeleportState.ReadingParty
+                or FrenTeleportState.TeleportIssued
+                or FrenTeleportState.Cooldown
+            || GameHelpers.IsAddonVisible("SelectYesno")
+            || GameHelpers.IsAddonVisible("_NotificationTelepo");
+    }
+
+    private static float GetChaseDistance(CharacterConfig config)
+        => float.IsFinite(config.MountUpToChaseFrenDistance)
+            ? Math.Max(1f, config.MountUpToChaseFrenDistance)
+            : 1f;
+
+    public static float GetXzDistance(Vector3 first, Vector3 second)
+    {
+        var dx = first.X - second.X;
+        var dz = first.Z - second.Z;
+        return MathF.Sqrt((dx * dx) + (dz * dz));
     }
 
     private void UpdateStuckFollowJump(
@@ -404,7 +577,7 @@ public class FollowService
             && !IsLoadingOrBetweenAreas()
             && !plugin.AdsIntegrationService.ShouldPauseDutySystems
             && !plugin.AutomationService.IsRepairFlowActive
-            && GetResolvedClingType(config) != 2;
+            && GetMovementClingType(config) != 2;
     }
 
     private void ResetStuckFollowJumpTracking()
@@ -421,7 +594,7 @@ public class FollowService
 
     private void NavigateToFren(CharacterConfig config, FrenTracker.FrenState fren)
     {
-        if (GetResolvedClingType(config) == 2)
+        if (GetMovementClingType(config) == 2)
         {
             ResetFlyingTakeoffState();
             CancelFlyingStuckRecovery("BossMod follow active");
@@ -648,7 +821,7 @@ public class FollowService
             && !IsLoadingOrBetweenAreas()
             && !plugin.AdsIntegrationService.ShouldPauseDutySystems
             && !plugin.AutomationService.IsRepairFlowActive
-            && GetResolvedClingType(config) != 2
+            && GetMovementClingType(config) != 2
             && zoneService.CurrentZone != ZoneType.Foray
             && now - lastNavCommandMs >= FlyingIdleNavCommandGraceMs
             && now - lastFlyingIdleReissueMs >= FlyingIdleReissueThrottleMs;
@@ -710,7 +883,7 @@ public class FollowService
             return;
         }
 
-        var clingType = GetResolvedClingType(config);
+        var clingType = GetMovementClingType(config);
         lastMovementClingType = clingType;
         lastNavigationWasFlying = false;
 
@@ -839,7 +1012,7 @@ public class FollowService
             && !IsLoadingOrBetweenAreas()
             && !plugin.AdsIntegrationService.ShouldPauseDutySystems
             && !plugin.AutomationService.IsRepairFlowActive
-            && GetResolvedClingType(config) != 2
+            && GetMovementClingType(config) != 2
             && zoneService.CurrentZone != ZoneType.Foray;
     }
 
@@ -962,7 +1135,7 @@ public class FollowService
         var distance = fren?.Distance;
         var cling = GetEffectiveClingDistance(config);
         var maxDistance = GetMaxDistance(config);
-        var followMode = DescribeMovementMode(GetResolvedClingType(config));
+        var followMode = DescribeMovementMode(GetMovementClingType(config));
         var inCombat = Plugin.Condition[ConditionFlag.InCombat];
         var selfMounted = Plugin.Condition[ConditionFlag.Mounted];
         var selfFlying = IsSelfFlightNavActive();

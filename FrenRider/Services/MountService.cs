@@ -25,9 +25,13 @@ public class MountService
 
     private bool wasFrenMounted;
     private long mountCooldownMs;
+    private bool farChaseMountPending;
+    private bool farChaseMountOwned;
+    private long farChaseMountPendingUntilMs;
 
     public MountState State { get; private set; } = MountState.Idle;
     public string StateDetail { get; private set; } = "";
+    public bool IsFarChaseMountOwned => farChaseMountOwned;
 
     public MountService(Plugin plugin, FrenTracker tracker, ZoneService zoneService)
     {
@@ -36,18 +40,31 @@ public class MountService
         this.zoneService = zoneService;
     }
 
+    public void PreemptFarChase(string reason)
+    {
+        State = MountState.Idle;
+        StateDetail = $"Far chase preempted: {reason}";
+    }
+
     public void Update()
     {
         var config = plugin.ConfigManager.GetActiveConfig();
+        var now = Environment.TickCount64;
+        var selfRidingPillion = Plugin.Condition[ConditionFlag.RidingPillion];
+        var selfOnOwnMount = Plugin.Condition[ConditionFlag.Mounted] && !selfRidingPillion;
+        UpdateFarChaseMountOwnership(selfOnOwnMount, now);
+
         if (!config.Enabled)
         {
+            PreemptFarChase("disabled");
             State = MountState.Idle;
             StateDetail = "Disabled";
             wasFrenMounted = false;
             return;
         }
 
-        if (plugin.AdsIntegrationService.ShouldPauseDutySystems)
+        if (plugin.AdsIntegrationService.ShouldPauseDutySystems
+            || plugin.AdsIntegrationService.IsHandoffPending)
         {
             State = MountState.Idle;
             StateDetail = plugin.AdsIntegrationService.IsHandoffPending
@@ -60,6 +77,13 @@ public class MountService
         {
             State = MountState.Idle;
             StateDetail = "Repair active";
+            return;
+        }
+
+        if (Plugin.Condition[ConditionFlag.Unconscious])
+        {
+            State = MountState.Idle;
+            StateDetail = "Unconscious";
             return;
         }
 
@@ -76,10 +100,97 @@ public class MountService
             || Plugin.Condition[ConditionFlag.RidingPillion];
         var selfMountBusy = selfOnMountOrPillion
             || Plugin.Condition[ConditionFlag.Mounting71];
-        var selfRidingPillion = Plugin.Condition[ConditionFlag.RidingPillion];
         var selfFlying = Plugin.Condition[ConditionFlag.InFlight];
         var inCombat = Plugin.Condition[ConditionFlag.InCombat];
-        var now = Environment.TickCount64;
+
+        if (plugin.FollowService.IsFarChaseRequested)
+        {
+            if (selfRidingPillion)
+            {
+                if (now >= mountCooldownMs)
+                {
+                    State = MountState.Dismounting;
+                    StateDetail = "Far chase: leaving pillion";
+                    DismountSelf();
+                }
+                else
+                {
+                    State = MountState.WaitingToMount;
+                    StateDetail = $"Far chase pillion cooldown ({(mountCooldownMs - now) / 1000.0:F1}s)";
+                }
+                return;
+            }
+
+            if (selfOnOwnMount)
+            {
+                State = MountState.Mounted;
+                StateDetail = selfFlying
+                    ? "Far chase: flying"
+                    : "Far chase: mounted; taking off";
+                return;
+            }
+
+            if (selfMountBusy || farChaseMountPending)
+            {
+                State = MountState.Mounting;
+                StateDetail = "Far chase: mounting own mount";
+                return;
+            }
+
+            if (!CanIssueFarChaseMountCommand(config, out var blockReason))
+            {
+                State = MountState.Idle;
+                StateDetail = $"Far chase blocked: {blockReason}";
+                return;
+            }
+
+            if (now >= mountCooldownMs)
+            {
+                farChaseMountPending = true;
+                farChaseMountPendingUntilMs = now + 5000;
+                MountOwnMount(config, "Far chase");
+            }
+            else
+            {
+                State = MountState.WaitingToMount;
+                StateDetail = $"Far chase mount cooldown ({(mountCooldownMs - now) / 1000.0:F1}s)";
+            }
+            return;
+        }
+
+        if (farChaseMountOwned || farChaseMountPending)
+        {
+            if (farChaseMountOwned && selfOnOwnMount)
+            {
+                if (CanSafelyDismountFarChaseMount(config, fren, out var retainReason))
+                {
+                    if (now >= mountCooldownMs)
+                    {
+                        State = MountState.Dismounting;
+                        StateDetail = "Far chase complete; dismounting";
+                        DismountSelf();
+                    }
+                    else
+                    {
+                        State = MountState.Dismounting;
+                        StateDetail = $"Far chase dismount cooldown ({(mountCooldownMs - now) / 1000.0:F1}s)";
+                    }
+                }
+                else
+                {
+                    State = MountState.Mounted;
+                    StateDetail = $"Far chase mount retained: {retainReason}";
+                }
+                return;
+            }
+
+            if (farChaseMountPending)
+            {
+                State = MountState.Mounting;
+                StateDetail = "Far chase mount pending";
+                return;
+            }
+        }
 
         // DISMOUNT LOGIC: If fren is not mounted and FlyYouFools is enabled, dismount
         // This matches SND: "if IsPartyMemberMounted(fren) == false and fly_you_fools == true"
@@ -166,27 +277,11 @@ public class MountService
 
     private void MountSelf(CharacterConfig config)
     {
-        var mountName = config.FoolFlier;
         mountCooldownMs = Environment.TickCount64 + 2000; // 2s cooldown
 
         if (config.FlyYouFools)
         {
-            // Fly You Fools: mount own mount
-            if (mountName == "Mount Roulette")
-            {
-                // Mount Roulette requires /generalaction, not /mount
-                SendCommand("/generalaction \"Mount Roulette\"");
-            }
-            else if (string.IsNullOrEmpty(mountName))
-            {
-                SendCommand("/mount \"Company Chocobo\"");
-            }
-            else
-            {
-                SendCommand($"/mount \"{mountName}\"");
-            }
-            State = MountState.Mounting;
-            StateDetail = $"Mounting: {mountName}";
+            MountOwnMount(config, "Fly You Fools");
         }
         else
         {
@@ -221,6 +316,182 @@ public class MountService
                 StateDetail = "Can't pillion: fren not found";
             }
         }
+    }
+
+    private void MountOwnMount(CharacterConfig config, string reason)
+    {
+        var mountName = config.FoolFlier;
+        mountCooldownMs = Environment.TickCount64 + 2000;
+
+        if (mountName == "Mount Roulette")
+        {
+            SendCommand("/generalaction \"Mount Roulette\"");
+        }
+        else if (string.IsNullOrEmpty(mountName))
+        {
+            mountName = "Company Chocobo";
+            SendCommand("/mount \"Company Chocobo\"");
+        }
+        else
+        {
+            SendCommand($"/mount \"{mountName}\"");
+        }
+
+        State = MountState.Mounting;
+        StateDetail = $"{reason}: mounting {mountName}";
+    }
+
+    private void UpdateFarChaseMountOwnership(bool selfOnOwnMount, long now)
+    {
+        if (farChaseMountPending && selfOnOwnMount)
+        {
+            farChaseMountPending = false;
+            farChaseMountOwned = true;
+            farChaseMountPendingUntilMs = 0;
+            Plugin.Log.Information("[FR][FarChase] Own mount acquired");
+            return;
+        }
+
+        if (farChaseMountOwned && !selfOnOwnMount)
+        {
+            farChaseMountOwned = false;
+            Plugin.Log.Information("[FR][FarChase] Own mount released after dismount");
+        }
+
+        if (farChaseMountPending && now >= farChaseMountPendingUntilMs)
+        {
+            farChaseMountPending = false;
+            farChaseMountPendingUntilMs = 0;
+            Plugin.Log.Information("[FR][FarChase] Own mount request timed out");
+        }
+    }
+
+    private bool CanIssueFarChaseMountCommand(CharacterConfig config, out string reason)
+    {
+        if (Plugin.Condition[ConditionFlag.InCombat])
+        {
+            reason = "in combat";
+            return false;
+        }
+
+        if (Plugin.Condition[ConditionFlag.BoundByDuty]
+            || Plugin.Condition[ConditionFlag.BoundByDuty56])
+        {
+            reason = "in duty";
+            return false;
+        }
+
+        if (Plugin.Condition[ConditionFlag.BetweenAreas]
+            || Plugin.Condition[ConditionFlag.BetweenAreas51])
+        {
+            reason = "area transition";
+            return false;
+        }
+
+        if (Plugin.Condition[ConditionFlag.Unconscious])
+        {
+            reason = "unconscious";
+            return false;
+        }
+
+        if (config.Formation)
+        {
+            reason = "formation";
+            return false;
+        }
+
+        if (plugin.AdsIntegrationService.ShouldPauseDutySystems
+            || plugin.AdsIntegrationService.IsHandoffPending)
+        {
+            reason = "ADS";
+            return false;
+        }
+
+        if (plugin.AutomationService.IsRepairFlowActive)
+        {
+            reason = "repair";
+            return false;
+        }
+
+        if (HasTeleportOrDialogActivity())
+        {
+            reason = "teleport or dialog";
+            return false;
+        }
+
+        return GameHelpers.CanUseMountActionNow(out reason);
+    }
+
+    private bool CanSafelyDismountFarChaseMount(
+        CharacterConfig config,
+        FrenTracker.FrenState fren,
+        out string reason)
+    {
+        var clingDistance = plugin.FollowService.GetEffectiveClingDistance(config);
+        if (fren.Distance > clingDistance)
+        {
+            reason = $"{fren.Distance:F1}y from fren, cling {clingDistance:F1}y";
+            return false;
+        }
+
+        if (Plugin.Condition[ConditionFlag.InFlight] || Plugin.Condition[ConditionFlag.Diving])
+        {
+            reason = "not grounded";
+            return false;
+        }
+
+        if (Plugin.Condition[ConditionFlag.InCombat]
+            || Plugin.Condition[ConditionFlag.Unconscious]
+            || Plugin.Condition[ConditionFlag.Mounting71])
+        {
+            reason = "player busy";
+            return false;
+        }
+
+        if (Plugin.Condition[ConditionFlag.BoundByDuty]
+            || Plugin.Condition[ConditionFlag.BoundByDuty56]
+            || Plugin.Condition[ConditionFlag.BetweenAreas]
+            || Plugin.Condition[ConditionFlag.BetweenAreas51])
+        {
+            reason = "duty or transition";
+            return false;
+        }
+
+        var localPlayer = Plugin.ObjectTable.LocalPlayer;
+        if (localPlayer?.IsCasting == true
+            || Plugin.Condition[ConditionFlag.OccupiedInQuestEvent]
+            || Plugin.Condition[ConditionFlag.OccupiedInCutSceneEvent]
+            || Plugin.Condition[ConditionFlag.Occupied33]
+            || Plugin.Condition[ConditionFlag.Occupied39]
+            || Plugin.Condition[ConditionFlag.WatchingCutscene])
+        {
+            reason = "casting or occupied";
+            return false;
+        }
+
+        if (config.Formation
+            || plugin.AdsIntegrationService.ShouldPauseDutySystems
+            || plugin.AdsIntegrationService.IsHandoffPending
+            || plugin.AutomationService.IsRepairFlowActive
+            || HasTeleportOrDialogActivity())
+        {
+            reason = "automation preempted";
+            return false;
+        }
+
+        reason = "safe and in cling range";
+        return true;
+    }
+
+    private bool HasTeleportOrDialogActivity()
+    {
+        var teleportState = plugin.FrenTeleportService.State;
+        return teleportState is FrenTeleportState.Waiting
+                or FrenTeleportState.ReadingParty
+                or FrenTeleportState.TeleportIssued
+                or FrenTeleportState.Cooldown
+            || GameHelpers.IsAddonVisible("SelectYesno")
+            || GameHelpers.IsAddonVisible("_NotificationTelepo");
     }
 
     private void DismountSelf()

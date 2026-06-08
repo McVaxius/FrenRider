@@ -208,6 +208,9 @@ public class MainWindow : Window, IDisposable
         var teleport = plugin.FrenTeleportService;
         UiHelpers.AlignedRow("Fren teleport", teleport.StatusText, GetTeleportColor(teleport.State));
 
+        var respawn = plugin.RespawnService;
+        UiHelpers.AlignedRow("Respawn", respawn.StatusText, GetRespawnColor(respawn.State));
+
         if (!string.IsNullOrWhiteSpace(auto.FoodStatus))
             UiHelpers.AlignedRow("Food", auto.FoodStatus, auto.FoodStatus.StartsWith("Well Fed", StringComparison.OrdinalIgnoreCase) ? UiHelpers.Green : UiHelpers.Yellow);
 
@@ -301,7 +304,7 @@ public class MainWindow : Window, IDisposable
         if (!ImGui.CollapsingHeader("Compact debug", ImGuiTreeNodeFlags.DefaultOpen))
             return;
 
-        UiHelpers.AlignedRow("Config", $"Run={config.Enabled}, FlyYouFools={config.FlyYouFools}, FollowMode={config.ClingType}/{config.ClingTypeDuty}");
+        UiHelpers.AlignedRow("Config", $"Run={config.Enabled}, FlyYouFools={config.FlyYouFools}, FarChase={config.MountUpToChaseFren}, FollowMode={config.ClingType}/{config.ClingTypeDuty}");
         UiHelpers.AlignedRow("Distances", $"Cling={config.Cling:F1}, Max={config.MaxBistance:F0}, ForayMax={config.MaxBistanceForay:F0}");
         UiHelpers.AlignedRow("ADS flags", $"Loaded={plugin.AdsIntegrationService.AdsLoaded}, Pending={plugin.AdsIntegrationService.IsHandoffPending}, Controlling={plugin.AdsIntegrationService.IsControllingDuty}");
     }
@@ -355,6 +358,15 @@ public class MainWindow : Window, IDisposable
             FrenTeleportState.TeleportIssued => UiHelpers.Green,
             FrenTeleportState.Cooldown => UiHelpers.Orange,
             FrenTeleportState.Blocked => UiHelpers.Red,
+            _ => UiHelpers.Grey,
+        };
+
+    private static Vector4 GetRespawnColor(RespawnState state)
+        => state switch
+        {
+            RespawnState.Waiting => UiHelpers.Yellow,
+            RespawnState.Returning => UiHelpers.Orange,
+            RespawnState.Blocked => UiHelpers.Red,
             _ => UiHelpers.Grey,
         };
 

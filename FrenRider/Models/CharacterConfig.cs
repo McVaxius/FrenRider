@@ -9,11 +9,26 @@ public class CharacterConfig
 {
     public const string DefaultCustomIdleCommand = "/smile motion";
 
+    private int respawnOutsideDutiesDelaySeconds = 60;
+    private float mountUpToChaseFrenDistance = 100f;
+
     // --- Party / Friend ---
     public string FrenName { get; set; } = "";
     public bool FlyYouFools { get; set; } = false;
     public bool TryTeleportToFrenWhenOutOfZone { get; set; } = false;
     public int TeleportToFrenDelaySeconds { get; set; } = 30;
+    public bool RespawnOutsideDuties { get; set; } = false;
+    public int RespawnOutsideDutiesDelaySeconds
+    {
+        get => respawnOutsideDutiesDelaySeconds;
+        set => respawnOutsideDutiesDelaySeconds = Math.Max(1, value);
+    }
+    public bool MountUpToChaseFren { get; set; } = false;
+    public float MountUpToChaseFrenDistance
+    {
+        get => mountUpToChaseFrenDistance;
+        set => mountUpToChaseFrenDistance = float.IsFinite(value) ? Math.Max(1f, value) : 1f;
+    }
     public string FoolFlier { get; set; } = "Company Chocobo";
     public string FulfType { get; set; } = "unchanged";
     public bool ForceGysahl { get; set; } = false;
@@ -120,6 +135,10 @@ public class CharacterConfig
             FlyYouFools = FlyYouFools,
             TryTeleportToFrenWhenOutOfZone = TryTeleportToFrenWhenOutOfZone,
             TeleportToFrenDelaySeconds = TeleportToFrenDelaySeconds,
+            RespawnOutsideDuties = RespawnOutsideDuties,
+            RespawnOutsideDutiesDelaySeconds = RespawnOutsideDutiesDelaySeconds,
+            MountUpToChaseFren = MountUpToChaseFren,
+            MountUpToChaseFrenDistance = MountUpToChaseFrenDistance,
             FoolFlier = FoolFlier,
             FulfType = FulfType,
             ForceGysahl = ForceGysahl,

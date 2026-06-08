@@ -584,7 +584,7 @@ public static class GameHelpers
     /// Click Yes on SelectYesno dialog if visible.
     /// Uses AtkUnitBase.FireCallback with proper AtkValue array.
     /// </summary>
-    public static unsafe bool ClickYesIfVisible()
+    public static unsafe bool ClickYesIfVisible(bool logClick = true)
     {
         try
         {
@@ -606,7 +606,8 @@ public static class GameHelpers
             atkValues[1].Int = 0;
 
             addon->FireCallback(2, atkValues);
-            Plugin.Log.Information("[YES/NO] Clicked Yes on SelectYesno dialog");
+            if (logClick)
+                Plugin.Log.Information("[YES/NO] Clicked Yes on SelectYesno dialog");
             return true;
         }
         catch (Exception ex)

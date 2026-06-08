@@ -453,6 +453,58 @@ public class ConfigWindow : Window, IDisposable
         ImGui.SameLine();
         HelpMarker("Delay before opening the party window and teleporting. Allowed range: 5-300 seconds. Default: 30.");
 
+        var respawnOutsideDuties = config.RespawnOutsideDuties;
+        if (ImGui.Checkbox("Respawn after death outside duties after", ref respawnOutsideDuties))
+        {
+            config.RespawnOutsideDuties = respawnOutsideDuties;
+            configManager.SaveCurrentAccount();
+        }
+
+        var respawnDelay = Math.Max(1, config.RespawnOutsideDutiesDelaySeconds);
+        if (respawnDelay != config.RespawnOutsideDutiesDelaySeconds)
+        {
+            config.RespawnOutsideDutiesDelaySeconds = respawnDelay;
+            configManager.SaveCurrentAccount();
+        }
+
+        ImGui.SameLine();
+        ImGui.SetNextItemWidth(120);
+        if (ImGui.InputInt("seconds##RespawnOutsideDutiesDelay", ref respawnDelay))
+        {
+            config.RespawnOutsideDutiesDelaySeconds = Math.Max(1, respawnDelay);
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("After remaining continuously unconscious outside duties for this delay, open the Return prompt and accept it. Minimum: 1 second. Default: 60.");
+
+        var mountUpToChaseFren = config.MountUpToChaseFren;
+        if (ImGui.Checkbox("Mount-up to chase fren if >", ref mountUpToChaseFren))
+        {
+            config.MountUpToChaseFren = mountUpToChaseFren;
+            configManager.SaveCurrentAccount();
+        }
+
+        var chaseDistance = float.IsFinite(config.MountUpToChaseFrenDistance)
+            ? Math.Max(1f, config.MountUpToChaseFrenDistance)
+            : 1f;
+        if (chaseDistance != config.MountUpToChaseFrenDistance)
+        {
+            config.MountUpToChaseFrenDistance = chaseDistance;
+            configManager.SaveCurrentAccount();
+        }
+
+        ImGui.SameLine();
+        ImGui.SetNextItemWidth(120);
+        if (ImGui.InputFloat("y from fren##MountUpToChaseFrenDistance", ref chaseDistance))
+        {
+            config.MountUpToChaseFrenDistance = float.IsFinite(chaseDistance)
+                ? Math.Max(1f, chaseDistance)
+                : 1f;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Outside duties, summon your configured own mount and fly toward a visible fren when horizontal XZ distance exceeds this threshold. Existing zone-specific Max Follow Distance still applies. Minimum: 1y. Default: 100y.");
+
         // Mount Name (searchable dropdown from game data)
         ImGui.Text("Mount Name (if flying solo)");
         ImGui.SameLine();

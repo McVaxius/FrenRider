@@ -273,6 +273,10 @@ public class ConfigManager
                 target.FlyYouFools = source.FlyYouFools;
                 target.TryTeleportToFrenWhenOutOfZone = source.TryTeleportToFrenWhenOutOfZone;
                 target.TeleportToFrenDelaySeconds = source.TeleportToFrenDelaySeconds;
+                target.RespawnOutsideDuties = source.RespawnOutsideDuties;
+                target.RespawnOutsideDutiesDelaySeconds = source.RespawnOutsideDutiesDelaySeconds;
+                target.MountUpToChaseFren = source.MountUpToChaseFren;
+                target.MountUpToChaseFrenDistance = source.MountUpToChaseFrenDistance;
                 target.FoolFlier = source.FoolFlier;
                 target.ForceGysahl = source.ForceGysahl;
                 target.CompanionStrat = source.CompanionStrat;

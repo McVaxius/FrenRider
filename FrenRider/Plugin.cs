@@ -62,6 +62,7 @@ public sealed class Plugin : IDalamudPlugin
     public FateSyncService FateSyncService { get; init; }
     public YesAlreadyIPC YesAlreadyIPC { get; init; }
     public AutoYesService AutoYesService { get; init; }
+    public RespawnService RespawnService { get; init; }
     public AutoDutyDetectionService AutoDutyDetectionService { get; init; }
     public bool ECommonsAvailable { get; private set; }
     public string[] MountNames { get; private set; } = Array.Empty<string>();
@@ -120,6 +121,7 @@ public sealed class Plugin : IDalamudPlugin
         FateSyncService = new FateSyncService(this, ZoneService);
         YesAlreadyIPC = new YesAlreadyIPC(Log);
         AutoYesService = new AutoYesService(this, GameGui, Condition, Log);
+        RespawnService = new RespawnService(this);
 		
         // Initialize AutoDuty warning system
         AutoDutyWarningWindow = new AutoDutyWarningWindow(this, ChatGui, Log);
@@ -252,6 +254,9 @@ public sealed class Plugin : IDalamudPlugin
         else
         {
             FollowService.CancelFlyingStuckRecovery("disabled");
+            FollowService.PreemptFarChase("disabled");
+            MountService.PreemptFarChase("disabled");
+            RespawnService.ResetForDisable();
             AutoDutyDetectionService.HandleFrenRiderDisabled();
         }
     }
@@ -383,6 +388,9 @@ public sealed class Plugin : IDalamudPlugin
             if (IsAreaTransitionActive())
             {
                 FrenTeleportService.ResetForAreaTransition();
+                FollowService.ResetForAreaTransition();
+                MountService.PreemptFarChase("area transition");
+                RespawnService.ResetForAreaTransition();
                 return;
             }
 
@@ -479,6 +487,7 @@ public sealed class Plugin : IDalamudPlugin
 
             Measure("fren-teleport", FrenTeleportService.Update);
             Measure("auto-yes", AutoYesService.Update);
+            Measure("respawn", RespawnService.Update);
             Measure("fate-sync", FateSyncService.Update);
             Measure("follow", FollowService.Update);
             Measure("mount", MountService.Update);
