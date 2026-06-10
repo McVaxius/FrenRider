@@ -5,9 +5,9 @@ using Dalamud.Plugin.Services;
 
 namespace FrenRider.Services;
 
-public sealed class AdsRepairStatusSnapshot
+public sealed class AdsUtilityStatusSnapshot
 {
-    public static AdsRepairStatusSnapshot Empty { get; } = new();
+    public static AdsUtilityStatusSnapshot Empty { get; } = new();
 
     public bool IsAvailable { get; init; }
     public bool StatusReadable { get; init; }
@@ -19,6 +19,13 @@ public sealed class AdsRepairStatusSnapshot
     public string UtilityLastSuccess { get; init; } = string.Empty;
     public string UtilityLastFailure { get; init; } = string.Empty;
     public DateTime? UtilityCompletedAtUtc { get; init; }
+    public string DesynthMode { get; init; } = string.Empty;
+    public string DesynthSource { get; init; } = string.Empty;
+    public string DesynthPreset { get; init; } = string.Empty;
+    public string DesynthLedgerStatus { get; init; } = string.Empty;
+    public int DesynthEligible { get; init; }
+    public int DesynthCompleted { get; init; }
+    public string DesynthFailure { get; init; } = string.Empty;
     public DateTime CapturedAtUtc { get; init; }
 
     public bool IsRepairRunning
@@ -28,23 +35,28 @@ public sealed class AdsRepairStatusSnapshot
 
     public bool SuppressesGenericYesNo
         => StatusReadable && UtilitySuppressesGenericYesNo;
+
+    public bool IsDesynthRunning
+        => UtilityRunning
+           && (UtilityMode.Contains("desynth", StringComparison.OrdinalIgnoreCase)
+               || UtilityTask.Contains("desynth", StringComparison.OrdinalIgnoreCase));
 }
 
-public sealed class AdsRepairIpcService : IDisposable
+public sealed class AdsUtilityIpcService : IDisposable
 {
     private readonly IDalamudPluginInterface pluginInterface;
     private readonly IPluginLog log;
     private readonly AdsAvailabilityCache adsAvailabilityCache;
     private DateTime lastRefreshUtc = DateTime.MinValue;
 
-    public AdsRepairIpcService(IDalamudPluginInterface pluginInterface, IPluginLog log)
+    public AdsUtilityIpcService(IDalamudPluginInterface pluginInterface, IPluginLog log)
     {
         this.pluginInterface = pluginInterface;
         this.log = log;
-        adsAvailabilityCache = new AdsAvailabilityCache(pluginInterface, log, "[FrenRider][Repair]");
+        adsAvailabilityCache = new AdsAvailabilityCache(pluginInterface, log, "[FrenRider][ADS Utility]");
     }
 
-    public AdsRepairStatusSnapshot Current { get; private set; } = AdsRepairStatusSnapshot.Empty;
+    public AdsUtilityStatusSnapshot Current { get; private set; } = AdsUtilityStatusSnapshot.Empty;
     public bool IsAdsAvailable { get; private set; }
 
     public void Dispose()
@@ -60,17 +72,20 @@ public sealed class AdsRepairIpcService : IDisposable
     public bool ShouldSuppressGenericYesNo()
         => Refresh().SuppressesGenericYesNo;
 
-    public AdsRepairStatusSnapshot Refresh(bool force = false)
+    public bool IsAnyUtilityRunning()
+        => Refresh().UtilityRunning;
+
+    public AdsUtilityStatusSnapshot Refresh(bool force = false)
     {
         var now = DateTime.UtcNow;
-        if (!force && now - lastRefreshUtc < TimeSpan.FromSeconds(1))
+        if (!force && now - lastRefreshUtc < TimeSpan.FromMilliseconds(100))
             return Current;
 
         lastRefreshUtc = now;
         IsAdsAvailable = adsAvailabilityCache.IsLoaded(force);
         if (!IsAdsAvailable)
         {
-            Current = AdsRepairStatusSnapshot.Empty;
+            Current = AdsUtilityStatusSnapshot.Empty;
             return Current;
         }
 
@@ -80,7 +95,7 @@ public sealed class AdsRepairIpcService : IDisposable
             var json = subscriber.InvokeFunc();
             if (string.IsNullOrWhiteSpace(json))
             {
-                Current = new AdsRepairStatusSnapshot
+                Current = new AdsUtilityStatusSnapshot
                 {
                     IsAvailable = true,
                     StatusReadable = false,
@@ -91,7 +106,7 @@ public sealed class AdsRepairIpcService : IDisposable
 
             using var document = JsonDocument.Parse(json);
             var root = document.RootElement;
-            Current = new AdsRepairStatusSnapshot
+            Current = new AdsUtilityStatusSnapshot
             {
                 IsAvailable = true,
                 StatusReadable = true,
@@ -103,14 +118,21 @@ public sealed class AdsRepairIpcService : IDisposable
                 UtilityLastSuccess = GetString(root, "utilityLastSuccess"),
                 UtilityLastFailure = GetString(root, "utilityLastFailure"),
                 UtilityCompletedAtUtc = GetDateTime(root, "utilityCompletedAtUtc"),
+                DesynthMode = GetString(root, "desynthMode"),
+                DesynthSource = GetString(root, "desynthSource"),
+                DesynthPreset = GetString(root, "desynthPreset"),
+                DesynthLedgerStatus = GetString(root, "desynthLedgerStatus"),
+                DesynthEligible = GetInt(root, "desynthEligible"),
+                DesynthCompleted = GetInt(root, "desynthCompleted"),
+                DesynthFailure = GetString(root, "desynthFailure"),
                 CapturedAtUtc = now,
             };
             return Current;
         }
         catch (Exception ex)
         {
-            log.Debug($"[FrenRider][Repair] Failed to read ADS status JSON: {ex.Message}");
-            Current = new AdsRepairStatusSnapshot
+            log.Debug($"[FrenRider][ADS Utility] Failed to read ADS status JSON: {ex.Message}");
+            Current = new AdsUtilityStatusSnapshot
             {
                 IsAvailable = true,
                 StatusReadable = false,
@@ -147,7 +169,53 @@ public sealed class AdsRepairIpcService : IDisposable
         }
     }
 
-    private static string BuildFailureText(AdsRepairStatusSnapshot status)
+    public bool StartDesynth(string mode, out string failure)
+    {
+        failure = string.Empty;
+        IsAdsAvailable = adsAvailabilityCache.IsLoaded(force: true);
+        if (!IsAdsAvailable)
+        {
+            failure = "ADS not loaded.";
+            return false;
+        }
+
+        try
+        {
+            var subscriber = pluginInterface.GetIpcSubscriber<string, bool>("ADS.StartDesynth");
+            if (subscriber.InvokeFunc(mode))
+                return true;
+
+            failure = BuildFailureText(Refresh(force: true));
+            return false;
+        }
+        catch (Exception ex)
+        {
+            failure = ex.Message;
+            log.Debug($"[FrenRider][ADS Utility] Failed to start ADS desynthesis via IPC: {ex.Message}");
+            return false;
+        }
+    }
+
+    public bool OpenDesynthConfig(out string failure)
+    {
+        failure = string.Empty;
+        if (adsAvailabilityCache.IsLoaded(force: true))
+        {
+            try
+            {
+                if (pluginInterface.GetIpcSubscriber<bool>("ADS.OpenDesynthConfigUi").InvokeFunc())
+                    return true;
+            }
+            catch (Exception ex)
+            {
+                failure = ex.Message;
+            }
+        }
+
+        return GameHelpers.SendChatCommand("/ads desynth", "ADS Utility");
+    }
+
+    private static string BuildFailureText(AdsUtilityStatusSnapshot status)
     {
         if (!string.IsNullOrWhiteSpace(status.UtilityLastFailure))
             return status.UtilityLastFailure;
@@ -156,7 +224,7 @@ public sealed class AdsRepairIpcService : IDisposable
             return status.UtilityStatus;
 
         return status.StatusReadable
-            ? "ADS did not accept the repair request."
+            ? "ADS did not accept the utility request."
             : "ADS status was not readable.";
     }
 
@@ -169,6 +237,9 @@ public sealed class AdsRepairIpcService : IDisposable
         => root.TryGetProperty(propertyName, out var property)
            && property.ValueKind is JsonValueKind.True or JsonValueKind.False
            && property.GetBoolean();
+
+    private static int GetInt(JsonElement root, string propertyName)
+        => root.TryGetProperty(propertyName, out var property) && property.TryGetInt32(out var value) ? value : 0;
 
     private static DateTime? GetDateTime(JsonElement root, string propertyName)
     {

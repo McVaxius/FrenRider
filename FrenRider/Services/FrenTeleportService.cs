@@ -251,9 +251,9 @@ public sealed class FrenTeleportService
             return true;
         }
 
-        if (plugin.AutomationService.IsRepairFlowActive)
+        if (plugin.AutomationService.IsUtilityGateActive)
         {
-            reason = "repair active";
+            reason = "ADS utility active";
             return true;
         }
 

@@ -84,12 +84,12 @@ public class CombatService
             return;
         }
 
-        if (plugin.AutomationService.IsRepairFlowActive)
+        if (plugin.AutomationService.IsUtilityGateActive)
         {
             ResetCombatSettingsRefreshTracking();
             lastObservedCombatSettingsSignature = string.Empty;
             State = CombatState.OutOfCombat;
-            StateDetail = "Repair active";
+            StateDetail = "ADS utility active";
             ActivePreset = "";
             wasInCombat = inCombat;
             wasInDuty = inDuty;

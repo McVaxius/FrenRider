@@ -51,8 +51,8 @@ public class PartyService
         if (!config.Enabled || config.InviteWhitelist.Count == 0)
             return;
 
-        if (plugin.AutomationService.IsRepairFlowActive
-            || plugin.AdsRepairIpcService.ShouldSuppressGenericYesNo())
+        if (plugin.AutomationService.IsUtilityGateActive
+            || plugin.AdsUtilityIpcService.ShouldSuppressGenericYesNo())
             return;
 
         var inParty = Plugin.PartyList.Length > 0;
@@ -88,8 +88,8 @@ public class PartyService
         if (!config.Enabled || config.InviteWhitelist.Count == 0)
             return;
 
-        if (plugin.AutomationService.IsRepairFlowActive
-            || plugin.AdsRepairIpcService.ShouldSuppressGenericYesNo())
+        if (plugin.AutomationService.IsUtilityGateActive
+            || plugin.AdsUtilityIpcService.ShouldSuppressGenericYesNo())
             return;
 
         // Don't auto-accept if already in a party

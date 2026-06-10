@@ -105,6 +105,7 @@ public class CharacterConfig
     public int XpItem { get; set; } = 0;
     public int Repair { get; set; } = 0; // 0=Disabled, 1=Self, 2=NPC no-inn
     public int TornClothes { get; set; } = 75;
+    public bool EnableAutoDesynth { get; set; } = false;
     public int SpamPrinter { get; set; } = 0; // 0=off, 1=on
     public bool DebugMode { get; set; } = false;
 
@@ -209,6 +210,7 @@ public class CharacterConfig
             XpItem = XpItem,
             Repair = Repair,
             TornClothes = TornClothes,
+            EnableAutoDesynth = EnableAutoDesynth,
             SpamPrinter = SpamPrinter,
             DebugMode = DebugMode,
             InviteWhitelist = new List<string>(InviteWhitelist),

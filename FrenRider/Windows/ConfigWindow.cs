@@ -1086,6 +1086,9 @@ public class ConfigWindow : Window, IDisposable
         UiHelpers.SectionHeader("Repair");
         DrawRepairSection(config);
 
+        UiHelpers.SectionHeader("Desynthesis");
+        DrawDesynthesisSection(config);
+
         UiHelpers.SectionHeader("Idle Behavior");
         DrawIdleBehaviorSection(config);
 
@@ -1276,6 +1279,30 @@ public class ConfigWindow : Window, IDisposable
         HelpMarker("Trigger repair when gear durability falls below this percentage.");
     }
 
+    private void DrawDesynthesisSection(CharacterConfig config)
+    {
+        var enabled = config.EnableAutoDesynth;
+        if (ImGui.Checkbox("Enable Auto Desynth", ref enabled))
+        {
+            config.EnableAutoDesynth = enabled;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("After DutyCompleted and duty exit, ask ADS to run configured desynthesis. FrenRider pauses automatic actions until completion or the 180s timeout.");
+
+        if (ImGui.Button("OPEN DESYNTH CONFIG"))
+        {
+            if (!plugin.AdsUtilityIpcService.OpenDesynthConfig(out var failure))
+                plugin.ReportToChatAndLog($"Could not open ADS desynthesis config: {failure}", isError: true);
+        }
+
+        if (!string.IsNullOrWhiteSpace(plugin.AutomationService.AutoDesynthStatus))
+        {
+            ImGui.SameLine();
+            ImGui.TextWrapped(plugin.AutomationService.AutoDesynthStatus);
+        }
+    }
+
     private void DrawIdleBehaviorSection(CharacterConfig config)
     {
         var idleMode = config.IdleActionMode;
@@ -1371,7 +1398,7 @@ public class ConfigWindow : Window, IDisposable
 
     private void TestAdsNpcNoInnRepair()
     {
-        if (!plugin.AdsRepairIpcService.CheckAvailability())
+        if (!plugin.AdsUtilityIpcService.CheckAvailability())
         {
             plugin.ReportToChatAndLog("FrenRider repair test failed: ADS not loaded.", isError: true);
             return;
@@ -1383,7 +1410,7 @@ public class ConfigWindow : Window, IDisposable
             return;
         }
 
-        if (plugin.AdsRepairIpcService.StartRepair("npc-no-inn", out var failure))
+        if (plugin.AdsUtilityIpcService.StartRepair("npc-no-inn", out var failure))
         {
             plugin.ReportToChatAndLog("FrenRider repair test accepted: ADS NPC no-inn repair requested.");
             return;
@@ -1678,6 +1705,14 @@ public class ConfigWindow : Window, IDisposable
         ImGui.Spacing();
 
         DrawRepairSection(config);
+
+        ImGui.Spacing();
+        ImGui.Separator();
+        ImGui.Spacing();
+
+        ImGui.Text("Desynthesis");
+        ImGui.Spacing();
+        DrawDesynthesisSection(config);
 
         ImGui.Spacing();
         ImGui.Separator();

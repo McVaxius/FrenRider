@@ -44,7 +44,7 @@ public class FormationService
             return;
         }
 
-        if (plugin.AutomationService.IsRepairFlowActive)
+        if (plugin.AutomationService.IsUtilityGateActive)
         {
             IsActive = false;
             AssignedSlot = -1;

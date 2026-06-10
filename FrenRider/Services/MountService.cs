@@ -73,10 +73,10 @@ public class MountService
             return;
         }
 
-        if (plugin.AutomationService.IsRepairFlowActive)
+        if (plugin.AutomationService.IsUtilityGateActive)
         {
             State = MountState.Idle;
-            StateDetail = "Repair active";
+            StateDetail = "ADS utility active";
             return;
         }
 
@@ -162,12 +162,21 @@ public class MountService
         {
             if (farChaseMountOwned && selfOnOwnMount)
             {
+                if (config.FlyYouFools)
+                {
+                    State = MountState.Mounted;
+                    StateDetail = "Far chase mount retained: Fly You Fools";
+                    return;
+                }
+
                 if (CanSafelyDismountFarChaseMount(config, fren, out var retainReason))
                 {
                     if (now >= mountCooldownMs)
                     {
                         State = MountState.Dismounting;
                         StateDetail = "Far chase complete; dismounting";
+                        Plugin.Log.Information(
+                            $"[FR][FarChase] Dismounting owned mount; inCombat={inCombat}; frenMounted={fren.IsMounted}");
                         DismountSelf();
                     }
                     else
@@ -407,7 +416,7 @@ public class MountService
             return false;
         }
 
-        if (plugin.AutomationService.IsRepairFlowActive)
+        if (plugin.AutomationService.IsUtilityGateActive)
         {
             reason = "repair";
             return false;
@@ -427,10 +436,24 @@ public class MountService
         FrenTracker.FrenState fren,
         out string reason)
     {
-        var clingDistance = plugin.FollowService.GetEffectiveClingDistance(config);
-        if (fren.Distance > clingDistance)
+        if (config.FlyYouFools)
         {
-            reason = $"{fren.Distance:F1}y from fren, cling {clingDistance:F1}y";
+            reason = "Fly You Fools enabled";
+            return false;
+        }
+
+        var localPlayer = Plugin.ObjectTable.LocalPlayer;
+        if (localPlayer == null)
+        {
+            reason = "local player unavailable";
+            return false;
+        }
+
+        var clingDistance = plugin.FollowService.GetEffectiveClingDistance(config);
+        var xzDistance = FollowService.GetXzDistance(localPlayer.Position, fren.Position);
+        if (xzDistance > clingDistance)
+        {
+            reason = $"{xzDistance:F1}y XZ from fren, handoff {clingDistance:F1}y";
             return false;
         }
 
@@ -440,8 +463,7 @@ public class MountService
             return false;
         }
 
-        if (Plugin.Condition[ConditionFlag.InCombat]
-            || Plugin.Condition[ConditionFlag.Unconscious]
+        if (Plugin.Condition[ConditionFlag.Unconscious]
             || Plugin.Condition[ConditionFlag.Mounting71])
         {
             reason = "player busy";
@@ -457,7 +479,6 @@ public class MountService
             return false;
         }
 
-        var localPlayer = Plugin.ObjectTable.LocalPlayer;
         if (localPlayer?.IsCasting == true
             || Plugin.Condition[ConditionFlag.OccupiedInQuestEvent]
             || Plugin.Condition[ConditionFlag.OccupiedInCutSceneEvent]
@@ -472,7 +493,7 @@ public class MountService
         if (config.Formation
             || plugin.AdsIntegrationService.ShouldPauseDutySystems
             || plugin.AdsIntegrationService.IsHandoffPending
-            || plugin.AutomationService.IsRepairFlowActive
+            || plugin.AutomationService.IsUtilityGateActive
             || HasTeleportOrDialogActivity())
         {
             reason = "automation preempted";

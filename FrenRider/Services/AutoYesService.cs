@@ -83,11 +83,12 @@ public class AutoYesService : IDisposable
         if (config == null || !config.Enabled)
             return;
 
-        if (plugin.AutomationService.IsRepairFlowActive
-            || plugin.AdsRepairIpcService.ShouldSuppressGenericYesNo())
-            return;
-            
         var now = DateTime.Now;
+        TryExpandMinimizedTeleportOffer(config, now);
+
+        if (plugin.AutomationService.IsUtilityGateActive
+            || plugin.AdsUtilityIpcService.ShouldSuppressGenericYesNo())
+            return;
 
         // Don't interfere during cutscenes or in combat
         if (condition[ConditionFlag.OccupiedInCutSceneEvent] || 

@@ -4,7 +4,7 @@ using FrenRider.Models;
 
 namespace FrenRider.Services;
 
-public class AutomationService
+public class AutomationService : IDisposable
 {
     private const long RepairIdleCheckMs = 30000;
     private const long RepairActiveCheckMs = 1000;
@@ -12,6 +12,9 @@ public class AutomationService
     private const long RepairStartGraceMs = 5000;
     private const long RepairTimeoutMs = 180000;
     private const long RepairBlockedLogMs = 15000;
+    private const long AutoDesynthRetryMs = 30000;
+    private const long AutoDesynthStartGraceMs = 5000;
+    private const long AutoDesynthTimeoutMs = 180000;
 
     private enum RepairFlowState
     {
@@ -19,6 +22,17 @@ public class AutomationService
         WaitingForAdsStart,
         WaitingForAdsCompletion,
         WaitingForDurability,
+    }
+
+    private enum AutoDesynthFlowState
+    {
+        Idle,
+        PendingExit,
+        WaitingStart,
+        Running,
+        RetryWait,
+        Completed,
+        Failed,
     }
 
     private readonly Plugin plugin;
@@ -42,6 +56,11 @@ public class AutomationService
     private RepairFlowState repairFlowState;
     private bool adsRepairUtilityObserved;
     private int repairRequestAttempts;
+    private AutoDesynthFlowState autoDesynthFlowState;
+    private long autoDesynthFlowStartedMs;
+    private long lastAutoDesynthAttemptMs;
+    private DateTime lastAutoDesynthAttemptUtc = DateTime.MinValue;
+    private int autoDesynthRequestAttempts;
     private int idleListIndex;
 
     // Resolved food item ID (cached from name lookup or food search)
@@ -70,14 +89,29 @@ public class AutomationService
     public string FoodStatus { get; private set; } = "";
     public string CompanionStatus { get; private set; } = "";
     public string RepairStatus { get; private set; } = "";
+    public string AutoDesynthStatus { get; private set; } = "";
     public bool IsRepairFlowActive => repairFlowState != RepairFlowState.Idle;
+    public bool IsUtilityGateActive
+        => IsRepairFlowActive
+           || plugin.AdsUtilityIpcService.Current.UtilityRunning
+           || IsAutoDesynthPendingAfterDutyExit;
+    private bool IsAutoDesynthPendingAfterDutyExit
+        => autoDesynthFlowState is AutoDesynthFlowState.PendingExit
+            or AutoDesynthFlowState.WaitingStart
+            or AutoDesynthFlowState.Running
+            or AutoDesynthFlowState.RetryWait
+           && !IsInDuty();
 
     public AutomationService(Plugin plugin, FrenTracker tracker, ZoneService zoneService)
     {
         this.plugin = plugin;
         this.tracker = tracker;
         this.zoneService = zoneService;
+        Plugin.DutyState.DutyCompleted += OnDutyCompleted;
     }
+
+    public void Dispose()
+        => Plugin.DutyState.DutyCompleted -= OnDutyCompleted;
 
     public void Update()
     {
@@ -87,6 +121,7 @@ public class AutomationService
             idleTickCounter = 0;
             IsIdle = false;
             CancelRepairFlow("");
+            ResetAutoDesynth("");
             return;
         }
 
@@ -116,14 +151,16 @@ public class AutomationService
         var inDuty = Plugin.Condition[ConditionFlag.BoundByDuty];
         var now = Environment.TickCount64;
 
-        CheckRepair(config, now);
-        if (IsRepairFlowActive)
+        CheckAutoDesynth(config, now);
+        if (!IsAutoDesynthPendingAfterDutyExit)
+            CheckRepair(config, now);
+        if (IsUtilityGateActive)
         {
             idleTickCounter = 0;
             IsIdle = false;
-            LastIdleAction = "Repair active";
-            FoodStatus = "Paused for repair";
-            CompanionStatus = "Paused for repair";
+            LastIdleAction = "ADS utility active";
+            FoodStatus = "Paused for ADS utility";
+            CompanionStatus = "Paused for ADS utility";
             return;
         }
 
@@ -199,12 +236,13 @@ public class AutomationService
         }
     }
 
-    public void UpdateRepairGate()
+    public void UpdateUtilityGate()
     {
         var config = plugin.ConfigManager.GetActiveConfig();
         if (!config.Enabled)
         {
             CancelRepairFlow("");
+            ResetAutoDesynth("");
             return;
         }
 
@@ -214,10 +252,13 @@ public class AutomationService
         if (zoneService.ZoneChanged)
         {
             CancelRepairFlow("Repair reset: zone transition.");
-            return;
         }
 
-        CheckRepair(config, Environment.TickCount64);
+        var now = Environment.TickCount64;
+        plugin.AdsUtilityIpcService.Refresh(force: IsRepairFlowActive || IsAutoDesynthPendingAfterDutyExit);
+        CheckAutoDesynth(config, now);
+        if (!IsAutoDesynthPendingAfterDutyExit)
+            CheckRepair(config, now);
     }
 
     private void PerformIdleAction(CharacterConfig config)
@@ -567,6 +608,204 @@ public class AutomationService
         SendCommand(stanceCmd);
     }
 
+    private void OnDutyCompleted(Dalamud.Game.DutyState.IDutyStateEventArgs args)
+    {
+        var config = plugin.ConfigManager.GetActiveConfig();
+        if (!config.Enabled || !config.EnableAutoDesynth)
+            return;
+
+        autoDesynthFlowState = AutoDesynthFlowState.PendingExit;
+        autoDesynthFlowStartedMs = Environment.TickCount64;
+        lastAutoDesynthAttemptMs = 0;
+        lastAutoDesynthAttemptUtc = DateTime.MinValue;
+        autoDesynthRequestAttempts = 0;
+        AutoDesynthStatus = $"Pending duty exit after completed territory {args.TerritoryType.RowId}.";
+        Plugin.Log.Information($"[FrenRider][AutoDesynth] {AutoDesynthStatus}");
+    }
+
+    private void CheckAutoDesynth(CharacterConfig config, long now)
+    {
+        if (!config.EnableAutoDesynth)
+        {
+            if (autoDesynthFlowState is not AutoDesynthFlowState.Idle)
+                ResetAutoDesynth("");
+            return;
+        }
+
+        if (autoDesynthFlowState is AutoDesynthFlowState.Idle or AutoDesynthFlowState.Completed or AutoDesynthFlowState.Failed)
+            return;
+
+        if (now - autoDesynthFlowStartedMs > AutoDesynthTimeoutMs)
+        {
+            autoDesynthFlowState = AutoDesynthFlowState.Failed;
+            AutoDesynthStatus = $"Failed: timed out after {AutoDesynthTimeoutMs / 1000}s.";
+            Plugin.Log.Warning($"[FrenRider][AutoDesynth] {AutoDesynthStatus}");
+            return;
+        }
+
+        if (IsInDuty())
+        {
+            autoDesynthFlowState = AutoDesynthFlowState.PendingExit;
+            AutoDesynthStatus = "Pending duty exit.";
+            return;
+        }
+
+        var adsStatus = plugin.AdsUtilityIpcService.Refresh(force: true);
+        if (!adsStatus.IsAvailable)
+        {
+            autoDesynthFlowState = AutoDesynthFlowState.RetryWait;
+            AutoDesynthStatus = "Retry wait: ADS not loaded.";
+            return;
+        }
+
+        if (adsStatus.IsDesynthRunning)
+        {
+            autoDesynthFlowState = AutoDesynthFlowState.Running;
+            AutoDesynthStatus = $"Running: {adsStatus.UtilityStatus}";
+            return;
+        }
+
+        if (IsCompletionAfterRequest(adsStatus))
+        {
+            if (!string.IsNullOrWhiteSpace(adsStatus.UtilityLastSuccess))
+            {
+                autoDesynthFlowState = AutoDesynthFlowState.Completed;
+                AutoDesynthStatus = $"Completed: {adsStatus.UtilityLastSuccess}";
+                Plugin.Log.Information($"[FrenRider][AutoDesynth] {AutoDesynthStatus}");
+                return;
+            }
+
+            autoDesynthFlowState = AutoDesynthFlowState.RetryWait;
+            AutoDesynthStatus = $"Retry wait after ADS failure: {GetAdsRepairStatusText(adsStatus)}";
+        }
+
+        if (autoDesynthFlowState == AutoDesynthFlowState.WaitingStart
+            && now - lastAutoDesynthAttemptMs < AutoDesynthStartGraceMs)
+        {
+            AutoDesynthStatus = "Waiting for ADS desynthesis to start.";
+            return;
+        }
+
+        if (adsStatus.UtilityRunning)
+        {
+            autoDesynthFlowState = AutoDesynthFlowState.RetryWait;
+            AutoDesynthStatus = $"Retry wait: ADS utility active ({adsStatus.UtilityTask}).";
+            return;
+        }
+
+        if (lastAutoDesynthAttemptMs > 0 && now - lastAutoDesynthAttemptMs < AutoDesynthRetryMs)
+        {
+            autoDesynthFlowState = AutoDesynthFlowState.RetryWait;
+            AutoDesynthStatus = $"Retry wait: {(AutoDesynthRetryMs - (now - lastAutoDesynthAttemptMs) + 999) / 1000}s.";
+            return;
+        }
+
+        if (!CanStartAutoDesynthNow(out var deferReason))
+        {
+            autoDesynthFlowState = AutoDesynthFlowState.RetryWait;
+            AutoDesynthStatus = $"Waiting: {deferReason}.";
+            return;
+        }
+
+        IssueAutoDesynthRequest(now);
+    }
+
+    private void IssueAutoDesynthRequest(long now)
+    {
+        autoDesynthRequestAttempts++;
+        lastAutoDesynthAttemptMs = now;
+        lastAutoDesynthAttemptUtc = DateTime.UtcNow;
+        autoDesynthFlowState = AutoDesynthFlowState.WaitingStart;
+
+        if (plugin.AdsUtilityIpcService.StartDesynth("configured", out var failure))
+        {
+            AutoDesynthStatus = $"Waiting start: configured desynthesis requested (attempt {autoDesynthRequestAttempts}).";
+            Plugin.Log.Information($"[FrenRider][AutoDesynth] {AutoDesynthStatus}");
+            return;
+        }
+
+        autoDesynthFlowState = AutoDesynthFlowState.RetryWait;
+        AutoDesynthStatus = $"Retry wait after rejected start: {failure}";
+        Plugin.Log.Warning($"[FrenRider][AutoDesynth] {AutoDesynthStatus}");
+    }
+
+    private void ResetAutoDesynth(string status)
+    {
+        autoDesynthFlowState = AutoDesynthFlowState.Idle;
+        autoDesynthFlowStartedMs = 0;
+        lastAutoDesynthAttemptMs = 0;
+        lastAutoDesynthAttemptUtc = DateTime.MinValue;
+        autoDesynthRequestAttempts = 0;
+        AutoDesynthStatus = status;
+    }
+
+    private bool IsCompletionAfterRequest(AdsUtilityStatusSnapshot status)
+        => status.UtilityCompletedAtUtc.HasValue
+           && lastAutoDesynthAttemptUtc != DateTime.MinValue
+           && status.UtilityCompletedAtUtc.Value >= lastAutoDesynthAttemptUtc;
+
+    private static bool CanStartAutoDesynthNow(out string reason)
+    {
+        var player = Plugin.ObjectTable.LocalPlayer;
+        if (player == null)
+        {
+            reason = "local player unavailable";
+            return false;
+        }
+        if (!GameHelpers.IsPlayerAlive())
+        {
+            reason = "player dead";
+            return false;
+        }
+        if (player.IsCasting)
+        {
+            reason = "casting";
+            return false;
+        }
+        if (Plugin.Condition[ConditionFlag.InCombat])
+        {
+            reason = "in combat";
+            return false;
+        }
+        if (IsInDuty())
+        {
+            reason = "in duty";
+            return false;
+        }
+        if (Plugin.Condition[ConditionFlag.BetweenAreas] || Plugin.Condition[ConditionFlag.BetweenAreas51])
+        {
+            reason = "between areas";
+            return false;
+        }
+        if (GameHelpers.TryGetMountedOrRidingOrMountingBlocker(out var mountBlocker))
+        {
+            reason = mountBlocker;
+            return false;
+        }
+        var dutyConfirmVisible = GameHelpers.IsAddonVisible("ContentsFinderConfirm");
+        if (Plugin.Condition[ConditionFlag.OccupiedInCutSceneEvent]
+            || Plugin.Condition[ConditionFlag.Occupied33]
+            || Plugin.Condition[ConditionFlag.WatchingCutscene]
+            || (!dutyConfirmVisible
+                && (Plugin.Condition[ConditionFlag.OccupiedInQuestEvent]
+                    || Plugin.Condition[ConditionFlag.Occupied39])))
+        {
+            reason = "occupied or in cutscene";
+            return false;
+        }
+        if (GameHelpers.IsAddonVisible("SelectYesno"))
+        {
+            reason = "SelectYesno dialog";
+            return false;
+        }
+
+        reason = "ready";
+        return true;
+    }
+
+    private static bool IsInDuty()
+        => Plugin.Condition[ConditionFlag.BoundByDuty] || Plugin.Condition[ConditionFlag.BoundByDuty56];
+
     private void CheckRepair(CharacterConfig config, long now)
     {
         var repairMode = ResolveAdsRepairMode(config);
@@ -594,11 +833,17 @@ public class AutomationService
 
         lastRepairCheckMs = now;
 
-        var adsStatus = plugin.AdsRepairIpcService.Refresh(force: repairFlowState != RepairFlowState.Idle);
+        var adsStatus = plugin.AdsUtilityIpcService.Refresh(force: repairFlowState != RepairFlowState.Idle);
         if (!adsStatus.IsAvailable)
         {
             ResetRepairFlow();
             RepairStatus = "Waiting: ADS not loaded.";
+            return;
+        }
+
+        if (repairFlowState == RepairFlowState.Idle && adsStatus.UtilityRunning)
+        {
+            RepairStatus = $"Waiting: ADS utility active ({adsStatus.UtilityTask}).";
             return;
         }
 
@@ -632,12 +877,12 @@ public class AutomationService
         TrackActiveRepair(now, repairMode, threshold, adsStatus);
     }
 
-    private void TrackActiveRepair(long now, string repairMode, int threshold, AdsRepairStatusSnapshot adsStatus)
+    private void TrackActiveRepair(long now, string repairMode, int threshold, AdsUtilityStatusSnapshot adsStatus)
     {
         var elapsedSinceRequest = now - lastRepairAttemptMs;
         if (elapsedSinceRequest > RepairTimeoutMs)
         {
-            var timeoutStatus = plugin.AdsRepairIpcService.Refresh(force: true);
+            var timeoutStatus = plugin.AdsUtilityIpcService.Refresh(force: true);
             RepairStatus = $"Repair timed out after {RepairTimeoutMs / 1000}s; ADS: {GetAdsRepairStatusText(timeoutStatus)}";
             Plugin.Log.Warning($"[FrenRider][Repair] {RepairStatus}");
             ResetRepairFlow(preserveStatus: true);
@@ -702,7 +947,7 @@ public class AutomationService
             Plugin.Log.Warning($"[FrenRider][Repair] Retrying ADS {repairMode} repair attempt {repairRequestAttempts} via IPC ({reason}).");
         }
 
-        if (plugin.AdsRepairIpcService.StartRepair(repairMode, out var failure))
+        if (plugin.AdsUtilityIpcService.StartRepair(repairMode, out var failure))
         {
             RepairStatus = $"{modeLabel} repair requested below {threshold}%; FrenRider paused.";
             Plugin.Log.Information($"[FrenRider][Repair] ADS {repairMode} repair requested (threshold {threshold}%).");
@@ -741,7 +986,7 @@ public class AutomationService
         if (!preserveStatus)
         {
             if (refreshAdsStatus)
-                plugin.AdsRepairIpcService.Refresh();
+                plugin.AdsUtilityIpcService.Refresh();
         }
     }
 
@@ -855,7 +1100,7 @@ public class AutomationService
         if (repairFlowState != RepairFlowState.Idle)
             return;
 
-        var adsStatus = plugin.AdsRepairIpcService.Refresh();
+        var adsStatus = plugin.AdsUtilityIpcService.Refresh();
         if (!adsStatus.IsAvailable)
             return;
 
@@ -886,7 +1131,7 @@ public class AutomationService
             _ => "ADS",
         };
 
-    private static string GetAdsRepairStatusText(AdsRepairStatusSnapshot status)
+    private static string GetAdsRepairStatusText(AdsUtilityStatusSnapshot status)
     {
         if (!string.IsNullOrWhiteSpace(status.UtilityLastFailure))
             return status.UtilityLastFailure;

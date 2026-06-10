@@ -171,15 +171,15 @@ public class ExitBehaviourService : IDisposable
             return;
         }
 
-        if (plugin.AutomationService.IsRepairFlowActive)
+        if (plugin.AutomationService.IsUtilityGateActive)
         {
-            StateDetail = "Repair active";
+            StateDetail = "ADS utility active";
             return;
         }
 
-        if (plugin.AdsRepairIpcService.ShouldSuppressGenericYesNo())
+        if (plugin.AdsUtilityIpcService.ShouldSuppressGenericYesNo())
         {
-            StateDetail = "ADS repair active";
+            StateDetail = "ADS utility dialog active";
             return;
         }
 

@@ -75,17 +75,17 @@ public class DutyInteractService
             return;
         }
 
-        if (plugin.AutomationService.IsRepairFlowActive)
+        if (plugin.AutomationService.IsUtilityGateActive)
         {
             Reset();
-            StateDetail = "Repair active";
+            StateDetail = "ADS utility active";
             return;
         }
 
-        if (plugin.AdsRepairIpcService.ShouldSuppressGenericYesNo())
+        if (plugin.AdsUtilityIpcService.ShouldSuppressGenericYesNo())
         {
             Reset();
-            StateDetail = "ADS repair active";
+            StateDetail = "ADS utility dialog active";
             return;
         }
 

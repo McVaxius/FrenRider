@@ -57,6 +57,12 @@ public sealed class RespawnService
             return;
         }
 
+        if (plugin.AutomationService.IsUtilityGateActive)
+        {
+            Reset(RespawnState.Blocked, "Blocked: ADS utility active");
+            return;
+        }
+
         if (!config.RespawnOutsideDuties)
         {
             Reset(RespawnState.Off, "Off");

@@ -1,5 +1,11 @@
 # Fren Rider
 
+## ADS Auto Desynthesis
+
+Per-character `Enable Auto Desynth` marks completed duties for ADS configured desynthesis. FrenRider waits for duty exit, pauses movement/combat/formation/maintenance/dialog acceptance, and retries rejected or failed starts every 30 seconds within a 180-second timeout. Successful completion, including no eligible items, is terminal for that duty.
+
+FrenRider can start desynthesis while `ContentsFinderConfirm` is visible and holds automatic Commence until ADS utility gate clears. Minimized teleport notification restoration still runs before utility gating. Existing ADS repair behavior is unchanged.
+
 
 ---
 

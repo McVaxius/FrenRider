@@ -47,7 +47,7 @@ public sealed class Plugin : IDalamudPlugin
     public ZoneService ZoneService { get; init; }
     public FrenTeleportService FrenTeleportService { get; init; }
     public AdsIntegrationService AdsIntegrationService { get; init; }
-    public AdsRepairIpcService AdsRepairIpcService { get; init; }
+    public AdsUtilityIpcService AdsUtilityIpcService { get; init; }
     public AdsReflectionIpcService AdsReflectionIpcService { get; init; }
     public FollowService FollowService { get; init; }
     public MountService MountService { get; init; }
@@ -105,7 +105,7 @@ public sealed class Plugin : IDalamudPlugin
         ZoneService = new ZoneService();
         FrenTeleportService = new FrenTeleportService(this, FrenTracker, ZoneService);
         AdsIntegrationService = new AdsIntegrationService(this, ZoneService);
-        AdsRepairIpcService = new AdsRepairIpcService(PluginInterface, Log);
+        AdsUtilityIpcService = new AdsUtilityIpcService(PluginInterface, Log);
         AdsReflectionIpcService = new AdsReflectionIpcService(this, PluginInterface, Log);
         FollowService = new FollowService(this, FrenTracker, ZoneService);
         MountService = new MountService(this, FrenTracker, ZoneService);
@@ -199,7 +199,8 @@ public sealed class Plugin : IDalamudPlugin
         MainWindow.Dispose();
 
         AutorotIpcService.Dispose();
-        AdsRepairIpcService.Dispose();
+        AdsUtilityIpcService.Dispose();
+        AutomationService.Dispose();
         AdsReflectionIpcService.Dispose();
         PartyService.Dispose();
         VideoPlaybackService.Dispose();
@@ -480,10 +481,10 @@ public sealed class Plugin : IDalamudPlugin
                 });
             }
 
-            // Update ADS coordination and repair gate before movement/combat services.
+            // Update ADS coordination and utility gate before movement/combat services.
             Measure("ads-integration", AdsIntegrationService.Update);
             Measure("ads-reflection", () => AdsReflectionIpcService.Update());
-            Measure("repair-gate", AutomationService.UpdateRepairGate);
+            Measure("utility-gate", AutomationService.UpdateUtilityGate);
 
             Measure("fren-teleport", FrenTeleportService.Update);
             Measure("auto-yes", AutoYesService.Update);

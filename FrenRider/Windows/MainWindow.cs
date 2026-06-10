@@ -217,6 +217,9 @@ public class MainWindow : Window, IDisposable
         if (!string.IsNullOrWhiteSpace(auto.RepairStatus))
             UiHelpers.AlignedRow("Repair", auto.RepairStatus, GetRepairColor(auto.RepairStatus));
 
+        if (!string.IsNullOrWhiteSpace(auto.AutoDesynthStatus))
+            UiHelpers.AlignedRow("Desynth", auto.AutoDesynthStatus, GetDesynthColor(auto.AutoDesynthStatus));
+
         DrawCompanionStatus(auto);
 
         var formation = plugin.FormationService;
@@ -256,6 +259,13 @@ public class MainWindow : Window, IDisposable
 
         return UiHelpers.Yellow;
     }
+
+    private static Vector4? GetDesynthColor(string status)
+        => status.StartsWith("Completed", StringComparison.OrdinalIgnoreCase)
+            ? UiHelpers.Green
+            : status.StartsWith("Failed", StringComparison.OrdinalIgnoreCase)
+                ? UiHelpers.Red
+                : UiHelpers.Yellow;
 
     private void DrawDutyPanel(CharacterConfig config)
     {

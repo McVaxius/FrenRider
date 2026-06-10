@@ -207,13 +207,13 @@ public class FollowService
             return;
         }
 
-        if (plugin.AutomationService.IsRepairFlowActive)
+        if (plugin.AutomationService.IsUtilityGateActive)
         {
-            SetFarChaseRequested(false, "repair active");
-            StopAllFollowing(config, "repair active");
+            SetFarChaseRequested(false, "ADS utility active");
+            StopAllFollowing(config, "ADS utility active");
             State = FollowState.Idle;
-            StateDetail = "Repair active";
-            LogFateFollowDecisionIfChanged(config, tracker.Fren, "repair active");
+            StateDetail = "ADS utility active";
+            LogFateFollowDecisionIfChanged(config, tracker.Fren, "ADS utility active");
             return;
         }
 
@@ -576,7 +576,7 @@ public class FollowService
             && !selfFlying
             && !IsLoadingOrBetweenAreas()
             && !plugin.AdsIntegrationService.ShouldPauseDutySystems
-            && !plugin.AutomationService.IsRepairFlowActive
+            && !plugin.AutomationService.IsUtilityGateActive
             && GetMovementClingType(config) != 2;
     }
 
@@ -820,7 +820,7 @@ public class FollowService
             && (Plugin.Condition[ConditionFlag.Mounted] || Plugin.Condition[ConditionFlag.Diving])
             && !IsLoadingOrBetweenAreas()
             && !plugin.AdsIntegrationService.ShouldPauseDutySystems
-            && !plugin.AutomationService.IsRepairFlowActive
+            && !plugin.AutomationService.IsUtilityGateActive
             && GetMovementClingType(config) != 2
             && zoneService.CurrentZone != ZoneType.Foray
             && now - lastNavCommandMs >= FlyingIdleNavCommandGraceMs
@@ -1011,7 +1011,7 @@ public class FollowService
             && (Plugin.Condition[ConditionFlag.Mounted] || Plugin.Condition[ConditionFlag.Diving])
             && !IsLoadingOrBetweenAreas()
             && !plugin.AdsIntegrationService.ShouldPauseDutySystems
-            && !plugin.AutomationService.IsRepairFlowActive
+            && !plugin.AutomationService.IsUtilityGateActive
             && GetMovementClingType(config) != 2
             && zoneService.CurrentZone != ZoneType.Foray;
     }
@@ -1024,7 +1024,7 @@ public class FollowService
             && selfFlying
             && !IsLoadingOrBetweenAreas()
             && !plugin.AdsIntegrationService.ShouldPauseDutySystems
-            && !plugin.AutomationService.IsRepairFlowActive;
+            && !plugin.AutomationService.IsUtilityGateActive;
     }
 
     private static bool IsLoadingOrBetweenAreas()

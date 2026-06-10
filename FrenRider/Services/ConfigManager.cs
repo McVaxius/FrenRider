@@ -360,6 +360,7 @@ public class ConfigManager
                 target.XpItem = source.XpItem;
                 target.Repair = source.Repair;
                 target.TornClothes = source.TornClothes;
+                target.EnableAutoDesynth = source.EnableAutoDesynth;
                 target.SpamPrinter = source.SpamPrinter;
                 target.DebugMode = source.DebugMode;
                 target.IdleAction = source.IdleAction;
