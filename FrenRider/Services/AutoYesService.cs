@@ -59,6 +59,7 @@ public class AutoYesService : IDisposable
     private readonly TimeSpan handleCooldown = TimeSpan.FromSeconds(2); // Don't spam same dialog
     private DateTime lastTeleportNotificationDiagnosticTime = DateTime.MinValue;
     private readonly TimeSpan teleportNotificationDiagnosticCooldown = TimeSpan.FromMilliseconds(250);
+    private bool teleportRepairRetryRequested;
     
     public AutoYesService(Plugin plugin, IGameGui gameGui, ICondition condition, IPluginLog log)
     {
@@ -79,6 +80,9 @@ public class AutoYesService : IDisposable
     /// </summary>
     public void Update()
     {
+        if (!GameHelpers.IsAddonVisible("_NotificationTelepo"))
+            teleportRepairRetryRequested = false;
+
         var config = plugin.ConfigManager.GetActiveConfig();
         if (config == null || !config.Enabled)
             return;
@@ -244,6 +248,20 @@ public class AutoYesService : IDisposable
 
         if (!GameHelpers.IsAddonVisible("_NotificationTelepo"))
             return false;
+
+        if (GameHelpers.IsAddonVisible("Repair"))
+        {
+            if (!teleportRepairRetryRequested)
+            {
+                teleportRepairRetryRequested = true;
+                plugin.AutomationService.RetryRepairAfterTeleportCollision(config);
+            }
+
+            return true;
+        }
+
+        if (teleportRepairRetryRequested && plugin.AdsUtilityIpcService.Current.IsRepairRunning)
+            return true;
 
         if (now - lastTeleportNotificationDiagnosticTime < teleportNotificationDiagnosticCooldown)
             return true;

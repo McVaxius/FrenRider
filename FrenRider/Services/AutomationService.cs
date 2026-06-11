@@ -1113,6 +1113,23 @@ public class AutomationService : IDisposable
         }
     }
 
+    internal void RetryRepairAfterTeleportCollision(CharacterConfig config)
+    {
+        var repairMode = ResolveAdsRepairMode(config);
+        if (string.IsNullOrWhiteSpace(repairMode))
+            return;
+
+        var threshold = Math.Clamp(config.TornClothes, 0, 100);
+        if (threshold <= 0)
+            return;
+
+        IssueRepairRequest(
+            Environment.TickCount64,
+            repairMode,
+            threshold,
+            "teleport notification interrupted repair");
+    }
+
     private static string ResolveAdsRepairMode(CharacterConfig config)
         => config.Repair switch
         {
