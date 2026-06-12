@@ -895,6 +895,27 @@ public class ConfigWindow : Window, IDisposable
         ImGui.SameLine();
         HelpMarker("Enable or disable BossMod AI module.");
 
+        var dontMoveWhileCasting = configuration.DontMoveWhileCasting;
+        if (ImGui.Checkbox("Don't move while casting", ref dontMoveWhileCasting))
+        {
+            configuration.DontMoveWhileCasting = dontMoveWhileCasting;
+            configuration.Save();
+            plugin.BossModActionTweaksService.ApplyDontMoveWhileCasting(dontMoveWhileCasting);
+        }
+        ImGui.SameLine();
+        HelpMarker("One-shot global setting. On change, applies BossMod Prevent movement while casting to currently loaded BMR and VBM plugins.");
+
+        var actionTweaks = plugin.BossModActionTweaksService;
+        if (actionTweaks.HasResult)
+        {
+            var statusColor = actionTweaks.HasFailures
+                ? UiHelpers.Red
+                : actionTweaks.HasNotLoadedTargets
+                    ? UiHelpers.Yellow
+                    : UiHelpers.Green;
+            ImGui.TextColored(statusColor, actionTweaks.StatusText);
+        }
+
         // Positional (dropdown)
         var positional = config.PositionalInCombat;
         ImGui.SetNextItemWidth(200);

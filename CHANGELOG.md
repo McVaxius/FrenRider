@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Combat settings now include a global one-shot **Don't move while casting** toggle that updates currently loaded BMR and VBM Action Tweaks settings
+
 ### Fixed
 - AutoDuty warning lifecycle now clears correctly when FrenRider is disabled instead of re-forcing the popup path
 - FATE join/leave no longer changes follow cling distance, so FATE entry cannot stop follow by itself

@@ -49,6 +49,7 @@ public sealed class Plugin : IDalamudPlugin
     public AdsIntegrationService AdsIntegrationService { get; init; }
     public AdsUtilityIpcService AdsUtilityIpcService { get; init; }
     public AdsReflectionIpcService AdsReflectionIpcService { get; init; }
+    public BossModActionTweaksService BossModActionTweaksService { get; init; }
     public FollowService FollowService { get; init; }
     public MountService MountService { get; init; }
     public CombatService CombatService { get; init; }
@@ -107,6 +108,7 @@ public sealed class Plugin : IDalamudPlugin
         AdsIntegrationService = new AdsIntegrationService(this, ZoneService);
         AdsUtilityIpcService = new AdsUtilityIpcService(PluginInterface, Log);
         AdsReflectionIpcService = new AdsReflectionIpcService(this, PluginInterface, Log);
+        BossModActionTweaksService = new BossModActionTweaksService(PluginInterface, Log);
         FollowService = new FollowService(this, FrenTracker, ZoneService);
         MountService = new MountService(this, FrenTracker, ZoneService);
         CombatService = new CombatService(this, FrenTracker, ZoneService);

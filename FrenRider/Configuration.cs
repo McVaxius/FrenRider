@@ -16,6 +16,7 @@ public class Configuration : IPluginConfiguration
     public string DtrIconDisabled { get; set; } = "\uE03D";
     public bool KrangleEnabled { get; set; } = false;
     public float LeftPanelWidth { get; set; } = 240f;
+    public bool DontMoveWhileCasting { get; set; } = false;
 
     // --- Video Notifications ---
     public bool VideoNotificationsEnabled { get; set; } = false;
