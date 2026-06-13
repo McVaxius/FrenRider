@@ -14,6 +14,7 @@ public sealed class AdsIntegrationService
     private const float PraetoriumTimeLimitSeconds = 7200f;
     private const double PraetoriumReadyFallbackSeconds = 15.0;
     private const double GenericDutyReadyDelaySeconds = 2.0;
+    private const double DisabledHandoffLogThrottleSeconds = 5.0;
 
     private static readonly HashSet<string> PilotDutyNames =
     [
@@ -66,6 +67,7 @@ public sealed class AdsIntegrationService
     private readonly AdsAvailabilityCache adsAvailabilityCache;
 
     private DateTime dutyEnteredUtc = DateTime.MinValue;
+    private DateTime lastDisabledHandoffLogUtc = DateTime.MinValue;
     private DateTime lastPraetoriumReadyWaitLogUtc = DateTime.MinValue;
     private uint trackedDutyTerritoryId;
     private bool adsInsideSent;
@@ -105,14 +107,13 @@ public sealed class AdsIntegrationService
             HadAdsControlThisDuty = false;
             IsControllingDuty = false;
             IsHandoffPending = false;
+            lastDisabledHandoffLogUtc = DateTime.MinValue;
             lastPraetoriumReadyWaitLogUtc = DateTime.MinValue;
         }
 
         if (config == null || !config.Enabled)
         {
-            IsControllingDuty = false;
-            IsHandoffPending = false;
-            StatusText = AdsLoaded ? "FrenRider disabled." : "ADS not loaded.";
+            SetDisabledHandoffState(inDuty && !adsInsideSent && !exitReleasedForCurrentDuty);
             return;
         }
 
@@ -127,6 +128,12 @@ public sealed class AdsIntegrationService
         }
 
         var readiness = ResolveReadiness(config, territoryTypeId);
+        if (!config.Enabled)
+        {
+            SetDisabledHandoffState(!adsInsideSent && !exitReleasedForCurrentDuty);
+            return;
+        }
+
         IsHandoffPending = readiness.CanUseAds && !adsInsideSent && !exitReleasedForCurrentDuty;
         IsControllingDuty = readiness.CanUseAds && adsInsideSent && !exitReleasedForCurrentDuty;
 
@@ -151,6 +158,13 @@ public sealed class AdsIntegrationService
         if (!IsReadyToStartAdsInsideDuty(territoryTypeId))
         {
             StatusText = BuildReadinessStatus(readiness, "waiting for duty start seam");
+            return;
+        }
+
+        var currentConfig = plugin.ConfigManager.GetActiveConfig();
+        if (currentConfig == null || !currentConfig.Enabled)
+        {
+            SetDisabledHandoffState(logBlockedHandoff: true);
             return;
         }
 
@@ -240,6 +254,9 @@ public sealed class AdsIntegrationService
 
     private AdsDutyReadiness ResolveReadiness(CharacterConfig config, uint territoryTypeId)
     {
+        if (!config.Enabled)
+            return new AdsDutyReadiness(null, default, false, "FrenRider disabled");
+
         if (!AdsLoaded)
             return new AdsDutyReadiness(null, default, false, "ADS is not loaded");
 
@@ -260,6 +277,23 @@ public sealed class AdsIntegrationService
         }
 
         return new AdsDutyReadiness(entry, familySettings, true, "ready");
+    }
+
+    private void SetDisabledHandoffState(bool logBlockedHandoff)
+    {
+        IsControllingDuty = false;
+        IsHandoffPending = false;
+        StatusText = "FrenRider disabled";
+
+        if (!logBlockedHandoff)
+            return;
+
+        var now = DateTime.UtcNow;
+        if ((now - lastDisabledHandoffLogUtc).TotalSeconds < DisabledHandoffLogThrottleSeconds)
+            return;
+
+        lastDisabledHandoffLogUtc = now;
+        Plugin.Log.Information("[FrenRider][ADS] ADS duty handoff blocked because FrenRider is disabled.");
     }
 
     private static string BuildReadinessStatus(AdsDutyReadiness readiness, string trailingStatus)
