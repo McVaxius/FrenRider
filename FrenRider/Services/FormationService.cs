@@ -51,6 +51,13 @@ public class FormationService
             return;
         }
 
+        if (plugin.AdsIntegrationService.ShouldPauseDutySystems)
+        {
+            IsActive = false;
+            AssignedSlot = -1;
+            return;
+        }
+
         var fren = tracker.Fren;
         if (fren == null || !fren.IsFound || !fren.IsVisible)
         {

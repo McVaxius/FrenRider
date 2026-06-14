@@ -91,6 +91,7 @@ public class DutyInteractService
 
         if (plugin.AdsIntegrationService.ShouldPauseDutySystems)
         {
+            StopInteractableNavigation("ADS authority active");
             Reset();
             StateDetail = plugin.AdsIntegrationService.IsHandoffPending
                 ? "ADS handoff pending"
@@ -377,6 +378,8 @@ public class DutyInteractService
 
         var target = localPlayer.Position + forward * NudgeDistance;
         var coords = FormatVector(target);
+        isNavigatingToInteractable = true;
+        navigatingInteractableGameObjectId = null;
         SendCommand($"/vnav moveto {coords}");
         StateDetail = "No interactables found, nudging forward...";
         Plugin.Log.Information($"[DutyInteract] Nudging forward to {coords}");

@@ -46,6 +46,7 @@ public sealed class Plugin : IDalamudPlugin
     public FrenTracker FrenTracker { get; init; }
     public ZoneService ZoneService { get; init; }
     public FrenTeleportService FrenTeleportService { get; init; }
+    public AdsDutyIpcService AdsDutyIpcService { get; init; }
     public AdsIntegrationService AdsIntegrationService { get; init; }
     public AdsUtilityIpcService AdsUtilityIpcService { get; init; }
     public AdsReflectionIpcService AdsReflectionIpcService { get; init; }
@@ -105,7 +106,8 @@ public sealed class Plugin : IDalamudPlugin
         FrenTracker = new FrenTracker(this);
         ZoneService = new ZoneService();
         FrenTeleportService = new FrenTeleportService(this, FrenTracker, ZoneService);
-        AdsIntegrationService = new AdsIntegrationService(this, ZoneService);
+        AdsDutyIpcService = new AdsDutyIpcService(PluginInterface, Log);
+        AdsIntegrationService = new AdsIntegrationService(this, ZoneService, AdsDutyIpcService);
         AdsUtilityIpcService = new AdsUtilityIpcService(PluginInterface, Log);
         AdsReflectionIpcService = new AdsReflectionIpcService(this, PluginInterface, Log);
         BossModActionTweaksService = new BossModActionTweaksService(PluginInterface, Log);
@@ -201,6 +203,7 @@ public sealed class Plugin : IDalamudPlugin
         MainWindow.Dispose();
 
         AutorotIpcService.Dispose();
+        AdsDutyIpcService.Dispose();
         AdsUtilityIpcService.Dispose();
         AutomationService.Dispose();
         AdsReflectionIpcService.Dispose();

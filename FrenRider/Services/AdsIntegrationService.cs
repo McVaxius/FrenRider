@@ -62,20 +62,22 @@ public sealed class AdsIntegrationService
 
     private readonly Plugin plugin;
     private readonly ZoneService zoneService;
+    private readonly AdsDutyIpcService adsDutyIpcService;
     private readonly Dictionary<uint, AdsDutyCatalogEntry> entriesByTerritory = [];
-    private readonly AdsAvailabilityCache adsAvailabilityCache;
 
     private DateTime dutyEnteredUtc = DateTime.MinValue;
     private DateTime lastPraetoriumReadyWaitLogUtc = DateTime.MinValue;
+    private DateTime handoffRequestedAtUtc = DateTime.MinValue;
+    private DateTime nextHandoffAttemptUtc = DateTime.MinValue;
     private uint trackedDutyTerritoryId;
-    private bool adsInsideSent;
-    private bool exitReleasedForCurrentDuty;
+    private bool runtimeOwnedLastUpdate;
+    private bool ownershipReleasedForCurrentDuty;
 
-    public AdsIntegrationService(Plugin plugin, ZoneService zoneService)
+    public AdsIntegrationService(Plugin plugin, ZoneService zoneService, AdsDutyIpcService adsDutyIpcService)
     {
         this.plugin = plugin;
         this.zoneService = zoneService;
-        adsAvailabilityCache = new AdsAvailabilityCache(Plugin.PluginInterface, Plugin.Log, "[FrenRider][ADS]");
+        this.adsDutyIpcService = adsDutyIpcService;
         BuildCatalog();
         StatusText = "ADS handoff off; FrenRider local duty logic active.";
     }
@@ -84,7 +86,13 @@ public sealed class AdsIntegrationService
     public bool IsHandoffPending { get; private set; }
     public bool IsControllingDuty { get; private set; }
     public bool HadAdsControlThisDuty { get; private set; }
-    public bool ShouldPauseDutySystems => IsControllingDuty;
+    public bool RuntimeOwnershipReadable { get; private set; }
+    public string RuntimeOwnershipSource { get; private set; } = AdsDutyOwnershipSource.None.ToString();
+    public bool ExitTakeoverActive { get; private set; }
+    public bool ShouldPauseDutySystems
+        => AdsIntegrationPolicy.ShouldPauseDutySystems(IsHandoffPending, IsControllingDuty, ExitTakeoverActive);
+    public bool ShouldPauseExitSystem
+        => AdsIntegrationPolicy.ShouldPauseExitSystem(IsHandoffPending, IsControllingDuty, ExitTakeoverActive);
     public string StatusText { get; private set; }
 
     public void Update()
@@ -94,23 +102,55 @@ public sealed class AdsIntegrationService
             || Plugin.Condition[ConditionFlag.BoundByDuty56];
         var territoryTypeId = zoneService.TerritoryId;
 
-        AdsLoaded = adsAvailabilityCache.IsLoaded();
+        var ownership = adsDutyIpcService.Refresh();
+        AdsLoaded = ownership.AdsLoaded;
+        RuntimeOwnershipReadable = ownership.StatusReadable;
+        RuntimeOwnershipSource = ownership.Source.ToString();
 
         if (territoryTypeId != trackedDutyTerritoryId || !inDuty)
         {
             trackedDutyTerritoryId = territoryTypeId;
             dutyEnteredUtc = inDuty ? DateTime.UtcNow : DateTime.MinValue;
-            adsInsideSent = false;
-            exitReleasedForCurrentDuty = false;
+            handoffRequestedAtUtc = DateTime.MinValue;
+            nextHandoffAttemptUtc = DateTime.MinValue;
+            ExitTakeoverActive = false;
             HadAdsControlThisDuty = false;
+            ownershipReleasedForCurrentDuty = false;
             IsControllingDuty = false;
             IsHandoffPending = false;
+            runtimeOwnedLastUpdate = false;
             lastPraetoriumReadyWaitLogUtc = DateTime.MinValue;
+        }
+
+        IsControllingDuty = ownership.IsOwned;
+        if (ownership.IsOwned)
+        {
+            HadAdsControlThisDuty = true;
+            IsHandoffPending = false;
+            handoffRequestedAtUtc = DateTime.MinValue;
+            nextHandoffAttemptUtc = DateTime.MinValue;
+        }
+        else if (runtimeOwnedLastUpdate && ownership.StatusReadable)
+        {
+            ownershipReleasedForCurrentDuty = true;
+            IsHandoffPending = false;
+            handoffRequestedAtUtc = DateTime.MinValue;
+            nextHandoffAttemptUtc = DateTime.MinValue;
+            Plugin.Log.Information("[FrenRider][ADS] ADS explicitly released runtime duty ownership; FrenRider local duty logic may resume.");
+        }
+
+        runtimeOwnedLastUpdate = ownership.IsOwned;
+
+        if (ownership.IsOwned)
+        {
+            StatusText = ExitTakeoverActive
+                ? $"ADS runtime ownership active via {RuntimeOwnershipSource}; FrenRider exit takeover active."
+                : $"ADS runtime ownership active via {RuntimeOwnershipSource}; FrenRider duty systems paused.";
+            return;
         }
 
         if (config == null || !config.Enabled)
         {
-            IsControllingDuty = false;
             IsHandoffPending = false;
             StatusText = AdsLoaded ? "FrenRider disabled." : "ADS not loaded.";
             return;
@@ -118,7 +158,6 @@ public sealed class AdsIntegrationService
 
         if (!inDuty)
         {
-            IsControllingDuty = false;
             IsHandoffPending = false;
             StatusText = AdsLoaded
                 ? "ADS loaded; waiting for duty. FrenRider local logic active."
@@ -126,25 +165,26 @@ public sealed class AdsIntegrationService
             return;
         }
 
+        if (ExitTakeoverActive)
+        {
+            IsHandoffPending = false;
+            StatusText = $"ADS released duty progression; configured FrenRider exit takeover active via {RuntimeOwnershipSource}.";
+            return;
+        }
+
+        if (ownershipReleasedForCurrentDuty)
+        {
+            IsHandoffPending = false;
+            StatusText = $"ADS released duty ownership via {RuntimeOwnershipSource}; FrenRider local duty logic active.";
+            return;
+        }
+
         var readiness = ResolveReadiness(config, territoryTypeId);
-        IsHandoffPending = readiness.CanUseAds && !adsInsideSent && !exitReleasedForCurrentDuty;
-        IsControllingDuty = readiness.CanUseAds && adsInsideSent && !exitReleasedForCurrentDuty;
+        IsHandoffPending = readiness.CanUseAds;
 
         if (!readiness.CanUseAds)
         {
             StatusText = BuildReadinessStatus(readiness, readiness.Reason);
-            return;
-        }
-
-        if (exitReleasedForCurrentDuty)
-        {
-            StatusText = BuildReadinessStatus(readiness, "ADS handoff complete; FrenRider exit owns duty leave");
-            return;
-        }
-
-        if (adsInsideSent)
-        {
-            StatusText = BuildReadinessStatus(readiness, "ADS owns the duty handoff");
             return;
         }
 
@@ -154,33 +194,73 @@ public sealed class AdsIntegrationService
             return;
         }
 
-        if (!Plugin.CommandManager.ProcessCommand("/ads inside"))
+        var now = DateTime.UtcNow;
+        if (AdsIntegrationPolicy.IsHandoffConfirmationPending(handoffRequestedAtUtc, now))
         {
-            IsHandoffPending = false;
-            IsControllingDuty = false;
-            StatusText = BuildReadinessStatus(readiness, "failed to send /ads inside; FrenRider local duty logic stays active");
+            var remaining = AdsIntegrationPolicy.HandoffConfirmationTimeout - (now - handoffRequestedAtUtc);
+            StatusText = BuildReadinessStatus(readiness, $"waiting {Math.Max(0, remaining.TotalSeconds):F1}s for ADS ownership confirmation");
             return;
         }
 
-        adsInsideSent = true;
-        HadAdsControlThisDuty = true;
-        IsHandoffPending = false;
-        IsControllingDuty = true;
-        StatusText = BuildReadinessStatus(readiness, "sent /ads inside");
-        Plugin.Log.Information(
-            $"[FrenRider][ADS] Sent /ads inside for {readiness.Entry!.EnglishName} ({AdsDutyCategoryCatalog.GetLabel(readiness.Entry.Category)}) with maturity {readiness.Entry.MaturityLevel} and threshold {readiness.FamilySettings.MaturityThreshold}.");
+        if (!AdsIntegrationPolicy.CanAttemptHandoff(handoffRequestedAtUtc, nextHandoffAttemptUtc, now))
+        {
+            StatusText = BuildReadinessStatus(readiness, $"handoff retry backoff until {nextHandoffAttemptUtc:HH:mm:ss}");
+            return;
+        }
+
+        handoffRequestedAtUtc = DateTime.MinValue;
+        var request = adsDutyIpcService.RequestStartDutyFromInside();
+        if (request.EndpointAvailable)
+        {
+            if (request.Accepted)
+            {
+                AwaitHandoffConfirmation(now, readiness, "ADS.StartDutyFromInside accepted");
+                return;
+            }
+
+            BackoffFailedHandoff(now, readiness, "ADS.StartDutyFromInside rejected; command fallback suppressed");
+            return;
+        }
+
+        if (Plugin.CommandManager.ProcessCommand("/ads inside"))
+        {
+            AwaitHandoffConfirmation(now, readiness, "typed endpoint unavailable; sent /ads inside fallback");
+            return;
+        }
+
+        BackoffFailedHandoff(now, readiness, "typed endpoint unavailable and /ads inside fallback failed");
     }
 
     public void ReleaseDutyControlForExit(string reason)
     {
-        if (!adsInsideSent && !HadAdsControlThisDuty)
+        var config = plugin.ConfigManager.GetActiveConfig();
+        var configuredExit = config.UseAdsLeaveAfterAdsDuty || config.ExitAfterDutyEnds || config.LeaveWhenAllLeft;
+        if (!configuredExit || !HadAdsControlThisDuty)
             return;
 
-        exitReleasedForCurrentDuty = true;
-        IsControllingDuty = false;
+        ExitTakeoverActive = true;
         IsHandoffPending = false;
-        StatusText = $"ADS handoff complete; FrenRider exit owns duty leave ({reason}).";
-        Plugin.Log.Information($"[FrenRider][ADS] Released ADS duty pause for FrenRider exit: {reason}");
+        handoffRequestedAtUtc = DateTime.MinValue;
+        nextHandoffAttemptUtc = DateTime.MinValue;
+        StatusText = $"ADS duty progression paused; configured FrenRider exit takeover active ({reason}).";
+        Plugin.Log.Information($"[FrenRider][ADS] Enabled exit-only takeover while keeping FrenRider duty systems paused: {reason}");
+    }
+
+    private void AwaitHandoffConfirmation(DateTime now, AdsDutyReadiness readiness, string reason)
+    {
+        handoffRequestedAtUtc = now;
+        nextHandoffAttemptUtc = now + AdsIntegrationPolicy.HandoffConfirmationTimeout;
+        StatusText = BuildReadinessStatus(readiness, $"{reason}; waiting for authoritative ownership");
+        Plugin.Log.Information(
+            $"[FrenRider][ADS] {reason} for {readiness.Entry!.EnglishName} ({AdsDutyCategoryCatalog.GetLabel(readiness.Entry.Category)}) with maturity {readiness.Entry.MaturityLevel} and threshold {readiness.FamilySettings.MaturityThreshold}.");
+    }
+
+    private void BackoffFailedHandoff(DateTime now, AdsDutyReadiness readiness, string reason)
+    {
+        handoffRequestedAtUtc = DateTime.MinValue;
+        nextHandoffAttemptUtc = now + AdsIntegrationPolicy.HandoffConfirmationTimeout;
+        StatusText = BuildReadinessStatus(readiness, $"{reason}; retrying after 5s");
+        Plugin.Log.Warning($"[FrenRider][ADS] {reason}.");
     }
 
     private void BuildCatalog()

@@ -11,8 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Combat settings now include a global one-shot **Don't move while casting** toggle that updates currently loaded BMR and VBM Action Tweaks settings
+- ADS runtime duty ownership polling now uses authoritative `ADS.IsDutyOwned()` IPC with JSON fallback, a 250ms poll interval, and a bounded 5-second stale hold for transient IPC failures
 
 ### Fixed
+- Manual ADS Start Inside/Resume now immediately pauses FrenRider follow, navigation, mounts, formation, combat-state changes, duty interaction, maintenance, and automatic dialogs
+- ADS handoff now waits for authoritative ownership confirmation, retries after a 5-second timeout/backoff, and falls back to `/ads inside` only when typed IPC is unavailable
+- Configured FrenRider duty exit can take over after duty completion while all non-exit FrenRider duty systems remain paused
 - AutoDuty warning lifecycle now clears correctly when FrenRider is disabled instead of re-forcing the popup path
 - FATE join/leave no longer changes follow cling distance, so FATE entry cannot stop follow by itself
 - Flying follow can now escape rare vnavmesh wall/object stalls by releasing vnav, ascending, automoving forward, and resuming normal pathing

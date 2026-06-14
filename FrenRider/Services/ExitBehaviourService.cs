@@ -183,7 +183,7 @@ public class ExitBehaviourService : IDisposable
             return;
         }
 
-        if (plugin.AdsIntegrationService.ShouldPauseDutySystems)
+        if (plugin.AdsIntegrationService.ShouldPauseExitSystem)
         {
             StateDetail = plugin.AdsIntegrationService.IsHandoffPending
                 ? "ADS handoff pending"

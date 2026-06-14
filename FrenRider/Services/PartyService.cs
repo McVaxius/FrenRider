@@ -52,7 +52,8 @@ public class PartyService
             return;
 
         if (plugin.AutomationService.IsUtilityGateActive
-            || plugin.AdsUtilityIpcService.ShouldSuppressGenericYesNo())
+            || plugin.AdsUtilityIpcService.ShouldSuppressGenericYesNo()
+            || plugin.AdsIntegrationService.ShouldPauseDutySystems)
             return;
 
         var inParty = Plugin.PartyList.Length > 0;
@@ -89,7 +90,8 @@ public class PartyService
             return;
 
         if (plugin.AutomationService.IsUtilityGateActive
-            || plugin.AdsUtilityIpcService.ShouldSuppressGenericYesNo())
+            || plugin.AdsUtilityIpcService.ShouldSuppressGenericYesNo()
+            || plugin.AdsIntegrationService.ShouldPauseDutySystems)
             return;
 
         // Don't auto-accept if already in a party

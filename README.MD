@@ -57,7 +57,7 @@ Fren Rider can hand duties to ADS when ADS is loaded, the current duty is in the
 
 Duty families are Solo, 4-Man, 8-Man, Alliance, Guild Hest, Deep Dungeon, Treasure Dungeon, and Other. Each family has its own enable flag and maturity threshold.
 
-When ADS handoff is active, Fren Rider pauses local follow, combat, duty interaction, maintenance, generic dialog handling, and exit behavior until ADS releases or the configured exit mode takes over.
+ADS runtime duty ownership is authoritative, including manual ADS **Start Inside** and **Resume**. While handoff is pending, ADS owns/leaves the live duty, or configured exit takeover is active, Fren Rider pauses follow/navigation, far chase, formation, mount actions, combat-state changes, duty interaction, maintenance, and automatic dialogs. Duty completion can enable the configured FrenRider exit path without resuming those other systems. ADS **Stop** releases runtime ownership and allows FrenRider local duty logic to resume.
 
 Repair and desynthesis are delegated to ADS utility IPC. Repair modes are disabled, self, NPC no-inn, and NPC no-inn/no-teleport. Auto desynthesis waits for duty completion and duty exit, requests ADS configured desynthesis, retries rejected starts every 30 seconds, and times out after 180 seconds.
 

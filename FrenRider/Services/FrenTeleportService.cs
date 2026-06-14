@@ -239,15 +239,11 @@ public sealed class FrenTeleportService
             return true;
         }
 
-        if (plugin.AdsIntegrationService.IsHandoffPending)
+        if (plugin.AdsIntegrationService.ShouldPauseDutySystems)
         {
-            reason = "ADS handoff pending";
-            return true;
-        }
-
-        if (plugin.AdsIntegrationService.IsControllingDuty)
-        {
-            reason = "ADS active";
+            reason = plugin.AdsIntegrationService.IsHandoffPending
+                ? "ADS handoff pending"
+                : "ADS active";
             return true;
         }
 

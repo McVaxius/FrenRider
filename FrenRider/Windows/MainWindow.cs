@@ -286,6 +286,7 @@ public class MainWindow : Window, IDisposable
                     ? UiHelpers.Blue
                     : UiHelpers.Grey;
         UiHelpers.AlignedRow("ADS", ads.StatusText, adsColor);
+        UiHelpers.AlignedRow("ADS authority", $"Source={ads.RuntimeOwnershipSource}, Readable={ads.RuntimeOwnershipReadable}, ExitTakeover={ads.ExitTakeoverActive}");
 
         var exitMethod = config.UseAdsLeaveAfterAdsDuty
             ? $"ADS Exit Method ({config.ExitAfterDutySeconds}s)"
@@ -316,7 +317,7 @@ public class MainWindow : Window, IDisposable
 
         UiHelpers.AlignedRow("Config", $"Run={config.Enabled}, FlyYouFools={config.FlyYouFools}, FarChase={config.MountUpToChaseFren}, FollowMode={config.ClingType}/{config.ClingTypeDuty}");
         UiHelpers.AlignedRow("Distances", $"Cling={config.Cling:F1}, Max={config.MaxBistance:F0}, ForayMax={config.MaxBistanceForay:F0}");
-        UiHelpers.AlignedRow("ADS flags", $"Loaded={plugin.AdsIntegrationService.AdsLoaded}, Pending={plugin.AdsIntegrationService.IsHandoffPending}, Controlling={plugin.AdsIntegrationService.IsControllingDuty}");
+        UiHelpers.AlignedRow("ADS flags", $"Loaded={plugin.AdsIntegrationService.AdsLoaded}, Pending={plugin.AdsIntegrationService.IsHandoffPending}, RuntimeOwned={plugin.AdsIntegrationService.IsControllingDuty}, Readable={plugin.AdsIntegrationService.RuntimeOwnershipReadable}, Source={plugin.AdsIntegrationService.RuntimeOwnershipSource}, ExitTakeover={plugin.AdsIntegrationService.ExitTakeoverActive}");
     }
 
     private string GetLocalCharacterText()

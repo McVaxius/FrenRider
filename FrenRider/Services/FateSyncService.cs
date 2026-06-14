@@ -30,6 +30,9 @@ public sealed class FateSyncService
         if (plugin.AutomationService.IsUtilityGateActive)
             return;
 
+        if (plugin.AdsIntegrationService.ShouldPauseDutySystems)
+            return;
+
         if (!Plugin.ClientState.IsLoggedIn || Plugin.ObjectTable.LocalPlayer == null)
             return;
 

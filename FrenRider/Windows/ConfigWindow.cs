@@ -1008,7 +1008,7 @@ public class ConfigWindow : Window, IDisposable
 
         ImGui.Text("ADS Duty Handoff");
         ImGui.SameLine();
-        HelpMarker("Per-duty-family ADS handoff.\nFrenRider keeps local duty logic running until /ads inside succeeds, then pauses only while ADS truly owns the run.");
+        HelpMarker("Per-duty-family ADS handoff.\nRuntime ADS ownership is authoritative even after manual Start Inside. FrenRider pauses local duty systems while handoff is pending or ADS owns the run; configured exit takeover remains available after duty completion.");
 
         if (!config.AdsDutyFamilySettingsMigrated)
         {
@@ -1062,6 +1062,7 @@ public class ConfigWindow : Window, IDisposable
                     ? new Vector4(0.95f, 0.8f, 0.3f, 1f)
                     : new Vector4(0.7f, 0.7f, 0.7f, 1f);
             ImGui.TextColored(adsColor, $"ADS Status: {adsStatus}");
+            ImGui.TextDisabled($"Authority source: {plugin.AdsIntegrationService.RuntimeOwnershipSource}; readable={plugin.AdsIntegrationService.RuntimeOwnershipReadable}; exit takeover={plugin.AdsIntegrationService.ExitTakeoverActive}");
         }
     }
 

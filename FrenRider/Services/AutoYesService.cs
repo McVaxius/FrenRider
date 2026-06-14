@@ -87,6 +87,9 @@ public class AutoYesService : IDisposable
         if (config == null || !config.Enabled)
             return;
 
+        if (plugin.AdsIntegrationService.ShouldPauseDutySystems)
+            return;
+
         var now = DateTime.Now;
         TryExpandMinimizedTeleportOffer(config, now);
 

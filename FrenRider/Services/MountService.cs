@@ -72,6 +72,7 @@ public class MountService
         if (plugin.AdsIntegrationService.ShouldPauseDutySystems
             || plugin.AdsIntegrationService.IsHandoffPending)
         {
+            PreemptFarChase("ADS authority active");
             lastDesiredMountStateLogKey = "";
             State = MountState.Idle;
             StateDetail = plugin.AdsIntegrationService.IsHandoffPending
