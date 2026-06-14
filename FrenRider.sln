@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FrenRider", "FrenRider\FrenRider.csproj", "{D7B1E5A0-1B2C-3D4E-5F6A-7B8C9D0E1F2A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FrenRider.Tests", "FrenRider.Tests\FrenRider.Tests.csproj", "{F86A3F7B-BF39-4D17-92FD-04BFD1736F29}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -15,5 +17,9 @@ Global
 		{D7B1E5A0-1B2C-3D4E-5F6A-7B8C9D0E1F2A}.Debug|x64.Build.0 = Debug|x64
 		{D7B1E5A0-1B2C-3D4E-5F6A-7B8C9D0E1F2A}.Release|x64.ActiveCfg = Release|x64
 		{D7B1E5A0-1B2C-3D4E-5F6A-7B8C9D0E1F2A}.Release|x64.Build.0 = Release|x64
+		{F86A3F7B-BF39-4D17-92FD-04BFD1736F29}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F86A3F7B-BF39-4D17-92FD-04BFD1736F29}.Debug|x64.Build.0 = Debug|Any CPU
+		{F86A3F7B-BF39-4D17-92FD-04BFD1736F29}.Release|x64.ActiveCfg = Release|Any CPU
+		{F86A3F7B-BF39-4D17-92FD-04BFD1736F29}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

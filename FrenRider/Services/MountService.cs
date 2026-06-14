@@ -19,14 +19,6 @@ public enum MountState
 
 public class MountService
 {
-    private enum DesiredMountState
-    {
-        PreserveCurrent,
-        OnFoot,
-        OwnMount,
-        Pillion,
-    }
-
     private readonly Plugin plugin;
     private readonly FrenTracker tracker;
     private readonly ZoneService zoneService;
@@ -35,6 +27,7 @@ public class MountService
     private long mountCooldownMs;
     private bool farChaseMountPending;
     private bool farChaseMountOwned;
+    private bool wasFarChaseRequested;
     private long farChaseMountPendingUntilMs;
     private string lastDesiredMountStateLogKey = "";
 
@@ -51,6 +44,8 @@ public class MountService
 
     public void PreemptFarChase(string reason)
     {
+        ClearFarChaseMountPending();
+        wasFarChaseRequested = false;
         State = MountState.Idle;
         StateDetail = $"Far chase preempted: {reason}";
         lastDesiredMountStateLogKey = "";
@@ -63,6 +58,7 @@ public class MountService
         var selfRidingPillion = Plugin.Condition[ConditionFlag.RidingPillion];
         var selfOnOwnMount = Plugin.Condition[ConditionFlag.Mounted] && !selfRidingPillion;
         UpdateFarChaseMountOwnership(selfOnOwnMount, now);
+        UpdateFarChaseTransition(plugin.FollowService.IsFarChaseRequested);
 
         if (!config.Enabled)
         {
@@ -115,6 +111,7 @@ public class MountService
         var selfMountBusy = selfOnMountOrPillion
             || Plugin.Condition[ConditionFlag.Mounting71];
         var selfFlying = Plugin.Condition[ConditionFlag.InFlight];
+        var selfAirborne = selfFlying || Plugin.Condition[ConditionFlag.Diving];
         var inCombat = Plugin.Condition[ConditionFlag.InCombat];
         var desiredMountState = GetDesiredMountState(config, fren, out var correctionReason);
         LogDesiredMountStateIfChanged(desiredMountState, correctionReason);
@@ -174,24 +171,33 @@ public class MountService
             return;
         }
 
-        if (farChaseMountPending)
-        {
-            State = MountState.Mounting;
-            StateDetail = "Far chase mount pending";
-            return;
-        }
-
         if (selfOnOwnMount
-            && desiredMountState is DesiredMountState.OnFoot or DesiredMountState.Pillion)
+            && desiredMountState is FrenMountPolicy.OnFoot or FrenMountPolicy.Pillion)
         {
-            if (CanSafelyDismountOwnMount(config, fren, out var retainReason))
+            var correctionAllowed = CanSafelyCorrectOwnMount(config, fren, out var retainReason);
+            var correctionAction = FrenRiderMountPolicy.GetCorrectionAction(
+                selfOnOwnMount,
+                desiredMountState,
+                correctionAllowed,
+                selfAirborne);
+            if (correctionAction != FrenMountCorrectionAction.None)
             {
                 if (now >= mountCooldownMs)
                 {
-                    DismountSelf();
-                    StateDetail = desiredMountState == DesiredMountState.Pillion
-                        ? "Near mounted fren; dismounting to ride pillion"
-                        : "Near fren on foot; dismounting";
+                    if (correctionAction == FrenMountCorrectionAction.Land)
+                    {
+                        LandSelf();
+                        StateDetail = desiredMountState == FrenMountPolicy.Pillion
+                            ? "Near mounted fren; landing to ride pillion"
+                            : "Near fren on foot; landing to dismount";
+                    }
+                    else
+                    {
+                        DismountSelf();
+                        StateDetail = desiredMountState == FrenMountPolicy.Pillion
+                            ? "Near mounted fren; dismounting to ride pillion"
+                            : "Near fren on foot; dismounting";
+                    }
                 }
                 else
                 {
@@ -204,6 +210,13 @@ public class MountService
                 State = MountState.Mounted;
                 StateDetail = $"Own mount retained: {retainReason}";
             }
+            return;
+        }
+
+        if (desiredMountState == FrenMountPolicy.PreserveCurrent)
+        {
+            State = selfOnMountOrPillion ? MountState.Mounted : MountState.Idle;
+            StateDetail = $"Mount state preserved: {correctionReason}";
             return;
         }
 
@@ -363,6 +376,29 @@ public class MountService
         }
     }
 
+    private void UpdateFarChaseTransition(bool requested)
+    {
+        if (requested)
+        {
+            wasFarChaseRequested = true;
+            return;
+        }
+
+        if (!wasFarChaseRequested)
+            return;
+
+        wasFarChaseRequested = false;
+        ClearFarChaseMountPending();
+        Plugin.Log.Information(
+            $"[FR][FarChase] Mount handoff retired; ownMountTracked={farChaseMountOwned}");
+    }
+
+    private void ClearFarChaseMountPending()
+    {
+        farChaseMountPending = false;
+        farChaseMountPendingUntilMs = 0;
+    }
+
     private bool CanIssueFarChaseMountCommand(CharacterConfig config, out string reason)
     {
         if (Plugin.Condition[ConditionFlag.InCombat])
@@ -419,7 +455,7 @@ public class MountService
         return GameHelpers.CanUseMountActionNow(out reason);
     }
 
-    private DesiredMountState GetDesiredMountState(
+    private FrenMountPolicy GetDesiredMountState(
         CharacterConfig config,
         FrenTracker.FrenState fren,
         out string reason)
@@ -427,41 +463,47 @@ public class MountService
         if (plugin.FollowService.IsFarChaseRequested)
         {
             reason = "far chase active";
-            return DesiredMountState.OwnMount;
+            return FrenMountPolicy.OwnMount;
         }
 
         var localPlayer = Plugin.ObjectTable.LocalPlayer;
-        if (localPlayer == null)
-        {
-            reason = "local player unavailable";
-            return DesiredMountState.PreserveCurrent;
-        }
-
         var clingDistance = plugin.FollowService.GetEffectiveClingDistance(config);
-        var xzDistance = FollowService.GetXzDistance(localPlayer.Position, fren.Position);
-        if (xzDistance > clingDistance)
+        var xzDistance = localPlayer == null
+            ? float.PositiveInfinity
+            : FollowService.GetXzDistance(localPlayer.Position, fren.Position);
+        var desiredPolicy = FrenRiderMountPolicy.GetNormalPolicy(
+            plugin.FollowService.IsFarChaseRequested,
+            localPlayer != null,
+            xzDistance,
+            clingDistance,
+            fren.IsMounted,
+            config.FlyYouFools);
+
+        if (desiredPolicy == FrenMountPolicy.PreserveCurrent)
         {
-            reason = "outside effective cling range";
-            return DesiredMountState.PreserveCurrent;
+            reason = localPlayer == null
+                ? "local player unavailable"
+                : "outside effective cling range";
+            return desiredPolicy;
         }
 
-        if (!fren.IsMounted)
+        if (desiredPolicy == FrenMountPolicy.OnFoot)
         {
             reason = "near fren on foot";
-            return DesiredMountState.OnFoot;
+            return desiredPolicy;
         }
 
-        if (config.FlyYouFools)
+        if (desiredPolicy == FrenMountPolicy.OwnMount)
         {
             reason = "near mounted fren with Fly You Fools enabled";
-            return DesiredMountState.OwnMount;
+            return desiredPolicy;
         }
 
         reason = "near mounted fren with Fly You Fools disabled";
-        return DesiredMountState.Pillion;
+        return desiredPolicy;
     }
 
-    private void LogDesiredMountStateIfChanged(DesiredMountState desiredMountState, string reason)
+    private void LogDesiredMountStateIfChanged(FrenMountPolicy desiredMountState, string reason)
     {
         var logKey = $"{desiredMountState}:{reason}";
         if (logKey == lastDesiredMountStateLogKey)
@@ -472,7 +514,7 @@ public class MountService
             $"[FR][MountCorrection] reason={reason}; desired={desiredMountState}");
     }
 
-    private bool CanSafelyDismountOwnMount(
+    private bool CanSafelyCorrectOwnMount(
         CharacterConfig config,
         FrenTracker.FrenState fren,
         out string reason)
@@ -504,15 +546,15 @@ public class MountService
             return false;
         }
 
-        if (Plugin.Condition[ConditionFlag.InFlight] || Plugin.Condition[ConditionFlag.Diving])
-        {
-            reason = "not grounded";
-            return false;
-        }
-
         if (fren.IsFlying)
         {
             reason = "fren flying";
+            return false;
+        }
+
+        if (Plugin.Condition[ConditionFlag.InCombat])
+        {
+            reason = "in combat";
             return false;
         }
 
@@ -576,6 +618,14 @@ public class MountService
         SendCommand("/mount");
         State = MountState.Dismounting;
         StateDetail = "Dismounting...";
+    }
+
+    private void LandSelf()
+    {
+        mountCooldownMs = Environment.TickCount64 + 1000;
+        SendCommand("/mount");
+        State = MountState.Dismounting;
+        StateDetail = "Landing...";
     }
 
     /// <summary>

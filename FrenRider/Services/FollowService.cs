@@ -282,7 +282,7 @@ public class FollowService
             ? 0f
             : GetXzDistance(localPlayer.Position, fren.Position);
 
-        UpdateFarChaseRequest(config, fren, FarChaseXzDistance, distance, maxDist);
+        UpdateFarChaseRequest(config, fren, FarChaseXzDistance, distance, maxDist, clingDist);
 
         var resolvedClingType = GetMovementClingType(config);
         if (resolvedClingType != 2 && bossModFollowActive)
@@ -461,9 +461,10 @@ public class FollowService
         FrenTracker.FrenState fren,
         float xzDistance,
         float distance,
-        float maxDistance)
+        float maxDistance,
+        float clingDistance)
     {
-        var requested = config.Enabled
+        var eligible = config.Enabled
             && config.MountUpToChaseFren
             && zoneService.CurrentZone == ZoneType.Overworld
             && !Plugin.Condition[ConditionFlag.BoundByDuty]
@@ -473,14 +474,25 @@ public class FollowService
             && !config.Formation
             && fren.IsFound
             && fren.IsVisible
-            && distance <= maxDistance
-            && xzDistance > GetChaseDistance(config);
+            && distance <= maxDistance;
+        var requested = FrenRiderMountPolicy.ShouldRequestFarChase(
+            IsFarChaseRequested,
+            eligible,
+            xzDistance,
+            GetChaseDistance(config),
+            clingDistance);
 
         if (requested == IsFarChaseRequested)
             return;
 
         StopAllFollowing(config, requested ? "starting far chase" : "ending far chase");
-        SetFarChaseRequested(requested, requested ? "horizontal threshold exceeded" : "horizontal threshold reached");
+        SetFarChaseRequested(
+            requested,
+            requested
+                ? "horizontal chase threshold exceeded"
+                : eligible
+                    ? "effective XZ cling range reached"
+                    : "eligibility lost");
     }
 
     private void SetFarChaseRequested(bool requested, string reason)
