@@ -90,6 +90,9 @@ public class AutoYesService : IDisposable
         if (plugin.AdsIntegrationService.ShouldPauseDutySystems)
             return;
 
+        if (plugin.RespawnService.ShouldOwnCurrentUnconsciousReviveFlow(config))
+            return;
+
         var now = DateTime.Now;
         TryExpandMinimizedTeleportOffer(config, now);
 
