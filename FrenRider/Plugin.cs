@@ -124,7 +124,7 @@ public sealed class Plugin : IDalamudPlugin
         ExitBehaviourService = new ExitBehaviourService(this, FrenTracker, ZoneService);
         FateSyncService = new FateSyncService(this, ZoneService);
         YesAlreadyIPC = new YesAlreadyIPC(Log);
-        AutoYesService = new AutoYesService(this, GameGui, Condition, Log);
+        AutoYesService = new AutoYesService(this, Condition, Log);
         RespawnService = new RespawnService(this);
 		
         // Initialize AutoDuty warning system

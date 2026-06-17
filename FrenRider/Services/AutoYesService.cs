@@ -1,13 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Dalamud.Game.ClientState.Conditions;
-using Dalamud.Game.Gui;
-using Dalamud.Memory;
 using Dalamud.Plugin.Services;
-using FFXIVClientStructs.FFXIV.Client.UI;
-using FFXIVClientStructs.FFXIV.Component.GUI;
 using FrenRider.Models;
 
 namespace FrenRider.Services;
@@ -20,7 +14,6 @@ public class AutoYesService : IDisposable
 {
     private readonly Plugin plugin;
     private readonly IPluginLog log;
-    private readonly IGameGui gameGui;
     private readonly ICondition condition;
     
     private readonly Dictionary<string, string> autoYesPatterns = new()
@@ -61,10 +54,9 @@ public class AutoYesService : IDisposable
     private readonly TimeSpan teleportNotificationDiagnosticCooldown = TimeSpan.FromMilliseconds(250);
     private bool teleportRepairRetryRequested;
     
-    public AutoYesService(Plugin plugin, IGameGui gameGui, ICondition condition, IPluginLog log)
+    public AutoYesService(Plugin plugin, ICondition condition, IPluginLog log)
     {
         this.plugin = plugin;
-        this.gameGui = gameGui;
         this.condition = condition;
         this.log = log;
     }
@@ -123,7 +115,7 @@ public class AutoYesService : IDisposable
 
         unsafe
         {
-            if (!TryReadSelectYesnoPrompt(out var dialogText))
+            if (!GameHelpers.TryReadSelectYesnoPrompt(out var dialogText))
             {
                 TryExpandMinimizedTeleportOffer(config, now);
                 return;
@@ -198,7 +190,7 @@ public class AutoYesService : IDisposable
         if (config == null || !config.Enabled || !config.TeleportOfferAutoAccept)
             return false;
 
-        if (TryReadSelectYesnoPrompt(out var dialogText))
+        if (GameHelpers.TryReadSelectYesnoPrompt(out var dialogText))
         {
             if (!IsTeleportOfferText(dialogText))
                 return false;
@@ -215,34 +207,7 @@ public class AutoYesService : IDisposable
     }
 
     private bool IsTeleportOfferText(string dialogText)
-        => autoYesPatterns
-            .Where(kvp => kvp.Key.StartsWith("teleport") || kvp.Key.StartsWith("return"))
-            .Any(kvp => dialogText.Contains(kvp.Value, StringComparison.OrdinalIgnoreCase));
-
-    private unsafe bool TryReadSelectYesnoPrompt(out string dialogText)
-    {
-        dialogText = string.Empty;
-
-        nint addonPtr = gameGui.GetAddonByName("SelectYesno", 1);
-        if (addonPtr == 0)
-            return false;
-
-        var addon = (AddonSelectYesno*)addonPtr;
-        if (!addon->AtkUnitBase.IsVisible)
-            return false;
-
-        var promptNode = addon->PromptText;
-        if (promptNode == null)
-            return false;
-
-        var textPtr = promptNode->NodeText.StringPtr;
-        if (!textPtr.HasValue)
-            return false;
-
-        var promptSe = MemoryHelper.ReadSeStringNullTerminated(new IntPtr(textPtr));
-        dialogText = promptSe.TextValue;
-        return !string.IsNullOrEmpty(dialogText);
-    }
+        => SelectYesnoPromptClassifier.Classify(dialogText) == SelectYesnoPromptKind.Teleport;
 
     private bool TryExpandMinimizedTeleportOffer(CharacterConfig config, DateTime now)
     {

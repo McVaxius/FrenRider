@@ -160,7 +160,10 @@ public sealed class RespawnService
             || Plugin.Condition[ConditionFlag.BetweenAreas51];
 
     public bool ShouldOwnCurrentUnconsciousReviveFlow(CharacterConfig config)
-        => RespawnNotificationRecoveryPolicy.ShouldOwnFlow(
+    {
+        var visiblePromptKind = TryGetVisibleSelectYesnoPromptKind(out _);
+
+        return RespawnNotificationRecoveryPolicy.ShouldOwnFlow(
             Plugin.ClientState.IsLoggedIn,
             config.Enabled,
             config.RespawnOutsideDuties,
@@ -168,39 +171,72 @@ public sealed class RespawnService
             IsInDuty(),
             IsAreaTransitionActive(),
             Plugin.Condition[ConditionFlag.Unconscious],
-            GameHelpers.IsAddonVisible("_NotificationRevive"));
+            GameHelpers.IsAddonVisible("_NotificationRevive"),
+            GameHelpers.IsAddonVisible("_NotificationTelepo"),
+            visiblePromptKind);
+    }
 
     private void HandleReviveNotificationFlow(long now)
     {
         var reviveVisible = GameHelpers.IsAddonVisible("_NotificationRevive");
         var telepoVisible = GameHelpers.IsAddonVisible("_NotificationTelepo");
-        var action = notificationRecovery.GetNextAction(now, reviveVisible, telepoVisible);
+        var visiblePromptKind = TryGetVisibleSelectYesnoPromptKind(out var promptText);
+        var action = notificationRecovery.GetNextAction(now, visiblePromptKind, reviveVisible, telepoVisible);
 
         switch (action)
         {
             case RespawnNotificationRecoveryAction.None:
-                StatusText = "Waiting for revive/Return notification";
+                StatusText = visiblePromptKind.HasValue
+                    ? $"Waiting for {visiblePromptKind.Value} SelectYesno dialog"
+                    : "Waiting for revive/Return notification";
                 return;
 
-            case RespawnNotificationRecoveryAction.ToggleNotification:
+            case RespawnNotificationRecoveryAction.ExpandTeleportNotification:
                 var callbackDispatched = GameHelpers.TryFireAddonCallback(
                     "_Notification",
                     true,
                     out var callbackFailureReason,
                     0,
                     16);
-                notificationRecovery.RecordToggle(now);
+                notificationRecovery.RecordNotificationAction(now);
 
                 var callbackFailure = string.IsNullOrEmpty(callbackFailureReason) ? "none" : callbackFailureReason;
                 Plugin.Log.Debug($"[Respawn] _NotificationTelepo blocks revive/Return; callback addon=_Notification; updateState=true; args=[Int=0, Int=16]; callback dispatched={callbackDispatched.ToString().ToLowerInvariant()}; callbackFailureReason={callbackFailure}");
                 StatusText = callbackDispatched
+                    ? "Surfacing teleport prompt"
+                    : "Waiting for teleport prompt";
+                return;
+
+            case RespawnNotificationRecoveryAction.ClickNo:
+                var declined = GameHelpers.ClickNoIfVisible(logClick: false);
+                notificationRecovery.RecordPromptClick(declined, now);
+                if (declined)
+                    Plugin.Log.Information($"[Respawn] Declined teleport prompt while unconscious: {promptText}");
+                StatusText = declined
+                    ? "Teleport declined"
+                    : "Waiting for teleport confirmation";
+                return;
+
+            case RespawnNotificationRecoveryAction.SurfaceRevivePrompt:
+                var reviveCallbackDispatched = GameHelpers.TryFireAddonCallback(
+                    "_Notification",
+                    true,
+                    out var reviveCallbackFailureReason,
+                    0,
+                    1,
+                    2);
+                notificationRecovery.RecordNotificationAction(now);
+
+                var reviveCallbackFailure = string.IsNullOrEmpty(reviveCallbackFailureReason) ? "none" : reviveCallbackFailureReason;
+                Plugin.Log.Debug($"[Respawn] Surfacing revive/Return prompt; callback addon=_Notification; updateState=true; args=[Int=0, Int=1, Int=2]; callback dispatched={reviveCallbackDispatched.ToString().ToLowerInvariant()}; callbackFailureReason={reviveCallbackFailure}");
+                StatusText = reviveCallbackDispatched
                     ? "Surfacing revive/Return prompt"
                     : "Waiting for revive/Return prompt";
                 return;
 
-            case RespawnNotificationRecoveryAction.TryYes:
+            case RespawnNotificationRecoveryAction.ClickYes:
                 var accepted = GameHelpers.ClickYesIfVisible(logClick: false);
-                notificationRecovery.RecordYesAttempt(accepted, now);
+                notificationRecovery.RecordPromptClick(accepted, now);
                 StatusText = accepted
                     ? "Revive/Return accepted"
                     : "Waiting for revive/Return confirmation";
@@ -215,10 +251,39 @@ public sealed class RespawnService
 
     private unsafe void TryReturn()
     {
+        if (GameHelpers.TryReadSelectYesnoPrompt(out var promptText))
+        {
+            var promptKind = SelectYesnoPromptClassifier.Classify(promptText);
+            switch (promptKind)
+            {
+                case SelectYesnoPromptKind.Teleport:
+                    if (GameHelpers.ClickNoIfVisible(logClick: false))
+                    {
+                        StatusText = "Teleport declined";
+                        Plugin.Log.Information($"[Respawn] Declined teleport prompt while unconscious: {promptText}");
+                    }
+                    else
+                    {
+                        StatusText = "Waiting for teleport confirmation";
+                    }
+                    return;
+
+                case SelectYesnoPromptKind.DeathReturn:
+                case SelectYesnoPromptKind.Raise:
+                    StatusText = GameHelpers.ClickYesIfVisible(logClick: false)
+                        ? "Revive/Return accepted"
+                        : "Waiting for revive/Return confirmation";
+                    return;
+
+                default:
+                    StatusText = $"Waiting for {promptKind} SelectYesno dialog";
+                    return;
+            }
+        }
+
         if (GameHelpers.IsAddonVisible("SelectYesno"))
         {
-            if (GameHelpers.ClickYesIfVisible(logClick: false))
-                StatusText = "Return accepted; waiting for revive";
+            StatusText = "Waiting for readable Return confirmation";
             return;
         }
 
@@ -275,5 +340,13 @@ public sealed class RespawnService
 
         if (previous != state)
             Plugin.Log.Information($"[Respawn] State {previous} -> {state}: {status}");
+    }
+
+    private static SelectYesnoPromptKind? TryGetVisibleSelectYesnoPromptKind(out string promptText)
+    {
+        if (!GameHelpers.TryReadSelectYesnoPrompt(out promptText))
+            return null;
+
+        return SelectYesnoPromptClassifier.Classify(promptText);
     }
 }

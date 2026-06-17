@@ -225,6 +225,12 @@ public sealed class FrenTeleportService
             return true;
         }
 
+        if (Plugin.Condition[ConditionFlag.Unconscious])
+        {
+            reason = "unconscious";
+            return true;
+        }
+
         if (Plugin.Condition[ConditionFlag.BoundByDuty] ||
             Plugin.Condition[ConditionFlag.BoundByDuty56])
         {

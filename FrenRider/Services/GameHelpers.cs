@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
 using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Memory;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
@@ -580,11 +581,54 @@ public static class GameHelpers
         }
     }
 
+    public static unsafe bool TryReadSelectYesnoPrompt(out string dialogText)
+    {
+        dialogText = string.Empty;
+
+        try
+        {
+            nint addonPtr = Plugin.GameGui.GetAddonByName("SelectYesno", 1);
+            if (addonPtr == 0)
+                return false;
+
+            var addon = (AddonSelectYesno*)addonPtr;
+            if (!addon->AtkUnitBase.IsVisible)
+                return false;
+
+            var promptNode = addon->PromptText;
+            if (promptNode == null)
+                return false;
+
+            var textPtr = promptNode->NodeText.StringPtr;
+            if (!textPtr.HasValue)
+                return false;
+
+            var promptSe = MemoryHelper.ReadSeStringNullTerminated(new IntPtr(textPtr));
+            dialogText = promptSe.TextValue;
+            return !string.IsNullOrWhiteSpace(dialogText);
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log.Error($"[YES/NO] TryReadSelectYesnoPrompt failed: {ex.Message}");
+            return false;
+        }
+    }
+
     /// <summary>
     /// Click Yes on SelectYesno dialog if visible.
     /// Uses AtkUnitBase.FireCallback with proper AtkValue array.
     /// </summary>
-    public static unsafe bool ClickYesIfVisible(bool logClick = true)
+    public static bool ClickYesIfVisible(bool logClick = true)
+        => ClickSelectYesnoButtonIfVisible(0, "Yes", logClick);
+
+    /// <summary>
+    /// Click No on SelectYesno dialog if visible.
+    /// Uses AtkUnitBase.FireCallback with proper AtkValue array.
+    /// </summary>
+    public static bool ClickNoIfVisible(bool logClick = true)
+        => ClickSelectYesnoButtonIfVisible(1, "No", logClick);
+
+    private static unsafe bool ClickSelectYesnoButtonIfVisible(int buttonIndex, string buttonLabel, bool logClick)
     {
         try
         {
@@ -596,23 +640,22 @@ public static class GameHelpers
             if (!addon->IsVisible)
                 return false;
 
-            // Create AtkValue array for Yes button (index 0)
             var atkValues = stackalloc AtkValue[2];
             atkValues[0] = default;
             atkValues[1] = default;
-            atkValues[0].Type = FFXIVClientStructs.FFXIV.Component.GUI.AtkValueType.Int;
-            atkValues[0].Int = 0; // Yes button index
-            atkValues[1].Type = FFXIVClientStructs.FFXIV.Component.GUI.AtkValueType.Int;
+            atkValues[0].Type = AtkValueType.Int;
+            atkValues[0].Int = buttonIndex;
+            atkValues[1].Type = AtkValueType.Int;
             atkValues[1].Int = 0;
 
             addon->FireCallback(2, atkValues);
             if (logClick)
-                Plugin.Log.Information("[YES/NO] Clicked Yes on SelectYesno dialog");
+                Plugin.Log.Information($"[YES/NO] Clicked {buttonLabel} on SelectYesno dialog");
             return true;
         }
         catch (Exception ex)
         {
-            Plugin.Log.Error($"[YES/NO] ClickYesIfVisible failed: {ex.Message}");
+            Plugin.Log.Error($"[YES/NO] Click{buttonLabel}IfVisible failed: {ex.Message}");
             return false;
         }
     }

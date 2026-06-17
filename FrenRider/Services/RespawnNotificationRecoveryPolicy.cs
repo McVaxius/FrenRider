@@ -3,8 +3,10 @@ namespace FrenRider.Services;
 public enum RespawnNotificationRecoveryAction
 {
     None,
-    ToggleNotification,
-    TryYes,
+    ExpandTeleportNotification,
+    ClickNo,
+    SurfaceRevivePrompt,
+    ClickYes,
     OpenReturnPrompt,
 }
 
@@ -16,11 +18,9 @@ public sealed class RespawnNotificationRecoveryPolicy
     public const int MaxFailedCyclesPerBurst = 6;
 
     private long nextActionAtMs;
-    private bool waitingForYes;
     private int failedCyclesInBurst;
 
     public long NextActionAtMs => nextActionAtMs;
-    public bool WaitingForYes => waitingForYes;
     public int FailedCyclesInBurst => failedCyclesInBurst;
 
     public static bool ShouldOwnFlow(
@@ -31,7 +31,9 @@ public sealed class RespawnNotificationRecoveryPolicy
         bool inDuty,
         bool areaTransitionActive,
         bool unconscious,
-        bool reviveNotificationVisible)
+        bool reviveNotificationVisible,
+        bool teleportNotificationVisible,
+        SelectYesnoPromptKind? visiblePromptKind)
         => loggedIn
             && frenRiderEnabled
             && respawnEnabled
@@ -39,40 +41,51 @@ public sealed class RespawnNotificationRecoveryPolicy
             && !inDuty
             && !areaTransitionActive
             && unconscious
-            && reviveNotificationVisible;
+            && (reviveNotificationVisible
+                || teleportNotificationVisible
+                || visiblePromptKind is SelectYesnoPromptKind.Teleport
+                    or SelectYesnoPromptKind.DeathReturn
+                    or SelectYesnoPromptKind.Raise);
 
     public RespawnNotificationRecoveryAction GetNextAction(
         long nowMs,
+        SelectYesnoPromptKind? visiblePromptKind,
         bool reviveNotificationVisible,
         bool teleportNotificationVisible)
     {
-        if (!reviveNotificationVisible)
-        {
-            Reset();
-            return RespawnNotificationRecoveryAction.OpenReturnPrompt;
-        }
-
         if (nowMs < nextActionAtMs)
             return RespawnNotificationRecoveryAction.None;
 
-        if (waitingForYes)
-            return RespawnNotificationRecoveryAction.TryYes;
+        switch (visiblePromptKind)
+        {
+            case SelectYesnoPromptKind.Teleport:
+                return RespawnNotificationRecoveryAction.ClickNo;
+            case SelectYesnoPromptKind.DeathReturn:
+            case SelectYesnoPromptKind.Raise:
+                return RespawnNotificationRecoveryAction.ClickYes;
+            case SelectYesnoPromptKind.Unknown:
+            case SelectYesnoPromptKind.Party:
+            case SelectYesnoPromptKind.Misc:
+                return RespawnNotificationRecoveryAction.None;
+        }
 
-        return teleportNotificationVisible
-            ? RespawnNotificationRecoveryAction.ToggleNotification
-            : RespawnNotificationRecoveryAction.TryYes;
+        if (teleportNotificationVisible)
+            return RespawnNotificationRecoveryAction.ExpandTeleportNotification;
+
+        if (reviveNotificationVisible)
+            return RespawnNotificationRecoveryAction.SurfaceRevivePrompt;
+
+        Reset();
+        return RespawnNotificationRecoveryAction.OpenReturnPrompt;
     }
 
-    public void RecordToggle(long nowMs)
+    public void RecordNotificationAction(long nowMs)
     {
-        waitingForYes = true;
         nextActionAtMs = nowMs + NotificationSwapDelayMs;
     }
 
-    public void RecordYesAttempt(bool accepted, long nowMs)
+    public void RecordPromptClick(bool accepted, long nowMs)
     {
-        waitingForYes = false;
-
         if (accepted)
         {
             failedCyclesInBurst = 0;
@@ -94,7 +107,6 @@ public sealed class RespawnNotificationRecoveryPolicy
     public void Reset()
     {
         nextActionAtMs = 0;
-        waitingForYes = false;
         failedCyclesInBurst = 0;
     }
 }
