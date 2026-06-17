@@ -17,6 +17,8 @@ public sealed class SelectYesnoPromptClassifierTests
     [InlineData("Return to your home point?")]
     [InlineData("Would you like to return to your Home Point?")]
     [InlineData("Return to the aetheryte plaza?")]
+    [InlineData("Return to Limsa Lominsa?")]
+    [InlineData("Return Home?")]
     public void DeathReturnPromptsClassifyAsDeathReturn(string prompt)
     {
         Assert.Equal(SelectYesnoPromptKind.DeathReturn, SelectYesnoPromptClassifier.Classify(prompt));

@@ -17,6 +17,8 @@ public static class SelectYesnoPromptClassifier
 {
     private static readonly Regex WhitespaceRegex = new(@"\s+", RegexOptions.Compiled);
     private static readonly Regex PartyInviteRegex = new(@"\bjoin\s+.+?'?s\s+party\?", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+    private static readonly Regex ReturnToDestinationRegex = new(@"^Return\s+to\s+.+\?", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+    private static readonly Regex ReturnHomeRegex = new(@"^Return\s+Home\?", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     public static SelectYesnoPromptKind Classify(string prompt)
     {
@@ -82,6 +84,8 @@ public static class SelectYesnoPromptClassifier
         return text.Contains("home point", StringComparison.OrdinalIgnoreCase)
             || text.Contains("return to your", StringComparison.OrdinalIgnoreCase)
             || text.Contains("return to the aetheryte", StringComparison.OrdinalIgnoreCase)
-            || text.Contains("return to an aetheryte", StringComparison.OrdinalIgnoreCase);
+            || text.Contains("return to an aetheryte", StringComparison.OrdinalIgnoreCase)
+            || ReturnToDestinationRegex.IsMatch(text)
+            || ReturnHomeRegex.IsMatch(text);
     }
 }

@@ -64,6 +64,33 @@ public sealed class RespawnNotificationRecoveryPolicyTests
                 teleportNotificationVisible));
     }
 
+    [Fact]
+    public void VisibleDeathReturnPromptWithoutNotificationsClicksYes()
+    {
+        var policy = new RespawnNotificationRecoveryPolicy();
+
+        Assert.True(
+            RespawnNotificationRecoveryPolicy.ShouldOwnFlow(
+                loggedIn: true,
+                frenRiderEnabled: true,
+                respawnEnabled: true,
+                utilityGateActive: false,
+                inDuty: false,
+                areaTransitionActive: false,
+                unconscious: true,
+                reviveNotificationVisible: false,
+                teleportNotificationVisible: false,
+                visiblePromptKind: SelectYesnoPromptKind.DeathReturn));
+
+        Assert.Equal(
+            RespawnNotificationRecoveryAction.ClickYes,
+            policy.GetNextAction(
+                nowMs: 1000,
+                visiblePromptKind: SelectYesnoPromptKind.DeathReturn,
+                reviveNotificationVisible: false,
+                teleportNotificationVisible: false));
+    }
+
     [Theory]
     [InlineData(SelectYesnoPromptKind.Unknown)]
     [InlineData(SelectYesnoPromptKind.Party)]
