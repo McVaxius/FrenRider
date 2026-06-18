@@ -59,6 +59,8 @@ public sealed class RespawnService
             return;
         }
 
+        var now = Environment.TickCount64;
+
         if (plugin.AutomationService.IsUtilityGateActive)
         {
             Reset(RespawnState.Blocked, "Blocked: ADS utility active");
@@ -89,7 +91,6 @@ public sealed class RespawnService
             return;
         }
 
-        var now = Environment.TickCount64;
         if (unconsciousStartedMs == 0)
         {
             unconsciousStartedMs = now;
@@ -124,7 +125,7 @@ public sealed class RespawnService
             return;
 
         lastActionMs = now;
-        TryReturn();
+        TryReturn(now);
     }
 
     public void ResetForAreaTransition()
@@ -171,7 +172,8 @@ public sealed class RespawnService
             IsInDuty(),
             IsAreaTransitionActive(),
             Plugin.Condition[ConditionFlag.Unconscious],
-            GameHelpers.IsAddonVisible("_NotificationRevive"),
+            notificationRecovery.HasPendingPromptAttempt
+                || GameHelpers.IsAddonVisible("_NotificationRevive"),
             GameHelpers.IsAddonVisible("_NotificationTelepo"),
             visiblePromptKind);
     }
@@ -180,7 +182,35 @@ public sealed class RespawnService
     {
         var reviveVisible = GameHelpers.IsAddonVisible("_NotificationRevive");
         var telepoVisible = GameHelpers.IsAddonVisible("_NotificationTelepo");
+        var selectYesnoVisible = GameHelpers.IsAddonVisible("SelectYesno");
         var visiblePromptKind = TryGetVisibleSelectYesnoPromptKind(out var promptText);
+        var observation = notificationRecovery.ObservePrompt(
+            now,
+            selectYesnoVisible,
+            visiblePromptKind,
+            promptText);
+
+        switch (observation.Outcome)
+        {
+            case RespawnPromptAttemptOutcome.Waiting:
+                StatusText = BuildPromptAttemptWaitingStatus(observation.Attempt);
+                return;
+
+            case RespawnPromptAttemptOutcome.Confirmed:
+                LogPromptAttemptConfirmation(observation.Attempt);
+                if (observation.Attempt.ResponseYes)
+                {
+                    lastActionMs = now;
+                    StatusText = "Revive/Return confirmed; waiting for transition";
+                    return;
+                }
+                break;
+
+            case RespawnPromptAttemptOutcome.TimedOut:
+                LogPromptAttemptTimeout(observation.Attempt);
+                break;
+        }
+
         var action = notificationRecovery.GetNextAction(now, visiblePromptKind, reviveVisible, telepoVisible);
 
         switch (action)
@@ -208,13 +238,11 @@ public sealed class RespawnService
                 return;
 
             case RespawnNotificationRecoveryAction.ClickNo:
-                var declined = GameHelpers.ClickNoIfVisible(logClick: false);
-                notificationRecovery.RecordPromptClick(declined, now);
-                if (declined)
-                    Plugin.Log.Information($"[Respawn] Declined teleport prompt while unconscious: {promptText}");
-                StatusText = declined
-                    ? "Teleport declined"
-                    : "Waiting for teleport confirmation";
+                AttemptPromptResponse(
+                    responseYes: false,
+                    SelectYesnoPromptKind.Teleport,
+                    promptText,
+                    now);
                 return;
 
             case RespawnNotificationRecoveryAction.SurfaceRevivePrompt:
@@ -235,21 +263,21 @@ public sealed class RespawnService
                 return;
 
             case RespawnNotificationRecoveryAction.ClickYes:
-                var accepted = GameHelpers.ClickYesIfVisible(logClick: false);
-                notificationRecovery.RecordPromptClick(accepted, now);
-                StatusText = accepted
-                    ? "Revive/Return accepted"
-                    : "Waiting for revive/Return confirmation";
+                AttemptPromptResponse(
+                    responseYes: true,
+                    visiblePromptKind ?? SelectYesnoPromptKind.DeathReturn,
+                    promptText,
+                    now);
                 return;
 
             case RespawnNotificationRecoveryAction.OpenReturnPrompt:
                 ClearNotificationRecovery();
-                TryReturn();
+                TryReturn(now);
                 return;
         }
     }
 
-    private unsafe void TryReturn()
+    private unsafe void TryReturn(long now)
     {
         if (GameHelpers.TryReadSelectYesnoPrompt(out var promptText))
         {
@@ -257,22 +285,20 @@ public sealed class RespawnService
             switch (promptKind)
             {
                 case SelectYesnoPromptKind.Teleport:
-                    if (GameHelpers.ClickNoIfVisible(logClick: false))
-                    {
-                        StatusText = "Teleport declined";
-                        Plugin.Log.Information($"[Respawn] Declined teleport prompt while unconscious: {promptText}");
-                    }
-                    else
-                    {
-                        StatusText = "Waiting for teleport confirmation";
-                    }
+                    AttemptPromptResponse(
+                        responseYes: false,
+                        promptKind,
+                        promptText,
+                        now);
                     return;
 
                 case SelectYesnoPromptKind.DeathReturn:
                 case SelectYesnoPromptKind.Raise:
-                    StatusText = GameHelpers.ClickYesIfVisible(logClick: false)
-                        ? "Revive/Return accepted"
-                        : "Waiting for revive/Return confirmation";
+                    AttemptPromptResponse(
+                        responseYes: true,
+                        promptKind,
+                        promptText,
+                        now);
                     return;
 
                 default:
@@ -313,10 +339,77 @@ public sealed class RespawnService
         }
     }
 
+    private void AttemptPromptResponse(
+        bool responseYes,
+        SelectYesnoPromptKind promptKind,
+        string promptText,
+        long now)
+    {
+        var callbackDispatched = responseYes
+            ? GameHelpers.ClickYesIfVisible(logClick: false)
+            : GameHelpers.ClickNoIfVisible(logClick: false);
+
+        notificationRecovery.RecordPromptAttempt(
+            callbackDispatched,
+            promptKind,
+            promptText,
+            responseYes,
+            now);
+
+        var response = responseYes ? "Yes" : "No";
+        Plugin.Log.Information(
+            $"[Respawn] SelectYesno {response} attempt; kind={promptKind}; callback dispatched={callbackDispatched.ToString().ToLowerInvariant()}; prompt={promptText}");
+
+        StatusText = callbackDispatched
+            ? responseYes
+                ? "Revive/Return accept attempted; waiting for dialog to close"
+                : "Teleport decline attempted; waiting for dialog to close"
+            : responseYes
+                ? "Revive/Return accept callback failed; waiting to retry"
+                : "Teleport decline callback failed; waiting to retry";
+    }
+
+    private static string BuildPromptAttemptWaitingStatus(RespawnPromptAttempt attempt)
+        => attempt.ResponseYes
+            ? "Waiting for revive/Return dialog to close"
+            : "Waiting for teleport dialog to close";
+
+    private static void LogPromptAttemptConfirmation(RespawnPromptAttempt attempt)
+    {
+        var response = attempt.ResponseYes ? "Yes" : "No";
+        Plugin.Log.Information(
+            $"[Respawn] SelectYesno {response} confirmed; dialog closed or changed; kind={attempt.PromptKind}; prompt={attempt.PromptText}");
+    }
+
+    private static void LogPromptAttemptTimeout(RespawnPromptAttempt attempt)
+    {
+        var response = attempt.ResponseYes ? "Yes" : "No";
+        Plugin.Log.Warning(
+            $"[Respawn] SelectYesno {response} attempt timed out; dialog unchanged after {RespawnNotificationRecoveryPolicy.RetryDelayMs}ms; kind={attempt.PromptKind}; prompt={attempt.PromptText}");
+    }
+
     private void Reset(RespawnState state, string status)
     {
+        ConfirmPendingPromptAttemptIfDialogChanged(Environment.TickCount64);
         ResetTimer();
         SetState(state, status);
+    }
+
+    private void ConfirmPendingPromptAttemptIfDialogChanged(long now)
+    {
+        if (!notificationRecovery.HasPendingPromptAttempt)
+            return;
+
+        var selectYesnoVisible = GameHelpers.IsAddonVisible("SelectYesno");
+        var visiblePromptKind = TryGetVisibleSelectYesnoPromptKind(out var promptText);
+        var observation = notificationRecovery.ObservePrompt(
+            now,
+            selectYesnoVisible,
+            visiblePromptKind,
+            promptText);
+
+        if (observation.Outcome == RespawnPromptAttemptOutcome.Confirmed)
+            LogPromptAttemptConfirmation(observation.Attempt);
     }
 
     private void ResetTimer()

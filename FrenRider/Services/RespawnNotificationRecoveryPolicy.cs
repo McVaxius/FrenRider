@@ -1,3 +1,5 @@
+using System;
+
 namespace FrenRider.Services;
 
 public enum RespawnNotificationRecoveryAction
@@ -10,18 +12,38 @@ public enum RespawnNotificationRecoveryAction
     OpenReturnPrompt,
 }
 
+public enum RespawnPromptAttemptOutcome
+{
+    None,
+    Waiting,
+    Confirmed,
+    TimedOut,
+}
+
+public readonly record struct RespawnPromptAttempt(
+    SelectYesnoPromptKind PromptKind,
+    string PromptText,
+    bool ResponseYes,
+    long StartedAtMs);
+
+public readonly record struct RespawnPromptAttemptObservation(
+    RespawnPromptAttemptOutcome Outcome,
+    RespawnPromptAttempt Attempt);
+
 public sealed class RespawnNotificationRecoveryPolicy
 {
     public const long NotificationSwapDelayMs = 250;
-    public const long RetryDelayMs = 250;
+    public const long RetryDelayMs = 1000;
     public const long BurstBackoffMs = 2000;
     public const int MaxFailedCyclesPerBurst = 6;
 
     private long nextActionAtMs;
     private int failedCyclesInBurst;
+    private RespawnPromptAttempt? pendingPromptAttempt;
 
     public long NextActionAtMs => nextActionAtMs;
     public int FailedCyclesInBurst => failedCyclesInBurst;
+    public bool HasPendingPromptAttempt => pendingPromptAttempt.HasValue;
 
     public static bool ShouldOwnFlow(
         bool loggedIn,
@@ -53,6 +75,9 @@ public sealed class RespawnNotificationRecoveryPolicy
         bool reviveNotificationVisible,
         bool teleportNotificationVisible)
     {
+        if (pendingPromptAttempt.HasValue)
+            return RespawnNotificationRecoveryAction.None;
+
         if (nowMs < nextActionAtMs)
             return RespawnNotificationRecoveryAction.None;
 
@@ -84,15 +109,58 @@ public sealed class RespawnNotificationRecoveryPolicy
         nextActionAtMs = nowMs + NotificationSwapDelayMs;
     }
 
-    public void RecordPromptClick(bool accepted, long nowMs)
+    public void RecordPromptAttempt(
+        bool callbackDispatched,
+        SelectYesnoPromptKind promptKind,
+        string promptText,
+        bool responseYes,
+        long nowMs)
     {
-        if (accepted)
+        if (callbackDispatched)
         {
-            failedCyclesInBurst = 0;
+            pendingPromptAttempt = new RespawnPromptAttempt(
+                promptKind,
+                promptText,
+                responseYes,
+                nowMs);
             nextActionAtMs = nowMs + RetryDelayMs;
             return;
         }
 
+        RecordFailedCycle(nowMs, retryImmediately: false);
+    }
+
+    public RespawnPromptAttemptObservation ObservePrompt(
+        long nowMs,
+        bool dialogVisible,
+        SelectYesnoPromptKind? visiblePromptKind,
+        string promptText)
+    {
+        if (pendingPromptAttempt is not { } attempt)
+            return default;
+
+        var readablePromptChanged = visiblePromptKind.HasValue
+            && (visiblePromptKind.Value != attempt.PromptKind
+                || !string.Equals(promptText, attempt.PromptText, StringComparison.Ordinal));
+
+        if (!dialogVisible || readablePromptChanged)
+        {
+            pendingPromptAttempt = null;
+            failedCyclesInBurst = 0;
+            nextActionAtMs = nowMs;
+            return new RespawnPromptAttemptObservation(RespawnPromptAttemptOutcome.Confirmed, attempt);
+        }
+
+        if (nowMs - attempt.StartedAtMs < RetryDelayMs)
+            return new RespawnPromptAttemptObservation(RespawnPromptAttemptOutcome.Waiting, attempt);
+
+        pendingPromptAttempt = null;
+        RecordFailedCycle(nowMs, retryImmediately: true);
+        return new RespawnPromptAttemptObservation(RespawnPromptAttemptOutcome.TimedOut, attempt);
+    }
+
+    private void RecordFailedCycle(long nowMs, bool retryImmediately)
+    {
         failedCyclesInBurst++;
         if (failedCyclesInBurst >= MaxFailedCyclesPerBurst)
         {
@@ -101,12 +169,13 @@ public sealed class RespawnNotificationRecoveryPolicy
             return;
         }
 
-        nextActionAtMs = nowMs + RetryDelayMs;
+        nextActionAtMs = retryImmediately ? nowMs : nowMs + RetryDelayMs;
     }
 
     public void Reset()
     {
         nextActionAtMs = 0;
         failedCyclesInBurst = 0;
+        pendingPromptAttempt = null;
     }
 }

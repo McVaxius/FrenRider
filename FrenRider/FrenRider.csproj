@@ -4,9 +4,9 @@
 
   <PropertyGroup>
 
-    <Version>1.1.0.33</Version>
-    <FileVersion>1.1.0.33</FileVersion>
-    <AssemblyVersion>1.1.0.33</AssemblyVersion>
+    <Version>1.1.1.0</Version>
+    <FileVersion>1.1.1.0</FileVersion>
+    <AssemblyVersion>1.1.1.0</AssemblyVersion>
 
     <PackageProjectUrl>https://github.com/McVaxius/FrenRider</PackageProjectUrl>
 

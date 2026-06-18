@@ -616,14 +616,14 @@ public static class GameHelpers
 
     /// <summary>
     /// Click Yes on SelectYesno dialog if visible.
-    /// Uses AtkUnitBase.FireCallback with proper AtkValue array.
+    /// Dispatches the SelectYesno response callback.
     /// </summary>
     public static bool ClickYesIfVisible(bool logClick = true)
         => ClickSelectYesnoButtonIfVisible(0, "Yes", logClick);
 
     /// <summary>
     /// Click No on SelectYesno dialog if visible.
-    /// Uses AtkUnitBase.FireCallback with proper AtkValue array.
+    /// Dispatches the SelectYesno response callback.
     /// </summary>
     public static bool ClickNoIfVisible(bool logClick = true)
         => ClickSelectYesnoButtonIfVisible(1, "No", logClick);
@@ -640,17 +640,14 @@ public static class GameHelpers
             if (!addon->IsVisible)
                 return false;
 
-            var atkValues = stackalloc AtkValue[2];
+            var atkValues = stackalloc AtkValue[1];
             atkValues[0] = default;
-            atkValues[1] = default;
             atkValues[0].Type = AtkValueType.Int;
             atkValues[0].Int = buttonIndex;
-            atkValues[1].Type = AtkValueType.Int;
-            atkValues[1].Int = 0;
 
-            addon->FireCallback(2, atkValues);
+            addon->FireCallback(1, atkValues, true);
             if (logClick)
-                Plugin.Log.Information($"[YES/NO] Clicked {buttonLabel} on SelectYesno dialog");
+                Plugin.Log.Information($"[YES/NO] Dispatched {buttonLabel} on SelectYesno dialog");
             return true;
         }
         catch (Exception ex)

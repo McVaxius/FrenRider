@@ -5,6 +5,14 @@ namespace FrenRider.Tests;
 public sealed class RespawnNotificationRecoveryPolicyTests
 {
     [Fact]
+    public void RetryTimingsKeepNotificationDelayAndUseOneSecondDialogRetry()
+    {
+        Assert.Equal(250, RespawnNotificationRecoveryPolicy.NotificationSwapDelayMs);
+        Assert.Equal(1000, RespawnNotificationRecoveryPolicy.RetryDelayMs);
+        Assert.Equal(2000, RespawnNotificationRecoveryPolicy.BurstBackoffMs);
+    }
+
+    [Fact]
     public void TeleportNotificationThenReviveNotificationDeclinesTeleportBeforeAcceptingReturn()
     {
         var policy = new RespawnNotificationRecoveryPolicy();
@@ -26,13 +34,35 @@ public sealed class RespawnNotificationRecoveryPolicyTests
             RespawnNotificationRecoveryAction.ClickNo,
             policy.GetNextAction(now, SelectYesnoPromptKind.Teleport, reviveNotificationVisible: true, teleportNotificationVisible: true));
 
-        policy.RecordPromptClick(accepted: true, now);
+        const string teleportPrompt = "Teleport to your party member?";
+        policy.RecordPromptAttempt(
+            callbackDispatched: true,
+            SelectYesnoPromptKind.Teleport,
+            teleportPrompt,
+            responseYes: false,
+            now);
+
+        Assert.Equal(
+            RespawnPromptAttemptOutcome.Waiting,
+            policy.ObservePrompt(
+                now + 100,
+                dialogVisible: true,
+                SelectYesnoPromptKind.Teleport,
+                teleportPrompt).Outcome);
 
         Assert.Equal(
             RespawnNotificationRecoveryAction.None,
-            policy.GetNextAction(now + RespawnNotificationRecoveryPolicy.RetryDelayMs - 1, null, true, false));
+            policy.GetNextAction(now + 100, SelectYesnoPromptKind.Teleport, true, true));
 
-        now += RespawnNotificationRecoveryPolicy.RetryDelayMs;
+        now += 200;
+
+        Assert.Equal(
+            RespawnPromptAttemptOutcome.Confirmed,
+            policy.ObservePrompt(
+                now,
+                dialogVisible: false,
+                visiblePromptKind: null,
+                promptText: string.Empty).Outcome);
 
         Assert.Equal(
             RespawnNotificationRecoveryAction.SurfaceRevivePrompt,
@@ -129,10 +159,40 @@ public sealed class RespawnNotificationRecoveryPolicyTests
     }
 
     [Fact]
-    public void FailedPromptClicksBackOffBeforeRetry()
+    public void FailedCallbackRetriesAfterOneSecond()
+    {
+        var policy = new RespawnNotificationRecoveryPolicy();
+        const long now = 1000;
+
+        policy.RecordPromptAttempt(
+            callbackDispatched: false,
+            SelectYesnoPromptKind.Teleport,
+            "Teleport?",
+            responseYes: false,
+            now);
+
+        Assert.Equal(
+            RespawnNotificationRecoveryAction.None,
+            policy.GetNextAction(
+                now + RespawnNotificationRecoveryPolicy.RetryDelayMs - 1,
+                SelectYesnoPromptKind.Teleport,
+                reviveNotificationVisible: true,
+                teleportNotificationVisible: true));
+        Assert.Equal(
+            RespawnNotificationRecoveryAction.ClickNo,
+            policy.GetNextAction(
+                now + RespawnNotificationRecoveryPolicy.RetryDelayMs,
+                SelectYesnoPromptKind.Teleport,
+                reviveNotificationVisible: true,
+                teleportNotificationVisible: true));
+    }
+
+    [Fact]
+    public void PersistentPromptBacksOffAfterSixOneSecondTimeouts()
     {
         var policy = new RespawnNotificationRecoveryPolicy();
         var now = 1000L;
+        const string prompt = "Teleport?";
 
         for (var i = 0; i < RespawnNotificationRecoveryPolicy.MaxFailedCyclesPerBurst; i++)
         {
@@ -140,10 +200,30 @@ public sealed class RespawnNotificationRecoveryPolicyTests
                 RespawnNotificationRecoveryAction.ClickNo,
                 policy.GetNextAction(now, SelectYesnoPromptKind.Teleport, reviveNotificationVisible: true, teleportNotificationVisible: true));
 
-            policy.RecordPromptClick(accepted: false, now);
+            policy.RecordPromptAttempt(
+                callbackDispatched: true,
+                SelectYesnoPromptKind.Teleport,
+                prompt,
+                responseYes: false,
+                now);
 
-            if (i < RespawnNotificationRecoveryPolicy.MaxFailedCyclesPerBurst - 1)
-                now += RespawnNotificationRecoveryPolicy.RetryDelayMs;
+            Assert.Equal(
+                RespawnPromptAttemptOutcome.Waiting,
+                policy.ObservePrompt(
+                    now + RespawnNotificationRecoveryPolicy.RetryDelayMs - 1,
+                    dialogVisible: true,
+                    SelectYesnoPromptKind.Teleport,
+                    prompt).Outcome);
+
+            now += RespawnNotificationRecoveryPolicy.RetryDelayMs;
+
+            Assert.Equal(
+                RespawnPromptAttemptOutcome.TimedOut,
+                policy.ObservePrompt(
+                    now,
+                    dialogVisible: true,
+                    SelectYesnoPromptKind.Teleport,
+                    prompt).Outcome);
         }
 
         Assert.Equal(
@@ -152,5 +232,61 @@ public sealed class RespawnNotificationRecoveryPolicyTests
         Assert.Equal(
             RespawnNotificationRecoveryAction.ClickNo,
             policy.GetNextAction(now + RespawnNotificationRecoveryPolicy.BurstBackoffMs, SelectYesnoPromptKind.Teleport, true, true));
+    }
+
+    [Fact]
+    public void ReturnCanBeAcceptedOnlyAfterTeleportDialogChanges()
+    {
+        var policy = new RespawnNotificationRecoveryPolicy();
+        const long now = 1000;
+        const string teleportPrompt = "Teleport?";
+        const string returnPrompt = "Return to your home point?";
+
+        policy.RecordPromptAttempt(
+            callbackDispatched: true,
+            SelectYesnoPromptKind.Teleport,
+            teleportPrompt,
+            responseYes: false,
+            now);
+
+        Assert.Equal(
+            RespawnNotificationRecoveryAction.None,
+            policy.GetNextAction(
+                now + 100,
+                SelectYesnoPromptKind.Teleport,
+                reviveNotificationVisible: true,
+                teleportNotificationVisible: false));
+
+        var confirmation = policy.ObservePrompt(
+            now + 100,
+            dialogVisible: true,
+            SelectYesnoPromptKind.DeathReturn,
+            returnPrompt);
+
+        Assert.Equal(RespawnPromptAttemptOutcome.Confirmed, confirmation.Outcome);
+        Assert.False(confirmation.Attempt.ResponseYes);
+        Assert.Equal(
+            RespawnNotificationRecoveryAction.ClickYes,
+            policy.GetNextAction(
+                now + 100,
+                SelectYesnoPromptKind.DeathReturn,
+                reviveNotificationVisible: true,
+                teleportNotificationVisible: false));
+
+        policy.RecordPromptAttempt(
+            callbackDispatched: true,
+            SelectYesnoPromptKind.DeathReturn,
+            returnPrompt,
+            responseYes: true,
+            now + 100);
+
+        var accepted = policy.ObservePrompt(
+            now + 200,
+            dialogVisible: false,
+            visiblePromptKind: null,
+            promptText: string.Empty);
+
+        Assert.Equal(RespawnPromptAttemptOutcome.Confirmed, accepted.Outcome);
+        Assert.True(accepted.Attempt.ResponseYes);
     }
 }
