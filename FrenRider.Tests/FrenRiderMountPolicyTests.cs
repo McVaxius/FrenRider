@@ -1,3 +1,4 @@
+using FrenRider.Models;
 using FrenRider.Services;
 
 namespace FrenRider.Tests;
@@ -34,6 +35,146 @@ public sealed class FrenRiderMountPolicyTests
             xzDistance: 4f,
             chaseDistance: 2f,
             clingDistance: 5f));
+    }
+
+    [Fact]
+    public void DefaultFarChaseDelayBlocksImmediateStart()
+    {
+        var config = new CharacterConfig();
+        var pendingSince = FrenRiderMountPolicy.FarChaseDelayNotPendingMs;
+
+        Assert.False(FrenRiderMountPolicy.ShouldRequestFarChase(
+            currentlyRequested: false,
+            eligible: true,
+            xzDistance: 120f,
+            chaseDistance: 100f,
+            clingDistance: 5f,
+            delaySeconds: config.MountUpToChaseFrenDelaySeconds,
+            nowMs: 1000,
+            ref pendingSince));
+        Assert.Equal(30, config.MountUpToChaseFrenDelaySeconds);
+        Assert.Equal(1000, pendingSince);
+    }
+
+    [Fact]
+    public void ElapsedFarChaseDelayStartsChase()
+    {
+        var pendingSince = FrenRiderMountPolicy.FarChaseDelayNotPendingMs;
+
+        Assert.False(FrenRiderMountPolicy.ShouldRequestFarChase(
+            currentlyRequested: false,
+            eligible: true,
+            xzDistance: 120f,
+            chaseDistance: 100f,
+            clingDistance: 5f,
+            delaySeconds: 30,
+            nowMs: 1000,
+            ref pendingSince));
+
+        Assert.True(FrenRiderMountPolicy.ShouldRequestFarChase(
+            currentlyRequested: false,
+            eligible: true,
+            xzDistance: 120f,
+            chaseDistance: 100f,
+            clingDistance: 5f,
+            delaySeconds: 30,
+            nowMs: 31000,
+            ref pendingSince));
+    }
+
+    [Fact]
+    public void LostFarChaseEligibilityResetsDelay()
+    {
+        var pendingSince = FrenRiderMountPolicy.FarChaseDelayNotPendingMs;
+
+        Assert.False(FrenRiderMountPolicy.ShouldRequestFarChase(
+            currentlyRequested: false,
+            eligible: true,
+            xzDistance: 120f,
+            chaseDistance: 100f,
+            clingDistance: 5f,
+            delaySeconds: 30,
+            nowMs: 1000,
+            ref pendingSince));
+
+        Assert.False(FrenRiderMountPolicy.ShouldRequestFarChase(
+            currentlyRequested: false,
+            eligible: true,
+            xzDistance: 99f,
+            chaseDistance: 100f,
+            clingDistance: 5f,
+            delaySeconds: 30,
+            nowMs: 5000,
+            ref pendingSince));
+        Assert.Equal(FrenRiderMountPolicy.FarChaseDelayNotPendingMs, pendingSince);
+
+        Assert.False(FrenRiderMountPolicy.ShouldRequestFarChase(
+            currentlyRequested: false,
+            eligible: true,
+            xzDistance: 120f,
+            chaseDistance: 100f,
+            clingDistance: 5f,
+            delaySeconds: 30,
+            nowMs: 31000,
+            ref pendingSince));
+        Assert.Equal(31000, pendingSince);
+    }
+
+    [Fact]
+    public void ZeroFarChaseDelayPreservesImmediateStart()
+    {
+        var pendingSince = FrenRiderMountPolicy.FarChaseDelayNotPendingMs;
+
+        Assert.True(FrenRiderMountPolicy.ShouldRequestFarChase(
+            currentlyRequested: false,
+            eligible: true,
+            xzDistance: 120f,
+            chaseDistance: 100f,
+            clingDistance: 5f,
+            delaySeconds: 0,
+            nowMs: 1000,
+            ref pendingSince));
+        Assert.Equal(FrenRiderMountPolicy.FarChaseDelayNotPendingMs, pendingSince);
+    }
+
+    [Theory]
+    [InlineData(-1, 0)]
+    [InlineData(301, 300)]
+    public void CharacterConfigClampsFarChaseDelay(int input, int expected)
+    {
+        var config = new CharacterConfig
+        {
+            MountUpToChaseFrenDelaySeconds = input,
+        };
+
+        Assert.Equal(expected, config.MountUpToChaseFrenDelaySeconds);
+        Assert.Equal(expected, config.Clone().MountUpToChaseFrenDelaySeconds);
+    }
+
+    [Fact]
+    public void ActiveFarChaseWithDelayStillRetiresOnlyAtClingRange()
+    {
+        var pendingSince = FrenRiderMountPolicy.FarChaseDelayNotPendingMs;
+
+        Assert.True(FrenRiderMountPolicy.ShouldRequestFarChase(
+            currentlyRequested: true,
+            eligible: true,
+            xzDistance: 50f,
+            chaseDistance: 100f,
+            clingDistance: 5f,
+            delaySeconds: 30,
+            nowMs: 1000,
+            ref pendingSince));
+
+        Assert.False(FrenRiderMountPolicy.ShouldRequestFarChase(
+            currentlyRequested: true,
+            eligible: true,
+            xzDistance: 5f,
+            chaseDistance: 100f,
+            clingDistance: 5f,
+            delaySeconds: 30,
+            nowMs: 1000,
+            ref pendingSince));
     }
 
     [Fact]

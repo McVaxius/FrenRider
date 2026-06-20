@@ -57,8 +57,6 @@ public class FollowService
     private bool chaseSettingsInitialized;
     private bool lastChaseEnabled;
     private float lastChaseDistance;
-    private int lastChaseDelaySeconds;
-    private long farChaseDelayEligibleSinceMs = FrenRiderMountPolicy.FarChaseDelayNotPendingMs;
 
     // Stuck detection: record position every 5s, check per-axis movement < 2y
     private Vector3 stuckCheckPosition;
@@ -122,8 +120,6 @@ public class FollowService
 
     public void PreemptFarChase(string reason)
     {
-        ResetFarChaseDelay();
-
         if (!IsFarChaseRequested)
             return;
 
@@ -155,8 +151,7 @@ public class FollowService
     {
         var config = plugin.ConfigManager.GetActiveConfig();
         var chaseDistance = GetChaseDistance(config);
-        var chaseDelaySeconds = GetChaseDelaySeconds(config);
-        if (ChaseSettingsChanged(config.MountUpToChaseFren, chaseDistance, chaseDelaySeconds))
+        if (ChaseSettingsChanged(config.MountUpToChaseFren, chaseDistance))
         {
             PreemptFarChase("settings changed");
             StopAllFollowing(config, "far chase settings changed");
@@ -286,9 +281,8 @@ public class FollowService
         FarChaseXzDistance = localPlayer == null
             ? 0f
             : GetXzDistance(localPlayer.Position, fren.Position);
-        var now = Environment.TickCount64;
 
-        UpdateFarChaseRequest(config, fren, FarChaseXzDistance, distance, maxDist, clingDist, chaseDelaySeconds, now);
+        UpdateFarChaseRequest(config, fren, FarChaseXzDistance, distance, maxDist, clingDist);
 
         var resolvedClingType = GetMovementClingType(config);
         if (resolvedClingType != 2 && bossModFollowActive)
@@ -302,6 +296,7 @@ public class FollowService
         var selfMounting = Plugin.Condition[ConditionFlag.Mounting71];
         var selfFlying = IsSelfFlightNavActive();
         var frenFlying = fren.IsFlying;
+        var now = Environment.TickCount64;
         if (!selfMounted || (!frenFlying && !IsFarChaseRequested))
             ResetFlyingTakeoffState();
 
@@ -443,27 +438,21 @@ public class FollowService
     private int GetMovementClingType(CharacterConfig config)
         => IsFarChaseRequested ? 0 : GetResolvedClingType(config);
 
-    private bool ChaseSettingsChanged(bool enabled, float distance, int delaySeconds)
+    private bool ChaseSettingsChanged(bool enabled, float distance)
     {
         if (!chaseSettingsInitialized)
         {
             chaseSettingsInitialized = true;
             lastChaseEnabled = enabled;
             lastChaseDistance = distance;
-            lastChaseDelaySeconds = delaySeconds;
             return false;
         }
 
-        if (lastChaseEnabled == enabled
-            && lastChaseDistance.Equals(distance)
-            && lastChaseDelaySeconds == delaySeconds)
-        {
+        if (lastChaseEnabled == enabled && lastChaseDistance.Equals(distance))
             return false;
-        }
 
         lastChaseEnabled = enabled;
         lastChaseDistance = distance;
-        lastChaseDelaySeconds = delaySeconds;
         return true;
     }
 
@@ -473,16 +462,13 @@ public class FollowService
         float xzDistance,
         float distance,
         float maxDistance,
-        float clingDistance,
-        int delaySeconds,
-        long now)
+        float clingDistance)
     {
         var eligible = config.Enabled
             && config.MountUpToChaseFren
             && zoneService.CurrentZone == ZoneType.Overworld
             && !Plugin.Condition[ConditionFlag.BoundByDuty]
             && !Plugin.Condition[ConditionFlag.BoundByDuty56]
-            && !IsLoadingOrBetweenAreas()
             && !Plugin.Condition[ConditionFlag.InCombat]
             && !Plugin.Condition[ConditionFlag.Unconscious]
             && !config.Formation
@@ -494,10 +480,7 @@ public class FollowService
             eligible,
             xzDistance,
             GetChaseDistance(config),
-            clingDistance,
-            delaySeconds,
-            now,
-            ref farChaseDelayEligibleSinceMs);
+            clingDistance);
 
         if (requested == IsFarChaseRequested)
             return;
@@ -514,9 +497,6 @@ public class FollowService
 
     private void SetFarChaseRequested(bool requested, string reason)
     {
-        if (!requested)
-            ResetFarChaseDelay();
-
         if (IsFarChaseRequested == requested)
             return;
 
@@ -540,12 +520,6 @@ public class FollowService
         => float.IsFinite(config.MountUpToChaseFrenDistance)
             ? Math.Max(1f, config.MountUpToChaseFrenDistance)
             : 1f;
-
-    private static int GetChaseDelaySeconds(CharacterConfig config)
-        => Math.Clamp(config.MountUpToChaseFrenDelaySeconds, 0, 300);
-
-    private void ResetFarChaseDelay()
-        => farChaseDelayEligibleSinceMs = FrenRiderMountPolicy.FarChaseDelayNotPendingMs;
 
     public static float GetXzDistance(Vector3 first, Vector3 second)
     {

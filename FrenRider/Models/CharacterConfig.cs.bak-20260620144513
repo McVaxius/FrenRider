@@ -11,7 +11,6 @@ public class CharacterConfig
 
     private int respawnOutsideDutiesDelaySeconds = 60;
     private float mountUpToChaseFrenDistance = 100f;
-    private int mountUpToChaseFrenDelaySeconds = 30;
 
     // --- Party / Friend ---
     public string FrenName { get; set; } = "";
@@ -29,11 +28,6 @@ public class CharacterConfig
     {
         get => mountUpToChaseFrenDistance;
         set => mountUpToChaseFrenDistance = float.IsFinite(value) ? Math.Max(1f, value) : 1f;
-    }
-    public int MountUpToChaseFrenDelaySeconds
-    {
-        get => mountUpToChaseFrenDelaySeconds;
-        set => mountUpToChaseFrenDelaySeconds = Math.Clamp(value, 0, 300);
     }
     public string FoolFlier { get; set; } = "Company Chocobo";
     public string FulfType { get; set; } = "unchanged";
@@ -146,7 +140,6 @@ public class CharacterConfig
             RespawnOutsideDutiesDelaySeconds = RespawnOutsideDutiesDelaySeconds,
             MountUpToChaseFren = MountUpToChaseFren,
             MountUpToChaseFrenDistance = MountUpToChaseFrenDistance,
-            MountUpToChaseFrenDelaySeconds = MountUpToChaseFrenDelaySeconds,
             FoolFlier = FoolFlier,
             FulfType = FulfType,
             ForceGysahl = ForceGysahl,

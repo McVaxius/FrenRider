@@ -277,7 +277,6 @@ public class ConfigManager
                 target.RespawnOutsideDutiesDelaySeconds = source.RespawnOutsideDutiesDelaySeconds;
                 target.MountUpToChaseFren = source.MountUpToChaseFren;
                 target.MountUpToChaseFrenDistance = source.MountUpToChaseFrenDistance;
-                target.MountUpToChaseFrenDelaySeconds = source.MountUpToChaseFrenDelaySeconds;
                 target.FoolFlier = source.FoolFlier;
                 target.ForceGysahl = source.ForceGysahl;
                 target.CompanionStrat = source.CompanionStrat;

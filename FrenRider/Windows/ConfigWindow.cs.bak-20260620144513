@@ -503,24 +503,7 @@ public class ConfigWindow : Window, IDisposable
             configManager.SaveCurrentAccount();
         }
         ImGui.SameLine();
-        ImGui.Text("after");
-        ImGui.SameLine();
-
-        var chaseDelay = Math.Clamp(config.MountUpToChaseFrenDelaySeconds, 0, 300);
-        if (chaseDelay != config.MountUpToChaseFrenDelaySeconds)
-        {
-            config.MountUpToChaseFrenDelaySeconds = chaseDelay;
-            configManager.SaveCurrentAccount();
-        }
-
-        ImGui.SetNextItemWidth(100);
-        if (ImGui.InputInt("seconds##MountUpToChaseFrenDelaySeconds", ref chaseDelay))
-        {
-            config.MountUpToChaseFrenDelaySeconds = Math.Clamp(chaseDelay, 0, 300);
-            configManager.SaveCurrentAccount();
-        }
-        ImGui.SameLine();
-        HelpMarker("Outside duties, summon your configured own mount and fly toward a visible fren after horizontal XZ distance exceeds this threshold continuously for the configured delay. Existing zone-specific Max Follow Distance still applies. Distance minimum: 1y. Delay range: 0-300 seconds; 0 means immediate. Defaults: 100y and 30 seconds.");
+        HelpMarker("Outside duties, summon your configured own mount and fly toward a visible fren when horizontal XZ distance exceeds this threshold. Existing zone-specific Max Follow Distance still applies. Minimum: 1y. Default: 100y.");
 
         // Mount Name (searchable dropdown from game data)
         ImGui.Text("Mount Name (if flying solo)");

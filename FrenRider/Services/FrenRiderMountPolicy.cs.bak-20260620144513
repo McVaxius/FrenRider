@@ -19,8 +19,6 @@ public enum FrenMountCorrectionAction
 
 public static class FrenRiderMountPolicy
 {
-    public const long FarChaseDelayNotPendingMs = -1;
-
     public static bool ShouldRequestFarChase(
         bool currentlyRequested,
         bool eligible,
@@ -35,48 +33,6 @@ public static class FrenRiderMountPolicy
             ? clingDistance
             : MathF.Max(chaseDistance, clingDistance);
         return xzDistance > retirementDistance;
-    }
-
-    public static bool ShouldRequestFarChase(
-        bool currentlyRequested,
-        bool eligible,
-        float xzDistance,
-        float chaseDistance,
-        float clingDistance,
-        int delaySeconds,
-        long nowMs,
-        ref long delayEligibleSinceMs)
-    {
-        if (currentlyRequested)
-        {
-            delayEligibleSinceMs = FarChaseDelayNotPendingMs;
-            return ShouldRequestFarChase(
-                currentlyRequested,
-                eligible,
-                xzDistance,
-                chaseDistance,
-                clingDistance);
-        }
-
-        var initialStartEligible = eligible
-            && xzDistance > MathF.Max(chaseDistance, clingDistance);
-        if (!initialStartEligible)
-        {
-            delayEligibleSinceMs = FarChaseDelayNotPendingMs;
-            return false;
-        }
-
-        var clampedDelaySeconds = Math.Clamp(delaySeconds, 0, 300);
-        if (clampedDelaySeconds == 0)
-        {
-            delayEligibleSinceMs = FarChaseDelayNotPendingMs;
-            return true;
-        }
-
-        if (delayEligibleSinceMs == FarChaseDelayNotPendingMs)
-            delayEligibleSinceMs = nowMs;
-
-        return nowMs - delayEligibleSinceMs >= clampedDelaySeconds * 1000L;
     }
 
     public static FrenMountPolicy GetNormalPolicy(
