@@ -28,6 +28,121 @@ public class ConfigManager
         WriteIndented = true,
     };
 
+    private sealed record ConfigCopySetting(string Label, Action<CharacterConfig, CharacterConfig> Copy);
+
+    private sealed record ConfigCopyTab(string Name, string[] Aliases, ConfigCopySetting[] Settings);
+
+    private static readonly ConfigCopyTab[] DefaultSyncTabs =
+    {
+        new(
+            "Profile",
+            new[] { "Profile", "Party" },
+            new[]
+            {
+                Setting("Fren Name", (source, target) => target.FrenName = source.FrenName),
+                Setting("Fly You Fools", (source, target) => target.FlyYouFools = source.FlyYouFools),
+                Setting("Try Teleport to Fren When Out of Zone", (source, target) => target.TryTeleportToFrenWhenOutOfZone = source.TryTeleportToFrenWhenOutOfZone),
+                Setting("Teleport Delay", (source, target) => target.TeleportToFrenDelaySeconds = source.TeleportToFrenDelaySeconds),
+                Setting("Respawn after death outside duties", CopyRespawnOutsideDuties),
+                Setting("Mount-up to chase fren", CopyMountUpToChaseFren),
+                Setting("Mount Name", (source, target) => target.FoolFlier = source.FoolFlier),
+                Setting("Summon Chocobo", (source, target) => target.ForceGysahl = source.ForceGysahl),
+                Setting("Companion Stance", (source, target) => target.CompanionStrat = source.CompanionStrat),
+                Setting("Update Interval", (source, target) => target.UpdateInterval = source.UpdateInterval),
+                Setting("Auto Discard", (source, target) => target.EnableAutoDiscard = source.EnableAutoDiscard),
+            }),
+        new(
+            "Follow",
+            new[] { "Follow", "Distance" },
+            new[]
+            {
+                Setting("Cling Distance", (source, target) => target.Cling = source.Cling),
+                Setting("Cling Type", (source, target) => target.ClingType = source.ClingType),
+                Setting("Cling Type (Duty)", (source, target) => target.ClingTypeDuty = source.ClingTypeDuty),
+                Setting("Social Distance", (source, target) => target.SocialDistancing = source.SocialDistancing),
+                Setting("Social Distance Indoors", (source, target) => target.SocialDistancingIndoors = source.SocialDistancingIndoors),
+                Setting("X Wiggle", (source, target) => target.SocialDistanceXWiggle = source.SocialDistanceXWiggle),
+                Setting("Z Wiggle", (source, target) => target.SocialDistanceZWiggle = source.SocialDistanceZWiggle),
+                Setting("Max Follow Distance", (source, target) => target.MaxBistance = source.MaxBistance),
+                Setting("Max Follow Distance (Foray)", (source, target) => target.MaxBistanceForay = source.MaxBistanceForay),
+                Setting("DD Extra Distance", (source, target) => target.DDDistance = source.DDDistance),
+                Setting("FATE Extra Distance", (source, target) => target.FDistance = source.FDistance),
+                Setting("Auto Sync FATE", (source, target) => target.AutoSyncFate = source.AutoSyncFate),
+                Setting("Formation Following", (source, target) => target.Formation = source.Formation),
+                Setting("Follow in Combat", (source, target) => target.FollowInCombat = source.FollowInCombat),
+                Setting("Harmonized Cling Reset Ticks", (source, target) => target.HClingReset = source.HClingReset),
+            }),
+        new(
+            "Combat",
+            new[] { "Combat" },
+            new[]
+            {
+                Setting("Configure rotation preset manually", (source, target) => target.ConfigureRotationPresetManually = source.ConfigureRotationPresetManually),
+                Setting("BM Rotation Preset", (source, target) => target.AutoRotationType = source.AutoRotationType),
+                Setting("BM Rotation Preset (DD)", (source, target) => target.AutoRotationTypeDD = source.AutoRotationTypeDD),
+                Setting("BM Rotation Preset (FATE)", (source, target) => target.AutoRotationTypeFATE = source.AutoRotationTypeFATE),
+                Setting("Rotation Plugin", (source, target) => target.RotationPlugin = source.RotationPlugin),
+                Setting("Rotation Plugin (Foray)", (source, target) => target.RotationPluginForay = source.RotationPluginForay),
+                Setting("Force BossMod preset regardless of rotation", (source, target) => target.ForceBossModPresetRegardlessOfRotation = source.ForceBossModPresetRegardlessOfRotation),
+                Setting("BossMod AI", (source, target) => target.BossModAI = source.BossModAI),
+                Setting("Positional", (source, target) => target.PositionalInCombat = source.PositionalInCombat),
+                Setting("Max AI Distance", (source, target) => target.MaxAIDistance = source.MaxAIDistance),
+                Setting("LB Threshold %", (source, target) => target.LimitPct = source.LimitPct),
+                Setting("RSR Rotation Type", (source, target) => target.RotationType = source.RotationType),
+                Setting("BMR reduce activation range for outdoor areas", (source, target) => target.BmrReduceActivationRangeForOutdoorAreas = source.BmrReduceActivationRangeForOutdoorAreas),
+                Setting("BMR Disable Hunt Modules", (source, target) => target.BmrDisableHuntModules = source.BmrDisableHuntModules),
+                Setting("BMR Disable Queen Lunatender", (source, target) => target.BmrDisableQueenLunatender = source.BmrDisableQueenLunatender),
+            }),
+        new(
+            "Duty",
+            new[] { "Duty", "Ads", "Duty / ADS / Exit" },
+            new[]
+            {
+                Setting("ADS Legacy Handoff", CopyAdsLegacySettings),
+                Setting("ADS Solo", CopyAdsDutyFamily(AdsDutyCategory.Solo)),
+                Setting("ADS 4-Man", CopyAdsDutyFamily(AdsDutyCategory.FourMan)),
+                Setting("ADS 8-Man", CopyAdsDutyFamily(AdsDutyCategory.EightMan)),
+                Setting("ADS Alliance", CopyAdsDutyFamily(AdsDutyCategory.Alliance)),
+                Setting("ADS Guild Hest", CopyAdsDutyFamily(AdsDutyCategory.GuildHest)),
+                Setting("ADS Deep Dungeon", CopyAdsDutyFamily(AdsDutyCategory.DeepDungeon)),
+                Setting("ADS Treasure Dungeon", CopyAdsDutyFamily(AdsDutyCategory.TreasureDungeon)),
+                Setting("ADS Other", CopyAdsDutyFamily(AdsDutyCategory.Other)),
+                Setting("ADS Chest Opening", (source, target) => target.AdsEnableChestOpening = source.AdsEnableChestOpening),
+                Setting("ADS Preset Selection", (source, target) => target.AdsPresetSelection = source.AdsPresetSelection),
+                Setting("ADS Duty Migration State", (source, target) => target.AdsDutyFamilySettingsMigrated = source.AdsDutyFamilySettingsMigrated),
+                Setting("ADS Exit Method", (source, target) => target.UseAdsLeaveAfterAdsDuty = source.UseAdsLeaveAfterAdsDuty),
+                Setting("Invite Whitelist", (source, target) => target.InviteWhitelist = new List<string>(source.InviteWhitelist)),
+                Setting("Raise offers", (source, target) => target.RaiseOfferAutoAccept = source.RaiseOfferAutoAccept),
+                Setting("Teleport offers", (source, target) => target.TeleportOfferAutoAccept = source.TeleportOfferAutoAccept),
+                Setting("Party invites", (source, target) => target.PartyInviteAutoAccept = source.PartyInviteAutoAccept),
+                Setting("Exit Method", CopyExitMethod),
+                Setting("Duty-end delay", (source, target) => target.ExitAfterDutySeconds = source.ExitAfterDutySeconds),
+            }),
+        new(
+            "Automation",
+            new[] { "Automation", "Misc" },
+            new[]
+            {
+                Setting("Loot Type", (source, target) => target.FulfType = source.FulfType),
+                Setting("Food", CopyFood),
+                Setting("Use HQ food", (source, target) => target.FeedMeUseHighQuality = source.FeedMeUseHighQuality),
+                Setting("Search for Food if Depleted", (source, target) => target.FeedMeSearch = source.FeedMeSearch),
+                Setting("XP Item", (source, target) => target.XpItem = source.XpItem),
+                Setting("Repair Mode", (source, target) => target.Repair = source.Repair),
+                Setting("Repair At % Durability", (source, target) => target.TornClothes = source.TornClothes),
+                Setting("Enable Auto Desynth", (source, target) => target.EnableAutoDesynth = source.EnableAutoDesynth),
+                Setting("Echo Messages", (source, target) => target.SpamPrinter = source.SpamPrinter),
+                Setting("Debug Mode", (source, target) => target.DebugMode = source.DebugMode),
+                Setting("Idle Mode", (source, target) => target.IdleActionMode = source.IdleActionMode),
+                Setting("Idle Command", (source, target) => target.IdleAction = source.IdleAction),
+                Setting("List Source", (source, target) => target.IdleListMode = source.IdleListMode),
+                Setting("Custom Idle List", (source, target) => target.CustomIdleList = CharacterConfig.CloneCustomIdleList(source.CustomIdleList)),
+                Setting("Idle Ticks Before Action", (source, target) => target.IdleTicksBeforeAction = source.IdleTicksBeforeAction),
+                Setting("Auto Discard", (source, target) => target.EnableAutoDiscard = source.EnableAutoDiscard),
+                Setting("Push Presets On Enable", (source, target) => target.AutorotPushOnEnable = source.AutorotPushOnEnable),
+            }),
+    };
+
     public ConfigManager(IDalamudPluginInterface pluginInterface, IPluginLog log)
     {
         this.pluginInterface = pluginInterface;
@@ -37,6 +152,84 @@ public class ConfigManager
             Directory.CreateDirectory(configDir);
 
         LoadAllAccounts();
+    }
+
+    public static bool CanSyncDefaultTab(string tabName)
+        => FindTab(tabName) != null;
+
+    private static ConfigCopySetting Setting(string label, Action<CharacterConfig, CharacterConfig> copy)
+        => new(label, copy);
+
+    private static void CopyRespawnOutsideDuties(CharacterConfig source, CharacterConfig target)
+    {
+        target.RespawnOutsideDuties = source.RespawnOutsideDuties;
+        target.RespawnOutsideDutiesDelaySeconds = source.RespawnOutsideDutiesDelaySeconds;
+    }
+
+    private static void CopyMountUpToChaseFren(CharacterConfig source, CharacterConfig target)
+    {
+        target.MountUpToChaseFren = source.MountUpToChaseFren;
+        target.MountUpToChaseFrenDistance = source.MountUpToChaseFrenDistance;
+        target.MountUpToChaseFrenDelaySeconds = source.MountUpToChaseFrenDelaySeconds;
+    }
+
+    private static void CopyAdsLegacySettings(CharacterConfig source, CharacterConfig target)
+    {
+        target.UseAdsIfAvailable = source.UseAdsIfAvailable;
+        target.AdsMaturityThreshold = source.AdsMaturityThreshold;
+    }
+
+    private static Action<CharacterConfig, CharacterConfig> CopyAdsDutyFamily(AdsDutyCategory category)
+        => (source, target) =>
+        {
+            var settings = source.GetAdsDutyFamilySettings(category);
+            target.EnsureAdsDutyFamilySettingsInitialized();
+            target.SetAdsDutyFamilySettings(category, settings.Enabled, settings.MaturityThreshold);
+        };
+
+    private static void CopyExitMethod(CharacterConfig source, CharacterConfig target)
+    {
+        target.UseAdsLeaveAfterAdsDuty = source.UseAdsLeaveAfterAdsDuty;
+        target.ExitAfterDutyEnds = source.ExitAfterDutyEnds;
+        target.LeaveWhenAllLeft = source.LeaveWhenAllLeft;
+        target.NormalizeExitMethodSelection();
+    }
+
+    private static void CopyFood(CharacterConfig source, CharacterConfig target)
+    {
+        target.FeedMeItemId = source.FeedMeItemId;
+        target.FeedMeItem = source.FeedMeItem;
+    }
+
+    private static ConfigCopyTab? FindTab(string tabName)
+        => DefaultSyncTabs.FirstOrDefault(tab =>
+            tab.Aliases.Any(alias => alias.Equals(tabName, StringComparison.OrdinalIgnoreCase)));
+
+    private static ConfigCopySetting? FindSetting(string label)
+        => DefaultSyncTabs
+            .SelectMany(tab => tab.Settings)
+            .FirstOrDefault(setting => setting.Label.Equals(label, StringComparison.OrdinalIgnoreCase));
+
+    private static IEnumerable<ConfigCopySetting> GetUniqueDefaultSyncSettings()
+    {
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var setting in DefaultSyncTabs.SelectMany(tab => tab.Settings))
+        {
+            if (seen.Add(setting.Label))
+                yield return setting;
+        }
+    }
+
+    private static bool ApplyTabSettings(CharacterConfig source, CharacterConfig target, string tabName)
+    {
+        var tab = FindTab(tabName);
+        if (tab == null)
+            return false;
+
+        foreach (var setting in tab.Settings)
+            setting.Copy(source, target);
+
+        return true;
     }
 
     public IReadOnlyDictionary<string, AccountConfig> Accounts => accounts;
@@ -253,6 +446,95 @@ public class ConfigManager
         SaveCurrentAccount();
     }
 
+    public int ApplyDefaultToAllCharacters()
+    {
+        var account = GetCurrentAccount();
+        if (account == null) return 0;
+
+        var count = ApplyDefaultToAllCharacters(account);
+        if (count > 0)
+            SaveCurrentAccount();
+
+        log.Information($"[ConfigManager] Synced DEFAULT CONFIG to {count} character profiles in account {CurrentAccountId}");
+        return count;
+    }
+
+    public int ApplyDefaultTabToAllCharacters(string tabName)
+    {
+        var account = GetCurrentAccount();
+        if (account == null) return 0;
+
+        var count = ApplyDefaultTabToAllCharacters(account, tabName);
+        if (count > 0)
+            SaveCurrentAccount();
+
+        log.Information($"[ConfigManager] Synced DEFAULT CONFIG tab '{tabName}' to {count} character profiles in account {CurrentAccountId}");
+        return count;
+    }
+
+    public int ApplyDefaultSettingToAllCharacters(string label)
+    {
+        var setting = FindSetting(label);
+        if (setting == null)
+        {
+            log.Warning($"[ConfigManager] No DEFAULT CONFIG sync mapping found for setting '{label}'");
+            return 0;
+        }
+
+        return ApplyDefaultSettingToAllCharacters(label, setting.Copy);
+    }
+
+    public int ApplyDefaultSettingToAllCharacters(string label, Action<CharacterConfig, CharacterConfig> copy)
+    {
+        var account = GetCurrentAccount();
+        if (account == null) return 0;
+
+        var count = ApplyDefaultSettingToAllCharacters(account, copy);
+        if (count > 0)
+            SaveCurrentAccount();
+
+        log.Information($"[ConfigManager] Synced DEFAULT CONFIG setting '{label}' to {count} character profiles in account {CurrentAccountId}");
+        return count;
+    }
+
+    internal static int ApplyDefaultToAllCharacters(AccountConfig account)
+    {
+        foreach (var target in account.Characters.Values)
+        {
+            foreach (var setting in GetUniqueDefaultSyncSettings())
+                setting.Copy(account.DefaultConfig, target);
+        }
+
+        return account.Characters.Count;
+    }
+
+    internal static int ApplyDefaultTabToAllCharacters(AccountConfig account, string tabName)
+    {
+        var tab = FindTab(tabName);
+        if (tab == null)
+            return 0;
+
+        foreach (var target in account.Characters.Values)
+        {
+            foreach (var setting in tab.Settings)
+                setting.Copy(account.DefaultConfig, target);
+        }
+
+        return account.Characters.Count;
+    }
+
+    internal static int ApplyDefaultSettingToAllCharacters(
+        AccountConfig account,
+        Action<CharacterConfig, CharacterConfig> copy)
+    {
+        ArgumentNullException.ThrowIfNull(copy);
+
+        foreach (var target in account.Characters.Values)
+            copy(account.DefaultConfig, target);
+
+        return account.Characters.Count;
+    }
+
     public void ResetCharacterTabToDefault(string charKey, string tabName)
     {
         var account = GetCurrentAccount();
@@ -264,114 +546,8 @@ public class ConfigManager
         if (target == null) return;
 
         var source = string.IsNullOrEmpty(charKey) ? new CharacterConfig() : account.DefaultConfig;
-
-        switch (tabName)
-        {
-            case "Profile":
-            case "Party":
-                target.FrenName = source.FrenName;
-                target.FlyYouFools = source.FlyYouFools;
-                target.TryTeleportToFrenWhenOutOfZone = source.TryTeleportToFrenWhenOutOfZone;
-                target.TeleportToFrenDelaySeconds = source.TeleportToFrenDelaySeconds;
-                target.RespawnOutsideDuties = source.RespawnOutsideDuties;
-                target.RespawnOutsideDutiesDelaySeconds = source.RespawnOutsideDutiesDelaySeconds;
-                target.MountUpToChaseFren = source.MountUpToChaseFren;
-                target.MountUpToChaseFrenDistance = source.MountUpToChaseFrenDistance;
-                target.MountUpToChaseFrenDelaySeconds = source.MountUpToChaseFrenDelaySeconds;
-                target.FoolFlier = source.FoolFlier;
-                target.ForceGysahl = source.ForceGysahl;
-                target.CompanionStrat = source.CompanionStrat;
-                target.UpdateInterval = source.UpdateInterval;
-                target.EnableAutoDiscard = source.EnableAutoDiscard;
-                break;
-            case "Follow":
-            case "Distance":
-                target.Cling = source.Cling;
-                target.ClingType = source.ClingType;
-                target.ClingTypeDuty = source.ClingTypeDuty;
-                target.SocialDistancing = source.SocialDistancing;
-                target.SocialDistancingIndoors = source.SocialDistancingIndoors;
-                target.SocialDistanceXWiggle = source.SocialDistanceXWiggle;
-                target.SocialDistanceZWiggle = source.SocialDistanceZWiggle;
-                target.MaxBistance = source.MaxBistance;
-                target.MaxBistanceForay = source.MaxBistanceForay;
-                target.DDDistance = source.DDDistance;
-                target.FollowInCombat = source.FollowInCombat;
-                target.FDistance = source.FDistance;
-                target.Formation = source.Formation;
-                target.HClingReset = source.HClingReset;
-                break;
-            case "Combat":
-                target.ConfigureRotationPresetManually = source.ConfigureRotationPresetManually;
-                target.AutoRotationType = source.AutoRotationType;
-                target.AutoRotationTypeDD = source.AutoRotationTypeDD;
-                target.AutoRotationTypeFATE = source.AutoRotationTypeFATE;
-                target.RotationPlugin = source.RotationPlugin;
-                target.RotationPluginForay = source.RotationPluginForay;
-                target.ForceBossModPresetRegardlessOfRotation = source.ForceBossModPresetRegardlessOfRotation;
-                target.BossModAI = source.BossModAI;
-                target.PositionalInCombat = source.PositionalInCombat;
-                target.MaxAIDistance = source.MaxAIDistance;
-                target.LimitPct = source.LimitPct;
-                target.RotationType = source.RotationType;
-                target.BmrReduceActivationRangeForOutdoorAreas = source.BmrReduceActivationRangeForOutdoorAreas;
-                target.BmrDisableHuntModules = source.BmrDisableHuntModules;
-                target.BmrDisableQueenLunatender = source.BmrDisableQueenLunatender;
-                break;
-            case "Duty":
-            case "Ads":
-                target.UseAdsIfAvailable = source.UseAdsIfAvailable;
-                target.AdsMaturityThreshold = source.AdsMaturityThreshold;
-                target.AdsDutyFamilySettingsMigrated = source.AdsDutyFamilySettingsMigrated;
-                target.AdsSoloEnabled = source.AdsSoloEnabled;
-                target.AdsSoloMaturityThreshold = source.AdsSoloMaturityThreshold;
-                target.AdsFourManEnabled = source.AdsFourManEnabled;
-                target.AdsFourManMaturityThreshold = source.AdsFourManMaturityThreshold;
-                target.AdsEightManEnabled = source.AdsEightManEnabled;
-                target.AdsEightManMaturityThreshold = source.AdsEightManMaturityThreshold;
-                target.AdsAllianceEnabled = source.AdsAllianceEnabled;
-                target.AdsAllianceMaturityThreshold = source.AdsAllianceMaturityThreshold;
-                target.AdsGuildHestEnabled = source.AdsGuildHestEnabled;
-                target.AdsGuildHestMaturityThreshold = source.AdsGuildHestMaturityThreshold;
-                target.AdsDeepDungeonEnabled = source.AdsDeepDungeonEnabled;
-                target.AdsDeepDungeonMaturityThreshold = source.AdsDeepDungeonMaturityThreshold;
-                target.AdsTreasureDungeonEnabled = source.AdsTreasureDungeonEnabled;
-                target.AdsTreasureDungeonMaturityThreshold = source.AdsTreasureDungeonMaturityThreshold;
-                target.AdsOtherEnabled = source.AdsOtherEnabled;
-                target.AdsOtherMaturityThreshold = source.AdsOtherMaturityThreshold;
-                target.AdsEnableChestOpening = source.AdsEnableChestOpening;
-                target.AdsPresetSelection = source.AdsPresetSelection;
-                target.UseAdsLeaveAfterAdsDuty = source.UseAdsLeaveAfterAdsDuty;
-                target.InviteWhitelist = new List<string>(source.InviteWhitelist);
-                target.RaiseOfferAutoAccept = source.RaiseOfferAutoAccept;
-                target.TeleportOfferAutoAccept = source.TeleportOfferAutoAccept;
-                target.PartyInviteAutoAccept = source.PartyInviteAutoAccept;
-                target.ExitAfterDutyEnds = source.ExitAfterDutyEnds;
-                target.ExitAfterDutySeconds = source.ExitAfterDutySeconds;
-                target.LeaveWhenAllLeft = source.LeaveWhenAllLeft;
-                break;
-            case "Automation":
-            case "Misc":
-                target.FulfType = source.FulfType;
-                target.EnableAutoDiscard = source.EnableAutoDiscard;
-                target.FeedMeItemId = source.FeedMeItemId;
-                target.FeedMeItem = source.FeedMeItem;
-                target.FeedMeUseHighQuality = source.FeedMeUseHighQuality;
-                target.FeedMeSearch = source.FeedMeSearch;
-                target.XpItem = source.XpItem;
-                target.Repair = source.Repair;
-                target.TornClothes = source.TornClothes;
-                target.EnableAutoDesynth = source.EnableAutoDesynth;
-                target.SpamPrinter = source.SpamPrinter;
-                target.DebugMode = source.DebugMode;
-                target.IdleAction = source.IdleAction;
-                target.IdleActionMode = source.IdleActionMode;
-                target.IdleListMode = source.IdleListMode;
-                target.CustomIdleList = CharacterConfig.CloneCustomIdleList(source.CustomIdleList);
-                target.IdleTicksBeforeAction = source.IdleTicksBeforeAction;
-                target.AutorotPushOnEnable = source.AutorotPushOnEnable;
-                break;
-        }
+        if (!ApplyTabSettings(source, target, tabName))
+            return;
 
         SaveCurrentAccount();
     }

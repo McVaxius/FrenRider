@@ -231,6 +231,7 @@ public class ConfigWindow : Window, IDisposable
     private void DrawRightPanel(CharacterConfig config)
     {
         // --- Top bar: Krangle | Reset All (?) | Reset This (?) ---
+        var isDefaultConfig = IsDefaultConfigSelected();
         var krangleEnabled = configuration.KrangleEnabled;
         if (ImGui.Checkbox("Krangle", ref krangleEnabled))
         {
@@ -242,8 +243,38 @@ public class ConfigWindow : Window, IDisposable
 
         // Right-align the buttons
         var avail = ImGui.GetContentRegionAvail().X;
-        var buttonGroupWidth = 340f;
+        var buttonGroupWidth = isDefaultConfig ? 590f : 340f;
         ImGui.SameLine(ImGui.GetCursorPosX() + avail - buttonGroupWidth);
+
+        if (isDefaultConfig)
+        {
+            ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.2f, 0.45f, 0.7f, 1));
+            if (ImGui.Button("Everything Sync"))
+                ReportDefaultSync("all settings", configManager.ApplyDefaultToAllCharacters());
+            ImGui.PopStyleColor();
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("Copy DEFAULT CONFIG character-profile settings to every character profile in this account.");
+
+            ImGui.SameLine();
+            var canSyncCurrentTab = ConfigManager.CanSyncDefaultTab(currentTab);
+            if (!canSyncCurrentTab)
+                ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 0.5f);
+
+            ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.2f, 0.5f, 0.35f, 1));
+            if (ImGui.Button("Full Tab Sync") && canSyncCurrentTab)
+                ReportDefaultSync($"{GetCurrentTabDisplayName()} tab", configManager.ApplyDefaultTabToAllCharacters(currentTab));
+            ImGui.PopStyleColor();
+
+            if (!canSyncCurrentTab)
+                ImGui.PopStyleVar();
+
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip(canSyncCurrentTab
+                    ? "Copy this DEFAULT CONFIG tab to every character profile in this account."
+                    : "UI / About uses global settings and is not copied to character profiles.");
+
+            ImGui.SameLine();
+        }
 
         ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.6f, 0.2f, 0.2f, 1));
         if (ImGui.Button("Reset All"))
@@ -335,6 +366,7 @@ public class ConfigWindow : Window, IDisposable
         ImGui.Text("Fren Name");
         ImGui.SameLine();
         HelpMarker("Name of the party member to follow. Can be partial if unique.\nThe @Server part is cosmetic for display; targeting uses the name before @.\nNames are auto-capitalized. Select from party or type manually.");
+        DrawDefaultSettingSyncButton("Fren Name");
 
         if (configuration.KrangleEnabled)
         {
@@ -426,6 +458,8 @@ public class ConfigWindow : Window, IDisposable
         ImGui.SameLine();
         HelpMarker("If enabled, you will summon your own mount instead of pillion riding.\nUseful for flying zones.\n\n⚠️ IMPORTANT: This feature requires you to be grouped with your fren.\nIt will not work properly if ungrouped (won't jump into air to follow).");
 
+        DrawDefaultSettingSyncButton("Fly You Fools");
+
         var tryTeleport = config.TryTeleportToFrenWhenOutOfZone;
         if (ImGui.Checkbox("Try Teleport to Fren When Out of Zone", ref tryTeleport))
         {
@@ -434,6 +468,8 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("When enabled, FrenRider waits after your configured fren is still in party but no longer visible, then asks Lifestream to teleport to a random unlocked aetheryte in that zone.");
+
+        DrawDefaultSettingSyncButton("Try Teleport to Fren When Out of Zone");
 
         var teleportDelay = config.TeleportToFrenDelaySeconds;
         var clampedTeleportDelay = Math.Clamp(teleportDelay, 5, 300);
@@ -452,6 +488,8 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("Delay before opening the party window and teleporting. Allowed range: 5-300 seconds. Default: 30.");
+
+        DrawDefaultSettingSyncButton("Teleport Delay");
 
         var respawnOutsideDuties = config.RespawnOutsideDuties;
         if (ImGui.Checkbox("Respawn after death outside duties after", ref respawnOutsideDuties))
@@ -476,6 +514,8 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("After remaining continuously unconscious outside duties for this delay, open the Return prompt and accept it. Minimum: 1 second. Default: 60.");
+
+        DrawDefaultSettingSyncButton("Respawn after death outside duties");
 
         var mountUpToChaseFren = config.MountUpToChaseFren;
         if (ImGui.Checkbox("Mount-up to chase fren if >", ref mountUpToChaseFren))
@@ -522,10 +562,14 @@ public class ConfigWindow : Window, IDisposable
         ImGui.SameLine();
         HelpMarker("Outside duties, summon your configured own mount and fly toward a visible fren after horizontal XZ distance exceeds this threshold continuously for the configured delay. Existing zone-specific Max Follow Distance still applies. Distance minimum: 1y. Delay range: 0-300 seconds; 0 means immediate. Defaults: 100y and 30 seconds.");
 
+        DrawDefaultSettingSyncButton("Mount-up to chase fren");
+
         // Mount Name (searchable dropdown from game data)
         ImGui.Text("Mount Name (if flying solo)");
         ImGui.SameLine();
         HelpMarker("Select the mount to use when flying solo.\n'Mount Roulette' picks a random mount.\nType to search the list.");
+
+        DrawDefaultSettingSyncButton("Mount Name");
 
         var mountNames = plugin.MountNames;
         var currentMount = config.FoolFlier;
@@ -568,6 +612,8 @@ public class ConfigWindow : Window, IDisposable
         ImGui.SameLine();
         HelpMarker("Auto-summon chocobo companion using Gysahl Greens when timer is low.\nWill not summon in sanctuaries or duties.");
 
+        DrawDefaultSettingSyncButton("Summon Chocobo");
+
         // Show greens count when enabled
         if (config.ForceGysahl)
         {
@@ -596,6 +642,8 @@ public class ConfigWindow : Window, IDisposable
         ImGui.SameLine();
         HelpMarker("Chocobo companion battle stance.\nControls how your companion behaves in combat.");
 
+        DrawDefaultSettingSyncButton("Companion Stance");
+
         // Auto Discard
         var autoDiscard = config.EnableAutoDiscard;
         if (ImGui.Checkbox("Auto Discard (/ays discard)", ref autoDiscard))
@@ -605,6 +653,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("Runs /ays discard every 10s only while mounted and in a safe idle window.\nFrenRider defers discard during combat, cutscenes, and area transitions.\nRequires AutoRetainer plugin.");
+        DrawDefaultSettingSyncButton("Auto Discard");
 
         ImGui.Spacing();
         ImGui.Separator();
@@ -620,6 +669,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("How often the plugin runs its main logic loop.\nLower values = more responsive but higher CPU usage.\nDefault: 0.3s. WARNING: Values below 0.1 may impact performance.");
+        DrawDefaultSettingSyncButton("Update Interval");
         if (updateInterval < 0.1f)
         {
             ImGui.TextColored(new Vector4(1, 0.4f, 0.4f, 1), "WARNING: Very low update interval may impact game performance!");
@@ -639,6 +689,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("Distance threshold (yalms) to start following fren.\nWhen you are farther than this from fren, navigation begins.");
+        DrawDefaultSettingSyncButton("Cling Distance");
 
         // Cling Type (no CBT)
         var clingType = config.ClingType;
@@ -650,6 +701,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("Navigation method to reach fren.\nNavMesh: VNavmesh plugin pathfinding (recommended)\nVisland: Alternative navigation\nBossMod Follow: Uses BossMod's follow leader\nVanilla Follow: Game's built-in /follow");
+        DrawDefaultSettingSyncButton("Cling Type");
 
         var clingTypeDuty = config.ClingTypeDuty;
         ImGui.SetNextItemWidth(200);
@@ -660,6 +712,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("Navigation method to use inside duties.\nMay need a different method than overworld.");
+        DrawDefaultSettingSyncButton("Cling Type (Duty)");
 
         ImGui.Spacing();
         ImGui.Separator();
@@ -675,6 +728,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("Minimum distance to maintain from fren in outdoor/foray zones.\nPrevents characters from stacking on top of each other (less bot-like).\nSet to 0 to disable.");
+        DrawDefaultSettingSyncButton("Social Distance");
 
         var sdIndoors = config.SocialDistancingIndoors;
         ImGui.SetNextItemWidth(200);
@@ -685,6 +739,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("Enable social distancing indoors too.\nOff by default. Turn on if you want spacing in dungeons.");
+        DrawDefaultSettingSyncButton("Social Distance Indoors");
 
         var xw = config.SocialDistanceXWiggle;
         ImGui.SetNextItemWidth(200);
@@ -695,6 +750,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("Random variance on X axis during social distancing.\nAdds natural-looking movement variance.");
+        DrawDefaultSettingSyncButton("X Wiggle");
 
         var zw = config.SocialDistanceZWiggle;
         ImGui.SetNextItemWidth(200);
@@ -705,6 +761,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("Random variance on Z axis during social distancing.");
+        DrawDefaultSettingSyncButton("Z Wiggle");
 
         ImGui.Spacing();
         ImGui.Separator();
@@ -720,6 +777,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("Maximum distance (yalms) to chase fren.\nBeyond this, stop following to avoid zone-hopping.");
+        DrawDefaultSettingSyncButton("Max Follow Distance");
 
         var maxBf = config.MaxBistanceForay;
         ImGui.SetNextItemWidth(200);
@@ -730,6 +788,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("Max follow distance in forays (Eureka/Bozja).\nLower value to avoid mini-aetheryte transition issues.");
+        DrawDefaultSettingSyncButton("Max Follow Distance (Foray)");
 
         var dd = config.DDDistance;
         ImGui.SetNextItemWidth(200);
@@ -740,6 +799,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("Extra distance added to cling in Deep Dungeons.\nPrevents constant chasing in PotD/HoH.");
+        DrawDefaultSettingSyncButton("DD Extra Distance");
 
         var fd = config.FDistance;
         ImGui.SetNextItemWidth(200);
@@ -750,6 +810,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("Reserved for future autosync FATE behavior.\nCurrent follow distance does not change on FATE join or leave.");
+        DrawDefaultSettingSyncButton("FATE Extra Distance");
 
         var autoSyncFate = config.AutoSyncFate;
         if (ImGui.Checkbox("Auto Sync FATE", ref autoSyncFate))
@@ -764,6 +825,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("Runs /levelsync on after joining a FATE.\nDefers while mounted or riding pillion.");
+        DrawDefaultSettingSyncButton("Auto Sync FATE");
 
         ImGui.Spacing();
         ImGui.Separator();
@@ -777,6 +839,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("Follow in a formation pattern (8-person grid).\nPositions based on party slot number.\nDisabled during mounting.");
+        DrawDefaultSettingSyncButton("Formation Following");
 
         var fic = config.FollowInCombat;
         ImGui.SetNextItemWidth(200);
@@ -787,6 +850,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("Whether to follow fren during combat.\nAuto: Let the plugin decide based on your job/role.");
+        DrawDefaultSettingSyncButton("Follow in Combat");
 
         var hcr = config.HClingReset;
         ImGui.SetNextItemWidth(200);
@@ -797,6 +861,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("Number of ticks before harmonized cling resets to 0.\nHandles special logic like DD/FATE force cling.");
+        DrawDefaultSettingSyncButton("Harmonized Cling Reset Ticks");
     }
 
     private void DrawCombatTab(CharacterConfig config)
@@ -813,6 +878,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("Which rotation automation plugin to use.\nBMR: BossModReborn\nVBM: VanillaBossMod\nRSR: RotationSolver Reborn\nWRATH: Wrath");
+        DrawDefaultSettingSyncButton("Rotation Plugin");
 
         // Rotation Plugin Foray (dropdown)
         var rotPluginForay = config.RotationPluginForay;
@@ -824,6 +890,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("Rotation plugin for foray content (Eureka/Bozja).\nWRATH recommended for phantom job support.");
+        DrawDefaultSettingSyncButton("Rotation Plugin (Foray)");
 
         ImGui.Spacing();
         ImGui.Separator();
@@ -838,6 +905,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("Off: FrenRider chooses the BossMod preset from current job and selected rotation plugin.\nOn: use the preset name fields below.");
+        DrawDefaultSettingSyncButton("Configure rotation preset manually");
 
         if (config.ConfigureRotationPresetManually)
         {
@@ -850,6 +918,7 @@ public class ConfigWindow : Window, IDisposable
             }
             ImGui.SameLine();
             HelpMarker("Name of the auto-rotation preset for general content.\nMust match a preset name in your rotation plugin.\nUse 'none' to not change the preset.");
+            DrawDefaultSettingSyncButton("BM Rotation Preset");
 
             var autoRotDD = config.AutoRotationTypeDD;
             ImGui.SetNextItemWidth(200);
@@ -860,6 +929,7 @@ public class ConfigWindow : Window, IDisposable
             }
             ImGui.SameLine();
             HelpMarker("Preset name for Deep Dungeon content.\nUse 'none' to not change the preset.");
+            DrawDefaultSettingSyncButton("BM Rotation Preset (DD)");
 
             var autoRotFATE = config.AutoRotationTypeFATE;
             ImGui.SetNextItemWidth(200);
@@ -870,6 +940,7 @@ public class ConfigWindow : Window, IDisposable
             }
             ImGui.SameLine();
             HelpMarker("Preset name for FATE content.\nUse 'none' to not change the preset.");
+            DrawDefaultSettingSyncButton("BM Rotation Preset (FATE)");
 
             var forceBossModPreset = config.ForceBossModPresetRegardlessOfRotation;
             if (ImGui.Checkbox("Force BossMod preset regardless of rotation", ref forceBossModPreset))
@@ -879,6 +950,7 @@ public class ConfigWindow : Window, IDisposable
             }
             ImGui.SameLine();
             HelpMarker("When RSR or WRATH is selected, also force BMR/VBM to the configured zone preset.");
+            DrawDefaultSettingSyncButton("Force BossMod preset regardless of rotation");
         }
         else
         {
@@ -900,6 +972,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("RSR operating mode when RSR is the selected rotation plugin.\nAuto: Full auto with standard hostile targeting.\nManual: Manual targeting mode.\nnone: Don't let FrenRider change the current rotation state.\nAuto (Support): Uses RSR's plugin-managed support mode and support-oriented targeting settings.\nPreviously Engaged Targets: Auto with RSR hostile targeting forced to previously engaged targets.");
+        DrawDefaultSettingSyncButton("RSR Rotation Type");
 
         // BossMod AI (dropdown)
         var bossModAI = config.BossModAI;
@@ -911,6 +984,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("Enable or disable BossMod AI module.");
+        DrawDefaultSettingSyncButton("BossMod AI");
 
         var dontMoveWhileCasting = configuration.DontMoveWhileCasting;
         if (ImGui.Checkbox("Don't move while casting", ref dontMoveWhileCasting))
@@ -943,6 +1017,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("Combat positional preference.\nFront: Stay in front of target\nRear: Stay behind target\nAny: No preference\nAuto: Let plugin decide based on job");
+        DrawDefaultSettingSyncButton("Positional");
 
         var maxAIDist = config.MaxAIDistance;
         ImGui.SetNextItemWidth(200);
@@ -953,6 +1028,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("Max distance to targets for combat AI.\n424242 = Auto (plugin decides based on job: melee 2.6, caster 10).");
+        DrawDefaultSettingSyncButton("Max AI Distance");
 
         var limitPct = config.LimitPct;
         ImGui.SetNextItemWidth(200);
@@ -963,6 +1039,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("Target HP percentage to use Limit Break.\n-1 = Disabled.\nAutomatically uses LB3 if available, otherwise LB2.");
+        DrawDefaultSettingSyncButton("LB Threshold %");
 
         DrawHacksSection(config);
     }
@@ -983,6 +1060,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker($"When enabled, FrenRider asks ADS to set BMR MaxLoadDistance to {AdsReflectionIpcService.ReducedOutdoorMaxLoadDistance:0}.");
+        DrawDefaultSettingSyncButton("BMR reduce activation range for outdoor areas");
 
         var disableHunts = config.BmrDisableHuntModules;
         if (ImGui.Checkbox("BMR Disable Hunt Modules", ref disableHunts))
@@ -993,6 +1071,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("When enabled, FrenRider asks ADS to disable BMR hunt modules.");
+        DrawDefaultSettingSyncButton("BMR Disable Hunt Modules");
 
         var disableQueen = config.BmrDisableQueenLunatender;
         if (ImGui.Checkbox("BMR Disable Queen Lunatender", ref disableQueen))
@@ -1003,6 +1082,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("When enabled, FrenRider asks ADS to disable the BMR Queen Lunatender module.");
+        DrawDefaultSettingSyncButton("BMR Disable Queen Lunatender");
 
         var reflection = plugin.AdsReflectionIpcService;
         var statusColor = !reflection.IsAdsAvailable && reflection.HasPendingActions
@@ -1061,6 +1141,7 @@ public class ConfigWindow : Window, IDisposable
                 config.SetAdsDutyFamilySettings(entry.Category, enabled, threshold);
                 configManager.SaveCurrentAccount();
             }
+            DrawDefaultSettingSyncButton($"ADS {entry.Label}", $"AdsFamily{entry.Category}");
         }
 
         if (ImGui.Button("OPEN ADS LOOT OPTIONS"))
@@ -1160,6 +1241,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("How loot is handled if LazyLoot is installed.\n'unchanged' = Don't modify loot settings.");
+        DrawDefaultSettingSyncButton("Loot Type");
     }
 
     private void DrawFoodSection(CharacterConfig config)
@@ -1176,6 +1258,7 @@ public class ConfigWindow : Window, IDisposable
             plugin.AutomationService.InvalidateFoodCache();
             configManager.SaveCurrentAccount();
         }
+        DrawDefaultSettingSyncButton("Food");
 
         if (config.FeedMeItemId > 0)
         {
@@ -1188,6 +1271,7 @@ public class ConfigWindow : Window, IDisposable
                 plugin.AutomationService.InvalidateFoodCache();
                 configManager.SaveCurrentAccount();
             }
+            DrawDefaultSettingSyncButton("Use HQ food");
 
             if (ImGui.SmallButton("Clear Food"))
             {
@@ -1212,6 +1296,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("If configured food runs out, search inventory for any food starting from lowest item ID.");
+        DrawDefaultSettingSyncButton("Search for Food if Depleted");
     }
 
     private void BackfillLegacyFoodSelection(CharacterConfig config)
@@ -1306,6 +1391,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("0 = disabled.\n1 = ADS self repair.\n2 = ADS NPC repair without inn fallback.\n3 = ADS NPC repair only when a mender is within 120y.");
+        DrawDefaultSettingSyncButton("Repair Mode");
 
         var tornClothes = Math.Clamp(config.TornClothes, 0, 100);
         ImGui.SetNextItemWidth(200);
@@ -1316,6 +1402,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("Trigger repair when gear durability falls below this percentage.");
+        DrawDefaultSettingSyncButton("Repair At % Durability");
     }
 
     private void DrawDesynthesisSection(CharacterConfig config)
@@ -1328,6 +1415,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("After DutyCompleted and duty exit, ask ADS to run configured desynthesis. FrenRider pauses automatic actions until completion or the 180s timeout.");
+        DrawDefaultSettingSyncButton("Enable Auto Desynth");
 
         if (ImGui.Button("OPEN DESYNTH CONFIG"))
         {
@@ -1353,6 +1441,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("What to do when idle.\nSpecific Action: execute one command\nAction From List: rotate through a list");
+        DrawDefaultSettingSyncButton("Idle Mode");
 
         if (config.IdleActionMode == 0)
         {
@@ -1365,6 +1454,7 @@ public class ConfigWindow : Window, IDisposable
             }
             ImGui.SameLine();
             HelpMarker("Slash command to execute when idle.\nExamples: /tomescroll, /dance, /snd run scriptname");
+            DrawDefaultSettingSyncButton("Idle Command");
         }
         else
         {
@@ -1377,9 +1467,13 @@ public class ConfigWindow : Window, IDisposable
             }
             ImGui.SameLine();
             HelpMarker("Default List: built-in emotes\nCustom List: your own command list");
+            DrawDefaultSettingSyncButton("List Source");
 
             if (config.IdleListMode == 1)
+            {
                 DrawCustomIdleListEditor(config);
+                DrawDefaultSettingSyncButton("Custom Idle List");
+            }
         }
 
         var idleTicks = config.IdleTicksBeforeAction;
@@ -1391,6 +1485,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("Number of update ticks before idle action triggers.");
+        DrawDefaultSettingSyncButton("Idle Ticks Before Action");
     }
 
     private void DrawAutoDiscardSection(CharacterConfig config)
@@ -1403,6 +1498,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("Runs /ays discard while mounted and in a safe idle window.\nRequires AutoRetainer plugin.");
+        DrawDefaultSettingSyncButton("Auto Discard");
     }
 
     private void DrawAutorotSection(CharacterConfig config)
@@ -1426,6 +1522,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("Print status messages to game chat.\nUseful for debugging but fills chat quickly.");
+        DrawDefaultSettingSyncButton("Echo Messages");
 
         if (config.DebugMode)
         {
@@ -1465,6 +1562,7 @@ public class ConfigWindow : Window, IDisposable
     {
         ImGui.Text("Trusted inviters");
         HelpMarker("Players in this list will have party invites automatically accepted when you are not in a group.\nNames should omit the @Server part.");
+        DrawDefaultSettingSyncButton("Invite Whitelist");
         ImGui.Spacing();
 
         for (int i = 0; i < config.InviteWhitelist.Count; i++)
@@ -1499,6 +1597,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("Automatically accept raise offers from other players.");
+        DrawDefaultSettingSyncButton("Raise offers");
 
         var teleportOffer = config.TeleportOfferAutoAccept;
         if (ImGui.Checkbox("Teleport offers", ref teleportOffer))
@@ -1508,6 +1607,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("Automatically accept teleport offers.");
+        DrawDefaultSettingSyncButton("Teleport offers");
 
         var partyInvite = config.PartyInviteAutoAccept;
         if (ImGui.Checkbox("Party invites (backup)", ref partyInvite))
@@ -1517,6 +1617,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("Backup auto-accept for party invites. Primary invite handling uses the whitelist.");
+        DrawDefaultSettingSyncButton("Party invites");
     }
 
     private void DrawExitBehaviourSection(CharacterConfig config)
@@ -1534,6 +1635,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("Use FrenRider's local Leave Duty flow after the configured duty-end condition.");
+        DrawDefaultSettingSyncButton("Exit Method", "FrenRiderExitMethod");
 
         if (!config.UseAdsLeaveAfterAdsDuty)
         {
@@ -1552,6 +1654,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("Send /ads leave after the configured duty-end delay. FrenRider does not also run its own Leave Duty flow.");
+        DrawDefaultSettingSyncButton("Exit Method", "AdsExitMethod");
 
         ImGui.Spacing();
         ImGui.Text("Duty-end delay");
@@ -1565,6 +1668,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         ImGui.Text("seconds after duty ends");
+        DrawDefaultSettingSyncButton("Duty-end delay");
     }
 
     private void DrawFrenRiderExitMethodOptions(CharacterConfig config)
@@ -1584,6 +1688,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("Automatically leave the duty N seconds after it completes.");
+        DrawDefaultSettingSyncButton("Exit Method", "ExitAfterSeconds");
 
         if (ImGui.RadioButton("Leave when all others left", method == 1))
         {
@@ -1594,6 +1699,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("Leave the duty if no other party members are visible in the zone.");
+        DrawDefaultSettingSyncButton("Exit Method", "LeaveWhenAllLeft");
 
         if (ImGui.RadioButton("No automatic exit", method == 2))
         {
@@ -1602,6 +1708,7 @@ public class ConfigWindow : Window, IDisposable
             config.LeaveWhenAllLeft = false;
             configManager.SaveCurrentAccount();
         }
+        DrawDefaultSettingSyncButton("Exit Method", "NoAutomaticExit");
     }
 
     private void DrawUiSettingsSection()
@@ -2246,6 +2353,38 @@ public class ConfigWindow : Window, IDisposable
     {
         var config = configManager.GetActiveConfig();
         frenNameInput = config?.FrenName ?? "";
+    }
+
+    private bool IsDefaultConfigSelected()
+        => string.IsNullOrEmpty(configManager.SelectedCharacterKey);
+
+    private string GetCurrentTabDisplayName()
+        => currentTab == "Duty" ? "Duty / ADS / Exit" : currentTab;
+
+    private void DrawDefaultSettingSyncButton(string label, string? idSuffix = null)
+    {
+        if (!IsDefaultConfigSelected())
+            return;
+
+        ImGui.SameLine();
+        var buttonId = idSuffix ?? label;
+        if (ImGui.SmallButton($"Sync all##DefaultSync{buttonId}"))
+            ReportDefaultSync(label, configManager.ApplyDefaultSettingToAllCharacters(label));
+
+        if (ImGui.IsItemHovered())
+            ImGui.SetTooltip($"Copy '{label}' from DEFAULT CONFIG to every character profile in this account.");
+    }
+
+    private void ReportDefaultSync(string scope, int count)
+    {
+        if (count <= 0)
+        {
+            plugin.ReportToChatAndLog($"FrenRider DEFAULT sync found no character profiles for {scope}.");
+            return;
+        }
+
+        var profileWord = count == 1 ? "profile" : "profiles";
+        plugin.ReportToChatAndLog($"FrenRider DEFAULT synced {scope} to {count} character {profileWord}.");
     }
 
     private static void HelpMarker(string desc)
