@@ -35,6 +35,7 @@ public class ConfigWindow : Window, IDisposable
     private static readonly string[] RotationPlugins = { "BMR", "VBM", "RSR", "WRATH" };
     private static readonly string[] RotationTypes = { "Auto", "Manual", "none", "Auto (Support)", "Previously Engaged Targets" };
     private static readonly string[] BossModAIOptions = { "on", "off" };
+    private static readonly string[] CleanupModes = { "Restore snapshot", "Turn everything off" };
     private static readonly string[] Positionals = { "Front", "Rear", "Any", "Auto" };
     private static readonly string[] FollowInCombatOptions = { "No", "Yes", "Auto" };
     private static readonly string[] AdsMaturityOptions = { "0 - Not Cleared", "1 - 1P Unsync Cleared", "2 - 1P Duty Support", "3 - 4P Sync Cleared" };
@@ -971,6 +972,19 @@ public class ConfigWindow : Window, IDisposable
         ImGui.Separator();
         ImGui.Text("Behavior");
         ImGui.Spacing();
+
+        var cleanupMode = config.CleanupMode == FrenRiderCleanupMode.TurnEverythingOff ? 1 : 0;
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.Combo("Cleanup Mode", ref cleanupMode, CleanupModes, CleanupModes.Length))
+        {
+            config.CleanupMode = cleanupMode == 1
+                ? FrenRiderCleanupMode.TurnEverythingOff
+                : FrenRiderCleanupMode.RestoreSnapshot;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Restore snapshot: put captured BMR/VBM/CBT follow and movement fields back on /fr off.\nTurn everything off: disable BMR/VBM AI, CBT AutoFollow, and Wrath auto if FrenRider started it.");
+        DrawDefaultSettingSyncButton("Cleanup Mode");
 
         // RSR Rotation Type (dropdown)
         var rotType = config.RotationType;

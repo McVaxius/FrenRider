@@ -51,12 +51,24 @@ public class CombatService
     public CombatState State { get; private set; } = CombatState.OutOfCombat;
     public string StateDetail { get; private set; } = "";
     public string ActivePreset { get; private set; } = "";
+    public bool WrathAutoActive => wrathAutoActive;
 
     public CombatService(Plugin plugin, FrenTracker tracker, ZoneService zoneService)
     {
         this.plugin = plugin;
         this.tracker = tracker;
         this.zoneService = zoneService;
+    }
+
+    public void ClearExternalAutomationRuntimeState(string reason)
+    {
+        if (mountedRotationSuppressed || wrathAutoActive)
+            Plugin.Log.Information($"[FrenRider] Cleared local external automation runtime flags after {reason}.");
+
+        mountedRotationSuppressed = false;
+        mountedSuppressedPluginName = string.Empty;
+        wrathAutoActive = false;
+        lastRotationToggleMs = 0;
     }
 
     public void Update()
@@ -69,8 +81,7 @@ public class CombatService
 
         if (!config.Enabled)
         {
-            SetWrathAuto(false, "plugin disabled");
-            RestoreMountedRotationLifecycle(config, inCombat, inDuty, "plugin disabled", reapplySelection: false);
+            ClearExternalAutomationRuntimeState("plugin disabled");
             ResetCombatSettingsRefreshTracking();
             lastObservedCombatSettingsSignature = string.Empty;
             lastBossModDefaultSettingsSignature = string.Empty;
@@ -469,6 +480,7 @@ public class CombatService
 
     public void ApplyBossModFollowStartupDefaults()
     {
+        plugin.CaptureExternalAutomationSnapshot("BossMod follow startup defaults");
         SendCommand("/bmrai followoutofcombat off");
         SendCommand("/cbt disable AutoFollow");
         SendCommand("/bmrai followcombat off");
@@ -507,6 +519,7 @@ public class CombatService
 
         var pluginName = GetSelectedRotationPluginName(config);
         mountedSuppressedPluginName = pluginName;
+        plugin.CaptureExternalAutomationSnapshot("mounted rotation suppression");
 
         switch (pluginName)
         {
@@ -754,6 +767,7 @@ public class CombatService
             return;
 
         lastBossModMovementUnlockSignature = signature;
+        plugin.CaptureExternalAutomationSnapshot("BossMod movement unlock");
         SendCommand("/bmrai forbidmovement off");
         SendCommand("/vbmai forbidmovement off");
         Plugin.Log.Information($"[FrenRider] Sent one-shot BossMod movement unlock after {reason}.");
@@ -794,6 +808,7 @@ public class CombatService
 
     private void EnsureBossModAiEnabled()
     {
+        plugin.CaptureExternalAutomationSnapshot("BossMod AI enable");
         SendCommand("/bmrai on");
     }
 
@@ -843,6 +858,8 @@ public class CombatService
 
         SendCommand(enabled ? "/wrath auto on" : "/wrath auto off");
         wrathAutoActive = enabled;
+        if (enabled)
+            plugin.MarkWrathAutoStartedByFrenRider(reason);
         Plugin.Log.Information($"Combat: Wrath auto {(enabled ? "on" : "off")} after {reason}");
     }
 

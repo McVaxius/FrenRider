@@ -93,6 +93,7 @@ public class ConfigManager
                 Setting("BMR reduce activation range for outdoor areas", (source, target) => target.BmrReduceActivationRangeForOutdoorAreas = source.BmrReduceActivationRangeForOutdoorAreas),
                 Setting("BMR Disable Hunt Modules", (source, target) => target.BmrDisableHuntModules = source.BmrDisableHuntModules),
                 Setting("BMR Disable Queen Lunatender", (source, target) => target.BmrDisableQueenLunatender = source.BmrDisableQueenLunatender),
+                Setting("Cleanup Mode", (source, target) => target.CleanupMode = source.CleanupMode),
             }),
         new(
             "Duty",

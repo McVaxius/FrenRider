@@ -13,6 +13,14 @@ public sealed class CharacterConfigTests
     }
 
     [Fact]
+    public void CleanupModeDefaultsToRestoreSnapshot()
+    {
+        var config = new CharacterConfig();
+
+        Assert.Equal(FrenRiderCleanupMode.RestoreSnapshot, config.CleanupMode);
+    }
+
+    [Fact]
     public void ClonePreservesDutyNudgeFallback()
     {
         var config = new CharacterConfig
@@ -21,5 +29,16 @@ public sealed class CharacterConfigTests
         };
 
         Assert.True(config.Clone().NudgeInDutyWhenFrenNotNearbyOrInZone);
+    }
+
+    [Fact]
+    public void ClonePreservesCleanupMode()
+    {
+        var config = new CharacterConfig
+        {
+            CleanupMode = FrenRiderCleanupMode.TurnEverythingOff,
+        };
+
+        Assert.Equal(FrenRiderCleanupMode.TurnEverythingOff, config.Clone().CleanupMode);
     }
 }

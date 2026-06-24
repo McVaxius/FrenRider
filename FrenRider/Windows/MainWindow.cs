@@ -199,6 +199,9 @@ public class MainWindow : Window, IDisposable
         var combatDetail = string.IsNullOrWhiteSpace(combat.StateDetail) ? combat.State.ToString() : $"{combat.State} - {combat.StateDetail}";
         UiHelpers.AlignedRow("Combat", combatDetail, GetCombatColor(combat.State));
 
+        var cleanup = plugin.ExternalAutomationCleanupService;
+        UiHelpers.AlignedRow("Cleanup", cleanup.StatusText, GetCleanupColor(cleanup.State));
+
         var auto = plugin.AutomationService;
         var idleText = auto.IsIdle
             ? string.IsNullOrWhiteSpace(auto.LastIdleAction) ? "Idle" : $"Idle; last {auto.LastIdleAction}"
@@ -359,6 +362,16 @@ public class MainWindow : Window, IDisposable
             CombatState.InCombat => UiHelpers.Red,
             CombatState.EnteringCombat => UiHelpers.Orange,
             CombatState.LeavingCombat => UiHelpers.Grey,
+            _ => UiHelpers.Grey,
+        };
+
+    private static Vector4 GetCleanupColor(ExternalAutomationCleanupState state)
+        => state switch
+        {
+            ExternalAutomationCleanupState.Restored or ExternalAutomationCleanupState.ForceOff => UiHelpers.Green,
+            ExternalAutomationCleanupState.Captured => UiHelpers.Blue,
+            ExternalAutomationCleanupState.Partial => UiHelpers.Yellow,
+            ExternalAutomationCleanupState.Failed => UiHelpers.Red,
             _ => UiHelpers.Grey,
         };
 

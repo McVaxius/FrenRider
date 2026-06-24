@@ -4,6 +4,12 @@ using System.Linq;
 
 namespace FrenRider.Models;
 
+public enum FrenRiderCleanupMode
+{
+    RestoreSnapshot,
+    TurnEverythingOff,
+}
+
 [Serializable]
 public class CharacterConfig
 {
@@ -80,6 +86,7 @@ public class CharacterConfig
     public bool BmrReduceActivationRangeForOutdoorAreas { get; set; } = false;
     public bool BmrDisableHuntModules { get; set; } = false;
     public bool BmrDisableQueenLunatender { get; set; } = false;
+    public FrenRiderCleanupMode CleanupMode { get; set; } = FrenRiderCleanupMode.RestoreSnapshot;
     public bool UseAdsIfAvailable { get; set; } = false;
     public int AdsMaturityThreshold { get; set; } = 3; // 0=Not Cleared, 1=1P Unsync, 2=1P Duty Support, 3=4P Sync
     public bool AdsDutyFamilySettingsMigrated { get; set; } = false;
@@ -189,6 +196,7 @@ public class CharacterConfig
             BmrReduceActivationRangeForOutdoorAreas = BmrReduceActivationRangeForOutdoorAreas,
             BmrDisableHuntModules = BmrDisableHuntModules,
             BmrDisableQueenLunatender = BmrDisableQueenLunatender,
+            CleanupMode = CleanupMode,
             UseAdsIfAvailable = UseAdsIfAvailable,
             AdsMaturityThreshold = AdsMaturityThreshold,
             AdsDutyFamilySettingsMigrated = AdsDutyFamilySettingsMigrated,

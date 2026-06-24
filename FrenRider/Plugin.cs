@@ -51,6 +51,7 @@ public sealed class Plugin : IDalamudPlugin
     public AdsUtilityIpcService AdsUtilityIpcService { get; init; }
     public AdsReflectionIpcService AdsReflectionIpcService { get; init; }
     public BossModActionTweaksService BossModActionTweaksService { get; init; }
+    public ExternalAutomationCleanupService ExternalAutomationCleanupService { get; init; }
     public FollowService FollowService { get; init; }
     public MountService MountService { get; init; }
     public CombatService CombatService { get; init; }
@@ -111,6 +112,11 @@ public sealed class Plugin : IDalamudPlugin
         AdsUtilityIpcService = new AdsUtilityIpcService(PluginInterface, Log);
         AdsReflectionIpcService = new AdsReflectionIpcService(this, PluginInterface, Log);
         BossModActionTweaksService = new BossModActionTweaksService(PluginInterface, Log);
+        ExternalAutomationCleanupService = new ExternalAutomationCleanupService(
+            new DalamudExternalAutomationCommandSender(),
+            new BossModExternalAutomationSnapshotProvider(PluginInterface, Log),
+            message => Log.Information(message),
+            message => Log.Warning(message));
         FollowService = new FollowService(this, FrenTracker, ZoneService);
         MountService = new MountService(this, FrenTracker, ZoneService);
         CombatService = new CombatService(this, FrenTracker, ZoneService);
@@ -250,6 +256,8 @@ public sealed class Plugin : IDalamudPlugin
 			//commandManager?.ProcessCommand("/xldisableplugin AutoDuty");
 			//commandManager?.ProcessCommand("/echo hi");
 
+            CaptureExternalAutomationSnapshot("FrenRider enabled");
+
             Log.Information("[FrenRider] Applying one-time BossMod follow defaults on enable");
             CombatService.ApplyBossModFollowStartupDefaults();
 
@@ -264,8 +272,30 @@ public sealed class Plugin : IDalamudPlugin
             MountService.PreemptFarChase("disabled");
             RespawnService.ResetForDisable();
             AutoDutyDetectionService.HandleFrenRiderDisabled();
+            ExternalAutomationCleanupService.Cleanup(
+                ConfigManager.GetActiveConfig(),
+                GetCleanupAccountId(),
+                GetCleanupCharacterKey(),
+                "FrenRider disabled");
+            CombatService.ClearExternalAutomationRuntimeState("FrenRider disabled cleanup");
         }
     }
+
+    internal void CaptureExternalAutomationSnapshot(string reason)
+    {
+        ExternalAutomationCleanupService.CaptureIfMissing(GetCleanupAccountId(), GetCleanupCharacterKey(), reason);
+    }
+
+    internal void MarkWrathAutoStartedByFrenRider(string reason)
+    {
+        ExternalAutomationCleanupService.MarkWrathAutoStarted(GetCleanupAccountId(), GetCleanupCharacterKey(), reason);
+    }
+
+    private string GetCleanupAccountId()
+        => string.IsNullOrWhiteSpace(ConfigManager.CurrentAccountId) ? "unknown-account" : ConfigManager.CurrentAccountId;
+
+    private string GetCleanupCharacterKey()
+        => string.IsNullOrWhiteSpace(ConfigManager.SelectedCharacterKey) ? "default" : ConfigManager.SelectedCharacterKey;
 
     private void OnCommand(string command, string args)
     {
@@ -587,8 +617,8 @@ public sealed class Plugin : IDalamudPlugin
 
         dtrEntry.Tooltip = new SeString(new TextPayload(
             config.Enabled
-                ? $"Fren Rider active - Following {config.FrenName}"
-                : "Fren Rider disabled - Click to toggle"));
+                ? $"Fren Rider active - Following {config.FrenName}. Cleanup: {ExternalAutomationCleanupService.StatusText}"
+                : $"Fren Rider disabled - Click to toggle. Cleanup: {ExternalAutomationCleanupService.StatusText}"));
     }
 
     private void LoadMountNames()

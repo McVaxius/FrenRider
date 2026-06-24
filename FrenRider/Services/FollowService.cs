@@ -1259,6 +1259,7 @@ public class FollowService
         if (isNavigating)
             StopNavigation(config, "switching to BossMod follow");
 
+        plugin.CaptureExternalAutomationSnapshot("BossMod follow start");
         SendCommand($"/bmrai follow {targetName}");
         SendCommand("/bmrai followoutofcombat on");
 
@@ -1287,6 +1288,7 @@ public class FollowService
         if (!bossModFollowActive)
             return;
 
+        plugin.CaptureExternalAutomationSnapshot("BossMod follow stop");
         SendCommand("/bmrai followoutofcombat off");
         SendCommand("/bmrai followcombat off");
         SendCommand("/bmrai followmodule off");

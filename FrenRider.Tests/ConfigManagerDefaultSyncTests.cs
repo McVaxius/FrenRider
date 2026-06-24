@@ -45,20 +45,28 @@ public sealed class ConfigManagerDefaultSyncTests
         account.DefaultConfig.Cling = 9f;
         account.DefaultConfig.AutoSyncFate = false;
         account.DefaultConfig.RotationPlugin = 1;
+        account.DefaultConfig.CleanupMode = FrenRiderCleanupMode.TurnEverythingOff;
 
         var target = account.Characters["Alt One@World"];
         target.FrenName = "Keep Me";
         target.Cling = 2f;
         target.AutoSyncFate = true;
         target.RotationPlugin = 3;
+        target.CleanupMode = FrenRiderCleanupMode.RestoreSnapshot;
 
-        var count = ConfigManager.ApplyDefaultTabToAllCharacters(account, "Follow");
+        var followCount = ConfigManager.ApplyDefaultTabToAllCharacters(account, "Follow");
 
-        Assert.Equal(2, count);
+        Assert.Equal(2, followCount);
         Assert.Equal("Keep Me", target.FrenName);
         Assert.Equal(9f, target.Cling);
         Assert.False(target.AutoSyncFate);
         Assert.Equal(3, target.RotationPlugin);
+        Assert.Equal(FrenRiderCleanupMode.RestoreSnapshot, target.CleanupMode);
+
+        var combatCount = ConfigManager.ApplyDefaultTabToAllCharacters(account, "Combat");
+
+        Assert.Equal(2, combatCount);
+        Assert.Equal(FrenRiderCleanupMode.TurnEverythingOff, target.CleanupMode);
     }
 
     [Fact]
