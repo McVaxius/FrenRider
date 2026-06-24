@@ -43,6 +43,7 @@ public class ConfigManager
                 Setting("Fly You Fools", (source, target) => target.FlyYouFools = source.FlyYouFools),
                 Setting("Try Teleport to Fren When Out of Zone", (source, target) => target.TryTeleportToFrenWhenOutOfZone = source.TryTeleportToFrenWhenOutOfZone),
                 Setting("Teleport Delay", (source, target) => target.TeleportToFrenDelaySeconds = source.TeleportToFrenDelaySeconds),
+                Setting("Nudge in duty when fren not nearby/in-zone", (source, target) => target.NudgeInDutyWhenFrenNotNearbyOrInZone = source.NudgeInDutyWhenFrenNotNearbyOrInZone),
                 Setting("Respawn after death outside duties", CopyRespawnOutsideDuties),
                 Setting("Mount-up to chase fren", CopyMountUpToChaseFren),
                 Setting("Mount Name", (source, target) => target.FoolFlier = source.FoolFlier),

@@ -18,6 +18,7 @@ public class CharacterConfig
     public bool FlyYouFools { get; set; } = false;
     public bool TryTeleportToFrenWhenOutOfZone { get; set; } = false;
     public int TeleportToFrenDelaySeconds { get; set; } = 30;
+    public bool NudgeInDutyWhenFrenNotNearbyOrInZone { get; set; } = false;
     public bool RespawnOutsideDuties { get; set; } = false;
     public int RespawnOutsideDutiesDelaySeconds
     {
@@ -142,6 +143,7 @@ public class CharacterConfig
             FlyYouFools = FlyYouFools,
             TryTeleportToFrenWhenOutOfZone = TryTeleportToFrenWhenOutOfZone,
             TeleportToFrenDelaySeconds = TeleportToFrenDelaySeconds,
+            NudgeInDutyWhenFrenNotNearbyOrInZone = NudgeInDutyWhenFrenNotNearbyOrInZone,
             RespawnOutsideDuties = RespawnOutsideDuties,
             RespawnOutsideDutiesDelaySeconds = RespawnOutsideDutiesDelaySeconds,
             MountUpToChaseFren = MountUpToChaseFren,

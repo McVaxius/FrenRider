@@ -491,6 +491,16 @@ public class ConfigWindow : Window, IDisposable
 
         DrawDefaultSettingSyncButton("Teleport Delay");
 
+        var nudgeInDutyWithoutFren = config.NudgeInDutyWhenFrenNotNearbyOrInZone;
+        if (ImGui.Checkbox("Nudge in duty when fren not nearby/in-zone", ref nudgeInDutyWithoutFren))
+        {
+            config.NudgeInDutyWhenFrenNotNearbyOrInZone = nudgeInDutyWithoutFren;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("When enabled, FrenRider may issue the fallback forward nudge inside duties even if the configured fren is not visible in your party/object table. Leave disabled for safer duty movement.");
+        DrawDefaultSettingSyncButton("Nudge in duty when fren not nearby/in-zone");
+
         var respawnOutsideDuties = config.RespawnOutsideDuties;
         if (ImGui.Checkbox("Respawn after death outside duties after", ref respawnOutsideDuties))
         {

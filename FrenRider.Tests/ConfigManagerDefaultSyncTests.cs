@@ -12,6 +12,7 @@ public sealed class ConfigManagerDefaultSyncTests
         account.DefaultConfig.FrenName = "Default Fren@Gilgamesh";
         account.DefaultConfig.Cling = 7.5f;
         account.DefaultConfig.RotationPlugin = 3;
+        account.DefaultConfig.NudgeInDutyWhenFrenNotNearbyOrInZone = true;
         account.DefaultConfig.ExitAfterDutySeconds = 42;
         account.DefaultConfig.FeedMeItemId = 123;
         account.DefaultConfig.FeedMeItem = "Default Food";
@@ -27,6 +28,7 @@ public sealed class ConfigManagerDefaultSyncTests
             Assert.Equal("Default Fren@Gilgamesh", character.FrenName);
             Assert.Equal(7.5f, character.Cling);
             Assert.Equal(3, character.RotationPlugin);
+            Assert.True(character.NudgeInDutyWhenFrenNotNearbyOrInZone);
             Assert.Equal(42, character.ExitAfterDutySeconds);
             Assert.Equal(123, character.FeedMeItemId);
             Assert.Equal("Default Food", character.FeedMeItem);
@@ -100,6 +102,23 @@ public sealed class ConfigManagerDefaultSyncTests
 
         Assert.Equal(new[] { "Trusted One" }, target.InviteWhitelist);
         Assert.Equal(new[] { "/wave", "/dance" }, target.CustomIdleList);
+    }
+
+    [Fact]
+    public void ProfileTabSyncCopiesDutyNudgeFallbackSetting()
+    {
+        var account = CreateAccount();
+        account.DefaultConfig.NudgeInDutyWhenFrenNotNearbyOrInZone = true;
+
+        var target = account.Characters["Alt One@World"];
+        target.NudgeInDutyWhenFrenNotNearbyOrInZone = false;
+        target.Cling = 2f;
+
+        var count = ConfigManager.ApplyDefaultTabToAllCharacters(account, "Profile");
+
+        Assert.Equal(2, count);
+        Assert.True(target.NudgeInDutyWhenFrenNotNearbyOrInZone);
+        Assert.Equal(2f, target.Cling);
     }
 
     [Fact]

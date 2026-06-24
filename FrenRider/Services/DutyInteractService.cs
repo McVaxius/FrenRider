@@ -217,16 +217,41 @@ public class DutyInteractService
             if (pathingStopped && (now - lastNudgeTime).TotalSeconds > 5)
             {
                 lastNudgeTime = now;
-                if (!boundByDuty)
+                if (!CanNudgeForwardInDuty(config, boundByDuty, out var blockReason))
                 {
-                    StateDetail = "No interactables found; not bound by duty";
-                    Plugin.Log.Information("[DutyInteract] Skipping forward nudge because BoundByDuty is false.");
+                    StateDetail = blockReason;
+                    Plugin.Log.Information($"[DutyInteract] Skipping forward nudge: {blockReason}");
                     return;
                 }
 
                 NudgeForward();
             }
         }
+    }
+
+    private bool CanNudgeForwardInDuty(CharacterConfig config, bool boundByDuty, out string blockReason)
+    {
+        if (!boundByDuty)
+        {
+            blockReason = "No interactables found; not bound by duty";
+            return false;
+        }
+
+        if (config.NudgeInDutyWhenFrenNotNearbyOrInZone)
+        {
+            blockReason = "";
+            return true;
+        }
+
+        var fren = tracker.Fren;
+        if (fren is { IsFound: true, IsVisible: true, InParty: true })
+        {
+            blockReason = "";
+            return true;
+        }
+
+        blockReason = "No interactables found; fren not visible in duty";
+        return false;
     }
 
     private IGameObject? FindNearestInteractable()
