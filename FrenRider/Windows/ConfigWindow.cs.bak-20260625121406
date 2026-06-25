@@ -983,7 +983,7 @@ public class ConfigWindow : Window, IDisposable
             configManager.SaveCurrentAccount();
         }
         ImGui.SameLine();
-        HelpMarker("Restore snapshot: put captured BMR/VBM AI on/off, follow, movement, and CBT fields back on /fr off.\nTurn everything off: disable BMR/VBM AI, CBT AutoFollow, and Wrath auto if FrenRider started it.");
+        HelpMarker("Restore snapshot: put captured BMR/VBM/CBT follow and movement fields back on /fr off.\nTurn everything off: disable BMR/VBM AI, CBT AutoFollow, and Wrath auto if FrenRider started it.");
         DrawDefaultSettingSyncButton("Cleanup Mode");
 
         // RSR Rotation Type (dropdown)
@@ -1007,7 +1007,7 @@ public class ConfigWindow : Window, IDisposable
             configManager.SaveCurrentAccount();
         }
         ImGui.SameLine();
-        HelpMarker("On: enable the selected BossMod AI implementation for combat.\nOff: send BMR and VBM AI off commands while preserving the rest of FrenRider's combat setup.");
+        HelpMarker("Enable or disable BossMod AI module.");
         DrawDefaultSettingSyncButton("BossMod AI");
 
         var dontMoveWhileCasting = configuration.DontMoveWhileCasting;

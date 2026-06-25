@@ -225,7 +225,7 @@ public class CombatService
 
         // Disable other rotation plugins first
         DisableOtherRotationPlugins(config);
-        ApplyBossModSafetyState(config, pluginName, bossModPreset, "activation");
+        ApplyBossModSafetyState(pluginName, bossModPreset, "activation");
 
         // Send activation commands
         switch (pluginName)
@@ -443,7 +443,7 @@ public class CombatService
         var bossModPreset = GetBossModPresetForPlugin(config, pluginName);
         var manualPreset = GetManualPresetForZone(config);
         ActivePreset = bossModPreset;
-        ApplyBossModSafetyState(config, pluginName, bossModPreset, reason);
+        ApplyBossModSafetyState(pluginName, bossModPreset, reason);
 
         switch (pluginName)
         {
@@ -553,10 +553,10 @@ public class CombatService
         switch (pluginName)
         {
             case "BMR":
-                ApplyConfiguredBossModAiState(config, pluginName, $"mounted lifecycle restore ({reason})");
+                SendCommand("/bmrai on");
                 break;
             case "VBM":
-                ApplyConfiguredBossModAiState(config, pluginName, $"mounted lifecycle restore ({reason})");
+                SendCommand("/vbmai on");
                 break;
             case "RSR":
                 SendCommand("/rotation auto");
@@ -709,9 +709,9 @@ public class CombatService
             : "RSR";
     }
 
-    private void ApplyBossModSafetyState(CharacterConfig config, string pluginName, string selectedPreset, string reason)
+    private void ApplyBossModSafetyState(string pluginName, string selectedPreset, string reason)
     {
-        ApplyConfiguredBossModAiState(config, pluginName, reason);
+        EnsureBossModAiEnabled();
         ApplyBossModDefaultSettingsOnce(pluginName, selectedPreset, reason);
         ApplyBossModMovementUnlockOnce(pluginName, selectedPreset, reason);
         ApplyBossModPreset(selectedPreset, reason);
@@ -806,35 +806,15 @@ public class CombatService
         Plugin.Log.Information($"Combat: Sent VBM preset command for '{presetName}' after {reason}");
     }
 
-    private void ApplyConfiguredBossModAiState(CharacterConfig config, string pluginName, string reason)
+    private void EnsureBossModAiEnabled()
     {
-        var commands = BuildBossModAiCommands(config.BossModAI, pluginName);
-        if (commands.Length == 0)
-            return;
-
-        plugin.CaptureExternalAutomationSnapshot("BossMod AI state change");
-        foreach (var command in commands)
-            SendCommand(command);
-
-        Plugin.Log.Information($"Combat: BossMod AI {DescribeBossModAiSetting(config.BossModAI)} for {pluginName} after {reason}");
+        plugin.CaptureExternalAutomationSnapshot("BossMod AI enable");
+        SendCommand("/bmrai on");
     }
-
-    internal static string[] BuildBossModAiCommands(int bossModAI, string pluginName)
-    {
-        if (bossModAI == 1)
-            return new[] { "/bmrai off", "/vbmai off" };
-
-        return string.Equals(pluginName, "VBM", StringComparison.OrdinalIgnoreCase)
-            ? new[] { "/vbmai on" }
-            : new[] { "/bmrai on" };
-    }
-
-    private static string DescribeBossModAiSetting(int bossModAI)
-        => bossModAI == 1 ? "off" : "on";
 
     private void DisableOtherRotationPlugins(CharacterConfig config)
     {
-        // Only disable conflicting rotation engines. BossMod AI state is applied from the user's setting.
+        // Only disable conflicting rotation engines. BossMod AI stays enabled for avoidance/movement.
         var pluginName = GetSelectedRotationPluginName(config);
         var pluginIdx = Array.IndexOf(RotationPluginNames, pluginName);
         var activePluginName = pluginIdx >= 0 ? pluginName : "none";

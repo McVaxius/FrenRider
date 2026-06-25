@@ -51,6 +51,41 @@ public sealed class ExternalAutomationCleanupServiceTests
     }
 
     [Fact]
+    public void RestoreSnapshotTurnsBmrAiOffFirstWhenCapturedIdle()
+    {
+        var provider = new FakeSnapshotProvider();
+        provider.Snapshots[("account", "character")] = Snapshot("account", "character", forbidMovement: true, bmrAiActive: false);
+        var sender = new FakeCommandSender();
+        var service = new ExternalAutomationCleanupService(sender, provider);
+
+        service.CaptureIfMissing("account", "character", "test");
+        var result = service.Cleanup(new CharacterConfig(), "account", "character", "test");
+
+        Assert.Equal(ExternalAutomationCleanupState.Restored, result.State);
+        Assert.Equal("/bmrai off", sender.Commands[0]);
+        Assert.Contains("/bmrai forbidmovement on", sender.Commands);
+        Assert.DoesNotContain("/bmrai on", sender.Commands);
+    }
+
+    [Fact]
+    public void RestoreSnapshotTurnsBmrAiOnLastWhenCapturedActive()
+    {
+        var provider = new FakeSnapshotProvider();
+        provider.Snapshots[("account", "character")] = Snapshot("account", "character", forbidMovement: true, bmrAiActive: true);
+        var sender = new FakeCommandSender();
+        var service = new ExternalAutomationCleanupService(sender, provider);
+
+        service.CaptureIfMissing("account", "character", "test");
+        var result = service.Cleanup(new CharacterConfig(), "account", "character", "test");
+
+        Assert.Equal(ExternalAutomationCleanupState.Restored, result.State);
+        var followModuleIndex = sender.Commands.IndexOf("/bmrai followmodule off");
+        var aiOnIndex = sender.Commands.IndexOf("/bmrai on");
+        Assert.True(aiOnIndex > followModuleIndex);
+        Assert.DoesNotContain("/bmrai off", sender.Commands);
+    }
+
+    [Fact]
     public void TurnEverythingOffStopsManagedAutomationAndWrathWhenStarted()
     {
         var provider = new FakeSnapshotProvider();
@@ -98,10 +133,13 @@ public sealed class ExternalAutomationCleanupServiceTests
         string accountId,
         string characterKey,
         bool forbidMovement,
-        bool cbtAutoFollow = false)
+        bool cbtAutoFollow = false,
+        bool? bmrAiActive = null,
+        bool? vbmAiActive = null)
     {
         var bmr = new BossModAutomationSnapshot(
             true,
+            bmrAiActive,
             forbidMovement,
             false,
             true,
@@ -111,6 +149,7 @@ public sealed class ExternalAutomationCleanupServiceTests
             string.Empty);
         var vbm = new BossModAutomationSnapshot(
             true,
+            vbmAiActive,
             forbidMovement,
             false,
             true,

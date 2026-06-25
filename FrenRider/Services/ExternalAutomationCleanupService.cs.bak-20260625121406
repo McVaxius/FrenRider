@@ -31,7 +31,6 @@ public interface IExternalAutomationSnapshotProvider
 
 public sealed record BossModAutomationSnapshot(
     bool IsAvailable,
-    bool? AiActive,
     bool? ForbidMovement,
     bool? FollowOutOfCombat,
     bool? FollowDuringCombat,
@@ -40,7 +39,7 @@ public sealed record BossModAutomationSnapshot(
     int? FollowSlot,
     string Detail)
 {
-    public static BossModAutomationSnapshot Unavailable(string detail) => new(false, null, null, null, null, null, null, null, detail);
+    public static BossModAutomationSnapshot Unavailable(string detail) => new(false, null, null, null, null, null, null, detail);
 }
 
 public sealed record CbtAutomationSnapshot(bool IsAvailable, bool? AutoFollowEnabled, string Detail)
@@ -224,9 +223,6 @@ public sealed class ExternalAutomationCleanupService
         if (!snapshot.IsAvailable)
             return;
 
-        if (snapshot.AiActive == false)
-            attempts.Add(Send($"{prefix} off"));
-
         AddBoolCommand(attempts, $"{prefix} forbidmovement", snapshot.ForbidMovement);
         AddBoolCommand(attempts, $"{prefix} followoutofcombat", snapshot.FollowOutOfCombat);
         AddBoolCommand(attempts, $"{prefix} followcombat", snapshot.FollowDuringCombat);
@@ -234,9 +230,6 @@ public sealed class ExternalAutomationCleanupService
 
         if (snapshot.FollowTarget == true && snapshot.FollowSlot is { } followSlot)
             attempts.Add(Send($"{prefix} follow Slot{followSlot}"));
-
-        if (snapshot.AiActive == true)
-            attempts.Add(Send($"{prefix} on"));
 
         infoLog?.Invoke($"[ExternalCleanup] Queued {label} restore commands.");
     }
@@ -349,7 +342,6 @@ public sealed class BossModExternalAutomationSnapshotProvider : IExternalAutomat
 
             return new BossModAutomationSnapshot(
                 true,
-                TryGetAiActive(liveAssembly),
                 TryGetBool(configNode, "ForbidMovement"),
                 TryGetBool(configNode, "FollowOutOfCombat"),
                 TryGetBool(configNode, "FollowDuringCombat"),
@@ -420,22 +412,6 @@ public sealed class BossModExternalAutomationSnapshotProvider : IExternalAutomat
         return null;
     }
 
-    private static bool? TryGetAiActive(Assembly liveAssembly)
-    {
-        var aiManagerType = liveAssembly.GetType("BossMod.AI.AIManager");
-        if (aiManagerType == null)
-            return null;
-
-        var instance = GetStaticMember(aiManagerType, "Instance");
-        if (instance == null)
-            return null;
-
-        if (!TryGetInstanceMember(instance, "Beh", out var behavior))
-            return null;
-
-        return behavior != null;
-    }
-
     private static bool IsLocalPlugin(Type type)
     {
         for (var current = type; current != null; current = current.BaseType)
@@ -496,29 +472,19 @@ public sealed class BossModExternalAutomationSnapshotProvider : IExternalAutomat
     }
 
     private static object? GetInstanceMember(object root, string name)
-        => TryGetInstanceMember(root, name, out var value) ? value : null;
-
-    private static bool TryGetInstanceMember(object root, string name, out object? value)
     {
         for (var type = root.GetType(); type != null; type = type.BaseType)
         {
             var property = type.GetProperty(name, InstanceMembers | BindingFlags.DeclaredOnly);
             if (property != null)
-            {
-                value = property.GetValue(root);
-                return true;
-            }
+                return property.GetValue(root);
 
             var field = type.GetField(name, InstanceMembers | BindingFlags.DeclaredOnly);
             if (field != null)
-            {
-                value = field.GetValue(root);
-                return true;
-            }
+                return field.GetValue(root);
         }
 
-        value = null;
-        return false;
+        return null;
     }
 
     private static object? FindConfigNode(object configRoot)

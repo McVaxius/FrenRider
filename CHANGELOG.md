@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - FATE join/leave no longer changes follow cling distance, so FATE entry cannot stop follow by itself
 - Flying follow can now escape rare vnavmesh wall/object stalls by releasing vnav, ascending, automoving forward, and resuming normal pathing
 - BossMod follow now uses the reviewed `/bmrai follow <name>` command flow instead of the older mismatched follow syntax
+- BossMod AI cleanup snapshots now preserve and restore BMR/VBM AI on/off state instead of only follow and movement fields
+- BossMod AI set to `off` now sends BMR/VBM AI off commands instead of re-enabling BossModReborn AI
 - Main-window AutoDuty warning is only shown while FrenRider is enabled and the blocking warning window is not already open
 - Duty area-transition recovery now resets zone-sensitive services after `BetweenAreas` loads, improving level-70 treasure dungeon waterfall recovery
 
