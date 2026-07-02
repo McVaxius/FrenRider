@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Combat settings now include a global one-shot **Don't move while casting** toggle that updates currently loaded BMR and VBM Action Tweaks settings
 - ADS runtime duty ownership polling now uses authoritative `ADS.IsDutyOwned()` IPC with JSON fallback, a 250ms poll interval, and a bounded 5-second stale hold for transient IPC failures
+- Questionable-driven duty entry now uses `Questionable.IsRunning` IPC to hold FrenRider combat automation, force BMR/VBM/RSR/Wrath off, and release the configured rotation only after 5 continuous ready seconds in duty
 
 ### Fixed
 - Manual ADS Start Inside/Resume now immediately pauses FrenRider follow, navigation, mounts, formation, combat-state changes, duty interaction, maintenance, and automatic dialogs

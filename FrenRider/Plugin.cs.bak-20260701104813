@@ -58,7 +58,6 @@ public sealed class Plugin : IDalamudPlugin
     public AutomationService AutomationService { get; init; }
     public FormationService FormationService { get; init; }
     public AutorotIpcService AutorotIpcService { get; init; }
-    public QuestionableIpcService QuestionableIpcService { get; init; }
     public PartyService PartyService { get; init; }
     public VideoPlaybackService VideoPlaybackService { get; init; }
     public DutyInteractService DutyInteractService { get; init; }
@@ -120,8 +119,7 @@ public sealed class Plugin : IDalamudPlugin
             message => Log.Warning(message));
         FollowService = new FollowService(this, FrenTracker, ZoneService);
         MountService = new MountService(this, FrenTracker, ZoneService);
-        QuestionableIpcService = new QuestionableIpcService(PluginInterface, Log);
-        CombatService = new CombatService(this, FrenTracker, ZoneService, QuestionableIpcService);
+        CombatService = new CombatService(this, FrenTracker, ZoneService);
         AutomationService = new AutomationService(this, FrenTracker, ZoneService);
         FormationService = new FormationService(this, FrenTracker);
         AutorotIpcService = new AutorotIpcService(PluginInterface, Log);
@@ -211,7 +209,6 @@ public sealed class Plugin : IDalamudPlugin
         MainWindow.Dispose();
 
         AutorotIpcService.Dispose();
-        QuestionableIpcService.Dispose();
         AdsDutyIpcService.Dispose();
         AdsUtilityIpcService.Dispose();
         AutomationService.Dispose();

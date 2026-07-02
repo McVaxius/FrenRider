@@ -26,8 +26,6 @@ public class CombatService
     private readonly Plugin plugin;
     private readonly FrenTracker tracker;
     private readonly ZoneService zoneService;
-    private readonly QuestionableIpcService questionableIpcService;
-    private readonly QuestionableDutyCombatGatePolicy questionableDutyCombatGate = new();
 
     private bool wasInCombat;
     private bool wasInDuty;
@@ -55,16 +53,11 @@ public class CombatService
     public string ActivePreset { get; private set; } = "";
     public bool WrathAutoActive => wrathAutoActive;
 
-    public CombatService(
-        Plugin plugin,
-        FrenTracker tracker,
-        ZoneService zoneService,
-        QuestionableIpcService questionableIpcService)
+    public CombatService(Plugin plugin, FrenTracker tracker, ZoneService zoneService)
     {
         this.plugin = plugin;
         this.tracker = tracker;
         this.zoneService = zoneService;
-        this.questionableIpcService = questionableIpcService;
     }
 
     public void ClearExternalAutomationRuntimeState(string reason)
@@ -76,14 +69,13 @@ public class CombatService
         mountedSuppressedPluginName = string.Empty;
         wrathAutoActive = false;
         lastRotationToggleMs = 0;
-        questionableDutyCombatGate.Reset(reason);
     }
 
     public void Update()
     {
         var config = plugin.ConfigManager.GetActiveConfig();
         var inCombat = Plugin.Condition[ConditionFlag.InCombat];
-        var inDuty = IsInDuty();
+        var inDuty = Plugin.Condition[ConditionFlag.BoundByDuty];
         var mountedOrMounting = Plugin.Condition[ConditionFlag.Mounted] || Plugin.Condition[ConditionFlag.Mounting71];
         var now = Environment.TickCount64;
 
@@ -102,10 +94,6 @@ public class CombatService
             wasInCombat = false;
             return;
         }
-
-        var questionableSnapshot = questionableIpcService.Refresh();
-        if (HandleQuestionableDutyCombatGate(config, inCombat, inDuty, now, questionableSnapshot))
-            return;
 
         if (plugin.AutomationService.IsUtilityGateActive)
         {
@@ -220,153 +208,6 @@ public class CombatService
         }
 
         TryApplyPendingCombatSettingsRefresh(config, now, inCombat, inDuty);
-    }
-
-    private bool HandleQuestionableDutyCombatGate(
-        CharacterConfig config,
-        bool inCombat,
-        bool inDuty,
-        long now,
-        QuestionableRunningSnapshot questionableSnapshot)
-    {
-        var questionableRunningOrRecent = questionableSnapshot.IsRunning
-            || questionableIpcService.WasRunningWithin(QuestionableIpcService.RecentRunningHold);
-        var ready = IsQuestionableDutyCombatReady(inDuty, out var notReadyReason);
-        var decision = questionableDutyCombatGate.Update(new QuestionableDutyCombatGateInput(
-            config.Enabled,
-            inDuty,
-            wasInDuty,
-            zoneService.ZoneChanged,
-            questionableRunningOrRecent,
-            ready,
-            notReadyReason,
-            now));
-
-        if (decision.ClearedWithoutActivation)
-        {
-            Plugin.Log.Information($"[FrenRider][Questionable] Combat gate cleared without activation ({decision.StateDetail}).");
-            return false;
-        }
-
-        if (!decision.IsActive && !decision.ShouldActivate)
-            return false;
-
-        if (decision.JustArmed)
-            Plugin.Log.Information("[FrenRider][Questionable] Duty combat gate armed from Questionable.IsRunning state.");
-
-        if (decision.ShouldForceCombatOff)
-            ForceQuestionableDutyCombatOff();
-
-        ResetCombatSettingsRefreshTracking();
-        lastObservedCombatSettingsSignature = string.Empty;
-        wasInCombat = inCombat;
-        wasInDuty = inDuty;
-
-        if (decision.ShouldActivate)
-        {
-            State = CombatState.EnteringCombat;
-            StateDetail = "Questionable duty entry - activating rotation";
-            ActivePreset = "";
-            lastRotationToggleMs = 0;
-
-            if (!IsRotationDisabled(config))
-                ActivateRotation(config, ignoreCooldown: true);
-            else
-            {
-                State = CombatState.OutOfCombat;
-                StateDetail = "Questionable duty entry - rotation disabled";
-            }
-
-            lastObservedCombatSettingsSignature = BuildCombatSettingsSignature(config);
-            Plugin.Log.Information("[FrenRider][Questionable] Duty combat gate released after continuous readiness.");
-            return true;
-        }
-
-        State = CombatState.OutOfCombat;
-        StateDetail = decision.StateDetail;
-        ActivePreset = "";
-        return true;
-    }
-
-    private void ForceQuestionableDutyCombatOff()
-    {
-        plugin.CaptureExternalAutomationSnapshot("Questionable duty combat gate");
-
-        var rsrHandled = plugin.AutorotIpcService.TrySetRsrMode(AutorotIpcService.RsrStateCommandType.Off);
-        foreach (var command in BuildQuestionableDutyCombatOffCommands(includeRsrFallback: !rsrHandled))
-            SendCommand(command);
-
-        wrathAutoActive = false;
-        lastActivePluginIdx = -1;
-        lastRotationToggleMs = 0;
-        ActivePreset = "";
-
-        if (mountedRotationSuppressed)
-            Plugin.Log.Information("[FrenRider][Questionable] Mounted rotation suppression handed off to duty combat gate.");
-        mountedRotationSuppressed = false;
-        mountedSuppressedPluginName = string.Empty;
-
-        Plugin.Log.Information(
-            rsrHandled
-                ? "[FrenRider][Questionable] Forced BMR/VBM/RSR/Wrath combat automation off for duty entry; RSR stopped via IPC."
-                : "[FrenRider][Questionable] Forced BMR/VBM/RSR/Wrath combat automation off for duty entry; RSR fallback command sent.");
-    }
-
-    private bool IsQuestionableDutyCombatReady(bool inDuty, out string reason)
-    {
-        if (!inDuty)
-        {
-            reason = "not in duty";
-            return false;
-        }
-
-        if (!Plugin.ClientState.IsLoggedIn)
-        {
-            reason = "not logged in";
-            return false;
-        }
-
-        if (IsLoadingOrBetweenAreas())
-        {
-            reason = "loading";
-            return false;
-        }
-
-        var player = Plugin.ObjectTable.LocalPlayer;
-        if (player == null)
-        {
-            reason = "local player unavailable";
-            return false;
-        }
-
-        if (Plugin.Condition[ConditionFlag.Unconscious] || player.CurrentHp == 0)
-        {
-            reason = "dead or unconscious";
-            return false;
-        }
-
-        if (IsOccupiedOrCutscene())
-        {
-            reason = "occupied or in cutscene";
-            return false;
-        }
-
-        if (plugin.AutomationService.IsUtilityGateActive)
-        {
-            reason = "ADS utility active";
-            return false;
-        }
-
-        if (plugin.AdsIntegrationService.ShouldPauseDutySystems)
-        {
-            reason = plugin.AdsIntegrationService.IsHandoffPending
-                ? "ADS handoff pending"
-                : "ADS active";
-            return false;
-        }
-
-        reason = "ready";
-        return true;
     }
 
     private void ActivateRotation(CharacterConfig config, bool ignoreCooldown = false)
@@ -988,13 +829,6 @@ public class CombatService
             : new[] { "/bmrai on" };
     }
 
-    internal static string[] BuildQuestionableDutyCombatOffCommands(bool includeRsrFallback = true)
-    {
-        return includeRsrFallback
-            ? new[] { "/bmrai off", "/vbmai off", "/rotation cancel", "/wrath auto off" }
-            : new[] { "/bmrai off", "/vbmai off", "/wrath auto off" };
-    }
-
     private static string DescribeBossModAiSetting(int bossModAI)
         => bossModAI == 1 ? "off" : "on";
 
@@ -1088,21 +922,6 @@ public class CombatService
     {
         return config.RotationType == RotationTypeNone;
     }
-
-    private static bool IsInDuty()
-        => Plugin.Condition[ConditionFlag.BoundByDuty]
-            || Plugin.Condition[ConditionFlag.BoundByDuty56];
-
-    private static bool IsLoadingOrBetweenAreas()
-        => Plugin.Condition[ConditionFlag.BetweenAreas]
-            || Plugin.Condition[ConditionFlag.BetweenAreas51];
-
-    private static bool IsOccupiedOrCutscene()
-        => Plugin.Condition[ConditionFlag.OccupiedInQuestEvent]
-            || Plugin.Condition[ConditionFlag.OccupiedInCutSceneEvent]
-            || Plugin.Condition[ConditionFlag.Occupied33]
-            || Plugin.Condition[ConditionFlag.Occupied39]
-            || Plugin.Condition[ConditionFlag.WatchingCutscene];
 
     private static string FormatCommandArgument(string value)
     {

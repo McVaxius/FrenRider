@@ -23,4 +23,20 @@ public sealed class CombatServiceBossModAiCommandTests
             new[] { command },
             CombatService.BuildBossModAiCommands(bossModAI, pluginName));
     }
+
+    [Fact]
+    public void QuestionableDutyGateCombatOffStopsEveryCombatEngine()
+    {
+        Assert.Equal(
+            new[] { "/bmrai off", "/vbmai off", "/rotation cancel", "/wrath auto off" },
+            CombatService.BuildQuestionableDutyCombatOffCommands());
+    }
+
+    [Fact]
+    public void QuestionableDutyGateCombatOffOmitsRsrFallbackWhenIpcHandledIt()
+    {
+        Assert.Equal(
+            new[] { "/bmrai off", "/vbmai off", "/wrath auto off" },
+            CombatService.BuildQuestionableDutyCombatOffCommands(includeRsrFallback: false));
+    }
 }
