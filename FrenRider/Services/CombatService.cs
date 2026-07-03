@@ -103,6 +103,12 @@ public class CombatService
             return;
         }
 
+        if (plugin.CoppeliaPowerlevelLeaseService.IsLeaseActive)
+        {
+            HandleCoppeliaPowerlevelLease(config, inCombat, inDuty);
+            return;
+        }
+
         var questionableSnapshot = questionableIpcService.Refresh();
         if (HandleQuestionableDutyCombatGate(config, inCombat, inDuty, now, questionableSnapshot))
             return;
@@ -995,8 +1001,44 @@ public class CombatService
             : new[] { "/bmrai off", "/vbmai off", "/wrath auto off" };
     }
 
+    internal static string[] BuildCoppeliaPowerlevelCombatOffCommands(bool includeRsrFallback = true)
+    {
+        return includeRsrFallback
+            ? new[] { "/bmrai off", "/vbmai off", "/rotation cancel", "/wrath auto off" }
+            : new[] { "/bmrai off", "/vbmai off", "/wrath auto off" };
+    }
+
     private static string DescribeBossModAiSetting(int bossModAI)
         => bossModAI == 1 ? "off" : "on";
+
+    private void HandleCoppeliaPowerlevelLease(CharacterConfig config, bool inCombat, bool inDuty)
+    {
+        ResetCombatSettingsRefreshTracking();
+        lastObservedCombatSettingsSignature = string.Empty;
+        State = CombatState.OutOfCombat;
+        StateDetail = "Coppelia PowerlevelBot lease active";
+        ActivePreset = "";
+        wasInCombat = inCombat;
+        wasInDuty = inDuty;
+
+        if (!plugin.CoppeliaPowerlevelLeaseService.TryClaimCombatSuppression())
+            return;
+
+        plugin.CaptureExternalAutomationSnapshot("Coppelia PowerlevelBot lease");
+        var rsrHandled = plugin.AutorotIpcService.TrySetRsrMode(AutorotIpcService.RsrStateCommandType.Off);
+        foreach (var command in BuildCoppeliaPowerlevelCombatOffCommands(includeRsrFallback: !rsrHandled))
+            SendCommand(command);
+
+        mountedRotationSuppressed = false;
+        mountedSuppressedPluginName = string.Empty;
+        wrathAutoActive = false;
+        lastActivePluginIdx = -1;
+        lastRotationToggleMs = 0;
+        Plugin.Log.Information(
+            rsrHandled
+                ? "[FrenRider][CoppeliaPowerlevel] Forced BMR/VBM/RSR/Wrath off; RSR stopped via IPC."
+                : "[FrenRider][CoppeliaPowerlevel] Forced BMR/VBM/RSR/Wrath off; RSR fallback command sent.");
+    }
 
     private void DisableOtherRotationPlugins(CharacterConfig config)
     {

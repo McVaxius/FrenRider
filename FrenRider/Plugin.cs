@@ -52,6 +52,7 @@ public sealed class Plugin : IDalamudPlugin
     public AdsReflectionIpcService AdsReflectionIpcService { get; init; }
     public BossModActionTweaksService BossModActionTweaksService { get; init; }
     public ExternalAutomationCleanupService ExternalAutomationCleanupService { get; init; }
+    public CoppeliaPowerlevelLeaseService CoppeliaPowerlevelLeaseService { get; init; }
     public FollowService FollowService { get; init; }
     public MountService MountService { get; init; }
     public CombatService CombatService { get; init; }
@@ -118,6 +119,7 @@ public sealed class Plugin : IDalamudPlugin
             new BossModExternalAutomationSnapshotProvider(PluginInterface, Log),
             message => Log.Information(message),
             message => Log.Warning(message));
+        CoppeliaPowerlevelLeaseService = new CoppeliaPowerlevelLeaseService(this);
         FollowService = new FollowService(this, FrenTracker, ZoneService);
         MountService = new MountService(this, FrenTracker, ZoneService);
         QuestionableIpcService = new QuestionableIpcService(PluginInterface, Log);
@@ -212,6 +214,7 @@ public sealed class Plugin : IDalamudPlugin
 
         AutorotIpcService.Dispose();
         QuestionableIpcService.Dispose();
+        CoppeliaPowerlevelLeaseService.Dispose();
         AdsDutyIpcService.Dispose();
         AdsUtilityIpcService.Dispose();
         AutomationService.Dispose();
@@ -270,6 +273,7 @@ public sealed class Plugin : IDalamudPlugin
         }
         else
         {
+            CoppeliaPowerlevelLeaseService.HandleManualFrenRiderDisable();
             FollowService.CancelFlyingStuckRecovery("disabled");
             FollowService.PreemptFarChase("disabled");
             MountService.PreemptFarChase("disabled");
@@ -423,6 +427,7 @@ public sealed class Plugin : IDalamudPlugin
         {
             Measure("dtr", UpdateDtrBar);
             Measure("zone", ZoneService.Update);
+            Measure("coppelia-powerlevel-lease", CoppeliaPowerlevelLeaseService.Update);
 
             if (IsAreaTransitionActive())
             {
@@ -454,6 +459,7 @@ public sealed class Plugin : IDalamudPlugin
 
             // Update fren tracking
             Measure("fren-tracker", FrenTracker.Update);
+            Measure("coppelia-powerlevel-lease", CoppeliaPowerlevelLeaseService.Update);
 
             // Check for plugin enable/disable state changes
             var config = ConfigManager.GetActiveConfig();
@@ -620,8 +626,8 @@ public sealed class Plugin : IDalamudPlugin
 
         dtrEntry.Tooltip = new SeString(new TextPayload(
             config.Enabled
-                ? $"Fren Rider active - Following {config.FrenName}. Cleanup: {ExternalAutomationCleanupService.StatusText}"
-                : $"Fren Rider disabled - Click to toggle. Cleanup: {ExternalAutomationCleanupService.StatusText}"));
+                ? $"Fren Rider active - Following {config.FrenName}. Coppelia: {CoppeliaPowerlevelLeaseService.StatusText}. Cleanup: {ExternalAutomationCleanupService.StatusText}"
+                : $"Fren Rider disabled - Click to toggle. Coppelia: {CoppeliaPowerlevelLeaseService.StatusText}. Cleanup: {ExternalAutomationCleanupService.StatusText}"));
     }
 
     private void LoadMountNames()

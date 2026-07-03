@@ -526,6 +526,12 @@ public class AutomationService : IDisposable
             return;
         }
 
+        if (plugin.CoppeliaPowerlevelLeaseService.ShouldSuppressCompanionAutoSummon)
+        {
+            CompanionStatus = "Suppressed by Coppelia PowerlevelBot";
+            return;
+        }
+
         var mounted = Plugin.Condition[ConditionFlag.Mounted];
         var riding = Plugin.Condition[ConditionFlag.Mounting71];
         var inDuty = Plugin.Condition[ConditionFlag.BoundByDuty];
