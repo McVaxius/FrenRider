@@ -412,6 +412,22 @@ public class ConfigManager
             SaveAccount(CurrentAccountId);
     }
 
+    public bool ClearActiveFrenName()
+    {
+        var account = GetCurrentAccount();
+        if (account == null)
+            return false;
+
+        var activeConfig = string.IsNullOrEmpty(SelectedCharacterKey)
+            ? account.DefaultConfig
+            : account.Characters.TryGetValue(SelectedCharacterKey, out var characterConfig)
+                ? characterConfig
+                : account.DefaultConfig;
+
+        activeConfig.FrenName = string.Empty;
+        return SaveAccount(CurrentAccountId);
+    }
+
     public void SetFrenRiderEnabled(bool enabled)
     {
         var currentConfig = GetActiveConfig();
@@ -613,9 +629,9 @@ public class ConfigManager
         }
     }
 
-    private void SaveAccount(string accountId)
+    private bool SaveAccount(string accountId)
     {
-        if (!accounts.TryGetValue(accountId, out var account)) return;
+        if (!accounts.TryGetValue(accountId, out var account)) return false;
 
         try
         {
@@ -624,10 +640,12 @@ public class ConfigManager
             var json = JsonSerializer.Serialize(account, JsonOptions);
             File.WriteAllText(filePath, json);
             log.Debug($"Saved account {accountId}");
+            return true;
         }
         catch (Exception ex)
         {
             log.Error($"Failed to save account {accountId}: {ex.Message}");
+            return false;
         }
     }
 

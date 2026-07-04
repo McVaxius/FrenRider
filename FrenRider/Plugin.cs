@@ -66,6 +66,7 @@ public sealed class Plugin : IDalamudPlugin
     public ExitBehaviourService ExitBehaviourService { get; init; }
     public FateSyncService FateSyncService { get; init; }
     public YesAlreadyIPC YesAlreadyIPC { get; init; }
+    public CombatOnlyIPC CombatOnlyIPC { get; init; }
     public AutoYesService AutoYesService { get; init; }
     public RespawnService RespawnService { get; init; }
     public AutoDutyDetectionService AutoDutyDetectionService { get; init; }
@@ -134,6 +135,7 @@ public sealed class Plugin : IDalamudPlugin
         ExitBehaviourService = new ExitBehaviourService(this, FrenTracker, ZoneService);
         FateSyncService = new FateSyncService(this, ZoneService);
         YesAlreadyIPC = new YesAlreadyIPC(Log);
+        CombatOnlyIPC = new CombatOnlyIPC(PluginInterface, ConfigManager, Log);
         AutoYesService = new AutoYesService(this, Condition, Log);
         RespawnService = new RespawnService(this);
 		
@@ -223,6 +225,7 @@ public sealed class Plugin : IDalamudPlugin
         VideoPlaybackService.Dispose();
         ExitBehaviourService.Dispose();
         YesAlreadyIPC.Dispose();
+        CombatOnlyIPC.Dispose();
         AutoYesService.Dispose();
         AutoDutyDetectionService.Dispose();
 
