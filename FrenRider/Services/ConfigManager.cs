@@ -428,6 +428,131 @@ public class ConfigManager
         return SaveAccount(CurrentAccountId);
     }
 
+    /// <summary>
+    /// Atomically configures and enables only the selected character profile for DAD.
+    /// The default profile is never used as a fallback by this operation.
+    /// </summary>
+    public bool ConfigureAndEnableActiveCharacter(string nameAtWorld)
+    {
+        if (string.IsNullOrWhiteSpace(CurrentAccountId))
+            return false;
+
+        var account = GetCurrentAccount();
+        if (account == null
+            || string.IsNullOrWhiteSpace(account.AccountId)
+            || !string.Equals(account.AccountId, CurrentAccountId, StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        var succeeded = TryConfigureAndEnableActiveCharacter(
+            account,
+            SelectedCharacterKey,
+            nameAtWorld,
+            () => SaveAccount(CurrentAccountId),
+            out var becameEnabled);
+
+        if (!succeeded)
+            return false;
+
+        if (becameEnabled)
+        {
+            try
+            {
+                OnFrenRiderEnabledChanged?.Invoke(true);
+            }
+            catch (Exception ex)
+            {
+                // The profile is already durably enabled at this point. Do not report a
+                // retryable IPC failure after persistence succeeded, because that would
+                // violate the endpoint's false-without-mutation contract.
+                log.Error(ex, "[ConfigManager] FrenRider enable lifecycle callback failed after DAD configuration was saved.");
+            }
+
+            log.Information("[ConfigManager] FrenRider enabled by DAD for the active character profile.");
+        }
+
+        return true;
+    }
+
+    internal static bool TryConfigureAndEnableActiveCharacter(
+        AccountConfig? account,
+        string? selectedCharacterKey,
+        string? nameAtWorld,
+        Func<bool> persist,
+        out bool becameEnabled)
+    {
+        becameEnabled = false;
+
+        if (account == null
+            || string.IsNullOrWhiteSpace(account.AccountId)
+            || account.Characters == null
+            || string.IsNullOrWhiteSpace(selectedCharacterKey)
+            || !account.Characters.TryGetValue(selectedCharacterKey, out var activeConfig)
+            || activeConfig == null
+            || !IsValidExactNameAtWorld(nameAtWorld))
+        {
+            return false;
+        }
+
+        var exactNameAtWorld = nameAtWorld!;
+        var previousFrenName = activeConfig.FrenName;
+        var wasEnabled = activeConfig.Enabled;
+
+        if (wasEnabled && string.Equals(previousFrenName, exactNameAtWorld, StringComparison.Ordinal))
+            return true;
+
+        activeConfig.FrenName = exactNameAtWorld;
+        activeConfig.Enabled = true;
+
+        var saved = false;
+        try
+        {
+            saved = persist();
+        }
+        catch
+        {
+            // Persistence exceptions are an ordinary endpoint rejection. Restore the
+            // exact in-memory values so callers can safely retry.
+        }
+
+        if (!saved)
+        {
+            activeConfig.FrenName = previousFrenName;
+            activeConfig.Enabled = wasEnabled;
+            return false;
+        }
+
+        becameEnabled = !wasEnabled;
+        return true;
+    }
+
+    internal static bool IsValidExactNameAtWorld(string? nameAtWorld)
+    {
+        if (string.IsNullOrWhiteSpace(nameAtWorld)
+            || !string.Equals(nameAtWorld, nameAtWorld.Trim(), StringComparison.Ordinal)
+            || nameAtWorld.Any(char.IsControl))
+        {
+            return false;
+        }
+
+        var separator = nameAtWorld.IndexOf('@');
+        if (separator <= 0
+            || separator != nameAtWorld.LastIndexOf('@')
+            || separator >= nameAtWorld.Length - 1)
+        {
+            return false;
+        }
+
+        var characterName = nameAtWorld[..separator];
+        var worldName = nameAtWorld[(separator + 1)..];
+        return !string.IsNullOrWhiteSpace(characterName)
+               && !string.IsNullOrWhiteSpace(worldName)
+               && string.Equals(characterName, characterName.Trim(), StringComparison.Ordinal)
+               && string.Equals(worldName, worldName.Trim(), StringComparison.Ordinal)
+               && !worldName.Any(char.IsWhiteSpace);
+    }
+
     public void SetFrenRiderEnabled(bool enabled)
     {
         var currentConfig = GetActiveConfig();

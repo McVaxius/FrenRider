@@ -67,6 +67,7 @@ public sealed class Plugin : IDalamudPlugin
     public FateSyncService FateSyncService { get; init; }
     public YesAlreadyIPC YesAlreadyIPC { get; init; }
     public CombatOnlyIPC CombatOnlyIPC { get; init; }
+    public DadIPC DadIPC { get; init; }
     public AutoYesService AutoYesService { get; init; }
     public RespawnService RespawnService { get; init; }
     public AutoDutyDetectionService AutoDutyDetectionService { get; init; }
@@ -145,6 +146,7 @@ public sealed class Plugin : IDalamudPlugin
 
         // Hook into FrenRider enabled state changes
         ConfigManager.OnFrenRiderEnabledChanged += OnFrenRiderEnabledChanged;
+        DadIPC = new DadIPC(PluginInterface, ConfigManager, FrenTracker, Log);
 
         // Check for AutoDuty on plugin load if FrenRider is already enabled
         if (ConfigManager.GetActiveConfig().Enabled)
@@ -226,6 +228,7 @@ public sealed class Plugin : IDalamudPlugin
         ExitBehaviourService.Dispose();
         YesAlreadyIPC.Dispose();
         CombatOnlyIPC.Dispose();
+        DadIPC.Dispose();
         AutoYesService.Dispose();
         AutoDutyDetectionService.Dispose();
 
