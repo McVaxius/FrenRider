@@ -90,7 +90,10 @@ public sealed class ExternalAutomationCleanupServiceTests
     {
         var provider = new FakeSnapshotProvider();
         var sender = new FakeCommandSender();
-        var service = new ExternalAutomationCleanupService(sender, provider);
+        var service = new ExternalAutomationCleanupService(
+            sender,
+            provider,
+            rsrCleanupController: new AutorotRsrCleanupController(() => true, sender));
         var config = new CharacterConfig { CleanupMode = FrenRiderCleanupMode.TurnEverythingOff };
 
         service.MarkWrathAutoStarted("account", "character", "test");
@@ -100,6 +103,8 @@ public sealed class ExternalAutomationCleanupServiceTests
         Assert.Equal(
             new[] { "/bmrai off", "/vbmai off", "/cbt disable AutoFollow", "/wrath auto off" },
             sender.Commands);
+        Assert.Contains(AutorotRsrCleanupController.TypedActionLabel, result.Commands);
+        Assert.DoesNotContain(AutorotRsrCleanupController.FallbackCommand, sender.Commands);
     }
 
     [Fact]
@@ -127,6 +132,105 @@ public sealed class ExternalAutomationCleanupServiceTests
 
         Assert.Equal(ExternalAutomationCleanupState.Partial, result.State);
         Assert.Contains("Partial", result.StatusText, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void TypedRsrSuccessDoesNotSendFallbackAndReportsOneCompositeAction()
+    {
+        var provider = new FakeSnapshotProvider();
+        var sender = new FakeCommandSender();
+        var controller = new AutorotRsrCleanupController(() => true, sender);
+        var service = new ExternalAutomationCleanupService(
+            sender,
+            provider,
+            rsrCleanupController: controller);
+
+        var result = service.Cleanup(
+            new CharacterConfig { CleanupMode = FrenRiderCleanupMode.TurnEverythingOff },
+            "account",
+            "character",
+            "test");
+
+        Assert.Equal(ExternalAutomationCleanupState.ForceOff, result.State);
+        Assert.DoesNotContain(AutorotRsrCleanupController.FallbackCommand, sender.Commands);
+        Assert.Equal(1, result.Commands.Count(command =>
+            command is AutorotRsrCleanupController.TypedActionLabel or AutorotRsrCleanupController.FallbackCommand));
+        Assert.Contains(AutorotRsrCleanupController.TypedActionLabel, result.Commands);
+    }
+
+    [Fact]
+    public void FailedTypedRsrUsesSuccessfulCommandFallbackOnce()
+    {
+        var provider = new FakeSnapshotProvider();
+        var sender = new FakeCommandSender();
+        var controller = new AutorotRsrCleanupController(() => false, sender);
+        var service = new ExternalAutomationCleanupService(
+            sender,
+            provider,
+            rsrCleanupController: controller);
+
+        var result = service.Cleanup(
+            new CharacterConfig { CleanupMode = FrenRiderCleanupMode.TurnEverythingOff },
+            "account",
+            "character",
+            "test");
+
+        Assert.Equal(ExternalAutomationCleanupState.ForceOff, result.State);
+        Assert.Equal(1, sender.Commands.Count(command =>
+            command == AutorotRsrCleanupController.FallbackCommand));
+        Assert.Contains(AutorotRsrCleanupController.FallbackCommand, result.Commands);
+        Assert.DoesNotContain(AutorotRsrCleanupController.TypedActionLabel, result.Commands);
+    }
+
+    [Fact]
+    public void ThrowingTypedRsrStillUsesCommandFallbackOnce()
+    {
+        var provider = new FakeSnapshotProvider();
+        var sender = new FakeCommandSender();
+        var controller = new AutorotRsrCleanupController(
+            () => throw new InvalidOperationException("typed IPC unavailable"),
+            sender);
+        var service = new ExternalAutomationCleanupService(
+            sender,
+            provider,
+            rsrCleanupController: controller);
+
+        var result = service.Cleanup(
+            new CharacterConfig { CleanupMode = FrenRiderCleanupMode.TurnEverythingOff },
+            "account",
+            "character",
+            "test");
+
+        Assert.Equal(ExternalAutomationCleanupState.ForceOff, result.State);
+        Assert.Equal(1, sender.Commands.Count(command =>
+            command == AutorotRsrCleanupController.FallbackCommand));
+        Assert.Contains(AutorotRsrCleanupController.FallbackCommand, result.Commands);
+    }
+
+    [Fact]
+    public void TypedAndFallbackRsrFailureCountsAsOneFailedCompositeAction()
+    {
+        var provider = new FakeSnapshotProvider();
+        var sender = new FakeCommandSender
+        {
+            FailedCommands = { AutorotRsrCleanupController.FallbackCommand },
+        };
+        var controller = new AutorotRsrCleanupController(() => false, sender);
+        var service = new ExternalAutomationCleanupService(
+            sender,
+            provider,
+            rsrCleanupController: controller);
+
+        var result = service.Cleanup(
+            new CharacterConfig { CleanupMode = FrenRiderCleanupMode.TurnEverythingOff },
+            "account",
+            "character",
+            "test");
+
+        Assert.Equal(ExternalAutomationCleanupState.Partial, result.State);
+        Assert.Contains("1/4", result.StatusText, StringComparison.Ordinal);
+        Assert.Equal(1, result.Commands.Count(command =>
+            command is AutorotRsrCleanupController.TypedActionLabel or AutorotRsrCleanupController.FallbackCommand));
     }
 
     private static ExternalAutomationSnapshot Snapshot(

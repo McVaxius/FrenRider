@@ -29,6 +29,68 @@ public interface IExternalAutomationSnapshotProvider
     ExternalAutomationSnapshot Capture(string accountId, string characterKey);
 }
 
+public sealed record RsrCleanupAttempt(bool Success, string ReportedAction, bool UsedFallback);
+
+public interface IRsrCleanupController
+{
+    RsrCleanupAttempt TurnOff();
+}
+
+public sealed class AutorotRsrCleanupController : IRsrCleanupController
+{
+    public const string TypedActionLabel = "RSR IPC Off";
+    public const string FallbackCommand = "/rotation cancel";
+    private readonly Func<bool> tryTypedOff;
+    private readonly IExternalAutomationCommandSender commandSender;
+
+    public AutorotRsrCleanupController(
+        AutorotIpcService autorotIpcService,
+        IExternalAutomationCommandSender commandSender)
+    {
+        tryTypedOff = () => autorotIpcService.TrySetRsrMode(AutorotIpcService.RsrStateCommandType.Off);
+        this.commandSender = commandSender;
+    }
+
+    public AutorotRsrCleanupController(
+        Func<bool> tryTypedOff,
+        IExternalAutomationCommandSender commandSender)
+    {
+        this.tryTypedOff = tryTypedOff;
+        this.commandSender = commandSender;
+    }
+
+    public RsrCleanupAttempt TurnOff()
+    {
+        var typedSucceeded = false;
+        try
+        {
+            typedSucceeded = tryTypedOff();
+        }
+        catch
+        {
+            // Typed IPC failure still permits the documented command fallback.
+        }
+
+        if (typedSucceeded)
+            return new RsrCleanupAttempt(true, TypedActionLabel, UsedFallback: false);
+
+        return new RsrCleanupAttempt(
+            commandSender.TrySendCommand(FallbackCommand),
+            FallbackCommand,
+            UsedFallback: true);
+    }
+}
+
+internal sealed class FallbackOnlyRsrCleanupController(
+    IExternalAutomationCommandSender commandSender) : IRsrCleanupController
+{
+    public RsrCleanupAttempt TurnOff()
+        => new(
+            commandSender.TrySendCommand(AutorotRsrCleanupController.FallbackCommand),
+            AutorotRsrCleanupController.FallbackCommand,
+            UsedFallback: true);
+}
+
 public sealed record BossModAutomationSnapshot(
     bool IsAvailable,
     bool? AiActive,
@@ -71,6 +133,7 @@ public sealed class ExternalAutomationCleanupService
     private readonly IExternalAutomationSnapshotProvider snapshotProvider;
     private readonly Action<string>? infoLog;
     private readonly Action<string>? warningLog;
+    private readonly IRsrCleanupController rsrCleanupController;
     private readonly Dictionary<string, ExternalAutomationSnapshot> snapshots = new(StringComparer.OrdinalIgnoreCase);
     private readonly HashSet<string> wrathStartedKeys = new(StringComparer.OrdinalIgnoreCase);
 
@@ -78,12 +141,14 @@ public sealed class ExternalAutomationCleanupService
         IExternalAutomationCommandSender commandSender,
         IExternalAutomationSnapshotProvider snapshotProvider,
         Action<string>? infoLog = null,
-        Action<string>? warningLog = null)
+        Action<string>? warningLog = null,
+        IRsrCleanupController? rsrCleanupController = null)
     {
         this.commandSender = commandSender;
         this.snapshotProvider = snapshotProvider;
         this.infoLog = infoLog;
         this.warningLog = warningLog;
+        this.rsrCleanupController = rsrCleanupController ?? new FallbackOnlyRsrCleanupController(commandSender);
     }
 
     public ExternalAutomationCleanupState State { get; private set; } = ExternalAutomationCleanupState.Idle;
@@ -167,6 +232,18 @@ public sealed class ExternalAutomationCleanupService
             Send("/vbmai off"),
             Send("/cbt disable AutoFollow"),
         };
+
+        RsrCleanupAttempt rsr;
+        try
+        {
+            rsr = rsrCleanupController.TurnOff();
+        }
+        catch (Exception ex)
+        {
+            rsr = new RsrCleanupAttempt(false, AutorotRsrCleanupController.TypedActionLabel, UsedFallback: false);
+            warningLog?.Invoke($"[ExternalCleanup] RSR cleanup controller failed: {ex.Message}");
+        }
+        attempts.Add(new CommandAttempt(rsr.ReportedAction, rsr.Success));
 
         if (wrathStartedKeys.Contains(key))
             attempts.Add(Send("/wrath auto off"));

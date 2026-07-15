@@ -983,7 +983,7 @@ public class ConfigWindow : Window, IDisposable
             configManager.SaveCurrentAccount();
         }
         ImGui.SameLine();
-        HelpMarker("Restore snapshot: put captured BMR/VBM AI on/off, follow, movement, and CBT fields back on /fr off.\nTurn everything off: disable BMR/VBM AI, CBT AutoFollow, and Wrath auto if FrenRider started it.");
+        HelpMarker("Restore snapshot: put captured BMR/VBM AI on/off, follow, movement, and CBT fields back on /fr off.\nTurn everything off: disable BMR/VBM AI, CBT AutoFollow, RotationSolverReborn, and Wrath auto if FrenRider started it.");
         DrawDefaultSettingSyncButton("Cleanup Mode");
 
         // RSR Rotation Type (dropdown)

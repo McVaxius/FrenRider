@@ -116,11 +116,14 @@ public sealed class Plugin : IDalamudPlugin
         AdsUtilityIpcService = new AdsUtilityIpcService(PluginInterface, Log);
         AdsReflectionIpcService = new AdsReflectionIpcService(this, PluginInterface, Log);
         BossModActionTweaksService = new BossModActionTweaksService(PluginInterface, Log);
+        AutorotIpcService = new AutorotIpcService(PluginInterface, Log);
+        var externalAutomationCommandSender = new DalamudExternalAutomationCommandSender();
         ExternalAutomationCleanupService = new ExternalAutomationCleanupService(
-            new DalamudExternalAutomationCommandSender(),
+            externalAutomationCommandSender,
             new BossModExternalAutomationSnapshotProvider(PluginInterface, Log),
             message => Log.Information(message),
-            message => Log.Warning(message));
+            message => Log.Warning(message),
+            new AutorotRsrCleanupController(AutorotIpcService, externalAutomationCommandSender));
         CoppeliaPowerlevelLeaseService = new CoppeliaPowerlevelLeaseService(this);
         FollowService = new FollowService(this, FrenTracker, ZoneService);
         MountService = new MountService(this, FrenTracker, ZoneService);
@@ -128,7 +131,6 @@ public sealed class Plugin : IDalamudPlugin
         CombatService = new CombatService(this, FrenTracker, ZoneService, QuestionableIpcService);
         AutomationService = new AutomationService(this, FrenTracker, ZoneService);
         FormationService = new FormationService(this, FrenTracker);
-        AutorotIpcService = new AutorotIpcService(PluginInterface, Log);
         PartyService = new PartyService(this, Log, GameGui);
         PartyService.Initialize();
         VideoPlaybackService = new VideoPlaybackService(Configuration, Log, ChatGui);
