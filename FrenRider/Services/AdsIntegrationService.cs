@@ -99,7 +99,8 @@ public sealed class AdsIntegrationService
     {
         var config = plugin.ConfigManager.GetActiveConfig();
         var inDuty = Plugin.Condition[ConditionFlag.BoundByDuty]
-            || Plugin.Condition[ConditionFlag.BoundByDuty56];
+            || Plugin.Condition[ConditionFlag.BoundByDuty56]
+            || Plugin.Condition[ConditionFlag.BoundByDuty95];
         var territoryTypeId = zoneService.TerritoryId;
 
         var ownership = adsDutyIpcService.Refresh();
@@ -246,6 +247,19 @@ public sealed class AdsIntegrationService
         Plugin.Log.Information($"[FrenRider][ADS] Enabled exit-only takeover while keeping FrenRider duty systems paused: {reason}");
     }
 
+    internal AdsDutyCategory? GetCurrentDutyCategory()
+    {
+        var territoryTypeId = zoneService.TerritoryId != 0
+            ? zoneService.TerritoryId
+            : Plugin.ClientState.TerritoryType;
+        return GetDutyCategory(territoryTypeId);
+    }
+
+    internal AdsDutyCategory? GetDutyCategory(uint territoryTypeId)
+        => entriesByTerritory.TryGetValue(territoryTypeId, out var entry)
+            ? entry.Category
+            : null;
+
     private void AwaitHandoffConfirmation(DateTime now, AdsDutyReadiness readiness, string reason)
     {
         handoffRequestedAtUtc = now;
@@ -292,7 +306,7 @@ public sealed class AdsIntegrationService
                 row.ContentType.Value.RowId,
                 row.ContentMemberType.Value.RowId,
                 partySize,
-                NormalizeName(row.ContentType.Value.Name.ToString()));
+                NormalizeName(englishRow.ContentType.Value.Name.ToString()));
             var lowered = englishName.ToLowerInvariant();
             var maturity = PilotDutyNames.Contains(lowered)
                 ? Math.Max(ClearanceMaturityByDutyName.GetValueOrDefault(englishName, 0), 3)
@@ -396,7 +410,7 @@ public sealed class AdsIntegrationService
         return true;
     }
 
-    private static AdsDutyCategory ClassifyDutyCategory(
+    internal static AdsDutyCategory ClassifyDutyCategory(
         uint territoryTypeId,
         uint contentTypeRowId,
         uint contentMemberTypeRowId,
@@ -408,12 +422,14 @@ public sealed class AdsIntegrationService
 
         var normalizedType = NormalizeName(contentTypeName).ToLowerInvariant();
         if (normalizedType.Contains("guild hest", StringComparison.Ordinal)
-            || normalizedType.Contains("guildhest", StringComparison.Ordinal))
+            || normalizedType.Contains("guildhest", StringComparison.Ordinal)
+            || contentTypeRowId == 5)
         {
             return AdsDutyCategory.GuildHest;
         }
 
-        if (normalizedType.Contains("deep dungeon", StringComparison.Ordinal))
+        if (normalizedType.Contains("deep dungeon", StringComparison.Ordinal)
+            || contentTypeRowId == 21)
             return AdsDutyCategory.DeepDungeon;
 
         if (normalizedType.Contains("treasure", StringComparison.Ordinal))
@@ -422,7 +438,7 @@ public sealed class AdsIntegrationService
         if (normalizedType.Contains("alliance", StringComparison.Ordinal) || partySize >= 24)
             return AdsDutyCategory.Alliance;
 
-        if (partySize <= 1)
+        if (partySize == 1)
             return AdsDutyCategory.Solo;
 
         if (partySize == 4)
@@ -431,18 +447,16 @@ public sealed class AdsIntegrationService
         if (partySize == 8)
             return AdsDutyCategory.EightMan;
 
-        return contentTypeRowId switch
+        if (partySize > 0)
+            return AdsDutyCategory.Other;
+
+        return contentMemberTypeRowId switch
         {
-            5 => AdsDutyCategory.GuildHest,
-            21 => AdsDutyCategory.DeepDungeon,
-            _ => contentMemberTypeRowId switch
-            {
-                3 => AdsDutyCategory.Solo,
-                4 => AdsDutyCategory.FourMan,
-                5 => AdsDutyCategory.EightMan,
-                6 => AdsDutyCategory.Alliance,
-                _ => AdsDutyCategory.Other,
-            },
+            3 => AdsDutyCategory.Solo,
+            4 => AdsDutyCategory.FourMan,
+            5 => AdsDutyCategory.EightMan,
+            6 => AdsDutyCategory.Alliance,
+            _ => AdsDutyCategory.Other,
         };
     }
 

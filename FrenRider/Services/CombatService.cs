@@ -27,7 +27,7 @@ public class CombatService
     private readonly FrenTracker tracker;
     private readonly ZoneService zoneService;
     private readonly QuestionableIpcService questionableIpcService;
-    private readonly QuestionableDutyCombatGatePolicy questionableDutyCombatGate = new();
+    private readonly DutyCombatAuthorityPolicy dutyCombatAuthorityPolicy = new();
 
     private bool wasInCombat;
     private bool wasInDuty;
@@ -54,6 +54,11 @@ public class CombatService
     public string StateDetail { get; private set; } = "";
     public string ActivePreset { get; private set; } = "";
     public bool WrathAutoActive => wrathAutoActive;
+    internal DutyCombatAuthority DutyAuthority => dutyCombatAuthorityPolicy.Authority;
+    internal bool IsQuestionableSoloAuthorityActive
+        => dutyCombatAuthorityPolicy.Authority == DutyCombatAuthority.QuestionableSolo;
+    private bool ShouldSuppressFrenRiderCombatCommands
+        => IsQuestionableSoloAuthorityActive;
 
     public CombatService(
         Plugin plugin,
@@ -76,7 +81,29 @@ public class CombatService
         mountedSuppressedPluginName = string.Empty;
         wrathAutoActive = false;
         lastRotationToggleMs = 0;
-        questionableDutyCombatGate.Reset(reason);
+        wasInCombat = false;
+        wasInDuty = false;
+        LogDutyAuthorityTransition(dutyCombatAuthorityPolicy.Reset(reason), null, false);
+    }
+
+    public bool PrepareForEnableCombatSetup()
+    {
+        var config = plugin.ConfigManager.GetActiveConfig();
+        var inDuty = IsInDuty();
+        var decision = RefreshDutyCombatAuthority(
+            config,
+            inDuty,
+            questionableIpcService.Refresh(force: true),
+            frenRiderBootstrapAllowed: false);
+
+        if (decision.ShouldForceCombatOff)
+            ForceQuestionableSoloCombatOff();
+
+        if (decision.Authority != DutyCombatAuthority.QuestionableSolo)
+            return true;
+
+        SetQuestionableSoloSuppressedState(Plugin.Condition[ConditionFlag.InCombat], inDuty);
+        return false;
     }
 
     public void Update()
@@ -96,10 +123,26 @@ public class CombatService
             lastBossModMovementUnlockSignature = string.Empty;
             //if (wasInCombat) DeactivateRotation(config);
 			//Plugin.Log.Information($"Combat: stopped FrenRider GHOST IN THE MACHINE 5 attemting to deactivate rotations after combat like an idiot");
-			//debug/code review this is called every frame and could be an issue
+            //debug/code review this is called every frame and could be an issue
             State = CombatState.OutOfCombat;
             StateDetail = "Disabled";
-            wasInCombat = false;
+            return;
+        }
+
+        var questionableSnapshot = questionableIpcService.Refresh();
+        var authorityDecision = RefreshDutyCombatAuthority(
+            config,
+            inDuty,
+            questionableSnapshot,
+            frenRiderBootstrapAllowed: !plugin.CoppeliaPowerlevelLeaseService.IsLeaseActive
+                && !plugin.AutomationService.IsUtilityGateActive);
+
+        if (authorityDecision.ShouldForceCombatOff)
+            ForceQuestionableSoloCombatOff();
+
+        if (authorityDecision.Authority == DutyCombatAuthority.QuestionableSolo)
+        {
+            SetQuestionableSoloSuppressedState(inCombat, inDuty);
             return;
         }
 
@@ -109,9 +152,11 @@ public class CombatService
             return;
         }
 
-        var questionableSnapshot = questionableIpcService.Refresh();
-        if (HandleQuestionableDutyCombatGate(config, inCombat, inDuty, now, questionableSnapshot))
+        if (authorityDecision.ShouldBootstrapFrenRider)
+        {
+            BootstrapFrenRiderDutyCombat(config, inCombat);
             return;
+        }
 
         if (plugin.AutomationService.IsUtilityGateActive)
         {
@@ -130,24 +175,27 @@ public class CombatService
         if (HandleMountedRotationLifecycle(config, mountedOrMounting, inCombat, inDuty))
             return;
 
-        // Zone transition: deactivate rotation and reset
-        if (zoneService.ZoneChanged)
-        {
-            HandleZoneTransition(config, inCombat, inDuty);
-            return;
-        }
-
         if (plugin.AdsIntegrationService.ShouldPauseDutySystems)
         {
             ResetCombatSettingsRefreshTracking();
             lastObservedCombatSettingsSignature = string.Empty;
-            State = CombatState.OutOfCombat;
-            StateDetail = plugin.AdsIntegrationService.IsHandoffPending
-                ? "ADS handoff pending"
-                : "ADS active";
-            ActivePreset = "";
+            State = IsRotationDisabled(config) ? CombatState.OutOfCombat : CombatState.InCombat;
+            StateDetail = IsRotationDisabled(config)
+                ? "ADS duty ownership active; FrenRider rotation disabled"
+                : plugin.AdsIntegrationService.IsHandoffPending
+                    ? "ADS handoff pending; FrenRider combat authoritative"
+                    : "ADS active; FrenRider combat authoritative";
+            if (IsRotationDisabled(config))
+                ActivePreset = "";
             wasInCombat = inCombat;
             wasInDuty = inDuty;
+            return;
+        }
+
+        // ADS-owned duties return above after their one per-duty combat bootstrap.
+        if (zoneService.ZoneChanged)
+        {
+            HandleZoneTransition(config, inCombat, inDuty);
             return;
         }
 
@@ -228,79 +276,95 @@ public class CombatService
         TryApplyPendingCombatSettingsRefresh(config, now, inCombat, inDuty);
     }
 
-    private bool HandleQuestionableDutyCombatGate(
+    private DutyCombatAuthorityDecision RefreshDutyCombatAuthority(
         CharacterConfig config,
-        bool inCombat,
         bool inDuty,
-        long now,
-        QuestionableRunningSnapshot questionableSnapshot)
+        QuestionableRunningSnapshot questionableSnapshot,
+        bool frenRiderBootstrapAllowed)
     {
         var questionableRunningOrRecent = questionableSnapshot.IsRunning
             || questionableIpcService.WasRunningWithin(QuestionableIpcService.RecentRunningHold);
-        var ready = IsQuestionableDutyCombatReady(inDuty, out var notReadyReason);
-        var decision = questionableDutyCombatGate.Update(new QuestionableDutyCombatGateInput(
+        var boundByDuty95 = Plugin.Condition[ConditionFlag.BoundByDuty95];
+        var dutyCategory = plugin.AdsIntegrationService.GetCurrentDutyCategory();
+        var decision = dutyCombatAuthorityPolicy.Update(new DutyCombatAuthorityInput(
             config.Enabled,
             inDuty,
-            wasInDuty,
-            zoneService.ZoneChanged,
+            boundByDuty95,
+            dutyCategory,
             questionableRunningOrRecent,
-            ready,
-            notReadyReason,
-            now));
+            frenRiderBootstrapAllowed));
 
-        if (decision.ClearedWithoutActivation)
+        LogDutyAuthorityTransition(decision, dutyCategory, boundByDuty95);
+        return decision;
+    }
+
+    private static void LogDutyAuthorityTransition(
+        DutyCombatAuthorityDecision decision,
+        AdsDutyCategory? dutyCategory,
+        bool boundByDuty95)
+    {
+        if (!decision.AuthorityChanged)
+            return;
+
+        var category = dutyCategory is { } value
+            ? AdsDutyCategoryCatalog.GetLabel(value)
+            : "Unknown";
+        Plugin.Log.Information(
+            $"[FrenRider][DutyAuthority] {decision.PreviousAuthority} -> {decision.Authority}; " +
+            $"category={category}; BoundByDuty95={boundByDuty95}; reason={decision.Reason}.");
+    }
+
+    private void BootstrapFrenRiderDutyCombat(CharacterConfig config, bool inCombat)
+    {
+        ResetCombatSettingsRefreshTracking();
+        lastObservedCombatSettingsSignature = string.Empty;
+        wasInCombat = inCombat;
+        wasInDuty = true;
+
+        if (mountedRotationSuppressed)
         {
-            Plugin.Log.Information($"[FrenRider][Questionable] Combat gate cleared without activation ({decision.StateDetail}).");
-            return false;
+            mountedRotationSuppressed = false;
+            mountedSuppressedPluginName = string.Empty;
+            Plugin.Log.Information("[FrenRider][DutyAuthority] Duty bootstrap superseded mounted rotation suppression.");
         }
 
-        if (!decision.IsActive && !decision.ShouldActivate)
-            return false;
+        lastRotationToggleMs = 0;
+        if (IsRotationDisabled(config))
+        {
+            State = CombatState.OutOfCombat;
+            StateDetail = "FrenRider duty authority; rotation disabled";
+            ActivePreset = "";
+        }
+        else
+        {
+            State = CombatState.EnteringCombat;
+            ActivateRotation(config, ignoreCooldown: true);
+        }
 
-        if (decision.JustArmed)
-            Plugin.Log.Information("[FrenRider][Questionable] Duty combat gate armed from Questionable.IsRunning state.");
+        lastObservedCombatSettingsSignature = BuildCombatSettingsSignature(config);
+        Plugin.Log.Information(
+            $"[FrenRider][DutyAuthority] FrenRider combat bootstrap completed once for duty; " +
+            $"rotationDisabled={IsRotationDisabled(config)}; adsPause={plugin.AdsIntegrationService.ShouldPauseDutySystems}.");
+    }
 
-        if (decision.ShouldForceCombatOff)
-            ForceQuestionableDutyCombatOff();
-
+    private void SetQuestionableSoloSuppressedState(bool inCombat, bool inDuty)
+    {
         ResetCombatSettingsRefreshTracking();
         lastObservedCombatSettingsSignature = string.Empty;
         wasInCombat = inCombat;
         wasInDuty = inDuty;
-
-        if (decision.ShouldActivate)
-        {
-            State = CombatState.EnteringCombat;
-            StateDetail = "Questionable duty entry - activating rotation";
-            ActivePreset = "";
-            lastRotationToggleMs = 0;
-
-            if (!IsRotationDisabled(config))
-                ActivateRotation(config, ignoreCooldown: true);
-            else
-            {
-                State = CombatState.OutOfCombat;
-                StateDetail = "Questionable duty entry - rotation disabled";
-            }
-
-            lastObservedCombatSettingsSignature = BuildCombatSettingsSignature(config);
-            Plugin.Log.Information("[FrenRider][Questionable] Duty combat gate released after continuous readiness.");
-            return true;
-        }
-
         State = CombatState.OutOfCombat;
-        StateDetail = decision.StateDetail;
+        StateDetail = "QuestionableSolo authority; FrenRider combat suppressed";
         ActivePreset = "";
-        return true;
     }
 
-    private void ForceQuestionableDutyCombatOff()
+    private void ForceQuestionableSoloCombatOff()
     {
-        plugin.CaptureExternalAutomationSnapshot("Questionable duty combat gate");
+        plugin.CaptureExternalAutomationSnapshot("QuestionableSolo duty authority");
 
         var rsrHandled = plugin.AutorotIpcService.TrySetRsrMode(AutorotIpcService.RsrStateCommandType.Off);
         foreach (var command in BuildQuestionableDutyCombatOffCommands(includeRsrFallback: !rsrHandled))
-            SendCommand(command);
+            SendCommand(command, allowDuringQuestionableSolo: true);
 
         wrathAutoActive = false;
         lastActivePluginIdx = -1;
@@ -308,75 +372,21 @@ public class CombatService
         ActivePreset = "";
 
         if (mountedRotationSuppressed)
-            Plugin.Log.Information("[FrenRider][Questionable] Mounted rotation suppression handed off to duty combat gate.");
+            Plugin.Log.Information("[FrenRider][Questionable] Mounted rotation suppression handed off to QuestionableSolo authority.");
         mountedRotationSuppressed = false;
         mountedSuppressedPluginName = string.Empty;
 
         Plugin.Log.Information(
             rsrHandled
-                ? "[FrenRider][Questionable] Forced BMR/VBM/RSR/Wrath combat automation off for duty entry; RSR stopped via IPC."
-                : "[FrenRider][Questionable] Forced BMR/VBM/RSR/Wrath combat automation off for duty entry; RSR fallback command sent.");
-    }
-
-    private bool IsQuestionableDutyCombatReady(bool inDuty, out string reason)
-    {
-        if (!inDuty)
-        {
-            reason = "not in duty";
-            return false;
-        }
-
-        if (!Plugin.ClientState.IsLoggedIn)
-        {
-            reason = "not logged in";
-            return false;
-        }
-
-        if (IsLoadingOrBetweenAreas())
-        {
-            reason = "loading";
-            return false;
-        }
-
-        var player = Plugin.ObjectTable.LocalPlayer;
-        if (player == null)
-        {
-            reason = "local player unavailable";
-            return false;
-        }
-
-        if (Plugin.Condition[ConditionFlag.Unconscious] || player.CurrentHp == 0)
-        {
-            reason = "dead or unconscious";
-            return false;
-        }
-
-        if (IsOccupiedOrCutscene())
-        {
-            reason = "occupied or in cutscene";
-            return false;
-        }
-
-        if (plugin.AutomationService.IsUtilityGateActive)
-        {
-            reason = "ADS utility active";
-            return false;
-        }
-
-        if (plugin.AdsIntegrationService.ShouldPauseDutySystems)
-        {
-            reason = plugin.AdsIntegrationService.IsHandoffPending
-                ? "ADS handoff pending"
-                : "ADS active";
-            return false;
-        }
-
-        reason = "ready";
-        return true;
+                ? "[FrenRider][Questionable] Initial QuestionableSolo shutdown forced BMR/VBM/RSR/Wrath off; RSR stopped via IPC."
+                : "[FrenRider][Questionable] Initial QuestionableSolo shutdown forced BMR/VBM/RSR/Wrath off; RSR fallback command sent.");
     }
 
     private void ActivateRotation(CharacterConfig config, bool ignoreCooldown = false)
     {
+        if (ShouldSuppressFrenRiderCombatCommands)
+            return;
+
         var now = Environment.TickCount64;
         if (!ignoreCooldown && now - lastRotationToggleMs < 2000) return; // Cooldown
         lastRotationToggleMs = now;
@@ -451,30 +461,31 @@ public class CombatService
 
     private string ApplyRsrMode(CharacterConfig config)
     {
+        var stateCommand = ResolveRsrStateCommandType(config.RotationType);
         switch (config.RotationType)
         {
             case RotationTypeManual:
-                if (!plugin.AutorotIpcService.TrySetRsrMode(AutorotIpcService.RsrStateCommandType.Manual))
+                if (!plugin.AutorotIpcService.TrySetRsrMode(stateCommand))
                     SendCommand("/rotation manual");
                 return "Manual";
 
             case RotationTypeAutoSupport:
                 plugin.AutorotIpcService.TrySetRsrHostileType(AutorotIpcService.RsrTargetHostileType.TargetsHaveTarget);
                 plugin.AutorotIpcService.TrySetRsrSupportTargeting(true);
-                if (!plugin.AutorotIpcService.TrySetRsrMode(AutorotIpcService.RsrStateCommandType.Henched))
+                if (!plugin.AutorotIpcService.TrySetRsrMode(stateCommand))
                     SendCommand("/rotation auto on");
                 return "Auto (Support)";
 
             case RotationTypePreviouslyEngagedTargets:
                 plugin.AutorotIpcService.TrySetRsrHostileType(AutorotIpcService.RsrTargetHostileType.TargetsHaveTarget);
-                if (!plugin.AutorotIpcService.TrySetRsrMode(AutorotIpcService.RsrStateCommandType.Auto))
+                if (!plugin.AutorotIpcService.TrySetRsrMode(stateCommand))
                     SendCommand("/rotation auto on");
                 return "Previously Engaged Targets";
 
             case RotationTypeAuto:
             default:
                 plugin.AutorotIpcService.TrySetRsrHostileType(AutorotIpcService.RsrTargetHostileType.AllTargetsCanAttack);
-                if (!plugin.AutorotIpcService.TrySetRsrMode(AutorotIpcService.RsrStateCommandType.Auto))
+                if (!plugin.AutorotIpcService.TrySetRsrMode(stateCommand))
                     SendCommand("/rotation auto on");
                 return "Auto";
         }
@@ -580,6 +591,9 @@ public class CombatService
 
     private void SetPositional(CharacterConfig config, string pluginName)
     {
+        if (ShouldSuppressFrenRiderCombatCommands)
+            return;
+
         // PositionalInCombat: 0=Front, 1=Rear, 2=Any, 3=Auto
         if (config.PositionalInCombat == 3) return; // Auto = let plugin decide
 
@@ -600,7 +614,7 @@ public class CombatService
 
     private void ApplyPassiveRotationSettings(CharacterConfig config, string reason)
     {
-        if (IsRotationDisabled(config))
+        if (ShouldSuppressFrenRiderCombatCommands || IsRotationDisabled(config))
             return;
 
         var pluginName = GetSelectedRotationPluginName(config);
@@ -632,6 +646,9 @@ public class CombatService
 
     public void ApplyPresetSelection(string reason, bool installPresets = true)
     {
+        if (ShouldSuppressFrenRiderCombatCommands)
+            return;
+
         var config = plugin.ConfigManager.GetActiveConfig();
         if (IsRotationDisabled(config))
             return;
@@ -645,6 +662,9 @@ public class CombatService
 
     public void ApplyBossModFollowStartupDefaults()
     {
+        if (ShouldSuppressFrenRiderCombatCommands)
+            return;
+
         plugin.CaptureExternalAutomationSnapshot("BossMod follow startup defaults");
         SendCommand("/bmrai followoutofcombat off");
         SendCommand("/cbt disable AutoFollow");
@@ -876,6 +896,9 @@ public class CombatService
 
     private void ApplyBossModSafetyState(CharacterConfig config, string pluginName, string selectedPreset, string reason)
     {
+        if (ShouldSuppressFrenRiderCombatCommands)
+            return;
+
         ApplyConfiguredBossModAiState(config, pluginName, reason);
         ApplyBossModDefaultSettingsOnce(pluginName, selectedPreset, reason);
         ApplyBossModMovementUnlockOnce(pluginName, selectedPreset, reason);
@@ -943,7 +966,7 @@ public class CombatService
 
     private void ApplyBossModPreset(string presetName, string reason, bool installPresets = true)
     {
-        if (!ShouldApplyPreset(presetName))
+        if (ShouldSuppressFrenRiderCombatCommands || !ShouldApplyPreset(presetName))
             return;
 
         if (installPresets)
@@ -1000,6 +1023,20 @@ public class CombatService
             ? new[] { "/bmrai off", "/vbmai off", "/rotation cancel", "/wrath auto off" }
             : new[] { "/bmrai off", "/vbmai off", "/wrath auto off" };
     }
+
+    internal static AutorotIpcService.RsrStateCommandType ResolveRsrStateCommandType(int rotationType)
+    {
+        return rotationType switch
+        {
+            RotationTypeManual => AutorotIpcService.RsrStateCommandType.Manual,
+            RotationTypeAutoSupport => AutorotIpcService.RsrStateCommandType.Henched,
+            RotationTypePreviouslyEngagedTargets => AutorotIpcService.RsrStateCommandType.Auto,
+            _ => AutorotIpcService.RsrStateCommandType.Auto,
+        };
+    }
+
+    internal static bool ShouldActivateConfiguredRotation(int rotationType)
+        => rotationType != RotationTypeNone;
 
     internal static string[] BuildCoppeliaPowerlevelCombatOffCommands(bool includeRsrFallback = true)
     {
@@ -1081,7 +1118,7 @@ public class CombatService
 
     private void SetWrathAuto(bool enabled, string reason)
     {
-        if (wrathAutoActive == enabled)
+        if (ShouldSuppressFrenRiderCombatCommands || wrathAutoActive == enabled)
             return;
 
         SendCommand(enabled ? "/wrath auto on" : "/wrath auto off");
@@ -1099,8 +1136,11 @@ public class CombatService
         // Future: check target's HP % and send /ac "Limit Break" when below threshold
     }
 
-    private static unsafe void SendCommand(string command)
+    private unsafe void SendCommand(string command, bool allowDuringQuestionableSolo = false)
     {
+        if (ShouldSuppressFrenRiderCombatCommands && !allowDuringQuestionableSolo)
+            return;
+
         try
         {
             var uiModule = UIModule.Instance();
@@ -1128,23 +1168,13 @@ public class CombatService
 
     private static bool IsRotationDisabled(CharacterConfig config)
     {
-        return config.RotationType == RotationTypeNone;
+        return !ShouldActivateConfiguredRotation(config.RotationType);
     }
 
     private static bool IsInDuty()
         => Plugin.Condition[ConditionFlag.BoundByDuty]
-            || Plugin.Condition[ConditionFlag.BoundByDuty56];
-
-    private static bool IsLoadingOrBetweenAreas()
-        => Plugin.Condition[ConditionFlag.BetweenAreas]
-            || Plugin.Condition[ConditionFlag.BetweenAreas51];
-
-    private static bool IsOccupiedOrCutscene()
-        => Plugin.Condition[ConditionFlag.OccupiedInQuestEvent]
-            || Plugin.Condition[ConditionFlag.OccupiedInCutSceneEvent]
-            || Plugin.Condition[ConditionFlag.Occupied33]
-            || Plugin.Condition[ConditionFlag.Occupied39]
-            || Plugin.Condition[ConditionFlag.WatchingCutscene];
+            || Plugin.Condition[ConditionFlag.BoundByDuty56]
+            || Plugin.Condition[ConditionFlag.BoundByDuty95];
 
     private static string FormatCommandArgument(string value)
     {

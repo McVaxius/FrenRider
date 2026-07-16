@@ -77,7 +77,9 @@ public class ZoneService
             CurrentZone = ZoneType.Foray;
             IsIndoors = false;
         }
-        else if (Plugin.Condition[ConditionFlag.BoundByDuty] || Plugin.Condition[ConditionFlag.BoundByDuty56])
+        else if (Plugin.Condition[ConditionFlag.BoundByDuty]
+            || Plugin.Condition[ConditionFlag.BoundByDuty56]
+            || Plugin.Condition[ConditionFlag.BoundByDuty95])
         {
             CurrentZone = ZoneType.Duty;
             IsIndoors = true;

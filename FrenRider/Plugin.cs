@@ -270,14 +270,21 @@ public sealed class Plugin : IDalamudPlugin
 			//commandManager?.ProcessCommand("/xldisableplugin AutoDuty");
 			//commandManager?.ProcessCommand("/echo hi");
 
-            CaptureExternalAutomationSnapshot("FrenRider enabled");
+            if (CombatService.PrepareForEnableCombatSetup())
+            {
+                CaptureExternalAutomationSnapshot("FrenRider enabled");
 
-            Log.Information("[FrenRider] Applying one-time BossMod follow defaults on enable");
-            CombatService.ApplyBossModFollowStartupDefaults();
+                Log.Information("[FrenRider] Applying one-time BossMod follow defaults on enable");
+                CombatService.ApplyBossModFollowStartupDefaults();
 
-            Log.Information("[FrenRider] Installing BossMod presets and applying current preset selection");
-            AutorotIpcService.CreatePresets(force: true);
-            CombatService.ApplyPresetSelection("FrenRider enabled", installPresets: false);
+                Log.Information("[FrenRider] Installing BossMod presets and applying current preset selection");
+                AutorotIpcService.CreatePresets(force: true);
+                CombatService.ApplyPresetSelection("FrenRider enabled", installPresets: false);
+            }
+            else
+            {
+                Log.Information("[FrenRider][DutyAuthority] Skipped enable-time combat setup under QuestionableSolo authority.");
+            }
         }
         else
         {
@@ -533,10 +540,12 @@ public sealed class Plugin : IDalamudPlugin
                 });
             }
 
-            // Update ADS coordination and utility gate before movement/combat services.
+            // Resolve ADS/utility state, then establish combat authority before
+            // ADS pauses FrenRider's movement and other duty systems.
             Measure("ads-integration", AdsIntegrationService.Update);
             Measure("ads-reflection", () => AdsReflectionIpcService.Update());
             Measure("utility-gate", AutomationService.UpdateUtilityGate);
+            Measure("combat", CombatService.Update);
 
             Measure("fren-teleport", FrenTeleportService.Update);
             Measure("auto-yes", AutoYesService.Update);
@@ -544,7 +553,6 @@ public sealed class Plugin : IDalamudPlugin
             Measure("fate-sync", FateSyncService.Update);
             Measure("follow", FollowService.Update);
             Measure("mount", MountService.Update);
-            Measure("combat", CombatService.Update);
             Measure("automation", AutomationService.Update);
             Measure("formation", FormationService.Update);
             Measure("party", PartyService.Update);

@@ -25,7 +25,7 @@ public sealed class CombatServiceBossModAiCommandTests
     }
 
     [Fact]
-    public void QuestionableDutyGateCombatOffStopsEveryCombatEngine()
+    public void QuestionableSoloInitialShutdownStopsEveryCombatEngine()
     {
         Assert.Equal(
             new[] { "/bmrai off", "/vbmai off", "/rotation cancel", "/wrath auto off" },
@@ -33,10 +33,25 @@ public sealed class CombatServiceBossModAiCommandTests
     }
 
     [Fact]
-    public void QuestionableDutyGateCombatOffOmitsRsrFallbackWhenIpcHandledIt()
+    public void QuestionableSoloInitialShutdownOmitsRsrFallbackWhenIpcHandledIt()
     {
         Assert.Equal(
             new[] { "/bmrai off", "/vbmai off", "/wrath auto off" },
             CombatService.BuildQuestionableDutyCombatOffCommands(includeRsrFallback: false));
+    }
+
+    [Fact]
+    public void AdsOwnedDungeonBootstrapUsesConfiguredRsrAutoMode()
+    {
+        Assert.Equal(
+            AutorotIpcService.RsrStateCommandType.Auto,
+            CombatService.ResolveRsrStateCommandType(rotationType: 0));
+    }
+
+    [Fact]
+    public void RotationTypeNoneDoesNotActivateDuringDutyBootstrap()
+    {
+        Assert.False(CombatService.ShouldActivateConfiguredRotation(rotationType: 2));
+        Assert.True(CombatService.ShouldActivateConfiguredRotation(rotationType: 0));
     }
 }

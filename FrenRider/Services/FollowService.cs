@@ -1239,6 +1239,9 @@ public class FollowService
 
     private void EnsureBossModFollow(CharacterConfig config, FrenTracker.FrenState fren)
     {
+        if (plugin.CombatService.IsQuestionableSoloAuthorityActive)
+            return;
+
         var targetName = fren.Name.Trim();
         if (string.IsNullOrWhiteSpace(targetName))
             return;
@@ -1288,17 +1291,29 @@ public class FollowService
         if (!bossModFollowActive)
             return;
 
+        if (plugin.CombatService.IsQuestionableSoloAuthorityActive)
+        {
+            ClearBossModFollowState();
+            Plugin.Log.Information("[FR] Relinquished local BossMod follow state under QuestionableSolo authority");
+            return;
+        }
+
         plugin.CaptureExternalAutomationSnapshot("BossMod follow stop");
         SendCommand("/bmrai followoutofcombat off");
         SendCommand("/bmrai followcombat off");
         SendCommand("/bmrai followmodule off");
+        ClearBossModFollowState();
+        Plugin.Log.Information("[FR] Stopped BossMod follow");
+    }
+
+    private void ClearBossModFollowState()
+    {
         bossModFollowActive = false;
         bossModFollowTarget = string.Empty;
         bossModFollowTerritoryId = 0;
         bossModFollowCombatMode = -1;
         bossModFollowFrenFlying = false;
         bossModFollowSelfFlying = false;
-        Plugin.Log.Information("[FR] Stopped BossMod follow");
     }
 
     private void StopAllFollowing(CharacterConfig config, string reason)

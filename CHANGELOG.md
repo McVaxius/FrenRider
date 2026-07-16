@@ -12,10 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Combat settings now include a global one-shot **Don't move while casting** toggle that updates currently loaded BMR and VBM Action Tweaks settings
 - ADS runtime duty ownership polling now uses authoritative `ADS.IsDutyOwned()` IPC with JSON fallback, a 250ms poll interval, and a bounded 5-second stale hold for transient IPC failures
-- Questionable-driven duty entry now uses `Questionable.IsRunning` IPC to hold FrenRider combat automation, force BMR/VBM/RSR/Wrath off, and release the configured rotation only after 5 continuous ready seconds in duty
+- Duty combat now uses latched `QuestionableSolo` versus `FrenRider` authority, classifying true solo duties from `BoundByDuty95` with a designed-party-size Lumina fallback
+- Non-solo duties now receive one FrenRider combat bootstrap per enabled duty session, including when ADS already owns navigation and progression
 
 ### Fixed
 - Manual ADS Start Inside/Resume now immediately pauses FrenRider follow, navigation, mounts, formation, combat-state changes, duty interaction, maintenance, and automatic dialogs
+- Questionable no longer forces FrenRider combat engines off in 4-player, 8-player, alliance, deep-dungeon, treasure, or unknown duties; true solo ownership remains latched until duty exit
+- Loading or re-enabling FrenRider inside an ADS-owned non-solo duty now activates the configured rotation exactly once before the ADS duty-system pause takes effect
 - ADS handoff now waits for authoritative ownership confirmation, retries after a 5-second timeout/backoff, and falls back to `/ads inside` only when typed IPC is unavailable
 - Configured FrenRider duty exit can take over after duty completion while all non-exit FrenRider duty systems remain paused
 - AutoDuty warning lifecycle now clears correctly when FrenRider is disabled instead of re-forcing the popup path
