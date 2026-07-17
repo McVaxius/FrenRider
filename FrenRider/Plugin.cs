@@ -317,7 +317,7 @@ public sealed class Plugin : IDalamudPlugin
         => string.IsNullOrWhiteSpace(ConfigManager.CurrentAccountId) ? "unknown-account" : ConfigManager.CurrentAccountId;
 
     private string GetCleanupCharacterKey()
-        => string.IsNullOrWhiteSpace(ConfigManager.SelectedCharacterKey) ? "default" : ConfigManager.SelectedCharacterKey;
+        => string.IsNullOrWhiteSpace(ConfigManager.ActiveCharacterKey) ? "inactive-character" : ConfigManager.ActiveCharacterKey;
 
     private void OnCommand(string command, string args)
     {
@@ -403,17 +403,26 @@ public sealed class Plugin : IDalamudPlugin
                 Log.Information($"OnLogin: Character={charName}@{worldName}, ContentId={contentId:X16}");
                 ConfigManager.EnsureAccountSelected(contentId, charName);
                 ConfigManager.EnsureCharacterExists(charName, worldName);
-                Configuration.LastAccountId = ConfigManager.CurrentAccountId;
-                Configuration.Save();
-                Log.Information($"Character detected: {charName}@{worldName} -> Account {ConfigManager.CurrentAccountId}");
+                if (!string.IsNullOrWhiteSpace(ConfigManager.ActiveCharacterKey))
+                {
+                    Configuration.LastAccountId = ConfigManager.CurrentAccountId;
+                    Configuration.Save();
+                    Log.Information($"Character detected: {ConfigManager.ActiveCharacterKey} -> Account {ConfigManager.CurrentAccountId}");
+                }
+                else
+                {
+                    Log.Warning($"OnLogin: No active profile resolved for {charName}@{worldName}");
+                }
             }
             else
             {
+                ConfigManager.ClearActiveCharacter();
                 Log.Warning($"OnLogin: Missing data - charName={charName}, worldName={worldName}");
             }
         }
         catch (Exception ex)
         {
+            ConfigManager.ClearActiveCharacter();
             Log.Error($"Error during login detection: {ex.Message}");
         }
     }
@@ -444,16 +453,8 @@ public sealed class Plugin : IDalamudPlugin
             Measure("zone", ZoneService.Update);
             Measure("coppelia-powerlevel-lease", CoppeliaPowerlevelLeaseService.Update);
 
-            if (IsAreaTransitionActive())
-            {
-                FrenTeleportService.ResetForAreaTransition();
-                FollowService.ResetForAreaTransition();
-                MountService.PreemptFarChase("area transition");
-                RespawnService.ResetForAreaTransition();
-                return;
-            }
-
-            // Delayed login detection (LocalPlayer may not be ready immediately)
+            // Detect logout before any transition early-return so stale active state
+            // cannot survive while the client is between areas.
             if (ClientState.IsLoggedIn && !wasLoggedIn)
             {
                 wasLoggedIn = true;
@@ -463,6 +464,16 @@ public sealed class Plugin : IDalamudPlugin
             {
                 wasLoggedIn = false;
                 loginDetectionDelay = 0;
+                ConfigManager.ClearActiveCharacter();
+            }
+
+            if (IsAreaTransitionActive())
+            {
+                FrenTeleportService.ResetForAreaTransition();
+                FollowService.ResetForAreaTransition();
+                MountService.PreemptFarChase("area transition");
+                RespawnService.ResetForAreaTransition();
+                return;
             }
 
             if (loginDetectionDelay > 0)

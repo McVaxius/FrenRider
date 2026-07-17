@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Non-solo duties now receive one FrenRider combat bootstrap per enabled duty session, including when ADS already owns navigation and progression
 
 ### Fixed
+- Settings character browsing now uses an editing-only selection, so viewing or changing `DEFAULT CONFIG` and other profiles cannot replace the logged-in character's runtime configuration or DAD target
 - Manual ADS Start Inside/Resume now immediately pauses FrenRider follow, navigation, mounts, formation, combat-state changes, duty interaction, maintenance, and automatic dialogs
 - Questionable no longer forces FrenRider combat engines off in 4-player, 8-player, alliance, deep-dungeon, treasure, or unknown duties; true solo ownership remains latched until duty exit
 - Loading or re-enabling FrenRider inside an ADS-owned non-solo duty now activates the configured rotation exactly once before the ADS duty-system pause takes effect

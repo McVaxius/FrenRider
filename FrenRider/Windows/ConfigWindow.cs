@@ -20,6 +20,9 @@ public class ConfigWindow : Window, IDisposable
     private readonly ConfigManager configManager;
 
     private string currentTab = "Profile";
+    private string editingCharacterKey = "";
+    private string observedActiveAccountId = "";
+    private string observedActiveCharacterKey = "";
     private string accountAliasEdit = "";
     private string frenNameInput = "";
     private bool frenNameFocused = false;
@@ -54,6 +57,9 @@ public class ConfigWindow : Window, IDisposable
         this.plugin = plugin;
         this.configuration = plugin.Configuration;
         this.configManager = plugin.ConfigManager;
+        editingCharacterKey = configManager.ActiveCharacterKey;
+        observedActiveAccountId = configManager.CurrentAccountId;
+        observedActiveCharacterKey = configManager.ActiveCharacterKey;
     }
 
     public void Dispose() { }
@@ -89,21 +95,22 @@ public class ConfigWindow : Window, IDisposable
 
     public override void PreDraw()
     {
+        SyncEditingSelectionWithActiveCharacter();
+
         if (configuration.IsConfigWindowMovable)
             Flags &= ~ImGuiWindowFlags.NoMove;
         else
             Flags |= ImGuiWindowFlags.NoMove;
 
         // Update window title based on selected character (krangled if enabled)
-        var sel = configManager.SelectedCharacterKey;
+        var sel = editingCharacterKey;
         var displaySel = string.IsNullOrEmpty(sel) ? "DEFAULT CONFIG" : Disp(sel);
         WindowName = $"Fren Rider Settings - {displaySel}###FrenRiderConfig";
     }
 
     public override void Draw()
     {
-        var config = configManager.GetActiveConfig();
-        if (config == null) return;
+        var config = configManager.GetCurrentCharacterConfig(editingCharacterKey);
 
         var panelWidth = configuration.LeftPanelWidth;
 
@@ -189,10 +196,10 @@ public class ConfigWindow : Window, IDisposable
         ImGui.Spacing();
 
         // DEFAULT CONFIG
-        var isDefault = string.IsNullOrEmpty(configManager.SelectedCharacterKey);
+        var isDefault = string.IsNullOrEmpty(editingCharacterKey);
         if (ImGui.Selectable("DEFAULT CONFIG", isDefault))
         {
-            configManager.SelectedCharacterKey = "";
+            editingCharacterKey = "";
             SyncFrenNameInput();
         }
 
@@ -204,11 +211,11 @@ public class ConfigWindow : Window, IDisposable
         var currentCharKey = GetCurrentCharacterKey();
         if (!string.IsNullOrEmpty(currentCharKey))
         {
-            var isCurrent = configManager.SelectedCharacterKey == currentCharKey;
+            var isCurrent = editingCharacterKey == currentCharKey;
             ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.4f, 1f, 0.4f, 1));
             if (ImGui.Selectable(Disp(currentCharKey), isCurrent))
             {
-                configManager.SelectedCharacterKey = currentCharKey;
+                editingCharacterKey = currentCharKey;
                 SyncFrenNameInput();
             }
             ImGui.PopStyleColor();
@@ -219,10 +226,10 @@ public class ConfigWindow : Window, IDisposable
         foreach (var charKey in configManager.GetSortedCharacterKeys())
         {
             if (charKey == currentCharKey) continue;
-            var isSelected = configManager.SelectedCharacterKey == charKey;
+            var isSelected = editingCharacterKey == charKey;
             if (ImGui.Selectable(Disp(charKey), isSelected))
             {
-                configManager.SelectedCharacterKey = charKey;
+                editingCharacterKey = charKey;
                 SyncFrenNameInput();
             }
             ImGui.Spacing();
@@ -280,7 +287,7 @@ public class ConfigWindow : Window, IDisposable
         ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.6f, 0.2f, 0.2f, 1));
         if (ImGui.Button("Reset All"))
         {
-            configManager.ResetCharacterToDefault(configManager.SelectedCharacterKey);
+            configManager.ResetCharacterToDefault(editingCharacterKey);
             SyncFrenNameInput();
         }
         ImGui.PopStyleColor();
@@ -290,29 +297,34 @@ public class ConfigWindow : Window, IDisposable
         ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.6f, 0.4f, 0.2f, 1));
         if (ImGui.Button("Reset This"))
         {
-            configManager.ResetCharacterTabToDefault(configManager.SelectedCharacterKey, currentTab);
+            configManager.ResetCharacterTabToDefault(editingCharacterKey, currentTab);
             SyncFrenNameInput();
         }
         ImGui.PopStyleColor();
         HelpMarker("Reset only the current tab for this character to default values.");
 
         // DELETE button (only for non-default characters, requires CTRL)
-        if (!string.IsNullOrEmpty(configManager.SelectedCharacterKey))
+        if (!string.IsNullOrEmpty(editingCharacterKey))
         {
             ImGui.SameLine();
             var io = ImGui.GetIO();
             var ctrlHeld = io.KeyCtrl;
-            if (!ctrlHeld) ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 0.5f);
+            var isActiveProfile = string.Equals(editingCharacterKey, configManager.ActiveCharacterKey, StringComparison.Ordinal);
+            var canDelete = ctrlHeld && !isActiveProfile;
+            if (!canDelete) ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 0.5f);
             ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.7f, 0.1f, 0.1f, 1));
             ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(0.9f, 0.2f, 0.2f, 1));
-            if (ImGui.Button("DELETE") && ctrlHeld)
+            if (ImGui.Button("DELETE") && canDelete && configManager.DeleteCharacter(editingCharacterKey))
             {
-                configManager.DeleteCharacter(configManager.SelectedCharacterKey);
+                editingCharacterKey = configManager.ActiveCharacterKey;
+                SyncFrenNameInput();
             }
             ImGui.PopStyleColor(2);
-            if (!ctrlHeld) ImGui.PopStyleVar();
+            if (!canDelete) ImGui.PopStyleVar();
             if (ImGui.IsItemHovered())
-                ImGui.SetTooltip("Hold CTRL and click to delete this character's config.\nThis cannot be undone.");
+                ImGui.SetTooltip(isActiveProfile
+                    ? "The currently active character profile cannot be deleted while logged in."
+                    : "Hold CTRL and click to delete this character's config.\nThis cannot be undone.");
         }
 
         ImGui.Spacing();
@@ -2285,14 +2297,7 @@ public class ConfigWindow : Window, IDisposable
     }
 
     private string GetCurrentCharacterKey()
-    {
-        if (!Plugin.ClientState.IsLoggedIn) return "";
-        var charName = Plugin.ObjectTable.LocalPlayer?.Name.ToString() ?? "";
-        var worldName = Plugin.ObjectTable.LocalPlayer?.HomeWorld.Value.Name.ToString() ?? "";
-        return !string.IsNullOrEmpty(charName) && !string.IsNullOrEmpty(worldName)
-            ? $"{charName}@{worldName}"
-            : "";
-    }
+        => configManager.ActiveCharacterKey;
 
     private bool DrawIconInputs(string label, ref string value, string fallback)
     {
@@ -2375,12 +2380,28 @@ public class ConfigWindow : Window, IDisposable
 
     private void SyncFrenNameInput()
     {
-        var config = configManager.GetActiveConfig();
-        frenNameInput = config?.FrenName ?? "";
+        var config = configManager.GetCurrentCharacterConfig(editingCharacterKey);
+        frenNameInput = config.FrenName;
+    }
+
+    private void SyncEditingSelectionWithActiveCharacter()
+    {
+        var activeAccountId = configManager.CurrentAccountId;
+        var activeCharacterKey = configManager.ActiveCharacterKey;
+        if (string.Equals(observedActiveAccountId, activeAccountId, StringComparison.Ordinal)
+            && string.Equals(observedActiveCharacterKey, activeCharacterKey, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        observedActiveAccountId = activeAccountId;
+        observedActiveCharacterKey = activeCharacterKey;
+        editingCharacterKey = activeCharacterKey;
+        SyncFrenNameInput();
     }
 
     private bool IsDefaultConfigSelected()
-        => string.IsNullOrEmpty(configManager.SelectedCharacterKey);
+        => string.IsNullOrEmpty(editingCharacterKey);
 
     private string GetCurrentTabDisplayName()
         => currentTab == "Duty" ? "Duty / ADS / Exit" : currentTab;

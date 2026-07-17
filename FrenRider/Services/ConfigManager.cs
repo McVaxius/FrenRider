@@ -18,7 +18,7 @@ public class ConfigManager
     private readonly Dictionary<string, AccountConfig> accounts = new();
 
     public string CurrentAccountId { get; set; } = "";
-    public string SelectedCharacterKey { get; set; } = ""; // "" = default config
+    public string ActiveCharacterKey { get; private set; } = "";
 
     // Event to notify when FrenRider enabled state changes
     public event Action<bool>? OnFrenRiderEnabledChanged;
@@ -245,52 +245,87 @@ public class ConfigManager
     public CharacterConfig GetActiveConfig()
     {
         var account = GetCurrentAccount();
-        if (account == null)
-            return new CharacterConfig();
-
-        if (string.IsNullOrEmpty(SelectedCharacterKey))
-            return account.DefaultConfig;
-
-        return account.Characters.TryGetValue(SelectedCharacterKey, out var cc)
-            ? cc
-            : account.DefaultConfig;
+        return ResolveActiveConfigOrDisabled(account, CurrentAccountId, ActiveCharacterKey);
     }
 
     public CharacterConfig GetCurrentCharacterConfig(string charKey)
     {
         var account = GetCurrentAccount();
-        if (account == null) return new CharacterConfig();
-        if (string.IsNullOrEmpty(charKey)) return account.DefaultConfig;
-        return account.Characters.TryGetValue(charKey, out var cc) ? cc : account.DefaultConfig;
+        return ResolveEditingConfigOrDisabled(account, charKey);
+    }
+
+    internal static CharacterConfig ResolveActiveConfigOrDisabled(
+        AccountConfig? account,
+        string? currentAccountId,
+        string? activeCharacterKey)
+    {
+        return TryResolveActiveConfig(account, currentAccountId, activeCharacterKey, out var activeConfig)
+            ? activeConfig!
+            : CreateDisabledConfig();
+    }
+
+    internal static CharacterConfig ResolveEditingConfigOrDisabled(AccountConfig? account, string? editingCharacterKey)
+    {
+        if (account == null)
+            return CreateDisabledConfig();
+
+        if (string.IsNullOrEmpty(editingCharacterKey))
+            return account.DefaultConfig ?? CreateDisabledConfig();
+
+        return account.Characters.TryGetValue(editingCharacterKey, out var characterConfig)
+            && characterConfig != null
+                ? characterConfig
+                : CreateDisabledConfig();
+    }
+
+    private static CharacterConfig CreateDisabledConfig()
+        => new()
+        {
+            Enabled = false,
+            AutoSyncFate = false,
+            AdsEnableChestOpening = false,
+            FeedMeSearch = false,
+            RaiseOfferAutoAccept = false,
+            TeleportOfferAutoAccept = false,
+            PartyInviteAutoAccept = false,
+            ExitAfterDutyEnds = false,
+            AutorotPushOnEnable = false,
+        };
+
+    private bool TryGetActiveConfig(out CharacterConfig? activeConfig)
+        => TryResolveActiveConfig(GetCurrentAccount(), CurrentAccountId, ActiveCharacterKey, out activeConfig);
+
+    internal static bool TryResolveActiveConfig(
+        AccountConfig? account,
+        string? currentAccountId,
+        string? activeCharacterKey,
+        out CharacterConfig? activeConfig)
+    {
+        activeConfig = null;
+        if (account == null
+            || string.IsNullOrWhiteSpace(currentAccountId)
+            || !string.Equals(account.AccountId, currentAccountId, StringComparison.Ordinal)
+            || account.Characters == null
+            || string.IsNullOrWhiteSpace(activeCharacterKey)
+            || !account.Characters.TryGetValue(activeCharacterKey, out var resolvedConfig)
+            || resolvedConfig == null)
+        {
+            return false;
+        }
+
+        activeConfig = resolvedConfig;
+        return true;
     }
 
     public void EnsureAccountSelected(ulong contentId, string? aliasHint = null)
     {
+        ActiveCharacterKey = "";
+
         if (contentId == 0)
         {
-            log.Warning("Cannot select account with content ID 0 - using fallback");
-            // Fallback: use first account or create one
-            if (accounts.Count > 0)
-            {
-                CurrentAccountId = accounts.Keys.First();
-                log.Information($"Using fallback account: {CurrentAccountId}");
-                return;
-            }
-            else
-            {
-                // Create a fallback account with a random ID
-                var fallbackId = Guid.NewGuid().ToString("N")[..8];
-                var fallbackAccount = new AccountConfig
-                {
-                    AccountId = fallbackId,
-                    AccountAlias = aliasHint ?? "Fallback Account",
-                };
-                accounts[fallbackId] = fallbackAccount;
-                CurrentAccountId = fallbackId;
-                SaveAccount(fallbackId);
-                log.Warning($"Created fallback account {fallbackId}");
-                return;
-            }
+            CurrentAccountId = "";
+            log.Warning("Cannot select an active account with content ID 0");
+            return;
         }
 
         var accountId = contentId.ToString("X");
@@ -350,47 +385,61 @@ public class ConfigManager
             return;
 
         var charKey = $"{characterName}@{worldName}";
-
-        // Search all accounts for this character
-        foreach (var kvp in accounts)
-        {
-            if (kvp.Value.Characters.ContainsKey(charKey))
-            {
-                CurrentAccountId = kvp.Key;
-                SelectedCharacterKey = charKey;
-                return;
-            }
-        }
-
         if (string.IsNullOrEmpty(CurrentAccountId))
         {
-            // No account selected yet (should not happen, but guard anyway)
-            var fallbackId = accounts.Keys.FirstOrDefault();
-            if (fallbackId == null)
-            {
-                fallbackId = Guid.NewGuid().ToString("N")[..8];
-                accounts[fallbackId] = new AccountConfig
-                {
-                    AccountId = fallbackId,
-                    AccountAlias = "Account 1",
-                };
-                SaveAccount(fallbackId);
-                log.Warning($"Fallback account {fallbackId} created for character {charKey}");
-            }
-
-            CurrentAccountId = fallbackId;
+            ActiveCharacterKey = "";
+            log.Warning($"Cannot activate character {charKey} without a content-ID-selected account");
+            return;
         }
 
         if (!accounts.TryGetValue(CurrentAccountId, out var accountForChar))
         {
+            ActiveCharacterKey = "";
             log.Error($"Current account {CurrentAccountId} missing when adding {charKey}");
             return;
         }
 
-        accountForChar.Characters[charKey] = accountForChar.DefaultConfig.Clone();
-        SelectedCharacterKey = charKey;
-        SaveAccount(CurrentAccountId);
-        log.Information($"Added character {charKey} to account {CurrentAccountId}");
+        if (!TryEnsureCharacterExists(accountForChar, charKey, out var added))
+        {
+            ActiveCharacterKey = "";
+            log.Error($"Failed to resolve character {charKey} in account {CurrentAccountId}");
+            return;
+        }
+
+        ActiveCharacterKey = charKey;
+        if (added)
+        {
+            SaveAccount(CurrentAccountId);
+            log.Information($"Added character {charKey} to account {CurrentAccountId}");
+        }
+    }
+
+    internal static bool TryEnsureCharacterExists(AccountConfig? account, string? charKey, out bool added)
+    {
+        added = false;
+        if (account == null
+            || account.Characters == null
+            || account.DefaultConfig == null
+            || string.IsNullOrWhiteSpace(charKey))
+        {
+            return false;
+        }
+
+        if (account.Characters.TryGetValue(charKey, out var existingConfig) && existingConfig != null)
+            return true;
+
+        account.Characters[charKey] = account.DefaultConfig.Clone();
+        added = true;
+        return true;
+    }
+
+    public void ClearActiveCharacter()
+    {
+        if (string.IsNullOrEmpty(ActiveCharacterKey))
+            return;
+
+        log.Information($"Cleared active character profile: {ActiveCharacterKey}");
+        ActiveCharacterKey = "";
     }
 
     public string CreateNewAccount(string alias)
@@ -414,22 +463,15 @@ public class ConfigManager
 
     public bool ClearActiveFrenName()
     {
-        var account = GetCurrentAccount();
-        if (account == null)
+        if (!TryGetActiveConfig(out var activeConfig) || activeConfig == null)
             return false;
-
-        var activeConfig = string.IsNullOrEmpty(SelectedCharacterKey)
-            ? account.DefaultConfig
-            : account.Characters.TryGetValue(SelectedCharacterKey, out var characterConfig)
-                ? characterConfig
-                : account.DefaultConfig;
 
         activeConfig.FrenName = string.Empty;
         return SaveAccount(CurrentAccountId);
     }
 
     /// <summary>
-    /// Atomically configures and enables only the selected character profile for DAD.
+    /// Atomically configures and enables only the active character profile for DAD.
     /// The default profile is never used as a fallback by this operation.
     /// </summary>
     public bool ConfigureAndEnableActiveCharacter(string nameAtWorld)
@@ -447,7 +489,7 @@ public class ConfigManager
 
         var succeeded = TryConfigureAndEnableActiveCharacter(
             account,
-            SelectedCharacterKey,
+            ActiveCharacterKey,
             nameAtWorld,
             () => SaveAccount(CurrentAccountId),
             out var becameEnabled);
@@ -477,7 +519,7 @@ public class ConfigManager
 
     internal static bool TryConfigureAndEnableActiveCharacter(
         AccountConfig? account,
-        string? selectedCharacterKey,
+        string? activeCharacterKey,
         string? nameAtWorld,
         Func<bool> persist,
         out bool becameEnabled)
@@ -487,8 +529,8 @@ public class ConfigManager
         if (account == null
             || string.IsNullOrWhiteSpace(account.AccountId)
             || account.Characters == null
-            || string.IsNullOrWhiteSpace(selectedCharacterKey)
-            || !account.Characters.TryGetValue(selectedCharacterKey, out var activeConfig)
+            || string.IsNullOrWhiteSpace(activeCharacterKey)
+            || !account.Characters.TryGetValue(activeCharacterKey, out var activeConfig)
             || activeConfig == null
             || !IsValidExactNameAtWorld(nameAtWorld))
         {
@@ -555,7 +597,12 @@ public class ConfigManager
 
     public void SetFrenRiderEnabled(bool enabled)
     {
-        var currentConfig = GetActiveConfig();
+        if (!TryGetActiveConfig(out var currentConfig) || currentConfig == null)
+        {
+            log.Warning($"[ConfigManager] Ignored enabled state change to {enabled}: no active character profile");
+            return;
+        }
+
         var wasEnabled = currentConfig.Enabled;
         
         if (wasEnabled != enabled)
@@ -698,16 +745,29 @@ public class ConfigManager
     public bool DeleteCharacter(string charKey)
     {
         var account = GetCurrentAccount();
-        if (account == null || string.IsNullOrEmpty(charKey)) return false;
-        if (!account.Characters.ContainsKey(charKey)) return false;
-
-        account.Characters.Remove(charKey);
-        if (SelectedCharacterKey == charKey)
-            SelectedCharacterKey = "";
+        if (!TryDeleteCharacter(account, ActiveCharacterKey, charKey))
+        {
+            if (string.Equals(ActiveCharacterKey, charKey, StringComparison.Ordinal))
+                log.Warning($"Cannot delete active character config: {charKey}");
+            return false;
+        }
 
         SaveCurrentAccount();
         log.Information($"Deleted character config: {charKey}");
         return true;
+    }
+
+    internal static bool TryDeleteCharacter(AccountConfig? account, string? activeCharacterKey, string? charKey)
+    {
+        if (account == null
+            || account.Characters == null
+            || string.IsNullOrEmpty(charKey)
+            || string.Equals(activeCharacterKey, charKey, StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        return account.Characters.Remove(charKey);
     }
 
     public IEnumerable<string> GetSortedCharacterKeys()
