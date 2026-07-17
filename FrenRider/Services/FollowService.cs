@@ -1237,12 +1237,29 @@ public class FollowService
         }
     }
 
+    internal static string ResolveBossModTargetName(string? trackedName, string? trackedWorld)
+    {
+        var targetName = trackedName?.Trim() ?? string.Empty;
+        var worldName = trackedWorld?.Trim() ?? string.Empty;
+
+        if (targetName.Length == 0
+            || worldName.Length == 0
+            || !targetName.EndsWith(worldName, StringComparison.OrdinalIgnoreCase))
+        {
+            return targetName;
+        }
+
+        var nameWithoutWorld = targetName[..^worldName.Length].TrimEnd();
+        var nameParts = nameWithoutWorld.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return nameParts.Length == 2 ? nameWithoutWorld : targetName;
+    }
+
     private void EnsureBossModFollow(CharacterConfig config, FrenTracker.FrenState fren)
     {
         if (plugin.CombatService.IsQuestionableSoloAuthorityActive)
             return;
 
-        var targetName = fren.Name.Trim();
+        var targetName = ResolveBossModTargetName(fren.Name, fren.WorldName);
         if (string.IsNullOrWhiteSpace(targetName))
             return;
 
