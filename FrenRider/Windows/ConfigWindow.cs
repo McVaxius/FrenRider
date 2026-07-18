@@ -1690,7 +1690,7 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         HelpMarker("Send /ads leave after the configured duty-end delay. FrenRider does not also run its own Leave Duty flow.");
-        DrawDefaultSettingSyncButton("Exit Method", "AdsExitMethod");
+        DrawDefaultSettingSyncButton("ADS Exit Method", "AdsExitMethod");
 
         ImGui.Spacing();
         ImGui.Text("Duty-end delay");

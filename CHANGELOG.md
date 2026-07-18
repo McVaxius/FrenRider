@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Non-solo duties now receive one FrenRider combat bootstrap per enabled duty session, including when ADS already owns navigation and progression
 
 ### Fixed
+- The row-level **Sync all** beside **ADS Exit Method** now copies the complete exit selection and clears conflicting local exit flags
 - Cross-world BossMod follow now removes a matching concatenated home-world suffix before sending `/bmrai follow`, while preserving legitimate surnames that match a world name
 - Settings character browsing now uses an editing-only selection, so viewing or changing `DEFAULT CONFIG` and other profiles cannot replace the logged-in character's runtime configuration or DAD target
 - Manual ADS Start Inside/Resume now immediately pauses FrenRider follow, navigation, mounts, formation, combat-state changes, duty interaction, maintenance, and automatic dialogs

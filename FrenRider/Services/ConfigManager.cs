@@ -112,7 +112,7 @@ public class ConfigManager
                 Setting("ADS Chest Opening", (source, target) => target.AdsEnableChestOpening = source.AdsEnableChestOpening),
                 Setting("ADS Preset Selection", (source, target) => target.AdsPresetSelection = source.AdsPresetSelection),
                 Setting("ADS Duty Migration State", (source, target) => target.AdsDutyFamilySettingsMigrated = source.AdsDutyFamilySettingsMigrated),
-                Setting("ADS Exit Method", (source, target) => target.UseAdsLeaveAfterAdsDuty = source.UseAdsLeaveAfterAdsDuty),
+                Setting("ADS Exit Method", CopyExitMethod),
                 Setting("Invite Whitelist", (source, target) => target.InviteWhitelist = new List<string>(source.InviteWhitelist)),
                 Setting("Raise offers", (source, target) => target.RaiseOfferAutoAccept = source.RaiseOfferAutoAccept),
                 Setting("Teleport offers", (source, target) => target.TeleportOfferAutoAccept = source.TeleportOfferAutoAccept),
@@ -711,6 +711,16 @@ public class ConfigManager
         }
 
         return account.Characters.Count;
+    }
+
+    internal static int ApplyDefaultSettingToAllCharacters(
+        AccountConfig account,
+        string label)
+    {
+        var setting = FindSetting(label);
+        return setting == null
+            ? 0
+            : ApplyDefaultSettingToAllCharacters(account, setting.Copy);
     }
 
     internal static int ApplyDefaultSettingToAllCharacters(
