@@ -944,6 +944,7 @@ public class CombatService
         SendCommand($"/rotation Settings ToggleManual False");
         SendCommand("/rotation Settings DummyBoss False");
         SendCommand("/rotation Settings DisableTargetDummys True");
+        SendCommand("/rotation Settings AutoUseTrueNorth False"); //suggested by matsuuzo
         SendCommand("/rotation Settings BmrSafetyCheckAuto True");
         SendCommand("/rotation Settings BmrSafetyCheckIntercept True");
     }
