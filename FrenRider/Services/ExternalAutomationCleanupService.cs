@@ -91,6 +91,25 @@ internal sealed class FallbackOnlyRsrCleanupController(
             UsedFallback: true);
 }
 
+public interface IDaedalusAutomationController
+{
+    bool TryGetEnabled(out bool enabled);
+    bool TrySetEnabled(bool enabled);
+}
+
+public sealed class AutorotDaedalusAutomationController(
+    AutorotIpcService autorotIpcService) : IDaedalusAutomationController
+{
+    public static string GetActionLabel(bool enabled)
+        => $"Daedalus IPC SetEnabled({enabled.ToString().ToLowerInvariant()})";
+
+    public bool TryGetEnabled(out bool enabled)
+        => autorotIpcService.TryGetDaedalusEnabled(out enabled);
+
+    public bool TrySetEnabled(bool enabled)
+        => autorotIpcService.TrySetDaedalusEnabled(enabled);
+}
+
 public sealed record BossModAutomationSnapshot(
     bool IsAvailable,
     bool? AiActive,
@@ -110,16 +129,23 @@ public sealed record CbtAutomationSnapshot(bool IsAvailable, bool? AutoFollowEna
     public static CbtAutomationSnapshot Unavailable(string detail) => new(false, null, detail);
 }
 
+public sealed record DaedalusAutomationSnapshot(bool IsAvailable, bool? Enabled, string Detail)
+{
+    public static DaedalusAutomationSnapshot Unavailable(string detail) => new(false, null, detail);
+}
+
 public sealed record ExternalAutomationSnapshot(
     string AccountId,
     string CharacterKey,
     BossModAutomationSnapshot Bmr,
     BossModAutomationSnapshot Vbm,
     CbtAutomationSnapshot Cbt,
-    DateTimeOffset CapturedAtUtc)
+    DateTimeOffset CapturedAtUtc,
+    DaedalusAutomationSnapshot? Daedalus = null)
 {
-    public bool HasAnyAvailableState => Bmr.IsAvailable || Vbm.IsAvailable || Cbt.IsAvailable;
-    public bool HasUnavailableState => !Bmr.IsAvailable || !Vbm.IsAvailable || !Cbt.IsAvailable;
+    public bool HasAnyAvailableState => Bmr.IsAvailable || Vbm.IsAvailable || Cbt.IsAvailable || Daedalus?.IsAvailable == true;
+    public bool HasUnavailableState =>
+        !Bmr.IsAvailable || !Vbm.IsAvailable || !Cbt.IsAvailable || Daedalus is { IsAvailable: false };
 }
 
 public sealed record ExternalAutomationCleanupResult(
@@ -134,6 +160,7 @@ public sealed class ExternalAutomationCleanupService
     private readonly Action<string>? infoLog;
     private readonly Action<string>? warningLog;
     private readonly IRsrCleanupController rsrCleanupController;
+    private readonly IDaedalusAutomationController? daedalusAutomationController;
     private readonly Dictionary<string, ExternalAutomationSnapshot> snapshots = new(StringComparer.OrdinalIgnoreCase);
     private readonly HashSet<string> wrathStartedKeys = new(StringComparer.OrdinalIgnoreCase);
 
@@ -142,13 +169,15 @@ public sealed class ExternalAutomationCleanupService
         IExternalAutomationSnapshotProvider snapshotProvider,
         Action<string>? infoLog = null,
         Action<string>? warningLog = null,
-        IRsrCleanupController? rsrCleanupController = null)
+        IRsrCleanupController? rsrCleanupController = null,
+        IDaedalusAutomationController? daedalusAutomationController = null)
     {
         this.commandSender = commandSender;
         this.snapshotProvider = snapshotProvider;
         this.infoLog = infoLog;
         this.warningLog = warningLog;
         this.rsrCleanupController = rsrCleanupController ?? new FallbackOnlyRsrCleanupController(commandSender);
+        this.daedalusAutomationController = daedalusAutomationController;
     }
 
     public ExternalAutomationCleanupState State { get; private set; } = ExternalAutomationCleanupState.Idle;
@@ -168,6 +197,8 @@ public sealed class ExternalAutomationCleanupService
             return;
 
         var snapshot = snapshotProvider.Capture(NormalizeAccountId(accountId), NormalizeCharacterKey(characterKey));
+        if (daedalusAutomationController != null)
+            snapshot = snapshot with { Daedalus = CaptureDaedalus() };
         snapshots[key] = snapshot;
 
         State = ExternalAutomationCleanupState.Captured;
@@ -208,6 +239,7 @@ public sealed class ExternalAutomationCleanupService
         RestoreBossMod("BMR", "/bmrai", snapshot.Bmr, attempts);
         RestoreBossMod("VBM", "/vbmai", snapshot.Vbm, attempts);
         RestoreCbt(snapshot.Cbt, attempts);
+        RestoreDaedalus(snapshot.Daedalus, attempts);
 
         var result = CompleteCleanup(
             key,
@@ -244,6 +276,9 @@ public sealed class ExternalAutomationCleanupService
             warningLog?.Invoke($"[ExternalCleanup] RSR cleanup controller failed: {ex.Message}");
         }
         attempts.Add(new CommandAttempt(rsr.ReportedAction, rsr.Success));
+
+        if (daedalusAutomationController != null)
+            attempts.Add(SetDaedalusEnabled(false));
 
         if (wrathStartedKeys.Contains(key))
             attempts.Add(Send("/wrath auto off"));
@@ -326,6 +361,46 @@ public sealed class ExternalAutomationCleanupService
         attempts.Add(Send(autoFollowEnabled ? "/cbt enable AutoFollow" : "/cbt disable AutoFollow"));
     }
 
+    private DaedalusAutomationSnapshot CaptureDaedalus()
+    {
+        try
+        {
+            return daedalusAutomationController!.TryGetEnabled(out var enabled)
+                ? new DaedalusAutomationSnapshot(true, enabled, string.Empty)
+                : DaedalusAutomationSnapshot.Unavailable("typed IPC unavailable");
+        }
+        catch (Exception ex)
+        {
+            warningLog?.Invoke($"[ExternalCleanup] Daedalus snapshot failed: {ex.Message}");
+            return DaedalusAutomationSnapshot.Unavailable(ex.Message);
+        }
+    }
+
+    private void RestoreDaedalus(DaedalusAutomationSnapshot? snapshot, List<CommandAttempt> attempts)
+    {
+        if (snapshot is not { IsAvailable: true, Enabled: { } enabled })
+            return;
+
+        attempts.Add(SetDaedalusEnabled(enabled));
+    }
+
+    private CommandAttempt SetDaedalusEnabled(bool enabled)
+    {
+        var action = AutorotDaedalusAutomationController.GetActionLabel(enabled);
+        if (daedalusAutomationController == null)
+            return new CommandAttempt(action, false);
+
+        try
+        {
+            return new CommandAttempt(action, daedalusAutomationController.TrySetEnabled(enabled));
+        }
+        catch (Exception ex)
+        {
+            warningLog?.Invoke($"[ExternalCleanup] {action} failed: {ex.Message}");
+            return new CommandAttempt(action, false);
+        }
+    }
+
     private void AddBoolCommand(List<CommandAttempt> attempts, string commandPrefix, bool? value)
     {
         if (value is not { } enabled)
@@ -339,11 +414,16 @@ public sealed class ExternalAutomationCleanupService
 
     private static string FormatSnapshotSummary(ExternalAutomationSnapshot snapshot)
     {
-        return string.Join(
-            "; ",
+        var targets = new List<string>
+        {
             FormatTarget("BMR", snapshot.Bmr.IsAvailable, snapshot.Bmr.Detail),
             FormatTarget("VBM", snapshot.Vbm.IsAvailable, snapshot.Vbm.Detail),
-            FormatTarget("CBT", snapshot.Cbt.IsAvailable, snapshot.Cbt.Detail));
+            FormatTarget("CBT", snapshot.Cbt.IsAvailable, snapshot.Cbt.Detail),
+        };
+        if (snapshot.Daedalus != null)
+            targets.Add(FormatTarget("Daedalus", snapshot.Daedalus.IsAvailable, snapshot.Daedalus.Detail));
+
+        return string.Join("; ", targets);
     }
 
     private static string FormatTarget(string label, bool available, string detail)

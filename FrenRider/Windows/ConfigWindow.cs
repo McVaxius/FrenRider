@@ -35,7 +35,7 @@ public class ConfigWindow : Window, IDisposable
 
     private static readonly string[] CompanionStances = { "Free Stance", "Defender Stance", "Attacker Stance", "Healer Stance", "Follow" };
     private static readonly string[] ClingTypes = { "NavMesh", "Visland", "BossMod Follow", "Vanilla Follow" };
-    private static readonly string[] RotationPlugins = { "BMR", "VBM", "RSR", "WRATH" };
+    private static readonly string[] RotationPlugins = { "BMR", "VBM", "RSR", "WRATH", "DAEDALUS" };
     private static readonly string[] RotationTypes = { "Auto", "Manual", "none", "Auto (Support)", "Previously Engaged Targets" };
     private static readonly string[] BossModAIOptions = { "on", "off" };
     private static readonly string[] CleanupModes = { "Restore snapshot", "Turn everything off" };
@@ -900,7 +900,7 @@ public class ConfigWindow : Window, IDisposable
             configManager.SaveCurrentAccount();
         }
         ImGui.SameLine();
-        HelpMarker("Which rotation automation plugin to use.\nBMR: BossModReborn\nVBM: VanillaBossMod\nRSR: RotationSolver Reborn\nWRATH: Wrath");
+        HelpMarker("Which rotation automation plugin to use.\nBMR: BossModReborn\nVBM: VanillaBossMod\nRSR: RotationSolver Reborn\nWRATH: Wrath\nDAEDALUS: Daedalus");
         DrawDefaultSettingSyncButton("Rotation Plugin");
 
         // Rotation Plugin Foray (dropdown)
@@ -972,12 +972,12 @@ public class ConfigWindow : Window, IDisposable
                 configManager.SaveCurrentAccount();
             }
             ImGui.SameLine();
-            HelpMarker("When RSR or WRATH is selected, also force BMR/VBM to the configured zone preset.");
+            HelpMarker("When RSR, WRATH, or DAEDALUS is selected, also force BMR to the configured zone preset.");
             DrawDefaultSettingSyncButton("Force BossMod preset regardless of rotation");
         }
         else
         {
-            ImGui.TextDisabled("Managed presets: BMR/VBM use FRENRIDER role presets; RSR/WRATH use passive role presets.");
+            ImGui.TextDisabled("Managed presets: BMR/VBM use FRENRIDER role presets; RSR/WRATH/DAEDALUS use passive role presets.");
         }
 
         ImGui.Spacing();
@@ -995,7 +995,7 @@ public class ConfigWindow : Window, IDisposable
             configManager.SaveCurrentAccount();
         }
         ImGui.SameLine();
-        HelpMarker("Restore snapshot: put captured BMR/VBM AI on/off, follow, movement, and CBT fields back on /fr off.\nTurn everything off: disable BMR/VBM AI, CBT AutoFollow, RotationSolverReborn, and Wrath auto if FrenRider started it.");
+        HelpMarker("Restore snapshot: put captured BMR/VBM AI on/off, follow, movement, CBT fields, and Daedalus enabled state back on /fr off.\nTurn everything off: disable BMR/VBM AI, CBT AutoFollow, RotationSolverReborn, Daedalus, and Wrath auto if FrenRider started it.");
         DrawDefaultSettingSyncButton("Cleanup Mode");
 
         // RSR Rotation Type (dropdown)
@@ -1030,7 +1030,7 @@ public class ConfigWindow : Window, IDisposable
             plugin.BossModActionTweaksService.ApplyDontMoveWhileCasting(dontMoveWhileCasting);
         }
         ImGui.SameLine();
-        HelpMarker("One-shot global setting. On change, applies BossMod Prevent movement while casting to currently loaded BMR and VBM plugins.");
+        HelpMarker("Global setting. On plugin load and whenever it changes, applies casting movement lock to currently loaded BMR, VBM, and RSR plugins.");
 
         var actionTweaks = plugin.BossModActionTweaksService;
         if (actionTweaks.HasResult)
@@ -1542,7 +1542,7 @@ public class ConfigWindow : Window, IDisposable
         ImGui.TextDisabled("FrenRider installs BossMod presets whenever it is enabled.");
 
         if (ImGui.Button("Push Presets Now"))
-            plugin.AutorotIpcService.CreatePresets(force: true);
+            plugin.CombatService.ApplyPresetSelection("manual preset push");
         ImGui.SameLine();
         ImGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1), plugin.AutorotIpcService.LastStatus);
     }
@@ -2171,7 +2171,7 @@ public class ConfigWindow : Window, IDisposable
 
         if (ImGui.Button("Push Presets Now"))
         {
-            plugin.AutorotIpcService.CreatePresets(force: true);
+            plugin.CombatService.ApplyPresetSelection("manual preset push");
         }
         ImGui.SameLine();
         ImGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1), plugin.AutorotIpcService.LastStatus);
@@ -2262,6 +2262,7 @@ public class ConfigWindow : Window, IDisposable
         ImGui.BulletText("BossMod / BossModReborn - Combat AI and following");
         ImGui.BulletText("Rotation Solver Reborn - Combat rotation automation");
         ImGui.BulletText("WRATH - Combat rotation automation");
+        ImGui.BulletText("Daedalus - Combat rotation automation");
         ImGui.BulletText("Questionable - Quest automation integration");
         ImGui.BulletText("Automaton (CBT) by Croizat - Enhanced duty start/end, auto-leave");
         ImGui.Spacing();

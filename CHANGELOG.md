@@ -10,12 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Combat settings now include a global one-shot **Don't move while casting** toggle that updates currently loaded BMR and VBM Action Tweaks settings
+- Daedalus is available as a normal and Foray combat-rotation choice, managed through typed enabled-state IPC with mounted/automation suppression and cleanup snapshot restoration
+- Combat settings now include a global **Don't move while casting** toggle that applies the stored value on plugin load and on change to currently loaded BMR/VBM Action Tweaks plus RSR `PoslockCasting`
 - ADS runtime duty ownership polling now uses authoritative `ADS.IsDutyOwned()` IPC with JSON fallback, a 250ms poll interval, and a bounded 5-second stale hold for transient IPC failures
 - Duty combat now uses latched `QuestionableSolo` versus `FrenRider` authority, classifying true solo duties from `BoundByDuty95` with a designed-party-size Lumina fallback
 - Non-solo duties now receive one FrenRider combat bootstrap per enabled duty session, including when ADS already owns navigation and progression
 
 ### Fixed
+- Automatic and manual BossMod preset application now targets only the selected provider, preventing non-VBM passive presets from being sent to VBM and interrupting Questionable progress
 - The row-level **Sync all** beside **ADS Exit Method** now copies the complete exit selection and clears conflicting local exit flags
 - Cross-world BossMod follow now removes a matching concatenated home-world suffix before sending `/bmrai follow`, while preserving legitimate surnames that match a world name
 - Settings character browsing now uses an editing-only selection, so viewing or changing `DEFAULT CONFIG` and other profiles cannot replace the logged-in character's runtime configuration or DAD target
@@ -34,6 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Duty area-transition recovery now resets zone-sensitive services after `BetweenAreas` loads, improving level-70 treasure dungeon waterfall recovery
 
 ### Changed
+- Global configuration schema v2 defaults **Don't move while casting** on, migrates v1 configurations on once, and preserves later v2 opt-outs
 - FATE transitions now log follow/combat decision context for pathing diagnostics
 - Mounted rotation suppression now targets the selected combat engine while mounted outside duty, then restores it on dismount or duty entry
 - BossMod follow is now treated as a stateful mode and only reissued when target, territory, or follow-combat settings change

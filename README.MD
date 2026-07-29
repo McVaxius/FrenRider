@@ -45,7 +45,7 @@ The main window shows run state, configured fren, party status, follow/mount/idl
 - Social spacing with configurable X/Z wiggle and indoor behavior.
 - Formation following for party-slot based positioning.
 - Mount and flying behavior, including Fly You Fools, own-mount chase, far-chase recovery, and vnavmesh flying-stuck recovery through ECommons keypress support.
-- Combat integration for BMR, VBM, RotationSolver Reborn, and Wrath, with packaged BossMod presets.
+- Combat integration for BMR, VBM, RotationSolver Reborn, Wrath, and Daedalus, with packaged BossMod presets.
 - FATE sync, food use/search, companion summon/stance, idle commands, auto-discard, repair, and desynthesis helpers.
 - DTR controls with text/icon modes.
 - Optional video notifications when enabling or disabling Fren Rider.
@@ -88,6 +88,12 @@ When investigating unexpected party drops, also check external auto-Return tools
 
 Global UI settings are stored by Dalamud in the normal Fren Rider plugin config.
 
+**Don't move while casting** is a global setting that defaults on. Fren Rider applies the stored value when the plugin loads and whenever the checkbox changes: BMR and VBM receive their existing Action Tweaks setting, while RotationSolver Reborn receives `PoslockCasting true|false` through typed IPC. Existing global v1 configurations enable the setting during their one-time v2 migration; a later v2 opt-out remains off.
+
+BossMod preset activation is provider-specific: VBM selections receive only the VBM preset command, while BMR and non-VBM rotation selections use BMR for BossMod AI and receive only the BMR preset command. **Push Presets Now** installs the packaged presets and applies the current selection through the same routing.
+
+Daedalus is rotation option 4 and is controlled through its typed `Daedalus.IsEnabled` and `Daedalus.SetEnabled` IPC. Fren Rider disables it during conflicting rotation, mounted, Questionable, and Coppelia ownership. **Restore snapshot** returns Daedalus to the enabled state captured before Fren Rider changed it; **Turn everything off** disables it.
+
 Per-account Fren Rider config files are stored in the plugin config directory as:
 
 ```text
@@ -103,7 +109,7 @@ Common integrations used by code paths:
 - **vnavmesh**: NavMesh pathing, flying, and path-state checks.
 - **Visland**: alternative movement backend.
 - **BossMod/BossMod Reborn**: BossMod Follow and packaged autorotation presets.
-- **RotationSolver Reborn** and **Wrath**: combat automation modes.
+- **RotationSolver Reborn**, **Wrath**, and **Daedalus**: combat automation modes.
 - **ADS**: duty handoff, repair, desynthesis, and ADS exit method.
 - **Lifestream**: optional teleport-to-fren support when the fren is out of zone.
 - **AutoRetainer**: auto-discard support through `/ays discard`.

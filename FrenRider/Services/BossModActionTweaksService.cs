@@ -24,11 +24,16 @@ public sealed class BossModActionTweaksService
 
     private readonly IDalamudPluginInterface pluginInterface;
     private readonly IPluginLog log;
+    private readonly AutorotIpcService autorotIpcService;
 
-    public BossModActionTweaksService(IDalamudPluginInterface pluginInterface, IPluginLog log)
+    public BossModActionTweaksService(
+        IDalamudPluginInterface pluginInterface,
+        IPluginLog log,
+        AutorotIpcService autorotIpcService)
     {
         this.pluginInterface = pluginInterface;
         this.log = log;
+        this.autorotIpcService = autorotIpcService;
     }
 
     public bool HasResult { get; private set; }
@@ -38,15 +43,19 @@ public sealed class BossModActionTweaksService
 
     public void ApplyDontMoveWhileCasting(bool enabled)
     {
-        var results = Targets.Select(target => Apply(target, enabled)).ToArray();
+        var results = Targets
+            .Select(target => Apply(target, enabled))
+            .Append(ApplyRsr(enabled))
+            .ToArray();
 
         HasResult = true;
         HasFailures = results.Any(result => result.Outcome == ApplyOutcome.Failed);
-        HasNotLoadedTargets = results.Any(result => result.Outcome == ApplyOutcome.NotLoaded);
-        StatusText = string.Join("; ", results.Select(result => $"{result.Target.Label}: {FormatOutcome(result.Outcome)}"));
+        HasNotLoadedTargets = results.Any(result =>
+            result.Outcome is ApplyOutcome.NotLoaded or ApplyOutcome.Unavailable);
+        StatusText = string.Join("; ", results.Select(result => $"{result.Label}: {FormatOutcome(result.Outcome)}"));
 
         foreach (var result in results.Where(result => result.Outcome == ApplyOutcome.Failed))
-            log.Warning($"[BossMod ActionTweaks] {result.Target.Label} failed: {result.Detail}");
+            log.Warning($"[BossMod ActionTweaks] {result.Label} failed: {result.Detail}");
 
         log.Information($"[BossMod ActionTweaks] PreventMovingWhileCasting={enabled}: {StatusText}");
     }
@@ -59,46 +68,51 @@ public sealed class BossModActionTweaksService
                 plugin.IsLoaded
                 && string.Equals(plugin.InternalName, target.InternalName, StringComparison.OrdinalIgnoreCase));
             if (exposed == null)
-                return new(target, ApplyOutcome.NotLoaded, string.Empty);
+                return new(target.Label, ApplyOutcome.NotLoaded, string.Empty);
 
             var liveAssembly = FindLivePluginAssembly(exposed, out var discoveryFailure);
             if (liveAssembly == null)
-                return new(target, ApplyOutcome.Failed, $"plugin is loaded, but live instance discovery failed: {discoveryFailure}");
+                return new(target.Label, ApplyOutcome.Failed, $"plugin is loaded, but live instance discovery failed: {discoveryFailure}");
 
             var serviceType = liveAssembly.GetType("BossMod.Service");
             if (serviceType == null)
-                return new(target, ApplyOutcome.Failed, "BossMod.Service was not found in the live plugin assembly");
+                return new(target.Label, ApplyOutcome.Failed, "BossMod.Service was not found in the live plugin assembly");
 
             var configRoot = GetStaticMember(serviceType, "Config");
             if (configRoot == null)
-                return new(target, ApplyOutcome.Failed, "BossMod.Service.Config was not available");
+                return new(target.Label, ApplyOutcome.Failed, "BossMod.Service.Config was not available");
 
             var configNode = FindConfigNode(configRoot);
             if (configNode == null)
-                return new(target, ApplyOutcome.Failed, $"{CurrentConfigType} or {LegacyConfigType} was not found");
+                return new(target.Label, ApplyOutcome.Failed, $"{CurrentConfigType} or {LegacyConfigType} was not found");
 
             var setting = configNode.GetType().GetField(SettingField, InstanceMembers);
             if (setting?.FieldType != typeof(bool))
-                return new(target, ApplyOutcome.Failed, $"{configNode.GetType().FullName}.{SettingField} was not a bool field");
+                return new(target.Label, ApplyOutcome.Failed, $"{configNode.GetType().FullName}.{SettingField} was not a bool field");
 
             if (setting.GetValue(configNode) is not bool current)
-                return new(target, ApplyOutcome.Failed, $"{SettingField} could not be read");
+                return new(target.Label, ApplyOutcome.Failed, $"{SettingField} could not be read");
 
             if (current == enabled)
-                return new(target, ApplyOutcome.AlreadySet, string.Empty);
+                return new(target.Label, ApplyOutcome.AlreadySet, string.Empty);
 
             setting.SetValue(configNode, enabled);
             if (setting.GetValue(configNode) is not bool readBack || readBack != enabled)
-                return new(target, ApplyOutcome.Failed, $"{SettingField} read-back did not match");
+                return new(target.Label, ApplyOutcome.Failed, $"{SettingField} read-back did not match");
 
             NotifyModified(configNode);
-            return new(target, ApplyOutcome.Applied, string.Empty);
+            return new(target.Label, ApplyOutcome.Applied, string.Empty);
         }
         catch (Exception ex)
         {
-            return new(target, ApplyOutcome.Failed, UnwrapMessage(ex));
+            return new(target.Label, ApplyOutcome.Failed, UnwrapMessage(ex));
         }
     }
+
+    private ApplyResult ApplyRsr(bool enabled)
+        => autorotIpcService.TrySetRsrPoslockCasting(enabled)
+            ? new("RSR", ApplyOutcome.Applied, string.Empty)
+            : new("RSR", ApplyOutcome.Unavailable, string.Empty);
 
     // Modern BossMod entrypoints may use IAsyncDalamudPlugin or HostedPlugin, so resolve through Dalamud's live wrapper.
     private static Assembly? FindLivePluginAssembly(IExposedPlugin exposed, out string failure)
@@ -281,6 +295,7 @@ public sealed class BossModActionTweaksService
             ApplyOutcome.Applied => "applied",
             ApplyOutcome.AlreadySet => "already set",
             ApplyOutcome.NotLoaded => "not loaded",
+            ApplyOutcome.Unavailable => "unavailable",
             _ => "failed",
         };
 
@@ -293,13 +308,14 @@ public sealed class BossModActionTweaksService
     }
 
     private sealed record BossModTarget(string InternalName, string Label);
-    private sealed record ApplyResult(BossModTarget Target, ApplyOutcome Outcome, string Detail);
+    private sealed record ApplyResult(string Label, ApplyOutcome Outcome, string Detail);
 
     private enum ApplyOutcome
     {
         Applied,
         AlreadySet,
         NotLoaded,
+        Unavailable,
         Failed,
     }
 }

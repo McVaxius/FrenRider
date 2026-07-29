@@ -44,7 +44,7 @@ public class CombatService
     private uint lastWarnedManagedPresetJobId = uint.MaxValue;
     private bool warnedMissingManagedPresetJob;
 
-    private static readonly string[] RotationPluginNames = { "BMR", "VBM", "RSR", "WRATH" };
+    private static readonly string[] RotationPluginNames = { "BMR", "VBM", "RSR", "WRATH", "DAEDALUS" };
     private const long CombatSettingsRefreshDebounceMs = 400;
     private const string ManagedPresetRoleTank = "TANK";
     private const string ManagedPresetRoleMelee = "MELEE";
@@ -363,6 +363,7 @@ public class CombatService
         plugin.CaptureExternalAutomationSnapshot("QuestionableSolo duty authority");
 
         var rsrHandled = plugin.AutorotIpcService.TrySetRsrMode(AutorotIpcService.RsrStateCommandType.Off);
+        var daedalusHandled = SetDaedalusEnabled(false, "QuestionableSolo duty authority");
         foreach (var command in BuildQuestionableDutyCombatOffCommands(includeRsrFallback: !rsrHandled))
             SendCommand(command, allowDuringQuestionableSolo: true);
 
@@ -378,8 +379,8 @@ public class CombatService
 
         Plugin.Log.Information(
             rsrHandled
-                ? "[FrenRider][Questionable] Initial QuestionableSolo shutdown forced BMR/VBM/RSR/Wrath off; RSR stopped via IPC."
-                : "[FrenRider][Questionable] Initial QuestionableSolo shutdown forced BMR/VBM/RSR/Wrath off; RSR fallback command sent.");
+                ? $"[FrenRider][Questionable] Initial QuestionableSolo shutdown forced BMR/VBM/RSR/Wrath off; RSR stopped via IPC; Daedalus {(daedalusHandled ? "stopped via IPC" : "IPC unavailable")}."
+                : $"[FrenRider][Questionable] Initial QuestionableSolo shutdown forced BMR/VBM/RSR/Wrath off; RSR fallback command sent; Daedalus {(daedalusHandled ? "stopped via IPC" : "IPC unavailable")}.");
     }
 
     private void ActivateRotation(CharacterConfig config, bool ignoreCooldown = false)
@@ -399,6 +400,7 @@ public class CombatService
         ActivePreset = bossModPreset;
 
         // Disable other rotation plugins first
+        plugin.CaptureExternalAutomationSnapshot("rotation activation");
         DisableOtherRotationPlugins(config);
         ApplyBossModSafetyState(config, pluginName, bossModPreset, "activation");
 
@@ -416,6 +418,11 @@ public class CombatService
             case "WRATH":
                 SetWrathAuto(true, "activation");
                 StateDetail = $"{pluginName} auto" + (string.IsNullOrEmpty(bossModPreset) ? "" : $" [{bossModPreset}]");
+                break;
+            case "DAEDALUS":
+                var daedalusHandled = SetDaedalusEnabled(true, "activation");
+                StateDetail = $"{pluginName} {(daedalusHandled ? "active" : "unavailable")}" +
+                    (string.IsNullOrEmpty(bossModPreset) ? "" : $" [{bossModPreset}]");
                 break;
             case "BMR":
                 StateDetail = $"{pluginName} active" + (string.IsNullOrEmpty(bossModPreset) ? "" : $" [{bossModPreset}]");
@@ -445,6 +452,9 @@ public class CombatService
                 break;
             case "WRATH":
                 SetWrathAuto(false, "deactivation");
+                break;
+            case "DAEDALUS":
+                SetDaedalusEnabled(false, "deactivation");
                 break;
             case "BMR":
             case "VBM":
@@ -513,7 +523,7 @@ public class CombatService
         return pluginName switch
         {
             "BMR" or "VBM" => manualPreset,
-            "RSR" or "WRATH" when config.ForceBossModPresetRegardlessOfRotation => manualPreset,
+            "RSR" or "WRATH" or "DAEDALUS" when config.ForceBossModPresetRegardlessOfRotation => manualPreset,
             _ => managedPreset,
         };
     }
@@ -622,6 +632,8 @@ public class CombatService
         var bossModPreset = GetBossModPresetForPlugin(config, pluginName);
         var manualPreset = GetManualPresetForZone(config);
         ActivePreset = bossModPreset;
+        plugin.CaptureExternalAutomationSnapshot($"rotation settings after {reason}");
+        DisableOtherRotationPlugins(config);
         ApplyBossModSafetyState(config, pluginName, bossModPreset, reason);
 
         switch (pluginName)
@@ -636,6 +648,9 @@ public class CombatService
             case "WRATH":
                 SetWrathAuto(true, reason);
                 break;
+            case "DAEDALUS":
+                SetDaedalusEnabled(true, reason);
+                break;
             case "BMR":
             case "VBM":
                 break;
@@ -646,6 +661,9 @@ public class CombatService
 
     public void ApplyPresetSelection(string reason, bool installPresets = true)
     {
+        if (installPresets)
+            plugin.AutorotIpcService.CreatePresets(force: true);
+
         if (ShouldSuppressFrenRiderCombatCommands)
             return;
 
@@ -657,7 +675,7 @@ public class CombatService
         lastActivePluginIdx = Array.IndexOf(RotationPluginNames, pluginName);
         var bossModPreset = GetBossModPresetForPlugin(config, pluginName);
         ActivePreset = bossModPreset;
-        ApplyBossModPreset(bossModPreset, reason, installPresets);
+        ApplyBossModPreset(pluginName, bossModPreset, reason, installPresets: false);
     }
 
     public void ApplyBossModFollowStartupDefaults()
@@ -719,6 +737,9 @@ public class CombatService
                 break;
             case "WRATH":
                 SetWrathAuto(false, "mounted rotation suppression");
+                break;
+            case "DAEDALUS":
+                SetDaedalusEnabled(false, "mounted rotation suppression");
                 break;
         }
 
@@ -889,9 +910,7 @@ public class CombatService
             ? config.RotationPluginForay
             : config.RotationPlugin;
 
-        return pluginIdx >= 0 && pluginIdx < RotationPluginNames.Length
-            ? RotationPluginNames[pluginIdx]
-            : "RSR";
+        return ResolveRotationPluginName(pluginIdx);
     }
 
     private void ApplyBossModSafetyState(CharacterConfig config, string pluginName, string selectedPreset, string reason)
@@ -902,7 +921,7 @@ public class CombatService
         ApplyConfiguredBossModAiState(config, pluginName, reason);
         ApplyBossModDefaultSettingsOnce(pluginName, selectedPreset, reason);
         ApplyBossModMovementUnlockOnce(pluginName, selectedPreset, reason);
-        ApplyBossModPreset(selectedPreset, reason);
+        ApplyBossModPreset(pluginName, selectedPreset, reason);
 
         switch (pluginName)
         {
@@ -920,6 +939,10 @@ public class CombatService
                 break;
             case "WRATH":
 				SendCommand($"/rotation cancel");  //ghost in the machine 8. disabling RSR when we switch to WRATH
+                break;
+            case "DAEDALUS":
+                SendCommand("/rotation cancel");
+                SetWrathAuto(false, $"{reason} because selected plugin is {pluginName}");
                 break;
         }
     }
@@ -965,7 +988,7 @@ public class CombatService
     private string BuildBossModSafetySignature(string pluginName, string selectedPreset)
         => string.Join("|", pluginName, selectedPreset, zoneService.TerritoryId, zoneService.CurrentZone);
 
-    private void ApplyBossModPreset(string presetName, string reason, bool installPresets = true)
+    private void ApplyBossModPreset(string pluginName, string presetName, string reason, bool installPresets = true)
     {
         if (ShouldSuppressFrenRiderCombatCommands || !ShouldApplyPreset(presetName))
             return;
@@ -973,26 +996,9 @@ public class CombatService
         if (installPresets)
             plugin.AutorotIpcService.CreatePresets(force: true);
         plugin.AutorotIpcService.ForcePreset(presetName);
-        SendBmrPresetCommand(presetName, reason);
-        SendVbmPresetCommand(presetName, reason);
-    }
-
-    private void SendBmrPresetCommand(string presetName, string reason)
-    {
-        if (!ShouldApplyPreset(presetName))
-            return;
-
-        SendCommand($"/bmrai setpresetname {presetName}");
-        Plugin.Log.Information($"Combat: Sent BMR preset command for '{presetName}' after {reason}");
-    }
-
-    private void SendVbmPresetCommand(string presetName, string reason)
-    {
-        if (!ShouldApplyPreset(presetName))
-            return;
-
-        SendCommand($"/vbm ar set {presetName}");
-        Plugin.Log.Information($"Combat: Sent VBM preset command for '{presetName}' after {reason}");
+        foreach (var command in BuildBossModPresetCommands(pluginName, presetName))
+            SendCommand(command);
+        Plugin.Log.Information($"Combat: Sent {GetBossModPresetProvider(pluginName)} preset command for '{presetName}' after {reason}");
     }
 
     private void ApplyConfiguredBossModAiState(CharacterConfig config, string pluginName, string reason)
@@ -1016,6 +1022,23 @@ public class CombatService
         return string.Equals(pluginName, "VBM", StringComparison.OrdinalIgnoreCase)
             ? new[] { "/vbmai on" }
             : new[] { "/bmrai on" };
+    }
+
+    internal static string[] BuildBossModPresetCommands(string pluginName, string presetName)
+    {
+        if (!ShouldApplyPreset(presetName))
+            return Array.Empty<string>();
+
+        return string.Equals(pluginName, "VBM", StringComparison.OrdinalIgnoreCase)
+            ? new[] { $"/vbm ar set {presetName}" }
+            : new[] { $"/bmrai setpresetname {presetName}" };
+    }
+
+    internal static string ResolveRotationPluginName(int pluginIdx)
+    {
+        return pluginIdx >= 0 && pluginIdx < RotationPluginNames.Length
+            ? RotationPluginNames[pluginIdx]
+            : "RSR";
     }
 
     internal static string[] BuildQuestionableDutyCombatOffCommands(bool includeRsrFallback = true)
@@ -1064,6 +1087,7 @@ public class CombatService
 
         plugin.CaptureExternalAutomationSnapshot("Coppelia PowerlevelBot lease");
         var rsrHandled = plugin.AutorotIpcService.TrySetRsrMode(AutorotIpcService.RsrStateCommandType.Off);
+        var daedalusHandled = SetDaedalusEnabled(false, "Coppelia PowerlevelBot lease");
         foreach (var command in BuildCoppeliaPowerlevelCombatOffCommands(includeRsrFallback: !rsrHandled))
             SendCommand(command);
 
@@ -1074,8 +1098,8 @@ public class CombatService
         lastRotationToggleMs = 0;
         Plugin.Log.Information(
             rsrHandled
-                ? "[FrenRider][CoppeliaPowerlevel] Forced BMR/VBM/RSR/Wrath off; RSR stopped via IPC."
-                : "[FrenRider][CoppeliaPowerlevel] Forced BMR/VBM/RSR/Wrath off; RSR fallback command sent.");
+                ? $"[FrenRider][CoppeliaPowerlevel] Forced BMR/VBM/RSR/Wrath off; RSR stopped via IPC; Daedalus {(daedalusHandled ? "stopped via IPC" : "IPC unavailable")}."
+                : $"[FrenRider][CoppeliaPowerlevel] Forced BMR/VBM/RSR/Wrath off; RSR fallback command sent; Daedalus {(daedalusHandled ? "stopped via IPC" : "IPC unavailable")}.");
     }
 
     private void DisableOtherRotationPlugins(CharacterConfig config)
@@ -1113,9 +1137,26 @@ public class CombatService
                 case "WRATH":
                     SetWrathAuto(false, $"selected rotation plugin is {pluginName}");
                     break;
+                case "DAEDALUS":
+                    SetDaedalusEnabled(false, $"selected rotation plugin is {pluginName}");
+                    break;
             }
         }
     }
+
+    private bool SetDaedalusEnabled(bool enabled, string reason)
+    {
+        var handled = plugin.AutorotIpcService.TrySetDaedalusEnabled(enabled);
+        if (handled)
+            Plugin.Log.Information($"Combat: Daedalus {(enabled ? "enabled" : "disabled")} after {reason}");
+        else
+            Plugin.Log.Debug($"Combat: Daedalus SetEnabled IPC unavailable after {reason}");
+
+        return handled;
+    }
+
+    private static string GetBossModPresetProvider(string pluginName)
+        => string.Equals(pluginName, "VBM", StringComparison.OrdinalIgnoreCase) ? "VBM" : "BMR";
 
     private void SetWrathAuto(bool enabled, string reason)
     {

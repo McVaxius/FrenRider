@@ -103,6 +103,12 @@ public sealed class Plugin : IDalamudPlugin
         }
 
         Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
+        if (Configuration.MigrateToCurrentVersion())
+        {
+            Configuration.Save();
+            Log.Information($"[FrenRider] Migrated global configuration to v{Configuration.Version}");
+        }
+
         ConfigManager = new ConfigManager(PluginInterface, Log);
 
         if (!string.IsNullOrEmpty(Configuration.LastAccountId))
@@ -115,15 +121,18 @@ public sealed class Plugin : IDalamudPlugin
         AdsIntegrationService = new AdsIntegrationService(this, ZoneService, AdsDutyIpcService);
         AdsUtilityIpcService = new AdsUtilityIpcService(PluginInterface, Log);
         AdsReflectionIpcService = new AdsReflectionIpcService(this, PluginInterface, Log);
-        BossModActionTweaksService = new BossModActionTweaksService(PluginInterface, Log);
         AutorotIpcService = new AutorotIpcService(PluginInterface, Log);
+        BossModActionTweaksService = new BossModActionTweaksService(PluginInterface, Log, AutorotIpcService);
+        BossModActionTweaksService.ApplyDontMoveWhileCasting(Configuration.DontMoveWhileCasting);
         var externalAutomationCommandSender = new DalamudExternalAutomationCommandSender();
+        var daedalusAutomationController = new AutorotDaedalusAutomationController(AutorotIpcService);
         ExternalAutomationCleanupService = new ExternalAutomationCleanupService(
             externalAutomationCommandSender,
             new BossModExternalAutomationSnapshotProvider(PluginInterface, Log),
             message => Log.Information(message),
             message => Log.Warning(message),
-            new AutorotRsrCleanupController(AutorotIpcService, externalAutomationCommandSender));
+            new AutorotRsrCleanupController(AutorotIpcService, externalAutomationCommandSender),
+            daedalusAutomationController);
         CoppeliaPowerlevelLeaseService = new CoppeliaPowerlevelLeaseService(this);
         FollowService = new FollowService(this, FrenTracker, ZoneService);
         MountService = new MountService(this, FrenTracker, ZoneService);

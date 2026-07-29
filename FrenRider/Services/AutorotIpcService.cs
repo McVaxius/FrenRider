@@ -14,6 +14,9 @@ namespace FrenRider.Services;
 /// </summary>
 public class AutorotIpcService : IDisposable
 {
+    internal const string DaedalusIsEnabledChannel = "Daedalus.IsEnabled";
+    internal const string DaedalusSetEnabledChannel = "Daedalus.SetEnabled";
+
     public enum RsrStateCommandType : byte
     {
         Off,
@@ -198,6 +201,45 @@ public class AutorotIpcService : IDisposable
     public bool TrySetRsrSupportTargeting(bool enabled)
     {
         return TrySetRsrSetting("FriendlyPartyNpcHealRaise3", enabled ? "true" : "false");
+    }
+
+    public bool TrySetRsrPoslockCasting(bool enabled)
+    {
+        return TrySetRsrSetting("PoslockCasting", enabled ? "true" : "false");
+    }
+
+    public bool TryGetDaedalusEnabled(out bool enabled)
+    {
+        enabled = false;
+
+        try
+        {
+            var subscriber = pluginInterface.GetIpcSubscriber<bool>(DaedalusIsEnabledChannel);
+            enabled = subscriber.InvokeFunc();
+            log.Debug($"Daedalus enabled state read via IPC: {enabled}");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            log.Debug($"Daedalus enabled-state IPC unavailable: {ex.Message}");
+            return false;
+        }
+    }
+
+    public bool TrySetDaedalusEnabled(bool enabled)
+    {
+        try
+        {
+            var subscriber = pluginInterface.GetIpcSubscriber<bool, object>(DaedalusSetEnabledChannel);
+            subscriber.InvokeAction(enabled);
+            log.Debug($"Daedalus enabled state set via IPC: {enabled}");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            log.Debug($"Daedalus SetEnabled IPC unavailable for {enabled}: {ex.Message}");
+            return false;
+        }
     }
 
     private bool TrySetRsrSetting(string settingName, string value)

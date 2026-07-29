@@ -233,6 +233,92 @@ public sealed class ExternalAutomationCleanupServiceTests
             command is AutorotRsrCleanupController.TypedActionLabel or AutorotRsrCleanupController.FallbackCommand));
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void RestoreSnapshotRestoresCapturedDaedalusEnabledState(bool capturedEnabled)
+    {
+        var provider = new FakeSnapshotProvider();
+        provider.Snapshots[("account", "character")] = Snapshot("account", "character", forbidMovement: false);
+        var sender = new FakeCommandSender();
+        var daedalus = new FakeDaedalusAutomationController { ReadEnabled = capturedEnabled };
+        var service = new ExternalAutomationCleanupService(
+            sender,
+            provider,
+            daedalusAutomationController: daedalus);
+
+        service.CaptureIfMissing("account", "character", "test");
+        var result = service.Cleanup(new CharacterConfig(), "account", "character", "test");
+
+        Assert.Equal(ExternalAutomationCleanupState.Restored, result.State);
+        Assert.Equal(new[] { capturedEnabled }, daedalus.SetRequests);
+        Assert.Contains(AutorotDaedalusAutomationController.GetActionLabel(capturedEnabled), result.Commands);
+    }
+
+    [Fact]
+    public void TurnEverythingOffDisablesDaedalus()
+    {
+        var provider = new FakeSnapshotProvider();
+        var sender = new FakeCommandSender();
+        var daedalus = new FakeDaedalusAutomationController();
+        var service = new ExternalAutomationCleanupService(
+            sender,
+            provider,
+            daedalusAutomationController: daedalus);
+
+        var result = service.Cleanup(
+            new CharacterConfig { CleanupMode = FrenRiderCleanupMode.TurnEverythingOff },
+            "account",
+            "character",
+            "test");
+
+        Assert.Equal(ExternalAutomationCleanupState.ForceOff, result.State);
+        Assert.Equal(new[] { false }, daedalus.SetRequests);
+        Assert.Contains(AutorotDaedalusAutomationController.GetActionLabel(false), result.Commands);
+    }
+
+    [Fact]
+    public void UnavailableDaedalusSnapshotIsReportedWithoutWritingState()
+    {
+        var provider = new FakeSnapshotProvider();
+        provider.Snapshots[("account", "character")] = Snapshot("account", "character", forbidMovement: false);
+        var sender = new FakeCommandSender();
+        var daedalus = new FakeDaedalusAutomationController { CanRead = false };
+        var service = new ExternalAutomationCleanupService(
+            sender,
+            provider,
+            daedalusAutomationController: daedalus);
+
+        service.CaptureIfMissing("account", "character", "test");
+        var result = service.Cleanup(new CharacterConfig(), "account", "character", "test");
+
+        Assert.Equal(ExternalAutomationCleanupState.Partial, result.State);
+        Assert.Empty(daedalus.SetRequests);
+    }
+
+    [Fact]
+    public void FailedDaedalusRestoreReportsPartialCleanup()
+    {
+        var provider = new FakeSnapshotProvider();
+        provider.Snapshots[("account", "character")] = Snapshot("account", "character", forbidMovement: false);
+        var sender = new FakeCommandSender();
+        var daedalus = new FakeDaedalusAutomationController
+        {
+            ReadEnabled = true,
+            SetSucceeds = false,
+        };
+        var service = new ExternalAutomationCleanupService(
+            sender,
+            provider,
+            daedalusAutomationController: daedalus);
+
+        service.CaptureIfMissing("account", "character", "test");
+        var result = service.Cleanup(new CharacterConfig(), "account", "character", "test");
+
+        Assert.Equal(ExternalAutomationCleanupState.Partial, result.State);
+        Assert.Equal(new[] { true }, daedalus.SetRequests);
+    }
+
     private static ExternalAutomationSnapshot Snapshot(
         string accountId,
         string characterKey,
@@ -284,6 +370,26 @@ public sealed class ExternalAutomationCleanupServiceTests
         {
             Commands.Add(command);
             return !FailedCommands.Contains(command);
+        }
+    }
+
+    private sealed class FakeDaedalusAutomationController : IDaedalusAutomationController
+    {
+        public bool CanRead { get; init; } = true;
+        public bool ReadEnabled { get; init; }
+        public bool SetSucceeds { get; init; } = true;
+        public List<bool> SetRequests { get; } = new();
+
+        public bool TryGetEnabled(out bool enabled)
+        {
+            enabled = ReadEnabled;
+            return CanRead;
+        }
+
+        public bool TrySetEnabled(bool enabled)
+        {
+            SetRequests.Add(enabled);
+            return SetSucceeds;
         }
     }
 }

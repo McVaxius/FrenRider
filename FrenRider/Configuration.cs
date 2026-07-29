@@ -6,7 +6,9 @@ namespace FrenRider;
 [Serializable]
 public class Configuration : IPluginConfiguration
 {
-    public int Version { get; set; } = 1;
+    public const int CurrentVersion = ConfigurationMigration.CurrentVersion;
+
+    public int Version { get; set; } = CurrentVersion;
 
     // --- Global UI Settings ---
     public bool IsConfigWindowMovable { get; set; } = true;
@@ -16,7 +18,7 @@ public class Configuration : IPluginConfiguration
     public string DtrIconDisabled { get; set; } = "\uE03D";
     public bool KrangleEnabled { get; set; } = false;
     public float LeftPanelWidth { get; set; } = 240f;
-    public bool DontMoveWhileCasting { get; set; } = false;
+    public bool DontMoveWhileCasting { get; set; } = ConfigurationMigration.DefaultDontMoveWhileCasting;
 
     // --- Video Notifications ---
     public bool VideoNotificationsEnabled { get; set; } = false;
@@ -30,8 +32,37 @@ public class Configuration : IPluginConfiguration
     // --- Account Tracking ---
     public string LastAccountId { get; set; } = "";
 
+    internal bool MigrateToCurrentVersion()
+    {
+        var version = Version;
+        var dontMoveWhileCasting = DontMoveWhileCasting;
+        var migrated = ConfigurationMigration.Apply(ref version, ref dontMoveWhileCasting);
+
+        Version = version;
+        DontMoveWhileCasting = dontMoveWhileCasting;
+        return migrated;
+    }
+
     public void Save()
     {
         Plugin.PluginInterface.SavePluginConfig(this);
+    }
+}
+
+internal static class ConfigurationMigration
+{
+    internal const int CurrentVersion = 2;
+    internal const bool DefaultDontMoveWhileCasting = true;
+
+    internal static bool Apply(ref int version, ref bool dontMoveWhileCasting)
+    {
+        if (version >= CurrentVersion)
+            return false;
+
+        if (version < 2)
+            dontMoveWhileCasting = true;
+
+        version = CurrentVersion;
+        return true;
     }
 }

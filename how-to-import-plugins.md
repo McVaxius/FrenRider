@@ -27,7 +27,7 @@ For full functionality, install these plugins from the Dalamud Plugin Installer:
 
 **Highly Recommended:**
 - **BossMod** or **BossModReborn** - For combat automation
-- **RotationSolver Reborn** or **Wrath** - For combat rotations
+- **RotationSolver Reborn**, **Wrath**, or **Daedalus** - For combat rotations
 - **Visland** - Alternative navigation system
 
 **Optional:**
@@ -118,7 +118,7 @@ For full functionality, install these plugins from the Dalamud Plugin Installer:
 ### 3. Configure Combat Settings (Optional)
 
 **Rotation Plugin:**
-- Choose which rotation plugin to use: BMR, VBM, RSR, or WRATH
+- Choose which rotation plugin to use: BMR, VBM, RSR, WRATH, or DAEDALUS
 - Set auto-rotation preset names for different content types
 
 **Combat Behavior:**
@@ -295,7 +295,7 @@ For full functionality, install these plugins from the Dalamud Plugin Installer:
 - **Check:** "Fly You Fools" setting matches intent
 
 ### Combat Not Working
-- **Check:** Rotation plugin (BMR/VBM/RSR/Wrath) installed
+- **Check:** Rotation plugin (BMR/VBM/RSR/Wrath/Daedalus) installed
 - **Check:** Rotation preset exists and is named correctly
 - **Check:** Rotation plugin is enabled
 
@@ -369,7 +369,7 @@ A: Possibly. Use at your own risk. Automation plugins violate TOS.
 A: Yes, with job-specific optimizations for each role.
 
 **Q: Can I customize the rotation?**  
-A: Yes, through the rotation plugin (BMR/VBM/RSR/Wrath) settings.
+A: Yes, through the rotation plugin (BMR/VBM/RSR/Wrath/Daedalus) settings.
 
 **Q: Does it work in all zones?**  
 A: Most zones, with special handling for dungeons, forays, deep dungeons, etc.
