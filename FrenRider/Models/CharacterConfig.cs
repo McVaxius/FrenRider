@@ -10,6 +10,14 @@ public enum FrenRiderCleanupMode
     TurnEverythingOff,
 }
 
+public enum DaedalusTargetMode
+{
+    None = 0,
+    Focus = 1,
+    Split = 2,
+    KillAdds = 3,
+}
+
 [Serializable]
 public class CharacterConfig
 {
@@ -77,6 +85,8 @@ public class CharacterConfig
     public string AutoRotationTypeFATE { get; set; } = "FATE";
     public int RotationPlugin { get; set; } = 2; // 0=BMR, 1=VBM, 2=RSR, 3=WRATH, 4=DAEDALUS
     public int RotationPluginForay { get; set; } = 3; // 0=BMR, 1=VBM, 2=RSR, 3=WRATH, 4=DAEDALUS
+    public DaedalusTargetMode DaedalusTargetMode { get; set; } =
+        global::FrenRider.Models.DaedalusTargetMode.None;
     public bool ForceBossModPresetRegardlessOfRotation { get; set; } = false;
     public int BossModAI { get; set; } = 0; // 0=on, 1=off
     public int PositionalInCombat { get; set; } = 3; // 0=Front, 1=Rear, 2=Any, 3=Auto
@@ -187,6 +197,7 @@ public class CharacterConfig
             AutoRotationTypeFATE = AutoRotationTypeFATE,
             RotationPlugin = RotationPlugin,
             RotationPluginForay = RotationPluginForay,
+            DaedalusTargetMode = DaedalusTargetMode,
             ForceBossModPresetRegardlessOfRotation = ForceBossModPresetRegardlessOfRotation,
             BossModAI = BossModAI,
             PositionalInCombat = PositionalInCombat,

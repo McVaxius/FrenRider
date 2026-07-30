@@ -36,6 +36,7 @@ public class ConfigWindow : Window, IDisposable
     private static readonly string[] CompanionStances = { "Free Stance", "Defender Stance", "Attacker Stance", "Healer Stance", "Follow" };
     private static readonly string[] ClingTypes = { "NavMesh", "Visland", "BossMod Follow", "Vanilla Follow" };
     private static readonly string[] RotationPlugins = { "BMR", "VBM", "RSR", "WRATH", "DAEDALUS" };
+    private static readonly string[] DaedalusTargetModes = { "None", "Focus", "Split", "Kill Adds" };
     private static readonly string[] RotationTypes = { "Auto", "Manual", "none", "Auto (Support)", "Previously Engaged Targets" };
     private static readonly string[] BossModAIOptions = { "on", "off" };
     private static readonly string[] CleanupModes = { "Restore snapshot", "Turn everything off" };
@@ -914,6 +915,32 @@ public class ConfigWindow : Window, IDisposable
         ImGui.SameLine();
         HelpMarker("Rotation plugin for foray content (Eureka/Bozja).\nWRATH recommended for phantom job support.");
         DrawDefaultSettingSyncButton("Rotation Plugin (Foray)");
+
+        var isForayContext = plugin.ZoneService.CurrentZone == ZoneType.Foray;
+        if (DaedalusTargetModeService.IsEffectiveRotation(
+                config.RotationPlugin,
+                config.RotationPluginForay,
+                isForayContext))
+        {
+            var daedalusTargetMode = (int)config.DaedalusTargetMode;
+            ImGui.SetNextItemWidth(200);
+            if (ImGui.Combo(
+                    "Daedalus Engage Mode",
+                    ref daedalusTargetMode,
+                    DaedalusTargetModes,
+                    DaedalusTargetModes.Length))
+            {
+                config.DaedalusTargetMode = Enum.IsDefined(typeof(DaedalusTargetMode), daedalusTargetMode)
+                    ? (DaedalusTargetMode)daedalusTargetMode
+                    : DaedalusTargetMode.None;
+                configManager.SaveCurrentAccount();
+                if (ReferenceEquals(config, configManager.GetActiveConfig()))
+                    plugin.DaedalusTargetModeService.Apply(config.DaedalusTargetMode, notifyUser: true);
+            }
+            ImGui.SameLine();
+            HelpMarker("Party engage mode sent through Daedalus LAN coordination.\nFocus requires a living enemy hard target.\nNone, Split, and Kill Adds preserve Daedalus's current focus and off-tank assignments.");
+            DrawDefaultSettingSyncButton("Daedalus Engage Mode");
+        }
 
         ImGui.Spacing();
         ImGui.Separator();
@@ -2263,6 +2290,17 @@ public class ConfigWindow : Window, IDisposable
         ImGui.BulletText("Rotation Solver Reborn - Combat rotation automation");
         ImGui.BulletText("WRATH - Combat rotation automation");
         ImGui.BulletText("Daedalus - Combat rotation automation");
+        ImGui.Indent();
+        const string daedalusRepoUrl = "https://raw.githubusercontent.com/ofnature/Daedalus/main/repo.json";
+        ImGui.TextColored(new Vector4(0.3f, 0.7f, 1f, 1), daedalusRepoUrl);
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+            ImGui.SetTooltip("Click to copy Daedalus repository URL");
+        }
+        if (ImGui.IsItemClicked())
+            ImGui.SetClipboardText(daedalusRepoUrl);
+        ImGui.Unindent();
         ImGui.BulletText("Questionable - Quest automation integration");
         ImGui.BulletText("Automaton (CBT) by Croizat - Enhanced duty start/end, auto-leave");
         ImGui.Spacing();

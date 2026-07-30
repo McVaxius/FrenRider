@@ -525,6 +525,16 @@ public sealed class BossModExternalAutomationSnapshotProvider : IExternalAutomat
 
     private static Assembly? FindLivePluginAssembly(IExposedPlugin exposed, out string failure)
     {
+        _ = FindLivePluginInstance(exposed, out var assembly, out failure);
+        return assembly;
+    }
+
+    internal static object? FindLivePluginInstance(
+        IExposedPlugin exposed,
+        out Assembly? assembly,
+        out string failure)
+    {
+        assembly = null;
         var visited = new HashSet<object>(ReferenceEqualityComparer.Instance);
         var localPlugin = FindLocalPlugin(exposed, exposed.GetType().Assembly, depth: 4, visited);
         if (localPlugin == null)
@@ -540,20 +550,21 @@ public sealed class BossModExternalAutomationSnapshotProvider : IExternalAutomat
             return null;
         }
 
-        if (GetInstanceMember(localPlugin, "Assembly") is not Assembly assembly)
+        if (GetInstanceMember(localPlugin, "Assembly") is not Assembly liveAssembly)
         {
             failure = "Dalamud LocalPlugin had no live assembly";
             return null;
         }
 
-        if (!ReferenceEquals(instance.GetType().Assembly, assembly))
+        if (!ReferenceEquals(instance.GetType().Assembly, liveAssembly))
         {
             failure = "Dalamud LocalPlugin instance and assembly did not match";
             return null;
         }
 
+        assembly = liveAssembly;
         failure = string.Empty;
-        return assembly;
+        return instance;
     }
 
     private static object? FindLocalPlugin(object root, Assembly dalamudAssembly, int depth, HashSet<object> visited)

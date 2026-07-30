@@ -421,6 +421,8 @@ public class CombatService
                 break;
             case "DAEDALUS":
                 var daedalusHandled = SetDaedalusEnabled(true, "activation");
+                if (daedalusHandled)
+                    plugin.DaedalusTargetModeService.Apply(config.DaedalusTargetMode, notifyUser: false);
                 StateDetail = $"{pluginName} {(daedalusHandled ? "active" : "unavailable")}" +
                     (string.IsNullOrEmpty(bossModPreset) ? "" : $" [{bossModPreset}]");
                 break;
@@ -649,7 +651,8 @@ public class CombatService
                 SetWrathAuto(true, reason);
                 break;
             case "DAEDALUS":
-                SetDaedalusEnabled(true, reason);
+                if (SetDaedalusEnabled(true, reason))
+                    plugin.DaedalusTargetModeService.Apply(config.DaedalusTargetMode, notifyUser: false);
                 break;
             case "BMR":
             case "VBM":
@@ -886,6 +889,7 @@ public class CombatService
             manualPresetSignature,
             config.RotationPlugin,
             config.RotationPluginForay,
+            config.DaedalusTargetMode,
             config.BossModAI,
             config.PositionalInCombat,
             config.MaxAIDistance,
@@ -955,7 +959,6 @@ public class CombatService
 
         lastBossModDefaultSettingsSignature = signature;
         Plugin.Log.Information($"[FrenRider] Applying BossMod/rotation defaults after {reason}.");
-        SendCommand($"/xldisableplugin AutoDuty");
         SendCommand($"/rotation Settings KeyBoardNoise false");
         SendCommand($"/rotation Settings AutoOffBetweenArea False");
         SendCommand($"/rotation Settings AutoOffCutScene False");

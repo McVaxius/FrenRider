@@ -91,6 +91,30 @@ public sealed class ConfigManagerDefaultSyncTests
     }
 
     [Fact]
+    public void DaedalusTargetModeSyncsByRowAndCombatTab()
+    {
+        var account = CreateAccount();
+        account.DefaultConfig.DaedalusTargetMode = DaedalusTargetMode.Split;
+        var target = account.Characters["Alt One@World"];
+        target.DaedalusTargetMode = DaedalusTargetMode.None;
+        target.RotationPlugin = 1;
+
+        var rowCount = ConfigManager.ApplyDefaultSettingToAllCharacters(
+            account,
+            "Daedalus Engage Mode");
+
+        Assert.Equal(2, rowCount);
+        Assert.Equal(DaedalusTargetMode.Split, target.DaedalusTargetMode);
+        Assert.Equal(1, target.RotationPlugin);
+
+        account.DefaultConfig.DaedalusTargetMode = DaedalusTargetMode.KillAdds;
+        var tabCount = ConfigManager.ApplyDefaultTabToAllCharacters(account, "Combat");
+
+        Assert.Equal(2, tabCount);
+        Assert.Equal(DaedalusTargetMode.KillAdds, target.DaedalusTargetMode);
+    }
+
+    [Fact]
     public void FullSyncDeepCopiesMutableListsAndArrays()
     {
         var account = CreateAccount();

@@ -84,6 +84,7 @@ public class ConfigManager
                 Setting("BM Rotation Preset (FATE)", (source, target) => target.AutoRotationTypeFATE = source.AutoRotationTypeFATE),
                 Setting("Rotation Plugin", (source, target) => target.RotationPlugin = source.RotationPlugin),
                 Setting("Rotation Plugin (Foray)", (source, target) => target.RotationPluginForay = source.RotationPluginForay),
+                Setting("Daedalus Engage Mode", (source, target) => target.DaedalusTargetMode = source.DaedalusTargetMode),
                 Setting("Force BossMod preset regardless of rotation", (source, target) => target.ForceBossModPresetRegardlessOfRotation = source.ForceBossModPresetRegardlessOfRotation),
                 Setting("BossMod AI", (source, target) => target.BossModAI = source.BossModAI),
                 Setting("Positional", (source, target) => target.PositionalInCombat = source.PositionalInCombat),

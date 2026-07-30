@@ -36,6 +36,7 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static IGameInteropProvider GameInteropProvider { get; private set; } = null!;
     [PluginService] internal static ITargetManager TargetManager { get; private set; } = null!;
     [PluginService] internal static IDutyState DutyState { get; private set; } = null!;
+    [PluginService] internal static IToastGui ToastGui { get; private set; } = null!;
     [PluginService] internal static IPluginLog Log { get; private set; } = null!;
 
     private const string CommandName = "/frenrider";
@@ -51,6 +52,8 @@ public sealed class Plugin : IDalamudPlugin
     public AdsUtilityIpcService AdsUtilityIpcService { get; init; }
     public AdsReflectionIpcService AdsReflectionIpcService { get; init; }
     public BossModActionTweaksService BossModActionTweaksService { get; init; }
+    public BossModConflictWarningService BossModConflictWarningService { get; init; }
+    public DaedalusTargetModeService DaedalusTargetModeService { get; init; }
     public ExternalAutomationCleanupService ExternalAutomationCleanupService { get; init; }
     public CoppeliaPowerlevelLeaseService CoppeliaPowerlevelLeaseService { get; init; }
     public FollowService FollowService { get; init; }
@@ -122,6 +125,8 @@ public sealed class Plugin : IDalamudPlugin
         AdsUtilityIpcService = new AdsUtilityIpcService(PluginInterface, Log);
         AdsReflectionIpcService = new AdsReflectionIpcService(this, PluginInterface, Log);
         AutorotIpcService = new AutorotIpcService(PluginInterface, Log);
+        DaedalusTargetModeService = new DaedalusTargetModeService(PluginInterface, TargetManager, ToastGui, Log);
+        BossModConflictWarningService = new BossModConflictWarningService(PluginInterface, ToastGui, Log);
         BossModActionTweaksService = new BossModActionTweaksService(PluginInterface, Log, AutorotIpcService);
         BossModActionTweaksService.ApplyDontMoveWhileCasting(Configuration.DontMoveWhileCasting);
         var externalAutomationCommandSender = new DalamudExternalAutomationCommandSender();
@@ -266,6 +271,7 @@ public sealed class Plugin : IDalamudPlugin
     private void OnFrenRiderEnabledChanged(bool enabled)
     {
         Log.Information($"[FrenRider] FrenRider enabled state changed to: {enabled}");
+        BossModConflictWarningService.Update(enabled);
         
         if (enabled)
         {
@@ -498,6 +504,7 @@ public sealed class Plugin : IDalamudPlugin
 
             // Check for plugin enable/disable state changes
             var config = ConfigManager.GetActiveConfig();
+            Measure("bossmod-conflict-warning", () => BossModConflictWarningService.Update(config?.Enabled == true));
             if (config != null)
             {
                 Measure("config-state", () =>

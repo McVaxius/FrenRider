@@ -92,7 +92,15 @@ Global UI settings are stored by Dalamud in the normal Fren Rider plugin config.
 
 BossMod preset activation is provider-specific: VBM selections receive only the VBM preset command, while BMR and non-VBM rotation selections use BMR for BossMod AI and receive only the BMR preset command. **Push Presets Now** installs the packaged presets and applies the current selection through the same routing.
 
-Daedalus is rotation option 4 and is controlled through its typed `Daedalus.IsEnabled` and `Daedalus.SetEnabled` IPC. Fren Rider disables it during conflicting rotation, mounted, Questionable, and Coppelia ownership. **Restore snapshot** returns Daedalus to the enabled state captured before Fren Rider changed it; **Turn everything off** disables it.
+Daedalus is rotation option 4 and is controlled through its typed `Daedalus.IsEnabled` and `Daedalus.SetEnabled` IPC. When Daedalus is the effective normal or Foray rotation, **Daedalus Engage Mode** can send None, Focus, Split, or Kill Adds through Daedalus LAN coordination. Focus requires a living enemy hard target; failures leave Daedalus unchanged. Fren Rider disables Daedalus during conflicting rotation, mounted, Questionable, and Coppelia ownership. **Restore snapshot** returns Daedalus to the enabled state captured before Fren Rider changed it; **Turn everything off** disables it.
+
+Daedalus custom repository URL:
+
+```text
+https://raw.githubusercontent.com/ofnature/Daedalus/main/repo.json
+```
+
+While Fren Rider is enabled, it warns immediately and every five seconds if both loaded internal plugins `BossModReborn` (BMR) and `BossMod` (VBM) are detected. The warning is informational: Fren Rider does not disable either plugin or block combat.
 
 Per-account Fren Rider config files are stored in the plugin config directory as:
 
@@ -114,7 +122,7 @@ Common integrations used by code paths:
 - **Lifestream**: optional teleport-to-fren support when the fren is out of zone.
 - **AutoRetainer**: auto-discard support through `/ays discard`.
 - **YesAlready**: paused while Fren Rider is enabled so Fren Rider can own its selected dialogs.
-- **AutoDuty**: detected and warned about; Fren Rider can send `/xldisableplugin AutoDuty` from its warning/defaults flow.
+- **AutoDuty**: detected and warned about; only the explicit **Disable AutoDuty** action in Fren Rider's warning window can send `/xldisableplugin AutoDuty`.
 
 ## Troubleshooting
 

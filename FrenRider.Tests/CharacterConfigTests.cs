@@ -21,6 +21,14 @@ public sealed class CharacterConfigTests
     }
 
     [Fact]
+    public void DaedalusTargetModeDefaultsToNone()
+    {
+        var config = new CharacterConfig();
+
+        Assert.Equal(DaedalusTargetMode.None, config.DaedalusTargetMode);
+    }
+
+    [Fact]
     public void ClonePreservesDutyNudgeFallback()
     {
         var config = new CharacterConfig
@@ -40,5 +48,16 @@ public sealed class CharacterConfigTests
         };
 
         Assert.Equal(FrenRiderCleanupMode.TurnEverythingOff, config.Clone().CleanupMode);
+    }
+
+    [Fact]
+    public void ClonePreservesDaedalusTargetMode()
+    {
+        var config = new CharacterConfig
+        {
+            DaedalusTargetMode = DaedalusTargetMode.KillAdds,
+        };
+
+        Assert.Equal(DaedalusTargetMode.KillAdds, config.Clone().DaedalusTargetMode);
     }
 }
