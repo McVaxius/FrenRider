@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Daedalus is available as a normal and Foray combat-rotation choice, managed through typed enabled-state IPC with mounted/automation suppression and cleanup snapshot restoration
 - Combat settings now include a global **Don't move while casting** toggle that applies the stored value on plugin load and on change to currently loaded BMR/VBM Action Tweaks plus RSR `PoslockCasting`
 - ADS runtime duty ownership polling now uses authoritative `ADS.IsDutyOwned()` IPC with JSON fallback, a 250ms poll interval, and a bounded 5-second stale hold for transient IPC failures
-- Duty combat now uses latched `QuestionableSolo` versus `FrenRider` authority, classifying true solo duties from `BoundByDuty95` with a designed-party-size Lumina fallback
+- Duty combat now uses latched `QuestionableSolo` versus `FrenRider` authority, classifying true solo duties only from the validated ADS `CurrentDuty` category while unknown or invalid duty context stays FrenRider-owned
 - Non-solo duties now receive one FrenRider combat bootstrap per enabled duty session, including when ADS already owns navigation and progression
 
 ### Fixed
@@ -36,6 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Duty area-transition recovery now resets zone-sensitive services after `BetweenAreas` loads, improving level-70 treasure dungeon waterfall recovery
 
 ### Changed
+- ADS duty identity, category, support, and clearance now come only from the validated `ADS.GetStatusJson` `CurrentDuty` projection; live GameMain territory/CFC mismatches or incomplete/unknown rows fail closed, and the former FrenRider maturity table, pilot promotions, treasure overrides, Lumina catalog, and category fallback are removed
 - Global configuration schema v2 defaults **Don't move while casting** on, migrates v1 configurations on once, and preserves later v2 opt-outs
 - FATE transitions now log follow/combat decision context for pathing diagnostics
 - Mounted rotation suppression now targets the selected combat engine while mounted outside duty, then restores it on dismount or duty entry

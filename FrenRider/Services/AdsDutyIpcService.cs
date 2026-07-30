@@ -54,6 +54,9 @@ public sealed class AdsDutyIpcService : IDisposable
     private DateTime lastPollUtc = DateTime.MinValue;
     private DateTime lastKnownOwnedUtc = DateTime.MinValue;
     private string lastTransitionSignature = string.Empty;
+    private bool trackedInInstancedDuty;
+    private uint trackedTerritoryTypeId;
+    private uint trackedContentFinderConditionId;
 
     public AdsDutyIpcService(IDalamudPluginInterface pluginInterface, IPluginLog log)
     {
@@ -96,14 +99,21 @@ public sealed class AdsDutyIpcService : IDisposable
     }
 
     public AdsDutyOwnershipSnapshot Current { get; private set; } = AdsDutyOwnershipSnapshot.Empty;
+    public AdsCurrentDutySnapshot? CurrentDuty { get; private set; }
+    public string CurrentDutyDetail { get; private set; } = "No validated ADS current-duty snapshot.";
 
     public void Dispose()
     {
     }
 
-    public AdsDutyOwnershipSnapshot Refresh(bool force = false)
+    public AdsDutyOwnershipSnapshot Refresh(
+        bool inInstancedDuty,
+        uint territoryTypeId,
+        uint contentFinderConditionId,
+        bool force = false)
     {
         var now = utcNow();
+        TrackLiveDutyIdentity(inInstancedDuty, territoryTypeId, contentFinderConditionId);
         if (!force && now - lastPollUtc < PollInterval)
             return Current;
 
@@ -111,6 +121,7 @@ public sealed class AdsDutyIpcService : IDisposable
         if (!isAdsLoaded())
         {
             lastKnownOwnedUtc = DateTime.MinValue;
+            ClearCurrentDuty("ADS unloaded.");
             return Apply(new AdsDutyOwnershipSnapshot(
                 false,
                 false,
@@ -122,59 +133,80 @@ public sealed class AdsDutyIpcService : IDisposable
                 "ADS unloaded."));
         }
 
+        bool typedOwned;
+        Exception? typedException = null;
         try
         {
-            var owned = queryTypedOwnership();
+            typedOwned = queryTypedOwnership();
+        }
+        catch (Exception ex)
+        {
+            typedOwned = false;
+            typedException = ex;
+        }
+
+        string? statusJson = null;
+        Exception? jsonException = null;
+        try
+        {
+            statusJson = queryStatusJson();
+            RefreshCurrentDuty(statusJson, now, inInstancedDuty, territoryTypeId, contentFinderConditionId);
+        }
+        catch (Exception ex)
+        {
+            jsonException = ex;
+            CurrentDutyDetail = CurrentDuty is null
+                ? $"ADS.GetStatusJson unavailable: {ex.Message}"
+                : $"ADS.GetStatusJson unavailable; retaining the validated current-duty snapshot for the same live identity: {ex.Message}";
+        }
+
+        if (typedException is null)
+        {
             return ApplySuccessful(
                 now,
-                owned,
-                owned,
-                owned ? "Owned" : "NotOwned",
+                typedOwned,
+                typedOwned,
+                typedOwned ? "Owned" : "NotOwned",
                 AdsDutyOwnershipSource.Typed,
                 "ADS.IsDutyOwned");
         }
-        catch (Exception typedException)
+
+        if (statusJson is not null
+            && TryParseFallbackStatus(statusJson, out var fallbackInDuty, out var ownershipMode, out var fallbackOwned))
         {
-            try
-            {
-                var json = queryStatusJson();
-                if (!TryParseFallbackStatus(json, out var inInstancedDuty, out var ownershipMode, out var owned))
-                    throw new InvalidOperationException("ADS.GetStatusJson omitted readable duty ownership fields.");
-
-                return ApplySuccessful(
-                    now,
-                    owned,
-                    inInstancedDuty,
-                    ownershipMode,
-                    AdsDutyOwnershipSource.JsonFallback,
-                    "ADS.GetStatusJson fallback");
-            }
-            catch (Exception jsonException)
-            {
-                if (Current.IsOwned
-                    && lastKnownOwnedUtc != DateTime.MinValue
-                    && now - lastKnownOwnedUtc <= TransientOwnedHold)
-                {
-                    return Apply(Current with
-                    {
-                        StatusReadable = false,
-                        Source = AdsDutyOwnershipSource.StaleHold,
-                        CapturedAtUtc = now,
-                        Detail = $"Transient IPC failure; preserving owned state. Typed: {typedException.Message}; JSON: {jsonException.Message}",
-                    });
-                }
-
-                return Apply(new AdsDutyOwnershipSnapshot(
-                    true,
-                    false,
-                    false,
-                    false,
-                    string.Empty,
-                    AdsDutyOwnershipSource.Unreadable,
-                    now,
-                    $"Duty ownership unreadable. Typed: {typedException.Message}; JSON: {jsonException.Message}"));
-            }
+            return ApplySuccessful(
+                now,
+                fallbackOwned,
+                fallbackInDuty,
+                ownershipMode,
+                AdsDutyOwnershipSource.JsonFallback,
+                "ADS.GetStatusJson fallback");
         }
+
+        var jsonFailure = jsonException?.Message
+            ?? "ADS.GetStatusJson omitted readable duty ownership fields.";
+        if (Current.IsOwned
+            && lastKnownOwnedUtc != DateTime.MinValue
+            && now - lastKnownOwnedUtc <= TransientOwnedHold)
+        {
+            return Apply(Current with
+            {
+                StatusReadable = false,
+                Source = AdsDutyOwnershipSource.StaleHold,
+                CapturedAtUtc = now,
+                Detail = $"Transient IPC failure; preserving owned state. Typed: {typedException.Message}; JSON: {jsonFailure}",
+            });
+        }
+
+        return Apply(new AdsDutyOwnershipSnapshot(
+            true,
+            false,
+            false,
+            false,
+            string.Empty,
+            AdsDutyOwnershipSource.Unreadable,
+            now,
+            $"Duty ownership unreadable. Typed: {typedException.Message}; JSON: {jsonFailure}"));
     }
 
     public AdsStartDutyRequestResult RequestStartDutyFromInside()
@@ -205,20 +237,27 @@ public sealed class AdsDutyIpcService : IDisposable
         if (string.IsNullOrWhiteSpace(json))
             return false;
 
-        using var document = JsonDocument.Parse(json);
-        var root = document.RootElement;
-        if (!root.TryGetProperty("inInstancedDuty", out var dutyProperty)
-            || dutyProperty.ValueKind is not (JsonValueKind.True or JsonValueKind.False)
-            || !root.TryGetProperty("ownershipMode", out var modeProperty)
-            || modeProperty.ValueKind != JsonValueKind.String)
+        try
+        {
+            using var document = JsonDocument.Parse(json);
+            var root = document.RootElement;
+            if (!root.TryGetProperty("inInstancedDuty", out var dutyProperty)
+                || dutyProperty.ValueKind is not (JsonValueKind.True or JsonValueKind.False)
+                || !root.TryGetProperty("ownershipMode", out var modeProperty)
+                || modeProperty.ValueKind != JsonValueKind.String)
+            {
+                return false;
+            }
+
+            inInstancedDuty = dutyProperty.GetBoolean();
+            ownershipMode = modeProperty.GetString() ?? string.Empty;
+            owned = inInstancedDuty && IsOwnedOrLeavingMode(ownershipMode);
+            return true;
+        }
+        catch (JsonException)
         {
             return false;
         }
-
-        inInstancedDuty = dutyProperty.GetBoolean();
-        ownershipMode = modeProperty.GetString() ?? string.Empty;
-        owned = inInstancedDuty && IsOwnedOrLeavingMode(ownershipMode);
-        return true;
     }
 
     public static bool IsOwnedOrLeavingMode(string ownershipMode)
@@ -245,6 +284,83 @@ public sealed class AdsDutyIpcService : IDisposable
             source,
             now,
             detail));
+    }
+
+    private void TrackLiveDutyIdentity(
+        bool inInstancedDuty,
+        uint territoryTypeId,
+        uint contentFinderConditionId)
+    {
+        if (!inInstancedDuty)
+        {
+            trackedInInstancedDuty = false;
+            trackedTerritoryTypeId = territoryTypeId;
+            trackedContentFinderConditionId = contentFinderConditionId;
+            ClearCurrentDuty("Live client is outside an instanced duty.");
+            return;
+        }
+
+        if (territoryTypeId == 0)
+        {
+            trackedInInstancedDuty = true;
+            trackedTerritoryTypeId = territoryTypeId;
+            trackedContentFinderConditionId = contentFinderConditionId;
+            ClearCurrentDuty("GameMain did not provide a live duty territory identity.");
+            return;
+        }
+
+        if (trackedInInstancedDuty
+            && (trackedTerritoryTypeId != territoryTypeId
+                || trackedContentFinderConditionId != contentFinderConditionId))
+        {
+            ClearCurrentDuty(
+                $"Live duty identity changed from territory/CFC {trackedTerritoryTypeId}/{trackedContentFinderConditionId} to {territoryTypeId}/{contentFinderConditionId}.");
+        }
+
+        trackedInInstancedDuty = true;
+        trackedTerritoryTypeId = territoryTypeId;
+        trackedContentFinderConditionId = contentFinderConditionId;
+    }
+
+    private void RefreshCurrentDuty(
+        string statusJson,
+        DateTime capturedAtUtc,
+        bool inInstancedDuty,
+        uint territoryTypeId,
+        uint contentFinderConditionId)
+    {
+        if (!inInstancedDuty)
+        {
+            ClearCurrentDuty("Live client is outside an instanced duty.");
+            return;
+        }
+
+        if (!AdsCurrentDutySnapshot.TryParseStatusJson(
+                statusJson,
+                capturedAtUtc,
+                out var snapshot,
+                out var failure)
+            || snapshot is null)
+        {
+            ClearCurrentDuty(failure);
+            return;
+        }
+
+        if (!snapshot.MatchesIdentity(territoryTypeId, contentFinderConditionId))
+        {
+            ClearCurrentDuty(
+                $"ADS current-duty identity {snapshot.TerritoryTypeId}/{snapshot.ContentFinderConditionId} does not match live GameMain identity {territoryTypeId}/{contentFinderConditionId}.");
+            return;
+        }
+
+        CurrentDuty = snapshot;
+        CurrentDutyDetail = $"Validated ADS current-duty snapshot for territory/CFC {territoryTypeId}/{contentFinderConditionId}.";
+    }
+
+    private void ClearCurrentDuty(string detail)
+    {
+        CurrentDuty = null;
+        CurrentDutyDetail = detail;
     }
 
     private AdsDutyOwnershipSnapshot Apply(AdsDutyOwnershipSnapshot snapshot)

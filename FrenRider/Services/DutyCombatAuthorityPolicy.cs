@@ -24,7 +24,7 @@ internal sealed class DutyCombatAuthorityPolicy
         if (!input.InDuty)
             return Reset("left duty");
 
-        var isTrueSoloDuty = IsTrueSoloDuty(input.BoundByDuty95, input.DutyCategory);
+        var isTrueSoloDuty = IsTrueSoloDuty(input.DutyCategory);
         var previousAuthority = Authority;
 
         // QuestionableSolo is the only sticky authority. Once armed, a later
@@ -80,8 +80,8 @@ internal sealed class DutyCombatAuthorityPolicy
             string.IsNullOrWhiteSpace(reason) ? "authority cleared" : reason);
     }
 
-    internal static bool IsTrueSoloDuty(bool boundByDuty95, AdsDutyCategory? dutyCategory)
-        => boundByDuty95 || dutyCategory == AdsDutyCategory.Solo;
+    internal static bool IsTrueSoloDuty(AdsDutyCategory? dutyCategory)
+        => dutyCategory == AdsDutyCategory.Solo;
 
     private static string BuildReason(
         DutyCombatAuthority authority,

@@ -1141,7 +1141,7 @@ public class ConfigWindow : Window, IDisposable
 
         ImGui.Text("ADS Duty Handoff");
         ImGui.SameLine();
-        HelpMarker("Per-duty-family ADS handoff.\nRuntime ADS ownership is authoritative even after manual Start Inside. FrenRider pauses local duty systems while handoff is pending or ADS owns the run; configured exit takeover remains available after duty completion.");
+        HelpMarker("Per-duty-family ADS handoff.\nDuty name, category, support, and clearance come only from ADS CurrentDuty. FrenRider accepts that snapshot only when ADS catalog metadata is complete and its territory/CFC matches live GameMain; otherwise local duty logic stays active.\nRuntime ADS ownership is authoritative even after manual Start Inside. FrenRider pauses local duty systems while handoff is pending or ADS owns the run; configured exit takeover remains available after duty completion.");
 
         if (!config.AdsDutyFamilySettingsMigrated)
         {
@@ -1157,7 +1157,7 @@ public class ConfigWindow : Window, IDisposable
         ImGui.Spacing();
         ImGui.Text("Duty Families");
         ImGui.SameLine();
-        HelpMarker("Each family has its own enable toggle and maturity threshold.\n0 = not cleared, 1 = unsync cleared, 2 = duty support cleared, 3 = proven sync clear.");
+        HelpMarker("Each family has its own enable toggle and maturity threshold, compared directly with ADS clearance for the validated current duty.\n0 = not cleared, 1 = unsync cleared, 2 = duty support cleared, 3 = proven sync clear.");
 
         foreach (var entry in AdsDutyCategoryCatalog.Entries)
         {

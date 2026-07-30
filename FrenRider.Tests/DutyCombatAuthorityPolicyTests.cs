@@ -12,11 +12,11 @@ public sealed class DutyCombatAuthorityPolicyTests
 
         var entered = policy.Update(Input(
             boundByDuty95: true,
-            dutyCategory: AdsDutyCategory.FourMan,
+            dutyCategory: AdsDutyCategory.Solo,
             questionableRunningOrRecent: true));
         var questionableStopped = policy.Update(Input(
             boundByDuty95: true,
-            dutyCategory: AdsDutyCategory.FourMan,
+            dutyCategory: AdsDutyCategory.Solo,
             questionableRunningOrRecent: false));
         var left = policy.Update(Input(inDuty: false));
 
@@ -32,7 +32,7 @@ public sealed class DutyCombatAuthorityPolicyTests
     }
 
     [Fact]
-    public void LuminaSoloCategoryIsFallbackWhenBoundByDuty95IsAbsent()
+    public void ValidatedAdsSoloCategoryTransfersAuthorityWhenBoundByDuty95IsAbsent()
     {
         var policy = new DutyCombatAuthorityPolicy();
 
@@ -95,6 +95,22 @@ public sealed class DutyCombatAuthorityPolicyTests
             dutyCategory: null,
             questionableRunningOrRecent: true));
 
+        Assert.Equal(DutyCombatAuthority.FrenRider, decision.Authority);
+        Assert.True(decision.ShouldBootstrapFrenRider);
+        Assert.False(decision.ShouldForceCombatOff);
+    }
+
+    [Fact]
+    public void BoundByDuty95WithoutValidatedAdsCategoryDefaultsToFrenRiderAuthority()
+    {
+        var policy = new DutyCombatAuthorityPolicy();
+
+        var decision = policy.Update(Input(
+            boundByDuty95: true,
+            dutyCategory: null,
+            questionableRunningOrRecent: true));
+
+        Assert.False(decision.IsTrueSoloDuty);
         Assert.Equal(DutyCombatAuthority.FrenRider, decision.Authority);
         Assert.True(decision.ShouldBootstrapFrenRider);
         Assert.False(decision.ShouldForceCombatOff);

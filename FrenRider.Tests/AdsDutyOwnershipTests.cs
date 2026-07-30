@@ -8,17 +8,24 @@ public sealed class AdsDutyOwnershipTests
     public void TypedOwnershipIsAuthoritative()
     {
         var now = new DateTime(2026, 6, 14, 12, 0, 0, DateTimeKind.Utc);
+        var jsonCalls = 0;
         var service = CreateService(
             () => true,
             () => true,
-            () => throw new InvalidOperationException("JSON should not be queried"),
+            () =>
+            {
+                jsonCalls++;
+                return """{"inInstancedDuty":true,"ownershipMode":"Observing","hasCatalogMetadata":true,"duty":"Sastasha","territoryTypeId":1036,"contentFinderConditionId":4,"dutyCategory":"FourMan","supportLevel":"PassiveOnly","clearanceStatus":"FourPlayerSyncCleared"}""";
+            },
             () => now);
 
-        var snapshot = service.Refresh(force: true);
+        var snapshot = service.Refresh(true, 1036, 4, force: true);
 
         Assert.True(snapshot.IsOwned);
         Assert.True(snapshot.StatusReadable);
         Assert.Equal(AdsDutyOwnershipSource.Typed, snapshot.Source);
+        Assert.Equal(1, jsonCalls);
+        Assert.Equal("Sastasha", service.CurrentDuty?.DutyName);
     }
 
     [Theory]
@@ -38,7 +45,7 @@ public sealed class AdsDutyOwnershipTests
             () => $$"""{"inInstancedDuty":true,"ownershipMode":"{{mode}}"}""",
             () => now);
 
-        var snapshot = service.Refresh(force: true);
+        var snapshot = service.Refresh(true, 1036, 4, force: true);
 
         Assert.Equal(expected, snapshot.IsOwned);
         Assert.True(snapshot.StatusReadable);
@@ -69,17 +76,17 @@ public sealed class AdsDutyOwnershipTests
             () => throw new InvalidOperationException("json failed"),
             () => now);
 
-        Assert.True(service.Refresh(force: true).IsOwned);
+        Assert.True(service.Refresh(true, 1036, 4, force: true).IsOwned);
 
         typedFails = true;
         now = now.AddSeconds(4);
-        var held = service.Refresh(force: true);
+        var held = service.Refresh(true, 1036, 4, force: true);
         Assert.True(held.IsOwned);
         Assert.False(held.StatusReadable);
         Assert.Equal(AdsDutyOwnershipSource.StaleHold, held.Source);
 
         now = now.AddSeconds(2);
-        var expired = service.Refresh(force: true);
+        var expired = service.Refresh(true, 1036, 4, force: true);
         Assert.False(expired.IsOwned);
         Assert.Equal(AdsDutyOwnershipSource.Unreadable, expired.Source);
     }
@@ -96,16 +103,16 @@ public sealed class AdsDutyOwnershipTests
             () => throw new InvalidOperationException(),
             () => now);
 
-        Assert.True(service.Refresh(force: true).IsOwned);
+        Assert.True(service.Refresh(true, 1036, 4, force: true).IsOwned);
 
         owned = false;
-        Assert.False(service.Refresh(force: true).IsOwned);
+        Assert.False(service.Refresh(true, 1036, 4, force: true).IsOwned);
         Assert.True(service.Current.StatusReadable);
 
         owned = true;
-        Assert.True(service.Refresh(force: true).IsOwned);
+        Assert.True(service.Refresh(true, 1036, 4, force: true).IsOwned);
         loaded = false;
-        Assert.False(service.Refresh(force: true).IsOwned);
+        Assert.False(service.Refresh(true, 1036, 4, force: true).IsOwned);
         Assert.Equal(AdsDutyOwnershipSource.Unloaded, service.Current.Source);
     }
 
@@ -131,6 +138,21 @@ public sealed class AdsDutyOwnershipTests
     }
 
     [Fact]
+    public void AcceptedStartRequestReturnsExplicitAcknowledgement()
+    {
+        var result = CreateService(
+            () => true,
+            () => false,
+            () => string.Empty,
+            () => DateTime.UtcNow,
+            () => true).RequestStartDutyFromInside();
+
+        Assert.True(result.EndpointAvailable);
+        Assert.True(result.Accepted);
+        Assert.Contains("accepted", result.Detail);
+    }
+
+    [Fact]
     public void ManualRuntimeOwnershipPausesRegardlessOfAutomaticHandoff()
         => Assert.True(AdsIntegrationPolicy.ShouldPauseDutySystems(
             handoffPending: false,
@@ -151,6 +173,35 @@ public sealed class AdsDutyOwnershipTests
         Assert.False(AdsIntegrationPolicy.CanAttemptHandoff(requested, requested, requested.AddSeconds(4.999)));
         Assert.True(AdsIntegrationPolicy.CanAttemptHandoff(requested, requested.AddSeconds(5), requested.AddSeconds(5)));
     }
+
+    [Fact]
+    public void PendingHandoffPausesDutyAndExitSystems()
+    {
+        Assert.True(AdsIntegrationPolicy.ShouldPauseDutySystems(
+            handoffPending: true,
+            runtimeOwned: false,
+            exitTakeoverActive: false));
+        Assert.True(AdsIntegrationPolicy.ShouldPauseExitSystem(
+            handoffPending: true,
+            runtimeOwned: false,
+            exitTakeoverActive: false));
+    }
+
+    [Fact]
+    public void ClearingRequestCancelsPendingConfirmation()
+    {
+        var now = new DateTime(2026, 6, 14, 12, 0, 0, DateTimeKind.Utc);
+
+        Assert.False(AdsIntegrationPolicy.IsHandoffConfirmationPending(DateTime.MinValue, now));
+        Assert.True(AdsIntegrationPolicy.CanAttemptHandoff(DateTime.MinValue, DateTime.MinValue, now));
+    }
+
+    [Fact]
+    public void ExplicitRuntimeReleaseRemovesPause()
+        => Assert.False(AdsIntegrationPolicy.ShouldPauseDutySystems(
+            handoffPending: false,
+            runtimeOwned: false,
+            exitTakeoverActive: false));
 
     [Fact]
     public void ExitOnlyTakeoverKeepsDutySystemsPausedButAllowsExit()

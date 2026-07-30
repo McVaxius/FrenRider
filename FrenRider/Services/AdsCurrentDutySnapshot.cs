@@ -111,9 +111,14 @@ public sealed record AdsCurrentDutySnapshot(
     private static bool TryReadBoolean(JsonElement root, string propertyName, out bool value)
     {
         value = false;
-        return root.TryGetProperty(propertyName, out var property)
-               && property.ValueKind is JsonValueKind.True or JsonValueKind.False
-               && (value = property.GetBoolean()) == property.GetBoolean();
+        if (!root.TryGetProperty(propertyName, out var property)
+            || property.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
+        {
+            return false;
+        }
+
+        value = property.GetBoolean();
+        return true;
     }
 
     private static bool TryReadUInt32(JsonElement root, string propertyName, out uint value)
@@ -139,34 +144,32 @@ public sealed record AdsCurrentDutySnapshot(
 
     private static bool TryParseCategory(string value, out AdsDutyCategory category)
     {
-        category = value.ToLowerInvariant() switch
+        category = value switch
         {
-            "solo" => AdsDutyCategory.Solo,
-            "fourman" => AdsDutyCategory.FourMan,
-            "eightman" => AdsDutyCategory.EightMan,
-            "allianceraid" or "alliance" => AdsDutyCategory.Alliance,
-            "guildhest" => AdsDutyCategory.GuildHest,
-            "deepdungeon" => AdsDutyCategory.DeepDungeon,
-            "treasuredungeon" => AdsDutyCategory.TreasureDungeon,
-            "other" => AdsDutyCategory.Other,
+            "Solo" => AdsDutyCategory.Solo,
+            "FourMan" => AdsDutyCategory.FourMan,
+            "EightMan" => AdsDutyCategory.EightMan,
+            "AllianceRaid" => AdsDutyCategory.Alliance,
+            "GuildHest" => AdsDutyCategory.GuildHest,
+            "DeepDungeon" => AdsDutyCategory.DeepDungeon,
+            "TreasureDungeon" => AdsDutyCategory.TreasureDungeon,
+            "Other" => AdsDutyCategory.Other,
             _ => (AdsDutyCategory)(-1),
         };
         return category >= AdsDutyCategory.Solo && category <= AdsDutyCategory.Other;
     }
 
     private static bool IsKnownSupportLevel(string value)
-        => value.Equals("Unsupported", StringComparison.OrdinalIgnoreCase)
-           || value.Equals("PassiveOnly", StringComparison.OrdinalIgnoreCase)
-           || value.Equals("ActiveSupported", StringComparison.OrdinalIgnoreCase);
+        => value is "Unsupported" or "PassiveOnly" or "ActiveSupported";
 
     private static bool TryParseClearance(string value, out int clearanceLevel)
     {
-        clearanceLevel = value.ToLowerInvariant() switch
+        clearanceLevel = value switch
         {
-            "notcleared" => 0,
-            "oneplayerunsynccleared" => 1,
-            "oneplayerdutysupport" => 2,
-            "fourplayersynccleared" => 3,
+            "NotCleared" => 0,
+            "OnePlayerUnsyncCleared" => 1,
+            "OnePlayerDutySupport" => 2,
+            "FourPlayerSyncCleared" => 3,
             _ => -1,
         };
         return clearanceLevel >= 0;

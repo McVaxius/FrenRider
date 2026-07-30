@@ -53,7 +53,7 @@ The main window shows run state, configured fren, party status, follow/mount/idl
 
 ## Duty And ADS Automation
 
-Fren Rider can hand duties to ADS when ADS is loaded, the current duty is in the mirrored ADS catalog, the duty family is enabled, and the duty maturity meets the configured threshold.
+Fren Rider can hand duties to ADS when ADS is loaded, ADS reports a complete `CurrentDuty` catalog row whose territory and Content Finder Condition match live GameMain, the ADS-reported duty family is enabled, and the ADS clearance meets the configured threshold. Missing, malformed, unknown, or mismatched duty metadata fails closed to Fren Rider's local duty logic; Fren Rider has no separate per-duty maturity table or pilot promotions.
 
 Duty families are Solo, 4-Man, 8-Man, Alliance, Guild Hest, Deep Dungeon, Treasure Dungeon, and Other. Each family has its own enable flag and maturity threshold.
 
