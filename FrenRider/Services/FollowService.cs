@@ -302,7 +302,9 @@ public class FollowService
         var selfMounting = Plugin.Condition[ConditionFlag.Mounting71];
         var selfFlying = IsSelfFlightNavActive();
         var frenFlying = fren.IsFlying;
-        if (!selfMounted || (!frenFlying && !IsFarChaseRequested))
+        if (!selfMounted
+            || (!frenFlying && !IsFarChaseRequested)
+            || zoneService.IsFlightRestrictedForay())
             ResetFlyingTakeoffState();
 
         // Too far — stop
@@ -735,7 +737,10 @@ public class FollowService
         bool frenFlying,
         long now)
     {
-        if (!selfMounted || !frenFlying || selfFlying)
+        if (zoneService.IsFlightRestrictedForay()
+            || !selfMounted
+            || !frenFlying
+            || selfFlying)
             return;
 
         if (now - lastFlyingAdjustMs <= FlyingTakeoffJumpThrottleMs)
@@ -765,6 +770,12 @@ public class FollowService
         Vector3 localPosition,
         long now)
     {
+        if (zoneService.IsFlightRestrictedForay())
+        {
+            ResetFlyingTakeoffState();
+            return false;
+        }
+
         if (!isFrenFollowTarget || !selfFlying)
             return false;
 
@@ -860,7 +871,7 @@ public class FollowService
             && !plugin.AdsIntegrationService.ShouldPauseDutySystems
             && !plugin.AutomationService.IsUtilityGateActive
             && GetMovementClingType(config) != 2
-            && zoneService.CurrentZone != ZoneType.Foray
+            && !zoneService.IsFlightRestrictedForay()
             && now - lastNavCommandMs >= FlyingIdleNavCommandGraceMs
             && now - lastFlyingIdleReissueMs >= FlyingIdleReissueThrottleMs;
     }
@@ -898,8 +909,8 @@ public class FollowService
         lastNavCommandMs = Environment.TickCount64;
         ResetFlyingIdleSampler();
 
-        // Foray zones: never fly, always use moveto (no flying in forays)
-        if (zoneService.CurrentZone == ZoneType.Foray)
+        // No-flight Forays always use ground navigation; Diadem remains flight-enabled.
+        if (zoneService.IsFlightRestrictedForay())
         {
             lastMovementClingType = 0;
             lastNavigationWasFlying = false;
@@ -1051,7 +1062,7 @@ public class FollowService
             && !plugin.AdsIntegrationService.ShouldPauseDutySystems
             && !plugin.AutomationService.IsUtilityGateActive
             && GetMovementClingType(config) != 2
-            && zoneService.CurrentZone != ZoneType.Foray;
+            && !zoneService.IsFlightRestrictedForay();
     }
 
     private bool IsFlyingStuckRecoveryAllowed(CharacterConfig config, bool selfMounted, bool selfFlying)
@@ -1062,7 +1073,8 @@ public class FollowService
             && selfFlying
             && !IsLoadingOrBetweenAreas()
             && !plugin.AdsIntegrationService.ShouldPauseDutySystems
-            && !plugin.AutomationService.IsUtilityGateActive;
+            && !plugin.AutomationService.IsUtilityGateActive
+            && !zoneService.IsFlightRestrictedForay();
     }
 
     private static bool IsLoadingOrBetweenAreas()

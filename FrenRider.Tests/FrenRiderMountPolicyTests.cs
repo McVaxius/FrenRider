@@ -5,6 +5,27 @@ namespace FrenRider.Tests;
 
 public sealed class FrenRiderMountPolicyTests
 {
+    [Theory]
+    [InlineData(true, true, false, false, true)]
+    [InlineData(true, false, false, true, false)]
+    [InlineData(true, true, true, true, false)]
+    [InlineData(false, false, false, true, true)]
+    [InlineData(false, false, true, true, false)]
+    [InlineData(false, false, false, false, false)]
+    public void OwnMountResolutionUsesNativeStateAndExcludesPillion(
+        bool nativeAccessAvailable,
+        bool nativeMounted,
+        bool ridingPillion,
+        bool conditionMounted,
+        bool expected)
+    {
+        Assert.Equal(expected, FrenRiderMountPolicy.ResolveOwnMountState(
+            nativeAccessAvailable,
+            nativeMounted,
+            ridingPillion,
+            conditionMounted));
+    }
+
     [Fact]
     public void FarChaseStartsBeyondChaseDistanceAndRetiresOnlyAtClingRange()
     {

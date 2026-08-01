@@ -47,6 +47,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - BossMod follow is now treated as a stateful mode and only reissued when target, territory, or follow-combat settings change
 - AutoDuty warning window no longer emits per-frame position debug logging
 
+### Fixed
+- Fly You Fools now uses ground `/vnav moveto` navigation in every no-flight Foray while retaining normal takeoff and `/vnav flyto` behavior in the Diadem (territory 939)
+- Nearby Fly You Fools followers now use the local character's ClientStructs mount state, excluding pillion, to reliably dismount after the fren dismounts; `ConditionFlag.Mounted` is retained only as the unavailable-native-state fallback
+
 ### Phase 11 - Food Eating & Chocobo Summoning
 
 #### [0.10.1] - 2026-02-28

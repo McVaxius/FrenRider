@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Text;
 using Dalamud.Game.ClientState.Conditions;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.System.String;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FrenRider.Models;
@@ -56,7 +57,7 @@ public class MountService
         var config = plugin.ConfigManager.GetActiveConfig();
         var now = Environment.TickCount64;
         var selfRidingPillion = Plugin.Condition[ConditionFlag.RidingPillion];
-        var selfOnOwnMount = Plugin.Condition[ConditionFlag.Mounted] && !selfRidingPillion;
+        var selfOnOwnMount = ResolveOwnMountState(selfRidingPillion);
         UpdateFarChaseMountOwnership(selfOnOwnMount, now);
         UpdateFarChaseTransition(plugin.FollowService.IsFarChaseRequested);
 
@@ -375,6 +376,39 @@ public class MountService
             farChaseMountPendingUntilMs = 0;
             Plugin.Log.Information("[FR][FarChase] Own mount request timed out");
         }
+    }
+
+    private static unsafe bool ResolveOwnMountState(bool selfRidingPillion)
+    {
+        try
+        {
+            var localPlayer = Plugin.ObjectTable.LocalPlayer;
+            if (localPlayer == null)
+                return ResolveFallbackOwnMountState(selfRidingPillion);
+
+            var character = (Character*)localPlayer.Address;
+            if (character == null)
+                return ResolveFallbackOwnMountState(selfRidingPillion);
+
+            return FrenRiderMountPolicy.ResolveOwnMountState(
+                nativeAccessAvailable: true,
+                nativeMounted: character->IsMounted(),
+                ridingPillion: selfRidingPillion,
+                conditionMounted: false);
+        }
+        catch
+        {
+            return ResolveFallbackOwnMountState(selfRidingPillion);
+        }
+    }
+
+    private static bool ResolveFallbackOwnMountState(bool selfRidingPillion)
+    {
+        return FrenRiderMountPolicy.ResolveOwnMountState(
+            nativeAccessAvailable: false,
+            nativeMounted: false,
+            ridingPillion: selfRidingPillion,
+            conditionMounted: Plugin.Condition[ConditionFlag.Mounted]);
     }
 
     private void UpdateFarChaseTransition(bool requested)

@@ -21,6 +21,16 @@ public static class FrenRiderMountPolicy
 {
     public const long FarChaseDelayNotPendingMs = -1;
 
+    public static bool ResolveOwnMountState(
+        bool nativeAccessAvailable,
+        bool nativeMounted,
+        bool ridingPillion,
+        bool conditionMounted)
+    {
+        return !ridingPillion
+            && (nativeAccessAvailable ? nativeMounted : conditionMounted);
+    }
+
     public static bool ShouldRequestFarChase(
         bool currentlyRequested,
         bool eligible,

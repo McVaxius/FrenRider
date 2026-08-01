@@ -44,7 +44,7 @@ The main window shows run state, configured fren, party status, follow/mount/idl
 - Separate overworld and duty follow modes, cling distance, max distance, foray distance, deep-dungeon distance, and combat-follow behavior.
 - Social spacing with configurable X/Z wiggle and indoor behavior.
 - Formation following for party-slot based positioning.
-- Mount and flying behavior, including Fly You Fools, own-mount chase, far-chase recovery, and vnavmesh flying-stuck recovery through ECommons keypress support.
+- Mount and flying behavior, including Fly You Fools, own-mount chase, far-chase recovery, and vnavmesh flying-stuck recovery through ECommons keypress support. Fly You Fools uses ground navigation in no-flight Forays but remains flight-enabled in the Diadem; nearby own mounts use the local ClientStructs mount state (excluding pillion) for dismount correction.
 - Combat integration for BMR, VBM, RotationSolver Reborn, Wrath, and Daedalus, with packaged BossMod presets.
 - FATE sync, food use/search, companion summon/stance, idle commands, auto-discard, repair, and desynthesis helpers.
 - DTR controls with text/icon modes.

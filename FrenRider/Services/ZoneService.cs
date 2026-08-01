@@ -17,6 +17,8 @@ public enum ZoneType
 
 public class ZoneService
 {
+    public const uint DiademTerritoryId = 939;
+
     // Known deep dungeon territory IDs (PotD, HoH, EO)
     private static readonly HashSet<uint> DeepDungeonIds = new()
     {
@@ -33,7 +35,7 @@ public class ZoneService
         732, 763, 795, 827, // Eureka zones (Anemos, Pagos, Pyros, Hydatos)
         759,           // Doman Enclave
         920, 975,           // Bozja Southern Front, Zadnor
-        939,                // The Diadem
+        DiademTerritoryId,  // The Diadem
         1237,1238,1239,1240,// moon 1,2,3 (4 is coming with 7.51) im just guessing on 234 not like it matters
         1252,1253,               // South Horn (Occult Crescent), North Horn with 7.5x guessing on north not like matters
     };
@@ -49,6 +51,16 @@ public class ZoneService
     public ushort PreviousFateId { get; private set; }
     public bool FateChanged { get; private set; }
     public bool ZoneChanged { get; private set; }
+
+    public static bool IsFlightRestrictedForay(uint territoryId)
+    {
+        return territoryId != DiademTerritoryId && ForayIds.Contains(territoryId);
+    }
+
+    public bool IsFlightRestrictedForay()
+    {
+        return IsFlightRestrictedForay(TerritoryId);
+    }
 
     public void Update()
     {
