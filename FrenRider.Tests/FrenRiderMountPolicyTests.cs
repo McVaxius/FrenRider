@@ -7,7 +7,7 @@ public sealed class FrenRiderMountPolicyTests
 {
     [Theory]
     [InlineData(true, true, false, false, true)]
-    [InlineData(true, false, false, true, false)]
+    [InlineData(true, false, false, true, true)]
     [InlineData(true, true, true, true, false)]
     [InlineData(false, false, false, true, true)]
     [InlineData(false, false, true, true, false)]

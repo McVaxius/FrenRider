@@ -27,8 +27,8 @@ public static class FrenRiderMountPolicy
         bool ridingPillion,
         bool conditionMounted)
     {
-        return !ridingPillion
-            && (nativeAccessAvailable ? nativeMounted : conditionMounted);
+        var hasNativeMountedState = nativeAccessAvailable && nativeMounted;
+        return !ridingPillion && (hasNativeMountedState || conditionMounted);
     }
 
     public static bool ShouldRequestFarChase(
