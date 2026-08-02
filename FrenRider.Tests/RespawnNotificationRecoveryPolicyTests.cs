@@ -13,6 +13,22 @@ public sealed class RespawnNotificationRecoveryPolicyTests
     }
 
     [Fact]
+    public void NotificationHandlingWaitsForConfiguredRespawnDelay()
+    {
+        const long unconsciousStartedMs = 1000;
+        const long delayMs = 15000;
+
+        Assert.False(RespawnService.HasRespawnDelayElapsed(
+            unconsciousStartedMs,
+            unconsciousStartedMs + delayMs - 1,
+            delayMs));
+        Assert.True(RespawnService.HasRespawnDelayElapsed(
+            unconsciousStartedMs,
+            unconsciousStartedMs + delayMs,
+            delayMs));
+    }
+
+    [Fact]
     public void TeleportNotificationThenReviveNotificationDeclinesTeleportBeforeAcceptingReturn()
     {
         var policy = new RespawnNotificationRecoveryPolicy();
@@ -103,7 +119,8 @@ public sealed class RespawnNotificationRecoveryPolicyTests
             RespawnNotificationRecoveryPolicy.ShouldOwnFlow(
                 loggedIn: true,
                 frenRiderEnabled: true,
-                respawnEnabled: true,
+                respawnOutsideDuties: true,
+                respawnInsideDuties: false,
                 utilityGateActive: false,
                 inDuty: false,
                 areaTransitionActive: false,
@@ -119,6 +136,66 @@ public sealed class RespawnNotificationRecoveryPolicyTests
                 visiblePromptKind: SelectYesnoPromptKind.DeathReturn,
                 reviveNotificationVisible: false,
                 teleportNotificationVisible: false));
+    }
+
+    [Theory]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    [InlineData(false, false)]
+    [InlineData(true, true)]
+    public void RespawnScopeSelectionControlsOwnershipAndPromptClicks(
+        bool respawnOutsideDuties,
+        bool respawnInsideDuties)
+    {
+        var outsideOwns = RespawnNotificationRecoveryPolicy.ShouldOwnFlow(
+            loggedIn: true,
+            frenRiderEnabled: true,
+            respawnOutsideDuties: respawnOutsideDuties,
+            respawnInsideDuties: respawnInsideDuties,
+            utilityGateActive: false,
+            inDuty: false,
+            areaTransitionActive: false,
+            unconscious: true,
+            reviveNotificationVisible: false,
+            teleportNotificationVisible: false,
+            visiblePromptKind: SelectYesnoPromptKind.DeathReturn);
+        var insideOwns = RespawnNotificationRecoveryPolicy.ShouldOwnFlow(
+            loggedIn: true,
+            frenRiderEnabled: true,
+            respawnOutsideDuties: respawnOutsideDuties,
+            respawnInsideDuties: respawnInsideDuties,
+            utilityGateActive: false,
+            inDuty: true,
+            areaTransitionActive: false,
+            unconscious: true,
+            reviveNotificationVisible: false,
+            teleportNotificationVisible: false,
+            visiblePromptKind: SelectYesnoPromptKind.DeathReturn);
+
+        Assert.Equal(respawnOutsideDuties, outsideOwns);
+        Assert.Equal(respawnInsideDuties, insideOwns);
+
+        var policy = new RespawnNotificationRecoveryPolicy();
+        Assert.Equal(
+            respawnOutsideDuties
+                ? RespawnNotificationRecoveryAction.ClickYes
+                : RespawnNotificationRecoveryAction.None,
+            policy.GetNextAction(
+                nowMs: 1000,
+                visiblePromptKind: SelectYesnoPromptKind.DeathReturn,
+                reviveNotificationVisible: false,
+                teleportNotificationVisible: false,
+                respawnEnabled: respawnOutsideDuties));
+        Assert.Equal(
+            respawnInsideDuties
+                ? RespawnNotificationRecoveryAction.ClickYes
+                : RespawnNotificationRecoveryAction.None,
+            policy.GetNextAction(
+                nowMs: 1000,
+                visiblePromptKind: SelectYesnoPromptKind.DeathReturn,
+                reviveNotificationVisible: false,
+                teleportNotificationVisible: false,
+                respawnEnabled: respawnInsideDuties));
     }
 
     [Theory]

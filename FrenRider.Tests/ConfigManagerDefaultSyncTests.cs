@@ -155,6 +155,30 @@ public sealed class ConfigManagerDefaultSyncTests
     }
 
     [Fact]
+    public void ProfileTabSyncCopiesIndependentRespawnScopes()
+    {
+        var account = CreateAccount();
+        account.DefaultConfig.RespawnOutsideDuties = true;
+        account.DefaultConfig.RespawnOutsideDutiesDelaySeconds = 17;
+        account.DefaultConfig.RespawnInsideDuties = true;
+        account.DefaultConfig.RespawnInsideDutiesDelaySeconds = 23;
+
+        var target = account.Characters["Alt One@World"];
+        target.RespawnOutsideDuties = false;
+        target.RespawnOutsideDutiesDelaySeconds = 31;
+        target.RespawnInsideDuties = false;
+        target.RespawnInsideDutiesDelaySeconds = 37;
+
+        var count = ConfigManager.ApplyDefaultTabToAllCharacters(account, "Profile");
+
+        Assert.Equal(2, count);
+        Assert.True(target.RespawnOutsideDuties);
+        Assert.Equal(17, target.RespawnOutsideDutiesDelaySeconds);
+        Assert.True(target.RespawnInsideDuties);
+        Assert.Equal(23, target.RespawnInsideDutiesDelaySeconds);
+    }
+
+    [Fact]
     public void FullSyncDoesNotCopyHiddenRuntimeEnabledState()
     {
         var account = CreateAccount();

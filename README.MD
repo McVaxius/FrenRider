@@ -72,9 +72,9 @@ Exit behavior supports:
 
 AutoYes handles selected dialogs while Fren Rider is enabled. It can accept raise offers, teleport offers, and party invites. Party invites are primarily handled by the whitelist system, with AutoYes as backup.
 
-Respawn is separate from AutoYes. The respawn feature is named **Respawn after death outside duties after** in settings. When enabled, Fren Rider waits until the character has been continuously `Unconscious` outside duties for the configured delay, opens the Return prompt, and accepts it.
+Respawn is separate from AutoYes. Settings provide independent **Respawn after death outside duties after** and **Respawn after death inside duties after** toggles and delays. When the selected setting is enabled, Fren Rider waits until the character has been continuously `Unconscious` in that scope for its configured delay, opens the Return prompt, and accepts it. Both settings are disabled by default.
 
-Respawn blocks while ADS utility is active, while area transition is active, and while `BoundByDuty` or `BoundByDuty56` is true. Treasure-map deaths can be timing-sensitive because game duty state may appear or disappear around death, Return, and portal/duty transitions.
+Respawn blocks while ADS utility is active or while area transition is active. The service selects inside-duty versus outside-duty scope only from `BoundByDuty` (condition 34); `BoundByDuty56` is not used for this respawn decision. Duty transitions reset the unconscious timer and notification recovery. Treasure-map deaths can be timing-sensitive because game duty state may appear or disappear around death, Return, and portal/duty transitions.
 
 ## Normal Game Behavior
 

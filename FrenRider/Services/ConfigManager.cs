@@ -45,6 +45,7 @@ public class ConfigManager
                 Setting("Teleport Delay", (source, target) => target.TeleportToFrenDelaySeconds = source.TeleportToFrenDelaySeconds),
                 Setting("Nudge in duty when fren not nearby/in-zone", (source, target) => target.NudgeInDutyWhenFrenNotNearbyOrInZone = source.NudgeInDutyWhenFrenNotNearbyOrInZone),
                 Setting("Respawn after death outside duties", CopyRespawnOutsideDuties),
+                Setting("Respawn after death inside duties", CopyRespawnInsideDuties),
                 Setting("Mount-up to chase fren", CopyMountUpToChaseFren),
                 Setting("Mount Name", (source, target) => target.FoolFlier = source.FoolFlier),
                 Setting("Summon Chocobo", (source, target) => target.ForceGysahl = source.ForceGysahl),
@@ -167,6 +168,12 @@ public class ConfigManager
     {
         target.RespawnOutsideDuties = source.RespawnOutsideDuties;
         target.RespawnOutsideDutiesDelaySeconds = source.RespawnOutsideDutiesDelaySeconds;
+    }
+
+    private static void CopyRespawnInsideDuties(CharacterConfig source, CharacterConfig target)
+    {
+        target.RespawnInsideDuties = source.RespawnInsideDuties;
+        target.RespawnInsideDutiesDelaySeconds = source.RespawnInsideDutiesDelaySeconds;
     }
 
     private static void CopyMountUpToChaseFren(CharacterConfig source, CharacterConfig target)

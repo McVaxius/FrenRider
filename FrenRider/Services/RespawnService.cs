@@ -25,6 +25,7 @@ public sealed class RespawnService
     private bool settingsInitialized;
     private bool lastEnabled;
     private int lastDelaySeconds;
+    private bool lastInDuty;
 
     public RespawnState State { get; private set; } = RespawnState.Off;
     public string StatusText { get; private set; } = "Off";
@@ -38,12 +39,21 @@ public sealed class RespawnService
     public void Update()
     {
         var config = plugin.ConfigManager.GetActiveConfig();
-        var delaySeconds = Math.Max(1, config.RespawnOutsideDutiesDelaySeconds);
+        var inDuty = IsInDuty();
+        var respawnEnabled = RespawnNotificationRecoveryPolicy.IsRespawnEnabledForDutyState(
+            config.RespawnOutsideDuties,
+            config.RespawnInsideDuties,
+            inDuty);
+        var delaySeconds = Math.Max(
+            1,
+            inDuty
+                ? config.RespawnInsideDutiesDelaySeconds
+                : config.RespawnOutsideDutiesDelaySeconds);
 
-        if (SettingsChanged(config.RespawnOutsideDuties, delaySeconds))
+        if (SettingsChanged(respawnEnabled, delaySeconds, inDuty))
         {
             ResetTimer();
-            SetState(config.RespawnOutsideDuties ? RespawnState.Idle : RespawnState.Off, "Setting changed");
+            SetState(respawnEnabled ? RespawnState.Idle : RespawnState.Off, inDuty ? "Duty scope changed" : "Setting changed");
             return;
         }
 
@@ -67,15 +77,9 @@ public sealed class RespawnService
             return;
         }
 
-        if (!config.RespawnOutsideDuties)
+        if (!respawnEnabled)
         {
-            Reset(RespawnState.Off, "Off");
-            return;
-        }
-
-        if (IsInDuty())
-        {
-            Reset(RespawnState.Blocked, "Blocked: in duty");
+            Reset(RespawnState.Off, inDuty ? "Off inside duties" : "Off outside duties");
             return;
         }
 
@@ -98,26 +102,25 @@ public sealed class RespawnService
             SetState(RespawnState.Waiting, $"Unconscious; return in {delaySeconds}s");
         }
 
+        var delayMs = delaySeconds * 1000L;
+        if (!HasRespawnDelayElapsed(unconsciousStartedMs, now, delayMs))
+        {
+            var remainingSeconds = Math.Max(1, (int)Math.Ceiling((delayMs - (now - unconsciousStartedMs)) / 1000.0));
+            SetState(RespawnState.Waiting, $"Unconscious; return in {remainingSeconds}s");
+            return;
+        }
+
         if (ShouldOwnCurrentUnconsciousReviveFlow(config))
         {
             OwnsUnconsciousReviveFlow = true;
             if (State != RespawnState.Returning)
                 SetState(RespawnState.Returning, "Handling revive/Return notification");
 
-            HandleReviveNotificationFlow(now);
+            HandleReviveNotificationFlow(now, respawnEnabled);
             return;
         }
 
         ClearNotificationRecovery();
-
-        var delayMs = delaySeconds * 1000L;
-        var elapsedMs = now - unconsciousStartedMs;
-        if (elapsedMs < delayMs)
-        {
-            var remainingSeconds = Math.Max(1, (int)Math.Ceiling((delayMs - elapsedMs) / 1000.0));
-            SetState(RespawnState.Waiting, $"Unconscious; return in {remainingSeconds}s");
-            return;
-        }
 
         if (State != RespawnState.Returning)
             SetState(RespawnState.Returning, "Opening Return prompt");
@@ -134,27 +137,31 @@ public sealed class RespawnService
     public void ResetForDisable()
         => Reset(RespawnState.Off, "FrenRider disabled");
 
-    private bool SettingsChanged(bool enabled, int delaySeconds)
+    internal static bool HasRespawnDelayElapsed(long unconsciousStartedMs, long nowMs, long delayMs)
+        => nowMs - unconsciousStartedMs >= delayMs;
+
+    private bool SettingsChanged(bool enabled, int delaySeconds, bool inDuty)
     {
         if (!settingsInitialized)
         {
             settingsInitialized = true;
             lastEnabled = enabled;
             lastDelaySeconds = delaySeconds;
+            lastInDuty = inDuty;
             return false;
         }
 
-        if (lastEnabled == enabled && lastDelaySeconds == delaySeconds)
+        if (lastEnabled == enabled && lastDelaySeconds == delaySeconds && lastInDuty == inDuty)
             return false;
 
         lastEnabled = enabled;
         lastDelaySeconds = delaySeconds;
+        lastInDuty = inDuty;
         return true;
     }
 
     private static bool IsInDuty()
-        => Plugin.Condition[ConditionFlag.BoundByDuty]
-            || Plugin.Condition[ConditionFlag.BoundByDuty56];
+        => Plugin.Condition[ConditionFlag.BoundByDuty];
 
     private static bool IsAreaTransitionActive()
         => Plugin.Condition[ConditionFlag.BetweenAreas]
@@ -168,6 +175,7 @@ public sealed class RespawnService
             Plugin.ClientState.IsLoggedIn,
             config.Enabled,
             config.RespawnOutsideDuties,
+            config.RespawnInsideDuties,
             plugin.AutomationService.IsUtilityGateActive,
             IsInDuty(),
             IsAreaTransitionActive(),
@@ -178,7 +186,7 @@ public sealed class RespawnService
             visiblePromptKind);
     }
 
-    private void HandleReviveNotificationFlow(long now)
+    private void HandleReviveNotificationFlow(long now, bool respawnEnabled)
     {
         var reviveVisible = GameHelpers.IsAddonVisible("_NotificationRevive");
         var telepoVisible = GameHelpers.IsAddonVisible("_NotificationTelepo");
@@ -211,7 +219,12 @@ public sealed class RespawnService
                 break;
         }
 
-        var action = notificationRecovery.GetNextAction(now, visiblePromptKind, reviveVisible, telepoVisible);
+        var action = notificationRecovery.GetNextAction(
+            now,
+            visiblePromptKind,
+            reviveVisible,
+            telepoVisible,
+            respawnEnabled);
 
         switch (action)
         {

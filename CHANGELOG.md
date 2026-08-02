@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Respawn settings now have independent outside-duty and inside-duty toggles and delays, each disabled by default with a 60-second delay and synchronized from DEFAULT CONFIG; notification, Return, and recovery prompt handling honor the selected delay
 - Per-character Daedalus engage modes now expose stable None, Focus, Split, and Kill Adds choices when Daedalus is the effective normal/Foray rotation, with immediate save/default sync and fail-safe LAN coordination reflection
 - Fren Rider now warns immediately and every five seconds while enabled if loaded internal plugins BossModReborn (BMR) and BossMod (VBM) are both detected, without disabling either plugin or blocking combat
 - About → Optional Plugins now shows a click-to-copy Daedalus repository URL: `https://raw.githubusercontent.com/ofnature/Daedalus/main/repo.json`
@@ -39,6 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Duty area-transition recovery now resets zone-sensitive services after `BetweenAreas` loads, improving level-70 treasure dungeon waterfall recovery
 
 ### Changed
+- Respawn now selects its inside-duty or outside-duty setting only from `BoundByDuty`, resets its unconscious timer and notification recovery on duty transitions, and no longer uses `BoundByDuty56` for this service
 - FrenRider no longer disables AutoDuty while applying BossMod/rotation defaults; only the explicit **Disable AutoDuty** action in its warning window can send the disable command
 - ADS duty identity, category, support, and clearance now come only from the validated `ADS.GetStatusJson` `CurrentDuty` projection; live GameMain territory/CFC mismatches or incomplete/unknown rows fail closed, and the former FrenRider maturity table, pilot promotions, treasure overrides, Lumina catalog, and category fallback are removed
 - Global configuration schema v2 defaults **Don't move while casting** on, migrates v1 configurations on once, and preserves later v2 opt-outs

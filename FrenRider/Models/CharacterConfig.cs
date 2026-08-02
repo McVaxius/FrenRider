@@ -24,6 +24,7 @@ public class CharacterConfig
     public const string DefaultCustomIdleCommand = "/smile motion";
 
     private int respawnOutsideDutiesDelaySeconds = 60;
+    private int respawnInsideDutiesDelaySeconds = 60;
     private float mountUpToChaseFrenDistance = 100f;
     private int mountUpToChaseFrenDelaySeconds = 30;
 
@@ -38,6 +39,12 @@ public class CharacterConfig
     {
         get => respawnOutsideDutiesDelaySeconds;
         set => respawnOutsideDutiesDelaySeconds = Math.Max(1, value);
+    }
+    public bool RespawnInsideDuties { get; set; } = false;
+    public int RespawnInsideDutiesDelaySeconds
+    {
+        get => respawnInsideDutiesDelaySeconds;
+        set => respawnInsideDutiesDelaySeconds = Math.Max(1, value);
     }
     public bool MountUpToChaseFren { get; set; } = false;
     public float MountUpToChaseFrenDistance
@@ -163,6 +170,8 @@ public class CharacterConfig
             NudgeInDutyWhenFrenNotNearbyOrInZone = NudgeInDutyWhenFrenNotNearbyOrInZone,
             RespawnOutsideDuties = RespawnOutsideDuties,
             RespawnOutsideDutiesDelaySeconds = RespawnOutsideDutiesDelaySeconds,
+            RespawnInsideDuties = RespawnInsideDuties,
+            RespawnInsideDutiesDelaySeconds = RespawnInsideDutiesDelaySeconds,
             MountUpToChaseFren = MountUpToChaseFren,
             MountUpToChaseFrenDistance = MountUpToChaseFrenDistance,
             MountUpToChaseFrenDelaySeconds = MountUpToChaseFrenDelaySeconds,

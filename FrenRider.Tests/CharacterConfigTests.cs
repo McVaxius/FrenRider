@@ -1,3 +1,4 @@
+using System.Text.Json;
 using FrenRider.Models;
 
 namespace FrenRider.Tests;
@@ -10,6 +11,47 @@ public sealed class CharacterConfigTests
         var config = new CharacterConfig();
 
         Assert.False(config.NudgeInDutyWhenFrenNotNearbyOrInZone);
+    }
+
+    [Fact]
+    public void RespawnScopeSettingsDefaultOffWithSixtySecondDelays()
+    {
+        var config = new CharacterConfig();
+
+        Assert.False(config.RespawnOutsideDuties);
+        Assert.Equal(60, config.RespawnOutsideDutiesDelaySeconds);
+        Assert.False(config.RespawnInsideDuties);
+        Assert.Equal(60, config.RespawnInsideDutiesDelaySeconds);
+    }
+
+    [Fact]
+    public void RespawnScopeSettingsSurviveClone()
+    {
+        var config = new CharacterConfig
+        {
+            RespawnOutsideDuties = true,
+            RespawnOutsideDutiesDelaySeconds = 17,
+            RespawnInsideDuties = true,
+            RespawnInsideDutiesDelaySeconds = 23,
+        };
+
+        var clone = config.Clone();
+
+        Assert.True(clone.RespawnOutsideDuties);
+        Assert.Equal(17, clone.RespawnOutsideDutiesDelaySeconds);
+        Assert.True(clone.RespawnInsideDuties);
+        Assert.Equal(23, clone.RespawnInsideDutiesDelaySeconds);
+    }
+
+    [Fact]
+    public void MissingInsideRespawnFieldsUseBackwardCompatibleDefaults()
+    {
+        var config = JsonSerializer.Deserialize<CharacterConfig>("{\"RespawnOutsideDuties\":true,\"RespawnOutsideDutiesDelaySeconds\":19}")!;
+
+        Assert.True(config.RespawnOutsideDuties);
+        Assert.Equal(19, config.RespawnOutsideDutiesDelaySeconds);
+        Assert.False(config.RespawnInsideDuties);
+        Assert.Equal(60, config.RespawnInsideDutiesDelaySeconds);
     }
 
     [Fact]

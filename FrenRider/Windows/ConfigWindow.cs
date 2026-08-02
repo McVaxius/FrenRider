@@ -541,6 +541,32 @@ public class ConfigWindow : Window, IDisposable
 
         DrawDefaultSettingSyncButton("Respawn after death outside duties");
 
+        var respawnInsideDuties = config.RespawnInsideDuties;
+        if (ImGui.Checkbox("Respawn after death inside duties after", ref respawnInsideDuties))
+        {
+            config.RespawnInsideDuties = respawnInsideDuties;
+            configManager.SaveCurrentAccount();
+        }
+
+        var respawnInsideDelay = Math.Max(1, config.RespawnInsideDutiesDelaySeconds);
+        if (respawnInsideDelay != config.RespawnInsideDutiesDelaySeconds)
+        {
+            config.RespawnInsideDutiesDelaySeconds = respawnInsideDelay;
+            configManager.SaveCurrentAccount();
+        }
+
+        ImGui.SameLine();
+        ImGui.SetNextItemWidth(120);
+        if (ImGui.InputInt("seconds##RespawnInsideDutiesDelay", ref respawnInsideDelay))
+        {
+            config.RespawnInsideDutiesDelaySeconds = Math.Max(1, respawnInsideDelay);
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("After remaining continuously unconscious inside duties for this delay, open the Return prompt and accept it. Duty scope is selected only by BoundByDuty. Minimum: 1 second. Default: 60.");
+
+        DrawDefaultSettingSyncButton("Respawn after death inside duties");
+
         var mountUpToChaseFren = config.MountUpToChaseFren;
         if (ImGui.Checkbox("Mount-up to chase fren if >", ref mountUpToChaseFren))
         {

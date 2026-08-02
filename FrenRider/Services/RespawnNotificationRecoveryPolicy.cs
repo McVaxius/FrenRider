@@ -45,6 +45,12 @@ public sealed class RespawnNotificationRecoveryPolicy
     public int FailedCyclesInBurst => failedCyclesInBurst;
     public bool HasPendingPromptAttempt => pendingPromptAttempt.HasValue;
 
+    public static bool IsRespawnEnabledForDutyState(
+        bool respawnOutsideDuties,
+        bool respawnInsideDuties,
+        bool inDuty)
+        => inDuty ? respawnInsideDuties : respawnOutsideDuties;
+
     public static bool ShouldOwnFlow(
         bool loggedIn,
         bool frenRiderEnabled,
@@ -63,18 +69,54 @@ public sealed class RespawnNotificationRecoveryPolicy
             && !inDuty
             && !areaTransitionActive
             && unconscious
-            && (reviveNotificationVisible
-                || teleportNotificationVisible
-                || visiblePromptKind is SelectYesnoPromptKind.Teleport
-                    or SelectYesnoPromptKind.DeathReturn
-                    or SelectYesnoPromptKind.Raise);
+            && HasRespawnPrompt(
+                reviveNotificationVisible,
+                teleportNotificationVisible,
+                visiblePromptKind);
+
+    public static bool ShouldOwnFlow(
+        bool loggedIn,
+        bool frenRiderEnabled,
+        bool respawnOutsideDuties,
+        bool respawnInsideDuties,
+        bool utilityGateActive,
+        bool inDuty,
+        bool areaTransitionActive,
+        bool unconscious,
+        bool reviveNotificationVisible,
+        bool teleportNotificationVisible,
+        SelectYesnoPromptKind? visiblePromptKind)
+        => loggedIn
+            && frenRiderEnabled
+            && IsRespawnEnabledForDutyState(respawnOutsideDuties, respawnInsideDuties, inDuty)
+            && !utilityGateActive
+            && !areaTransitionActive
+            && unconscious
+            && HasRespawnPrompt(
+                reviveNotificationVisible,
+                teleportNotificationVisible,
+                visiblePromptKind);
+
+    private static bool HasRespawnPrompt(
+        bool reviveNotificationVisible,
+        bool teleportNotificationVisible,
+        SelectYesnoPromptKind? visiblePromptKind)
+        => reviveNotificationVisible
+            || teleportNotificationVisible
+            || visiblePromptKind is SelectYesnoPromptKind.Teleport
+                or SelectYesnoPromptKind.DeathReturn
+                or SelectYesnoPromptKind.Raise;
 
     public RespawnNotificationRecoveryAction GetNextAction(
         long nowMs,
         SelectYesnoPromptKind? visiblePromptKind,
         bool reviveNotificationVisible,
-        bool teleportNotificationVisible)
+        bool teleportNotificationVisible,
+        bool respawnEnabled = true)
     {
+        if (!respawnEnabled)
+            return RespawnNotificationRecoveryAction.None;
+
         if (pendingPromptAttempt.HasValue)
             return RespawnNotificationRecoveryAction.None;
 
