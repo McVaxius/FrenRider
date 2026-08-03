@@ -394,7 +394,7 @@ public class MountService
                 nativeAccessAvailable: true,
                 nativeMounted: character->IsMounted(),
                 ridingPillion: selfRidingPillion,
-                conditionMounted: false);
+                conditionMounted: Plugin.Condition[ConditionFlag.Mounted]);
         }
         catch
         {
@@ -600,13 +600,16 @@ public class MountService
             return false;
         }
 
-        if (zoneService.CurrentZone == ZoneType.Duty
-            || Plugin.Condition[ConditionFlag.BoundByDuty]
-            || Plugin.Condition[ConditionFlag.BoundByDuty56]
-            || Plugin.Condition[ConditionFlag.BetweenAreas]
+        if (ZoneService.ShouldSuppressOwnMountCorrection(zoneService.TerritoryId))
+        {
+            reason = "Praetorium";
+            return false;
+        }
+
+        if (Plugin.Condition[ConditionFlag.BetweenAreas]
             || Plugin.Condition[ConditionFlag.BetweenAreas51])
         {
-            reason = "duty or transition";
+            reason = "area transition";
             return false;
         }
 

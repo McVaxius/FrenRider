@@ -51,7 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Fly You Fools now uses ground `/vnav moveto` navigation in every no-flight Foray while retaining normal takeoff and `/vnav flyto` behavior in the Diadem (territory 939)
-- Nearby Fly You Fools followers now use the local character's ClientStructs mount state, excluding pillion, to reliably dismount after the fren dismounts; `ConditionFlag.Mounted` remains valid alongside the native check
+- Nearby Fly You Fools followers now honor `ConditionFlag.Mounted` alongside the local character's ClientStructs mount state while excluding pillion; normal own-mount correction applies in Forays and every duty except The Praetorium (territory 1044)
 
 ### Phase 11 - Food Eating & Chocobo Summoning
 

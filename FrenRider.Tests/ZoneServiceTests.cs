@@ -25,4 +25,14 @@ public sealed class ZoneServiceTests
     {
         Assert.False(ZoneService.IsFlightRestrictedForay(129));
     }
+
+    [Theory]
+    [InlineData(ZoneService.PraetoriumTerritoryId, true)]
+    [InlineData(732, false)]
+    [InlineData(920, false)]
+    [InlineData(129, false)]
+    public void OnlyPraetoriumSuppressesOwnMountCorrection(uint territoryId, bool expected)
+    {
+        Assert.Equal(expected, ZoneService.ShouldSuppressOwnMountCorrection(territoryId));
+    }
 }

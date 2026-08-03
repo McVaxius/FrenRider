@@ -18,6 +18,7 @@ public enum ZoneType
 public class ZoneService
 {
     public const uint DiademTerritoryId = 939;
+    public const uint PraetoriumTerritoryId = 1044;
 
     // Known deep dungeon territory IDs (PotD, HoH, EO)
     private static readonly HashSet<uint> DeepDungeonIds = new()
@@ -55,6 +56,11 @@ public class ZoneService
     public static bool IsFlightRestrictedForay(uint territoryId)
     {
         return territoryId != DiademTerritoryId && ForayIds.Contains(territoryId);
+    }
+
+    internal static bool ShouldSuppressOwnMountCorrection(uint territoryId)
+    {
+        return territoryId == PraetoriumTerritoryId;
     }
 
     public bool IsFlightRestrictedForay()
