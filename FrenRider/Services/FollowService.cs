@@ -573,6 +573,13 @@ public class FollowService
             return;
         }
 
+        var vnavStateKnown = vnavState.TryGetState(out var pathRunning, out var pathfindInProgress);
+        if (!ShouldTrackStuckFollowJumpForVNavState(vnavStateKnown, pathRunning, pathfindInProgress))
+        {
+            ResetStuckFollowJumpTracking();
+            return;
+        }
+
         var position = localPlayer.Position;
         if (stuckFollowJumpBaselineTimeMs == 0)
         {
@@ -619,6 +626,12 @@ public class FollowService
             && !plugin.AutomationService.IsUtilityGateActive
             && GetMovementClingType(config) != 2;
     }
+
+    internal static bool ShouldTrackStuckFollowJumpForVNavState(
+        bool stateKnown,
+        bool pathRunning,
+        bool pathfindInProgress)
+        => stateKnown && pathRunning && !pathfindInProgress;
 
     private void ResetStuckFollowJumpTracking()
     {
@@ -1249,10 +1262,13 @@ public class FollowService
         }
     }
 
-    internal static string ResolveBossModTargetName(string? trackedName, string? trackedWorld)
+    internal static string ResolveBossModTargetName(
+        string? trackedName,
+        string? trackedWorld,
+        string? configuredFrenIdentity = null)
     {
         var targetName = trackedName?.Trim() ?? string.Empty;
-        var worldName = trackedWorld?.Trim() ?? string.Empty;
+        var worldName = FrenTracker.ResolveWorldName(trackedWorld, configuredFrenIdentity);
 
         if (targetName.Length == 0
             || worldName.Length == 0
@@ -1271,7 +1287,7 @@ public class FollowService
         if (plugin.CombatService.IsQuestionableSoloAuthorityActive)
             return;
 
-        var targetName = ResolveBossModTargetName(fren.Name, fren.WorldName);
+        var targetName = ResolveBossModTargetName(fren.Name, fren.WorldName, config.FrenName);
         if (string.IsNullOrWhiteSpace(targetName))
             return;
 
