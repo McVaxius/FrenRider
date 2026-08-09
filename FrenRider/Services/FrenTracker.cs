@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 
@@ -155,10 +154,8 @@ public class FrenTracker
             return;
         }
 
-        // Extract name part (before @, which is cosmetic) while retaining the
-        // configured world as fallback identity for visible non-party players.
+        // Extract name part (before @, which is cosmetic)
         var searchName = frenName.Split('@')[0].Trim();
-        var configuredWorldName = ResolveWorldName(null, frenName);
         if (string.IsNullOrEmpty(searchName))
         {
             Fren = null;
@@ -219,26 +216,12 @@ public class FrenTracker
             var frenState = new FrenState
             {
                 Name = objName,
-                WorldName = configuredWorldName,
                 Position = obj.Position,
                 Distance = Vector3.Distance(localPlayer.Position, obj.Position),
                 IsFound = true,
                 IsVisible = true,
                 InParty = false,
             };
-
-            if (obj is IPlayerCharacter playerCharacter)
-            {
-                try
-                {
-                    var liveWorldName = playerCharacter.HomeWorld.Value.Name.ToString();
-                    frenState.WorldName = ResolveWorldName(liveWorldName, frenName);
-                }
-                catch
-                {
-                    // Keep the configured world fallback when live world data is unavailable.
-                }
-            }
 
             // Mount detection
             try
@@ -262,17 +245,6 @@ public class FrenTracker
             Name = searchName,
             IsFound = false,
         };
-    }
-
-    internal static string ResolveWorldName(string? liveWorldName, string? configuredFrenIdentity)
-    {
-        var liveWorld = liveWorldName?.Trim() ?? string.Empty;
-        if (liveWorld.Length > 0)
-            return liveWorld;
-
-        var configuredIdentity = configuredFrenIdentity?.Trim() ?? string.Empty;
-        var atIndex = configuredIdentity.IndexOf('@');
-        return atIndex >= 0 ? configuredIdentity[(atIndex + 1)..].Trim() : string.Empty;
     }
 
     /// <summary>

@@ -1262,13 +1262,10 @@ public class FollowService
         }
     }
 
-    internal static string ResolveBossModTargetName(
-        string? trackedName,
-        string? trackedWorld,
-        string? configuredFrenIdentity = null)
+    internal static string ResolveBossModTargetName(string? trackedName, string? trackedWorld)
     {
         var targetName = trackedName?.Trim() ?? string.Empty;
-        var worldName = FrenTracker.ResolveWorldName(trackedWorld, configuredFrenIdentity);
+        var worldName = trackedWorld?.Trim() ?? string.Empty;
 
         if (targetName.Length == 0
             || worldName.Length == 0
@@ -1287,7 +1284,7 @@ public class FollowService
         if (plugin.CombatService.IsQuestionableSoloAuthorityActive)
             return;
 
-        var targetName = ResolveBossModTargetName(fren.Name, fren.WorldName, config.FrenName);
+        var targetName = ResolveBossModTargetName(fren.Name, fren.WorldName);
         if (string.IsNullOrWhiteSpace(targetName))
             return;
 

@@ -26,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Automatic and manual BossMod preset application now targets only the selected provider, preventing non-VBM passive presets from being sent to VBM and interrupting Questionable progress
 - The row-level **Sync all** beside **ADS Exit Method** now copies the complete exit selection and clears conflicting local exit flags
-- Cross-world BossMod follow now removes a matching concatenated home-world suffix before sending `/bmrai follow`, using a visible player's live home world first and configured `@World` identity as fallback while preserving legitimate surnames and partial names
+- Cross-world BossMod follow now removes a matching concatenated home-world suffix before sending `/bmrai follow`, while preserving legitimate surnames that match a world name
 - Ground stuck-jump recovery now tracks only while vnav reports a running path with no path calculation in progress; idle, calculating, or unknown vnav state resets the jump timer
 - Settings character browsing now uses an editing-only selection, so viewing or changing `DEFAULT CONFIG` and other profiles cannot replace the logged-in character's runtime configuration or DAD target
 - Manual ADS Start Inside/Resume now immediately pauses FrenRider follow, navigation, mounts, formation, combat-state changes, duty interaction, maintenance, and automatic dialogs
