@@ -29,10 +29,14 @@ Common commands:
 ```text
 /fr on
 /fr off
+/fr settings
+/fr s
+/fr mini
+/fr m
 /fr debug
 ```
 
-`/frenrider` always opens the main window. `/fr` opens the main window when no recognized argument is supplied. `/fr debug` toggles debug controls for the active character config.
+`/frenrider` always opens the main window. `/fr` opens the main window when no recognized argument is supplied. `/fr settings` and `/fr s` toggle the settings window. `/fr mini` and `/fr m` toggle a separate auto-sized **MAGIA** window whose Attack, Defense, and Off buttons send `/magiaauto attack`, `/magiaauto defense`, and `/magiaauto off`. The mini window does not enable anything automatically. `/fr debug` toggles debug controls for the active character config.
 
 The main window shows run state, configured fren, party status, follow/mount/idle/teleport/respawn state, ADS state, exit mode, and debug details when enabled.
 
@@ -46,7 +50,10 @@ The main window shows run state, configured fren, party status, follow/mount/idl
 - Formation following for party-slot based positioning.
 - Mount and flying behavior, including Fly You Fools, own-mount chase, far-chase recovery, and vnavmesh flying-stuck recovery through ECommons keypress support. Fly You Fools uses ground navigation in no-flight Forays but remains flight-enabled in the Diadem; nearby own mounts use the local ClientStructs mount state (excluding pillion) for dismount correction.
 - Combat integration for BMR, VBM, RotationSolver Reborn, Wrath, and Daedalus, with packaged BossMod presets.
+- Separate RotationSolver Reborn operating-mode and hostile-target choices, synchronized per character.
 - FATE sync, food use/search, companion summon/stance, idle commands, auto-discard, repair, and desynthesis helpers.
+- Optional per-character job-stone equip for level 30+ base classes, disabled by default.
+- Optional MAGIA mini controls for attack, defense, and off commands.
 - DTR controls with text/icon modes.
 - Optional video notifications when enabling or disabling Fren Rider.
 - Optional Krangle mode to obfuscate character names in UI.
@@ -89,6 +96,10 @@ When investigating unexpected party drops, also check external auto-Return tools
 Global UI settings are stored by Dalamud in the normal Fren Rider plugin config.
 
 **Don't move while casting** is a global setting that defaults on. Fren Rider applies the stored value when the plugin loads and whenever the checkbox changes: BMR and VBM receive their existing Action Tweaks setting, while RotationSolver Reborn receives `PoslockCasting true|false` through typed IPC. Existing global v1 configurations enable the setting during their one-time v2 migration; a later v2 opt-out remains off.
+
+RotationSolver Reborn configuration keeps Auto, Manual, None, and Support under **RSR Operating Mode**. **RSR Aggro Type** independently exposes all five upstream hostile-target choices and applies the selected value through RSR settings IPC. Existing per-character value `4` from the former combined operating-mode list migrates once to Auto plus Previously Engaged Targets.
+
+**Equip job stone for current class** is a per-character Automation setting and defaults off. While Fren Rider is enabled, it acts only on a level 30+ base class when equipment can be changed safely and the character has a valid current gearset. Fren Rider checks the Soul Crystal armoury chest in slot order, equips the first stone whose job belongs to the current class, confirms the equipped slot, and updates that gearset once. A character already on a job is never scanned; Arcanist uses whichever matching Summoner or Scholar stone is encountered first.
 
 BossMod preset activation is provider-specific: VBM selections receive only the VBM preset command, while BMR and non-VBM rotation selections use BMR for BossMod AI and receive only the BMR preset command. **Push Presets Now** installs the packaged presets and applies the current selection through the same routing.
 

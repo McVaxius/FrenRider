@@ -38,6 +38,7 @@ public class AutomationService : IDisposable
     private readonly Plugin plugin;
     private readonly FrenTracker tracker;
     private readonly ZoneService zoneService;
+    private readonly JobStoneEquipService jobStoneEquipService = new();
 
     private int idleTickCounter;
     private long lastIdleActionMs;
@@ -116,6 +117,7 @@ public class AutomationService : IDisposable
     public void Update()
     {
         var config = plugin.ConfigManager.GetActiveConfig();
+        jobStoneEquipService.Update(config);
         if (!config.Enabled)
         {
             idleTickCounter = 0;

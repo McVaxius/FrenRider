@@ -473,7 +473,15 @@ public class CombatService
 
     private string ApplyRsrMode(CharacterConfig config)
     {
+        if (config.RotationType == RotationTypeNone)
+            return "None";
+
         var stateCommand = ResolveRsrStateCommandType(config.RotationType);
+        var hostileType = config.RotationType == RotationTypePreviouslyEngagedTargets
+            ? AutorotIpcService.RsrTargetHostileType.TargetsHaveTarget
+            : ResolveRsrTargetHostileType(config.RsrAggroType);
+        plugin.AutorotIpcService.TrySetRsrHostileType(hostileType);
+
         switch (config.RotationType)
         {
             case RotationTypeManual:
@@ -482,21 +490,18 @@ public class CombatService
                 return "Manual";
 
             case RotationTypeAutoSupport:
-                plugin.AutorotIpcService.TrySetRsrHostileType(AutorotIpcService.RsrTargetHostileType.TargetsHaveTarget);
                 plugin.AutorotIpcService.TrySetRsrSupportTargeting(true);
                 if (!plugin.AutorotIpcService.TrySetRsrMode(stateCommand))
                     SendCommand("/rotation auto on");
-                return "Auto (Support)";
+                return "Support";
 
             case RotationTypePreviouslyEngagedTargets:
-                plugin.AutorotIpcService.TrySetRsrHostileType(AutorotIpcService.RsrTargetHostileType.TargetsHaveTarget);
                 if (!plugin.AutorotIpcService.TrySetRsrMode(stateCommand))
                     SendCommand("/rotation auto on");
-                return "Previously Engaged Targets";
+                return "Auto";
 
             case RotationTypeAuto:
             default:
-                plugin.AutorotIpcService.TrySetRsrHostileType(AutorotIpcService.RsrTargetHostileType.AllTargetsCanAttack);
                 if (!plugin.AutorotIpcService.TrySetRsrMode(stateCommand))
                     SendCommand("/rotation auto on");
                 return "Auto";
@@ -895,6 +900,7 @@ public class CombatService
             config.MaxAIDistance,
             config.LimitPct,
             config.RotationType,
+            config.RsrAggroType,
             zoneService.CurrentZone,
             zoneService.InFate,
             GetBossModPresetForPlugin(config, GetSelectedRotationPluginName(config)),
@@ -1059,6 +1065,18 @@ public class CombatService
             RotationTypeAutoSupport => AutorotIpcService.RsrStateCommandType.Henched,
             RotationTypePreviouslyEngagedTargets => AutorotIpcService.RsrStateCommandType.Auto,
             _ => AutorotIpcService.RsrStateCommandType.Auto,
+        };
+    }
+
+    internal static AutorotIpcService.RsrTargetHostileType ResolveRsrTargetHostileType(int aggroType)
+    {
+        return aggroType switch
+        {
+            1 => AutorotIpcService.RsrTargetHostileType.TargetsHaveTarget,
+            2 => AutorotIpcService.RsrTargetHostileType.AllTargetsWhenSoloInDuty,
+            3 => AutorotIpcService.RsrTargetHostileType.AllTargetsWhenSolo,
+            4 => AutorotIpcService.RsrTargetHostileType.SoloDeepDungeonSmart,
+            _ => AutorotIpcService.RsrTargetHostileType.AllTargetsCanAttack,
         };
     }
 

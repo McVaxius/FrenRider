@@ -37,7 +37,15 @@ public class ConfigWindow : Window, IDisposable
     private static readonly string[] ClingTypes = { "NavMesh", "Visland", "BossMod Follow", "Vanilla Follow" };
     private static readonly string[] RotationPlugins = { "BMR", "VBM", "RSR", "WRATH", "DAEDALUS" };
     private static readonly string[] DaedalusTargetModes = { "None", "Focus", "Split", "Kill Adds" };
-    private static readonly string[] RotationTypes = { "Auto", "Manual", "none", "Auto (Support)", "Previously Engaged Targets" };
+    private static readonly string[] RsrOperatingModes = { "Auto", "Manual", "None", "Support" };
+    private static readonly string[] RsrAggroTypes =
+    {
+        "All Attackable Targets",
+        "Previously Engaged Targets",
+        "All Targets When Solo in Duty",
+        "All Targets When Solo",
+        "Solo Deep Dungeon Smart",
+    };
     private static readonly string[] BossModAIOptions = { "on", "off" };
     private static readonly string[] CleanupModes = { "Restore snapshot", "Turn everything off" };
     private static readonly string[] Positionals = { "Front", "Rear", "Any", "Auto" };
@@ -1051,17 +1059,28 @@ public class ConfigWindow : Window, IDisposable
         HelpMarker("Restore snapshot: put captured BMR/VBM AI on/off, follow, movement, CBT fields, and Daedalus enabled state back on /fr off.\nTurn everything off: disable BMR/VBM AI, CBT AutoFollow, RotationSolverReborn, Daedalus, and Wrath auto if FrenRider started it.");
         DrawDefaultSettingSyncButton("Cleanup Mode");
 
-        // RSR Rotation Type (dropdown)
+        // RSR Operating Mode (dropdown)
         var rotType = config.RotationType;
         ImGui.SetNextItemWidth(200);
-        if (ImGui.Combo("RSR Rotation Type", ref rotType, RotationTypes, RotationTypes.Length))
+        if (ImGui.Combo("RSR Operating Mode", ref rotType, RsrOperatingModes, RsrOperatingModes.Length))
         {
             config.RotationType = rotType;
             configManager.SaveCurrentAccount();
         }
         ImGui.SameLine();
-        HelpMarker("RSR operating mode when RSR is the selected rotation plugin.\nAuto: Full auto with standard hostile targeting.\nManual: Manual targeting mode.\nnone: Don't let FrenRider change the current rotation state.\nAuto (Support): Uses RSR's plugin-managed support mode and support-oriented targeting settings.\nPreviously Engaged Targets: Auto with RSR hostile targeting forced to previously engaged targets.");
-        DrawDefaultSettingSyncButton("RSR Rotation Type");
+        HelpMarker("RSR operating mode when RSR is the selected rotation plugin.\nAuto: Full auto.\nManual: Manual targeting mode.\nNone: Don't let FrenRider change the current rotation state.\nSupport: Uses RSR's plugin-managed support mode.");
+        DrawDefaultSettingSyncButton("RSR Operating Mode");
+
+        var rsrAggroType = config.RsrAggroType;
+        ImGui.SetNextItemWidth(200);
+        if (ImGui.Combo("RSR Aggro Type", ref rsrAggroType, RsrAggroTypes, RsrAggroTypes.Length))
+        {
+            config.RsrAggroType = rsrAggroType;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Hostile target selection sent to RotationSolver Reborn through its typed settings IPC.");
+        DrawDefaultSettingSyncButton("RSR Aggro Type");
 
         // BossMod AI (dropdown)
         var bossModAI = config.BossModAI;
@@ -1295,6 +1314,9 @@ public class ConfigWindow : Window, IDisposable
         UiHelpers.SectionHeader("Repair");
         DrawRepairSection(config);
 
+        UiHelpers.SectionHeader("Equipment");
+        DrawEquipmentSection(config);
+
         UiHelpers.SectionHeader("Desynthesis");
         DrawDesynthesisSection(config);
 
@@ -1307,6 +1329,19 @@ public class ConfigWindow : Window, IDisposable
 
         UiHelpers.SectionHeader("Debug");
         DrawDebugLoggingSection(config);
+    }
+
+    private void DrawEquipmentSection(CharacterConfig config)
+    {
+        var equipJobStone = config.EquipJobStoneForCurrentClass;
+        if (ImGui.Checkbox("Equip job stone for current class", ref equipJobStone))
+        {
+            config.EquipJobStoneForCurrentClass = equipJobStone;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("While Fren Rider is enabled, equip the first matching armoury-chest soul crystal when the current character is on a level 30+ base class and equipment can be changed safely. The current gearset is updated after the equip is confirmed.");
+        DrawDefaultSettingSyncButton("Equip job stone for current class");
     }
 
     private void DrawUiAboutTab()
@@ -2301,6 +2336,8 @@ public class ConfigWindow : Window, IDisposable
         ImGui.BulletText("/fr - Open main window (alias)");
         ImGui.BulletText("/fr on - Enable Fren Rider");
         ImGui.BulletText("/fr off - Disable Fren Rider");
+        ImGui.BulletText("/fr settings or /fr s - Toggle settings");
+        ImGui.BulletText("/fr mini or /fr m - Toggle MAGIA mini window");
         ImGui.BulletText("/fr debug - Toggle debug controls");
         ImGui.Spacing();
         ImGui.Separator();

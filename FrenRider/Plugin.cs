@@ -80,6 +80,7 @@ public sealed class Plugin : IDalamudPlugin
     public readonly WindowSystem WindowSystem = new("FrenRider");
     private ConfigWindow ConfigWindow { get; init; }
     private MainWindow MainWindow { get; init; }
+    private MagiaMiniWindow MagiaMiniWindow { get; init; }
     private AutoDutyWarningWindow AutoDutyWarningWindow { get; init; }
 
     private IDtrBarEntry? dtrEntry;
@@ -175,9 +176,11 @@ public sealed class Plugin : IDalamudPlugin
 
         ConfigWindow = new ConfigWindow(this);
         MainWindow = new MainWindow(this);
+        MagiaMiniWindow = new MagiaMiniWindow();
 
         WindowSystem.AddWindow(ConfigWindow);
         WindowSystem.AddWindow(MainWindow);
+        WindowSystem.AddWindow(MagiaMiniWindow);
         WindowSystem.AddWindow(AutoDutyWarningWindow);
 
         CommandManager.AddHandler(CommandName, new CommandInfo(OnCommand)
@@ -187,7 +190,7 @@ public sealed class Plugin : IDalamudPlugin
 
         CommandManager.AddHandler(AliasCommandName, new CommandInfo(OnAliasCommand)
         {
-            HelpMessage = "Fren Rider: /fr [on|off|debug] to toggle, or /fr to open UI."
+            HelpMessage = "Fren Rider: /fr [on|off|settings|s|mini|m|debug], or /fr to open the main window."
         });
 
         PluginInterface.UiBuilder.Draw += WindowSystem.Draw;
@@ -231,6 +234,7 @@ public sealed class Plugin : IDalamudPlugin
 
         ConfigWindow.Dispose();
         MainWindow.Dispose();
+        MagiaMiniWindow.Dispose();
 
         AutorotIpcService.Dispose();
         QuestionableIpcService.Dispose();
@@ -346,6 +350,14 @@ public sealed class Plugin : IDalamudPlugin
         {
             ConfigManager.SetFrenRiderEnabled(arg == "on");
             Log.Information($"Fren Rider {(arg == "on" ? "enabled" : "disabled")} via /fr {arg}");
+        }
+        else if (arg == "settings" || arg == "s")
+        {
+            ConfigWindow.Toggle();
+        }
+        else if (arg == "mini" || arg == "m")
+        {
+            MagiaMiniWindow.Toggle();
         }
         else if (arg == "debug")
         {

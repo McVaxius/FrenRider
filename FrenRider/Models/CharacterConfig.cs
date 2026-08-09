@@ -22,6 +22,8 @@ public enum DaedalusTargetMode
 public class CharacterConfig
 {
     public const string DefaultCustomIdleCommand = "/smile motion";
+    internal const int LegacyPreviouslyEngagedRotationType = 4;
+    internal const int PreviouslyEngagedRsrAggroType = 1;
 
     private int respawnOutsideDutiesDelaySeconds = 60;
     private int respawnInsideDutiesDelaySeconds = 60;
@@ -99,7 +101,8 @@ public class CharacterConfig
     public int PositionalInCombat { get; set; } = 3; // 0=Front, 1=Rear, 2=Any, 3=Auto
     public float MaxAIDistance { get; set; } = 424242f;
     public float LimitPct { get; set; } = -1f;
-    public int RotationType { get; set; } = 0; // 0=Auto, 1=Manual, 2=none, 3=Auto (Support), 4=Previously Engaged Targets
+    public int RotationType { get; set; } = 0; // 0=Auto, 1=Manual, 2=None, 3=Support
+    public int RsrAggroType { get; set; } = 0; // Matches RSR TargetHostileType ordering
     public bool BmrReduceActivationRangeForOutdoorAreas { get; set; } = false;
     public bool BmrDisableHuntModules { get; set; } = false;
     public bool BmrDisableQueenLunatender { get; set; } = false;
@@ -129,6 +132,7 @@ public class CharacterConfig
 
     // --- Automation / Misc ---
     public bool EnableAutoDiscard { get; set; } = false;
+    public bool EquipJobStoneForCurrentClass { get; set; } = false;
     public int FeedMeItemId { get; set; } = 0;
     public string FeedMeItem { get; set; } = "Boiled Egg";
     public bool FeedMeUseHighQuality { get; set; } = false;
@@ -213,6 +217,7 @@ public class CharacterConfig
             MaxAIDistance = MaxAIDistance,
             LimitPct = LimitPct,
             RotationType = RotationType,
+            RsrAggroType = RsrAggroType,
             BmrReduceActivationRangeForOutdoorAreas = BmrReduceActivationRangeForOutdoorAreas,
             BmrDisableHuntModules = BmrDisableHuntModules,
             BmrDisableQueenLunatender = BmrDisableQueenLunatender,
@@ -240,6 +245,7 @@ public class CharacterConfig
             AdsPresetSelection = AdsPresetSelection,
             UseAdsLeaveAfterAdsDuty = UseAdsLeaveAfterAdsDuty,
             EnableAutoDiscard = EnableAutoDiscard,
+            EquipJobStoneForCurrentClass = EquipJobStoneForCurrentClass,
             FeedMeItemId = FeedMeItemId,
             FeedMeItem = FeedMeItem,
             FeedMeUseHighQuality = FeedMeUseHighQuality,
@@ -260,6 +266,16 @@ public class CharacterConfig
             AutorotPushOnEnable = AutorotPushOnEnable,
             Enabled = Enabled,
         };
+    }
+
+    internal bool MigrateLegacyRsrOperatingMode()
+    {
+        if (RotationType != LegacyPreviouslyEngagedRotationType)
+            return false;
+
+        RotationType = 0;
+        RsrAggroType = PreviouslyEngagedRsrAggroType;
+        return true;
     }
 
     public bool EnsureCustomIdleListSeeded()

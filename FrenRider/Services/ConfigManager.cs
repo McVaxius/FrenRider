@@ -91,7 +91,8 @@ public class ConfigManager
                 Setting("Positional", (source, target) => target.PositionalInCombat = source.PositionalInCombat),
                 Setting("Max AI Distance", (source, target) => target.MaxAIDistance = source.MaxAIDistance),
                 Setting("LB Threshold %", (source, target) => target.LimitPct = source.LimitPct),
-                Setting("RSR Rotation Type", (source, target) => target.RotationType = source.RotationType),
+                Setting("RSR Operating Mode", (source, target) => target.RotationType = source.RotationType),
+                Setting("RSR Aggro Type", (source, target) => target.RsrAggroType = source.RsrAggroType),
                 Setting("BMR reduce activation range for outdoor areas", (source, target) => target.BmrReduceActivationRangeForOutdoorAreas = source.BmrReduceActivationRangeForOutdoorAreas),
                 Setting("BMR Disable Hunt Modules", (source, target) => target.BmrDisableHuntModules = source.BmrDisableHuntModules),
                 Setting("BMR Disable Queen Lunatender", (source, target) => target.BmrDisableQueenLunatender = source.BmrDisableQueenLunatender),
@@ -143,6 +144,7 @@ public class ConfigManager
                 Setting("Custom Idle List", (source, target) => target.CustomIdleList = CharacterConfig.CloneCustomIdleList(source.CustomIdleList)),
                 Setting("Idle Ticks Before Action", (source, target) => target.IdleTicksBeforeAction = source.IdleTicksBeforeAction),
                 Setting("Auto Discard", (source, target) => target.EnableAutoDiscard = source.EnableAutoDiscard),
+                Setting("Equip job stone for current class", (source, target) => target.EquipJobStoneForCurrentClass = source.EquipJobStoneForCurrentClass),
                 Setting("Push Presets On Enable", (source, target) => target.AutorotPushOnEnable = source.AutorotPushOnEnable),
             }),
     };
@@ -817,6 +819,11 @@ public class ConfigManager
                     if (account != null && !string.IsNullOrEmpty(account.AccountId))
                     {
                         accounts[account.AccountId] = account;
+                        if (MigrateLegacyRsrSettings(account))
+                        {
+                            SaveAccount(account.AccountId);
+                            log.Information($"Migrated legacy RSR settings for account {account.AccountId}");
+                        }
                         log.Information($"Loaded account {account.AccountId} ({account.AccountAlias}) with {account.Characters.Count} characters");
                     }
                 }
@@ -830,6 +837,18 @@ public class ConfigManager
         {
             log.Error($"Failed to enumerate config files: {ex.Message}");
         }
+    }
+
+    internal static bool MigrateLegacyRsrSettings(AccountConfig account)
+    {
+        var migrated = account.DefaultConfig?.MigrateLegacyRsrOperatingMode() == true;
+        if (account.Characters == null)
+            return migrated;
+
+        foreach (var config in account.Characters.Values)
+            migrated |= config?.MigrateLegacyRsrOperatingMode() == true;
+
+        return migrated;
     }
 
     private bool SaveAccount(string accountId)
