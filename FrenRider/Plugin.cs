@@ -176,7 +176,7 @@ public sealed class Plugin : IDalamudPlugin
 
         ConfigWindow = new ConfigWindow(this);
         MainWindow = new MainWindow(this);
-        MagiaMiniWindow = new MagiaMiniWindow();
+        MagiaMiniWindow = new MagiaMiniWindow(this);
 
         WindowSystem.AddWindow(ConfigWindow);
         WindowSystem.AddWindow(MainWindow);
