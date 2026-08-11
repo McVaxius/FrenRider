@@ -12,6 +12,8 @@ public class AutomationService : IDisposable
     private const long RepairStartGraceMs = 5000;
     private const long RepairTimeoutMs = 180000;
     private const long RepairBlockedLogMs = 15000;
+    private const long RepairDismountRetryMs = 2000;
+    private const long RepairDismountTimeoutMs = 15000;
     private const long AutoDesynthRetryMs = 30000;
     private const long AutoDesynthStartGraceMs = 5000;
     private const long AutoDesynthTimeoutMs = 180000;
@@ -19,6 +21,7 @@ public class AutomationService : IDisposable
     private enum RepairFlowState
     {
         Idle,
+        WaitingForDismount,
         WaitingForAdsStart,
         WaitingForAdsCompletion,
         WaitingForDurability,
@@ -52,6 +55,8 @@ public class AutomationService : IDisposable
     private long lastRepairCheckMs;
     private long lastRepairAttemptMs;
     private long lastRepairBlockedLogMs;
+    private long repairDismountStartedMs;
+    private long lastRepairDismountAttemptMs;
     private string lastDiscardDeferReason = "";
     private string lastRepairBlockedReason = "";
     private RepairFlowState repairFlowState;
@@ -869,10 +874,23 @@ public class AutomationService : IDisposable
             return;
         }
 
+        if (repairFlowState == RepairFlowState.WaitingForDismount)
+        {
+            ContinueRepairAfterDismount(now, repairMode, threshold);
+            return;
+        }
+
         if (repairFlowState == RepairFlowState.Idle)
         {
             if (!CanStartRepairNow(repairMode, out var deferReason))
             {
+                if (string.Equals(deferReason, "mounted", StringComparison.OrdinalIgnoreCase)
+                    && CanAutoDismountForRepair())
+                {
+                    BeginRepairDismount(now, repairMode, threshold);
+                    return;
+                }
+
                 RepairStatus = $"{GetRepairModeLabel(repairMode)} repair needed below {threshold}%; waiting while {deferReason}.";
                 LogRepairBlocked(now, deferReason);
                 return;
@@ -883,6 +901,92 @@ public class AutomationService : IDisposable
         }
 
         TrackActiveRepair(now, repairMode, threshold, adsStatus);
+    }
+
+    private void BeginRepairDismount(long now, string repairMode, int threshold)
+    {
+        repairFlowState = RepairFlowState.WaitingForDismount;
+        repairDismountStartedMs = now;
+        lastRepairDismountAttemptMs = 0;
+        adsRepairUtilityObserved = false;
+        repairRequestAttempts = 0;
+        RepairStatus = $"{GetRepairModeLabel(repairMode)} repair needed below {threshold}%; dismounting first.";
+        Plugin.Log.Information($"[FrenRider][Repair] {RepairStatus}");
+        TryDismountForRepair(now);
+    }
+
+    private void ContinueRepairAfterDismount(long now, string repairMode, int threshold)
+    {
+        if (now - repairDismountStartedMs > RepairDismountTimeoutMs)
+        {
+            RepairStatus = $"{GetRepairModeLabel(repairMode)} repair still needed below {threshold}%; automatic dismount timed out.";
+            Plugin.Log.Warning($"[FrenRider][Repair] {RepairStatus}");
+            ResetRepairFlow(preserveStatus: true);
+            return;
+        }
+
+        if (CanStartRepairNow(repairMode, out var deferReason))
+        {
+            IssueRepairRequest(now, repairMode, threshold, "after automatic dismount");
+            return;
+        }
+
+        if (string.Equals(deferReason, "mounted", StringComparison.OrdinalIgnoreCase))
+        {
+            if (CanAutoDismountForRepair())
+                TryDismountForRepair(now);
+
+            RepairStatus = $"{GetRepairModeLabel(repairMode)} repair needed below {threshold}%; waiting to dismount.";
+            return;
+        }
+
+        if (string.Equals(deferReason, "mounting", StringComparison.OrdinalIgnoreCase))
+        {
+            RepairStatus = $"{GetRepairModeLabel(repairMode)} repair needed below {threshold}%; waiting for mount transition.";
+            return;
+        }
+
+        RepairStatus = $"{GetRepairModeLabel(repairMode)} repair needed below {threshold}%; waiting while {deferReason}.";
+        Plugin.Log.Information($"[FrenRider][Repair] Dismount preparation released because repair is now blocked by {deferReason}.");
+        ResetRepairFlow(preserveStatus: true);
+    }
+
+    private void TryDismountForRepair(long now)
+    {
+        if (now - lastRepairDismountAttemptMs < RepairDismountRetryMs)
+            return;
+
+        lastRepairDismountAttemptMs = now;
+        if (SendCommand("/mount"))
+        {
+            Plugin.Log.Information("[FrenRider][Repair] Sent /mount to leave self mount before ADS repair.");
+        }
+        else
+        {
+            Plugin.Log.Warning("[FrenRider][Repair] Failed to send /mount while preparing ADS repair.");
+        }
+    }
+
+    private static bool CanAutoDismountForRepair()
+    {
+        if (Plugin.Condition[ConditionFlag.InFlight]
+            || Plugin.Condition[ConditionFlag.Diving]
+            || Plugin.Condition[ConditionFlag.Mounting71])
+        {
+            return false;
+        }
+
+        if (Plugin.Condition[ConditionFlag.OccupiedInQuestEvent]
+            || Plugin.Condition[ConditionFlag.OccupiedInCutSceneEvent]
+            || Plugin.Condition[ConditionFlag.Occupied33]
+            || Plugin.Condition[ConditionFlag.Occupied39]
+            || Plugin.Condition[ConditionFlag.WatchingCutscene])
+        {
+            return false;
+        }
+
+        return !GameHelpers.IsAddonVisible("ContentsFinderConfirm")
+               && !GameHelpers.IsAddonVisible("SelectYesno");
     }
 
     private void TrackActiveRepair(long now, string repairMode, int threshold, AdsUtilityStatusSnapshot adsStatus)
@@ -943,6 +1047,8 @@ public class AutomationService : IDisposable
         repairRequestAttempts++;
         lastRepairAttemptMs = now;
         repairFlowState = RepairFlowState.WaitingForAdsStart;
+        repairDismountStartedMs = 0;
+        lastRepairDismountAttemptMs = 0;
         adsRepairUtilityObserved = false;
         var modeLabel = GetRepairModeLabel(repairMode);
 
@@ -987,6 +1093,8 @@ public class AutomationService : IDisposable
     {
         repairFlowState = RepairFlowState.Idle;
         lastRepairAttemptMs = 0;
+        repairDismountStartedMs = 0;
+        lastRepairDismountAttemptMs = 0;
         lastRepairBlockedLogMs = 0;
         lastRepairBlockedReason = "";
         adsRepairUtilityObserved = false;
