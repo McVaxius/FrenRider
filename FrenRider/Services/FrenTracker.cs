@@ -137,6 +137,8 @@ public class FrenTracker
                         var chara = (Character*)obj.Address;
                         info.IsMounted = chara->IsMounted();
                         info.MountId = chara->Mount.MountId;
+                        info.IsFlying = info.IsMounted
+                            && chara->MoveController.MovementState == MovementStateOptions.Flying;
                     }
                 }
                 catch { /* Mount data inaccessible */ }
@@ -174,16 +176,6 @@ public class FrenTracker
         {
             if (member.Name.Contains(searchName, StringComparison.OrdinalIgnoreCase))
             {
-                // Check if fren is flying by looking at their GameObject
-                var frenFlying = false;
-                if (objectSnapshotByName.TryGetValue(member.Name, out var obj))
-                {
-                    // Check if the object has InFlight condition
-                    // Note: We can't directly check other player's conditions, so we check position height
-                    // If mounted and Y position is significantly higher than ground, likely flying
-                    frenFlying = member.IsMounted && obj.Position.Y > localPlayer.Position.Y + 2.0f;
-                }
-                
                 Fren = new FrenState
                 {
                     Name = member.Name,
@@ -198,7 +190,7 @@ public class FrenTracker
                     InParty = true,
                     IsMounted = member.IsMounted,
                     MountId = member.MountId,
-                    IsFlying = frenFlying,
+                    IsFlying = member.IsFlying,
                 };
                 return;
             }
@@ -313,5 +305,6 @@ public class FrenTracker
         public bool IsVisible { get; set; }
         public bool IsMounted { get; set; }
         public ushort MountId { get; set; }
+        public bool IsFlying { get; set; }
     }
 }

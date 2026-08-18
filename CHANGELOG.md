@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Non-solo duties now receive one FrenRider combat bootstrap per enabled duty session, including when ADS already owns navigation and progression
 
 ### Fixed
+- Followed mounted party members now use their movement state for flight detection instead of their height relative to the local player
 - Configured BMR/VBM AI state is now applied after BossMod preset setup so zone loading cannot override the selected on/off state
 - Whitelisted party invite acceptance now closes the accepted invite dialog correctly
 - Automatic and manual BossMod preset application now targets only the selected provider, preventing non-VBM passive presets from being sent to VBM and interrupting Questionable progress
