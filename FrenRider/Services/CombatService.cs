@@ -928,7 +928,6 @@ public class CombatService
         if (ShouldSuppressFrenRiderCombatCommands)
             return;
 
-        ApplyConfiguredBossModAiState(config, pluginName, reason);
         ApplyBossModDefaultSettingsOnce(pluginName, selectedPreset, reason);
         ApplyBossModMovementUnlockOnce(pluginName, selectedPreset, reason);
         ApplyBossModPreset(pluginName, selectedPreset, reason);
@@ -955,6 +954,8 @@ public class CombatService
                 SetWrathAuto(false, $"{reason} because selected plugin is {pluginName}");
                 break;
         }
+
+        ApplyConfiguredBossModAiState(config, pluginName, reason);
     }
 
     private void ApplyBossModDefaultSettingsOnce(string pluginName, string selectedPreset, string reason)

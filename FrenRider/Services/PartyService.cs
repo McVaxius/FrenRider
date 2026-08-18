@@ -204,15 +204,12 @@ public class PartyService
             if (unitBase == null || !unitBase->IsVisible)
                 return false;
 
-            var atkValues = stackalloc AtkValue[2];
+            var atkValues = stackalloc AtkValue[1];
             atkValues[0] = default;
-            atkValues[1] = default;
             atkValues[0].Type = AtkValueType.Int;
             atkValues[0].Int = 0;
-            atkValues[1].Type = AtkValueType.Int;
-            atkValues[1].Int = 0;
 
-            unitBase->FireCallback(2, atkValues);
+            unitBase->FireCallback(1, atkValues, true);
             log.Information($"Invite accept attempt #{attempt} for {inviterName}: SelectYesno direct Yes callback fired");
             return true;
         }
