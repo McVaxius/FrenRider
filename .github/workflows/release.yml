@@ -25,7 +25,7 @@ jobs:
       - name: Install Dalamud runtime
         uses: Blooym/setup-dalamud@v1
         with:
-          branch: api15
+          branch: release
 
       - name: Restore
         run: dotnet restore .\FrenRider.sln
