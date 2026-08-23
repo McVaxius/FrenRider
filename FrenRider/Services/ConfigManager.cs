@@ -11,7 +11,6 @@ namespace FrenRider.Services;
 
 public class ConfigManager
 {
-    private readonly IDalamudPluginInterface pluginInterface;
     private readonly IPluginLog log;
     private readonly string configDir;
 
@@ -151,13 +150,69 @@ public class ConfigManager
 
     public ConfigManager(IDalamudPluginInterface pluginInterface, IPluginLog log)
     {
-        this.pluginInterface = pluginInterface;
         this.log = log;
-        configDir = Path.Combine(pluginInterface.GetPluginConfigDirectory());
+        configDir = pluginInterface.GetPluginConfigDirectory();
         if (!Directory.Exists(configDir))
             Directory.CreateDirectory(configDir);
 
         LoadAllAccounts();
+    }
+
+    internal bool TryReadLauncherAccountId(out string accountId)
+    {
+        if (TryReadLauncherAccountId(configDir, out accountId, out var error))
+            return true;
+
+        log.Warning(error);
+        return false;
+    }
+
+    internal static bool TryReadLauncherAccountId(
+        string configDirectory,
+        out string accountId,
+        out string error)
+    {
+        accountId = "";
+        error = "";
+
+        var pluginConfigsDirectory = Directory.GetParent(configDirectory);
+        var launcherRoot = pluginConfigsDirectory?.Parent;
+        if (pluginConfigsDirectory == null
+            || !pluginConfigsDirectory.Name.Equals("pluginConfigs", StringComparison.OrdinalIgnoreCase)
+            || launcherRoot == null)
+        {
+            error = $"Cannot resolve XIVLauncher root from plugin config directory {configDirectory}";
+            return false;
+        }
+
+        var launcherConfigPath = Path.Combine(launcherRoot.FullName, "launcherConfigV3.json");
+        try
+        {
+            using var document = JsonDocument.Parse(
+                File.ReadAllText(launcherConfigPath),
+                new JsonDocumentOptions
+                {
+                    AllowTrailingCommas = true,
+                    CommentHandling = JsonCommentHandling.Skip,
+                });
+
+            if (document.RootElement.ValueKind != JsonValueKind.Object
+                || !document.RootElement.TryGetProperty("CurrentAccountId", out var accountIdElement)
+                || accountIdElement.ValueKind != JsonValueKind.String
+                || string.IsNullOrWhiteSpace(accountIdElement.GetString()))
+            {
+                error = $"XIVLauncher config {launcherConfigPath} has no usable CurrentAccountId";
+                return false;
+            }
+
+            accountId = accountIdElement.GetString()!;
+            return true;
+        }
+        catch (Exception ex)
+        {
+            error = $"Failed to read XIVLauncher account ID from {launcherConfigPath}: {ex.Message}";
+            return false;
+        }
     }
 
     public static bool CanSyncDefaultTab(string tabName)
@@ -327,66 +382,179 @@ public class ConfigManager
         return true;
     }
 
-    public void EnsureAccountSelected(ulong contentId, string? aliasHint = null)
+    public void EnsureAccountSelected(
+        string? launcherAccountId,
+        string? currentCharacterKey,
+        string? aliasHint = null)
     {
         ActiveCharacterKey = "";
 
-        if (contentId == 0)
+        if (string.IsNullOrWhiteSpace(launcherAccountId))
         {
             CurrentAccountId = "";
-            log.Warning("Cannot select an active account with content ID 0");
+            log.Warning("Cannot select an active account without XIVLauncher CurrentAccountId");
             return;
         }
 
-        var accountId = contentId.ToString("X");
-        log.Information($"EnsureAccountSelected: ContentId={contentId:X16}, AccountId={accountId}");
-        if (!accounts.TryGetValue(accountId, out var account))
+        if (string.IsNullOrWhiteSpace(currentCharacterKey))
         {
-            // Migration: if only one legacy account exists, move it to the new ID
-            if (accounts.Count == 1)
-            {
-                var kvp = accounts.First();
-                var oldId = kvp.Key;
-                account = kvp.Value;
-                accounts.Remove(oldId);
-                account.AccountId = accountId;
-                accounts[accountId] = account;
-
-                try
-                {
-                    var oldFile = Path.Combine(configDir, $"{oldId}_FrenRider.json");
-                    if (File.Exists(oldFile))
-                        File.Delete(oldFile);
-                }
-                catch (Exception ex)
-                {
-                    log.Warning($"Failed to delete legacy config file for {oldId}: {ex.Message}");
-                }
-
-                SaveAccount(accountId);
-                log.Information($"Migrated legacy account {oldId} -> {accountId}");
-            }
-            else
-            {
-                account = new AccountConfig
-                {
-                    AccountId = accountId,
-                    AccountAlias = !string.IsNullOrWhiteSpace(aliasHint)
-                        ? aliasHint
-                        : $"Account {accounts.Count + 1}",
-                };
-                accounts[accountId] = account;
-                SaveAccount(accountId);
-                log.Information($"Created account {accountId} ({account.AccountAlias})");
-            }
+            CurrentAccountId = "";
+            log.Warning("Cannot select an active account without the current character key");
+            return;
         }
-        else if (!string.IsNullOrWhiteSpace(aliasHint) && string.IsNullOrWhiteSpace(account.AccountAlias))
+
+        var accountId = launcherAccountId;
+        var characterKey = currentCharacterKey;
+        log.Information($"EnsureAccountSelected: LauncherAccountId={accountId}, Character={characterKey}");
+        if (!TrySelectLauncherAccount(
+                accounts,
+                accountId,
+                characterKey,
+                aliasHint,
+                SaveAccount,
+                DeleteReplacedLegacyAccount,
+                out _,
+                out var failure))
         {
-            account.AccountAlias = aliasHint;
-            SaveAccount(accountId);
+            CurrentAccountId = "";
+            log.Warning(failure);
+            return;
         }
 
         CurrentAccountId = accountId;
+    }
+
+    internal static bool TrySelectLauncherAccount(
+        IDictionary<string, AccountConfig> accountConfigs,
+        string launcherAccountId,
+        string characterKey,
+        string? aliasHint,
+        Func<string, bool> saveAccount,
+        Action<string> deleteReplacedLegacyAccount,
+        out AccountConfig? selectedAccount,
+        out string failure)
+    {
+        selectedAccount = null;
+        failure = "";
+
+        var matchingLegacyAccounts = accountConfigs
+            .Where(kvp => !string.Equals(kvp.Key, launcherAccountId, StringComparison.Ordinal)
+                          && kvp.Value.Characters != null
+                          && kvp.Value.Characters.TryGetValue(characterKey, out var config)
+                          && config != null)
+            .ToList();
+
+        if (accountConfigs.TryGetValue(launcherAccountId, out var existingAccount))
+        {
+            if (existingAccount.Characters == null)
+            {
+                failure = $"Launcher account {launcherAccountId} has an invalid character collection";
+                return false;
+            }
+
+            var copiedCharacter = false;
+            var needsCharacterMigration = !existingAccount.Characters.TryGetValue(characterKey, out var existingCharacter)
+                                          || existingCharacter == null;
+            if (needsCharacterMigration && matchingLegacyAccounts.Count > 1)
+            {
+                failure = $"Cannot safely migrate {characterKey}: multiple legacy account files contain that character";
+                return false;
+            }
+
+            if (needsCharacterMigration && matchingLegacyAccounts.Count == 1)
+            {
+                existingAccount.Characters[characterKey] = matchingLegacyAccounts[0].Value.Characters[characterKey].Clone();
+                copiedCharacter = true;
+            }
+
+            var previousAlias = existingAccount.AccountAlias;
+            var changedAlias = !string.IsNullOrWhiteSpace(aliasHint)
+                               && string.IsNullOrWhiteSpace(existingAccount.AccountAlias);
+            if (changedAlias)
+                existingAccount.AccountAlias = aliasHint!;
+
+            if ((copiedCharacter || changedAlias) && !saveAccount(launcherAccountId))
+            {
+                if (copiedCharacter)
+                    existingAccount.Characters.Remove(characterKey);
+                if (changedAlias)
+                    existingAccount.AccountAlias = previousAlias;
+                failure = $"Failed to save launcher account {launcherAccountId}";
+                return false;
+            }
+
+            selectedAccount = existingAccount;
+            return true;
+        }
+
+        if (matchingLegacyAccounts.Count > 1)
+        {
+            failure = $"Cannot safely migrate {characterKey}: multiple legacy account files contain that character";
+            return false;
+        }
+
+        if (accountConfigs.Count == 1 && matchingLegacyAccounts.Count == 1)
+        {
+            var legacyAccount = matchingLegacyAccounts[0];
+            var account = legacyAccount.Value;
+            var storedAccountId = account.AccountId;
+            var storedAlias = account.AccountAlias;
+
+            account.AccountId = launcherAccountId;
+            if (!string.IsNullOrWhiteSpace(aliasHint) && string.IsNullOrWhiteSpace(account.AccountAlias))
+                account.AccountAlias = aliasHint!;
+            accountConfigs[launcherAccountId] = account;
+
+            if (!saveAccount(launcherAccountId))
+            {
+                accountConfigs.Remove(launcherAccountId);
+                account.AccountId = storedAccountId;
+                account.AccountAlias = storedAlias;
+                failure = $"Failed to save launcher account {launcherAccountId}; legacy account {legacyAccount.Key} was left unchanged";
+                return false;
+            }
+
+            accountConfigs.Remove(legacyAccount.Key);
+            deleteReplacedLegacyAccount(legacyAccount.Key);
+            selectedAccount = account;
+            return true;
+        }
+
+        var newAccount = new AccountConfig
+        {
+            AccountId = launcherAccountId,
+            AccountAlias = !string.IsNullOrWhiteSpace(aliasHint)
+                ? aliasHint
+                : $"Account {accountConfigs.Count + 1}",
+        };
+
+        if (matchingLegacyAccounts.Count == 1)
+            newAccount.Characters[characterKey] = matchingLegacyAccounts[0].Value.Characters[characterKey].Clone();
+
+        accountConfigs[launcherAccountId] = newAccount;
+        if (!saveAccount(launcherAccountId))
+        {
+            accountConfigs.Remove(launcherAccountId);
+            failure = $"Failed to save launcher account {launcherAccountId}";
+            return false;
+        }
+
+        selectedAccount = newAccount;
+        return true;
+    }
+
+    private void DeleteReplacedLegacyAccount(string accountId)
+    {
+        try
+        {
+            var file = Path.Combine(configDir, $"{accountId}_FrenRider.json");
+            if (File.Exists(file))
+                File.Delete(file);
+        }
+        catch (Exception ex)
+        {
+            log.Warning($"Failed to delete replaced legacy config file for {accountId}: {ex.Message}");
+        }
     }
 
     public void EnsureCharacterExists(string characterName, string worldName)
@@ -398,7 +566,7 @@ public class ConfigManager
         if (string.IsNullOrEmpty(CurrentAccountId))
         {
             ActiveCharacterKey = "";
-            log.Warning($"Cannot activate character {charKey} without a content-ID-selected account");
+            log.Warning($"Cannot activate character {charKey} without a launcher-account-selected config");
             return;
         }
 
@@ -416,12 +584,20 @@ public class ConfigManager
             return;
         }
 
-        ActiveCharacterKey = charKey;
         if (added)
         {
-            SaveAccount(CurrentAccountId);
+            if (!SaveAccount(CurrentAccountId))
+            {
+                accountForChar.Characters.Remove(charKey);
+                ActiveCharacterKey = "";
+                log.Error($"Failed to persist character {charKey} in account {CurrentAccountId}");
+                return;
+            }
+
             log.Information($"Added character {charKey} to account {CurrentAccountId}");
         }
+
+        ActiveCharacterKey = charKey;
     }
 
     internal static bool TryEnsureCharacterExists(AccountConfig? account, string? charKey, out bool added)
@@ -454,15 +630,8 @@ public class ConfigManager
 
     public string CreateNewAccount(string alias)
     {
-        var newId = Guid.NewGuid().ToString("N")[..8];
-        var newAccount = new AccountConfig
-        {
-            AccountId = newId,
-            AccountAlias = alias,
-        };
-        accounts[newId] = newAccount;
-        SaveAccount(newId);
-        return newId;
+        log.Warning("Cannot create an account without XIVLauncher CurrentAccountId");
+        return "";
     }
 
     public void SaveCurrentAccount()

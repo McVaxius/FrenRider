@@ -115,9 +115,6 @@ public sealed class Plugin : IDalamudPlugin
 
         ConfigManager = new ConfigManager(PluginInterface, Log);
 
-        if (!string.IsNullOrEmpty(Configuration.LastAccountId))
-            ConfigManager.CurrentAccountId = Configuration.LastAccountId;
-
         FrenTracker = new FrenTracker(this);
         ZoneService = new ZoneService();
         FrenTeleportService = new FrenTeleportService(this, FrenTracker, ZoneService);
@@ -426,10 +423,19 @@ public sealed class Plugin : IDalamudPlugin
             var worldName = ObjectTable.LocalPlayer?.HomeWorld.Value.Name.ToString() ?? "";
             if (!string.IsNullOrEmpty(charName) && !string.IsNullOrEmpty(worldName))
             {
+                var characterKey = $"{charName}@{worldName}";
                 var contentId = PlayerState.ContentId;
-                Log.Information($"OnLogin: Character={charName}@{worldName}, ContentId={contentId:X16}");
-                ConfigManager.EnsureAccountSelected(contentId, charName);
-                ConfigManager.EnsureCharacterExists(charName, worldName);
+                Log.Information($"OnLogin: Character={characterKey}, ContentId={contentId:X16}");
+                if (ConfigManager.TryReadLauncherAccountId(out var launcherAccountId))
+                {
+                    ConfigManager.EnsureAccountSelected(launcherAccountId, characterKey, charName);
+                    ConfigManager.EnsureCharacterExists(charName, worldName);
+                }
+                else
+                {
+                    ConfigManager.EnsureAccountSelected(null, characterKey, charName);
+                }
+
                 if (!string.IsNullOrWhiteSpace(ConfigManager.ActiveCharacterKey))
                 {
                     Configuration.LastAccountId = ConfigManager.CurrentAccountId;

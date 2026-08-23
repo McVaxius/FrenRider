@@ -119,7 +119,7 @@ Per-account Fren Rider config files are stored in the plugin config directory as
 {AccountId}_FrenRider.json
 ```
 
-`AccountId` normally comes from the FFXIV content ID. Each account file contains a default config plus per-character configs keyed as `Character Name@World`.
+`AccountId` is XIVLauncher's raw `launcherConfigV3.json` `CurrentAccountId`. Each launcher account receives its own file, containing a default config plus per-character configs keyed as `Character Name@World`; the FFXIV content ID remains character/session identity only.
 
 ## Integrations
 
