@@ -192,6 +192,30 @@ public sealed class ConfigManagerDefaultSyncTests
         Assert.All(account.Characters.Values, character => Assert.False(character.Enabled));
     }
 
+    [Fact]
+    public void ProfileAcceptanceSyncsFromDefaultToLocalCharactersOnly()
+    {
+        var account = CreateAccount();
+        account.DefaultConfig.ProfileAcceptancePolicy = FrenRiderProfileAcceptancePolicy.Permanent;
+        account.RemoteProfiles.Add(new RemoteProfileRow
+        {
+            OwnerId = "owner",
+            IslandId = "island",
+            CharacterId = "opaque",
+            Config = new CharacterConfig
+            {
+                ProfileAcceptancePolicy = FrenRiderProfileAcceptancePolicy.Off,
+            },
+        });
+
+        var count = ConfigManager.ApplyDefaultSettingToAllCharacters(account, "DAD Profile Acceptance");
+
+        Assert.Equal(account.Characters.Count, count);
+        Assert.All(account.Characters.Values, character =>
+            Assert.Equal(FrenRiderProfileAcceptancePolicy.Permanent, character.ProfileAcceptancePolicy));
+        Assert.Equal(FrenRiderProfileAcceptancePolicy.Off, account.RemoteProfiles[0].Config.ProfileAcceptancePolicy);
+    }
+
     [Theory]
     [InlineData(true, false, false)]
     [InlineData(false, true, false)]

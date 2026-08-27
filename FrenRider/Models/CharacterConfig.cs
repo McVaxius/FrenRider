@@ -18,6 +18,13 @@ public enum DaedalusTargetMode
     KillAdds = 3,
 }
 
+public enum FrenRiderProfileAcceptancePolicy
+{
+    Temporary = 0,
+    Off = 1,
+    Permanent = 2,
+}
+
 [Serializable]
 public class CharacterConfig
 {
@@ -161,6 +168,8 @@ public class CharacterConfig
     public bool AutorotPushOnEnable { get; set; } = true;
 
     // --- Plugin State ---
+    public FrenRiderProfileAcceptancePolicy ProfileAcceptancePolicy { get; set; } =
+        FrenRiderProfileAcceptancePolicy.Temporary;
     public bool Enabled { get; set; } = false;
 
     public CharacterConfig Clone()
@@ -264,6 +273,7 @@ public class CharacterConfig
             ExitAfterDutySeconds = ExitAfterDutySeconds,
             LeaveWhenAllLeft = LeaveWhenAllLeft,
             AutorotPushOnEnable = AutorotPushOnEnable,
+            ProfileAcceptancePolicy = ProfileAcceptancePolicy,
             Enabled = Enabled,
         };
     }

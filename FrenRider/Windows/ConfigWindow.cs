@@ -21,6 +21,7 @@ public class ConfigWindow : Window, IDisposable
 
     private string currentTab = "Profile";
     private string editingCharacterKey = "";
+    private string editingRemoteRowId = "";
     private string observedActiveAccountId = "";
     private string observedActiveCharacterKey = "";
     private string accountAliasEdit = "";
@@ -112,14 +113,18 @@ public class ConfigWindow : Window, IDisposable
             Flags |= ImGuiWindowFlags.NoMove;
 
         // Update window title based on selected character (krangled if enabled)
+        var remote = GetEditingRemoteProfile();
         var sel = editingCharacterKey;
-        var displaySel = string.IsNullOrEmpty(sel) ? "DEFAULT CONFIG" : Disp(sel);
+        var displaySel = remote != null
+            ? $"REMOTE: {Disp(GetRemoteDisplayLabel(remote))}"
+            : string.IsNullOrEmpty(sel) ? "DEFAULT CONFIG" : Disp(sel);
         WindowName = $"Fren Rider Settings - {displaySel}###FrenRiderConfig";
     }
 
     public override void Draw()
     {
-        var config = configManager.GetCurrentCharacterConfig(editingCharacterKey);
+        var remote = GetEditingRemoteProfile();
+        var config = remote?.Config ?? configManager.GetCurrentCharacterConfig(editingCharacterKey);
 
         var panelWidth = configuration.LeftPanelWidth;
 
@@ -163,7 +168,7 @@ public class ConfigWindow : Window, IDisposable
 
         // Right panel
         ImGui.BeginChild("RightPanel", Vector2.Zero, false);
-        DrawRightPanel(config);
+        DrawRightPanel(config, remote);
         ImGui.EndChild();
     }
 
@@ -205,10 +210,11 @@ public class ConfigWindow : Window, IDisposable
         ImGui.Spacing();
 
         // DEFAULT CONFIG
-        var isDefault = string.IsNullOrEmpty(editingCharacterKey);
+        var isDefault = string.IsNullOrEmpty(editingRemoteRowId) && string.IsNullOrEmpty(editingCharacterKey);
         if (ImGui.Selectable("DEFAULT CONFIG", isDefault))
         {
             editingCharacterKey = "";
+            editingRemoteRowId = "";
             SyncFrenNameInput();
         }
 
@@ -220,11 +226,12 @@ public class ConfigWindow : Window, IDisposable
         var currentCharKey = GetCurrentCharacterKey();
         if (!string.IsNullOrEmpty(currentCharKey))
         {
-            var isCurrent = editingCharacterKey == currentCharKey;
+            var isCurrent = string.IsNullOrEmpty(editingRemoteRowId) && editingCharacterKey == currentCharKey;
             ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.4f, 1f, 0.4f, 1));
             if (ImGui.Selectable(Disp(currentCharKey), isCurrent))
             {
                 editingCharacterKey = currentCharKey;
+                editingRemoteRowId = "";
                 SyncFrenNameInput();
             }
             ImGui.PopStyleColor();
@@ -235,17 +242,40 @@ public class ConfigWindow : Window, IDisposable
         foreach (var charKey in configManager.GetSortedCharacterKeys())
         {
             if (charKey == currentCharKey) continue;
-            var isSelected = editingCharacterKey == charKey;
+            var isSelected = string.IsNullOrEmpty(editingRemoteRowId) && editingCharacterKey == charKey;
             if (ImGui.Selectable(Disp(charKey), isSelected))
             {
                 editingCharacterKey = charKey;
+                editingRemoteRowId = "";
                 SyncFrenNameInput();
             }
             ImGui.Spacing();
         }
+
+        var remoteProfiles = configManager.GetSortedRemoteProfiles().ToList();
+        if (remoteProfiles.Count == 0)
+            return;
+
+        ImGui.Separator();
+        ImGui.Spacing();
+        ImGui.TextColored(new Vector4(0.85f, 0.5f, 1f, 1f), "REMOTE PROFILES (DAD)");
+        ImGui.TextWrapped("Separate profiles for exact remote identities. They never become local character rows.");
+        ImGui.Spacing();
+        foreach (var remote in remoteProfiles)
+        {
+            var selected = string.Equals(editingRemoteRowId, remote.RowId, StringComparison.Ordinal);
+            ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.9f, 0.65f, 1f, 1f));
+            if (ImGui.Selectable($"REMOTE: {Disp(GetRemoteDisplayLabel(remote))}##Remote{remote.RowId}", selected))
+            {
+                editingRemoteRowId = remote.RowId;
+                SyncFrenNameInput();
+            }
+            ImGui.PopStyleColor();
+            ImGui.Spacing();
+        }
     }
 
-    private void DrawRightPanel(CharacterConfig config)
+    private void DrawRightPanel(CharacterConfig config, RemoteProfileRow? remote)
     {
         // --- Top bar: Krangle | Reset All (?) | Reset This (?) ---
         var isDefaultConfig = IsDefaultConfigSelected();
@@ -260,10 +290,26 @@ public class ConfigWindow : Window, IDisposable
 
         // Right-align the buttons
         var avail = ImGui.GetContentRegionAvail().X;
-        var buttonGroupWidth = isDefaultConfig ? 590f : 340f;
+        var buttonGroupWidth = remote != null ? 125f : isDefaultConfig ? 590f : 340f;
         ImGui.SameLine(ImGui.GetCursorPosX() + avail - buttonGroupWidth);
 
-        if (isDefaultConfig)
+        if (remote != null)
+        {
+            var ctrlHeld = ImGui.GetIO().KeyCtrl;
+            if (!ctrlHeld) ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 0.5f);
+            ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.7f, 0.1f, 0.1f, 1));
+            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(0.9f, 0.2f, 0.2f, 1));
+            if (ImGui.Button("DELETE REMOTE") && ctrlHeld && configManager.DeleteRemoteProfile(remote.RowId))
+            {
+                editingRemoteRowId = "";
+                SyncFrenNameInput();
+            }
+            ImGui.PopStyleColor(2);
+            if (!ctrlHeld) ImGui.PopStyleVar();
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("Hold CTRL and click to delete this remote profile.");
+        }
+        else if (isDefaultConfig)
         {
             ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.2f, 0.45f, 0.7f, 1));
             if (ImGui.Button("Everything Sync"))
@@ -293,27 +339,30 @@ public class ConfigWindow : Window, IDisposable
             ImGui.SameLine();
         }
 
-        ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.6f, 0.2f, 0.2f, 1));
-        if (ImGui.Button("Reset All"))
+        if (remote == null)
         {
-            configManager.ResetCharacterToDefault(editingCharacterKey);
-            SyncFrenNameInput();
-        }
-        ImGui.PopStyleColor();
-        HelpMarker("Reset ALL tabs for this character to default values.\nIf editing DEFAULT CONFIG, resets to plugin defaults.");
+            ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.6f, 0.2f, 0.2f, 1));
+            if (ImGui.Button("Reset All"))
+            {
+                configManager.ResetCharacterToDefault(editingCharacterKey);
+                SyncFrenNameInput();
+            }
+            ImGui.PopStyleColor();
+            HelpMarker("Reset ALL tabs for this character to default values.\nIf editing DEFAULT CONFIG, resets to plugin defaults.");
 
-        ImGui.SameLine();
-        ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.6f, 0.4f, 0.2f, 1));
-        if (ImGui.Button("Reset This"))
-        {
-            configManager.ResetCharacterTabToDefault(editingCharacterKey, currentTab);
-            SyncFrenNameInput();
+            ImGui.SameLine();
+            ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.6f, 0.4f, 0.2f, 1));
+            if (ImGui.Button("Reset This"))
+            {
+                configManager.ResetCharacterTabToDefault(editingCharacterKey, currentTab);
+                SyncFrenNameInput();
+            }
+            ImGui.PopStyleColor();
+            HelpMarker("Reset only the current tab for this character to default values.");
         }
-        ImGui.PopStyleColor();
-        HelpMarker("Reset only the current tab for this character to default values.");
 
         // DELETE button (only for non-default characters, requires CTRL)
-        if (!string.IsNullOrEmpty(editingCharacterKey))
+        if (remote == null && !string.IsNullOrEmpty(editingCharacterKey))
         {
             ImGui.SameLine();
             var io = ImGui.GetIO();
@@ -337,6 +386,9 @@ public class ConfigWindow : Window, IDisposable
         }
 
         ImGui.Spacing();
+
+        if (remote != null)
+            DrawRemoteProfileBanner(remote);
 
         if (ImGui.BeginTabBar("FrenRiderTabs"))
         {
@@ -469,6 +521,27 @@ public class ConfigWindow : Window, IDisposable
         }
 
         ImGui.Spacing();
+
+        if (GetEditingRemoteProfile() == null)
+        {
+            ImGui.Text("DAD Profile Acceptance");
+            ImGui.SameLine();
+            HelpMarker("Temporary uses an in-memory profile only for the exact DAD proposal. Off opts this local character out. Permanent replaces this local character's profile while keeping this choice.");
+            DrawDefaultSettingSyncButton("DAD Profile Acceptance");
+
+            var acceptance = (int)config.ProfileAcceptancePolicy;
+            ImGui.SetNextItemWidth(220f);
+            if (ImGui.Combo("##DadProfileAcceptance", ref acceptance, "Temporary\0Off\0Permanent\0"))
+            {
+                config.ProfileAcceptancePolicy = (FrenRiderProfileAcceptancePolicy)acceptance;
+                configManager.SaveCurrentAccount();
+            }
+
+            if (config.ProfileAcceptancePolicy == FrenRiderProfileAcceptancePolicy.Permanent)
+                ImGui.TextColored(new Vector4(1f, 0.72f, 0.2f, 1f), "Incoming DAD profiles will replace this character's saved profile.");
+
+            ImGui.Spacing();
+        }
 
         // Fly You Fools
         var flyYouFools = config.FlyYouFools;
@@ -2390,6 +2463,39 @@ public class ConfigWindow : Window, IDisposable
         ImGui.TextColored(new Vector4(0.5f, 0.5f, 0.5f, 1), "Made by McVaxius");
     }
 
+    private void DrawRemoteProfileBanner(RemoteProfileRow remote)
+    {
+        ImGui.PushStyleColor(ImGuiCol.ChildBg, new Vector4(0.18f, 0.08f, 0.24f, 0.75f));
+        if (ImGui.BeginChild("RemoteProfileIdentity", new Vector2(0, 190f), true))
+        {
+            ImGui.TextColored(new Vector4(0.95f, 0.65f, 1f, 1f), "REMOTE DAD PROFILE");
+            ImGui.TextWrapped("This row is separate from local characters and can never become the active-character profile.");
+
+            var displayLabel = remote.DisplayLabel;
+            ImGui.SetNextItemWidth(320f);
+            if (ImGui.InputText("Display label", ref displayLabel, 256))
+            {
+                remote.DisplayLabel = displayLabel;
+                configManager.SaveCurrentAccount();
+            }
+
+            ImGui.TextDisabled($"Owner: {Disp(remote.OwnerId)}");
+            ImGui.TextDisabled($"Island: {Disp(remote.IslandId)}");
+            ImGui.TextDisabled($"Opaque character: {Disp(remote.CharacterId)}");
+            ImGui.TextDisabled($"Row ID: {remote.RowId}");
+
+            var enabled = remote.Config.Enabled;
+            if (ImGui.Checkbox("Enabled when transferred", ref enabled))
+            {
+                remote.Config.Enabled = enabled;
+                configManager.SaveCurrentAccount();
+            }
+        }
+        ImGui.EndChild();
+        ImGui.PopStyleColor();
+        ImGui.Spacing();
+    }
+
     // --- Helpers ---
 
     /// <summary>Display a name, applying Krangle if enabled.</summary>
@@ -2482,9 +2588,20 @@ public class ConfigWindow : Window, IDisposable
 
     private void SyncFrenNameInput()
     {
-        var config = configManager.GetCurrentCharacterConfig(editingCharacterKey);
+        var config = GetEditingRemoteProfile()?.Config
+                     ?? configManager.GetCurrentCharacterConfig(editingCharacterKey);
         frenNameInput = config.FrenName;
     }
+
+    private RemoteProfileRow? GetEditingRemoteProfile()
+        => string.IsNullOrWhiteSpace(editingRemoteRowId)
+            ? null
+            : configManager.GetRemoteProfile(editingRemoteRowId);
+
+    private static string GetRemoteDisplayLabel(RemoteProfileRow remote)
+        => string.IsNullOrWhiteSpace(remote.DisplayLabel)
+            ? remote.CharacterId
+            : remote.DisplayLabel;
 
     private void SyncEditingSelectionWithActiveCharacter()
     {
@@ -2499,11 +2616,12 @@ public class ConfigWindow : Window, IDisposable
         observedActiveAccountId = activeAccountId;
         observedActiveCharacterKey = activeCharacterKey;
         editingCharacterKey = activeCharacterKey;
+        editingRemoteRowId = "";
         SyncFrenNameInput();
     }
 
     private bool IsDefaultConfigSelected()
-        => string.IsNullOrEmpty(editingCharacterKey);
+        => string.IsNullOrEmpty(editingRemoteRowId) && string.IsNullOrEmpty(editingCharacterKey);
 
     private string GetCurrentTabDisplayName()
         => currentTab == "Duty" ? "Duty / ADS / Exit" : currentTab;

@@ -13,6 +13,8 @@ public sealed class DadIPC : IDisposable
     public const string ConfigureAndEnableEndpoint = "FrenRider.Dad.ConfigureAndEnable";
 
     private readonly DadIpcEndpoint endpoint;
+    private readonly DadProfileTransferService profileTransferService;
+    private readonly DadProfileIpcEndpoint profileEndpoint;
 
     public DadIPC(
         IDalamudPluginInterface pluginInterface,
@@ -28,10 +30,67 @@ public sealed class DadIPC : IDisposable
             forceNextTrackerScan: frenTracker.ForceNextScan,
             logInformation: message => log.Information(message),
             logWarning: (exception, message) => log.Warning(exception, message));
+
+        profileTransferService = new DadProfileTransferService(configManager);
+        var resolveProvider = pluginInterface.GetIpcProvider<string, string>(DadProfileTransferContract.ResolveOrCreateProfileEndpoint);
+        var applyProvider = pluginInterface.GetIpcProvider<string, string>(DadProfileTransferContract.ApplyProfileEndpoint);
+        var releaseProvider = pluginInterface.GetIpcProvider<string, string>(DadProfileTransferContract.ReleaseTemporaryProfileEndpoint);
+        profileEndpoint = new DadProfileIpcEndpoint(
+            resolveProvider.RegisterFunc,
+            resolveProvider.UnregisterFunc,
+            applyProvider.RegisterFunc,
+            applyProvider.UnregisterFunc,
+            releaseProvider.RegisterFunc,
+            releaseProvider.UnregisterFunc,
+            profileTransferService.ResolveOrCreateProfile,
+            profileTransferService.ApplyProfile,
+            profileTransferService.ReleaseTemporaryProfile);
     }
 
     public void Dispose()
-        => endpoint.Dispose();
+    {
+        profileEndpoint.Dispose();
+        profileTransferService.Dispose();
+        endpoint.Dispose();
+    }
+}
+
+internal sealed class DadProfileIpcEndpoint : IDisposable
+{
+    private readonly Action unregisterResolve;
+    private readonly Action unregisterApply;
+    private readonly Action unregisterRelease;
+    private bool disposed;
+
+    internal DadProfileIpcEndpoint(
+        Action<Func<string, string>> registerResolve,
+        Action unregisterResolve,
+        Action<Func<string, string>> registerApply,
+        Action unregisterApply,
+        Action<Func<string, string>> registerRelease,
+        Action unregisterRelease,
+        Func<string, string> resolve,
+        Func<string, string> apply,
+        Func<string, string> release)
+    {
+        this.unregisterResolve = unregisterResolve;
+        this.unregisterApply = unregisterApply;
+        this.unregisterRelease = unregisterRelease;
+        registerResolve(resolve);
+        registerApply(apply);
+        registerRelease(release);
+    }
+
+    public void Dispose()
+    {
+        if (disposed)
+            return;
+
+        disposed = true;
+        unregisterRelease();
+        unregisterApply();
+        unregisterResolve();
+    }
 }
 
 internal sealed class DadIpcEndpoint : IDisposable

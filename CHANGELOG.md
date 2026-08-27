@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- DAD can now resolve and export exact remote FrenRider profiles, apply them under each local character's Off/Temporary/Permanent acceptance policy, and release proposal-owned temporary overlays through bounded JSON IPC
+- Settings now keep visually distinct editable remote DAD profile rows separate from local characters, keyed by exact owner, sender-island, and opaque-character identity
 - `/fr settings` and `/fr s` now toggle settings, while `/fr mini` and `/fr m` toggle a separate auto-sized MAGIA window with Attack, Defense, and Off command buttons
 - RSR combat configuration now separates the preserved Auto, Manual, None, and Support operating modes from all five upstream hostile-target choices, with per-character/default sync and typed IPC application
 - A disabled-by-default per-character Automation option can equip the first matching Soul Crystal armoury item for a safe level 30+ base class, confirm it, and update the valid current gearset once

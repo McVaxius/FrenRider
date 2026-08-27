@@ -102,4 +102,24 @@ public sealed class CharacterConfigTests
 
         Assert.Equal(DaedalusTargetMode.KillAdds, config.Clone().DaedalusTargetMode);
     }
+
+    [Fact]
+    public void ProfileAcceptanceDefaultsTemporaryForNewAndMissingJson()
+    {
+        Assert.Equal(
+            FrenRiderProfileAcceptancePolicy.Temporary,
+            new CharacterConfig().ProfileAcceptancePolicy);
+
+        var migrated = JsonSerializer.Deserialize<CharacterConfig>("{\"FrenName\":\"Existing\"}")!;
+        Assert.Equal(FrenRiderProfileAcceptancePolicy.Temporary, migrated.ProfileAcceptancePolicy);
+    }
+
+    [Fact]
+    public void ExistingAcceptancePolicySurvivesJsonAndClone()
+    {
+        var loaded = JsonSerializer.Deserialize<CharacterConfig>("{\"ProfileAcceptancePolicy\":2}")!;
+
+        Assert.Equal(FrenRiderProfileAcceptancePolicy.Permanent, loaded.ProfileAcceptancePolicy);
+        Assert.Equal(FrenRiderProfileAcceptancePolicy.Permanent, loaded.Clone().ProfileAcceptancePolicy);
+    }
 }

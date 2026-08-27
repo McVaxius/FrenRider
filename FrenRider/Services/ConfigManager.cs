@@ -9,12 +9,13 @@ using FrenRider.Models;
 
 namespace FrenRider.Services;
 
-public class ConfigManager
+public class ConfigManager : IDadProfileStore
 {
     private readonly IPluginLog log;
     private readonly string configDir;
 
     private readonly Dictionary<string, AccountConfig> accounts = new();
+    private readonly TemporaryProfileOverlay temporaryProfileOverlay = new();
 
     public string CurrentAccountId { get; set; } = "";
     public string ActiveCharacterKey { get; private set; } = "";
@@ -39,6 +40,7 @@ public class ConfigManager
             new[]
             {
                 Setting("Fren Name", (source, target) => target.FrenName = source.FrenName),
+                Setting("DAD Profile Acceptance", (source, target) => target.ProfileAcceptancePolicy = source.ProfileAcceptancePolicy),
                 Setting("Fly You Fools", (source, target) => target.FlyYouFools = source.FlyYouFools),
                 Setting("Try Teleport to Fren When Out of Zone", (source, target) => target.TryTeleportToFrenWhenOutOfZone = source.TryTeleportToFrenWhenOutOfZone),
                 Setting("Teleport Delay", (source, target) => target.TeleportToFrenDelaySeconds = source.TeleportToFrenDelaySeconds),
@@ -310,6 +312,10 @@ public class ConfigManager
     public CharacterConfig GetActiveConfig()
     {
         var account = GetCurrentAccount();
+        var overlay = temporaryProfileOverlay.Resolve(CurrentAccountId, ActiveCharacterKey);
+        if (overlay != null && TryResolveActiveConfig(account, CurrentAccountId, ActiveCharacterKey, out _))
+            return overlay;
+
         return ResolveActiveConfigOrDisabled(account, CurrentAccountId, ActiveCharacterKey);
     }
 
@@ -358,6 +364,12 @@ public class ConfigManager
         };
 
     private bool TryGetActiveConfig(out CharacterConfig? activeConfig)
+    {
+        activeConfig = GetActiveConfig();
+        return TryResolveActiveConfig(GetCurrentAccount(), CurrentAccountId, ActiveCharacterKey, out _);
+    }
+
+    internal bool TryGetLocalActiveConfig(out CharacterConfig? activeConfig)
         => TryResolveActiveConfig(GetCurrentAccount(), CurrentAccountId, ActiveCharacterKey, out activeConfig);
 
     internal static bool TryResolveActiveConfig(
@@ -387,6 +399,7 @@ public class ConfigManager
         string? currentCharacterKey,
         string? aliasHint = null)
     {
+        ReleaseTemporaryProfileForCharacterTransition();
         ActiveCharacterKey = "";
 
         if (string.IsNullOrWhiteSpace(launcherAccountId))
@@ -624,8 +637,138 @@ public class ConfigManager
         if (string.IsNullOrEmpty(ActiveCharacterKey))
             return;
 
+        ReleaseTemporaryProfileForCharacterTransition();
         log.Information($"Cleared active character profile: {ActiveCharacterKey}");
         ActiveCharacterKey = "";
+    }
+
+    internal bool TryInstallTemporaryProfile(DadProfileIdentity identity, CharacterConfig config)
+    {
+        if (!TryGetLocalActiveConfig(out var localConfig) || localConfig == null)
+            return false;
+
+        config.ProfileAcceptancePolicy = localConfig.ProfileAcceptancePolicy;
+        var previousEnabled = GetActiveConfig().Enabled;
+        if (!temporaryProfileOverlay.TryInstall(identity, CurrentAccountId, ActiveCharacterKey, config))
+            return false;
+
+        NotifyEffectiveEnabledChanged(previousEnabled, config.Enabled, "temporary DAD profile applied");
+        return true;
+    }
+
+    internal bool TryReleaseTemporaryProfile(DadProfileIdentity identity)
+    {
+        var previousEnabled = GetActiveConfig().Enabled;
+        if (!temporaryProfileOverlay.TryRelease(identity, out _))
+            return false;
+
+        NotifyEffectiveEnabledChanged(previousEnabled, GetActiveConfig().Enabled, "temporary DAD profile released");
+        return true;
+    }
+
+    internal bool HasTemporaryProfile => temporaryProfileOverlay.IsInstalled;
+
+    private void ReleaseTemporaryProfileForCharacterTransition()
+    {
+        if (!TryGetLocalActiveConfig(out var localConfig) || localConfig == null)
+        {
+            ReleaseTemporaryProfileOnUnload();
+            return;
+        }
+        if (!temporaryProfileOverlay.TryReleaseForActiveCharacter(
+                CurrentAccountId,
+                ActiveCharacterKey,
+                localConfig,
+                out var previousEnabled,
+                out var currentEnabled))
+            return;
+
+        NotifyEffectiveEnabledChanged(
+            previousEnabled,
+            currentEnabled,
+            "temporary DAD profile released for character transition");
+    }
+
+    internal void ReleaseTemporaryProfileOnUnload()
+    {
+        var identity = temporaryProfileOverlay.Identity;
+        if (identity != null)
+            temporaryProfileOverlay.TryRelease(identity, out _);
+    }
+
+    internal bool TryReplaceActiveProfilePermanently(CharacterConfig incoming)
+    {
+        var account = GetCurrentAccount();
+        if (temporaryProfileOverlay.IsInstalled
+            || !TryReplaceActiveProfilePermanently(
+                account,
+                ActiveCharacterKey,
+                incoming,
+                () => SaveAccount(CurrentAccountId),
+                out var previousEnabled,
+                out var currentEnabled))
+            return false;
+
+        NotifyEffectiveEnabledChanged(previousEnabled, currentEnabled, "permanent DAD profile applied");
+        return true;
+    }
+
+    internal static bool TryReplaceActiveProfilePermanently(
+        AccountConfig? account,
+        string? activeCharacterKey,
+        CharacterConfig incoming,
+        Func<bool> persist,
+        out bool previousEnabled,
+        out bool currentEnabled)
+    {
+        previousEnabled = false;
+        currentEnabled = false;
+        if (account?.Characters == null
+            || string.IsNullOrWhiteSpace(activeCharacterKey)
+            || !account.Characters.TryGetValue(activeCharacterKey, out var localConfig)
+            || localConfig == null)
+        {
+            return false;
+        }
+
+        var replacement = incoming.Clone();
+        replacement.ProfileAcceptancePolicy = localConfig.ProfileAcceptancePolicy;
+        previousEnabled = localConfig.Enabled;
+        currentEnabled = replacement.Enabled;
+        account.Characters[activeCharacterKey] = replacement;
+
+        var saved = false;
+        try
+        {
+            saved = persist();
+        }
+        catch
+        {
+            // Treat persistence exceptions as an atomic rejection and restore the local row.
+        }
+
+        if (saved)
+            return true;
+
+        account.Characters[activeCharacterKey] = localConfig;
+        previousEnabled = false;
+        currentEnabled = false;
+        return false;
+    }
+
+    private void NotifyEffectiveEnabledChanged(bool previousEnabled, bool currentEnabled, string reason)
+    {
+        if (previousEnabled == currentEnabled)
+            return;
+
+        try
+        {
+            OnFrenRiderEnabledChanged?.Invoke(currentEnabled);
+        }
+        catch (Exception ex)
+        {
+            log.Error(ex, $"[ConfigManager] FrenRider lifecycle callback failed after {reason}.");
+        }
     }
 
     public string CreateNewAccount(string alias)
@@ -959,6 +1102,133 @@ public class ConfigManager
         return account.Characters.Remove(charKey);
     }
 
+    internal bool TryResolveOrCreateRemoteProfile(
+        string ownerId,
+        string islandId,
+        string characterId,
+        string displayLabel,
+        out RemoteProfileRow? row,
+        out string code)
+    {
+        var account = GetCurrentAccount();
+        if (!TryResolveOrCreateRemoteProfile(
+                account,
+                ownerId,
+                islandId,
+                characterId,
+                displayLabel,
+                out row,
+                out var added,
+                out code))
+        {
+            return false;
+        }
+
+        if (!added)
+            return true;
+
+        if (SaveAccount(CurrentAccountId))
+            return true;
+
+        var addedRowId = row!.RowId;
+        account!.RemoteProfiles.RemoveAll(candidate =>
+            string.Equals(candidate.RowId, addedRowId, StringComparison.Ordinal));
+        row = null;
+        code = "save-failed";
+        return false;
+    }
+
+    internal static bool TryResolveOrCreateRemoteProfile(
+        AccountConfig? account,
+        string ownerId,
+        string islandId,
+        string characterId,
+        string displayLabel,
+        out RemoteProfileRow? row,
+        out bool added,
+        out string code)
+    {
+        row = null;
+        added = false;
+        code = "invalid-local-account";
+        if (account?.DefaultConfig == null || account.RemoteProfiles == null)
+            return false;
+
+        var matches = account.RemoteProfiles
+            .Where(candidate => candidate != null
+                                && string.Equals(candidate.OwnerId, ownerId, StringComparison.Ordinal)
+                                && string.Equals(candidate.IslandId, islandId, StringComparison.Ordinal)
+                                && string.Equals(candidate.CharacterId, characterId, StringComparison.Ordinal))
+            .ToList();
+
+        if (matches.Count > 1)
+        {
+            code = "duplicate-remote-profile";
+            return false;
+        }
+
+        if (matches.Count == 1)
+        {
+            row = matches[0];
+            code = "ok";
+            return true;
+        }
+
+        row = new RemoteProfileRow
+        {
+            RowId = Guid.NewGuid().ToString("N"),
+            OwnerId = ownerId,
+            IslandId = islandId,
+            CharacterId = characterId,
+            DisplayLabel = displayLabel,
+            Config = account.DefaultConfig.Clone(),
+        };
+        account.RemoteProfiles.Add(row);
+        added = true;
+        code = "ok";
+        return true;
+    }
+
+    public IEnumerable<RemoteProfileRow> GetSortedRemoteProfiles()
+    {
+        var account = GetCurrentAccount();
+        return account?.RemoteProfiles?
+                   .Where(row => row != null)
+                   .OrderBy(row => row.DisplayLabel, StringComparer.OrdinalIgnoreCase)
+                   .ThenBy(row => row.RowId, StringComparer.Ordinal)
+               ?? Enumerable.Empty<RemoteProfileRow>();
+    }
+
+    public RemoteProfileRow? GetRemoteProfile(string rowId)
+    {
+        var account = GetCurrentAccount();
+        if (account?.RemoteProfiles == null || string.IsNullOrWhiteSpace(rowId))
+            return null;
+
+        var matches = account.RemoteProfiles
+            .Where(row => row != null && string.Equals(row.RowId, rowId, StringComparison.Ordinal))
+            .Take(2)
+            .ToList();
+        return matches.Count == 1 ? matches[0] : null;
+    }
+
+    public bool DeleteRemoteProfile(string rowId)
+    {
+        var account = GetCurrentAccount();
+        var row = GetRemoteProfile(rowId);
+        if (account?.RemoteProfiles == null || row == null)
+            return false;
+
+        if (!account.RemoteProfiles.Remove(row))
+            return false;
+
+        if (SaveAccount(CurrentAccountId))
+            return true;
+
+        account.RemoteProfiles.Add(row);
+        return false;
+    }
+
     public IEnumerable<string> GetSortedCharacterKeys()
     {
         var account = GetCurrentAccount();
@@ -987,6 +1257,9 @@ public class ConfigManager
                     var account = JsonSerializer.Deserialize<AccountConfig>(json, JsonOptions);
                     if (account != null && !string.IsNullOrEmpty(account.AccountId))
                     {
+                        account.DefaultConfig ??= new CharacterConfig();
+                        account.Characters ??= new Dictionary<string, CharacterConfig>();
+                        account.RemoteProfiles ??= new List<RemoteProfileRow>();
                         accounts[account.AccountId] = account;
                         if (MigrateLegacyRsrSettings(account))
                         {
@@ -1058,4 +1331,30 @@ public class ConfigManager
 
         return serverPart.Length > 0 ? $"{charPart}@{serverPart}" : charPart;
     }
+
+    bool IDadProfileStore.TryResolveOrCreateRemoteProfile(
+        string ownerId,
+        string islandId,
+        string characterId,
+        string displayLabel,
+        out RemoteProfileRow? row,
+        out string code)
+        => TryResolveOrCreateRemoteProfile(ownerId, islandId, characterId, displayLabel, out row, out code);
+
+    bool IDadProfileStore.TryGetLocalActiveConfig(out CharacterConfig? activeConfig)
+        => TryGetLocalActiveConfig(out activeConfig);
+
+    bool IDadProfileStore.TryInstallTemporaryProfile(DadProfileIdentity identity, CharacterConfig config)
+        => TryInstallTemporaryProfile(identity, config);
+
+    bool IDadProfileStore.TryReleaseTemporaryProfile(DadProfileIdentity identity)
+        => TryReleaseTemporaryProfile(identity);
+
+    bool IDadProfileStore.HasTemporaryProfile => HasTemporaryProfile;
+
+    bool IDadProfileStore.TryReplaceActiveProfilePermanently(CharacterConfig incoming)
+        => TryReplaceActiveProfilePermanently(incoming);
+
+    void IDadProfileStore.ReleaseTemporaryProfileOnUnload()
+        => ReleaseTemporaryProfileOnUnload();
 }
