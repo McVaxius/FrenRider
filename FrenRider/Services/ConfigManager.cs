@@ -11,6 +11,9 @@ namespace FrenRider.Services;
 
 public class ConfigManager : IDadProfileStore
 {
+    private const string CollectorAccountIdPrefix = "collector-";
+    private const string CollectorAccountAlias = "Collector Account";
+
     private readonly IPluginLog log;
     private readonly string configDir;
 
@@ -187,6 +190,12 @@ public class ConfigManager : IDadProfileStore
             return false;
         }
 
+        var coreLauncherConfigPath = launcherRoot.Name.Equals(".xlcore", StringComparison.OrdinalIgnoreCase)
+            ? Path.Combine(launcherRoot.FullName, "launcher.ini")
+            : Path.Combine(launcherRoot.FullName, ".xlcore", "launcher.ini");
+        if (File.Exists(coreLauncherConfigPath))
+            return TryReadCoreLauncherAccountId(coreLauncherConfigPath, out accountId, out error);
+
         var launcherConfigPath = Path.Combine(launcherRoot.FullName, "launcherConfigV3.json");
         try
         {
@@ -213,6 +222,56 @@ public class ConfigManager : IDadProfileStore
         catch (Exception ex)
         {
             error = $"Failed to read XIVLauncher account ID from {launcherConfigPath}: {ex.Message}";
+            return false;
+        }
+    }
+
+    private static bool TryReadCoreLauncherAccountId(
+        string launcherConfigPath,
+        out string accountId,
+        out string error)
+    {
+        accountId = "";
+        error = "";
+
+        try
+        {
+            foreach (var rawLine in File.ReadLines(launcherConfigPath))
+            {
+                var line = rawLine.Trim();
+                if (line.Length == 0 || line[0] is '#' or ';' or '[')
+                    continue;
+
+                var separatorIndex = line.IndexOf('=');
+                if (separatorIndex <= 0
+                    || !line[..separatorIndex].Trim().Equals("CurrentAccountId", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                var value = line[(separatorIndex + 1)..].Trim();
+                if (value.Length >= 2
+                    && ((value[0] == '"' && value[^1] == '"')
+                        || (value[0] == '\'' && value[^1] == '\'')))
+                {
+                    value = value[1..^1].Trim();
+                }
+
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    accountId = value;
+                    return true;
+                }
+
+                break;
+            }
+
+            error = $"XIVLauncher.Core config {launcherConfigPath} has no usable CurrentAccountId";
+            return false;
+        }
+        catch (Exception ex)
+        {
+            error = $"Failed to read XIVLauncher.Core account ID from {launcherConfigPath}: {ex.Message}";
             return false;
         }
     }
@@ -402,13 +461,6 @@ public class ConfigManager : IDadProfileStore
         ReleaseTemporaryProfileForCharacterTransition();
         ActiveCharacterKey = "";
 
-        if (string.IsNullOrWhiteSpace(launcherAccountId))
-        {
-            CurrentAccountId = "";
-            log.Warning("Cannot select an active account without XIVLauncher CurrentAccountId");
-            return;
-        }
-
         if (string.IsNullOrWhiteSpace(currentCharacterKey))
         {
             CurrentAccountId = "";
@@ -416,25 +468,46 @@ public class ConfigManager : IDadProfileStore
             return;
         }
 
-        var accountId = launcherAccountId;
         var characterKey = currentCharacterKey;
-        log.Information($"EnsureAccountSelected: LauncherAccountId={accountId}, Character={characterKey}");
-        if (!TrySelectLauncherAccount(
+        if (!string.IsNullOrWhiteSpace(launcherAccountId))
+        {
+            var accountId = launcherAccountId;
+            log.Information($"EnsureAccountSelected: LauncherAccountId={accountId}, Character={characterKey}");
+            if (TrySelectLauncherAccount(
+                    accounts,
+                    accountId,
+                    characterKey,
+                    aliasHint,
+                    SaveAccount,
+                    DeleteReplacedLegacyAccount,
+                    out _,
+                    out var selectionFailure))
+            {
+                CurrentAccountId = accountId;
+                return;
+            }
+
+            log.Warning(selectionFailure);
+        }
+        else
+        {
+            log.Warning("Cannot select an active account without XIVLauncher CurrentAccountId; using the collector account");
+        }
+
+        if (!TrySelectCollectorAccount(
                 accounts,
-                accountId,
                 characterKey,
-                aliasHint,
                 SaveAccount,
-                DeleteReplacedLegacyAccount,
-                out _,
-                out var failure))
+                out var collectorAccount,
+                out var collectorFailure))
         {
             CurrentAccountId = "";
-            log.Warning(failure);
+            log.Warning(collectorFailure);
             return;
         }
 
-        CurrentAccountId = accountId;
+        CurrentAccountId = collectorAccount!.AccountId;
+        log.Information($"Selected collector account {CurrentAccountId} for unlinked character {characterKey}");
     }
 
     internal static bool TrySelectLauncherAccount(
@@ -450,7 +523,10 @@ public class ConfigManager : IDadProfileStore
         selectedAccount = null;
         failure = "";
 
-        var matchingLegacyAccounts = accountConfigs
+        var legacyAccountConfigs = accountConfigs
+            .Where(kvp => !IsCollectorAccountId(kvp.Key))
+            .ToList();
+        var matchingLegacyAccounts = legacyAccountConfigs
             .Where(kvp => !string.Equals(kvp.Key, launcherAccountId, StringComparison.Ordinal)
                           && kvp.Value.Characters != null
                           && kvp.Value.Characters.TryGetValue(characterKey, out var config)
@@ -506,7 +582,7 @@ public class ConfigManager : IDadProfileStore
             return false;
         }
 
-        if (accountConfigs.Count == 1 && matchingLegacyAccounts.Count == 1)
+        if (legacyAccountConfigs.Count == 1 && matchingLegacyAccounts.Count == 1)
         {
             var legacyAccount = matchingLegacyAccounts[0];
             var account = legacyAccount.Value;
@@ -555,6 +631,80 @@ public class ConfigManager : IDadProfileStore
         selectedAccount = newAccount;
         return true;
     }
+
+    internal static bool TrySelectCollectorAccount(
+        IDictionary<string, AccountConfig> accountConfigs,
+        string characterKey,
+        Func<string, bool> saveAccount,
+        out AccountConfig? selectedAccount,
+        out string failure)
+    {
+        selectedAccount = null;
+        failure = "";
+
+        if (string.IsNullOrWhiteSpace(characterKey))
+        {
+            failure = "Cannot select a collector account without the current character key";
+            return false;
+        }
+
+        var existingCollectors = accountConfigs
+            .Where(kvp => IsCollectorAccountId(kvp.Key))
+            .OrderByDescending(kvp => kvp.Value.Characters != null
+                                      && kvp.Value.Characters.TryGetValue(characterKey, out var config)
+                                      && config != null)
+            .ThenBy(kvp => kvp.Key, StringComparer.Ordinal)
+            .ToList();
+
+        var createdCollector = existingCollectors.Count == 0;
+        string collectorId;
+        AccountConfig collector;
+        if (createdCollector)
+        {
+            collectorId = $"{CollectorAccountIdPrefix}{Guid.NewGuid():N}";
+            collector = new AccountConfig
+            {
+                AccountId = collectorId,
+                AccountAlias = CollectorAccountAlias,
+            };
+        }
+        else
+        {
+            collectorId = existingCollectors[0].Key;
+            collector = existingCollectors[0].Value;
+        }
+
+        if (collector.Characters == null || collector.DefaultConfig == null)
+        {
+            failure = $"Collector account {collectorId} has invalid profile data";
+            return false;
+        }
+
+        var addedCharacter = !collector.Characters.TryGetValue(characterKey, out var existingCharacter)
+                             || existingCharacter == null;
+        if (addedCharacter)
+            collector.Characters[characterKey] = collector.DefaultConfig.Clone();
+
+        if (createdCollector)
+            accountConfigs[collectorId] = collector;
+
+        if ((createdCollector || addedCharacter) && !saveAccount(collectorId))
+        {
+            if (createdCollector)
+                accountConfigs.Remove(collectorId);
+            else if (addedCharacter)
+                collector.Characters.Remove(characterKey);
+
+            failure = $"Failed to save collector account {collectorId}";
+            return false;
+        }
+
+        selectedAccount = collector;
+        return true;
+    }
+
+    private static bool IsCollectorAccountId(string accountId)
+        => accountId.StartsWith(CollectorAccountIdPrefix, StringComparison.OrdinalIgnoreCase);
 
     private void DeleteReplacedLegacyAccount(string accountId)
     {

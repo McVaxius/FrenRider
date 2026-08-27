@@ -27,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Fren Name edits and party-dropdown selections in Settings no longer disappear while interacting with the input
-- Character lists are now grouped by XIVLauncher's raw `CurrentAccountId` instead of character content ID, with fail-closed launcher-config reads and character-proven migration of legacy account files
+- Character lists are now grouped by XIVLauncher's raw `CurrentAccountId` from Windows or XIVLauncher.Core, with fail-closed launcher-config reads, character-proven migration of legacy account files, and a persistent Collector Account for genuinely unlinked characters
 - Followed mounted party members now use their movement state for flight detection instead of their height relative to the local player
 - Configured BMR/VBM AI state is now applied after BossMod preset setup so zone loading cannot override the selected on/off state
 - Whitelisted party invite acceptance now closes the accepted invite dialog correctly

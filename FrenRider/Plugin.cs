@@ -429,12 +429,13 @@ public sealed class Plugin : IDalamudPlugin
                 if (ConfigManager.TryReadLauncherAccountId(out var launcherAccountId))
                 {
                     ConfigManager.EnsureAccountSelected(launcherAccountId, characterKey, charName);
-                    ConfigManager.EnsureCharacterExists(charName, worldName);
                 }
                 else
                 {
                     ConfigManager.EnsureAccountSelected(null, characterKey, charName);
                 }
+
+                ConfigManager.EnsureCharacterExists(charName, worldName);
 
                 if (!string.IsNullOrWhiteSpace(ConfigManager.ActiveCharacterKey))
                 {

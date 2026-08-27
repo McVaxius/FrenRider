@@ -167,6 +167,156 @@ public sealed class ConfigManagerActiveCharacterTests
         }
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void CoreLauncherIniAccountIdTakesPriorityOverWindowsConfig(bool pluginConfigsInsideCoreRoot)
+    {
+        var launcherRoot = Path.Combine(Path.GetTempPath(), "FrenRiderTests", Path.GetRandomFileName());
+        var coreRoot = Path.Combine(launcherRoot, ".xlcore");
+        var resolvedLauncherRoot = pluginConfigsInsideCoreRoot ? coreRoot : launcherRoot;
+        var configDirectory = Path.Combine(resolvedLauncherRoot, "pluginConfigs", "FrenRider");
+        Directory.CreateDirectory(configDirectory);
+        Directory.CreateDirectory(coreRoot);
+
+        try
+        {
+            File.WriteAllText(
+                Path.Combine(coreRoot, "launcher.ini"),
+                "[Launcher]\nCurrentAccountId = \"core-account-id\"\n");
+            WriteLauncherConfig(resolvedLauncherRoot, "windows-account-id");
+
+            Assert.True(
+                ConfigManager.TryReadLauncherAccountId(configDirectory, out var accountId, out var readError),
+                readError);
+            Assert.Equal("core-account-id", accountId);
+        }
+        finally
+        {
+            Directory.Delete(launcherRoot, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void CollectorSelectionCreatesAndReusesOnePersistentAccount()
+    {
+        var accounts = new Dictionary<string, AccountConfig>();
+        var savedAccountIds = new List<string>();
+
+        Assert.True(ConfigManager.TrySelectCollectorAccount(
+            accounts,
+            ActiveCharacterKey,
+            SaveAccount,
+            out var selectedAccount,
+            out var failure), failure);
+
+        var collector = Assert.IsType<AccountConfig>(selectedAccount);
+        Assert.StartsWith("collector-", collector.AccountId, StringComparison.OrdinalIgnoreCase);
+        Assert.True(Guid.TryParseExact(collector.AccountId["collector-".Length..], "N", out _));
+        Assert.Equal("Collector Account", collector.AccountAlias);
+        Assert.Contains(ActiveCharacterKey, collector.Characters.Keys);
+        Assert.Equal(new[] { collector.AccountId }, savedAccountIds);
+
+        collector.Characters[ActiveCharacterKey].FrenName = "Persistent Fren@Excalibur";
+        Assert.True(ConfigManager.TrySelectCollectorAccount(
+            accounts,
+            OtherCharacterKey,
+            SaveAccount,
+            out selectedAccount,
+            out failure), failure);
+
+        Assert.Same(collector, selectedAccount);
+        Assert.Single(accounts);
+        Assert.Equal("Persistent Fren@Excalibur", collector.Characters[ActiveCharacterKey].FrenName);
+        Assert.Contains(OtherCharacterKey, collector.Characters.Keys);
+        Assert.Equal(new[] { collector.AccountId, collector.AccountId }, savedAccountIds);
+
+        bool SaveAccount(string accountId)
+        {
+            savedAccountIds.Add(accountId);
+            return accounts.ContainsKey(accountId);
+        }
+    }
+
+    [Fact]
+    public void CollectorSelectionPrefersCharacterMatchThenAccountIdOrder()
+    {
+        var firstCollector = CreateAccount("collector-a");
+        firstCollector.Characters.Clear();
+        var matchingCollector = CreateAccount("collector-b");
+        matchingCollector.Characters.Remove(ActiveCharacterKey);
+        var accounts = new Dictionary<string, AccountConfig>
+        {
+            [matchingCollector.AccountId] = matchingCollector,
+            [firstCollector.AccountId] = firstCollector,
+        };
+        var savedAccountIds = new List<string>();
+
+        Assert.True(ConfigManager.TrySelectCollectorAccount(
+            accounts,
+            OtherCharacterKey,
+            SaveAccount,
+            out var selectedAccount,
+            out var failure), failure);
+        Assert.Same(matchingCollector, selectedAccount);
+        Assert.Empty(savedAccountIds);
+
+        Assert.True(ConfigManager.TrySelectCollectorAccount(
+            accounts,
+            ActiveCharacterKey,
+            SaveAccount,
+            out selectedAccount,
+            out failure), failure);
+        Assert.Same(firstCollector, selectedAccount);
+        Assert.Equal(new[] { firstCollector.AccountId }, savedAccountIds);
+
+        bool SaveAccount(string accountId)
+        {
+            savedAccountIds.Add(accountId);
+            return true;
+        }
+    }
+
+    [Fact]
+    public void CollectorAccountIsExcludedFromLegacyReplacementAndProfileCopy()
+    {
+        var collector = CreateAccount("collector-existing");
+        collector.AccountAlias = "Collector Account";
+        collector.DefaultConfig.FrenName = "Collector Default@Excalibur";
+        collector.Characters[ActiveCharacterKey].FrenName = "Collector Fren@Excalibur";
+        var accounts = new Dictionary<string, AccountConfig>
+        {
+            [collector.AccountId] = collector,
+        };
+        var savedAccountIds = new List<string>();
+        var deletedAccountIds = new List<string>();
+
+        Assert.True(ConfigManager.TrySelectLauncherAccount(
+            accounts,
+            "real-launcher-account",
+            ActiveCharacterKey,
+            "Real Account",
+            SaveAccount,
+            deletedAccountIds.Add,
+            out var selectedAccount,
+            out var failure), failure);
+
+        var realAccount = Assert.IsType<AccountConfig>(selectedAccount);
+        Assert.NotSame(collector, realAccount);
+        Assert.Equal("real-launcher-account", realAccount.AccountId);
+        Assert.Empty(realAccount.Characters);
+        Assert.Same(collector, accounts[collector.AccountId]);
+        Assert.Equal("Collector Fren@Excalibur", collector.Characters[ActiveCharacterKey].FrenName);
+        Assert.Equal(new[] { realAccount.AccountId }, savedAccountIds);
+        Assert.Empty(deletedAccountIds);
+
+        bool SaveAccount(string accountId)
+        {
+            savedAccountIds.Add(accountId);
+            return accounts.ContainsKey(accountId);
+        }
+    }
+
     [Fact]
     public void ActiveLookupReturnsOnlyExactProfileFromCurrentAccount()
     {
