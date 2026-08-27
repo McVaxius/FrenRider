@@ -96,8 +96,8 @@ public class CombatService
             questionableIpcService.Refresh(force: true),
             frenRiderBootstrapAllowed: false);
 
-        if (decision.ShouldForceCombatOff)
-            ForceQuestionableSoloCombatOff();
+        // if (decision.ShouldForceCombatOff)
+        //     ForceQuestionableSoloCombatOff();
 
         if (decision.Authority != DutyCombatAuthority.QuestionableSolo)
             return true;
@@ -137,8 +137,8 @@ public class CombatService
             frenRiderBootstrapAllowed: !plugin.CoppeliaPowerlevelLeaseService.IsLeaseActive
                 && !plugin.AutomationService.IsUtilityGateActive);
 
-        if (authorityDecision.ShouldForceCombatOff)
-            ForceQuestionableSoloCombatOff();
+        // if (authorityDecision.ShouldForceCombatOff)
+        //     ForceQuestionableSoloCombatOff();
 
         if (authorityDecision.Authority == DutyCombatAuthority.QuestionableSolo)
         {
