@@ -456,11 +456,8 @@ public class ConfigWindow : Window, IDisposable
             if (frenNameInput != config.FrenName && !frenNameFocused)
                 frenNameInput = config.FrenName;
             ImGui.SetNextItemWidth(300);
-            frenNameFocused = false;
-            if (ImGui.InputText("##FrenName", ref frenNameInput, 64))
-            {
-                frenNameFocused = true;
-            }
+            ImGui.InputText("##FrenName", ref frenNameInput, 64);
+            frenNameFocused = ImGui.IsItemActive();
             if (ImGui.IsItemDeactivatedAfterEdit())
             {
                 config.FrenName = ConfigManager.FixNameCapitalization(frenNameInput);

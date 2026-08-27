@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Non-solo duties now receive one FrenRider combat bootstrap per enabled duty session, including when ADS already owns navigation and progression
 
 ### Fixed
+- Fren Name edits and party-dropdown selections in Settings no longer disappear while interacting with the input
 - Character lists are now grouped by XIVLauncher's raw `CurrentAccountId` instead of character content ID, with fail-closed launcher-config reads and character-proven migration of legacy account files
 - Followed mounted party members now use their movement state for flight detection instead of their height relative to the local player
 - Configured BMR/VBM AI state is now applied after BossMod preset setup so zone loading cannot override the selected on/off state
