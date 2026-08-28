@@ -286,11 +286,14 @@ public class CombatService
             || questionableIpcService.WasRunningWithin(QuestionableIpcService.RecentRunningHold);
         var boundByDuty95 = Plugin.Condition[ConditionFlag.BoundByDuty95];
         var dutyCategory = plugin.AdsIntegrationService.GetCurrentDutyCategory();
+        var adsDutyHandoffActive = plugin.AdsIntegrationService.IsHandoffPending
+            || plugin.AdsIntegrationService.IsControllingDuty;
         var decision = dutyCombatAuthorityPolicy.Update(new DutyCombatAuthorityInput(
             config.Enabled,
             inDuty,
             boundByDuty95,
             dutyCategory,
+            adsDutyHandoffActive,
             questionableRunningOrRecent,
             frenRiderBootstrapAllowed));
 

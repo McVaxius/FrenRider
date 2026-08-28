@@ -181,6 +181,31 @@ public sealed class DutyCombatAuthorityPolicyTests
     }
 
     [Fact]
+    public void AdsHandoffOverridesLatchedQuestionableSoloAndBootstrapsExactlyOnce()
+    {
+        var policy = new DutyCombatAuthorityPolicy();
+
+        var questionableSolo = policy.Update(Input(
+            dutyCategory: AdsDutyCategory.Solo,
+            questionableRunningOrRecent: true,
+            frenRiderBootstrapAllowed: false));
+        var adsHandoff = policy.Update(Input(
+            dutyCategory: AdsDutyCategory.Solo,
+            adsDutyHandoffActive: true,
+            questionableRunningOrRecent: true));
+        var repeated = policy.Update(Input(
+            dutyCategory: AdsDutyCategory.Solo,
+            adsDutyHandoffActive: true,
+            questionableRunningOrRecent: true));
+
+        Assert.Equal(DutyCombatAuthority.QuestionableSolo, questionableSolo.Authority);
+        Assert.Equal(DutyCombatAuthority.FrenRider, adsHandoff.Authority);
+        Assert.True(adsHandoff.ShouldBootstrapFrenRider);
+        Assert.False(adsHandoff.ShouldForceCombatOff);
+        Assert.False(repeated.ShouldBootstrapFrenRider);
+    }
+
+    [Fact]
     public void DisableClearsAuthorityAndAllowsOneBootstrapAfterMidDutyReenable()
     {
         var policy = new DutyCombatAuthorityPolicy();
@@ -241,6 +266,7 @@ public sealed class DutyCombatAuthorityPolicyTests
         bool inDuty = true,
         bool boundByDuty95 = false,
         AdsDutyCategory? dutyCategory = AdsDutyCategory.FourMan,
+        bool adsDutyHandoffActive = false,
         bool questionableRunningOrRecent = false,
         bool frenRiderBootstrapAllowed = true)
     {
@@ -249,6 +275,7 @@ public sealed class DutyCombatAuthorityPolicyTests
             inDuty,
             boundByDuty95,
             dutyCategory,
+            adsDutyHandoffActive,
             questionableRunningOrRecent,
             frenRiderBootstrapAllowed);
     }

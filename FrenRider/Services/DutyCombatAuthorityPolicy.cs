@@ -27,9 +27,16 @@ internal sealed class DutyCombatAuthorityPolicy
         var isTrueSoloDuty = IsTrueSoloDuty(input.DutyCategory);
         var previousAuthority = Authority;
 
-        // QuestionableSolo is the only sticky authority. Once armed, a later
-        // Questionable.IsRunning=false must not let FrenRider reclaim combat.
-        if (Authority != DutyCombatAuthority.QuestionableSolo)
+        // ADS owns duty progression, not combat rotation. A pending or active
+        // ADS handoff must keep FrenRider's one-time combat bootstrap available,
+        // even if QuestionableSolo was observed first.
+        if (input.AdsDutyHandoffActive)
+        {
+            Authority = DutyCombatAuthority.FrenRider;
+        }
+        // QuestionableSolo is otherwise the only sticky authority. Once armed,
+        // a later Questionable.IsRunning=false must not let FrenRider reclaim combat.
+        else if (Authority != DutyCombatAuthority.QuestionableSolo)
         {
             Authority = isTrueSoloDuty && input.QuestionableRunningOrRecent
                 ? DutyCombatAuthority.QuestionableSolo
@@ -60,7 +67,7 @@ internal sealed class DutyCombatAuthorityPolicy
             shouldForceCombatOff,
             shouldBootstrapFrenRider,
             isTrueSoloDuty,
-            BuildReason(Authority, isTrueSoloDuty, input.DutyCategory));
+            BuildReason(Authority, isTrueSoloDuty, input.DutyCategory, input.AdsDutyHandoffActive));
     }
 
     public DutyCombatAuthorityDecision Reset(string reason)
@@ -86,8 +93,12 @@ internal sealed class DutyCombatAuthorityPolicy
     private static string BuildReason(
         DutyCombatAuthority authority,
         bool isTrueSoloDuty,
-        AdsDutyCategory? dutyCategory)
+        AdsDutyCategory? dutyCategory,
+        bool adsDutyHandoffActive)
     {
+        if (adsDutyHandoffActive)
+            return "ADS duty handoff active; FrenRider retains combat bootstrap authority";
+
         if (authority == DutyCombatAuthority.QuestionableSolo)
             return "true solo duty with Questionable running or recently running";
 
@@ -105,6 +116,7 @@ internal readonly record struct DutyCombatAuthorityInput(
     bool InDuty,
     bool BoundByDuty95,
     AdsDutyCategory? DutyCategory,
+    bool AdsDutyHandoffActive,
     bool QuestionableRunningOrRecent,
     bool FrenRiderBootstrapAllowed);
 
