@@ -276,6 +276,9 @@ public sealed class Plugin : IDalamudPlugin
         
         if (enabled)
         {
+            Log.Information("[FrenRider] Refreshing packaged BossMod presets on enable");
+            AutorotIpcService.CreatePresets(force: true);
+
            // Trigger AutoDuty check when FrenRider is enabled
             Log.Information("[FrenRider] Triggering AutoDuty detection check");
             
@@ -293,8 +296,7 @@ public sealed class Plugin : IDalamudPlugin
                 Log.Information("[FrenRider] Applying one-time BossMod follow defaults on enable");
                 CombatService.ApplyBossModFollowStartupDefaults();
 
-                Log.Information("[FrenRider] Installing BossMod presets and applying current preset selection");
-                AutorotIpcService.CreatePresets(force: true);
+                Log.Information("[FrenRider] Applying current BossMod preset selection");
                 CombatService.ApplyPresetSelection("FrenRider enabled", installPresets: false);
             }
             else
