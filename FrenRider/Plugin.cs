@@ -56,6 +56,7 @@ public sealed class Plugin : IDalamudPlugin
     public DaedalusTargetModeService DaedalusTargetModeService { get; init; }
     public ExternalAutomationCleanupService ExternalAutomationCleanupService { get; init; }
     public CoppeliaPowerlevelLeaseService CoppeliaPowerlevelLeaseService { get; init; }
+    public AdsHyperFocusLeaseService AdsHyperFocusLeaseService { get; init; }
     public FollowService FollowService { get; init; }
     public MountService MountService { get; init; }
     public CombatService CombatService { get; init; }
@@ -141,6 +142,7 @@ public sealed class Plugin : IDalamudPlugin
         MountService = new MountService(this, FrenTracker, ZoneService);
         QuestionableIpcService = new QuestionableIpcService(PluginInterface, Log);
         CombatService = new CombatService(this, FrenTracker, ZoneService, QuestionableIpcService);
+        AdsHyperFocusLeaseService = new AdsHyperFocusLeaseService(this);
         AutomationService = new AutomationService(this, FrenTracker, ZoneService);
         FormationService = new FormationService(this, FrenTracker);
         PartyService = new PartyService(this, Log, GameGui);
@@ -236,6 +238,7 @@ public sealed class Plugin : IDalamudPlugin
         AutorotIpcService.Dispose();
         QuestionableIpcService.Dispose();
         CoppeliaPowerlevelLeaseService.Dispose();
+        AdsHyperFocusLeaseService.Dispose();
         AdsDutyIpcService.Dispose();
         AdsUtilityIpcService.Dispose();
         AutomationService.Dispose();
@@ -307,6 +310,7 @@ public sealed class Plugin : IDalamudPlugin
         else
         {
             CoppeliaPowerlevelLeaseService.HandleManualFrenRiderDisable();
+            AdsHyperFocusLeaseService.HandleManualFrenRiderDisable();
             FollowService.CancelFlyingStuckRecovery("disabled");
             FollowService.PreemptFarChase("disabled");
             MountService.PreemptFarChase("disabled");
@@ -488,6 +492,7 @@ public sealed class Plugin : IDalamudPlugin
             Measure("dtr", UpdateDtrBar);
             Measure("zone", ZoneService.Update);
             Measure("coppelia-powerlevel-lease", CoppeliaPowerlevelLeaseService.Update);
+            Measure("ads-hyper-focus-lease", AdsHyperFocusLeaseService.Update);
 
             // Detect logout before any transition early-return so stale active state
             // cannot survive while the client is between areas.
@@ -522,6 +527,7 @@ public sealed class Plugin : IDalamudPlugin
             // Update fren tracking
             Measure("fren-tracker", FrenTracker.Update);
             Measure("coppelia-powerlevel-lease", CoppeliaPowerlevelLeaseService.Update);
+            Measure("ads-hyper-focus-lease", AdsHyperFocusLeaseService.Update);
 
             // Check for plugin enable/disable state changes
             var config = ConfigManager.GetActiveConfig();

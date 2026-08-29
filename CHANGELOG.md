@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- ADS can acquire a five-second token-owned Hyper Focus lease through JSON IPC to run RSR Manual as the sole temporary combat provider in validated ADS-owned solo duties
 - DAD can now resolve and export exact remote FrenRider profiles, apply them under each local character's Off/Temporary/Permanent acceptance policy, and release proposal-owned temporary overlays through bounded JSON IPC
 - Settings now keep visually distinct editable remote DAD profile rows separate from local characters, keyed by exact owner, sender-island, and opaque-character identity
 - `/fr settings` and `/fr s` now toggle settings, while `/fr mini` and `/fr m` toggle a separate auto-sized MAGIA window with Attack, Defense, and Off command buttons
@@ -26,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Non-solo duties now receive one FrenRider combat bootstrap per enabled duty session, including when ADS already owns navigation and progression
 
 ### Fixed
+- ADS handoff from latched Questionable solo authority now reactivates the configured combat provider once even when an earlier duty bootstrap was already consumed
 - Solo duties handed to ADS now retain FrenRider's one-time configured combat-rotation bootstrap instead of suppressing it under `QuestionableSolo` authority
 - Packaged BossMod presets are now force-refreshed whenever Fren Rider is enabled, including when duty authority skips combat setup
 - Fren Name edits and party-dropdown selections in Settings no longer disappear while interacting with the input

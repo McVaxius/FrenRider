@@ -50,6 +50,20 @@ public sealed class CoppeliaPowerlevelLeaseTests
     }
 
     [Fact]
+    public void ActiveHyperFocusBlocksAcquire()
+    {
+        var harness = new LeaseHarness
+        {
+            Environment = LeaseHarness.ValidEnvironment with { HyperFocusLeaseActive = true },
+        };
+
+        var response = harness.Coordinator.Acquire("token-a");
+
+        Assert.False(response.Ok);
+        Assert.Contains("hyper focus", response.Reason, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void CombatSuppressionCommandsStopAllEngines()
     {
         Assert.Equal(

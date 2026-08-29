@@ -135,6 +135,7 @@ public class CombatService
             inDuty,
             questionableSnapshot,
             frenRiderBootstrapAllowed: !plugin.CoppeliaPowerlevelLeaseService.IsLeaseActive
+                && !plugin.AdsHyperFocusLeaseService.IsLeaseActive
                 && !plugin.AutomationService.IsUtilityGateActive);
 
         // if (authorityDecision.ShouldForceCombatOff)
@@ -149,6 +150,12 @@ public class CombatService
         if (plugin.CoppeliaPowerlevelLeaseService.IsLeaseActive)
         {
             HandleCoppeliaPowerlevelLease(config, inCombat, inDuty);
+            return;
+        }
+
+        if (plugin.AdsHyperFocusLeaseService.IsLeaseActive)
+        {
+            HandleAdsHyperFocusLease(inCombat, inDuty);
             return;
         }
 
@@ -1094,6 +1101,13 @@ public class CombatService
             : new[] { "/bmrai off", "/vbmai off", "/wrath auto off" };
     }
 
+    internal static string[] BuildAdsHyperFocusCombatCommands(bool includeRsrFallback = true)
+    {
+        return includeRsrFallback
+            ? new[] { "/bmrai off", "/vbmai off", "/wrath auto off", "/rotation manual" }
+            : new[] { "/bmrai off", "/vbmai off", "/wrath auto off" };
+    }
+
     private static string DescribeBossModAiSetting(int bossModAI)
         => bossModAI == 1 ? "off" : "on";
 
@@ -1125,6 +1139,89 @@ public class CombatService
             rsrHandled
                 ? $"[FrenRider][CoppeliaPowerlevel] Forced BMR/VBM/RSR/Wrath off; RSR stopped via IPC; Daedalus {(daedalusHandled ? "stopped via IPC" : "IPC unavailable")}."
                 : $"[FrenRider][CoppeliaPowerlevel] Forced BMR/VBM/RSR/Wrath off; RSR fallback command sent; Daedalus {(daedalusHandled ? "stopped via IPC" : "IPC unavailable")}.");
+    }
+
+    internal void ActivateAdsHyperFocusLease()
+    {
+        if (!plugin.AdsHyperFocusLeaseService.IsLeaseActive
+            || !plugin.AdsHyperFocusLeaseService.TryClaimCombatActivation())
+            return;
+
+        ResetCombatSettingsRefreshTracking();
+        lastObservedCombatSettingsSignature = string.Empty;
+        plugin.CaptureExternalAutomationSnapshot("ADS Hyper Focus lease");
+
+        foreach (var command in BuildAdsHyperFocusCombatCommands(includeRsrFallback: false))
+            SendCommand(command, allowDuringQuestionableSolo: true);
+        var daedalusHandled = SetDaedalusEnabled(false, "ADS Hyper Focus lease");
+        if (!plugin.AutorotIpcService.TrySetRsrMode(AutorotIpcService.RsrStateCommandType.Manual))
+            SendCommand("/rotation manual", allowDuringQuestionableSolo: true);
+
+        mountedRotationSuppressed = false;
+        mountedSuppressedPluginName = string.Empty;
+        wrathAutoActive = false;
+        lastActivePluginIdx = Array.IndexOf(RotationPluginNames, "RSR");
+        lastRotationToggleMs = Environment.TickCount64;
+        State = CombatState.InCombat;
+        StateDetail = "ADS Hyper Focus lease active; RSR Manual";
+        ActivePreset = string.Empty;
+        Plugin.Log.Information(
+            $"[FrenRider][AdsHyperFocus] Activated RSR Manual and stopped BMR/VBM/Wrath; Daedalus {(daedalusHandled ? "stopped via IPC" : "IPC unavailable")}.");
+    }
+
+    internal void RestoreConfiguredCombatAfterAdsHyperFocusLease(string reason)
+    {
+        var config = plugin.ConfigManager.GetActiveConfig();
+        if (!plugin.AutorotIpcService.TrySetRsrMode(AutorotIpcService.RsrStateCommandType.Off))
+            SendCommand("/rotation cancel", allowDuringQuestionableSolo: true);
+
+        lastActivePluginIdx = -1;
+        lastRotationToggleMs = 0;
+        ActivePreset = string.Empty;
+
+        var inDuty = IsInDuty();
+        if (!config.Enabled || !inDuty)
+        {
+            State = CombatState.OutOfCombat;
+            StateDetail = config.Enabled ? "ADS Hyper Focus ended outside duty" : "Disabled";
+            return;
+        }
+
+        var authorityDecision = RefreshDutyCombatAuthority(
+            config,
+            inDuty,
+            questionableIpcService.Refresh(force: true),
+            frenRiderBootstrapAllowed: false);
+        if (authorityDecision.Authority == DutyCombatAuthority.QuestionableSolo)
+        {
+            State = CombatState.OutOfCombat;
+            StateDetail = "ADS Hyper Focus ended under QuestionableSolo authority";
+            return;
+        }
+
+        if (IsRotationDisabled(config))
+        {
+            State = CombatState.OutOfCombat;
+            StateDetail = "ADS Hyper Focus ended; configured rotation disabled";
+            dutyCombatAuthorityPolicy.MarkFrenRiderBootstrapComplete();
+            return;
+        }
+
+        ActivateRotation(config, ignoreCooldown: true);
+        dutyCombatAuthorityPolicy.MarkFrenRiderBootstrapComplete();
+        Plugin.Log.Information($"[FrenRider][AdsHyperFocus] Restored configured combat provider after {reason}.");
+    }
+
+    private void HandleAdsHyperFocusLease(bool inCombat, bool inDuty)
+    {
+        ResetCombatSettingsRefreshTracking();
+        lastObservedCombatSettingsSignature = string.Empty;
+        State = CombatState.InCombat;
+        StateDetail = "ADS Hyper Focus lease active; RSR Manual";
+        ActivePreset = string.Empty;
+        wasInCombat = inCombat;
+        wasInDuty = inDuty;
+        ActivateAdsHyperFocusLease();
     }
 
     private void DisableOtherRotationPlugins(CharacterConfig config)

@@ -15,6 +15,7 @@ internal sealed class DutyCombatAuthorityPolicy
     public bool FrenRiderBootstrapComplete { get; private set; }
 
     private bool questionableShutdownSent;
+    private bool adsHandoffRecoveryPending;
 
     public DutyCombatAuthorityDecision Update(DutyCombatAuthorityInput input)
     {
@@ -33,6 +34,8 @@ internal sealed class DutyCombatAuthorityPolicy
         if (input.AdsDutyHandoffActive)
         {
             Authority = DutyCombatAuthority.FrenRider;
+            if (previousAuthority == DutyCombatAuthority.QuestionableSolo)
+                adsHandoffRecoveryPending = true;
         }
         // QuestionableSolo is otherwise the only sticky authority. Once armed,
         // a later Questionable.IsRunning=false must not let FrenRider reclaim combat.
@@ -48,15 +51,19 @@ internal sealed class DutyCombatAuthorityPolicy
 
         if (Authority == DutyCombatAuthority.QuestionableSolo)
         {
+            adsHandoffRecoveryPending = false;
             if (!questionableShutdownSent)
             {
                 questionableShutdownSent = true;
                 shouldForceCombatOff = true;
             }
         }
-        else if (input.FrenRiderBootstrapAllowed && !FrenRiderBootstrapComplete)
+        else if (input.FrenRiderBootstrapAllowed
+                 && (!FrenRiderBootstrapComplete
+                     || adsHandoffRecoveryPending))
         {
             FrenRiderBootstrapComplete = true;
+            adsHandoffRecoveryPending = false;
             shouldBootstrapFrenRider = true;
         }
 
@@ -76,6 +83,7 @@ internal sealed class DutyCombatAuthorityPolicy
         Authority = DutyCombatAuthority.None;
         FrenRiderBootstrapComplete = false;
         questionableShutdownSent = false;
+        adsHandoffRecoveryPending = false;
 
         return new DutyCombatAuthorityDecision(
             previousAuthority,
@@ -85,6 +93,12 @@ internal sealed class DutyCombatAuthorityPolicy
             false,
             false,
             string.IsNullOrWhiteSpace(reason) ? "authority cleared" : reason);
+    }
+
+    public void MarkFrenRiderBootstrapComplete()
+    {
+        FrenRiderBootstrapComplete = true;
+        adsHandoffRecoveryPending = false;
     }
 
     internal static bool IsTrueSoloDuty(AdsDutyCategory? dutyCategory)

@@ -89,6 +89,22 @@ public sealed class CombatServiceBossModAiCommandTests
     }
 
     [Fact]
+    public void AdsHyperFocusStopsOtherProvidersAndFallsBackToRsrManual()
+    {
+        Assert.Equal(
+            new[] { "/bmrai off", "/vbmai off", "/wrath auto off", "/rotation manual" },
+            CombatService.BuildAdsHyperFocusCombatCommands());
+    }
+
+    [Fact]
+    public void AdsHyperFocusOmitsRsrFallbackWhenTypedIpcHandledManualMode()
+    {
+        Assert.Equal(
+            new[] { "/bmrai off", "/vbmai off", "/wrath auto off" },
+            CombatService.BuildAdsHyperFocusCombatCommands(includeRsrFallback: false));
+    }
+
+    [Fact]
     public void AdsOwnedDungeonBootstrapUsesConfiguredRsrAutoMode()
     {
         Assert.Equal(

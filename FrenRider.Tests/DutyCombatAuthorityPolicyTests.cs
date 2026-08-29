@@ -206,6 +206,120 @@ public sealed class DutyCombatAuthorityPolicyTests
     }
 
     [Fact]
+    public void AdsHandoffReactivatesOnceAfterQuestionableConsumesAnEarlierBootstrap()
+    {
+        var policy = new DutyCombatAuthorityPolicy();
+
+        var initial = policy.Update(Input(dutyCategory: AdsDutyCategory.Solo));
+        var questionable = policy.Update(Input(
+            dutyCategory: AdsDutyCategory.Solo,
+            questionableRunningOrRecent: true));
+        var adsHandoff = policy.Update(Input(
+            dutyCategory: AdsDutyCategory.Solo,
+            adsDutyHandoffActive: true,
+            questionableRunningOrRecent: true));
+        var repeated = policy.Update(Input(
+            dutyCategory: AdsDutyCategory.Solo,
+            adsDutyHandoffActive: true,
+            questionableRunningOrRecent: true));
+
+        Assert.True(initial.ShouldBootstrapFrenRider);
+        Assert.Equal(DutyCombatAuthority.QuestionableSolo, questionable.Authority);
+        Assert.True(adsHandoff.ShouldBootstrapFrenRider);
+        Assert.False(repeated.ShouldBootstrapFrenRider);
+    }
+
+    [Fact]
+    public void ASecondQuestionableToAdsTransitionGetsOneFreshReactivation()
+    {
+        var policy = new DutyCombatAuthorityPolicy();
+        policy.Update(Input(dutyCategory: AdsDutyCategory.Solo));
+        policy.Update(Input(dutyCategory: AdsDutyCategory.Solo, questionableRunningOrRecent: true));
+        policy.Update(Input(dutyCategory: AdsDutyCategory.Solo, adsDutyHandoffActive: true, questionableRunningOrRecent: true));
+
+        var questionableAgain = policy.Update(Input(
+            dutyCategory: AdsDutyCategory.Solo,
+            questionableRunningOrRecent: true));
+        var secondHandoff = policy.Update(Input(
+            dutyCategory: AdsDutyCategory.Solo,
+            adsDutyHandoffActive: true,
+            questionableRunningOrRecent: true));
+        var repeated = policy.Update(Input(
+            dutyCategory: AdsDutyCategory.Solo,
+            adsDutyHandoffActive: true,
+            questionableRunningOrRecent: true));
+
+        Assert.Equal(DutyCombatAuthority.QuestionableSolo, questionableAgain.Authority);
+        Assert.True(secondHandoff.ShouldBootstrapFrenRider);
+        Assert.False(repeated.ShouldBootstrapFrenRider);
+    }
+
+    [Fact]
+    public void QuestionableToAdsReactivationWaitsForCombatSafetyWithoutBeingLost()
+    {
+        var policy = new DutyCombatAuthorityPolicy();
+        policy.Update(Input(dutyCategory: AdsDutyCategory.Solo));
+        policy.Update(Input(dutyCategory: AdsDutyCategory.Solo, questionableRunningOrRecent: true));
+
+        var blocked = policy.Update(Input(
+            dutyCategory: AdsDutyCategory.Solo,
+            adsDutyHandoffActive: true,
+            questionableRunningOrRecent: true,
+            frenRiderBootstrapAllowed: false));
+        var released = policy.Update(Input(
+            dutyCategory: AdsDutyCategory.Solo,
+            adsDutyHandoffActive: true,
+            questionableRunningOrRecent: true));
+        var repeated = policy.Update(Input(
+            dutyCategory: AdsDutyCategory.Solo,
+            adsDutyHandoffActive: true,
+            questionableRunningOrRecent: true));
+
+        Assert.False(blocked.ShouldBootstrapFrenRider);
+        Assert.True(released.ShouldBootstrapFrenRider);
+        Assert.False(repeated.ShouldBootstrapFrenRider);
+    }
+
+    [Fact]
+    public void DirectLeaseRestorationConsumesPendingAdsReactivation()
+    {
+        var policy = new DutyCombatAuthorityPolicy();
+        policy.Update(Input(dutyCategory: AdsDutyCategory.Solo));
+        policy.Update(Input(dutyCategory: AdsDutyCategory.Solo, questionableRunningOrRecent: true));
+        var blocked = policy.Update(Input(
+            dutyCategory: AdsDutyCategory.Solo,
+            adsDutyHandoffActive: true,
+            questionableRunningOrRecent: true,
+            frenRiderBootstrapAllowed: false));
+
+        policy.MarkFrenRiderBootstrapComplete();
+        var afterDirectRestoration = policy.Update(Input(
+            dutyCategory: AdsDutyCategory.Solo,
+            adsDutyHandoffActive: true,
+            questionableRunningOrRecent: true));
+
+        Assert.False(blocked.ShouldBootstrapFrenRider);
+        Assert.False(afterDirectRestoration.ShouldBootstrapFrenRider);
+    }
+
+    [Fact]
+    public void DisabledFrenRiderCannotRecoverCombatForAnAdsHandoff()
+    {
+        var policy = new DutyCombatAuthorityPolicy();
+        policy.Update(Input(dutyCategory: AdsDutyCategory.Solo));
+        policy.Update(Input(dutyCategory: AdsDutyCategory.Solo, questionableRunningOrRecent: true));
+
+        var disabled = policy.Update(Input(
+            enabled: false,
+            dutyCategory: AdsDutyCategory.Solo,
+            adsDutyHandoffActive: true,
+            questionableRunningOrRecent: true));
+
+        Assert.Equal(DutyCombatAuthority.None, disabled.Authority);
+        Assert.False(disabled.ShouldBootstrapFrenRider);
+    }
+
+    [Fact]
     public void DisableClearsAuthorityAndAllowsOneBootstrapAfterMidDutyReenable()
     {
         var policy = new DutyCombatAuthorityPolicy();

@@ -34,7 +34,8 @@ internal sealed record CoppeliaPowerlevelEnvironment(
     ulong VisibleFrenObjectId,
     bool CompanionActive,
     string CompanionName,
-    ulong CompanionObjectId);
+    ulong CompanionObjectId,
+    bool HyperFocusLeaseActive = false);
 
 internal sealed record CoppeliaPowerlevelStatus(
     int ContractVersion,
@@ -86,6 +87,9 @@ internal sealed class CoppeliaPowerlevelLeaseCoordinator
         var environment = readEnvironment();
         if (!environment.FrenRiderEnabled)
             return Reject("FrenRider is disabled.");
+
+        if (environment.HyperFocusLeaseActive)
+            return Reject("ADS Hyper Focus lease is active.");
 
         if (string.IsNullOrWhiteSpace(environment.ConfiguredFrenName))
             return Reject("FrenRider has no configured Fren.");
@@ -273,7 +277,8 @@ public sealed class CoppeliaPowerlevelLeaseService : IDisposable
             fren is { IsFound: true, IsVisible: true } ? FindObjectIdByName(fren.Name) : 0,
             companionActive,
             companionName,
-            companionObjectId);
+            companionObjectId,
+            plugin.AdsHyperFocusLeaseService?.IsLeaseActive == true);
     }
 
     private void RecoverAfterLease(string reason)
