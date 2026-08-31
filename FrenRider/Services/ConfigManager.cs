@@ -552,7 +552,7 @@ public class ConfigManager : IDadProfileStore
 
             if (needsCharacterMigration && matchingLegacyAccounts.Count == 1)
             {
-                existingAccount.Characters[characterKey] = matchingLegacyAccounts[0].Value.Characters[characterKey].Clone();
+                existingAccount.Characters[characterKey] = existingAccount.DefaultConfig.Clone();
                 copiedCharacter = true;
             }
 

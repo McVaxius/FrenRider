@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Non-solo duties now receive one FrenRider combat bootstrap per enabled duty session, including when ADS already owns navigation and progression
 
 ### Fixed
+- Newly surfaced characters in an existing XIVLauncher account group now inherit that group's `DEFAULT CONFIG` instead of stale legacy character settings
 - ADS handoff from latched Questionable solo authority now reactivates the configured combat provider once even when an earlier duty bootstrap was already consumed
 - Solo duties handed to ADS now retain FrenRider's one-time configured combat-rotation bootstrap instead of suppressing it under `QuestionableSolo` authority
 - Packaged BossMod presets are now force-refreshed whenever Fren Rider is enabled, including when duty authority skips combat setup

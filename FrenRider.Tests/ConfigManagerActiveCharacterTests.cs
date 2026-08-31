@@ -167,6 +167,71 @@ public sealed class ConfigManagerActiveCharacterTests
         }
     }
 
+    [Fact]
+    public void ExistingLauncherAccountCreatesNewGroupedCharacterFromAccountDefault()
+    {
+        const string launcherAccountId = "raw-launcher-account";
+        const string legacyAccountId = "stale-legacy-account";
+        var existingAccount = CreateAccount(launcherAccountId);
+        existingAccount.AccountAlias = "Grouped Account";
+        existingAccount.DefaultConfig.FrenName = "Grouped Default@Excalibur";
+        existingAccount.DefaultConfig.Cling = 4.25f;
+        existingAccount.Characters.Remove(OtherCharacterKey);
+
+        var existingCharacter = existingAccount.Characters[ActiveCharacterKey];
+        var existingCharacterBefore = JsonSerializer.Serialize(existingCharacter);
+        var staleLegacyCharacter = new CharacterConfig
+        {
+            FrenName = "Stale Legacy@Excalibur",
+            Cling = 9.75f,
+            Enabled = false,
+        };
+        var legacyAccount = new AccountConfig
+        {
+            AccountId = legacyAccountId,
+            Characters = new Dictionary<string, CharacterConfig>
+            {
+                [OtherCharacterKey] = staleLegacyCharacter,
+            },
+        };
+        var staleLegacyBefore = JsonSerializer.Serialize(staleLegacyCharacter);
+        var accounts = new Dictionary<string, AccountConfig>
+        {
+            [launcherAccountId] = existingAccount,
+            [legacyAccountId] = legacyAccount,
+        };
+        var savedAccountIds = new List<string>();
+        var deletedAccountIds = new List<string>();
+
+        Assert.True(ConfigManager.TrySelectLauncherAccount(
+            accounts,
+            launcherAccountId,
+            OtherCharacterKey,
+            "Grouped Account",
+            accountId =>
+            {
+                savedAccountIds.Add(accountId);
+                return true;
+            },
+            deletedAccountIds.Add,
+            out var selectedAccount,
+            out var failure), failure);
+
+        Assert.Same(existingAccount, selectedAccount);
+        var groupedCharacter = existingAccount.Characters[OtherCharacterKey];
+        Assert.Equivalent(existingAccount.DefaultConfig, groupedCharacter, strict: true);
+        Assert.NotSame(existingAccount.DefaultConfig, groupedCharacter);
+        Assert.NotEqual(staleLegacyCharacter.FrenName, groupedCharacter.FrenName);
+        Assert.NotEqual(staleLegacyCharacter.Cling, groupedCharacter.Cling);
+        Assert.Same(existingCharacter, existingAccount.Characters[ActiveCharacterKey]);
+        Assert.Equal(existingCharacterBefore, JsonSerializer.Serialize(existingCharacter));
+        Assert.Same(staleLegacyCharacter, legacyAccount.Characters[OtherCharacterKey]);
+        Assert.Equal(staleLegacyBefore, JsonSerializer.Serialize(staleLegacyCharacter));
+        Assert.Same(legacyAccount, accounts[legacyAccountId]);
+        Assert.Equal(new[] { launcherAccountId }, savedAccountIds);
+        Assert.Empty(deletedAccountIds);
+    }
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
