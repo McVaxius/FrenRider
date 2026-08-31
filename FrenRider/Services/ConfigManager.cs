@@ -312,7 +312,11 @@ public class ConfigManager : IDadProfileStore
         {
             var settings = source.GetAdsDutyFamilySettings(category);
             target.EnsureAdsDutyFamilySettingsInitialized();
-            target.SetAdsDutyFamilySettings(category, settings.Enabled, settings.MaturityThreshold);
+            target.SetAdsDutyFamilySettings(
+                category,
+                settings.Enabled,
+                settings.MaturityThreshold,
+                settings.HandoffDelaySeconds);
         };
 
     private static void CopyExitMethod(CharacterConfig source, CharacterConfig target)

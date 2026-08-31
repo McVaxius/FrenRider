@@ -269,6 +269,28 @@ public sealed class ConfigManagerDefaultSyncTests
     }
 
     [Fact]
+    public void AdsDutyFamilyRowSyncCopiesHandoffDelayWithTheFamilySettings()
+    {
+        var account = CreateAccount();
+        account.DefaultConfig.SetAdsDutyFamilySettings(AdsDutyCategory.Solo, true, 2, 37);
+        account.DefaultConfig.SetAdsDutyFamilySettings(AdsDutyCategory.FourMan, true, 1, 18);
+
+        var target = account.Characters["Alt One@World"];
+        target.SetAdsDutyFamilySettings(AdsDutyCategory.Solo, false, 0, 2);
+        target.SetAdsDutyFamilySettings(AdsDutyCategory.FourMan, false, 3, 99);
+
+        var count = ConfigManager.ApplyDefaultSettingToAllCharacters(account, "ADS Solo");
+
+        Assert.Equal(account.Characters.Count, count);
+        Assert.Equal(
+            account.DefaultConfig.GetAdsDutyFamilySettings(AdsDutyCategory.Solo),
+            target.GetAdsDutyFamilySettings(AdsDutyCategory.Solo));
+        Assert.Equal(
+            new AdsDutyFamilySettings(false, 3, 99),
+            target.GetAdsDutyFamilySettings(AdsDutyCategory.FourMan));
+    }
+
+    [Fact]
     public void FullSyncCopiesEveryPersistedCharacterSettingExceptEnabled()
     {
         var account = CreateAccount();

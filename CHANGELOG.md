@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Non-solo duties now receive one FrenRider combat bootstrap per enabled duty session, including when ADS already owns navigation and progression
 
 ### Fixed
+- ADS handoff now waits for each duty family's configurable continuous-ready delay before calling ADS (Solo defaults to 10 seconds; all other families to 2), restarting after player, death/unconscious, transition, cutscene, or duty-identity interruptions while preserving Praetorium readiness and the five-second ownership retry
 - Newly surfaced characters in an existing XIVLauncher account group now inherit that group's `DEFAULT CONFIG` instead of stale legacy character settings
 - ADS handoff from latched Questionable solo authority now reactivates the configured combat provider once even when an earlier duty bootstrap was already consumed
 - Solo duties handed to ADS now retain FrenRider's one-time configured combat-rotation bootstrap instead of suppressing it under `QuestionableSolo` authority

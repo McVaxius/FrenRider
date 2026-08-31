@@ -10,7 +10,6 @@ public sealed class AdsIntegrationService
     private const uint PraetoriumTerritoryTypeId = 1044;
     private const float PraetoriumTimeLimitSeconds = 7200f;
     private const double PraetoriumReadyFallbackSeconds = 15.0;
-    private const double GenericDutyReadyDelaySeconds = 2.0;
 
     private readonly Plugin plugin;
     private readonly ZoneService zoneService;
@@ -20,6 +19,7 @@ public sealed class AdsIntegrationService
     private DateTime lastPraetoriumReadyWaitLogUtc = DateTime.MinValue;
     private DateTime handoffRequestedAtUtc = DateTime.MinValue;
     private DateTime nextHandoffAttemptUtc = DateTime.MinValue;
+    private AdsHandoffCountdownState handoffCountdownState;
     private uint trackedDutyTerritoryId;
     private uint trackedDutyContentFinderConditionId;
     private bool runtimeOwnedLastUpdate;
@@ -79,6 +79,7 @@ public sealed class AdsIntegrationService
             IsHandoffPending = false;
             runtimeOwnedLastUpdate = false;
             lastPraetoriumReadyWaitLogUtc = DateTime.MinValue;
+            handoffCountdownState = default;
         }
 
         IsControllingDuty = ownership.IsOwned;
@@ -111,6 +112,7 @@ public sealed class AdsIntegrationService
         if (config == null || !config.Enabled)
         {
             IsHandoffPending = false;
+            handoffCountdownState = default;
             StatusText = AdsLoaded ? "FrenRider disabled." : "ADS not loaded.";
             return;
         }
@@ -118,6 +120,7 @@ public sealed class AdsIntegrationService
         if (!inDuty)
         {
             IsHandoffPending = false;
+            handoffCountdownState = default;
             StatusText = AdsLoaded
                 ? "ADS loaded; waiting for duty. FrenRider local logic active."
                 : "ADS not loaded. FrenRider local logic active.";
@@ -138,25 +141,67 @@ public sealed class AdsIntegrationService
             return;
         }
 
+        var now = DateTime.UtcNow;
+        var localPlayer = Plugin.ObjectTable.LocalPlayer;
+        var readinessConditions = new AdsHandoffReadinessConditions(
+            Plugin.ClientState.IsLoggedIn,
+            localPlayer is not null,
+            localPlayer?.CurrentHp > 0,
+            Plugin.Condition[ConditionFlag.Unconscious],
+            Plugin.Condition[ConditionFlag.BetweenAreas]
+                || Plugin.Condition[ConditionFlag.BetweenAreas51],
+            Plugin.Condition[ConditionFlag.WatchingCutscene],
+            Plugin.Condition[ConditionFlag.OccupiedInCutSceneEvent]);
         var readiness = ResolveReadiness(
             config,
             liveDutyIdentity.TerritoryTypeId,
             liveDutyIdentity.ContentFinderConditionId);
         IsHandoffPending = readiness.CanUseAds;
 
+        var runtimeBlocker = AdsIntegrationPolicy.GetHandoffReadinessBlocker(readinessConditions);
+        if (runtimeBlocker is not null)
+        {
+            handoffCountdownState = default;
+            StatusText = BuildReadinessStatus(readiness, runtimeBlocker);
+            return;
+        }
+
         if (!readiness.CanUseAds)
         {
+            handoffCountdownState = default;
             StatusText = BuildReadinessStatus(readiness, readiness.Reason);
             return;
         }
 
-        if (!IsReadyToStartAdsInsideDuty(territoryTypeId))
+        var countdown = AdsIntegrationPolicy.EvaluateHandoffCountdown(
+            handoffCountdownState,
+            liveDutyIdentity.TerritoryTypeId,
+            liveDutyIdentity.ContentFinderConditionId,
+            now,
+            readiness.FamilySettings.HandoffDelaySeconds,
+            readinessConditions);
+        handoffCountdownState = countdown.State;
+
+        if (countdown.Blocker is not null)
+        {
+            StatusText = BuildReadinessStatus(readiness, countdown.Blocker);
+            return;
+        }
+
+        if (!countdown.IsReady)
+        {
+            StatusText = BuildReadinessStatus(
+                readiness,
+                $"handoff in {Math.Max(0, countdown.Remaining.TotalSeconds):F1}s of continuous readiness");
+            return;
+        }
+
+        if (!IsReadyToStartAdsInsideDuty(territoryTypeId, now))
         {
             StatusText = BuildReadinessStatus(readiness, "waiting for duty start seam");
             return;
         }
 
-        var now = DateTime.UtcNow;
         if (AdsIntegrationPolicy.IsHandoffConfirmationPending(handoffRequestedAtUtc, now))
         {
             var remaining = AdsIntegrationPolicy.HandoffConfirmationTimeout - (now - handoffRequestedAtUtc);
@@ -225,7 +270,7 @@ public sealed class AdsIntegrationService
         nextHandoffAttemptUtc = now + AdsIntegrationPolicy.HandoffConfirmationTimeout;
         StatusText = BuildReadinessStatus(readiness, $"{reason}; waiting for authoritative ownership");
         Plugin.Log.Information(
-            $"[FrenRider][ADS] {reason} for {readiness.Entry!.DutyName} ({AdsDutyCategoryCatalog.GetLabel(readiness.Entry.Category)}) with ADS clearance {readiness.Entry.ClearanceStatus} (M{readiness.Entry.ClearanceLevel}), support {readiness.Entry.SupportLevel}, and threshold {readiness.FamilySettings.MaturityThreshold}.");
+            $"[FrenRider][ADS] {reason} for {readiness.Entry!.DutyName} ({AdsDutyCategoryCatalog.GetLabel(readiness.Entry.Category)}) with ADS clearance {readiness.Entry.ClearanceStatus} (M{readiness.Entry.ClearanceLevel}), support {readiness.Entry.SupportLevel}, threshold {readiness.FamilySettings.MaturityThreshold}, and {readiness.FamilySettings.HandoffDelaySeconds}s continuous-ready delay.");
     }
 
     private void BackoffFailedHandoff(DateTime now, AdsDutyReadiness readiness, string reason)
@@ -284,21 +329,14 @@ public sealed class AdsIntegrationService
         return $"{categoryLabel} {readiness.Entry.DutyName}: M{readiness.Entry.ClearanceLevel}/T{readiness.FamilySettings.MaturityThreshold}, {trailingStatus}.";
     }
 
-    private bool IsReadyToStartAdsInsideDuty(uint territoryTypeId)
+    private bool IsReadyToStartAdsInsideDuty(uint territoryTypeId, DateTime now)
     {
-        if (Plugin.Condition[ConditionFlag.BetweenAreas]
-            || Plugin.Condition[ConditionFlag.BetweenAreas51])
-        {
-            return false;
-        }
-
-        var now = DateTime.UtcNow;
         var secondsSinceEnter = dutyEnteredUtc == DateTime.MinValue
             ? double.MaxValue
             : (now - dutyEnteredUtc).TotalSeconds;
 
         if (territoryTypeId != PraetoriumTerritoryTypeId)
-            return secondsSinceEnter >= GenericDutyReadyDelaySeconds;
+            return true;
 
         var remainingTime = GameHelpers.GetDutyRemainingTime();
         if (remainingTime > 0f && remainingTime < PraetoriumTimeLimitSeconds)

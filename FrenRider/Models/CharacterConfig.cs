@@ -36,6 +36,14 @@ public class CharacterConfig
     private int respawnInsideDutiesDelaySeconds = 60;
     private float mountUpToChaseFrenDistance = 100f;
     private int mountUpToChaseFrenDelaySeconds = 30;
+    private int adsSoloHandoffDelaySeconds = 10;
+    private int adsFourManHandoffDelaySeconds = 2;
+    private int adsEightManHandoffDelaySeconds = 2;
+    private int adsAllianceHandoffDelaySeconds = 2;
+    private int adsGuildHestHandoffDelaySeconds = 2;
+    private int adsDeepDungeonHandoffDelaySeconds = 2;
+    private int adsTreasureDungeonHandoffDelaySeconds = 2;
+    private int adsOtherHandoffDelaySeconds = 2;
 
     // --- Party / Friend ---
     public string FrenName { get; set; } = "";
@@ -119,20 +127,60 @@ public class CharacterConfig
     public bool AdsDutyFamilySettingsMigrated { get; set; } = false;
     public bool AdsSoloEnabled { get; set; } = false;
     public int AdsSoloMaturityThreshold { get; set; } = 3;
+    public int AdsSoloHandoffDelaySeconds
+    {
+        get => adsSoloHandoffDelaySeconds;
+        set => adsSoloHandoffDelaySeconds = Math.Clamp(value, 2, 300);
+    }
     public bool AdsFourManEnabled { get; set; } = false;
     public int AdsFourManMaturityThreshold { get; set; } = 3;
+    public int AdsFourManHandoffDelaySeconds
+    {
+        get => adsFourManHandoffDelaySeconds;
+        set => adsFourManHandoffDelaySeconds = Math.Clamp(value, 2, 300);
+    }
     public bool AdsEightManEnabled { get; set; } = false;
     public int AdsEightManMaturityThreshold { get; set; } = 3;
+    public int AdsEightManHandoffDelaySeconds
+    {
+        get => adsEightManHandoffDelaySeconds;
+        set => adsEightManHandoffDelaySeconds = Math.Clamp(value, 2, 300);
+    }
     public bool AdsAllianceEnabled { get; set; } = false;
     public int AdsAllianceMaturityThreshold { get; set; } = 3;
+    public int AdsAllianceHandoffDelaySeconds
+    {
+        get => adsAllianceHandoffDelaySeconds;
+        set => adsAllianceHandoffDelaySeconds = Math.Clamp(value, 2, 300);
+    }
     public bool AdsGuildHestEnabled { get; set; } = false;
     public int AdsGuildHestMaturityThreshold { get; set; } = 3;
+    public int AdsGuildHestHandoffDelaySeconds
+    {
+        get => adsGuildHestHandoffDelaySeconds;
+        set => adsGuildHestHandoffDelaySeconds = Math.Clamp(value, 2, 300);
+    }
     public bool AdsDeepDungeonEnabled { get; set; } = false;
     public int AdsDeepDungeonMaturityThreshold { get; set; } = 3;
+    public int AdsDeepDungeonHandoffDelaySeconds
+    {
+        get => adsDeepDungeonHandoffDelaySeconds;
+        set => adsDeepDungeonHandoffDelaySeconds = Math.Clamp(value, 2, 300);
+    }
     public bool AdsTreasureDungeonEnabled { get; set; } = false;
     public int AdsTreasureDungeonMaturityThreshold { get; set; } = 3;
+    public int AdsTreasureDungeonHandoffDelaySeconds
+    {
+        get => adsTreasureDungeonHandoffDelaySeconds;
+        set => adsTreasureDungeonHandoffDelaySeconds = Math.Clamp(value, 2, 300);
+    }
     public bool AdsOtherEnabled { get; set; } = false;
     public int AdsOtherMaturityThreshold { get; set; } = 3;
+    public int AdsOtherHandoffDelaySeconds
+    {
+        get => adsOtherHandoffDelaySeconds;
+        set => adsOtherHandoffDelaySeconds = Math.Clamp(value, 2, 300);
+    }
     public bool AdsEnableChestOpening { get; set; } = true;
     public int AdsPresetSelection { get; set; } = 0; // Local stub only until FrenRider can push richer ADS config
     public bool UseAdsLeaveAfterAdsDuty { get; set; } = false;
@@ -236,20 +284,28 @@ public class CharacterConfig
             AdsDutyFamilySettingsMigrated = AdsDutyFamilySettingsMigrated,
             AdsSoloEnabled = AdsSoloEnabled,
             AdsSoloMaturityThreshold = AdsSoloMaturityThreshold,
+            AdsSoloHandoffDelaySeconds = AdsSoloHandoffDelaySeconds,
             AdsFourManEnabled = AdsFourManEnabled,
             AdsFourManMaturityThreshold = AdsFourManMaturityThreshold,
+            AdsFourManHandoffDelaySeconds = AdsFourManHandoffDelaySeconds,
             AdsEightManEnabled = AdsEightManEnabled,
             AdsEightManMaturityThreshold = AdsEightManMaturityThreshold,
+            AdsEightManHandoffDelaySeconds = AdsEightManHandoffDelaySeconds,
             AdsAllianceEnabled = AdsAllianceEnabled,
             AdsAllianceMaturityThreshold = AdsAllianceMaturityThreshold,
+            AdsAllianceHandoffDelaySeconds = AdsAllianceHandoffDelaySeconds,
             AdsGuildHestEnabled = AdsGuildHestEnabled,
             AdsGuildHestMaturityThreshold = AdsGuildHestMaturityThreshold,
+            AdsGuildHestHandoffDelaySeconds = AdsGuildHestHandoffDelaySeconds,
             AdsDeepDungeonEnabled = AdsDeepDungeonEnabled,
             AdsDeepDungeonMaturityThreshold = AdsDeepDungeonMaturityThreshold,
+            AdsDeepDungeonHandoffDelaySeconds = AdsDeepDungeonHandoffDelaySeconds,
             AdsTreasureDungeonEnabled = AdsTreasureDungeonEnabled,
             AdsTreasureDungeonMaturityThreshold = AdsTreasureDungeonMaturityThreshold,
+            AdsTreasureDungeonHandoffDelaySeconds = AdsTreasureDungeonHandoffDelaySeconds,
             AdsOtherEnabled = AdsOtherEnabled,
             AdsOtherMaturityThreshold = AdsOtherMaturityThreshold,
+            AdsOtherHandoffDelaySeconds = AdsOtherHandoffDelaySeconds,
             AdsEnableChestOpening = AdsEnableChestOpening,
             AdsPresetSelection = AdsPresetSelection,
             UseAdsLeaveAfterAdsDuty = UseAdsLeaveAfterAdsDuty,
@@ -341,61 +397,82 @@ public class CharacterConfig
     public AdsDutyFamilySettings GetAdsDutyFamilySettings(AdsDutyCategory category)
     {
         if (!AdsDutyFamilySettingsMigrated)
-            return new AdsDutyFamilySettings(UseAdsIfAvailable, Math.Clamp(AdsMaturityThreshold, 0, 3));
+        {
+            return new AdsDutyFamilySettings(
+                UseAdsIfAvailable,
+                Math.Clamp(AdsMaturityThreshold, 0, 3),
+                GetDefaultAdsHandoffDelaySeconds(category));
+        }
 
         return category switch
         {
-            AdsDutyCategory.Solo => new AdsDutyFamilySettings(AdsSoloEnabled, Math.Clamp(AdsSoloMaturityThreshold, 0, 3)),
-            AdsDutyCategory.FourMan => new AdsDutyFamilySettings(AdsFourManEnabled, Math.Clamp(AdsFourManMaturityThreshold, 0, 3)),
-            AdsDutyCategory.EightMan => new AdsDutyFamilySettings(AdsEightManEnabled, Math.Clamp(AdsEightManMaturityThreshold, 0, 3)),
-            AdsDutyCategory.Alliance => new AdsDutyFamilySettings(AdsAllianceEnabled, Math.Clamp(AdsAllianceMaturityThreshold, 0, 3)),
-            AdsDutyCategory.GuildHest => new AdsDutyFamilySettings(AdsGuildHestEnabled, Math.Clamp(AdsGuildHestMaturityThreshold, 0, 3)),
-            AdsDutyCategory.DeepDungeon => new AdsDutyFamilySettings(AdsDeepDungeonEnabled, Math.Clamp(AdsDeepDungeonMaturityThreshold, 0, 3)),
-            AdsDutyCategory.TreasureDungeon => new AdsDutyFamilySettings(AdsTreasureDungeonEnabled, Math.Clamp(AdsTreasureDungeonMaturityThreshold, 0, 3)),
-            _ => new AdsDutyFamilySettings(AdsOtherEnabled, Math.Clamp(AdsOtherMaturityThreshold, 0, 3)),
+            AdsDutyCategory.Solo => new AdsDutyFamilySettings(AdsSoloEnabled, Math.Clamp(AdsSoloMaturityThreshold, 0, 3), AdsSoloHandoffDelaySeconds),
+            AdsDutyCategory.FourMan => new AdsDutyFamilySettings(AdsFourManEnabled, Math.Clamp(AdsFourManMaturityThreshold, 0, 3), AdsFourManHandoffDelaySeconds),
+            AdsDutyCategory.EightMan => new AdsDutyFamilySettings(AdsEightManEnabled, Math.Clamp(AdsEightManMaturityThreshold, 0, 3), AdsEightManHandoffDelaySeconds),
+            AdsDutyCategory.Alliance => new AdsDutyFamilySettings(AdsAllianceEnabled, Math.Clamp(AdsAllianceMaturityThreshold, 0, 3), AdsAllianceHandoffDelaySeconds),
+            AdsDutyCategory.GuildHest => new AdsDutyFamilySettings(AdsGuildHestEnabled, Math.Clamp(AdsGuildHestMaturityThreshold, 0, 3), AdsGuildHestHandoffDelaySeconds),
+            AdsDutyCategory.DeepDungeon => new AdsDutyFamilySettings(AdsDeepDungeonEnabled, Math.Clamp(AdsDeepDungeonMaturityThreshold, 0, 3), AdsDeepDungeonHandoffDelaySeconds),
+            AdsDutyCategory.TreasureDungeon => new AdsDutyFamilySettings(AdsTreasureDungeonEnabled, Math.Clamp(AdsTreasureDungeonMaturityThreshold, 0, 3), AdsTreasureDungeonHandoffDelaySeconds),
+            _ => new AdsDutyFamilySettings(AdsOtherEnabled, Math.Clamp(AdsOtherMaturityThreshold, 0, 3), AdsOtherHandoffDelaySeconds),
         };
     }
 
-    public void SetAdsDutyFamilySettings(AdsDutyCategory category, bool enabled, int maturityThreshold)
+    public void SetAdsDutyFamilySettings(
+        AdsDutyCategory category,
+        bool enabled,
+        int maturityThreshold,
+        int handoffDelaySeconds)
     {
         EnsureAdsDutyFamilySettingsInitialized();
         var clampedThreshold = Math.Clamp(maturityThreshold, 0, 3);
+        var clampedDelay = Math.Clamp(handoffDelaySeconds, 2, 300);
         switch (category)
         {
             case AdsDutyCategory.Solo:
                 AdsSoloEnabled = enabled;
                 AdsSoloMaturityThreshold = clampedThreshold;
+                AdsSoloHandoffDelaySeconds = clampedDelay;
                 break;
             case AdsDutyCategory.FourMan:
                 AdsFourManEnabled = enabled;
                 AdsFourManMaturityThreshold = clampedThreshold;
+                AdsFourManHandoffDelaySeconds = clampedDelay;
                 break;
             case AdsDutyCategory.EightMan:
                 AdsEightManEnabled = enabled;
                 AdsEightManMaturityThreshold = clampedThreshold;
+                AdsEightManHandoffDelaySeconds = clampedDelay;
                 break;
             case AdsDutyCategory.Alliance:
                 AdsAllianceEnabled = enabled;
                 AdsAllianceMaturityThreshold = clampedThreshold;
+                AdsAllianceHandoffDelaySeconds = clampedDelay;
                 break;
             case AdsDutyCategory.GuildHest:
                 AdsGuildHestEnabled = enabled;
                 AdsGuildHestMaturityThreshold = clampedThreshold;
+                AdsGuildHestHandoffDelaySeconds = clampedDelay;
                 break;
             case AdsDutyCategory.DeepDungeon:
                 AdsDeepDungeonEnabled = enabled;
                 AdsDeepDungeonMaturityThreshold = clampedThreshold;
+                AdsDeepDungeonHandoffDelaySeconds = clampedDelay;
                 break;
             case AdsDutyCategory.TreasureDungeon:
                 AdsTreasureDungeonEnabled = enabled;
                 AdsTreasureDungeonMaturityThreshold = clampedThreshold;
+                AdsTreasureDungeonHandoffDelaySeconds = clampedDelay;
                 break;
             default:
                 AdsOtherEnabled = enabled;
                 AdsOtherMaturityThreshold = clampedThreshold;
+                AdsOtherHandoffDelaySeconds = clampedDelay;
                 break;
         }
     }
+
+    private static int GetDefaultAdsHandoffDelaySeconds(AdsDutyCategory category)
+        => category == AdsDutyCategory.Solo ? 10 : 2;
 
     public bool NormalizeExitMethodSelection()
     {

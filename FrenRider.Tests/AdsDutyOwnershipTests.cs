@@ -175,6 +175,107 @@ public sealed class AdsDutyOwnershipTests
     }
 
     [Fact]
+    public void ContinuousReadinessCountdownExpiresAtTheExactConfiguredDelay()
+    {
+        var startedAt = new DateTime(2026, 8, 31, 12, 0, 0, DateTimeKind.Utc);
+        var state = default(AdsHandoffCountdownState);
+
+        var started = AdsIntegrationPolicy.EvaluateHandoffCountdown(
+            state, 1036, 4, startedAt, 10, ReadyConditions);
+        Assert.False(started.IsReady);
+        Assert.Equal(TimeSpan.FromSeconds(10), started.Remaining);
+
+        var beforeExpiry = AdsIntegrationPolicy.EvaluateHandoffCountdown(
+            started.State, 1036, 4, startedAt.AddSeconds(9.999), 10, ReadyConditions);
+        Assert.False(beforeExpiry.IsReady);
+
+        var atExpiry = AdsIntegrationPolicy.EvaluateHandoffCountdown(
+            beforeExpiry.State, 1036, 4, startedAt.AddSeconds(10), 10, ReadyConditions);
+        Assert.True(atExpiry.IsReady);
+        Assert.Equal(TimeSpan.Zero, atExpiry.Remaining);
+    }
+
+    [Fact]
+    public void ReadinessInterruptionRestartsTheFullCountdown()
+    {
+        var startedAt = new DateTime(2026, 8, 31, 12, 0, 0, DateTimeKind.Utc);
+        var started = AdsIntegrationPolicy.EvaluateHandoffCountdown(
+            default, 1036, 4, startedAt, 10, ReadyConditions);
+
+        var interrupted = AdsIntegrationPolicy.EvaluateHandoffCountdown(
+            started.State,
+            1036,
+            4,
+            startedAt.AddSeconds(9),
+            10,
+            ReadyConditions with { IsWatchingCutscene = true });
+        Assert.False(interrupted.IsReady);
+        Assert.Equal(DateTime.MinValue, interrupted.State.ReadySinceUtc);
+
+        var restartedAt = startedAt.AddSeconds(10);
+        var restarted = AdsIntegrationPolicy.EvaluateHandoffCountdown(
+            interrupted.State, 1036, 4, restartedAt, 10, ReadyConditions);
+        Assert.False(restarted.IsReady);
+        Assert.Equal(restartedAt, restarted.State.ReadySinceUtc);
+
+        var atRestartedExpiry = AdsIntegrationPolicy.EvaluateHandoffCountdown(
+            restarted.State, 1036, 4, restartedAt.AddSeconds(10), 10, ReadyConditions);
+        Assert.True(atRestartedExpiry.IsReady);
+    }
+
+    [Fact]
+    public void DutyIdentityChangeRestartsTheFullCountdown()
+    {
+        var startedAt = new DateTime(2026, 8, 31, 12, 0, 0, DateTimeKind.Utc);
+        var original = AdsIntegrationPolicy.EvaluateHandoffCountdown(
+            default, 1036, 4, startedAt, 2, ReadyConditions);
+
+        var changedAt = startedAt.AddSeconds(2);
+        var changed = AdsIntegrationPolicy.EvaluateHandoffCountdown(
+            original.State, 1037, 5, changedAt, 2, ReadyConditions);
+
+        Assert.False(changed.IsReady);
+        Assert.Equal(changedAt, changed.State.ReadySinceUtc);
+        Assert.Equal(TimeSpan.FromSeconds(2), changed.Remaining);
+    }
+
+    [Theory]
+    [InlineData(0, "waiting for login")]
+    [InlineData(1, "waiting for local player")]
+    [InlineData(2, "waiting for local player to be alive")]
+    [InlineData(3, "waiting for unconscious state to clear")]
+    [InlineData(4, "waiting for area transition to finish")]
+    [InlineData(5, "waiting for cutscene to finish")]
+    [InlineData(6, "waiting for cutscene event to finish")]
+    public void RuntimeReadinessBlockersResetTheCountdown(int blockerCase, string expectedBlocker)
+    {
+        var now = new DateTime(2026, 8, 31, 12, 0, 0, DateTimeKind.Utc);
+        var conditions = blockerCase switch
+        {
+            0 => ReadyConditions with { IsLoggedIn = false },
+            1 => ReadyConditions with { HasLocalPlayer = false },
+            2 => ReadyConditions with { IsPlayerAlive = false },
+            3 => ReadyConditions with { IsUnconscious = true },
+            4 => ReadyConditions with { IsBetweenAreas = true },
+            5 => ReadyConditions with { IsWatchingCutscene = true },
+            6 => ReadyConditions with { IsOccupiedInCutSceneEvent = true },
+            _ => throw new ArgumentOutOfRangeException(nameof(blockerCase)),
+        };
+
+        var result = AdsIntegrationPolicy.EvaluateHandoffCountdown(
+            new AdsHandoffCountdownState(1036, 4, now.AddSeconds(-1)),
+            1036,
+            4,
+            now,
+            2,
+            conditions);
+
+        Assert.False(result.IsReady);
+        Assert.Equal(expectedBlocker, result.Blocker);
+        Assert.Equal(DateTime.MinValue, result.State.ReadySinceUtc);
+    }
+
+    [Fact]
     public void PendingHandoffPausesDutyAndExitSystems()
     {
         Assert.True(AdsIntegrationPolicy.ShouldPauseDutySystems(
@@ -215,6 +316,15 @@ public sealed class AdsDutyOwnershipTests
             runtimeOwned: false,
             exitTakeoverActive: true));
     }
+
+    private static AdsHandoffReadinessConditions ReadyConditions => new(
+        IsLoggedIn: true,
+        HasLocalPlayer: true,
+        IsPlayerAlive: true,
+        IsUnconscious: false,
+        IsBetweenAreas: false,
+        IsWatchingCutscene: false,
+        IsOccupiedInCutSceneEvent: false);
 
     private static AdsDutyIpcService CreateService(
         Func<bool> loaded,

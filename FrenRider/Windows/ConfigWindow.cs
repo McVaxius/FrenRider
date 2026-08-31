@@ -1283,7 +1283,7 @@ public class ConfigWindow : Window, IDisposable
 
         ImGui.Text("ADS Duty Handoff");
         ImGui.SameLine();
-        HelpMarker("Per-duty-family ADS handoff.\nDuty name, category, support, and clearance come only from ADS CurrentDuty. FrenRider accepts that snapshot only when ADS catalog metadata is complete and its territory/CFC matches live GameMain; otherwise local duty logic stays active.\nRuntime ADS ownership is authoritative even after manual Start Inside. FrenRider pauses local duty systems while handoff is pending or ADS owns the run; configured exit takeover remains available after duty completion.");
+        HelpMarker("Per-duty-family ADS handoff.\nDuty name, category, support, and clearance come only from ADS CurrentDuty. FrenRider accepts that snapshot only when ADS catalog metadata is complete and its territory/CFC matches live GameMain; otherwise local duty logic stays active.\nThe handoff delay counts only while the character remains continuously ready: logged in, present, alive, conscious, out of area transitions, and out of cutscenes.\nRuntime ADS ownership is authoritative even after manual Start Inside. FrenRider pauses local duty systems while handoff is pending or ADS owns the run; configured exit takeover remains available after duty completion.");
 
         if (!config.AdsDutyFamilySettingsMigrated)
         {
@@ -1299,7 +1299,7 @@ public class ConfigWindow : Window, IDisposable
         ImGui.Spacing();
         ImGui.Text("Duty Families");
         ImGui.SameLine();
-        HelpMarker("Each family has its own enable toggle and maturity threshold, compared directly with ADS clearance for the validated current duty.\n0 = not cleared, 1 = unsync cleared, 2 = duty support cleared, 3 = proven sync clear.");
+        HelpMarker("Each family has its own enable toggle, maturity threshold, and continuous-ready handoff delay.\n0 = not cleared, 1 = unsync cleared, 2 = duty support cleared, 3 = proven sync clear.\nHandoff delay range: 2-300 seconds.");
 
         foreach (var entry in AdsDutyCategoryCatalog.Entries)
         {
@@ -1307,7 +1307,11 @@ public class ConfigWindow : Window, IDisposable
             var enabled = settings.Enabled;
             if (ImGui.Checkbox($"{entry.Label}##AdsFamily{entry.Category}", ref enabled))
             {
-                config.SetAdsDutyFamilySettings(entry.Category, enabled, settings.MaturityThreshold);
+                config.SetAdsDutyFamilySettings(
+                    entry.Category,
+                    enabled,
+                    settings.MaturityThreshold,
+                    settings.HandoffDelaySeconds);
                 configManager.SaveCurrentAccount();
             }
 
@@ -1316,9 +1320,24 @@ public class ConfigWindow : Window, IDisposable
             ImGui.SetNextItemWidth(240);
             if (ImGui.Combo($"##AdsFamilyThreshold{entry.Category}", ref threshold, AdsMaturityOptions, AdsMaturityOptions.Length))
             {
-                config.SetAdsDutyFamilySettings(entry.Category, enabled, threshold);
+                config.SetAdsDutyFamilySettings(
+                    entry.Category,
+                    enabled,
+                    threshold,
+                    settings.HandoffDelaySeconds);
                 configManager.SaveCurrentAccount();
             }
+
+            ImGui.SameLine();
+            var handoffDelaySeconds = settings.HandoffDelaySeconds;
+            ImGui.SetNextItemWidth(90);
+            if (ImGui.InputInt($"##AdsFamilyHandoffDelay{entry.Category}", ref handoffDelaySeconds, 1, 10))
+            {
+                config.SetAdsDutyFamilySettings(entry.Category, enabled, threshold, handoffDelaySeconds);
+                configManager.SaveCurrentAccount();
+            }
+            ImGui.SameLine();
+            ImGui.TextDisabled("sec ready");
             DrawDefaultSettingSyncButton($"ADS {entry.Label}", $"AdsFamily{entry.Category}");
         }
 

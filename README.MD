@@ -62,7 +62,9 @@ The main window shows run state, configured fren, party status, follow/mount/idl
 
 Fren Rider can hand duties to ADS when ADS is loaded, ADS reports a complete `CurrentDuty` catalog row whose territory and Content Finder Condition match live GameMain, the ADS-reported duty family is enabled, and the ADS clearance meets the configured threshold. Missing, malformed, unknown, or mismatched duty metadata fails closed to Fren Rider's local duty logic; Fren Rider has no separate per-duty maturity table or pilot promotions.
 
-Duty families are Solo, 4-Man, 8-Man, Alliance, Guild Hest, Deep Dungeon, Treasure Dungeon, and Other. Each family has its own enable flag and maturity threshold.
+Duty families are Solo, 4-Man, 8-Man, Alliance, Guild Hest, Deep Dungeon, Treasure Dungeon, and Other. Each family has its own enable flag, maturity threshold, and 2-300 second ADS handoff delay. Solo defaults to 10 seconds; every other family defaults to 2 seconds.
+
+The handoff delay advances only while readiness remains continuous: the client is logged in, the local player is present and alive, the character is not `Unconscious`, no area transition is active, and neither `WatchingCutscene` nor `OccupiedInCutSceneEvent` is active. Losing readiness or changing duty identity restarts the full family delay. Combat does not block this countdown because some solo-duty openings enter combat before handoff. The ADS status shows the current blocker or remaining continuous-ready time without per-frame logging. The Praetorium must also satisfy its existing duty-timer/fallback start seam before Fren Rider asks ADS to take ownership.
 
 ADS runtime duty ownership is authoritative, including manual ADS **Start Inside** and **Resume**. While handoff is pending, ADS owns/leaves the live duty, or configured exit takeover is active, Fren Rider pauses follow/navigation, far chase, formation, mount actions, combat-state changes, duty interaction, maintenance, and automatic dialogs. Duty completion can enable the configured FrenRider exit path without resuming those other systems. ADS **Stop** releases runtime ownership and allows FrenRider local duty logic to resume.
 

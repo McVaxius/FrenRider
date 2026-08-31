@@ -15,7 +15,10 @@ public enum AdsDutyCategory
     Other = 7,
 }
 
-public readonly record struct AdsDutyFamilySettings(bool Enabled, int MaturityThreshold);
+public readonly record struct AdsDutyFamilySettings(
+    bool Enabled,
+    int MaturityThreshold,
+    int HandoffDelaySeconds);
 
 public sealed record AdsDutyCategoryEntry(AdsDutyCategory Category, string Label);
 
