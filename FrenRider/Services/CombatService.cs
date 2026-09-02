@@ -1180,36 +1180,25 @@ public class CombatService
         ActivePreset = string.Empty;
 
         var inDuty = IsInDuty();
-        if (!config.Enabled || !inDuty)
+        var adsOwnsDuty = plugin.AdsIntegrationService.IsHandoffPending
+            || plugin.AdsIntegrationService.IsControllingDuty;
+        if (!config.Enabled || !inDuty || !adsOwnsDuty)
         {
             State = CombatState.OutOfCombat;
-            StateDetail = config.Enabled ? "ADS Hyper Focus ended outside duty" : "Disabled";
+            StateDetail = !config.Enabled
+                ? "Disabled"
+                : !inDuty
+                    ? "ADS Hyper Focus ended outside duty"
+                    : "ADS Hyper Focus ended without ADS duty ownership";
             return;
         }
 
-        var authorityDecision = RefreshDutyCombatAuthority(
-            config,
-            inDuty,
-            questionableIpcService.Refresh(force: true),
-            frenRiderBootstrapAllowed: false);
-        if (authorityDecision.Authority == DutyCombatAuthority.QuestionableSolo)
-        {
-            State = CombatState.OutOfCombat;
-            StateDetail = "ADS Hyper Focus ended under QuestionableSolo authority";
-            return;
-        }
-
-        if (IsRotationDisabled(config))
-        {
-            State = CombatState.OutOfCombat;
-            StateDetail = "ADS Hyper Focus ended; configured rotation disabled";
-            dutyCombatAuthorityPolicy.MarkFrenRiderBootstrapComplete();
-            return;
-        }
-
-        ActivateRotation(config, ignoreCooldown: true);
-        dutyCombatAuthorityPolicy.MarkFrenRiderBootstrapComplete();
-        Plugin.Log.Information($"[FrenRider][AdsHyperFocus] Restored configured combat provider after {reason}.");
+        ClearExternalAutomationRuntimeState($"ADS Hyper Focus {reason}");
+        ResetCombatSettingsRefreshTracking();
+        lastObservedCombatSettingsSignature = string.Empty;
+        State = CombatState.OutOfCombat;
+        StateDetail = "ADS Hyper Focus ended; combat bootstrap pending";
+        Plugin.Log.Information($"[FrenRider][AdsHyperFocus] Re-armed configured combat bootstrap after {reason}.");
     }
 
     private void HandleAdsHyperFocusLease(bool inCombat, bool inDuty)
