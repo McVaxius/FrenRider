@@ -436,6 +436,19 @@ public class ConfigWindow : Window, IDisposable
     {
         ImGui.Spacing();
 
+        if (IsDefaultConfigSelected())
+        {
+            var enabledByDefault = config.Enabled;
+            if (ImGui.Checkbox("Fren Rider enabled by default", ref enabledByDefault))
+            {
+                config.Enabled = enabledByDefault;
+                configManager.SaveCurrentAccount();
+            }
+            HelpMarker("New character profiles inherit this setting. Existing characters change only when you use a sync action.");
+            DrawDefaultSettingSyncButton("Fren Rider enabled by default");
+            ImGui.Spacing();
+        }
+
         // Fren Name with party dropdown and capitalization fix
         ImGui.Text("Fren Name");
         ImGui.SameLine();

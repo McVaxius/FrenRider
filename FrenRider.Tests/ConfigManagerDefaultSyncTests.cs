@@ -179,7 +179,7 @@ public sealed class ConfigManagerDefaultSyncTests
     }
 
     [Fact]
-    public void FullSyncDoesNotCopyHiddenRuntimeEnabledState()
+    public void FullSyncCopiesEnabledState()
     {
         var account = CreateAccount();
         account.DefaultConfig.Enabled = true;
@@ -189,7 +189,55 @@ public sealed class ConfigManagerDefaultSyncTests
 
         ConfigManager.ApplyDefaultToAllCharacters(account);
 
-        Assert.All(account.Characters.Values, character => Assert.False(character.Enabled));
+        Assert.All(account.Characters.Values, character => Assert.True(character.Enabled));
+    }
+
+    [Fact]
+    public void EnabledNamedSettingSyncsFromDefaultToLocalCharactersOnly()
+    {
+        var account = CreateAccount();
+        account.DefaultConfig.Enabled = true;
+        account.RemoteProfiles.Add(new RemoteProfileRow
+        {
+            Config = new CharacterConfig
+            {
+                Enabled = false,
+            },
+        });
+
+        foreach (var character in account.Characters.Values)
+            character.Enabled = false;
+
+        var count = ConfigManager.ApplyDefaultSettingToAllCharacters(
+            account,
+            "Fren Rider enabled by default");
+
+        Assert.Equal(account.Characters.Count, count);
+        Assert.All(account.Characters.Values, character => Assert.True(character.Enabled));
+        Assert.False(account.RemoteProfiles[0].Config.Enabled);
+    }
+
+    [Fact]
+    public void ProfileTabSyncCopiesEnabledState()
+    {
+        var account = CreateAccount();
+        account.DefaultConfig.Enabled = true;
+        account.DefaultConfig.Cling = 9f;
+
+        foreach (var character in account.Characters.Values)
+        {
+            character.Enabled = false;
+            character.Cling = 2f;
+        }
+
+        var count = ConfigManager.ApplyDefaultTabToAllCharacters(account, "Profile");
+
+        Assert.Equal(account.Characters.Count, count);
+        Assert.All(account.Characters.Values, character =>
+        {
+            Assert.True(character.Enabled);
+            Assert.Equal(2f, character.Cling);
+        });
     }
 
     [Fact]
@@ -291,7 +339,7 @@ public sealed class ConfigManagerDefaultSyncTests
     }
 
     [Fact]
-    public void FullSyncCopiesEveryPersistedCharacterSettingExceptEnabled()
+    public void FullSyncCopiesEveryPersistedCharacterSetting()
     {
         var account = CreateAccount();
         AssignDistinctPersistedValues(account.DefaultConfig, 0, true, 0);
@@ -315,11 +363,8 @@ public sealed class ConfigManagerDefaultSyncTests
         Assert.Equal(account.Characters.Count, count);
         foreach (var target in account.Characters.Values)
         {
-            foreach (var property in PersistedCharacterProperties.Where(property => property.Name != nameof(CharacterConfig.Enabled)))
+            foreach (var property in PersistedCharacterProperties)
                 AssertPropertyValuesEqual(property, account.DefaultConfig, target);
-
-            Assert.True(account.DefaultConfig.Enabled);
-            Assert.False(target.Enabled);
         }
     }
 

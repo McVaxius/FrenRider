@@ -42,6 +42,7 @@ public class ConfigManager : IDadProfileStore
             new[] { "Profile", "Party" },
             new[]
             {
+                Setting("Fren Rider enabled by default", (source, target) => target.Enabled = source.Enabled),
                 Setting("Fren Name", (source, target) => target.FrenName = source.FrenName),
                 Setting("DAD Profile Acceptance", (source, target) => target.ProfileAcceptancePolicy = source.ProfileAcceptancePolicy),
                 Setting("Fly You Fools", (source, target) => target.FlyYouFools = source.FlyYouFools),
@@ -1117,9 +1118,16 @@ public class ConfigManager : IDadProfileStore
         var account = GetCurrentAccount();
         if (account == null) return 0;
 
+        var previousEffectiveEnabled = GetActiveConfig().Enabled;
         var count = ApplyDefaultToAllCharacters(account);
         if (count > 0)
+        {
             SaveCurrentAccount();
+            NotifyEffectiveEnabledChanged(
+                previousEffectiveEnabled,
+                GetActiveConfig().Enabled,
+                "DEFAULT CONFIG everything sync");
+        }
 
         log.Information($"[ConfigManager] Synced DEFAULT CONFIG to {count} character profiles in account {CurrentAccountId}");
         return count;
@@ -1130,9 +1138,16 @@ public class ConfigManager : IDadProfileStore
         var account = GetCurrentAccount();
         if (account == null) return 0;
 
+        var previousEffectiveEnabled = GetActiveConfig().Enabled;
         var count = ApplyDefaultTabToAllCharacters(account, tabName);
         if (count > 0)
+        {
             SaveCurrentAccount();
+            NotifyEffectiveEnabledChanged(
+                previousEffectiveEnabled,
+                GetActiveConfig().Enabled,
+                $"DEFAULT CONFIG tab '{tabName}' sync");
+        }
 
         log.Information($"[ConfigManager] Synced DEFAULT CONFIG tab '{tabName}' to {count} character profiles in account {CurrentAccountId}");
         return count;
@@ -1155,9 +1170,16 @@ public class ConfigManager : IDadProfileStore
         var account = GetCurrentAccount();
         if (account == null) return 0;
 
+        var previousEffectiveEnabled = GetActiveConfig().Enabled;
         var count = ApplyDefaultSettingToAllCharacters(account, copy);
         if (count > 0)
+        {
             SaveCurrentAccount();
+            NotifyEffectiveEnabledChanged(
+                previousEffectiveEnabled,
+                GetActiveConfig().Enabled,
+                $"DEFAULT CONFIG setting '{label}' sync");
+        }
 
         log.Information($"[ConfigManager] Synced DEFAULT CONFIG setting '{label}' to {count} character profiles in account {CurrentAccountId}");
         return count;

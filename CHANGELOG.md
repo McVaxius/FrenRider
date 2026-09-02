@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- DEFAULT CONFIG now exposes whether Fren Rider is enabled by default and can sync that state to local character profiles
 - ADS can acquire a five-second token-owned Hyper Focus lease through JSON IPC to run RSR Manual as the sole temporary combat provider in validated ADS-owned solo duties
 - DAD can now resolve and export exact remote FrenRider profiles, apply them under each local character's Off/Temporary/Permanent acceptance policy, and release proposal-owned temporary overlays through bounded JSON IPC
 - Settings now keep visually distinct editable remote DAD profile rows separate from local characters, keyed by exact owner, sender-island, and opaque-character identity
