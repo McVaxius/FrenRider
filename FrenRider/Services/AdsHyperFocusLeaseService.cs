@@ -237,7 +237,10 @@ public sealed class AdsHyperFocusLeaseService : IDisposable
             var generation = coordinator.LeaseGeneration;
             var response = coordinator.Acquire(ReadToken(requestJson));
             if (response.Ok && coordinator.LeaseGeneration != generation)
+            {
+                plugin.BossModActionTweaksService.ResetRecovery();
                 plugin.CombatService.ActivateAdsHyperFocusLease();
+            }
             return Serialize(response);
         });
         heartbeatProvider.RegisterFunc(requestJson => Serialize(coordinator.Heartbeat(ReadToken(requestJson))));

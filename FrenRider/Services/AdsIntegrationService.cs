@@ -157,6 +157,8 @@ public sealed class AdsIntegrationService
             liveDutyIdentity.TerritoryTypeId,
             liveDutyIdentity.ContentFinderConditionId);
         IsHandoffPending = readiness.CanUseAds;
+        if (IsHandoffPending)
+            plugin.BossModActionTweaksService.ResetRecovery();
 
         var runtimeBlocker = AdsIntegrationPolicy.GetHandoffReadinessBlocker(readinessConditions);
         if (runtimeBlocker is not null)
@@ -371,7 +373,7 @@ public sealed class AdsIntegrationService
         return settings.Enabled && snapshot.ClearanceLevel >= settings.MaturityThreshold;
     }
 
-    private static unsafe (uint TerritoryTypeId, uint ContentFinderConditionId) ReadLiveDutyIdentity()
+    internal static unsafe (uint TerritoryTypeId, uint ContentFinderConditionId) ReadLiveDutyIdentity()
     {
         try
         {

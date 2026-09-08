@@ -446,6 +446,8 @@ public class ConfigWindow : Window, IDisposable
             }
             HelpMarker("New character profiles inherit this setting. Existing characters change only when you use a sync action.");
             DrawDefaultSettingSyncButton("Fren Rider enabled by default");
+            DrawAllFrenRiderButton(false);
+            DrawAllFrenRiderButton(true);
             ImGui.Spacing();
         }
 
@@ -2667,6 +2669,25 @@ public class ConfigWindow : Window, IDisposable
 
         if (ImGui.IsItemHovered())
             ImGui.SetTooltip($"Copy '{label}' from DEFAULT CONFIG to every character profile in this account.");
+    }
+
+    private void DrawAllFrenRiderButton(bool enabled)
+    {
+        ImGui.SameLine();
+        ImGui.PushStyleColor(ImGuiCol.Button, enabled
+            ? new Vector4(0.1f, 0.45f, 0.15f, 1f)
+            : new Vector4(0.6f, 0.1f, 0.1f, 1f));
+        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, enabled
+            ? new Vector4(0.15f, 0.6f, 0.2f, 1f)
+            : new Vector4(0.8f, 0.15f, 0.15f, 1f));
+        ImGui.PushStyleColor(ImGuiCol.ButtonActive, enabled
+            ? new Vector4(0.1f, 0.35f, 0.1f, 1f)
+            : new Vector4(0.45f, 0.05f, 0.05f, 1f));
+        if (ImGui.SmallButton(enabled ? "All FR on" : "All FR off"))
+            ReportDefaultSync(enabled ? "All FR on" : "All FR off", configManager.SetAllFrenRiderEnabled(enabled));
+        ImGui.PopStyleColor(3);
+        if (ImGui.IsItemHovered())
+            ImGui.SetTooltip("Set DEFAULT CONFIG and every local character in this account, including the active temporary profile.");
     }
 
     private void ReportDefaultSync(string scope, int count)

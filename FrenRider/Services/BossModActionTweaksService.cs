@@ -2,9 +2,16 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Reflection;
+using System.Runtime.Loader;
+using Dalamud.Game.ClientState.Conditions;
+using Dalamud.Game.ClientState.Objects.Enums;
+using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
+using Lumina.Excel.Sheets;
 
 namespace FrenRider.Services;
 
@@ -25,15 +32,24 @@ public sealed class BossModActionTweaksService
     private readonly IDalamudPluginInterface pluginInterface;
     private readonly IPluginLog log;
     private readonly AutorotIpcService autorotIpcService;
+    private readonly Plugin plugin;
+    private readonly CastingFailureRecovery recovery;
+    private readonly HashSet<string> movementErrors = new(StringComparer.Ordinal);
 
-    public BossModActionTweaksService(
-        IDalamudPluginInterface pluginInterface,
-        IPluginLog log,
-        AutorotIpcService autorotIpcService)
+    public BossModActionTweaksService(Plugin plugin)
     {
-        this.pluginInterface = pluginInterface;
-        this.log = log;
-        this.autorotIpcService = autorotIpcService;
+        this.plugin = plugin;
+        pluginInterface = Plugin.PluginInterface;
+        log = Plugin.Log;
+        autorotIpcService = plugin.AutorotIpcService;
+        recovery = new CastingFailureRecovery(ReadRecoverySettings, message => log.Warning(message));
+        var sheet = Plugin.DataManager.GetExcelSheet<LogMessage>();
+        foreach (var rowId in new uint[] { 562, 565, 566 })
+        {
+            var text = sheet.GetRowOrDefault(rowId)?.Text.ExtractText();
+            if (!string.IsNullOrWhiteSpace(text))
+                movementErrors.Add(text.Trim());
+        }
     }
 
     public bool HasResult { get; private set; }
@@ -43,6 +59,8 @@ public sealed class BossModActionTweaksService
 
     public void ApplyDontMoveWhileCasting(bool enabled)
     {
+        // The explicit checkbox choice supersedes the temporary recovery values.
+        recovery.Reset(restore: false);
         var results = Targets
             .Select(target => Apply(target, enabled))
             .Append(ApplyRsr(enabled))
@@ -58,6 +76,118 @@ public sealed class BossModActionTweaksService
             log.Warning($"[BossMod ActionTweaks] {result.Label} failed: {result.Detail}");
 
         log.Information($"[BossMod ActionTweaks] PreventMovingWhileCasting={enabled}: {StatusText}");
+    }
+
+    internal void OnErrorToast(ref SeString message, ref bool isHandled)
+    {
+        if (movementErrors.Contains(message.TextValue.Trim()))
+            recovery.OnError(ReadRecoveryContext(refreshOwnership: true), Environment.TickCount64);
+    }
+
+    public void UpdateRecovery()
+    {
+        if (recovery.HasPendingWork)
+            recovery.Update(ReadRecoveryContext(), Environment.TickCount64);
+    }
+
+    public void ResetRecovery() => recovery.Reset();
+
+    private CastingRecoveryContext ReadRecoveryContext(bool refreshOwnership = false)
+    {
+        var player = Plugin.ObjectTable.LocalPlayer;
+        var target = Plugin.TargetManager.Target as IBattleNpc;
+        var inDuty = Plugin.Condition[ConditionFlag.BoundByDuty]
+            || Plugin.Condition[ConditionFlag.BoundByDuty56]
+            || Plugin.Condition[ConditionFlag.BoundByDuty95];
+        var ads = plugin.AdsIntegrationService;
+        var ownership = plugin.AdsDutyIpcService.Current;
+        if (refreshOwnership)
+        {
+            var identity = AdsIntegrationService.ReadLiveDutyIdentity();
+            ownership = plugin.AdsDutyIpcService.Refresh(inDuty, identity.TerritoryTypeId,
+                identity.ContentFinderConditionId, force: true);
+        }
+        var questionable = plugin.QuestionableIpcService.Refresh(force: refreshOwnership);
+        var playerReady = Plugin.ClientState.IsLoggedIn && player?.CurrentHp > 0
+            && !Plugin.Condition[ConditionFlag.Unconscious]
+            && !Plugin.Condition[ConditionFlag.BetweenAreas]
+            && !Plugin.Condition[ConditionFlag.BetweenAreas51]
+            && !Plugin.Condition[ConditionFlag.WatchingCutscene]
+            && !Plugin.Condition[ConditionFlag.OccupiedInCutSceneEvent];
+        var livingHostile = target is { IsTargetable: true, CurrentHp: > 0 }
+            && target.StatusFlags.HasFlag(StatusFlags.Hostile);
+        return new CastingRecoveryContext(
+            Plugin.PlayerState.ContentId,
+            Plugin.ClientState.TerritoryType,
+            livingHostile ? target!.GameObjectId : 0,
+            player?.Position ?? default,
+            playerReady && plugin.ConfigManager.GetActiveConfig().Enabled,
+            Plugin.Condition[ConditionFlag.InCombat],
+            inDuty,
+            ads.IsControllingDuty || ownership.IsOwned,
+            ads.IsHandoffPending,
+            ownership.StatusReadable,
+            plugin.AdsUtilityIpcService.Refresh(force: refreshOwnership).UtilityRunning
+                || plugin.AutomationService.IsUtilityGateActive,
+            plugin.AdsHyperFocusLeaseService.IsLeaseActive,
+            questionable.IsRunning || plugin.CombatService.IsQuestionableSoloAuthorityActive
+                || (!questionable.StatusReadable && plugin.QuestionableIpcService.WasRunningWithin(QuestionableIpcService.RecentRunningHold)),
+            plugin.CoppeliaPowerlevelLeaseService.IsLeaseActive);
+    }
+
+    private IEnumerable<CastingMovementSetting> ReadRecoverySettings()
+    {
+        foreach (var target in Targets)
+        {
+            var setting = ReadRecoverySetting(target.InternalName, target.Label, rsr: false);
+            if (setting != null)
+                yield return setting;
+        }
+        var rsr = ReadRecoverySetting("RotationSolver", "RSR", rsr: true);
+        if (rsr != null)
+            yield return rsr;
+    }
+
+    private CastingMovementSetting? ReadRecoverySetting(string internalName, string label, bool rsr)
+    {
+        try
+        {
+            var exposed = pluginInterface.InstalledPlugins.FirstOrDefault(p => p.IsLoaded
+                && string.Equals(p.InternalName, internalName, StringComparison.OrdinalIgnoreCase));
+            if (exposed == null)
+                return null;
+            var instance = BossModExternalAutomationSnapshotProvider.FindLivePluginInstance(exposed, out var assembly, out _);
+            if (instance == null || assembly == null)
+                return null;
+
+            if (rsr)
+            {
+                // Resolve Basic from this live plugin's load context; never load another copy.
+                var basic = AssemblyLoadContext.GetLoadContext(assembly)?.Assemblies
+                    .FirstOrDefault(a => a.GetName().Name == "RotationSolver.Basic");
+                var service = basic?.GetType("RotationSolver.Basic.Service");
+                var config = service == null ? null : GetStaticMember(service, "Config");
+                var poslock = config == null ? null : GetInstanceMember(config, "PoslockCasting");
+                var value = poslock?.GetType().GetProperty("Value", InstanceMembers);
+                if (value?.PropertyType != typeof(bool) || !value.CanRead || !value.CanWrite)
+                    return null;
+                return new(label, () => value.GetValue(poslock) as bool?, enabled => value.SetValue(poslock, enabled));
+            }
+
+            var bossModService = assembly.GetType("BossMod.Service");
+            var root = bossModService == null ? null : GetStaticMember(bossModService, "Config");
+            var node = root == null ? null : FindConfigNode(root);
+            var field = node?.GetType().GetField(SettingField, InstanceMembers);
+            if (field?.FieldType != typeof(bool) || field.IsInitOnly)
+                return null;
+            // Temporary writes intentionally do not notify the config persistence event.
+            return new(label, () => field.GetValue(node) as bool?, enabled => field.SetValue(node, enabled));
+        }
+        catch (Exception ex)
+        {
+            log.Debug($"[Casting recovery] {label} setting unreadable: {UnwrapMessage(ex)}");
+            return null;
+        }
     }
 
     private ApplyResult Apply(BossModTarget target, bool enabled)
@@ -317,5 +447,129 @@ public sealed class BossModActionTweaksService
         NotLoaded,
         Unavailable,
         Failed,
+    }
+}
+
+internal readonly record struct CastingRecoveryContext(
+    ulong CharacterId,
+    uint TerritoryId,
+    ulong TargetId,
+    Vector3 Position,
+    bool EnabledAndReady,
+    bool InCombat,
+    bool InDuty = false,
+    bool AdsOwned = false,
+    bool HandoffPending = false,
+    bool AdsOwnershipReadable = true,
+    bool UtilityActive = false,
+    bool HyperFocusActive = false,
+    bool QuestionableControlled = false,
+    bool CoppeliaControlled = false)
+{
+    public bool HasControl => EnabledAndReady && !AdsOwned && !HandoffPending
+        && (!InDuty || AdsOwnershipReadable) && !UtilityActive && !HyperFocusActive
+        && !QuestionableControlled && !CoppeliaControlled;
+}
+
+internal sealed record CastingMovementSetting(string Label, Func<bool?> Read, Action<bool> Write);
+
+internal sealed class CastingFailureRecovery(
+    Func<IEnumerable<CastingMovementSetting>> readSettings,
+    Action<string> warn)
+{
+    private const long WindowMs = 5000;
+    private readonly Queue<long> errors = new();
+    private readonly List<CastingMovementSetting> changed = new();
+    private CastingRecoveryContext tracked;
+    private long? restoreAt;
+
+    internal bool IsRecovering => restoreAt.HasValue;
+    internal bool HasPendingWork => IsRecovering || errors.Count > 0;
+
+    internal void Update(CastingRecoveryContext context, long now)
+    {
+        if (!context.HasControl || context.InCombat
+            || context.CharacterId != tracked.CharacterId || context.TerritoryId != tracked.TerritoryId)
+        {
+            Reset();
+            tracked = context;
+            return;
+        }
+
+        if (restoreAt.HasValue)
+        {
+            if (now >= restoreAt.Value)
+            {
+                Reset();
+                tracked = context;
+            }
+            return;
+        }
+
+        if (context.TargetId == 0 || context.TargetId != tracked.TargetId
+            || Vector3.DistanceSquared(context.Position, tracked.Position) > 0.25f)
+        {
+            errors.Clear();
+            tracked = context;
+        }
+        while (errors.TryPeek(out var first) && now - first > WindowMs)
+            errors.Dequeue();
+        if (errors.Count == 0)
+            tracked = context;
+    }
+
+    internal void OnError(CastingRecoveryContext context, long now)
+    {
+        Update(context, now);
+        if (IsRecovering || !context.HasControl || context.InCombat || context.TargetId == 0)
+            return;
+
+        errors.Enqueue(now);
+        if (errors.Count < 3)
+            return;
+
+        errors.Clear();
+        restoreAt = now + WindowMs;
+        foreach (var setting in readSettings())
+        {
+            try
+            {
+                if (setting.Read() != true)
+                    continue;
+                // Keep restoration even if a setter throws after changing its value.
+                changed.Add(setting);
+                setting.Write(false);
+                if (setting.Read() != false)
+                    warn($"[Casting recovery] {setting.Label} did not confirm the temporary unlock.");
+            }
+            catch (Exception ex)
+            {
+                warn($"[Casting recovery] {setting.Label} unlock failed: {ex.Message}");
+            }
+        }
+    }
+
+    internal void Reset(bool restore = true)
+    {
+        if (restore)
+        {
+            foreach (var setting in changed)
+            {
+                try
+                {
+                    setting.Write(true);
+                    if (setting.Read() != true)
+                        warn($"[Casting recovery] {setting.Label} did not confirm restoration.");
+                }
+                catch (Exception ex)
+                {
+                    warn($"[Casting recovery] {setting.Label} restoration failed: {ex.Message}");
+                }
+            }
+        }
+        changed.Clear();
+        restoreAt = null;
+        errors.Clear();
+        tracked = default;
     }
 }

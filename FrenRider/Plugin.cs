@@ -126,7 +126,7 @@ public sealed class Plugin : IDalamudPlugin
         AutorotIpcService = new AutorotIpcService(PluginInterface, Log);
         DaedalusTargetModeService = new DaedalusTargetModeService(PluginInterface, TargetManager, ToastGui, Log);
         BossModConflictWarningService = new BossModConflictWarningService(PluginInterface, ToastGui, Log);
-        BossModActionTweaksService = new BossModActionTweaksService(PluginInterface, Log, AutorotIpcService);
+        BossModActionTweaksService = new BossModActionTweaksService(this);
         BossModActionTweaksService.ApplyDontMoveWhileCasting(Configuration.DontMoveWhileCasting);
         var externalAutomationCommandSender = new DalamudExternalAutomationCommandSender();
         var daedalusAutomationController = new AutorotDaedalusAutomationController(AutorotIpcService);
@@ -204,6 +204,7 @@ public sealed class Plugin : IDalamudPlugin
 
         // Login detection (deferred via framework update to avoid thread issues)
         ClientState.Login += OnLoginEvent;
+        ToastGui.ErrorToast += BossModActionTweaksService.OnErrorToast;
         Framework.Update += OnFrameworkUpdate;
 
         // If already logged in at plugin load, defer detection to framework update
@@ -220,6 +221,8 @@ public sealed class Plugin : IDalamudPlugin
 
     public void Dispose()
     {
+        ToastGui.ErrorToast -= BossModActionTweaksService.OnErrorToast;
+        BossModActionTweaksService.ResetRecovery();
         FollowService.Dispose();
 
         Framework.Update -= OnFrameworkUpdate;
@@ -309,6 +312,7 @@ public sealed class Plugin : IDalamudPlugin
         }
         else
         {
+            BossModActionTweaksService.ResetRecovery();
             CoppeliaPowerlevelLeaseService.HandleManualFrenRiderDisable();
             AdsHyperFocusLeaseService.HandleManualFrenRiderDisable();
             FollowService.CancelFlyingStuckRecovery("disabled");
@@ -491,6 +495,7 @@ public sealed class Plugin : IDalamudPlugin
         {
             Measure("dtr", UpdateDtrBar);
             Measure("zone", ZoneService.Update);
+            Measure("casting-recovery", BossModActionTweaksService.UpdateRecovery);
             Measure("coppelia-powerlevel-lease", CoppeliaPowerlevelLeaseService.Update);
             Measure("ads-hyper-focus-lease", AdsHyperFocusLeaseService.Update);
 
@@ -510,6 +515,7 @@ public sealed class Plugin : IDalamudPlugin
 
             if (IsAreaTransitionActive())
             {
+                BossModActionTweaksService.ResetRecovery();
                 FrenTeleportService.ResetForAreaTransition();
                 FollowService.ResetForAreaTransition();
                 MountService.PreemptFarChase("area transition");
@@ -600,6 +606,7 @@ public sealed class Plugin : IDalamudPlugin
             Measure("ads-reflection", () => AdsReflectionIpcService.Update());
             Measure("utility-gate", AutomationService.UpdateUtilityGate);
             Measure("combat", CombatService.Update);
+            Measure("casting-recovery", BossModActionTweaksService.UpdateRecovery);
 
             Measure("fren-teleport", FrenTeleportService.Update);
             Measure("auto-yes", AutoYesService.Update);

@@ -258,7 +258,13 @@ public sealed class CoppeliaPowerlevelLeaseService : IDisposable
         releaseProvider = Plugin.PluginInterface.GetIpcProvider<string, string>(ReleaseEndpoint);
         statusProvider = Plugin.PluginInterface.GetIpcProvider<string>(StatusEndpoint);
 
-        acquireProvider.RegisterFunc(requestJson => Serialize(coordinator.Acquire(ReadToken(requestJson))));
+        acquireProvider.RegisterFunc(requestJson =>
+        {
+            var response = coordinator.Acquire(ReadToken(requestJson));
+            if (response.Ok)
+                plugin.BossModActionTweaksService.ResetRecovery();
+            return Serialize(response);
+        });
         heartbeatProvider.RegisterFunc(requestJson => Serialize(coordinator.Heartbeat(ReadToken(requestJson))));
         releaseProvider.RegisterFunc(requestJson => Serialize(coordinator.Release(ReadToken(requestJson))));
         statusProvider.RegisterFunc(() => Serialize(coordinator.BuildStatus()));

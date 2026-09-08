@@ -1094,6 +1094,22 @@ public class ConfigManager : IDadProfileStore
         }
     }
 
+    public int SetAllFrenRiderEnabled(bool enabled)
+    {
+        var account = GetCurrentAccount();
+        if (account == null) return 0;
+
+        account.DefaultConfig.Enabled = enabled;
+        // Apply the lifecycle before syncing the backing profiles, including a live DAD overlay.
+        if (TryGetActiveConfig(out _))
+            SetFrenRiderEnabled(enabled);
+
+        var count = ApplyDefaultSettingToAllCharacters("Fren Rider enabled by default");
+        if (count == 0)
+            SaveCurrentAccount();
+        return count;
+    }
+
     public void ResetCharacterToDefault(string charKey)
     {
         var account = GetCurrentAccount();
