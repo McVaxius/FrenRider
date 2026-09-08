@@ -178,6 +178,56 @@ public sealed class DadProfileTransferTests
         Assert.False(overlay.IsInstalled);
     }
 
+    [Theory]
+    [InlineData(FrenRiderProfileAcceptancePolicy.Off)]
+    [InlineData(FrenRiderProfileAcceptancePolicy.Temporary)]
+    [InlineData(FrenRiderProfileAcceptancePolicy.Permanent)]
+    public void ForcedTemporaryPreservesSavedProfileAndPolicyAndRequiresExactOwner(FrenRiderProfileAcceptancePolicy policy)
+    {
+        var account = CreateAccount(policy);
+        var original = account.Characters[ActiveCharacterKey];
+        var saves = 0;
+        var manager = new TestProfileStore(account, ActiveCharacterKey, _ => { saves++; return true; });
+        using var service = new DadProfileTransferService(manager);
+        var incoming = original.Clone();
+        incoming.Enabled = true;
+        incoming.FrenName = "Assigned Helper@World";
+        incoming.FlyYouFools = false;
+        incoming.Cling = 2.6f;
+        incoming.RotationPlugin = 4;
+        var profile = Export(incoming);
+
+        var applied = ReadResult(service.ApplyProfile(ApplyRequest(profile, forceTemporary: true)));
+        Assert.Equal("ok", applied.Code);
+        Assert.Equal("temporary-applied", applied.Outcome);
+        Assert.True(manager.HasTemporaryProfile);
+        Assert.True(manager.GetActiveConfig().Enabled);
+        Assert.Equal("Assigned Helper@World", manager.GetActiveConfig().FrenName);
+        Assert.Equal(4, manager.GetActiveConfig().RotationPlugin);
+        Assert.Equal(policy, manager.GetActiveConfig().ProfileAcceptancePolicy);
+        Assert.Same(original, account.Characters[ActiveCharacterKey]);
+        Assert.False(original.Enabled);
+        Assert.Equal("Local Fren", original.FrenName);
+        Assert.Equal(policy, original.ProfileAcceptancePolicy);
+        Assert.Equal(0, saves);
+
+        Assert.Equal("overlay-conflict", ReadResult(service.ApplyProfile(
+            ApplyRequest(profile, ownerId: "another-owner", forceTemporary: true))).Code);
+        foreach (var wrong in new[]
+        {
+            ReleaseRequest(ownerId: "wrong"), ReleaseRequest(islandId: "wrong"),
+            ReleaseRequest(characterId: "wrong"), ReleaseRequest(proposalId: "wrong"),
+        })
+        {
+            Assert.Equal("overlay-not-owned", ReadResult(service.ReleaseTemporaryProfile(wrong)).Code);
+            Assert.True(manager.HasTemporaryProfile);
+        }
+        Assert.Equal("released", ReadResult(service.ReleaseTemporaryProfile(ReleaseRequest())).Outcome);
+        Assert.False(manager.HasTemporaryProfile);
+        Assert.Same(original, manager.GetActiveConfig());
+        Assert.Equal(0, saves);
+    }
+
     [Fact]
     public void PermanentApplyPreservesLocalPolicyAndSavesExactlyOnce()
     {
@@ -456,16 +506,23 @@ public sealed class DadProfileTransferTests
         string ownerId = "owner",
         string islandId = "island",
         string characterId = "character",
-        string proposalId = "proposal")
-        => JsonSerializer.Serialize(new
+        string proposalId = "proposal",
+        bool? forceTemporary = null)
+    {
+        var request = new Dictionary<string, object?>
         {
-            version = DadProfileTransferContract.Version,
-            ownerId,
-            islandId,
-            characterId,
-            proposalId,
-            profileJson,
-        });
+            ["version"] = DadProfileTransferContract.Version,
+            ["ownerId"] = ownerId,
+            ["islandId"] = islandId,
+            ["characterId"] = characterId,
+            ["proposalId"] = proposalId,
+            ["profileJson"] = profileJson,
+        };
+        // Existing tests deliberately omit the new field to verify legacy behavior.
+        if (forceTemporary.HasValue)
+            request["forceTemporary"] = forceTemporary.Value;
+        return JsonSerializer.Serialize(request);
+    }
 
     private static string ReleaseRequest(
         string ownerId = "owner",

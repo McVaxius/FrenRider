@@ -35,6 +35,8 @@ public class MainWindow : Window, IDisposable
 
         DrawTopBar(config);
         ImGui.Separator();
+        DrawAccountControls();
+        ImGui.Separator();
 
         if (ImGui.BeginChild("##FrenRiderOperatorScroll", Vector2.Zero, false))
         {
@@ -98,6 +100,38 @@ public class MainWindow : Window, IDisposable
         ImGui.SameLine();
         if (ImGui.Button("Close"))
             IsOpen = false;
+    }
+
+    private void DrawAccountControls()
+    {
+        var buttonSize = new Vector2(
+            (ImGui.GetContentRegionAvail().X - ImGui.GetStyle().ItemSpacing.X) / 2f,
+            UiHelpers.Scale(40f));
+
+        ImGui.BeginDisabled(plugin.ConfigManager.GetCurrentAccount() == null);
+        DrawAllFrenRiderButton(false, buttonSize);
+        ImGui.SameLine();
+        DrawAllFrenRiderButton(true, buttonSize);
+        ImGui.EndDisabled();
+    }
+
+    private void DrawAllFrenRiderButton(bool enabled, Vector2 size)
+    {
+        ImGui.PushStyleColor(ImGuiCol.Button, enabled
+            ? new Vector4(0.1f, 0.45f, 0.15f, 1f)
+            : new Vector4(0.6f, 0.1f, 0.1f, 1f));
+        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, enabled
+            ? new Vector4(0.15f, 0.6f, 0.2f, 1f)
+            : new Vector4(0.8f, 0.15f, 0.15f, 1f));
+        ImGui.PushStyleColor(ImGuiCol.ButtonActive, enabled
+            ? new Vector4(0.1f, 0.35f, 0.1f, 1f)
+            : new Vector4(0.45f, 0.05f, 0.05f, 1f));
+        if (ImGui.Button(enabled ? "All FR on" : "All FR off", size))
+            plugin.ConfigManager.SetAllFrenRiderEnabled(enabled);
+        ImGui.PopStyleColor(3);
+
+        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+            ImGui.SetTooltip("Set DEFAULT CONFIG and every local character in the current account, including the active temporary profile.");
     }
 
     private void DrawWarnings()

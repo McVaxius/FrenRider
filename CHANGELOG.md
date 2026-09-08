@@ -9,8 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- `FrenRider.Dad.ApplyProfile` accepts optional `forceTemporary` (default false). Companion HealRider can install the existing in-memory overlay under Off, Temporary, or Permanent acceptance without saving or changing that setting. Exact-owner conflicts, release, full-profile enable/disable effects, and callers that omit the field keep their existing behavior.
+
 ### Added
-- DEFAULT CONFIG now has compact red **All FR off** and green **All FR on** buttons for the current account's local profiles, including an active temporary profile
+- The main window now has large, equal-width red **All FR off** and green **All FR on** buttons above the scrolling content, also available as compact buttons in DEFAULT CONFIG, to immediately set the current account's default and local profiles, including an active temporary profile; main-window controls are disabled only when no account is loaded
 - Repeated target range/line-of-sight errors can temporarily release confirmed casting movement locks while stationary outside combat, restoring on combat, a fixed five-second timeout, disable, transitions, unload, or control transfer; ADS, Questionable, and Coppelia ownership block recovery
 - DEFAULT CONFIG now exposes whether Fren Rider is enabled by default and can sync that state to local character profiles
 - ADS can acquire a five-second token-owned Hyper Focus lease through JSON IPC to run RSR Manual as the sole temporary combat provider in validated ADS-owned solo duties

@@ -91,7 +91,7 @@ internal sealed class DadProfileTransferService : IDisposable
             if (!Enum.IsDefined(localConfig.ProfileAcceptancePolicy))
                 return Serialize(Failure("invalid-acceptance-policy"));
 
-            if (localConfig.ProfileAcceptancePolicy == FrenRiderProfileAcceptancePolicy.Off)
+            if (!request!.ForceTemporary && localConfig.ProfileAcceptancePolicy == FrenRiderProfileAcceptancePolicy.Off)
                 return Serialize(Success("opted-out"));
 
             if (!TryDeserializeProfile(request!.ProfileJson!, out var incoming, out var code))
@@ -99,6 +99,11 @@ internal sealed class DadProfileTransferService : IDisposable
 
             incoming!.ProfileAcceptancePolicy = localConfig.ProfileAcceptancePolicy;
             var identity = ToIdentity(request);
+            if (request.ForceTemporary)
+                return profileStore.TryInstallTemporaryProfile(identity, incoming)
+                    ? Serialize(Success("temporary-applied"))
+                    : Serialize(Failure("overlay-conflict"));
+
             switch (localConfig.ProfileAcceptancePolicy)
             {
                 case FrenRiderProfileAcceptancePolicy.Temporary:
@@ -399,6 +404,7 @@ internal sealed class DadProfileResolveRequest : DadProfileIdentityRequest
 internal sealed class DadProfileApplyRequest : DadProfileIdentityRequest
 {
     public string? ProfileJson { get; set; }
+    public bool ForceTemporary { get; set; }
 }
 
 internal sealed class DadProfileReleaseRequest : DadProfileIdentityRequest
