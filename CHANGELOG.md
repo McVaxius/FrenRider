@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- Automatic ADS solo-duty handoffs now suppress active combat providers until the full configured char-safe delay and readable ADS ownership confirmation. Loading, all three cutscene flags, death, duty re-entry, and re-enable restart readiness; rejected or timed-out attempts receive a fresh countdown. Enable-time presets and Hyper Focus cannot bypass the hold, and the configured rotation bootstraps once afterward, respecting disabled rotation and leases.
 - Questionable running-state checks support both Questionable and WigglyQuest, using the single loaded installation's
   IPC endpoint. Disabled duplicates do not override it, and multiple loaded copies report an unreadable state without
   querying either endpoint. The 250 ms polling interval and 15-second recent-running combat hold are unchanged.

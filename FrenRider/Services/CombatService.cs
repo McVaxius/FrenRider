@@ -58,7 +58,7 @@ public class CombatService
     internal bool IsQuestionableSoloAuthorityActive
         => dutyCombatAuthorityPolicy.Authority == DutyCombatAuthority.QuestionableSolo;
     private bool ShouldSuppressFrenRiderCombatCommands
-        => IsQuestionableSoloAuthorityActive;
+        => IsQuestionableSoloAuthorityActive || plugin.AdsIntegrationService.IsSoloCombatHeld;
 
     public CombatService(
         Plugin plugin,
@@ -97,7 +97,13 @@ public class CombatService
             frenRiderBootstrapAllowed: false);
 
         // if (decision.ShouldForceCombatOff)
-        //     ForceQuestionableSoloCombatOff();
+        //     ForceDutyCombatOff("QuestionableSolo duty authority");
+
+        if (plugin.AdsIntegrationService.IsSoloCombatHeld)
+        {
+            HoldAdsSoloCombat(decision, Plugin.Condition[ConditionFlag.InCombat], inDuty);
+            return false;
+        }
 
         if (decision.Authority != DutyCombatAuthority.QuestionableSolo)
             return true;
@@ -139,7 +145,13 @@ public class CombatService
                 && !plugin.AutomationService.IsUtilityGateActive);
 
         // if (authorityDecision.ShouldForceCombatOff)
-        //     ForceQuestionableSoloCombatOff();
+        //     ForceDutyCombatOff("QuestionableSolo duty authority");
+
+        if (plugin.AdsIntegrationService.IsSoloCombatHeld)
+        {
+            HoldAdsSoloCombat(authorityDecision, inCombat, inDuty);
+            return;
+        }
 
         if (authorityDecision.Authority == DutyCombatAuthority.QuestionableSolo)
         {
@@ -302,7 +314,8 @@ public class CombatService
             dutyCategory,
             adsDutyHandoffActive,
             questionableRunningOrRecent,
-            frenRiderBootstrapAllowed));
+            frenRiderBootstrapAllowed,
+            plugin.AdsIntegrationService.IsSoloCombatHeld));
 
         LogDutyAuthorityTransition(decision, dutyCategory, boundByDuty95);
         return decision;
@@ -368,29 +381,42 @@ public class CombatService
         ActivePreset = "";
     }
 
-    private void ForceQuestionableSoloCombatOff()
+    private void HoldAdsSoloCombat(DutyCombatAuthorityDecision decision, bool inCombat, bool inDuty)
     {
-        plugin.CaptureExternalAutomationSnapshot("QuestionableSolo duty authority");
+        if (decision.ShouldForceCombatOff)
+            ForceDutyCombatOff("ADS solo handoff readiness hold");
+
+        ResetCombatSettingsRefreshTracking();
+        lastObservedCombatSettingsSignature = string.Empty;
+        wasInCombat = inCombat;
+        wasInDuty = inDuty;
+        State = CombatState.OutOfCombat;
+        StateDetail = $"Combat held: {plugin.AdsIntegrationService.StatusText}";
+        ActivePreset = "";
+    }
+
+    private void ForceDutyCombatOff(string reason)
+    {
+        plugin.CaptureExternalAutomationSnapshot(reason);
 
         var rsrHandled = plugin.AutorotIpcService.TrySetRsrMode(AutorotIpcService.RsrStateCommandType.Off);
-        var daedalusHandled = SetDaedalusEnabled(false, "QuestionableSolo duty authority");
+        var daedalusHandled = SetDaedalusEnabled(false, reason);
+        plugin.AutorotIpcService.ClearForcedPreset();
         foreach (var command in BuildQuestionableDutyCombatOffCommands(includeRsrFallback: !rsrHandled))
-            SendCommand(command, allowDuringQuestionableSolo: true);
+            SendCommand(command, allowWhileSuppressed: true);
 
         wrathAutoActive = false;
         lastActivePluginIdx = -1;
         lastRotationToggleMs = 0;
         ActivePreset = "";
 
-        if (mountedRotationSuppressed)
-            Plugin.Log.Information("[FrenRider][Questionable] Mounted rotation suppression handed off to QuestionableSolo authority.");
         mountedRotationSuppressed = false;
         mountedSuppressedPluginName = string.Empty;
 
         Plugin.Log.Information(
             rsrHandled
-                ? $"[FrenRider][Questionable] Initial QuestionableSolo shutdown forced BMR/VBM/RSR/Wrath off; RSR stopped via IPC; Daedalus {(daedalusHandled ? "stopped via IPC" : "IPC unavailable")}."
-                : $"[FrenRider][Questionable] Initial QuestionableSolo shutdown forced BMR/VBM/RSR/Wrath off; RSR fallback command sent; Daedalus {(daedalusHandled ? "stopped via IPC" : "IPC unavailable")}.");
+                ? $"[FrenRider][DutyAuthority] {reason}: forced BMR/VBM/RSR/Wrath off; RSR stopped via IPC; Daedalus {(daedalusHandled ? "stopped via IPC" : "IPC unavailable")}."
+                : $"[FrenRider][DutyAuthority] {reason}: forced BMR/VBM/RSR/Wrath off; RSR fallback command sent; Daedalus {(daedalusHandled ? "stopped via IPC" : "IPC unavailable")}.");
     }
 
     private void ActivateRotation(CharacterConfig config, bool ignoreCooldown = false)
@@ -679,6 +705,9 @@ public class CombatService
 
     public void ApplyPresetSelection(string reason, bool installPresets = true)
     {
+        if (plugin.AdsIntegrationService.IsSoloCombatHeld)
+            return;
+
         if (installPresets)
             plugin.AutorotIpcService.CreatePresets(force: true);
 
@@ -1143,7 +1172,8 @@ public class CombatService
 
     internal void ActivateAdsHyperFocusLease()
     {
-        if (!plugin.AdsHyperFocusLeaseService.IsLeaseActive
+        if (plugin.AdsIntegrationService.IsSoloCombatHeld
+            || !plugin.AdsHyperFocusLeaseService.IsLeaseActive
             || !plugin.AdsHyperFocusLeaseService.TryClaimCombatActivation())
             return;
 
@@ -1152,10 +1182,10 @@ public class CombatService
         plugin.CaptureExternalAutomationSnapshot("ADS Hyper Focus lease");
 
         foreach (var command in BuildAdsHyperFocusCombatCommands(includeRsrFallback: false))
-            SendCommand(command, allowDuringQuestionableSolo: true);
+            SendCommand(command, allowWhileSuppressed: true);
         var daedalusHandled = SetDaedalusEnabled(false, "ADS Hyper Focus lease");
         if (!plugin.AutorotIpcService.TrySetRsrMode(AutorotIpcService.RsrStateCommandType.Manual))
-            SendCommand("/rotation manual", allowDuringQuestionableSolo: true);
+            SendCommand("/rotation manual", allowWhileSuppressed: true);
 
         mountedRotationSuppressed = false;
         mountedSuppressedPluginName = string.Empty;
@@ -1173,7 +1203,7 @@ public class CombatService
     {
         var config = plugin.ConfigManager.GetActiveConfig();
         if (!plugin.AutorotIpcService.TrySetRsrMode(AutorotIpcService.RsrStateCommandType.Off))
-            SendCommand("/rotation cancel", allowDuringQuestionableSolo: true);
+            SendCommand("/rotation cancel", allowWhileSuppressed: true);
 
         lastActivePluginIdx = -1;
         lastRotationToggleMs = 0;
@@ -1289,9 +1319,9 @@ public class CombatService
         // Future: check target's HP % and send /ac "Limit Break" when below threshold
     }
 
-    private unsafe void SendCommand(string command, bool allowDuringQuestionableSolo = false)
+    private unsafe void SendCommand(string command, bool allowWhileSuppressed = false)
     {
-        if (ShouldSuppressFrenRiderCombatCommands && !allowDuringQuestionableSolo)
+        if (ShouldSuppressFrenRiderCombatCommands && !allowWhileSuppressed)
             return;
 
         try

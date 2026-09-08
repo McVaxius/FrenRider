@@ -16,6 +16,7 @@ internal sealed class DutyCombatAuthorityPolicy
 
     private bool questionableShutdownSent;
     private bool adsHandoffRecoveryPending;
+    private bool adsSoloCombatHeld;
 
     public DutyCombatAuthorityDecision Update(DutyCombatAuthorityInput input)
     {
@@ -49,7 +50,17 @@ internal sealed class DutyCombatAuthorityPolicy
         var shouldForceCombatOff = false;
         var shouldBootstrapFrenRider = false;
 
-        if (Authority == DutyCombatAuthority.QuestionableSolo)
+        if (input.AdsSoloCombatHeld)
+        {
+            // A late catalog classification can put an already bootstrapped
+            // rotation on hold. Re-arm it once, then leave it pending.
+            if (!adsSoloCombatHeld)
+            {
+                FrenRiderBootstrapComplete = false;
+                shouldForceCombatOff = true;
+            }
+        }
+        else if (Authority == DutyCombatAuthority.QuestionableSolo)
         {
             adsHandoffRecoveryPending = false;
             if (!questionableShutdownSent)
@@ -66,6 +77,8 @@ internal sealed class DutyCombatAuthorityPolicy
             adsHandoffRecoveryPending = false;
             shouldBootstrapFrenRider = true;
         }
+
+        adsSoloCombatHeld = input.AdsSoloCombatHeld;
 
         return new DutyCombatAuthorityDecision(
             previousAuthority,
@@ -84,6 +97,7 @@ internal sealed class DutyCombatAuthorityPolicy
         FrenRiderBootstrapComplete = false;
         questionableShutdownSent = false;
         adsHandoffRecoveryPending = false;
+        adsSoloCombatHeld = false;
 
         return new DutyCombatAuthorityDecision(
             previousAuthority,
@@ -132,7 +146,8 @@ internal readonly record struct DutyCombatAuthorityInput(
     AdsDutyCategory? DutyCategory,
     bool AdsDutyHandoffActive,
     bool QuestionableRunningOrRecent,
-    bool FrenRiderBootstrapAllowed);
+    bool FrenRiderBootstrapAllowed,
+    bool AdsSoloCombatHeld = false);
 
 internal readonly record struct DutyCombatAuthorityDecision(
     DutyCombatAuthority PreviousAuthority,

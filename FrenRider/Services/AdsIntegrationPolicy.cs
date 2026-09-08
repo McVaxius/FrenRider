@@ -9,7 +9,9 @@ internal readonly record struct AdsHandoffReadinessConditions(
     bool IsUnconscious,
     bool IsBetweenAreas,
     bool IsWatchingCutscene,
-    bool IsOccupiedInCutSceneEvent);
+    bool IsOccupiedInCutSceneEvent,
+    bool IsWatchingCutscene78 = false,
+    bool IsBetweenAreas51 = false);
 
 internal readonly record struct AdsHandoffCountdownState(
     uint TerritoryTypeId,
@@ -21,6 +23,44 @@ internal readonly record struct AdsHandoffCountdownResult(
     bool IsReady,
     TimeSpan Remaining,
     string? Blocker);
+
+internal sealed class AdsHandoffState
+{
+    private AdsHandoffCountdownState countdownState;
+
+    public bool IsCombatHeld { get; private set; }
+
+    public void Reset()
+    {
+        ResetCountdown();
+        IsCombatHeld = false;
+    }
+
+    public void ResetCountdown() => countdownState = default;
+
+    // Called even on framework frames that skip normal services during loading.
+    public void ObserveReadiness(AdsHandoffReadinessConditions conditions)
+    {
+        if (AdsIntegrationPolicy.GetHandoffReadinessBlocker(conditions) is not null)
+            ResetCountdown();
+    }
+
+    public AdsHandoffCountdownResult Update(
+        uint territoryTypeId,
+        uint contentFinderConditionId,
+        DateTime nowUtc,
+        int delaySeconds,
+        AdsHandoffReadinessConditions conditions,
+        bool automaticSoloHandoff,
+        bool ownershipConfirmed)
+    {
+        var result = AdsIntegrationPolicy.EvaluateHandoffCountdown(
+            countdownState, territoryTypeId, contentFinderConditionId, nowUtc, delaySeconds, conditions);
+        countdownState = result.State;
+        IsCombatHeld = automaticSoloHandoff && (!result.IsReady || !ownershipConfirmed);
+        return result;
+    }
+}
 
 public static class AdsIntegrationPolicy
 {
@@ -86,9 +126,9 @@ public static class AdsIntegrationPolicy
             return "waiting for unconscious state to clear";
         if (!conditions.IsPlayerAlive)
             return "waiting for local player to be alive";
-        if (conditions.IsBetweenAreas)
+        if (conditions.IsBetweenAreas || conditions.IsBetweenAreas51)
             return "waiting for area transition to finish";
-        if (conditions.IsWatchingCutscene)
+        if (conditions.IsWatchingCutscene || conditions.IsWatchingCutscene78)
             return "waiting for cutscene to finish";
         if (conditions.IsOccupiedInCutSceneEvent)
             return "waiting for cutscene event to finish";

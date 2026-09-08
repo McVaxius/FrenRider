@@ -1,3 +1,4 @@
+using FrenRider.Models;
 using FrenRider.Services;
 
 namespace FrenRider.Tests;
@@ -315,6 +316,195 @@ public sealed class AdsDutyOwnershipTests
             handoffPending: false,
             runtimeOwned: false,
             exitTakeoverActive: true));
+    }
+
+    [Theory]
+    [InlineData("logout")]
+    [InlineData("missing player")]
+    [InlineData("death")]
+    [InlineData("unconscious")]
+    [InlineData("BetweenAreas")]
+    [InlineData("BetweenAreas51")]
+    [InlineData("WatchingCutscene")]
+    [InlineData("WatchingCutscene78")]
+    [InlineData("OccupiedInCutSceneEvent")]
+    [InlineData("duty re-entry")]
+    [InlineData("re-enable")]
+    [InlineData("cancellation")]
+    [InlineData("territory change")]
+    [InlineData("CFC change")]
+    public void AutomaticSoloCombatWaitsForContinuousReadinessAndConfirmedOwnership(string interruption)
+    {
+        // Exercise the same handoff state, IPC contract and combat authority
+        // together, with a controllable clock and no live command dispatch.
+        foreach (var rotationType in new[] { 0, 2 })
+        {
+            var epoch = new DateTime(2026, 9, 8, 12, 0, 0, DateTimeKind.Utc);
+            var now = epoch;
+            var handoff = new AdsHandoffState();
+            var authority = new DutyCombatAuthorityPolicy();
+            var owned = false;
+            var acceptStart = false;
+            var requests = 0;
+            var activations = 0;
+            var bootstraps = 0;
+            var suppressions = 0;
+            var rotationActive = true;
+            uint territory = 100;
+            uint cfc = 1;
+            var requestedAt = DateTime.MinValue;
+            var nextAttempt = DateTime.MinValue;
+            var ipc = CreateService(() => true, () => owned, () => "{}", () => now, () =>
+            {
+                requests++;
+                return acceptStart;
+            });
+
+            // Account for an earlier bootstrap before ADS classified the duty.
+            Assert.True(authority.Update(new DutyCombatAuthorityInput(
+                true, true, false, null, false, false, true)).ShouldBootstrapFrenRider);
+
+            AdsHandoffCountdownResult Frame(double seconds, AdsHandoffReadinessConditions conditions,
+                bool bootstrapAllowed = true)
+            {
+                now = epoch.AddSeconds(seconds);
+                handoff.ObserveReadiness(conditions);
+                var ownership = ipc.Refresh(true, territory, cfc, force: true);
+                if (!ownership.IsOwned && requestedAt != DateTime.MinValue
+                    && !AdsIntegrationPolicy.IsHandoffConfirmationPending(requestedAt, now))
+                {
+                    requestedAt = DateTime.MinValue;
+                    handoff.ResetCountdown();
+                }
+                var countdown = handoff.Update(territory, cfc, now, 10, conditions,
+                    automaticSoloHandoff: true, ownershipConfirmed: ownership.IsOwned && ownership.StatusReadable);
+                if (countdown.IsReady && !ownership.IsOwned
+                    && AdsIntegrationPolicy.CanAttemptHandoff(requestedAt, nextAttempt, now))
+                {
+                    var request = ipc.RequestStartDutyFromInside();
+                    requestedAt = request.Accepted ? now : DateTime.MinValue;
+                    nextAttempt = now + AdsIntegrationPolicy.HandoffConfirmationTimeout;
+                    if (!request.Accepted)
+                        handoff.ResetCountdown();
+                }
+
+                var decision = authority.Update(new DutyCombatAuthorityInput(
+                    true, true, true, AdsDutyCategory.Solo, true, true,
+                    bootstrapAllowed, handoff.IsCombatHeld));
+                if (decision.ShouldForceCombatOff)
+                {
+                    suppressions++;
+                    rotationActive = false;
+                }
+                if (decision.ShouldBootstrapFrenRider)
+                {
+                    bootstraps++;
+                    if (CombatService.ShouldActivateConfiguredRotation(rotationType))
+                    {
+                        activations++;
+                        rotationActive = true;
+                    }
+                }
+                return countdown;
+            }
+
+            void AssertHeld(int expectedRequests)
+            {
+                Assert.True(handoff.IsCombatHeld);
+                Assert.False(rotationActive);
+                Assert.False(authority.FrenRiderBootstrapComplete);
+                Assert.Equal(0, activations);
+                Assert.Equal(0, bootstraps);
+                Assert.Equal(expectedRequests, requests);
+            }
+
+            Assert.Equal(TimeSpan.FromSeconds(10), Frame(0, ReadyConditions).Remaining);
+            Assert.Equal(1, suppressions);
+            AssertHeld(0);
+            Frame(9, ReadyConditions);
+            AssertHeld(0);
+
+            var unsafeConditions = interruption switch
+            {
+                "logout" => ReadyConditions with { IsLoggedIn = false },
+                "missing player" => ReadyConditions with { HasLocalPlayer = false },
+                "death" => ReadyConditions with { IsPlayerAlive = false },
+                "unconscious" => ReadyConditions with { IsUnconscious = true },
+                "BetweenAreas" => ReadyConditions with { IsBetweenAreas = true },
+                "BetweenAreas51" => ReadyConditions with { IsBetweenAreas51 = true },
+                "WatchingCutscene" => ReadyConditions with { IsWatchingCutscene = true },
+                "WatchingCutscene78" => ReadyConditions with { IsWatchingCutscene78 = true },
+                "OccupiedInCutSceneEvent" => ReadyConditions with { IsOccupiedInCutSceneEvent = true },
+                _ => ReadyConditions,
+            };
+
+            if (interruption is "duty re-entry" or "re-enable" or "cancellation")
+            {
+                handoff.Reset();
+                authority.Update(new DutyCombatAuthorityInput(
+                    interruption != "re-enable", interruption != "duty re-entry", false,
+                    AdsDutyCategory.Solo, false, false, false));
+                Assert.False(handoff.IsCombatHeld);
+            }
+            else if (interruption == "territory change")
+                territory++;
+            else if (interruption == "CFC change")
+                cfc++;
+            else if (interruption is "BetweenAreas" or "BetweenAreas51")
+            {
+                // Framework early return: no normal ADS or combat update runs.
+                handoff.ObserveReadiness(unsafeConditions);
+                AssertHeld(0);
+            }
+            else
+            {
+                Assert.NotNull(Frame(9.5, unsafeConditions).Blocker);
+                AssertHeld(0);
+            }
+
+            Assert.Equal(TimeSpan.FromSeconds(10), Frame(20, ReadyConditions).Remaining);
+            Frame(29.999, ReadyConditions);
+            AssertHeld(0);
+            Frame(30, ReadyConditions); // Rejected start must not release combat.
+            AssertHeld(1);
+
+            acceptStart = true;
+            Assert.Equal(TimeSpan.FromSeconds(10), Frame(31, ReadyConditions).Remaining);
+            Frame(40.999, ReadyConditions);
+            AssertHeld(1);
+            Frame(41, ReadyConditions); // Accepted is not confirmed ownership.
+            AssertHeld(2);
+            Frame(44, ReadyConditions);
+            AssertHeld(2);
+
+            Assert.Equal(TimeSpan.FromSeconds(10), Frame(46, ReadyConditions).Remaining);
+            Frame(55.999, ReadyConditions);
+            AssertHeld(2);
+            Frame(56, ReadyConditions); // A timed-out attempt also gets a fresh delay.
+            AssertHeld(3);
+
+            // Confirmation during a new cutscene cannot bypass a restarted wait.
+            owned = true;
+            Frame(60, ReadyConditions with { IsWatchingCutscene78 = true });
+            AssertHeld(3);
+            Assert.Equal(TimeSpan.FromSeconds(10), Frame(65, ReadyConditions).Remaining);
+            Frame(74.999, ReadyConditions);
+            AssertHeld(3);
+
+            // The handoff is ready, but existing lease/utility exclusions can
+            // still defer bootstrap without consuming it.
+            Frame(75, ReadyConditions, bootstrapAllowed: false);
+            Assert.False(handoff.IsCombatHeld);
+            Assert.False(authority.FrenRiderBootstrapComplete);
+            Assert.Equal(0, bootstraps);
+            Frame(76, ReadyConditions);
+            Frame(77, ReadyConditions);
+            Assert.Equal(1, bootstraps);
+            Assert.True(authority.FrenRiderBootstrapComplete);
+            Assert.Equal(rotationType == 2 ? 0 : 1, activations);
+            Assert.Equal(rotationType != 2, rotationActive);
+            Assert.Equal(3, requests);
+        }
     }
 
     private static AdsHandoffReadinessConditions ReadyConditions => new(

@@ -120,7 +120,7 @@ public sealed class Plugin : IDalamudPlugin
         ZoneService = new ZoneService();
         FrenTeleportService = new FrenTeleportService(this, FrenTracker, ZoneService);
         AdsDutyIpcService = new AdsDutyIpcService(PluginInterface, Log);
-        AdsIntegrationService = new AdsIntegrationService(this, ZoneService, AdsDutyIpcService);
+        AdsIntegrationService = new AdsIntegrationService(this, AdsDutyIpcService);
         AdsUtilityIpcService = new AdsUtilityIpcService(PluginInterface, Log);
         AdsReflectionIpcService = new AdsReflectionIpcService(this, PluginInterface, Log);
         AutorotIpcService = new AutorotIpcService(PluginInterface, Log);
@@ -279,11 +279,17 @@ public sealed class Plugin : IDalamudPlugin
     {
         Log.Information($"[FrenRider] FrenRider enabled state changed to: {enabled}");
         BossModConflictWarningService.Update(enabled);
+        AdsIntegrationService.ResetHandoff();
         
         if (enabled)
         {
-            Log.Information("[FrenRider] Refreshing packaged BossMod presets on enable");
-            AutorotIpcService.CreatePresets(force: true);
+            AdsIntegrationService.Update(forceOwnershipRefresh: true);
+            var allowCombatSetup = CombatService.PrepareForEnableCombatSetup();
+            if (!AdsIntegrationService.IsSoloCombatHeld)
+            {
+                Log.Information("[FrenRider] Refreshing packaged BossMod presets on enable");
+                AutorotIpcService.CreatePresets(force: true);
+            }
 
            // Trigger AutoDuty check when FrenRider is enabled
             Log.Information("[FrenRider] Triggering AutoDuty detection check");
@@ -295,7 +301,7 @@ public sealed class Plugin : IDalamudPlugin
 			//commandManager?.ProcessCommand("/xldisableplugin AutoDuty");
 			//commandManager?.ProcessCommand("/echo hi");
 
-            if (CombatService.PrepareForEnableCombatSetup())
+            if (allowCombatSetup)
             {
                 CaptureExternalAutomationSnapshot("FrenRider enabled");
 
@@ -307,7 +313,7 @@ public sealed class Plugin : IDalamudPlugin
             }
             else
             {
-                Log.Information("[FrenRider][DutyAuthority] Skipped enable-time combat setup under QuestionableSolo authority.");
+                Log.Information($"[FrenRider][DutyAuthority] Skipped enable-time combat setup: {CombatService.StateDetail}.");
             }
         }
         else
@@ -495,6 +501,7 @@ public sealed class Plugin : IDalamudPlugin
         {
             Measure("dtr", UpdateDtrBar);
             Measure("zone", ZoneService.Update);
+            Measure("ads-readiness", AdsIntegrationService.ObserveHandoffReadiness);
             Measure("casting-recovery", BossModActionTweaksService.UpdateRecovery);
             Measure("coppelia-powerlevel-lease", CoppeliaPowerlevelLeaseService.Update);
             Measure("ads-hyper-focus-lease", AdsHyperFocusLeaseService.Update);
