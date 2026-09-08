@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 
@@ -35,7 +36,7 @@ public sealed class QuestionableIpcService : IDisposable
 
     private const string IpcIsRunning = "Questionable.IsRunning";
 
-    private readonly Func<bool> queryIsRunning;
+    private readonly Func<(string Endpoint, bool Running)> queryIsRunning;
     private readonly Func<DateTime> utcNow;
     private readonly Action<string> logTransition;
     private readonly Action<string> logDebug;
@@ -46,7 +47,7 @@ public sealed class QuestionableIpcService : IDisposable
 
     public QuestionableIpcService(IDalamudPluginInterface pluginInterface, IPluginLog log)
         : this(
-            () => pluginInterface.GetIpcSubscriber<bool>(IpcIsRunning).InvokeFunc(),
+            () => QuerySelectedInstallation(pluginInterface),
             () => DateTime.UtcNow,
             message => log.Information(message),
             message => log.Debug(message))
@@ -58,6 +59,15 @@ public sealed class QuestionableIpcService : IDisposable
         Func<DateTime> utcNow,
         Action<string>? logTransition = null,
         Action<string>? logDebug = null)
+        : this(() => (IpcIsRunning, queryIsRunning()), utcNow, logTransition, logDebug)
+    {
+    }
+
+    private QuestionableIpcService(
+        Func<(string Endpoint, bool Running)> queryIsRunning,
+        Func<DateTime> utcNow,
+        Action<string>? logTransition,
+        Action<string>? logDebug)
     {
         this.queryIsRunning = queryIsRunning;
         this.utcNow = utcNow;
@@ -66,6 +76,18 @@ public sealed class QuestionableIpcService : IDisposable
     }
 
     public QuestionableRunningSnapshot Current { get; private set; } = QuestionableRunningSnapshot.Empty;
+
+    private static (string Endpoint, bool Running) QuerySelectedInstallation(IDalamudPluginInterface pluginInterface)
+    {
+        var loaded = pluginInterface.InstalledPlugins.Where(plugin => plugin.IsLoaded &&
+            plugin.InternalName is "Questionable" or "WigglyQuest").ToArray();
+        if (loaded.Length != 1)
+            throw new InvalidOperationException(loaded.Length == 0
+                ? "No Questionable / WigglyQuest installation is loaded."
+                : "Multiple Questionable installations are loaded; disable all but one of Questionable / WigglyQuest.");
+        var endpoint = $"{loaded[0].InternalName}.IsRunning";
+        return (endpoint, pluginInterface.GetIpcSubscriber<bool>(endpoint).InvokeFunc());
+    }
 
     public void Dispose()
     {
@@ -81,7 +103,7 @@ public sealed class QuestionableIpcService : IDisposable
 
         try
         {
-            var running = queryIsRunning();
+            var (endpoint, running) = queryIsRunning();
             if (running)
                 lastRunningUtc = now;
 
@@ -91,11 +113,11 @@ public sealed class QuestionableIpcService : IDisposable
                 QuestionableRunningSource.Ipc,
                 now,
                 lastRunningUtc,
-                IpcIsRunning));
+                endpoint));
         }
         catch (Exception ex)
         {
-            logDebug($"[FrenRider][Questionable] {IpcIsRunning} unreadable: {ex.Message}");
+            logDebug($"[FrenRider][Questionable] IsRunning unreadable: {ex.Message}");
             return Apply(new QuestionableRunningSnapshot(
                 false,
                 false,
@@ -118,13 +140,13 @@ public sealed class QuestionableIpcService : IDisposable
     private QuestionableRunningSnapshot Apply(QuestionableRunningSnapshot snapshot)
     {
         Current = snapshot;
-        var signature = $"{snapshot.StatusReadable}|{snapshot.IsRunning}|{snapshot.Source}";
+        var signature = $"{snapshot.StatusReadable}|{snapshot.IsRunning}|{snapshot.Source}|{snapshot.Detail}";
         if (string.Equals(signature, lastTransitionSignature, StringComparison.Ordinal))
             return Current;
 
         lastTransitionSignature = signature;
         logTransition(
-            $"[FrenRider][Questionable] IsRunning transition: readable={snapshot.StatusReadable}, running={snapshot.IsRunning}, source={snapshot.Source}.");
+            $"[FrenRider][Questionable] IsRunning transition: readable={snapshot.StatusReadable}, running={snapshot.IsRunning}, source={snapshot.Source}. {snapshot.Detail}");
         return Current;
     }
 }

@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- Questionable running-state checks support both Questionable and WigglyQuest, using the single loaded installation's
+  IPC endpoint. Disabled duplicates do not override it, and multiple loaded copies report an unreadable state without
+  querying either endpoint. The 250 ms polling interval and 15-second recent-running combat hold are unchanged.
 - `FrenRider.Dad.ApplyProfile` accepts optional `forceTemporary` (default false). Companion HealRider can install the existing in-memory overlay under Off, Temporary, or Permanent acceptance without saving or changing that setting. Exact-owner conflicts, release, full-profile enable/disable effects, and callers that omit the field keep their existing behavior.
 
 ### Added

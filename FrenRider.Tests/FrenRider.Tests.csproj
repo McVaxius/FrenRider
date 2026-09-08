@@ -13,6 +13,11 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="Dalamud;Dalamud.Common;Dalamud.Bindings.ImGui;Lumina;Lumina.Excel;Serilog;Newtonsoft.Json">
+      <HintPath Condition="'$(DALAMUD_HOME)' == ''">$(appdata)\XIVLauncher\addon\Hooks\dev\%(Identity).dll</HintPath>
+      <HintPath Condition="'$(DALAMUD_HOME)' != ''">$(DALAMUD_HOME)/%(Identity).dll</HintPath>
+      <Private>true</Private>
+    </Reference>
     <ProjectReference Include="..\FrenRider\FrenRider.csproj" />
   </ItemGroup>
 </Project>
