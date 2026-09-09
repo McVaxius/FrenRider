@@ -11,8 +11,12 @@ public sealed class AdsIntegrationService
     private const float PraetoriumTimeLimitSeconds = 7200f;
     private const double PraetoriumReadyFallbackSeconds = 15.0;
 
-    private readonly Plugin plugin;
     private readonly AdsDutyIpcService adsDutyIpcService;
+    private readonly Func<CharacterConfig> getConfig;
+    private readonly Action resetRecovery;
+    private readonly Func<string, bool> processCommand;
+    private readonly Action<string> logInformation;
+    private readonly Action<string> logWarning;
 
     private DateTime dutyEnteredUtc = DateTime.MinValue;
     private DateTime lastPraetoriumReadyWaitLogUtc = DateTime.MinValue;
@@ -25,20 +29,36 @@ public sealed class AdsIntegrationService
     private bool runtimeOwnedLastUpdate;
     private bool ownershipReleasedForCurrentDuty;
 
+    internal AdsDutySession DutySession { get; } = new();
+
     public AdsIntegrationService(Plugin plugin, AdsDutyIpcService adsDutyIpcService)
+        : this(adsDutyIpcService, () => plugin.ConfigManager.GetActiveConfig(),
+            () => plugin.BossModActionTweaksService.ResetRecovery(),
+            command => Plugin.CommandManager.ProcessCommand(command),
+            message => Plugin.Log.Information(message), message => Plugin.Log.Warning(message))
     {
-        this.plugin = plugin;
+    }
+
+    internal AdsIntegrationService(AdsDutyIpcService adsDutyIpcService, Func<CharacterConfig> getConfig,
+        Action resetRecovery, Func<string, bool> processCommand,
+        Action<string> logInformation, Action<string> logWarning)
+    {
         this.adsDutyIpcService = adsDutyIpcService;
+        this.getConfig = getConfig;
+        this.resetRecovery = resetRecovery;
+        this.processCommand = processCommand;
+        this.logInformation = logInformation;
+        this.logWarning = logWarning;
         StatusText = "ADS handoff off; FrenRider local duty logic active.";
     }
 
     public bool AdsLoaded { get; private set; }
     public bool IsHandoffPending { get; private set; }
     public bool IsControllingDuty { get; private set; }
-    public bool HadAdsControlThisDuty { get; private set; }
+    public bool HadAdsControlThisDuty => DutySession.HadAdsControl;
     public bool RuntimeOwnershipReadable { get; private set; }
     public string RuntimeOwnershipSource { get; private set; } = AdsDutyOwnershipSource.None.ToString();
-    public bool ExitTakeoverActive { get; private set; }
+    public bool ExitTakeoverActive => DutySession.ExitTakeoverActive;
     internal bool IsSoloCombatHeld => handoffState.IsCombatHeld;
     public bool ShouldPauseDutySystems
         => AdsIntegrationPolicy.ShouldPauseDutySystems(IsHandoffPending, IsControllingDuty, ExitTakeoverActive);
@@ -55,21 +75,67 @@ public sealed class AdsIntegrationService
     }
 
     internal void ObserveHandoffReadiness()
+        => ObserveHandoffReadiness(IsInDuty(), ReadLiveDutyIdentity(), ReadReadinessConditions(), DateTime.UtcNow);
+
+    internal void ObserveHandoffReadiness(bool inDuty,
+        (uint TerritoryTypeId, uint ContentFinderConditionId) identity,
+        AdsHandoffReadinessConditions conditions, DateTime nowUtc)
     {
-        var inDuty = IsInDuty();
+        ObserveDutySession(inDuty, identity, conditions, nowUtc);
         if (!inDuty)
             trackedInDuty = false;
 
-        if (!plugin.ConfigManager.GetActiveConfig().Enabled || !inDuty)
+        if (!getConfig().Enabled || !inDuty || DutySession.IsCompleted)
         {
             ResetHandoff();
             return;
         }
 
-        var conditions = ReadReadinessConditions();
         handoffState.ObserveReadiness(conditions);
         if (IsSoloCombatHeld && AdsIntegrationPolicy.GetHandoffReadinessBlocker(conditions) is { } blocker)
             StatusText = $"ADS solo combat held; {blocker}.";
+    }
+
+    private void ObserveDutySession(
+        bool inDuty,
+        (uint TerritoryTypeId, uint ContentFinderConditionId) identity,
+        AdsHandoffReadinessConditions conditions, DateTime nowUtc)
+    {
+        if (DutySession.Observe(inDuty, identity.TerritoryTypeId, identity.ContentFinderConditionId,
+                conditions, nowUtc))
+            ResetDutyTracking();
+    }
+
+    internal void OnDutyStarted(uint territoryId)
+        => OnDutyStarted(territoryId, DateTime.UtcNow);
+
+    internal void OnDutyStarted(uint territoryId, DateTime nowUtc)
+    {
+        DutySession.Start(territoryId, nowUtc);
+        ResetDutyTracking();
+    }
+
+    internal void OnDutyCompleted(uint territoryId)
+        => OnDutyCompleted(territoryId, DateTime.UtcNow);
+
+    internal void OnDutyCompleted(uint territoryId, DateTime nowUtc)
+    {
+        DutySession.Complete(territoryId, nowUtc);
+        ResetHandoff();
+        ReleaseDutyControlForExit($"DutyCompleted territory {territoryId}");
+    }
+
+    private void ResetDutyTracking()
+    {
+        trackedInDuty = false;
+        trackedDutyTerritoryId = 0;
+        trackedDutyContentFinderConditionId = 0;
+        dutyEnteredUtc = DateTime.MinValue;
+        ownershipReleasedForCurrentDuty = false;
+        runtimeOwnedLastUpdate = false;
+        IsControllingDuty = false;
+        lastPraetoriumReadyWaitLogUtc = DateTime.MinValue;
+        ResetHandoff();
     }
 
     private static bool IsInDuty()
@@ -95,11 +161,15 @@ public sealed class AdsIntegrationService
     public void Update() => Update(forceOwnershipRefresh: false);
 
     internal void Update(bool forceOwnershipRefresh)
+        => Update(IsInDuty(), ReadLiveDutyIdentity(), ReadReadinessConditions(), DateTime.UtcNow, forceOwnershipRefresh);
+
+    internal void Update(bool inDuty,
+        (uint TerritoryTypeId, uint ContentFinderConditionId) liveDutyIdentity,
+        AdsHandoffReadinessConditions readinessConditions, DateTime now, bool forceOwnershipRefresh = false)
     {
-        var config = plugin.ConfigManager.GetActiveConfig();
-        var inDuty = IsInDuty();
-        var liveDutyIdentity = ReadLiveDutyIdentity();
+        var config = getConfig();
         var territoryTypeId = liveDutyIdentity.TerritoryTypeId;
+        ObserveDutySession(inDuty, liveDutyIdentity, readinessConditions, now);
 
         var ownership = adsDutyIpcService.Refresh(
             inDuty,
@@ -118,42 +188,50 @@ public sealed class AdsIntegrationService
             trackedInDuty = inDuty;
             trackedDutyTerritoryId = territoryTypeId;
             trackedDutyContentFinderConditionId = liveDutyIdentity.ContentFinderConditionId;
-            dutyEnteredUtc = inDuty ? DateTime.UtcNow : DateTime.MinValue;
+            dutyEnteredUtc = inDuty ? now : DateTime.MinValue;
             handoffRequestedAtUtc = DateTime.MinValue;
             nextHandoffAttemptUtc = DateTime.MinValue;
-            ExitTakeoverActive = false;
-            HadAdsControlThisDuty = false;
-            ownershipReleasedForCurrentDuty = false;
             IsControllingDuty = false;
             IsHandoffPending = false;
-            runtimeOwnedLastUpdate = false;
             lastPraetoriumReadyWaitLogUtc = DateTime.MinValue;
             handoffState.Reset();
         }
 
-        IsControllingDuty = ownership.IsOwned;
-        if (ownership.IsOwned)
+        IsControllingDuty = inDuty && readinessConditions.IsLoggedIn && ownership.IsOwned;
+        if (IsControllingDuty)
         {
-            HadAdsControlThisDuty = true;
+            DutySession.ObserveAdsControl();
             IsHandoffPending = false;
             handoffRequestedAtUtc = DateTime.MinValue;
             nextHandoffAttemptUtc = DateTime.MinValue;
         }
-        else if (runtimeOwnedLastUpdate && ownership.StatusReadable)
+        else if (runtimeOwnedLastUpdate && !ownership.IsOwned && ownership.StatusReadable)
         {
             ownershipReleasedForCurrentDuty = true;
             ResetHandoff();
-            Plugin.Log.Information("[FrenRider][ADS] ADS explicitly released runtime duty ownership; FrenRider local duty logic may resume.");
+            logInformation("[FrenRider][ADS] ADS explicitly released runtime duty ownership.");
         }
 
-        runtimeOwnedLastUpdate = ownership.IsOwned;
+        runtimeOwnedLastUpdate = IsControllingDuty;
 
         if (config == null || !config.Enabled || !inDuty)
             ResetHandoff();
 
+        // Completion belongs to the duty session, not the current ADS owner or
+        // the transient GameMain identity. Never restart a completed duty.
+        if (DutySession.IsCompleted)
+        {
+            ResetHandoff();
+            ReleaseDutyControlForExit("duty completed");
+            StatusText = ExitTakeoverActive
+                ? "Duty completed; configured FrenRider exit takeover active."
+                : "Duty completed; automatic ADS handoff stopped.";
+            return;
+        }
+
         // Manual ownership keeps its existing behavior. An automatic solo
         // attempt must finish its safe delay even if ADS confirms early.
-        if (ownership.IsOwned && !IsSoloCombatHeld)
+        if (IsControllingDuty && !IsSoloCombatHeld)
         {
             StatusText = ExitTakeoverActive
                 ? $"ADS runtime ownership active via {RuntimeOwnershipSource}; FrenRider exit takeover active."
@@ -189,15 +267,13 @@ public sealed class AdsIntegrationService
             return;
         }
 
-        var now = DateTime.UtcNow;
-        var readinessConditions = ReadReadinessConditions();
         var readiness = ResolveReadiness(
             config,
             liveDutyIdentity.TerritoryTypeId,
             liveDutyIdentity.ContentFinderConditionId);
         IsHandoffPending = readiness.CanUseAds && !ownership.IsOwned;
         if (IsHandoffPending)
-            plugin.BossModActionTweaksService.ResetRecovery();
+            resetRecovery();
 
         if (!readiness.CanUseAds)
         {
@@ -278,7 +354,7 @@ public sealed class AdsIntegrationService
             return;
         }
 
-        if (Plugin.CommandManager.ProcessCommand("/ads inside"))
+        if (processCommand("/ads inside"))
         {
             AwaitHandoffConfirmation(now, readiness, "typed endpoint unavailable; sent /ads inside fallback");
             return;
@@ -289,15 +365,14 @@ public sealed class AdsIntegrationService
 
     public void ReleaseDutyControlForExit(string reason)
     {
-        var config = plugin.ConfigManager.GetActiveConfig();
+        var config = getConfig();
         var configuredExit = config.UseAdsLeaveAfterAdsDuty || config.ExitAfterDutyEnds || config.LeaveWhenAllLeft;
-        if (!configuredExit || !HadAdsControlThisDuty)
+        if (!DutySession.TryTakeOverExit(configuredExit))
             return;
 
-        ExitTakeoverActive = true;
         ResetHandoff();
         StatusText = $"ADS duty progression paused; configured FrenRider exit takeover active ({reason}).";
-        Plugin.Log.Information($"[FrenRider][ADS] Enabled exit-only takeover while keeping FrenRider duty systems paused: {reason}");
+        logInformation($"[FrenRider][ADS] Enabled exit-only takeover while keeping FrenRider duty systems paused: {reason}");
     }
 
     internal AdsDutyCategory? GetCurrentDutyCategory()
@@ -316,7 +391,7 @@ public sealed class AdsIntegrationService
         handoffRequestedAtUtc = now;
         nextHandoffAttemptUtc = now + AdsIntegrationPolicy.HandoffConfirmationTimeout;
         StatusText = BuildReadinessStatus(readiness, $"{reason}; waiting for authoritative ownership");
-        Plugin.Log.Information(
+        logInformation(
             $"[FrenRider][ADS] {reason} for {readiness.Entry!.DutyName} ({AdsDutyCategoryCatalog.GetLabel(readiness.Entry.Category)}) with ADS clearance {readiness.Entry.ClearanceStatus} (M{readiness.Entry.ClearanceLevel}), support {readiness.Entry.SupportLevel}, threshold {readiness.FamilySettings.MaturityThreshold}, and {readiness.FamilySettings.HandoffDelaySeconds}s continuous-ready delay.");
     }
 
@@ -326,7 +401,7 @@ public sealed class AdsIntegrationService
         nextHandoffAttemptUtc = now + AdsIntegrationPolicy.HandoffConfirmationTimeout;
         handoffState.ResetCountdown();
         StatusText = BuildReadinessStatus(readiness, $"{reason}; restarting readiness delay with 5s retry backoff");
-        Plugin.Log.Warning($"[FrenRider][ADS] {reason}.");
+        logWarning($"[FrenRider][ADS] {reason}.");
     }
 
     private AdsDutyReadiness ResolveReadiness(
@@ -395,7 +470,7 @@ public sealed class AdsIntegrationService
             if ((now - lastPraetoriumReadyWaitLogUtc).TotalSeconds >= 5.0)
             {
                 lastPraetoriumReadyWaitLogUtc = now;
-                Plugin.Log.Information($"[FrenRider][ADS] Praetorium entered but timer is still at {remainingTime:F0}s; waiting before sending /ads inside.");
+                logInformation($"[FrenRider][ADS] Praetorium entered but timer is still at {remainingTime:F0}s; waiting before sending /ads inside.");
             }
 
             return false;
@@ -407,7 +482,7 @@ public sealed class AdsIntegrationService
         if ((now - lastPraetoriumReadyWaitLogUtc).TotalSeconds >= 5.0)
         {
             lastPraetoriumReadyWaitLogUtc = now;
-            Plugin.Log.Warning("[FrenRider][ADS] Praetorium timer never appeared; using fallback readiness window before /ads inside.");
+            logWarning("[FrenRider][ADS] Praetorium timer never appeared; using fallback readiness window before /ads inside.");
         }
 
         return true;
@@ -439,4 +514,84 @@ public sealed class AdsIntegrationService
         AdsDutyFamilySettings FamilySettings,
         bool CanUseAds,
         string Reason);
+}
+
+// Shared by ADS handoff and configured exit so dispatch cannot erase completion.
+internal sealed class AdsDutySession
+{
+    private uint dutyTerritoryId;
+
+    public DateTime EnteredAtUtc { get; private set; } = DateTime.MinValue;
+    public DateTime CompletedAtUtc { get; private set; } = DateTime.MinValue;
+    public bool IsCompleted => CompletedAtUtc != DateTime.MinValue;
+    public bool HadAdsControl { get; private set; }
+    public bool ExitTakeoverActive { get; private set; }
+    public bool LeaveIssued { get; set; }
+
+    public bool Observe(bool inDuty, uint territoryId, uint contentFinderConditionId,
+        AdsHandoffReadinessConditions conditions, DateTime nowUtc)
+    {
+        // A dropped duty flag or missing identity during a cutscene is not an exit.
+        var confirmedExit = !inDuty && territoryId != 0 && territoryId != dutyTerritoryId
+                            && contentFinderConditionId == 0
+                            && AdsIntegrationPolicy.GetHandoffReadinessBlocker(conditions) is null;
+        if (!conditions.IsLoggedIn || confirmedExit)
+        {
+            var hadSession = EnteredAtUtc != DateTime.MinValue || IsCompleted;
+            Reset();
+            return hadSession;
+        }
+
+        if (inDuty)
+        {
+            ObserveEntry(nowUtc);
+            if (dutyTerritoryId == 0)
+                dutyTerritoryId = territoryId;
+        }
+
+        return false;
+    }
+
+    public void ObserveEntry(DateTime nowUtc)
+    {
+        if (EnteredAtUtc == DateTime.MinValue)
+            EnteredAtUtc = nowUtc;
+    }
+
+    public void Start(uint territoryId, DateTime nowUtc)
+    {
+        Reset();
+        dutyTerritoryId = territoryId;
+        EnteredAtUtc = nowUtc;
+    }
+
+    public void Complete(uint territoryId, DateTime nowUtc)
+    {
+        if (IsCompleted)
+            return;
+
+        dutyTerritoryId = territoryId;
+        CompletedAtUtc = nowUtc;
+    }
+
+    public void ObserveAdsControl() => HadAdsControl = true;
+
+    public bool TryTakeOverExit(bool configuredExit)
+    {
+        if (!configuredExit || !HadAdsControl || ExitTakeoverActive)
+            return false;
+
+        ExitTakeoverActive = true;
+        return true;
+    }
+
+    private void Reset()
+    {
+        dutyTerritoryId = 0;
+        EnteredAtUtc = DateTime.MinValue;
+        CompletedAtUtc = DateTime.MinValue;
+        HadAdsControl = false;
+        ExitTakeoverActive = false;
+        LeaveIssued = false;
+    }
 }

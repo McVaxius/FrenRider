@@ -16,6 +16,13 @@ using FrenRider.Models;
 
 namespace FrenRider.Services;
 
+internal readonly record struct DutyExitConditions(
+    bool InDuty,
+    bool IsBetweenAreas,
+    bool InCombat,
+    bool UtilityActive,
+    bool AdsPaused);
+
 /// <summary>
 /// Handles automatic exit behaviour based on configurable rules:
 /// 1. Exit if an exit object (Cairn of Return, etc.) exists in the zone - path to it + interact
@@ -30,13 +37,11 @@ public class ExitBehaviourService : IDisposable
     private readonly ZoneService zoneService;
 
     // Duty completion tracking
-    private bool dutyCompleted;
-    private DateTime dutyCompletedTime;
-    private bool dutyLeaveIssued;
-    private bool wasBoundByDuty;
-    private DateTime dutyEnteredTime = DateTime.MinValue;
+    private AdsDutySession DutySession => plugin.AdsIntegrationService.DutySession;
+    private bool dutyCompleted => DutySession.IsCompleted;
+    private DateTime dutyCompletedTime => DutySession.CompletedAtUtc;
+    private bool dutyLeaveIssued => DutySession.LeaveIssued;
     private const double DutyGracePeriodSeconds = 30.0;
-    private bool adsLeaveIssuedForDuty;
 
     // Exit object navigation state
     private IGameObject? exitTarget;
@@ -86,12 +91,20 @@ public class ExitBehaviourService : IDisposable
 
         // Hook DutyCompleted event
         Plugin.DutyState.DutyCompleted += OnDutyCompleted;
+        Plugin.DutyState.DutyStarted += OnDutyStarted;
     }
 
     public void Dispose()
     {
         CancelLeaveDutySequence("dispose");
         Plugin.DutyState.DutyCompleted -= OnDutyCompleted;
+        Plugin.DutyState.DutyStarted -= OnDutyStarted;
+    }
+
+    private void OnDutyStarted(Dalamud.Game.DutyState.IDutyStateEventArgs args)
+    {
+        ResetOutsideDutyState();
+        plugin.AdsIntegrationService.OnDutyStarted(args.TerritoryType.RowId);
     }
 
     private void OnDutyCompleted(Dalamud.Game.DutyState.IDutyStateEventArgs args)
@@ -99,10 +112,7 @@ public class ExitBehaviourService : IDisposable
 
     private void OnDutyCompleted(uint territoryId)
     {
-        dutyCompleted = true;
-        dutyCompletedTime = DateTime.Now;
-        dutyLeaveIssued = false;
-        plugin.AdsIntegrationService.ReleaseDutyControlForExit($"DutyCompleted territory {territoryId}");
+        plugin.AdsIntegrationService.OnDutyCompleted(territoryId);
         Plugin.Log.Information($"[ExitBehaviour] Duty completed in territory {territoryId}");
     }
 
@@ -110,7 +120,6 @@ public class ExitBehaviourService : IDisposable
     {
         var hadState = dutyCompleted
                        || dutyLeaveIssued
-                       || adsLeaveIssuedForDuty
                        || leaveAttemptCount > 0
                        || exitTarget != null
                        || isNavigatingToExit
@@ -121,12 +130,7 @@ public class ExitBehaviourService : IDisposable
         if (isNavigatingToExit)
             SendCommand("/vnav stop");
 
-        dutyCompleted = false;
-        dutyCompletedTime = DateTime.MinValue;
-        dutyLeaveIssued = false;
-        adsLeaveIssuedForDuty = false;
         leaveAttemptCount = 0;
-        dutyEnteredTime = DateTime.MinValue;
         lastExitInteractTime = DateTime.MinValue;
         lastExitScanTime = DateTime.MinValue;
         lastPartyCheckTime = DateTime.MinValue;
@@ -135,7 +139,6 @@ public class ExitBehaviourService : IDisposable
         pendingLeaveReason = "";
         exitTarget = null;
         isNavigatingToExit = false;
-        wasBoundByDuty = false;
         StateDetail = "";
 
         if (hadState)
@@ -149,12 +152,18 @@ public class ExitBehaviourService : IDisposable
     {
         var config = plugin.ConfigManager.GetActiveConfig();
         var inDuty = Plugin.Condition[ConditionFlag.BoundByDuty] ||
-                     Plugin.Condition[ConditionFlag.BoundByDuty56];
+                     Plugin.Condition[ConditionFlag.BoundByDuty56] ||
+                     Plugin.Condition[ConditionFlag.BoundByDuty95];
+        var now = DateTime.UtcNow;
+
+        // Entry tracking must run even while ADS or a utility pauses exit checks.
+        if (inDuty)
+            DutySession.ObserveEntry(now);
 
         if (!config.Enabled)
         {
             CancelLeaveDutySequence("plugin disabled");
-            if (!inDuty)
+            if (!inDuty && DutySession.EnteredAtUtc == DateTime.MinValue && !dutyCompleted)
                 ResetOutsideDutyState();
             return;
         }
@@ -167,7 +176,8 @@ public class ExitBehaviourService : IDisposable
 
         if (!inDuty)
         {
-            ResetOutsideDutyState();
+            if (DutySession.EnteredAtUtc == DateTime.MinValue && !dutyCompleted)
+                ResetOutsideDutyState();
             return;
         }
 
@@ -191,15 +201,6 @@ public class ExitBehaviourService : IDisposable
             return;
         }
 
-        // Track duty entry for grace period
-        if (inDuty && !wasBoundByDuty)
-        {
-            dutyEnteredTime = DateTime.Now;
-            adsLeaveIssuedForDuty = false;
-            Plugin.Log.Information($"[ExitBehaviour] Entered duty - {DutyGracePeriodSeconds}s grace period before exit checks");
-        }
-        wasBoundByDuty = true;
-
         // Don't try to leave during loading screens
         if (Plugin.Condition[ConditionFlag.BetweenAreas] || Plugin.Condition[ConditionFlag.BetweenAreas51])
         {
@@ -213,65 +214,43 @@ public class ExitBehaviourService : IDisposable
         if (Plugin.Condition[ConditionFlag.InCombat])
             return;
 
-        // Grace period: don't check exit conditions for first 30s after entering duty
-        // This prevents premature exits when party members haven't loaded in yet
-        if (dutyEnteredTime != DateTime.MinValue)
+        // Exit object feature removed - no longer needed
+
+        if (dutyCompleted && (config.UseAdsLeaveAfterAdsDuty || config.ExitAfterDutyEnds))
         {
-            var sinceDutyEntry = (DateTime.Now - dutyEnteredTime).TotalSeconds;
+            var elapsed = (now - dutyCompletedTime).TotalSeconds;
+            TryIssueCompletedExit(DutySession, config, now, new DutyExitConditions(
+                inDuty,
+                Plugin.Condition[ConditionFlag.BetweenAreas] || Plugin.Condition[ConditionFlag.BetweenAreas51],
+                Plugin.Condition[ConditionFlag.InCombat],
+                plugin.AutomationService.IsUtilityGateActive || plugin.AdsUtilityIpcService.ShouldSuppressGenericYesNo(),
+                plugin.AdsIntegrationService.ShouldPauseExitSystem), useAds =>
+            {
+                Plugin.Log.Information($"[ExitBehaviour] Configured completion exit: elapsed={elapsed:F1}s >= configured={config.ExitAfterDutySeconds}s, ADS={useAds}");
+                if (useAds)
+                {
+                    Plugin.Log.Information("[ExitBehaviour] ADS exit method enabled - sending /ads leave once.");
+                    SendCommand("/ads leave");
+                }
+                else
+                    LeaveDuty();
+            });
+
+            StateDetail = dutyLeaveIssued
+                ? "Duty exit requested; waiting to leave duty."
+                : $"Duty completed, {(config.UseAdsLeaveAfterAdsDuty ? "ADS " : "")}leaving in {Math.Max(0, config.ExitAfterDutySeconds - elapsed):F0}s...";
+            return;
+        }
+
+        // Only premature-exit checks need the entry grace while party members load.
+        if (!dutyCompleted && DutySession.EnteredAtUtc != DateTime.MinValue)
+        {
+            var sinceDutyEntry = (now - DutySession.EnteredAtUtc).TotalSeconds;
             if (sinceDutyEntry < DutyGracePeriodSeconds)
             {
                 StateDetail = $"Grace period ({DutyGracePeriodSeconds - sinceDutyEntry:F0}s)...";
                 return;
             }
-        }
-
-        // Exit object feature removed - no longer needed
-
-        if (config.UseAdsLeaveAfterAdsDuty && dutyCompleted && !dutyLeaveIssued)
-        {
-            var elapsed = (DateTime.Now - dutyCompletedTime).TotalSeconds;
-            if (elapsed >= config.ExitAfterDutySeconds)
-            {
-                Plugin.Log.Information("[ExitBehaviour] === ADS EXIT TRIGGERED ===");
-                Plugin.Log.Information($"[ExitBehaviour] Reason: ADS exit method, elapsed={elapsed:F1}s >= configured={config.ExitAfterDutySeconds}s");
-                SendAdsLeaveForExit();
-                dutyLeaveIssued = true;
-            }
-            else
-            {
-                StateDetail = $"Duty completed, ADS leaving in {(config.ExitAfterDutySeconds - elapsed):F0}s...";
-            }
-        }
-        // Rule 2: Exit N seconds after duty ends
-        else if (config.ExitAfterDutyEnds && dutyCompleted && !dutyLeaveIssued)
-        {
-            var elapsed = (DateTime.Now - dutyCompletedTime).TotalSeconds;
-            if (elapsed >= config.ExitAfterDutySeconds)
-            {
-                Plugin.Log.Information($"[ExitBehaviour] === LEAVE DUTY TRIGGERED ===");
-                Plugin.Log.Information($"[ExitBehaviour] Reason: ExitAfterDutyEnds={config.ExitAfterDutyEnds}, elapsed={elapsed:F1}s >= configured={config.ExitAfterDutySeconds}s");
-                Plugin.Log.Information($"[ExitBehaviour] DutyCompleted={dutyCompleted}, CompletedAt={dutyCompletedTime:HH:mm:ss}, InDuty={inDuty}");
-                LeaveDuty();
-                dutyLeaveIssued = true;
-            }
-            else
-            {
-                StateDetail = $"Duty completed, leaving in {(config.ExitAfterDutySeconds - elapsed):F0}s...";
-                // Log every 10 seconds during countdown
-                if ((int)elapsed % 10 == 0 && elapsed > 0)
-                {
-                    Plugin.Log.Debug($"[ExitBehaviour] Duty leave countdown: {elapsed:F0}s elapsed, {config.ExitAfterDutySeconds - elapsed:F0}s remaining");
-                }
-            }
-        }
-        else if (!config.ExitAfterDutyEnds && !config.UseAdsLeaveAfterAdsDuty && dutyCompleted)
-        {
-            // Clear duty completion state when feature is disabled
-            Plugin.Log.Debug("[ExitBehaviour] Exit after duty ends feature disabled - clearing completion state");
-            dutyCompleted = false;
-            dutyLeaveIssued = false;
-            adsLeaveIssuedForDuty = false;
-            leaveAttemptCount = 0;
         }
 
         // Rule 3: Leave when all others have left the zone
@@ -290,6 +269,20 @@ public class ExitBehaviourService : IDisposable
         }
 
         // CBT auto-leave feature removed
+    }
+
+    internal static bool TryIssueCompletedExit(AdsDutySession session, CharacterConfig config,
+        DateTime nowUtc, DutyExitConditions conditions, Action<bool> issueExit)
+    {
+        if (!config.Enabled || !conditions.InDuty || conditions.IsBetweenAreas || conditions.InCombat
+            || conditions.UtilityActive || conditions.AdsPaused || !session.IsCompleted || session.LeaveIssued
+            || (!config.UseAdsLeaveAfterAdsDuty && !config.ExitAfterDutyEnds)
+            || nowUtc - session.CompletedAtUtc < TimeSpan.FromSeconds(config.ExitAfterDutySeconds))
+            return false;
+
+        session.LeaveIssued = true;
+        issueExit(config.UseAdsLeaveAfterAdsDuty);
+        return true;
     }
 
     private void CheckExitObject()
@@ -497,18 +490,6 @@ public class ExitBehaviourService : IDisposable
         }
     }
 
-    private void SendAdsLeaveForExit()
-    {
-        if (adsLeaveIssuedForDuty)
-        {
-            return;
-        }
-
-        adsLeaveIssuedForDuty = true;
-        Plugin.Log.Information("[ExitBehaviour] ADS exit method enabled - sending /ads leave once.");
-        SendCommand("/ads leave");
-    }
-
     private void LeaveDuty()
     {
         var now = DateTime.UtcNow;
@@ -523,7 +504,7 @@ public class ExitBehaviourService : IDisposable
         
         if (config.ExitAfterDutyEnds && dutyCompleted)
         {
-            var elapsed = (DateTime.Now - dutyCompletedTime).TotalSeconds;
+            var elapsed = (DateTime.UtcNow - dutyCompletedTime).TotalSeconds;
             leaveReason = $"Exit after duty ends - {elapsed:F0}s elapsed (configured: {config.ExitAfterDutySeconds}s)";
         }
         else if (config.LeaveWhenAllLeft)
