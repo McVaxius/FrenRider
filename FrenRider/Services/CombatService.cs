@@ -588,7 +588,7 @@ public class CombatService
         return jobId.Value switch
         {
             1 or 3 or 19 or 21 or 32 or 37 => ManagedPresetRoleTank,
-            2 or 4 or 20 or 22 or 29 or 30 or 34 or 39 or 41 => ManagedPresetRoleMelee,
+            2 or 4 or 20 or 22 or 29 or 30 or 34 or 39 or 41 or 43 => ManagedPresetRoleMelee,
             5 or 6 or 7 or 23 or 24 or 25 or 26 or 27 or 28 or 31 or 33 or 35 or 36 or 38 or 40 or 42 => ManagedPresetRoleRanged,
             _ => WarnUnknownClassJob(jobId.Value),
         };
