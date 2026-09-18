@@ -93,6 +93,7 @@ public class ConfigManager : IDadProfileStore
                 Setting("Daedalus Engage Mode", (source, target) => target.DaedalusTargetMode = source.DaedalusTargetMode),
                 Setting("Force BossMod preset regardless of rotation", (source, target) => target.ForceBossModPresetRegardlessOfRotation = source.ForceBossModPresetRegardlessOfRotation),
                 Setting("BossMod AI", (source, target) => target.BossModAI = source.BossModAI),
+                Setting("Obstacle maps on", (source, target) => target.ObstacleMapsOn = source.ObstacleMapsOn),
                 Setting("Positional", (source, target) => target.PositionalInCombat = source.PositionalInCombat),
                 Setting("Max AI Distance", (source, target) => target.MaxAIDistance = source.MaxAIDistance),
                 Setting("LB Threshold %", (source, target) => target.LimitPct = source.LimitPct),

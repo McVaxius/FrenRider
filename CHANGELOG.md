@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `FrenRider.Dad.ApplyProfile` accepts optional `forceTemporary` (default false). Companion HealRider can install the existing in-memory overlay under Off, Temporary, or Permanent acceptance without saving or changing that setting. Exact-owner conflicts, release, full-profile enable/disable effects, and callers that omit the field keep their existing behavior.
 
 ### Added
+- Added **Obstacle maps on** under Combat > Advanced, defaulting to off. The setting is saved per profile, included in profile copying and default synchronization, and sent to BossMod Reborn at the end of each enable-time setup regardless of combat provider. VBM is unaffected; disabling FrenRider does not restore the setting.
 - The main window now has large, equal-width red **All FR off** and green **All FR on** buttons above the scrolling content, also available as compact buttons in DEFAULT CONFIG, to immediately set the current account's default and local profiles, including an active temporary profile; main-window controls are disabled only when no account is loaded
 - Repeated target range/line-of-sight errors can temporarily release confirmed casting movement locks while stationary outside combat, restoring on combat, a fixed five-second timeout, disable, transitions, unload, or control transfer; ADS, Questionable, and Coppelia ownership block recovery
 - DEFAULT CONFIG now exposes whether Fren Rider is enabled by default and can sync that state to local character profiles

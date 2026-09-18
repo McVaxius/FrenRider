@@ -113,6 +113,7 @@ public class CharacterConfig
         global::FrenRider.Models.DaedalusTargetMode.None;
     public bool ForceBossModPresetRegardlessOfRotation { get; set; } = false;
     public int BossModAI { get; set; } = 0; // 0=on, 1=off
+    public bool ObstacleMapsOn { get; set; } = false;
     public int PositionalInCombat { get; set; } = 3; // 0=Front, 1=Rear, 2=Any, 3=Auto
     public float MaxAIDistance { get; set; } = 424242f;
     public float LimitPct { get; set; } = -1f;
@@ -270,6 +271,7 @@ public class CharacterConfig
             DaedalusTargetMode = DaedalusTargetMode,
             ForceBossModPresetRegardlessOfRotation = ForceBossModPresetRegardlessOfRotation,
             BossModAI = BossModAI,
+            ObstacleMapsOn = ObstacleMapsOn,
             PositionalInCombat = PositionalInCombat,
             MaxAIDistance = MaxAIDistance,
             LimitPct = LimitPct,

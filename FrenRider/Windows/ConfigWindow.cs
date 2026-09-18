@@ -1234,6 +1234,21 @@ public class ConfigWindow : Window, IDisposable
         HelpMarker("Target HP percentage to use Limit Break.\n-1 = Disabled.\nAutomatically uses LB3 if available, otherwise LB2.");
         DrawDefaultSettingSyncButton("LB Threshold %");
 
+        ImGui.Spacing();
+        ImGui.Separator();
+        ImGui.Text("Advanced");
+        ImGui.Spacing();
+
+        var obstacleMapsOn = config.ObstacleMapsOn;
+        if (ImGui.Checkbox("Obstacle maps on", ref obstacleMapsOn))
+        {
+            config.ObstacleMapsOn = obstacleMapsOn;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Controls BossMod Reborn only. Default: off. Applies when FrenRider is enabled, regardless of combat provider.");
+        DrawDefaultSettingSyncButton("Obstacle maps on");
+
         DrawHacksSection(config);
     }
 

@@ -315,6 +315,11 @@ public sealed class Plugin : IDalamudPlugin
             {
                 Log.Information($"[FrenRider][DutyAuthority] Skipped enable-time combat setup: {CombatService.StateDetail}.");
             }
+
+            CommandManager.ProcessCommand(
+                ConfigManager.GetActiveConfig().ObstacleMapsOn
+                    ? "/bmrai obstaclemaps on"
+                    : "/bmrai obstaclemaps off");
         }
         else
         {
