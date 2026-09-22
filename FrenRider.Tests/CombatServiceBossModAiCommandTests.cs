@@ -13,15 +13,15 @@ public sealed class CombatServiceBossModAiCommandTests
     }
 
     [Theory]
-    [InlineData(0, "BMR", "/bmrai on")]
-    [InlineData(99, "RSR", "/bmrai on")]
-    [InlineData(0, "WRATH", "/bmrai on")]
-    [InlineData(0, "DAEDALUS", "/bmrai on")]
-    [InlineData(0, "VBM", "/vbmai on")]
-    public void BossModAiOnUsesSelectedImplementation(int bossModAI, string pluginName, string command)
+    [InlineData(0, "BMR", new[] { "/bmrai prefdistance 1.5", "/bmrai on" })]
+    [InlineData(99, "RSR", new[] { "/bmrai prefdistance 1.5", "/bmrai on" })]
+    [InlineData(0, "WRATH", new[] { "/bmrai prefdistance 1.5", "/bmrai on" })]
+    [InlineData(0, "DAEDALUS", new[] { "/bmrai prefdistance 1.5", "/bmrai on" })]
+    [InlineData(0, "VBM", new[] { "/vbmai on" })]
+    public void BossModAiOnUsesSelectedImplementation(int bossModAI, string pluginName, string[] commands)
     {
         Assert.Equal(
-            new[] { command },
+            commands,
             CombatService.BuildBossModAiCommands(bossModAI, pluginName));
     }
 

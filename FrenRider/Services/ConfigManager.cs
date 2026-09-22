@@ -47,6 +47,7 @@ public class ConfigManager : IDadProfileStore
                 Setting("DAD Profile Acceptance", (source, target) => target.ProfileAcceptancePolicy = source.ProfileAcceptancePolicy),
                 Setting("Fly You Fools", (source, target) => target.FlyYouFools = source.FlyYouFools),
                 Setting("Try Teleport to Fren When Out of Zone", (source, target) => target.TryTeleportToFrenWhenOutOfZone = source.TryTeleportToFrenWhenOutOfZone),
+                Setting("Follow local aetheryte networks", (source, target) => target.FollowLocalAetheryteNetworks = source.FollowLocalAetheryteNetworks),
                 Setting("Teleport Delay", (source, target) => target.TeleportToFrenDelaySeconds = source.TeleportToFrenDelaySeconds),
                 Setting("Nudge in duty when fren not nearby/in-zone", (source, target) => target.NudgeInDutyWhenFrenNotNearbyOrInZone = source.NudgeInDutyWhenFrenNotNearbyOrInZone),
                 Setting("Respawn after death outside duties", CopyRespawnOutsideDuties),

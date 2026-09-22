@@ -31,6 +31,10 @@
     ],
     "BossMod.Autorotation.MiscAI.NormalMovement": [
       {
+        "Track": "ForbiddenZoneCushion",
+        "Option": "Medium"
+      },
+      {
         "Track": "Destination",
         "Option": "Pathfind"
       },

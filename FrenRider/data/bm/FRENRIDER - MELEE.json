@@ -273,6 +273,10 @@
     ],
     "BossMod.Autorotation.MiscAI.NormalMovement": [
       {
+        "Track": "ForbiddenZoneCushion",
+        "Option": "Medium"
+      },
+      {
         "Track": "Cast",
         "Option": "Leeway"
       },

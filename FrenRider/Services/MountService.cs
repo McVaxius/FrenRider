@@ -98,6 +98,14 @@ public class MountService
             return;
         }
 
+        if (plugin.FrenTeleportService.IsLocalTravelActive)
+        {
+            PreemptFarChase("local aethernet travel active");
+            State = MountState.Idle;
+            StateDetail = "Teleport active";
+            return;
+        }
+
         var fren = tracker.Fren;
         if (fren == null || !fren.IsFound || !fren.IsVisible)
         {

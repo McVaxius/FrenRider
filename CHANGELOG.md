@@ -9,7 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Optional local aetheryte-network following under teleport settings detects a fren's jump and requests the matching Lifestream destination in connected normal, custom (including Bozja/Eureka), and residential networks when both players were at the origin.
+
 ### Fixed
+- Apply DDUCK's 1.5-yalm dodge clearance through Medium cushioning in all six packaged presets and before BMR AI activation.
 - BST (43) now selects the melee BMR preset, including through DAD's existing FrenRider integration. Manual preset overrides remain in control.
 - Configured ADS duty exit now waits from duty completion, bypasses the entry grace, and sends `/ads leave` once when loading, combat, and utility guards clear. Completed duties cannot restart automatic ADS progression after ownership release, cutscenes, missing duty identity, or re-enable; actual exit, logout, or a new duty start resets the session.
 - Automatic ADS solo-duty handoffs now suppress active combat providers until the full configured char-safe delay and readable ADS ownership confirmation. Loading, all three cutscene flags, death, duty re-entry, and re-enable restart readiness; rejected or timed-out attempts receive a fresh countdown. Enable-time presets and Hyper Focus cannot bypass the hold, and the configured rotation bootstraps once afterward, respecting disabled rotation and leases.

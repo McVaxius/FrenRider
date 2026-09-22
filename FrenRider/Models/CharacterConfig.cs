@@ -49,6 +49,7 @@ public class CharacterConfig
     public string FrenName { get; set; } = "";
     public bool FlyYouFools { get; set; } = false;
     public bool TryTeleportToFrenWhenOutOfZone { get; set; } = false;
+    public bool FollowLocalAetheryteNetworks { get; set; } = true;
     public int TeleportToFrenDelaySeconds { get; set; } = 30;
     public bool NudgeInDutyWhenFrenNotNearbyOrInZone { get; set; } = false;
     public bool RespawnOutsideDuties { get; set; } = false;
@@ -228,6 +229,7 @@ public class CharacterConfig
             FrenName = FrenName,
             FlyYouFools = FlyYouFools,
             TryTeleportToFrenWhenOutOfZone = TryTeleportToFrenWhenOutOfZone,
+            FollowLocalAetheryteNetworks = FollowLocalAetheryteNetworks,
             TeleportToFrenDelaySeconds = TeleportToFrenDelaySeconds,
             NudgeInDutyWhenFrenNotNearbyOrInZone = NudgeInDutyWhenFrenNotNearbyOrInZone,
             RespawnOutsideDuties = RespawnOutsideDuties,

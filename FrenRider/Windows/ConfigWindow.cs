@@ -578,6 +578,21 @@ public class ConfigWindow : Window, IDisposable
 
         DrawDefaultSettingSyncButton("Try Teleport to Fren When Out of Zone");
 
+        if (tryTeleport)
+        {
+            ImGui.Indent();
+            var followLocalNetworks = config.FollowLocalAetheryteNetworks;
+            if (ImGui.Checkbox("Follow local aetheryte networks", ref followLocalNetworks))
+            {
+                config.FollowLocalAetheryteNetworks = followLocalNetworks;
+                configManager.SaveCurrentAccount();
+            }
+            ImGui.SameLine();
+            HelpMarker("Immediately follow a fren's aethernet jump through Lifestream when you are at the same origin. Supports connected city, residential, and custom networks, including Bozja and Eureka.");
+            DrawDefaultSettingSyncButton("Follow local aetheryte networks");
+            ImGui.Unindent();
+        }
+
         var teleportDelay = config.TeleportToFrenDelaySeconds;
         var clampedTeleportDelay = Math.Clamp(teleportDelay, 5, 300);
         if (teleportDelay != clampedTeleportDelay)

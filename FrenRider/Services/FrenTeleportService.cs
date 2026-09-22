@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using Dalamud.Game.ClientState.Conditions;
+using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Memory;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
@@ -62,6 +64,10 @@ public sealed class FrenTeleportService
     private bool openedPartyWindow;
     private string activeStateKey = "";
     private string lastLoggedStatus = "";
+    private readonly LocalAethernetFollowDetector localDetector = new();
+    private LocalAethernetSample? localSample;
+    private (string Configured, string Name, string World) localTargetKey = ("", "", "");
+    internal bool IsLocalTravelActive { get; private set; }
 
     public FrenTeleportState State { get; private set; } = FrenTeleportState.Idle;
     public string StatusText { get; private set; } = "Off";
@@ -104,17 +110,47 @@ public sealed class FrenTeleportService
 
         if (zoneService.ZoneChanged)
         {
-            ResetState("Zone changed", FrenTeleportState.Idle);
+            ResetState("Zone changed", FrenTeleportState.Idle, preserveLocalRequest: true);
             return;
         }
 
-        if (IsBlocked(out var blockReason))
+        if (IsBlocked(out var blockReason, includeDuty: false))
         {
             ResetState($"Blocked: {blockReason}", FrenTeleportState.Blocked);
             return;
         }
 
         var fren = tracker.Fren;
+        var localKey = (config.FrenName, fren?.Name ?? "", fren?.WorldName ?? "");
+        if (localTargetKey.Configured != config.FrenName
+            || (fren?.IsFound == true && localTargetKey != localKey))
+        {
+            ClearLocalTracking();
+            localTargetKey = localKey;
+        }
+
+        var localDutyAllowed = zoneService.CurrentZone == ZoneType.Foray
+            || !(Plugin.Condition[ConditionFlag.BoundByDuty]
+                || Plugin.Condition[ConditionFlag.BoundByDuty56]
+                || Plugin.Condition[ConditionFlag.BoundByDuty95]);
+        if (config.FollowLocalAetheryteNetworks && localDutyAllowed)
+        {
+            if (TryFollowLocalNetwork(config, fren, now))
+                return;
+        }
+        else
+        {
+            ClearLocalTracking();
+        }
+
+        // Only the local branch may run in a supported foray. Keep the existing
+        // out-of-zone duty restriction and delay below unchanged.
+        if (IsBlocked(out blockReason))
+        {
+            ResetState($"Blocked: {blockReason}", FrenTeleportState.Blocked, resetLocal: false);
+            return;
+        }
+
         if (fren == null || !fren.IsFound)
         {
             ResetState("Fren not found", FrenTeleportState.Idle);
@@ -123,13 +159,13 @@ public sealed class FrenTeleportService
 
         if (!fren.InParty)
         {
-            ResetState("Fren not in party", FrenTeleportState.Idle);
+            ResetState("Fren not in party", FrenTeleportState.Idle, resetLocal: false);
             return;
         }
 
         if (fren.IsVisible)
         {
-            ResetState("Fren visible", FrenTeleportState.Idle);
+            ResetState("Fren visible", FrenTeleportState.Idle, resetLocal: false);
             return;
         }
 
@@ -169,7 +205,120 @@ public sealed class FrenTeleportService
     }
 
     public void ResetForAreaTransition()
-        => ResetState("Blocked: area transition", FrenTeleportState.Blocked);
+        => ResetState("Blocked: area transition", FrenTeleportState.Blocked, preserveLocalRequest: true);
+
+    private bool TryFollowLocalNetwork(CharacterConfig config, FrenTracker.FrenState? fren, long now)
+    {
+        try
+        {
+            if (!IsLifestreamLoaded())
+            {
+                ClearLocalTracking();
+                return false;
+            }
+
+            var ipc = Plugin.PluginInterface;
+            var busy = ipc.GetIpcSubscriber<bool>("Lifestream.IsBusy").InvokeFunc();
+            if (IsLocalTravelActive && busy)
+            {
+                localDetector.Clear();
+                localSample = null;
+                SetStatus(FrenTeleportState.TeleportIssued, "Following local aetheryte network");
+                return true;
+            }
+            IsLocalTravelActive = false;
+            if (busy || fren?.IsFound != true)
+            {
+                ClearLocalTracking();
+                return false;
+            }
+
+            var before = localSample;
+            var sample = ReadLocalSample(config, fren, now);
+            var player = Plugin.ObjectTable.LocalPlayer;
+            LocalAethernetNetwork? network = null;
+            Vector3? originPosition = null;
+            // Read the catalog only for a jump, not for every stationary frame.
+            if (player != null && before != null && sample != null
+                && Vector3.Distance(before.Position, sample.Position) > 50f
+                && LifestreamAethernetCatalog.TryRead(Plugin.ClientState.TerritoryType, out var catalog, out var origin))
+            {
+                network = catalog;
+                originPosition = origin;
+            }
+
+            if (!localDetector.Observe(sample, network, originPosition, player?.Position ?? default, now, out var destination))
+                return false;
+
+            // AethernetTeleport is a single immediate request; rejected/busy requests
+            // consume the observation without scheduling a local retry.
+            if (!ipc.GetIpcSubscriber<string, bool>("Lifestream.AethernetTeleport").InvokeFunc(destination.Name))
+                return false;
+
+            IsLocalTravelActive = true;
+            timerStartedMs = 0;
+            cooldownUntilMs = 0;
+            SetStatus(FrenTeleportState.TeleportIssued,
+                $"Following local aetheryte network to {destination.Name}{ReleasePartyWindowStatusSuffix()}", log: true);
+            return true;
+        }
+        catch
+        {
+            ClearLocalTracking();
+            return false;
+        }
+    }
+
+    private LocalAethernetSample? ReadLocalSample(CharacterConfig config, FrenTracker.FrenState fren, long now)
+    {
+        var party = Plugin.PartyList.Where(member => member.Name.ToString() == fren.Name
+            && member.World.Value.Name.ToString() == fren.WorldName).ToArray();
+        Vector3 position;
+        uint territory;
+        uint world;
+        bool visible;
+        if (fren.InParty && party.Length == 1)
+        {
+            var member = party[0];
+            var obj = member.GameObject;
+            visible = obj != null;
+            position = obj?.Position ?? member.Position;
+            territory = visible ? Plugin.ClientState.TerritoryType : member.Territory.RowId;
+            world = member.World.RowId;
+        }
+        else if (!fren.InParty && fren.IsVisible)
+        {
+            var matches = Plugin.ObjectTable.OfType<IPlayerCharacter>().Where(obj => obj.Name.ToString() == fren.Name).ToArray();
+            if (matches.Length != 1)
+                return localSample = null;
+            position = matches[0].Position;
+            territory = Plugin.ClientState.TerritoryType;
+            world = matches[0].HomeWorld.RowId;
+            visible = true;
+        }
+        else
+        {
+            return localSample = null;
+        }
+
+        var target = $"{config.FrenName}|{fren.Name}@{world}";
+        // An unchanged out-of-view party snapshot is not a new position sample.
+        if (visible || localSample == null || localSample.Target != target
+            || localSample.Territory != territory || localSample.Position != position)
+            localSample = new LocalAethernetSample(target, territory, position, now);
+        return localSample;
+    }
+
+    private void ClearLocalTracking(bool preserveRequest = false)
+    {
+        localDetector.Clear();
+        localSample = null;
+        if (!preserveRequest)
+        {
+            IsLocalTravelActive = false;
+            localTargetKey = ("", "", "");
+        }
+    }
 
     private void TryTeleport(CharacterConfig config, long now)
     {
@@ -217,7 +366,7 @@ public sealed class FrenTeleportService
             log: true);
     }
 
-    private bool IsBlocked(out string reason)
+    private bool IsBlocked(out string reason, bool includeDuty = true)
     {
         if (Plugin.Condition[ConditionFlag.InCombat])
         {
@@ -231,8 +380,8 @@ public sealed class FrenTeleportService
             return true;
         }
 
-        if (Plugin.Condition[ConditionFlag.BoundByDuty] ||
-            Plugin.Condition[ConditionFlag.BoundByDuty56])
+        if (includeDuty && (Plugin.Condition[ConditionFlag.BoundByDuty] ||
+            Plugin.Condition[ConditionFlag.BoundByDuty56]))
         {
             reason = "in duty";
             return true;
@@ -777,8 +926,10 @@ public sealed class FrenTeleportService
         SetStatus(FrenTeleportState.Cooldown, $"{reason}{ReleasePartyWindowStatusSuffix()}; retry in {AttemptCooldownMs / 1000}s", log: true);
     }
 
-    private void ResetState(string status, FrenTeleportState state)
+    private void ResetState(string status, FrenTeleportState state, bool resetLocal = true, bool preserveLocalRequest = false)
     {
+        if (resetLocal)
+            ClearLocalTracking(preserveLocalRequest);
         var partyWindowSuffix = ReleasePartyWindowStatusSuffix();
         timerStartedMs = 0;
         cooldownUntilMs = 0;
