@@ -1070,7 +1070,7 @@ public class CombatService
 
         return string.Equals(pluginName, "VBM", StringComparison.OrdinalIgnoreCase)
             ? new[] { "/vbmai on" }
-            : new[] { "/bmrai prefdistance 1.5", "/bmrai on" };
+            : new[] { "/bmrai prefdistance 1.5", "/bmrai forbidactions off", "/bmrai on" };
     }
 
     internal static string[] BuildBossModPresetCommands(string pluginName, string presetName)
