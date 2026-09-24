@@ -15,6 +15,12 @@ public class AutoYesService : IDisposable
     private readonly Plugin plugin;
     private readonly IPluginLog log;
     private readonly ICondition condition;
+    private readonly Func<CharacterConfig?> getConfig;
+    private readonly Func<string?> readPrompt;
+    private readonly Func<bool> clickYes;
+    private string handledRaiseDialog = string.Empty;
+    private DateTime lastRaiseAcceptedTime = DateTime.MinValue;
+    public bool RaiseOfferActive { get; private set; }
     
     private readonly Dictionary<string, string> autoYesPatterns = new()
     {
@@ -25,10 +31,6 @@ public class AutoYesService : IDisposable
         {"misc3", "Duty calls"},
         {"misc4", "Are you interested"},    
         {"misc5", "Move immediately to sealed area"},
-        
-        // Raise offers
-        {"raise", "Would you like to be raised"},
-        {"raise2", "Accept Raise"},
         
         // Teleport offers  
         {"teleport", "Accept Teleport to"},
@@ -55,10 +57,21 @@ public class AutoYesService : IDisposable
     private bool teleportRepairRetryRequested;
     
     public AutoYesService(Plugin plugin, ICondition condition, IPluginLog log)
+        : this(plugin, condition, log, () => plugin.ConfigManager.GetActiveConfig(),
+            () => GameHelpers.TryReadSelectYesnoPrompt(out var text) ? text : null,
+            () => GameHelpers.ClickYesIfVisible(requireEnabled: true))
+    {
+    }
+
+    internal AutoYesService(Plugin plugin, ICondition condition, IPluginLog log,
+        Func<CharacterConfig?> getConfig, Func<string?> readPrompt, Func<bool> clickYes)
     {
         this.plugin = plugin;
         this.condition = condition;
         this.log = log;
+        this.getConfig = getConfig;
+        this.readPrompt = readPrompt;
+        this.clickYes = clickYes;
     }
     
     public void Dispose()
@@ -72,12 +85,37 @@ public class AutoYesService : IDisposable
     /// </summary>
     public void Update()
     {
+        RaiseOfferActive = false;
+        var config = getConfig();
+        if (config == null || !config.Enabled)
+        {
+            handledRaiseDialog = string.Empty;
+            lastRaiseAcceptedTime = DateTime.MinValue;
+            return;
+        }
+
+        var now = DateTime.Now;
+        var prompt = readPrompt();
+        if (SelectYesnoPromptClassifier.Classify(prompt ?? string.Empty) == SelectYesnoPromptKind.Raise)
+        {
+            RaiseOfferActive = true;
+            // Own the visible offer even when its button is not actionable yet.
+            if (handledRaiseDialog != prompt && now - lastRaiseAcceptedTime >= handleCooldown
+                && ClickYesAndLog(prompt!, "Raise offer"))
+            {
+                handledRaiseDialog = prompt!;
+                lastRaiseAcceptedTime = now;
+            }
+            return;
+        }
+        handledRaiseDialog = string.Empty;
+        // Give a successful Raise response time to close and begin revival before Return can run.
+        RaiseOfferActive = now - lastRaiseAcceptedTime < handleCooldown;
+        if (RaiseOfferActive)
+            return;
+
         if (!GameHelpers.IsAddonVisible("_NotificationTelepo"))
             teleportRepairRetryRequested = false;
-
-        var config = plugin.ConfigManager.GetActiveConfig();
-        if (config == null || !config.Enabled)
-            return;
 
         if (plugin.AdsIntegrationService.ShouldPauseDutySystems)
             return;
@@ -85,7 +123,6 @@ public class AutoYesService : IDisposable
         if (plugin.RespawnService.ShouldOwnCurrentUnconsciousReviveFlow(config))
             return;
 
-        var now = DateTime.Now;
         TryExpandMinimizedTeleportOffer(config, now);
 
         if (plugin.AutomationService.IsUtilityGateActive
@@ -148,18 +185,6 @@ public class AutoYesService : IDisposable
                     // Let PartyService handle party invites based on whitelist
                     log.Debug($"[AutoYes] Party invite detected, letting PartyService handle: {dialogText}");
                     return;
-                }
-                
-                // Handle raise offers
-                if (matchedKey.StartsWith("raise") && config.RaiseOfferAutoAccept)
-                {
-                    log.Debug($"[AutoYes] Accepting raise offer (config enabled)");
-                    ClickYesAndLog(dialogText, "Raise offer");
-                    return;
-                }
-                else if (matchedKey.StartsWith("raise"))
-                {
-                    log.Debug($"[AutoYes] Skipping raise offer (config disabled)");
                 }
                 
                 // Handle teleport offers
@@ -256,22 +281,25 @@ public class AutoYesService : IDisposable
         return true;
     }
     
-    private unsafe void ClickYesAndLog(string dialogText, string dialogType)
+    private bool ClickYesAndLog(string dialogText, string dialogType)
     {
         try
         {
             // Use the existing GameHelpers method
-            GameHelpers.ClickYesIfVisible();
+            if (!clickYes())
+                return false;
             
             // Track that we handled this dialog
             lastHandledDialog = dialogText;
             lastHandledTime = DateTime.Now;
             
             log.Information($"[AutoYes] Automatically clicked Yes on {dialogType}: {dialogText}");
+            return true;
         }
         catch (Exception ex)
         {
             log.Error($"[AutoYes] Failed to click Yes on {dialogType}: {ex.Message}");
+            return false;
         }
     }
 }

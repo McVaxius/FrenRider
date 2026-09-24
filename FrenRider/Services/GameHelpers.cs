@@ -618,8 +618,8 @@ public static class GameHelpers
     /// Click Yes on SelectYesno dialog if visible.
     /// Dispatches the SelectYesno response callback.
     /// </summary>
-    public static bool ClickYesIfVisible(bool logClick = true)
-        => ClickSelectYesnoButtonIfVisible(0, "Yes", logClick);
+    public static bool ClickYesIfVisible(bool logClick = true, bool requireEnabled = false)
+        => ClickSelectYesnoButtonIfVisible(0, "Yes", logClick, requireEnabled);
 
     /// <summary>
     /// Click No on SelectYesno dialog if visible.
@@ -628,7 +628,7 @@ public static class GameHelpers
     public static bool ClickNoIfVisible(bool logClick = true)
         => ClickSelectYesnoButtonIfVisible(1, "No", logClick);
 
-    private static unsafe bool ClickSelectYesnoButtonIfVisible(int buttonIndex, string buttonLabel, bool logClick)
+    private static unsafe bool ClickSelectYesnoButtonIfVisible(int buttonIndex, string buttonLabel, bool logClick, bool requireEnabled = false)
     {
         try
         {
@@ -639,6 +639,13 @@ public static class GameHelpers
             var addon = (AtkUnitBase*)addonPtr;
             if (!addon->IsVisible)
                 return false;
+
+            if (requireEnabled)
+            {
+                var yesNo = (AddonSelectYesno*)addonPtr;
+                if (!addon->IsReady || yesNo->YesButton == null || !yesNo->YesButton->IsEnabled)
+                    return false;
+            }
 
             var atkValues = stackalloc AtkValue[1];
             atkValues[0] = default;

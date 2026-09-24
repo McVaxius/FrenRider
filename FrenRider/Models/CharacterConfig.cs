@@ -205,7 +205,6 @@ public class CharacterConfig
     public List<string> InviteWhitelist { get; set; } = new();
 
     // --- Auto-Yes Dialogs ---
-    public bool RaiseOfferAutoAccept { get; set; } = true;
     public bool TeleportOfferAutoAccept { get; set; } = true;
     public bool PartyInviteAutoAccept { get; set; } = true;
 
@@ -326,7 +325,6 @@ public class CharacterConfig
             SpamPrinter = SpamPrinter,
             DebugMode = DebugMode,
             InviteWhitelist = new List<string>(InviteWhitelist),
-            RaiseOfferAutoAccept = RaiseOfferAutoAccept,
             TeleportOfferAutoAccept = TeleportOfferAutoAccept,
             PartyInviteAutoAccept = PartyInviteAutoAccept,
             ExitAfterDutyEnds = ExitAfterDutyEnds,

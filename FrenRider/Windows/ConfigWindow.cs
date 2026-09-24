@@ -1847,15 +1847,7 @@ public class ConfigWindow : Window, IDisposable
 
     private void DrawAutoYesSection(CharacterConfig config)
     {
-        var raiseOffer = config.RaiseOfferAutoAccept;
-        if (ImGui.Checkbox("Raise offers", ref raiseOffer))
-        {
-            config.RaiseOfferAutoAccept = raiseOffer;
-            configManager.SaveCurrentAccount();
-        }
-        ImGui.SameLine();
-        HelpMarker("Automatically accept raise offers from other players.");
-        DrawDefaultSettingSyncButton("Raise offers");
+        ImGui.TextWrapped("Raise offers are accepted automatically while FrenRider is enabled.");
 
         var teleportOffer = config.TeleportOfferAutoAccept;
         if (ImGui.Checkbox("Teleport offers", ref teleportOffer))
@@ -2341,16 +2333,6 @@ public class ConfigWindow : Window, IDisposable
         ImGui.SameLine();
         HelpMarker("Automatically click Yes on specific dialog types when FrenRider is enabled.\nWorks alongside YesAlready - FrenRider pauses YesAlready and handles these dialogs itself.");
         ImGui.Spacing();
-
-        // Raise offers
-        var raiseOffer = config.RaiseOfferAutoAccept;
-        if (ImGui.Checkbox("Raise offers", ref raiseOffer))
-        {
-            config.RaiseOfferAutoAccept = raiseOffer;
-            configManager.SaveCurrentAccount();
-        }
-        ImGui.SameLine();
-        HelpMarker("Automatically accept raise offers from other players.");
 
         // Teleport offers
         var teleportOffer = config.TeleportOfferAutoAccept;

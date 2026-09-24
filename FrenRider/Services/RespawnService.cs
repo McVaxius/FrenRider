@@ -38,6 +38,12 @@ public sealed class RespawnService
 
     public void Update()
     {
+        if (plugin.AutoYesService.RaiseOfferActive)
+        {
+            Reset(RespawnState.Waiting, "Raise offer handled by AutoYes");
+            return;
+        }
+
         var config = plugin.ConfigManager.GetActiveConfig();
         var inDuty = IsInDuty();
         var respawnEnabled = RespawnNotificationRecoveryPolicy.IsRespawnEnabledForDutyState(

@@ -418,7 +418,6 @@ public sealed class ConfigManagerActiveCharacterTests
         Assert.False(second.Enabled);
         Assert.False(second.AutoSyncFate);
         Assert.False(second.AdsEnableChestOpening);
-        Assert.False(second.RaiseOfferAutoAccept);
         Assert.False(second.TeleportOfferAutoAccept);
         Assert.False(second.PartyInviteAutoAccept);
         Assert.False(second.ExitAfterDutyEnds);
