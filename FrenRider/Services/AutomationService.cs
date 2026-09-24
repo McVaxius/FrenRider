@@ -61,6 +61,8 @@ public class AutomationService : IDisposable
     private string lastRepairBlockedReason = "";
     private RepairFlowState repairFlowState;
     private bool adsRepairUtilityObserved;
+    private bool repairReturnsToInn;
+    private DateTime repairRequestedUtc;
     private int repairRequestAttempts;
     private AutoDesynthFlowState autoDesynthFlowState;
     private long autoDesynthFlowStartedMs;
@@ -149,7 +151,8 @@ public class AutomationService : IDisposable
             IsIdle = false;
             LastIdleAction = "";
             InvalidateFoodCache(); // Re-resolve food on zone change
-            CancelRepairFlow("Repair reset: zone transition.");
+            if (!repairReturnsToInn)
+                CancelRepairFlow("Repair reset: zone transition.");
             return;
         }
 
@@ -256,7 +259,7 @@ public class AutomationService : IDisposable
         if (plugin.AdsIntegrationService.ShouldPauseDutySystems)
             return;
 
-        if (zoneService.ZoneChanged)
+        if (zoneService.ZoneChanged && !repairReturnsToInn)
         {
             CancelRepairFlow("Repair reset: zone transition.");
         }
@@ -860,6 +863,12 @@ public class AutomationService : IDisposable
             return;
         }
 
+        if (repairReturnsToInn && repairFlowState is not (RepairFlowState.Idle or RepairFlowState.WaitingForDismount))
+        {
+            TrackActiveRepair(now, "npc-yes-inn", threshold, adsStatus);
+            return;
+        }
+
         var needsRepair = GameHelpers.NeedsRepair(threshold);
         if (!needsRepair)
         {
@@ -1018,6 +1027,22 @@ public class AutomationService : IDisposable
             return;
         }
 
+        if (repairReturnsToInn && adsStatus.UtilityCompletedAtUtc >= repairRequestedUtc)
+        {
+            if (!string.IsNullOrWhiteSpace(adsStatus.UtilityLastFailure))
+            {
+                RepairStatus = $"NPC repair + inn room failed: {adsStatus.UtilityLastFailure}";
+                Plugin.Log.Warning($"[FrenRider][Repair] {RepairStatus}");
+                ResetRepairFlow(preserveStatus: true);
+                return;
+            }
+            if (!string.IsNullOrWhiteSpace(adsStatus.UtilityLastSuccess) && !GameHelpers.NeedsRepair(threshold))
+            {
+                CompleteRepairFlow(threshold);
+                return;
+            }
+        }
+
         if (!adsRepairUtilityObserved && elapsedSinceRequest < RepairStartGraceMs)
         {
             repairFlowState = RepairFlowState.WaitingForAdsStart;
@@ -1044,6 +1069,8 @@ public class AutomationService : IDisposable
 
     private void IssueRepairRequest(long now, string repairMode, int threshold, string reason)
     {
+        repairReturnsToInn = repairMode == "npc-yes-inn";
+        repairRequestedUtc = DateTime.UtcNow;
         repairRequestAttempts++;
         lastRepairAttemptMs = now;
         repairFlowState = RepairFlowState.WaitingForAdsStart;
@@ -1091,6 +1118,7 @@ public class AutomationService : IDisposable
 
     private void ResetRepairFlow(bool preserveStatus = false, bool refreshAdsStatus = false)
     {
+        repairReturnsToInn = false;
         repairFlowState = RepairFlowState.Idle;
         lastRepairAttemptMs = 0;
         repairDismountStartedMs = 0;
@@ -1199,7 +1227,7 @@ public class AutomationService : IDisposable
     }
 
     /// <summary>
-    /// Trigger repair based on config (0=Disabled, 1=Self, 2=NPC no-inn, 3=NPC no-inn/no-teleport).
+    /// Trigger repair based on config (0=Disabled, 1=Self, 2=NPC no-inn, 3=NPC no-inn/no-teleport, 4=NPC repair + inn room).
     /// FrenRider always delegates repair to ADS.
     /// </summary>
     public void TriggerRepair(CharacterConfig config)
@@ -1231,6 +1259,9 @@ public class AutomationService : IDisposable
 
     internal void RetryRepairAfterTeleportCollision(CharacterConfig config)
     {
+        if (repairReturnsToInn && plugin.AdsUtilityIpcService.Refresh(force: true).IsRepairRunning)
+            return;
+
         var repairMode = ResolveAdsRepairMode(config);
         if (string.IsNullOrWhiteSpace(repairMode))
             return;
@@ -1252,6 +1283,7 @@ public class AutomationService : IDisposable
             1 => "self",
             2 => "npc-no-inn",
             3 => "npc-no-teleport-no-inn",
+            4 => "npc-yes-inn",
             _ => string.Empty,
         };
 
@@ -1260,6 +1292,7 @@ public class AutomationService : IDisposable
         {
             "npc-no-inn" => "NPC no-inn",
             "npc-no-teleport-no-inn" => "NPC no-inn/no-teleport",
+            "npc-yes-inn" => "NPC repair + inn room",
             "self" => "Self",
             _ => "ADS",
         };

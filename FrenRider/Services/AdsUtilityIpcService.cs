@@ -30,7 +30,7 @@ public sealed class AdsUtilityStatusSnapshot
 
     public bool IsRepairRunning
         => UtilityRunning
-           && (UtilityMode is "self" or "npc-no-inn" or "npc-no-teleport-no-inn" or "npc"
+           && (UtilityMode is "self" or "npc-no-inn" or "npc-no-teleport-no-inn" or "npc" or "npc-yes-inn"
                || UtilityTask.Contains("repair", StringComparison.OrdinalIgnoreCase));
 
     public bool SuppressesGenericYesNo

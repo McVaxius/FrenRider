@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Appended NPC repair + inn room as repair mode 4, preserving modes 0–3 and the Disabled default. FrenRider waits for ADS to finish the inn return even after durability recovers, and displays failed-trip status.
 - Optional local aetheryte-network following under teleport settings detects a fren's jump and requests the matching Lifestream destination in connected normal, custom (including Bozja/Eureka), and residential networks when both players were at the origin.
 
 ### Fixed

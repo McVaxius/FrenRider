@@ -195,7 +195,7 @@ public class CharacterConfig
     public bool FeedMeUseHighQuality { get; set; } = false;
     public bool FeedMeSearch { get; set; } = true;
     public int XpItem { get; set; } = 0;
-    public int Repair { get; set; } = 0; // 0=Disabled, 1=Self, 2=NPC no-inn
+    public int Repair { get; set; } = 0; // 0=Disabled, 1=Self, 2=NPC no-inn, 3=NPC no-inn/no-TP, 4=NPC repair + inn room
     public int TornClothes { get; set; } = 75;
     public bool EnableAutoDesynth { get; set; } = false;
     public int SpamPrinter { get; set; } = 0; // 0=off, 1=on
