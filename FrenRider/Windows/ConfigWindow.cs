@@ -36,7 +36,9 @@ public class ConfigWindow : Window, IDisposable
 
     private static readonly string[] CompanionStances = { "Free Stance", "Defender Stance", "Attacker Stance", "Healer Stance", "Follow" };
     private static readonly string[] ClingTypes = { "NavMesh", "Visland", "BossMod Follow", "Vanilla Follow" };
-    private static readonly string[] RotationPlugins = { "BMR", "VBM", "RSR", "WRATH", "DAEDALUS" };
+    private static readonly string[] RotationPlugins = { "BMR", "DAEDALUS", "RSR", "VBM", "WRATH" };
+    // Keep saved plugin IDs stable while displaying names alphabetically.
+    private static readonly int[] RotationPluginIds = { 0, 4, 2, 1, 3 };
     private static readonly string[] DaedalusTargetModes = { "None", "Focus", "Split", "Kill Adds" };
     private static readonly string[] RsrOperatingModes = { "Auto", "Manual", "None", "Support" };
     private static readonly string[] RsrAggroTypes =
@@ -1027,11 +1029,11 @@ public class ConfigWindow : Window, IDisposable
         ImGui.Spacing();
 
         // Rotation Plugin (dropdown)
-        var rotPlugin = config.RotationPlugin;
+        var rotPlugin = Array.IndexOf(RotationPluginIds, config.RotationPlugin);
         ImGui.SetNextItemWidth(200);
         if (ImGui.Combo("Rotation Plugin", ref rotPlugin, RotationPlugins, RotationPlugins.Length))
         {
-            config.RotationPlugin = rotPlugin;
+            config.RotationPlugin = RotationPluginIds[rotPlugin];
             configManager.SaveCurrentAccount();
         }
         ImGui.SameLine();
@@ -1039,11 +1041,11 @@ public class ConfigWindow : Window, IDisposable
         DrawDefaultSettingSyncButton("Rotation Plugin");
 
         // Rotation Plugin Foray (dropdown)
-        var rotPluginForay = config.RotationPluginForay;
+        var rotPluginForay = Array.IndexOf(RotationPluginIds, config.RotationPluginForay);
         ImGui.SetNextItemWidth(200);
         if (ImGui.Combo("Rotation Plugin (Foray)", ref rotPluginForay, RotationPlugins, RotationPlugins.Length))
         {
-            config.RotationPluginForay = rotPluginForay;
+            config.RotationPluginForay = RotationPluginIds[rotPluginForay];
             configManager.SaveCurrentAccount();
         }
         ImGui.SameLine();

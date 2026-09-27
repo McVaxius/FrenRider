@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- Alphabetized the normal and Foray combat-plugin dropdowns while preserving saved selections.
 - Accept actionable Raise offers immediately while FrenRider is enabled, ahead of ADS, combat, utility, respawn and generic dialog gates. Remove the unused Raise controls and setting; old configurations still load and drop the obsolete key on the next normal save. Suppress duplicate responses and defer Return while revival begins; record handling only after a successful click.
 
 ### Added
