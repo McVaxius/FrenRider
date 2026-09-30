@@ -384,6 +384,33 @@ public class ConfigManager : IDadProfileStore
         return ResolveActiveConfigOrDisabled(account, CurrentAccountId, ActiveCharacterKey);
     }
 
+    internal QuestionableDutySettingsOverride QuestionableDutySettings { get; } = new();
+
+    internal string QuestionableCharacterIdentity
+        => Plugin.ClientState.IsLoggedIn && Plugin.PlayerState.ContentId != 0 &&
+           TryResolveActiveConfig(GetCurrentAccount(), CurrentAccountId, ActiveCharacterKey, out _)
+            ? $"{CurrentAccountId}/{ActiveCharacterKey}/{Plugin.PlayerState.ContentId}"
+            : string.Empty;
+
+    internal AdsDutyFamilySettings GetEffectiveAdsDutyFamilySettings(CharacterConfig config, AdsDutyCategory category)
+        => IsActiveCharacterConfig(config)
+            ? QuestionableDutySettings.Resolve(config, category, QuestionableCharacterIdentity)
+            : config.GetAdsDutyFamilySettings(category);
+
+    internal bool IsQuestionableDutyFamilyControlled(CharacterConfig config, AdsDutyCategory category)
+        => IsActiveCharacterConfig(config) &&
+           QuestionableDutySettings.Controls(category, QuestionableCharacterIdentity);
+
+    internal DutyExitSettings GetEffectiveDutyExitSettings(CharacterConfig config)
+        => IsActiveCharacterConfig(config)
+            ? QuestionableDutySettings.ResolveExit(config, QuestionableCharacterIdentity)
+            : DutyExitSettings.FromConfig(config);
+
+    private bool IsActiveCharacterConfig(CharacterConfig config)
+        => ReferenceEquals(config, GetActiveConfig()) ||
+           (TryResolveActiveConfig(GetCurrentAccount(), CurrentAccountId, ActiveCharacterKey, out var saved) &&
+            ReferenceEquals(config, saved));
+
     public CharacterConfig GetCurrentCharacterConfig(string charKey)
     {
         var account = GetCurrentAccount();

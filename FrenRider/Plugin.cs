@@ -505,6 +505,7 @@ public sealed class Plugin : IDalamudPlugin
         try
         {
             Measure("dtr", UpdateDtrBar);
+            Measure("dad-questionable-settings", DadIPC.UpdateQuestionableDutySettings);
             Measure("zone", ZoneService.Update);
             Measure("ads-readiness", AdsIntegrationService.ObserveHandoffReadiness);
             Measure("casting-recovery", BossModActionTweaksService.UpdateRecovery);

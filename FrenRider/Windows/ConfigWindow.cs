@@ -1350,7 +1350,9 @@ public class ConfigWindow : Window, IDisposable
 
         foreach (var entry in AdsDutyCategoryCatalog.Entries)
         {
-            var settings = config.GetAdsDutyFamilySettings(entry.Category);
+            var controlled = configManager.IsQuestionableDutyFamilyControlled(config, entry.Category);
+            var settings = configManager.GetEffectiveAdsDutyFamilySettings(config, entry.Category);
+            ImGui.BeginDisabled(controlled);
             var enabled = settings.Enabled;
             if (ImGui.Checkbox($"{entry.Label}##AdsFamily{entry.Category}", ref enabled))
             {
@@ -1386,6 +1388,12 @@ public class ConfigWindow : Window, IDisposable
             ImGui.SameLine();
             ImGui.TextDisabled("sec ready");
             DrawDefaultSettingSyncButton($"ADS {entry.Label}", $"AdsFamily{entry.Category}");
+            ImGui.EndDisabled();
+            if (controlled)
+            {
+                ImGui.SameLine();
+                ImGui.TextDisabled("Temporarily controlled by DAD");
+            }
         }
 
         if (ImGui.Button("OPEN ADS LOOT OPTIONS"))
@@ -1874,10 +1882,16 @@ public class ConfigWindow : Window, IDisposable
 
     private void DrawExitBehaviourSection(CharacterConfig config)
     {
-        if (config.NormalizeExitMethodSelection())
+        var controlled = configManager.IsQuestionableDutyFamilyControlled(config, AdsDutyCategory.Solo);
+        if (!controlled && config.NormalizeExitMethodSelection())
             configManager.SaveCurrentAccount();
+        var exits = configManager.GetEffectiveDutyExitSettings(config);
 
-        if (ImGui.RadioButton("FrenRider Exit method", !config.UseAdsLeaveAfterAdsDuty))
+        if (controlled)
+            ImGui.TextDisabled("Temporarily controlled by DAD");
+        ImGui.BeginDisabled(controlled);
+
+        if (ImGui.RadioButton("FrenRider Exit method", !exits.UseAdsLeaveAfterAdsDuty))
         {
             config.UseAdsLeaveAfterAdsDuty = false;
             if (!config.ExitAfterDutyEnds && !config.LeaveWhenAllLeft)
@@ -1889,7 +1903,7 @@ public class ConfigWindow : Window, IDisposable
         HelpMarker("Use FrenRider's local Leave Duty flow after the configured duty-end condition.");
         DrawDefaultSettingSyncButton("Exit Method", "FrenRiderExitMethod");
 
-        if (!config.UseAdsLeaveAfterAdsDuty)
+        if (!exits.UseAdsLeaveAfterAdsDuty)
         {
             ImGui.Indent();
             DrawFrenRiderExitMethodOptions(config);
@@ -1897,7 +1911,7 @@ public class ConfigWindow : Window, IDisposable
         }
 
         ImGui.Spacing();
-        if (ImGui.RadioButton("ADS Exit Method", config.UseAdsLeaveAfterAdsDuty))
+        if (ImGui.RadioButton("ADS Exit Method", exits.UseAdsLeaveAfterAdsDuty))
         {
             config.UseAdsLeaveAfterAdsDuty = true;
             config.ExitAfterDutyEnds = false;
@@ -1911,7 +1925,7 @@ public class ConfigWindow : Window, IDisposable
         ImGui.Spacing();
         ImGui.Text("Duty-end delay");
         ImGui.SameLine();
-        var exitSeconds = config.ExitAfterDutySeconds;
+        var exitSeconds = exits.ExitAfterDutySeconds;
         ImGui.SetNextItemWidth(70);
         if (ImGui.InputInt("##exitSecondsDuty", ref exitSeconds))
         {
@@ -1921,6 +1935,7 @@ public class ConfigWindow : Window, IDisposable
         ImGui.SameLine();
         ImGui.Text("seconds after duty ends");
         DrawDefaultSettingSyncButton("Duty-end delay");
+        ImGui.EndDisabled();
     }
 
     private void DrawFrenRiderExitMethodOptions(CharacterConfig config)

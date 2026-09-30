@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using FrenRider.Services;
@@ -11,10 +12,17 @@ namespace FrenRider.IPC;
 public sealed class DadIPC : IDisposable
 {
     public const string ConfigureAndEnableEndpoint = "FrenRider.Dad.ConfigureAndEnable";
+    public const string ApplyQuestionableDutySettingsEndpoint = "FrenRider.Dad.ApplyQuestionableDutySettings";
+    public const string ReleaseQuestionableDutySettingsEndpoint = "FrenRider.Dad.ReleaseQuestionableDutySettings";
 
     private readonly DadIpcEndpoint endpoint;
     private readonly DadProfileTransferService profileTransferService;
     private readonly DadProfileIpcEndpoint profileEndpoint;
+    private readonly IDalamudPluginInterface pluginInterface;
+    private readonly ConfigManager configManager;
+    private readonly Dalamud.Plugin.Ipc.ICallGateProvider<string, string, bool> applyQuestionableProvider;
+    private readonly Dalamud.Plugin.Ipc.ICallGateProvider<string, bool> releaseQuestionableProvider;
+    private bool disposed;
 
     public DadIPC(
         IDalamudPluginInterface pluginInterface,
@@ -22,6 +30,14 @@ public sealed class DadIPC : IDisposable
         FrenTracker frenTracker,
         IPluginLog log)
     {
+        this.pluginInterface = pluginInterface;
+        this.configManager = configManager;
+        applyQuestionableProvider = pluginInterface.GetIpcProvider<string, string, bool>(ApplyQuestionableDutySettingsEndpoint);
+        releaseQuestionableProvider = pluginInterface.GetIpcProvider<string, bool>(ReleaseQuestionableDutySettingsEndpoint);
+        applyQuestionableProvider.RegisterFunc((runId, json) =>
+            configManager.QuestionableDutySettings.Apply(runId, json, configManager.QuestionableCharacterIdentity));
+        releaseQuestionableProvider.RegisterFunc(configManager.QuestionableDutySettings.Release);
+        pluginInterface.ActivePluginsChanged += OnActivePluginsChanged;
         var provider = pluginInterface.GetIpcProvider<string, bool>(ConfigureAndEnableEndpoint);
         endpoint = new DadIpcEndpoint(
             register: provider.RegisterFunc,
@@ -49,9 +65,25 @@ public sealed class DadIPC : IDisposable
 
     public void Dispose()
     {
+        if (disposed)
+            return;
+        disposed = true;
+        pluginInterface.ActivePluginsChanged -= OnActivePluginsChanged;
+        applyQuestionableProvider.UnregisterFunc();
+        releaseQuestionableProvider.UnregisterFunc();
+        configManager.QuestionableDutySettings.Clear();
         profileEndpoint.Dispose();
         profileTransferService.Dispose();
         endpoint.Dispose();
+    }
+
+    internal void UpdateQuestionableDutySettings()
+        => configManager.QuestionableDutySettings.ObserveCharacter(configManager.QuestionableCharacterIdentity);
+
+    private void OnActivePluginsChanged(IActivePluginsChangedEventArgs args)
+    {
+        if (args.AffectedInternalNames.Contains("dad", StringComparer.OrdinalIgnoreCase))
+            configManager.QuestionableDutySettings.Clear();
     }
 }
 

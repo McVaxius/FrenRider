@@ -168,11 +168,14 @@ public class ExitBehaviourService : IDisposable
             return;
         }
 
-        if (config.NormalizeExitMethodSelection())
+        if (!plugin.ConfigManager.IsQuestionableDutyFamilyControlled(config, Models.AdsDutyCategory.Solo) &&
+            config.NormalizeExitMethodSelection())
         {
             Plugin.Log.Warning("[ExitBehaviour] Normalized mutually exclusive exit method settings");
             plugin.ConfigManager.SaveCurrentAccount();
         }
+
+        var exits = plugin.ConfigManager.GetEffectiveDutyExitSettings(config);
 
         if (!inDuty)
         {
@@ -216,7 +219,7 @@ public class ExitBehaviourService : IDisposable
 
         // Exit object feature removed - no longer needed
 
-        if (dutyCompleted && (config.UseAdsLeaveAfterAdsDuty || config.ExitAfterDutyEnds))
+        if (dutyCompleted && (exits.UseAdsLeaveAfterAdsDuty || exits.ExitAfterDutyEnds))
         {
             var elapsed = (now - dutyCompletedTime).TotalSeconds;
             TryIssueCompletedExit(DutySession, config, now, new DutyExitConditions(
@@ -226,7 +229,7 @@ public class ExitBehaviourService : IDisposable
                 plugin.AutomationService.IsUtilityGateActive || plugin.AdsUtilityIpcService.ShouldSuppressGenericYesNo(),
                 plugin.AdsIntegrationService.ShouldPauseExitSystem), useAds =>
             {
-                Plugin.Log.Information($"[ExitBehaviour] Configured completion exit: elapsed={elapsed:F1}s >= configured={config.ExitAfterDutySeconds}s, ADS={useAds}");
+                Plugin.Log.Information($"[ExitBehaviour] Configured completion exit: elapsed={elapsed:F1}s >= configured={exits.ExitAfterDutySeconds}s, ADS={useAds}");
                 if (useAds)
                 {
                     Plugin.Log.Information("[ExitBehaviour] ADS exit method enabled - sending /ads leave once.");
@@ -234,11 +237,11 @@ public class ExitBehaviourService : IDisposable
                 }
                 else
                     LeaveDuty();
-            });
+            }, exits);
 
             StateDetail = dutyLeaveIssued
                 ? "Duty exit requested; waiting to leave duty."
-                : $"Duty completed, {(config.UseAdsLeaveAfterAdsDuty ? "ADS " : "")}leaving in {Math.Max(0, config.ExitAfterDutySeconds - elapsed):F0}s...";
+                : $"Duty completed, {(exits.UseAdsLeaveAfterAdsDuty ? "ADS " : "")}leaving in {Math.Max(0, exits.ExitAfterDutySeconds - elapsed):F0}s...";
             return;
         }
 
@@ -254,7 +257,7 @@ public class ExitBehaviourService : IDisposable
         }
 
         // Rule 3: Leave when all others have left the zone
-        if (config.LeaveWhenAllLeft)
+        if (exits.LeaveWhenAllLeft)
         {
             CheckPartyInZone();
         }
@@ -272,16 +275,17 @@ public class ExitBehaviourService : IDisposable
     }
 
     internal static bool TryIssueCompletedExit(AdsDutySession session, CharacterConfig config,
-        DateTime nowUtc, DutyExitConditions conditions, Action<bool> issueExit)
+        DateTime nowUtc, DutyExitConditions conditions, Action<bool> issueExit, Models.DutyExitSettings? effectiveSettings = null)
     {
+        var exits = effectiveSettings ?? Models.DutyExitSettings.FromConfig(config);
         if (!config.Enabled || !conditions.InDuty || conditions.IsBetweenAreas || conditions.InCombat
             || conditions.UtilityActive || conditions.AdsPaused || !session.IsCompleted || session.LeaveIssued
-            || (!config.UseAdsLeaveAfterAdsDuty && !config.ExitAfterDutyEnds)
-            || nowUtc - session.CompletedAtUtc < TimeSpan.FromSeconds(config.ExitAfterDutySeconds))
+            || (!exits.UseAdsLeaveAfterAdsDuty && !exits.ExitAfterDutyEnds)
+            || nowUtc - session.CompletedAtUtc < TimeSpan.FromSeconds(exits.ExitAfterDutySeconds))
             return false;
 
         session.LeaveIssued = true;
-        issueExit(config.UseAdsLeaveAfterAdsDuty);
+        issueExit(exits.UseAdsLeaveAfterAdsDuty);
         return true;
     }
 

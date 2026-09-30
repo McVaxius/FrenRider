@@ -13,6 +13,8 @@ public sealed class AdsIntegrationService
 
     private readonly AdsDutyIpcService adsDutyIpcService;
     private readonly Func<CharacterConfig> getConfig;
+    private readonly Func<CharacterConfig, AdsDutyCategory, AdsDutyFamilySettings> getFamilySettings;
+    private readonly Func<CharacterConfig, DutyExitSettings> getExitSettings;
     private readonly Action resetRecovery;
     private readonly Func<string, bool> processCommand;
     private readonly Action<string> logInformation;
@@ -35,16 +37,21 @@ public sealed class AdsIntegrationService
         : this(adsDutyIpcService, () => plugin.ConfigManager.GetActiveConfig(),
             () => plugin.BossModActionTweaksService.ResetRecovery(),
             command => Plugin.CommandManager.ProcessCommand(command),
-            message => Plugin.Log.Information(message), message => Plugin.Log.Warning(message))
+            message => Plugin.Log.Information(message), message => Plugin.Log.Warning(message),
+            plugin.ConfigManager.GetEffectiveAdsDutyFamilySettings, plugin.ConfigManager.GetEffectiveDutyExitSettings)
     {
     }
 
     internal AdsIntegrationService(AdsDutyIpcService adsDutyIpcService, Func<CharacterConfig> getConfig,
         Action resetRecovery, Func<string, bool> processCommand,
-        Action<string> logInformation, Action<string> logWarning)
+        Action<string> logInformation, Action<string> logWarning,
+        Func<CharacterConfig, AdsDutyCategory, AdsDutyFamilySettings>? getFamilySettings = null,
+        Func<CharacterConfig, DutyExitSettings>? getExitSettings = null)
     {
         this.adsDutyIpcService = adsDutyIpcService;
         this.getConfig = getConfig;
+        this.getFamilySettings = getFamilySettings ?? ((config, category) => config.GetAdsDutyFamilySettings(category));
+        this.getExitSettings = getExitSettings ?? DutyExitSettings.FromConfig;
         this.resetRecovery = resetRecovery;
         this.processCommand = processCommand;
         this.logInformation = logInformation;
@@ -366,7 +373,8 @@ public sealed class AdsIntegrationService
     public void ReleaseDutyControlForExit(string reason)
     {
         var config = getConfig();
-        var configuredExit = config.UseAdsLeaveAfterAdsDuty || config.ExitAfterDutyEnds || config.LeaveWhenAllLeft;
+        var exits = getExitSettings(config);
+        var configuredExit = exits.UseAdsLeaveAfterAdsDuty || exits.ExitAfterDutyEnds || exits.LeaveWhenAllLeft;
         if (!DutySession.TryTakeOverExit(configuredExit))
             return;
 
@@ -425,11 +433,11 @@ public sealed class AdsIntegrationService
                 $"ADS current-duty identity does not match live GameMain territory/CFC {territoryTypeId}/{contentFinderConditionId}; FrenRider local duty logic stays active");
         }
 
-        var familySettings = config.GetAdsDutyFamilySettings(entry.Category);
+        var familySettings = getFamilySettings(config, entry.Category);
         if (!familySettings.Enabled)
             return new AdsDutyReadiness(entry, familySettings, false, $"{AdsDutyCategoryCatalog.GetLabel(entry.Category)} handoff is off; FrenRider local duty logic stays active");
 
-        if (!IsSnapshotReady(config, entry))
+        if (entry.ClearanceLevel < familySettings.MaturityThreshold)
         {
             return new AdsDutyReadiness(
                 entry,

@@ -20,6 +20,16 @@ public readonly record struct AdsDutyFamilySettings(
     int MaturityThreshold,
     int HandoffDelaySeconds);
 
+internal readonly record struct DutyExitSettings(
+    bool UseAdsLeaveAfterAdsDuty,
+    bool ExitAfterDutyEnds,
+    bool LeaveWhenAllLeft,
+    int ExitAfterDutySeconds)
+{
+    internal static DutyExitSettings FromConfig(CharacterConfig config)
+        => new(config.UseAdsLeaveAfterAdsDuty, config.ExitAfterDutyEnds, config.LeaveWhenAllLeft, config.ExitAfterDutySeconds);
+}
+
 public sealed record AdsDutyCategoryEntry(AdsDutyCategory Category, string Label);
 
 public static class AdsDutyCategoryCatalog

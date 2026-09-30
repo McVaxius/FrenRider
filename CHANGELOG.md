@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Accept actionable Raise offers immediately while FrenRider is enabled, ahead of ADS, combat, utility, respawn and generic dialog gates. Remove the unused Raise controls and setting; old configurations still load and drop the obsolete key on the next normal save. Suppress duplicate responses and defer Return while revival begins; record handling only after a successful click.
 
 ### Added
+- Added owned DAD IPC for temporary Questionable/WigglyQuest Solo and 4-man ADS handoff settings: enabled at maturity 0 with 10s/2s continuous-ready delays, plus ADS Exit Method with a 20-second duty-end delay and both local exit choices disabled. The active character's two family rows and exit section display "Temporarily controlled by DAD"; saved profiles and other families remain unchanged. Owner release, character change/logout, DAD unload and FrenRider unload clear the in-memory override.
 - Appended NPC repair + inn room as repair mode 4, preserving modes 0–3 and the Disabled default. FrenRider waits for ADS to finish the inn return even after durability recovers, and displays failed-trip status.
 - Optional local aetheryte-network following under teleport settings detects a fren's jump and requests the matching Lifestream destination in connected normal, custom (including Bozja/Eureka), and residential networks when both players were at the origin.
 
