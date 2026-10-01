@@ -26,10 +26,10 @@ jobs:
           branch: release
 
       - name: Restore
-        run: dotnet restore .\FrenRider.sln
+        run: dotnet restore .\FrenRider\FrenRider.csproj
 
       - name: Build (Release)
-        run: dotnet build .\FrenRider.sln -c Release --no-restore -p:Platform=x64
+        run: dotnet build .\FrenRider\FrenRider.csproj -c Release --no-restore -p:Platform=x64
 
       - name: Upload packaged plugin zip
         uses: actions/upload-artifact@v4
