@@ -1253,6 +1253,71 @@ public class ConfigWindow : Window, IDisposable
 
         ImGui.Spacing();
         ImGui.Separator();
+        ImGui.Text("Beastmaster Capture");
+        var catchBeasts = config.TryToCatchBeasts;
+        if (ImGui.Checkbox("Try to catch beasts", ref catchBeasts))
+        {
+            config.TryToCatchBeasts = catchBeasts;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("While FrenRider is enabled on Beastmaster, try Capture on eligible living beasts closer than 10 yalms, including passive beasts outside combat.\nPrefers an eligible current target; otherwise automatically targets the nearest eligible beast when Capture is ready.\nSkips owned beasts and enemies above your effective level, and respects both HP thresholds.\nRetries on later cooldowns, including already marked beasts.");
+        DrawDefaultSettingSyncButton("Try to catch beasts");
+
+        var farHp = config.CaptureHpFarBelow;
+        ImGui.SetNextItemWidth(120);
+        if (ImGui.InputInt("Capture HP: more than 5 levels below you", ref farHp))
+        {
+            config.CaptureHpFarBelow = farHp;
+            configManager.SaveCurrentAccount();
+        }
+        DrawDefaultSettingSyncButton("Capture HP: more than 5 levels below you");
+
+        var nearHp = config.CaptureHpNearOrEqual;
+        ImGui.SetNextItemWidth(120);
+        if (ImGui.InputInt("Capture HP: within 5 levels below you or equal", ref nearHp))
+        {
+            config.CaptureHpNearOrEqual = nearHp;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Both HP thresholds accept 1–100%. Exactly five levels below uses this second threshold.\n100% permits Capture on a full-health beast and may initiate combat.");
+        DrawDefaultSettingSyncButton("Capture HP: within 5 levels below you or equal");
+
+        if (ImGui.CollapsingHeader("Saved beasts"))
+        {
+            var account = configManager.GetCurrentAccount();
+            if (!string.IsNullOrEmpty(editingRemoteRowId) || string.IsNullOrEmpty(editingCharacterKey) || account == null)
+            {
+                ImGui.TextWrapped("Select a local character to browse their saved beasts.");
+            }
+            else
+            {
+                account.UnlockedBeasts.TryGetValue(editingCharacterKey, out var owned);
+                ImGui.TextWrapped(owned == null
+                    ? "No confirmed list saved yet. This character's list refreshes while on Beastmaster."
+                    : "Saved ownership refreshes while on Beastmaster, including when automatic Capture is off.");
+                if (ImGui.BeginTable("SavedBeasts", 2, ImGuiTableFlags.ScrollY | ImGuiTableFlags.RowBg,
+                        new Vector2(0, 220)))
+                {
+                    ImGui.TableSetupColumn("Beast");
+                    ImGui.TableSetupColumn("Saved ownership");
+                    ImGui.TableHeadersRow();
+                    foreach (var entry in plugin.BeastCaptureService.Roster)
+                    {
+                        ImGui.TableNextRow();
+                        ImGui.TableNextColumn();
+                        ImGui.TextUnformatted(entry.Name);
+                        ImGui.TableNextColumn();
+                        ImGui.TextUnformatted(owned == null ? "Unknown" : owned.Contains(entry.Id) ? "Owned" : "Missing");
+                    }
+                    ImGui.EndTable();
+                }
+            }
+        }
+
+        ImGui.Spacing();
+        ImGui.Separator();
         ImGui.Text("Advanced");
         ImGui.Spacing();
 

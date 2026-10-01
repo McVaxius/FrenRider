@@ -86,6 +86,9 @@ public class ConfigManager : IDadProfileStore
             new[]
             {
                 Setting("Configure rotation preset manually", (source, target) => target.ConfigureRotationPresetManually = source.ConfigureRotationPresetManually),
+                Setting("Try to catch beasts", (source, target) => target.TryToCatchBeasts = source.TryToCatchBeasts),
+                Setting("Capture HP: more than 5 levels below you", (source, target) => target.CaptureHpFarBelow = source.CaptureHpFarBelow),
+                Setting("Capture HP: within 5 levels below you or equal", (source, target) => target.CaptureHpNearOrEqual = source.CaptureHpNearOrEqual),
                 Setting("BM Rotation Preset", (source, target) => target.AutoRotationType = source.AutoRotationType),
                 Setting("BM Rotation Preset (DD)", (source, target) => target.AutoRotationTypeDD = source.AutoRotationTypeDD),
                 Setting("BM Rotation Preset (FATE)", (source, target) => target.AutoRotationTypeFATE = source.AutoRotationTypeFATE),
@@ -965,6 +968,24 @@ public class ConfigManager : IDadProfileStore
             SaveAccount(CurrentAccountId);
     }
 
+    internal void SaveUnlockedBeasts(IReadOnlySet<uint> beastIds)
+    {
+        if (UpdateUnlockedBeasts(GetCurrentAccount(), ActiveCharacterKey, beastIds))
+            SaveCurrentAccount();
+    }
+
+    internal static bool UpdateUnlockedBeasts(AccountConfig? account, string characterKey, IReadOnlySet<uint> beastIds)
+    {
+        if (account == null || string.IsNullOrEmpty(characterKey) || !account.Characters.ContainsKey(characterKey))
+            return false;
+
+        if (account.UnlockedBeasts.TryGetValue(characterKey, out var saved) && beastIds.SetEquals(saved))
+            return false;
+
+        account.UnlockedBeasts[characterKey] = beastIds.OrderBy(id => id).ToList();
+        return true;
+    }
+
     public bool ClearActiveFrenName()
     {
         if (!TryGetActiveConfig(out var activeConfig) || activeConfig == null)
@@ -1478,6 +1499,7 @@ public class ConfigManager : IDadProfileStore
                     {
                         account.DefaultConfig ??= new CharacterConfig();
                         account.Characters ??= new Dictionary<string, CharacterConfig>();
+                        account.UnlockedBeasts ??= new Dictionary<string, List<uint>>();
                         account.RemoteProfiles ??= new List<RemoteProfileRow>();
                         accounts[account.AccountId] = account;
                         if (MigrateLegacyRsrSettings(account))

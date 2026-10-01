@@ -10,6 +10,8 @@ public class AccountConfig
     public string AccountAlias { get; set; } = "";
     public CharacterConfig DefaultConfig { get; set; } = new();
     public Dictionary<string, CharacterConfig> Characters { get; set; } = new();
+    // Confirmed native XBMPet IDs belong to local characters, never to transferable profiles.
+    public Dictionary<string, List<uint>> UnlockedBeasts { get; set; } = new();
     public List<RemoteProfileRow> RemoteProfiles { get; set; } = new();
 }
 

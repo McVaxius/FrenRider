@@ -318,14 +318,16 @@ public static class GameHelpers
         uint actionId,
         ulong targetId = 0xE0000000,
         Vector3? targetPosition = null,
-        uint itemLocation = 0xFFFF)
+        uint itemLocation = 0xFFFF,
+        bool quiet = false)
     {
         try
         {
             var actionManager = ActionManager.Instance();
             if (actionManager == null)
             {
-                Plugin.Log.Warning($"TryUseActionLocation({actionType}, {actionId}): ActionManager is null");
+                if (!quiet)
+                    Plugin.Log.Warning($"TryUseActionLocation({actionType}, {actionId}): ActionManager is null");
                 return false;
             }
 
@@ -339,7 +341,8 @@ public static class GameHelpers
         }
         catch (Exception ex)
         {
-            Plugin.Log.Error($"TryUseActionLocation({actionType}, {actionId}) failed: {ex.Message}");
+            if (!quiet)
+                Plugin.Log.Error($"TryUseActionLocation({actionType}, {actionId}) failed: {ex.Message}");
             return false;
         }
     }

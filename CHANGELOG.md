@@ -9,7 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Added Beastmaster automatic Capture for eligible Combatant beasts closer than 10 yalms while FrenRider is enabled, including outside combat. **Try to catch beasts** defaults to on, with independent 1–100% HP thresholds of 90% for enemies more than five levels below and 40% for enemies within five levels below or equal. A threshold of 100% permits Capture on a full-health beast and may initiate combat. More distant targets are skipped before beast resolution. Higher-level, owned, unresolved, and ambiguous beasts are skipped; attempts respect native availability, cooldowns, combat authority, utility holds, and leases without changing another rotation plugin.
+- Added a collapsed **Saved beasts** list in Combat settings. Confirmed native XBMPet unlocks refresh on Beastmaster after login/job changes, area changes, and combat exit, even with automatic Capture disabled. Catches stay in local character account data through settings copies, resets, and profile transfers, and remain browsable on other jobs.
+
 ### Changed
+- Capture prefers an eligible current target, then scans nearby living Combatant beasts nearest first. It automatically selects an unowned beast only after HP, level, range, native action availability, cooldown, and existing hold checks pass, so manual targeting is no longer required.
+- Capture now accepts passive Combatant beasts without requiring hostile status, allowing Capture to open combat when the configured HP threshold permits it.
+- Capture attempt spacing now uses the native calculated cooldown rather than the current recast timer's total, allowing a first attempt before that timer is initialized. Native availability and active-recast checks still gate each attempt.
+- Manual `Z:\FrenRider.bat` Debug builds now target the plugin project directly, skipping the test project.
+- Capture now writes one log line when it attempts the action, including the native wrapper's true/false return value. Attempt logging is always on; skipped checks remain quiet.
 - Alphabetized the normal and Foray combat-plugin dropdowns while preserving saved selections.
 - Accept actionable Raise offers immediately while FrenRider is enabled, ahead of ADS, combat, utility, respawn and generic dialog gates. Remove the unused Raise controls and setting; old configurations still load and drop the obsolete key on the next normal save. Suppress duplicate responses and defer Return while revival begins; record handling only after a successful click.
 

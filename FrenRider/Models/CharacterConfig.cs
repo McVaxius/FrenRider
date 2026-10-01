@@ -44,6 +44,8 @@ public class CharacterConfig
     private int adsDeepDungeonHandoffDelaySeconds = 2;
     private int adsTreasureDungeonHandoffDelaySeconds = 2;
     private int adsOtherHandoffDelaySeconds = 2;
+    private int captureHpFarBelow = 90;
+    private int captureHpNearOrEqual = 40;
 
     // --- Party / Friend ---
     public string FrenName { get; set; } = "";
@@ -104,6 +106,17 @@ public class CharacterConfig
     public int HClingReset { get; set; } = 10;
 
     // --- Combat / AI ---
+    public bool TryToCatchBeasts { get; set; } = true;
+    public int CaptureHpFarBelow
+    {
+        get => captureHpFarBelow;
+        set => captureHpFarBelow = Math.Clamp(value, 1, 100);
+    }
+    public int CaptureHpNearOrEqual
+    {
+        get => captureHpNearOrEqual;
+        set => captureHpNearOrEqual = Math.Clamp(value, 1, 100);
+    }
     public bool ConfigureRotationPresetManually { get; set; } = false;
     public string AutoRotationType { get; set; } = "FRENRIDER";
     public string AutoRotationTypeDD { get; set; } = "DD";
@@ -263,6 +276,9 @@ public class CharacterConfig
             AutoSyncFate = AutoSyncFate,
             Formation = Formation,
             HClingReset = HClingReset,
+            TryToCatchBeasts = TryToCatchBeasts,
+            CaptureHpFarBelow = CaptureHpFarBelow,
+            CaptureHpNearOrEqual = CaptureHpNearOrEqual,
             ConfigureRotationPresetManually = ConfigureRotationPresetManually,
             AutoRotationType = AutoRotationType,
             AutoRotationTypeDD = AutoRotationTypeDD,

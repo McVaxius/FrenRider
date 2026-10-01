@@ -24,6 +24,7 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static ICommandManager CommandManager { get; private set; } = null!;
     [PluginService] internal static IClientState ClientState { get; private set; } = null!;
     [PluginService] internal static IPlayerState PlayerState { get; private set; } = null!;
+    [PluginService] internal static IUnlockState UnlockState { get; private set; } = null!;
     [PluginService] internal static IFramework Framework { get; private set; } = null!;
     [PluginService] internal static IObjectTable ObjectTable { get; private set; } = null!;
     [PluginService] internal static IPartyList PartyList { get; private set; } = null!;
@@ -60,6 +61,7 @@ public sealed class Plugin : IDalamudPlugin
     public FollowService FollowService { get; init; }
     public MountService MountService { get; init; }
     public CombatService CombatService { get; init; }
+    internal BeastCaptureService BeastCaptureService { get; init; }
     public AutomationService AutomationService { get; init; }
     public FormationService FormationService { get; init; }
     public AutorotIpcService AutorotIpcService { get; init; }
@@ -142,6 +144,7 @@ public sealed class Plugin : IDalamudPlugin
         MountService = new MountService(this, FrenTracker, ZoneService);
         QuestionableIpcService = new QuestionableIpcService(PluginInterface, Log);
         CombatService = new CombatService(this, FrenTracker, ZoneService, QuestionableIpcService);
+        BeastCaptureService = new BeastCaptureService(this);
         AdsHyperFocusLeaseService = new AdsHyperFocusLeaseService(this);
         AutomationService = new AutomationService(this, FrenTracker, ZoneService);
         FormationService = new FormationService(this, FrenTracker);
@@ -528,6 +531,7 @@ public sealed class Plugin : IDalamudPlugin
 
             if (IsAreaTransitionActive())
             {
+                BeastCaptureService.Suspend();
                 BossModActionTweaksService.ResetRecovery();
                 FrenTeleportService.ResetForAreaTransition();
                 FollowService.ResetForAreaTransition();
@@ -619,6 +623,7 @@ public sealed class Plugin : IDalamudPlugin
             Measure("ads-reflection", () => AdsReflectionIpcService.Update());
             Measure("utility-gate", AutomationService.UpdateUtilityGate);
             Measure("combat", CombatService.Update);
+            Measure("beast-capture", BeastCaptureService.Update);
             Measure("casting-recovery", BossModActionTweaksService.UpdateRecovery);
 
             Measure("fren-teleport", FrenTeleportService.Update);
