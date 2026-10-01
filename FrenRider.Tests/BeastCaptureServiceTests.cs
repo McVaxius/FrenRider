@@ -16,7 +16,7 @@ namespace FrenRider.Tests;
 
 public sealed class BeastCaptureServiceTests
 {
-    private static readonly BeastCaptureTarget EligibleTarget = new(100, true, true, 400, 1000, 84, 1);
+    private static readonly BeastCaptureTarget EligibleTarget = new(100, true, true, 400, 1000, 84, new uint[] { 1 });
 
     [Theory]
     [InlineData(84, 900, true)]
@@ -102,14 +102,14 @@ public sealed class BeastCaptureServiceTests
             properties["DataManager"].SetValue(null, new EmptyDataManager());
             Assert.Equal(StatusFlags.None, target.StatusFlags);
             var classified = Assert.IsType<BeastCaptureTarget>(new NativeBeastCaptureRuntime(null!).ReadTarget());
-            Assert.Equal(new BeastCaptureTarget(100, true, true, 51, 51, 2, 0), classified);
+            Assert.Equal(new BeastCaptureTarget(100, true, true, 51, 51, 2, Array.Empty<uint>()), classified);
 
             // Resolve the beast through the existing roster seam without game data.
             var runtime = new FakeRuntime();
-            var beastId = BeastCaptureService.ResolveBeast(5, 10, 1,
+            var beastIds = BeastCaptureService.ResolveBeasts(5, 10,
                 BeastCaptureService.BuildModelLookup(runtime.Roster));
-            Assert.Equal(1u, beastId);
-            runtime.Target = classified with { BeastId = beastId };
+            Assert.Equal(new uint[] { 1 }, beastIds);
+            runtime.Target = classified with { CandidateBeastIds = beastIds };
             runtime.Frame = runtime.Frame with { EffectiveLevel = 11, InCombat = false };
             runtime.Frame.Config.CaptureHpFarBelow = 100;
             runtime.Frame.Config.CaptureHpNearOrEqual = 40;
@@ -120,6 +120,92 @@ public sealed class BeastCaptureServiceTests
 
             Assert.Equal(new ulong[] { 100 }, runtime.CapturedTargets);
             Assert.Equal(1, runtime.ActionReads);
+            Assert.Empty(runtime.Account.UnlockedBeasts["First"]);
+        }
+        finally
+        {
+            foreach (var pair in properties)
+                pair.Value.SetValue(null, previous[pair.Key]);
+        }
+    }
+
+    [Fact]
+    public void UntargetedNearbyPassiveSprigganCanBeCapturedAtFullHealthBeforeCombat()
+    {
+        var spriggan = DispatchProxy.Create<IBattleNpc, QuestionableTestProxy>();
+        ((QuestionableTestProxy)(object)spriggan).Handler = (method, _) => method.Name switch
+        {
+            "get_GameObjectId" => 100UL,
+            "get_CurrentDistance" => (byte)8,
+            "get_BaseId" => 37u,
+            "get_BattleNpcKind" => BattleNpcSubKind.Combatant,
+            "get_StatusFlags" => StatusFlags.None,
+            "get_IsTargetable" => true,
+            "get_CurrentHp" => 126u,
+            "get_MaxHp" => 126u,
+            "get_Level" => (byte)7,
+            _ => throw new InvalidOperationException(method.Name),
+        };
+        IGameObject? selected = null;
+        var targetChanges = new List<ulong>();
+        var targets = DispatchProxy.Create<ITargetManager, QuestionableTestProxy>();
+        ((QuestionableTestProxy)(object)targets).Handler = (method, args) =>
+        {
+            if (method.Name == "get_Target") return selected;
+            if (method.Name == "set_Target")
+            {
+                selected = (IGameObject)args![0]!;
+                targetChanges.Add(selected.GameObjectId);
+                return null;
+            }
+            throw new InvalidOperationException(method.Name);
+        };
+        var table = DispatchProxy.Create<IObjectTable, QuestionableTestProxy>();
+        ((QuestionableTestProxy)(object)table).Handler = (method, args) => method.Name switch
+        {
+            "GetEnumerator" => ((IEnumerable<IGameObject>)new[] { spriggan }).GetEnumerator(),
+            "SearchById" => (ulong)args![0]! == spriggan.GameObjectId ? spriggan : null,
+            _ => throw new InvalidOperationException(method.Name),
+        };
+        var properties = new[] { "TargetManager", "ObjectTable", "DataManager" }.ToDictionary(name => name,
+            name => typeof(Plugin).GetProperty(name, BindingFlags.Static | BindingFlags.NonPublic)!);
+        var previous = properties.ToDictionary(pair => pair.Key, pair => pair.Value.GetValue(null));
+        try
+        {
+            properties["TargetManager"].SetValue(null, targets);
+            properties["ObjectTable"].SetValue(null, table);
+            properties["DataManager"].SetValue(null, new EmptyDataManager());
+            var native = new NativeBeastCaptureRuntime(null!);
+            Assert.Null(native.ReadTarget());
+            Assert.Equal(StatusFlags.None, spriggan.StatusFlags);
+            var nearby = Assert.Single(native.ReadNearbyTargets());
+            Assert.Empty(nearby.CandidateBeastIds);
+
+            var runtime = new FakeRuntime
+            {
+                Target = null,
+                TargetSelector = native.TargetBeast,
+                Roster = new[] { new BeastRosterEntry(29, "Spriggan", 28) },
+            };
+            // Supply the model at the existing offline boundary without loading game data.
+            var beastIds = BeastCaptureService.ResolveBeasts(5, 28,
+                BeastCaptureService.BuildModelLookup(runtime.Roster));
+            Assert.Equal(new uint[] { 29 }, beastIds);
+            runtime.NearbyTargets.Add(nearby with { CandidateBeastIds = beastIds });
+            runtime.Frame = runtime.Frame with { EffectiveLevel = 15, InCombat = false };
+            runtime.Frame.Config.CaptureHpFarBelow = 100;
+            runtime.Frame.Config.CaptureHpNearOrEqual = 90;
+            var service = new BeastCaptureService(runtime);
+
+            service.Update(1000);
+            service.Update(1001);
+
+            Assert.Equal(new ulong[] { 100 }, targetChanges);
+            Assert.Equal(new ulong[] { 100 }, runtime.SelectedTargets);
+            Assert.Equal(new ulong[] { 100 }, runtime.CapturedTargets);
+            Assert.Equal(1, runtime.ActionReads);
+            Assert.Equal(100UL, selected!.GameObjectId);
+            Assert.False(runtime.Frame.InCombat);
             Assert.Empty(runtime.Account.UnlockedBeasts["First"]);
         }
         finally
@@ -194,7 +280,7 @@ public sealed class BeastCaptureServiceTests
             // Supply resolved beast IDs at the existing offline boundary; 300 remains unresolved.
             runtime.NearbyTargets.AddRange(nearby.Select(beast => beast with
             {
-                BeastId = beast.Id == 300 ? 0 : (uint)beast.Id,
+                CandidateBeastIds = beast.Id == 300 ? Array.Empty<uint>() : new[] { (uint)beast.Id },
             }));
             runtime.BeastOwnership[400] = true;
             runtime.BeastOwnership[500] = null;
@@ -266,7 +352,7 @@ public sealed class BeastCaptureServiceTests
             EligibleTarget with { MaxHp = 0 },
             EligibleTarget with { CurrentHp = 1001 },
             EligibleTarget with { Level = 0 },
-            EligibleTarget with { BeastId = 0 },
+            EligibleTarget with { CandidateBeastIds = Array.Empty<uint>() },
         };
         Assert.All(invalid, target => Assert.False(BeastCaptureService.IsEligible(target, 90, new())));
         Assert.False(BeastCaptureService.IsEligible(EligibleTarget, 0, new()));
@@ -274,25 +360,28 @@ public sealed class BeastCaptureServiceTests
     }
 
     [Fact]
-    public void ModelBaseResolutionRequiresCapturableAndUniquePrimaryModel()
+    public void ModelOnlyResolutionReturnsDistinctNonzeroCandidatesForCapturableBeasts()
     {
         var lookup = BeastCaptureService.BuildModelLookup(new[]
         {
-            new BeastRosterEntry(1, "First", 10, 1),
-            new BeastRosterEntry(1, "Same entry", 10, 1),
-            new BeastRosterEntry(2, "Different base", 10, 2),
-            new BeastRosterEntry(3, "Ambiguous first", 20, 1),
-            new BeastRosterEntry(4, "Ambiguous second", 20, 1),
-            new BeastRosterEntry(5, "Missing primary model", 0, 0),
-            new BeastRosterEntry(0, "Placeholder", 30, 1),
+            new BeastRosterEntry(1, "First", 10),
+            new BeastRosterEntry(1, "Same entry", 10),
+            new BeastRosterEntry(2, "Shared model", 10),
+            new BeastRosterEntry(0, "Invalid shared entry", 10),
+            new BeastRosterEntry(3, "Shared first", 20),
+            new BeastRosterEntry(4, "Shared second", 20),
+            new BeastRosterEntry(5, "Missing primary model", 0),
+            new BeastRosterEntry(0, "Placeholder", 30),
+            new BeastRosterEntry(6, "Unique model", 40),
         });
-        Assert.Equal(1u, BeastCaptureService.ResolveBeast(5, 10, 1, lookup));
-        Assert.Equal(2u, BeastCaptureService.ResolveBeast(5, 10, 2, lookup));
-        Assert.Equal(0u, BeastCaptureService.ResolveBeast(4, 10, 1, lookup));
-        Assert.Equal(0u, BeastCaptureService.ResolveBeast(5, 10, 3, lookup));
-        Assert.Equal(0u, BeastCaptureService.ResolveBeast(5, 20, 1, lookup));
-        Assert.Equal(0u, BeastCaptureService.ResolveBeast(5, 0, 0, lookup));
-        Assert.Equal(0u, BeastCaptureService.ResolveBeast(5, 30, 1, lookup));
+        Assert.Equal(new uint[] { 1, 2 }, BeastCaptureService.ResolveBeasts(5, 10, lookup));
+        Assert.Equal(new uint[] { 3, 4 }, BeastCaptureService.ResolveBeasts(5, 20, lookup));
+        Assert.Equal(new uint[] { 6 }, BeastCaptureService.ResolveBeasts(5, 40, lookup));
+        Assert.Empty(BeastCaptureService.ResolveBeasts(0, 10, lookup));
+        Assert.Empty(BeastCaptureService.ResolveBeasts(4, 10, lookup));
+        Assert.Empty(BeastCaptureService.ResolveBeasts(5, 99, lookup));
+        Assert.Empty(BeastCaptureService.ResolveBeasts(5, 0, lookup));
+        Assert.Empty(BeastCaptureService.ResolveBeasts(5, 30, lookup));
     }
 
     [Theory]
@@ -356,6 +445,58 @@ public sealed class BeastCaptureServiceTests
     }
 
     [Fact]
+    public void SharedModelRemainsEligibleUntilAllCandidatesAreConfirmedOwned()
+    {
+        var runtime = new FakeRuntime { Owned = true };
+        var candidates = BeastCaptureService.ResolveBeasts(5, 10, BeastCaptureService.BuildModelLookup(new[]
+        {
+            new BeastRosterEntry(1, "First", 10),
+            new BeastRosterEntry(2, "Second", 10),
+        }));
+        runtime.Target = EligibleTarget with { CandidateBeastIds = candidates };
+        runtime.BeastOwnership[2] = false;
+        var service = new BeastCaptureService(runtime);
+
+        service.Update(1000);
+        Assert.Equal(new ulong[] { 100 }, runtime.CapturedTargets);
+        Assert.Empty(runtime.Account.UnlockedBeasts["First"]);
+
+        runtime.BeastOwnership[2] = true;
+        service.Update(8500);
+        Assert.Equal(new ulong[] { 100 }, runtime.CapturedTargets);
+        Assert.Equal(1, runtime.ActionReads);
+    }
+
+    [Theory]
+    [InlineData(false, false, true)]
+    [InlineData(true, false, true)]
+    [InlineData(false, true, true)]
+    [InlineData(null, false, true)]
+    [InlineData(false, null, true)]
+    [InlineData(true, true, false)]
+    [InlineData(true, null, false)]
+    [InlineData(null, true, false)]
+    [InlineData(null, null, false)]
+    public void SharedModelAttemptsRequireAtLeastOneConfirmedUnownedCandidate(bool? first, bool? second, bool expected)
+    {
+        var runtime = new FakeRuntime
+        {
+            Target = EligibleTarget with { CandidateBeastIds = new uint[] { 1, 2 } },
+        };
+        runtime.NearbyTargets.Add(runtime.Target.Value with { Id = 200 });
+        runtime.BeastOwnership[1] = first;
+        runtime.BeastOwnership[2] = second;
+
+        new BeastCaptureService(runtime).Update(1000);
+
+        var attempted = expected ? new ulong[] { 100 } : Array.Empty<ulong>();
+        Assert.Equal(attempted, runtime.CapturedTargets);
+        Assert.Equal(attempted, runtime.SelectedTargets);
+        Assert.Equal(expected ? 1 : 0, runtime.ActionReads);
+        Assert.Empty(runtime.Account.UnlockedBeasts["First"]);
+    }
+
+    [Fact]
     public void MissingTargetsAndAboveThresholdTargetsNeverReachActionCheck()
     {
         var runtime = new FakeRuntime { Target = null };
@@ -363,7 +504,7 @@ public sealed class BeastCaptureServiceTests
         service.Update(1000);
         runtime.Target = EligibleTarget with { CurrentHp = 901 };
         service.Update(1001);
-        runtime.Target = EligibleTarget with { BeastId = 0 };
+        runtime.Target = EligibleTarget with { CandidateBeastIds = Array.Empty<uint>() };
         service.Update(1002);
         Assert.Empty(runtime.CapturedTargets);
         Assert.Equal(0, runtime.ActionReads);
@@ -633,7 +774,7 @@ public sealed class BeastCaptureServiceTests
 
     private sealed class FakeRuntime : IBeastCaptureRuntime
     {
-        public IReadOnlyList<BeastRosterEntry> Roster { get; } = new[] { new BeastRosterEntry(1, "Beast", 10, 1) };
+        public IReadOnlyList<BeastRosterEntry> Roster { get; init; } = new[] { new BeastRosterEntry(1, "Beast", 10) };
         internal BeastCaptureFrame Frame = new("Account", "First", new() { Enabled = true }, true, true, true, false, true, 90);
         internal BeastCaptureTarget? Target = EligibleTarget;
         internal BeastCaptureAction Action = new(true, false, 7.5f);

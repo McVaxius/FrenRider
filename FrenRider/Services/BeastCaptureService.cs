@@ -10,9 +10,9 @@ using Lumina.Excel.Sheets;
 
 namespace FrenRider.Services;
 
-internal readonly record struct BeastRosterEntry(uint Id, string Name, ushort Model, byte Base);
+internal readonly record struct BeastRosterEntry(uint Id, string Name, ushort Model);
 internal readonly record struct BeastCaptureTarget(
-    ulong Id, bool IsEnemy, bool IsTargetable, uint CurrentHp, uint MaxHp, int Level, uint BeastId);
+    ulong Id, bool IsEnemy, bool IsTargetable, uint CurrentHp, uint MaxHp, int Level, IReadOnlyList<uint> CandidateBeastIds);
 internal readonly record struct BeastCaptureFrame(
     string AccountId, string CharacterKey, CharacterConfig Config, bool IsBeastmaster,
     bool OwnershipLoaded, bool InCombat, bool AreaChanged, bool CanAct, int EffectiveLevel);
@@ -114,7 +114,8 @@ internal sealed class BeastCaptureService
 
     private bool TryCapture(BeastCaptureTarget beast, BeastCaptureFrame frame, long now)
     {
-        if (!IsEligible(beast, frame.EffectiveLevel, frame.Config) || runtime.IsOwned(beast.BeastId) != false)
+        if (!IsEligible(beast, frame.EffectiveLevel, frame.Config)
+            || !beast.CandidateBeastIds.Any(id => runtime.IsOwned(id) == false))
             return false;
 
         var action = runtime.ReadAction(beast.Id);
@@ -134,22 +135,21 @@ internal sealed class BeastCaptureService
     {
         if (target.Id is 0 or 0xE0000000 || !target.IsEnemy || !target.IsTargetable
             || target.CurrentHp == 0 || target.MaxHp == 0 || target.CurrentHp > target.MaxHp
-            || effectiveLevel <= 0 || target.Level <= 0 || target.Level > effectiveLevel || target.BeastId == 0)
+            || effectiveLevel <= 0 || target.Level <= 0 || target.Level > effectiveLevel || target.CandidateBeastIds.Count == 0)
             return false;
 
         var threshold = effectiveLevel - target.Level > 5 ? config.CaptureHpFarBelow : config.CaptureHpNearOrEqual;
         return (ulong)target.CurrentHp * 100 <= (ulong)target.MaxHp * (uint)threshold;
     }
 
-    internal static Dictionary<(ushort Model, byte Base), uint> BuildModelLookup(IEnumerable<BeastRosterEntry> roster)
+    internal static Dictionary<ushort, IReadOnlyList<uint>> BuildModelLookup(IEnumerable<BeastRosterEntry> roster)
         => roster.Where(entry => entry.Id != 0 && entry.Model != 0)
-            .GroupBy(entry => (entry.Model, entry.Base))
-            .Where(group => group.Select(entry => entry.Id).Distinct().Count() == 1)
-            .ToDictionary(group => group.Key, group => group.First().Id);
+            .GroupBy(entry => entry.Model)
+            .ToDictionary(group => group.Key, group => (IReadOnlyList<uint>)group.Select(entry => entry.Id).Distinct().ToArray());
 
-    internal static uint ResolveBeast(byte captureType, ushort model, byte modelBase,
-        IReadOnlyDictionary<(ushort Model, byte Base), uint> lookup)
-        => captureType == 5 && lookup.TryGetValue((model, modelBase), out var id) ? id : 0;
+    internal static IReadOnlyList<uint> ResolveBeasts(byte captureType, ushort model,
+        IReadOnlyDictionary<ushort, IReadOnlyList<uint>> lookup)
+        => captureType == 5 && lookup.TryGetValue(model, out var ids) ? ids : Array.Empty<uint>();
 }
 
 internal sealed class NativeBeastCaptureRuntime : IBeastCaptureRuntime
@@ -157,7 +157,7 @@ internal sealed class NativeBeastCaptureRuntime : IBeastCaptureRuntime
     private const uint BeastmasterJobId = 43;
     private readonly Plugin plugin;
     private List<BeastRosterEntry>? roster;
-    private Dictionary<(ushort Model, byte Base), uint> modelLookup = new();
+    private Dictionary<ushort, IReadOnlyList<uint>> modelLookup = new();
 
     internal NativeBeastCaptureRuntime(Plugin plugin) => this.plugin = plugin;
     public IReadOnlyList<BeastRosterEntry> Roster
@@ -190,7 +190,7 @@ internal sealed class NativeBeastCaptureRuntime : IBeastCaptureRuntime
             // API15 names these links Unknown4 (Pet) and Unknown8 (primary PetMirage).
             var model = pet.Unknown8 != 0 && mirages.TryGetRow(pet.Unknown8, out var mirage)
                 ? models.GetRowOrDefault(mirage.ModelChara.RowId) : null;
-            entries.Add(new BeastRosterEntry(beast.RowId, pet.Name.ExtractText(), model?.Model ?? 0, model?.Base ?? 0));
+            entries.Add(new BeastRosterEntry(beast.RowId, pet.Name.ExtractText(), model?.Model ?? 0));
         }
 
         modelLookup = BeastCaptureService.BuildModelLookup(entries);
@@ -248,11 +248,11 @@ internal sealed class NativeBeastCaptureRuntime : IBeastCaptureRuntime
         var npc = Plugin.DataManager.GetExcelSheet<BNpcBase>()?.GetRowOrDefault(target.BaseId);
         var model = npc is { Unknown10: 5 }
             ? Plugin.DataManager.GetExcelSheet<ModelChara>()?.GetRowOrDefault(npc.Value.ModelChara.RowId) : null;
-        var beastId = model is { } value
-            ? BeastCaptureService.ResolveBeast(npc!.Value.Unknown10, value.Model, value.Base, modelLookup) : 0;
+        var beastIds = model is { } value
+            ? BeastCaptureService.ResolveBeasts(npc!.Value.Unknown10, value.Model, modelLookup) : Array.Empty<uint>();
         return new BeastCaptureTarget(target.GameObjectId,
             target.BattleNpcKind == BattleNpcSubKind.Combatant,
-            target.IsTargetable, target.CurrentHp, target.MaxHp, target.Level, beastId);
+            target.IsTargetable, target.CurrentHp, target.MaxHp, target.Level, beastIds);
     }
 
     public bool? IsOwned(uint beastId)
