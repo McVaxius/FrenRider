@@ -1,3 +1,7 @@
+2026-10-06 - Default-branch CI
+
+- Run the existing artifact-only CI on master as well as the retained main branch, matching this repository's default branch. Preserve the fork-PR guard, build steps, dependency pin and version; Build and Release remains the sole publisher.
+
 2026-10-06 - Actions dependency revision
 
 - Pin both existing Actions library checkouts to published AethertekUI revision `6c193cf06ac67f954c549cafc2033ac0efdd630a`, which contains the Hindi text host used by the current source. Preserve the existing build/release routes; the last successful remote run predates this UI adoption.
