@@ -132,6 +132,14 @@ public class FollowService
         SetFarChaseRequested(false, reason);
     }
 
+    public void SuspendForRecovery()
+    {
+        PreemptFarChase("Phoenix Down recovery");
+        StopAllFollowing(plugin.ConfigManager.GetActiveConfig(), "Phoenix Down recovery");
+        State = FollowState.Idle;
+        StateDetail = "Phoenix Down recovery";
+    }
+
     public void CancelFlyingStuckRecovery(string reason)
     {
         if (flyingStuckRecoveryPhase == FlyingStuckRecoveryPhase.None

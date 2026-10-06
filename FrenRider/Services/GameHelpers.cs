@@ -128,6 +128,9 @@ public static class GameHelpers
     /// HQ item actions use the base item row with the HQ action ID offset.
     /// </summary>
     public static unsafe bool UseItem(uint itemId, bool highQuality)
+        => UseItem(itemId, highQuality, 0xE0000000);
+
+    public static unsafe bool UseItem(uint itemId, bool highQuality, ulong targetId)
     {
         try
         {
@@ -165,7 +168,7 @@ public static class GameHelpers
             var actionItemId = highQuality ? itemId + 1_000_000u : itemId;
 
             // Check if the action is ready
-            var status = am->GetActionStatus(ActionType.Item, actionItemId);
+            var status = am->GetActionStatus(ActionType.Item, actionItemId, targetId);
             if (status != 0)
             {
                 Plugin.Log.Debug($"UseItem({itemId}, HQ={highQuality}): ActionStatus={status}, not ready");
@@ -173,7 +176,7 @@ public static class GameHelpers
             }
 
             // Use item with extraParam 65535 (required for item usage)
-            var result = am->UseAction(ActionType.Item, actionItemId, extraParam: 65535);
+            var result = am->UseAction(ActionType.Item, actionItemId, targetId, extraParam: 65535);
             Plugin.Log.Information($"UseItem({itemId}, HQ={highQuality}): UseAction result={result}");
             return result;
         }
@@ -310,8 +313,8 @@ public static class GameHelpers
     }
 
     /// <summary>
-    /// Uses the API15 ClientStructs UseActionLocation wrapper. FrenRider does not detour it today;
-    /// this is just the low-level call surface.
+    /// Uses the API15 ClientStructs UseActionLocation wrapper. Phoenix Down recovery
+    /// temporarily gates competing actions at this native boundary.
     /// </summary>
     public static unsafe bool TryUseActionLocation(
         ActionType actionType,

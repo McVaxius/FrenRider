@@ -1023,6 +1023,8 @@ public class CombatService
 
     private void ApplyBossModMovementUnlockOnce(string pluginName, string selectedPreset, string reason)
     {
+        if (plugin.PhoenixDownRecoveryService.HoldMovement)
+            return;
         var signature = BuildBossModSafetySignature(pluginName, selectedPreset);
         if (string.Equals(signature, lastBossModMovementUnlockSignature, StringComparison.Ordinal))
             return;

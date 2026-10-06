@@ -114,6 +114,9 @@ public class AutoYesService : IDisposable
         if (RaiseOfferActive)
             return;
 
+        if (plugin.PhoenixDownRecoveryService.HoldMovement || plugin.PhoenixDownRecoveryService.DeferReturn)
+            return;
+
         if (!GameHelpers.IsAddonVisible("_NotificationTelepo"))
             teleportRepairRetryRequested = false;
 

@@ -11,6 +11,16 @@ public class Configuration : IPluginConfiguration
     public int Version { get; set; } = CurrentVersion;
 
     // --- Global UI Settings ---
+    public string UiLanguage { get; set; } = "en";
+    public uint UiAccentRgb { get; set; } = 0x70C677;
+    public bool UiCompact { get; set; } = false;
+    public bool UiCompactVisibleOnMainWindow { get; set; } = true;
+    public bool UiLanguageVisibleOnMainWindow { get; set; } = true;
+    public bool UiTransparencyEnabled { get; set; } = true;
+    public int UiWindowOpacityPercent { get; set; } = 100;
+    public bool UiAutoFade { get; set; } = true;
+    public int UiFadedOpacityPercent { get; set; } = 50;
+    public float UiUnfocusedDelaySeconds { get; set; } = 10;
     public bool IsConfigWindowMovable { get; set; } = true;
     public bool DtrBarEnabled { get; set; } = true;
     public int DtrBarMode { get; set; } = 0; // 0=text-only, 1=icon+text, 2=icon-only

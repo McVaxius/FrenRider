@@ -1,0 +1,2706 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="Blue" xml:space="preserve">
+    <value>Bleu</value>
+  </data>
+  <data name="Character" xml:space="preserve">
+    <value>Personnage</value>
+  </data>
+  <data name="Color" xml:space="preserve">
+    <value>Couleur</value>
+  </data>
+  <data name="Custom RGB" xml:space="preserve">
+    <value>RVB personnalisé</value>
+  </data>
+  <data name="Enabled" xml:space="preserve">
+    <value>Activé</value>
+  </data>
+  <data name="Forced / On" xml:space="preserve">
+    <value>Forcé / Activé</value>
+  </data>
+  <data name="Icon only" xml:space="preserve">
+    <value>Icône seule</value>
+  </data>
+  <data name="Interactive" xml:space="preserve">
+    <value>Interactif</value>
+  </data>
+  <data name="Job" xml:space="preserve">
+    <value>Job</value>
+  </data>
+  <data name="Ko-fi" xml:space="preserve">
+    <value>Ko-fi</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>Langue</value>
+  </data>
+  <data name="Loading UI fonts..." xml:space="preserve">
+    <value>Chargement des polices...</value>
+  </data>
+  <data name="N" xml:space="preserve">
+    <value>N</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>Non</value>
+  </data>
+  <data name="Off" xml:space="preserve">
+    <value>Désactivé</value>
+  </data>
+  <data name="On" xml:space="preserve">
+    <value>Activé</value>
+  </data>
+  <data name="Override Off" xml:space="preserve">
+    <value>Forcé désactivé</value>
+  </data>
+  <data name="Passive" xml:space="preserve">
+    <value>Passif</value>
+  </data>
+  <data name="Pink" xml:space="preserve">
+    <value>Rose</value>
+  </data>
+  <data name="Profile" xml:space="preserve">
+    <value>Profil</value>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>Rechercher</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>Paramètres</value>
+  </data>
+  <data name="Teal" xml:space="preserve">
+    <value>Turquoise</value>
+  </data>
+  <data name="Text only" xml:space="preserve">
+    <value>Texte seul</value>
+  </data>
+  <data name="UI fonts failed to load. See the plugin log." xml:space="preserve">
+    <value>Échec du chargement des polices. Voir le journal du plugin.</value>
+  </data>
+  <data name="Unknown" xml:space="preserve">
+    <value>Inconnu</value>
+  </data>
+  <data name="Y" xml:space="preserve">
+    <value>O</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>Oui</value>
+  </data>
+  <data name="Compact mode" xml:space="preserve">
+    <value>Mode compact</value>
+  </data>
+  <data name="Run" xml:space="preserve">
+    <value>Exécuter</value>
+  </data>
+  <data name="Operator" xml:space="preserve">
+    <value>Opérateur</value>
+  </data>
+  <data name="Party" xml:space="preserve">
+    <value>Équipe</value>
+  </data>
+  <data name="Automation" xml:space="preserve">
+    <value>Automatisation</value>
+  </data>
+  <data name="Account" xml:space="preserve">
+    <value>Compte</value>
+  </data>
+  <data name="Fren" xml:space="preserve">
+    <value>Ami</value>
+  </data>
+  <data name="Tracking" xml:space="preserve">
+    <value>Suivi</value>
+  </data>
+  <data name="Position" xml:space="preserve">
+    <value>Position</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Nom</value>
+  </data>
+  <data name="Distance" xml:space="preserve">
+    <value>Distance</value>
+  </data>
+  <data name="Follow" xml:space="preserve">
+    <value>Suivi</value>
+  </data>
+  <data name="Mount" xml:space="preserve">
+    <value>Monture</value>
+  </data>
+  <data name="Combat" xml:space="preserve">
+    <value>Combat</value>
+  </data>
+  <data name="Cleanup" xml:space="preserve">
+    <value>Restauration</value>
+  </data>
+  <data name="Idle" xml:space="preserve">
+    <value>Inactif</value>
+  </data>
+  <data name="Fren teleport" xml:space="preserve">
+    <value>Téléportation vers l'ami</value>
+  </data>
+  <data name="Phoenix Down" xml:space="preserve">
+    <value>Queue de phénix</value>
+  </data>
+  <data name="Respawn" xml:space="preserve">
+    <value>Réapparition</value>
+  </data>
+  <data name="Food" xml:space="preserve">
+    <value>Nourriture</value>
+  </data>
+  <data name="Repair" xml:space="preserve">
+    <value>Réparation</value>
+  </data>
+  <data name="Desynth" xml:space="preserve">
+    <value>Recyclage</value>
+  </data>
+  <data name="Companion" xml:space="preserve">
+    <value>Compagnon</value>
+  </data>
+  <data name="Formation" xml:space="preserve">
+    <value>Formation</value>
+  </data>
+  <data name="Duty / ADS / Exit" xml:space="preserve">
+    <value>Instance / ADS / Sortie</value>
+  </data>
+  <data name="Zone" xml:space="preserve">
+    <value>Zone</value>
+  </data>
+  <data name="Exit method" xml:space="preserve">
+    <value>Méthode de sortie</value>
+  </data>
+  <data name="Exit" xml:space="preserve">
+    <value>Sortie</value>
+  </data>
+  <data name="Duty interact" xml:space="preserve">
+    <value>Interaction d'instance</value>
+  </data>
+  <data name="ADS authority" xml:space="preserve">
+    <value>Contrôle ADS</value>
+  </data>
+  <data name="Compact debug" xml:space="preserve">
+    <value>Détails de débogage</value>
+  </data>
+  <data name="Config" xml:space="preserve">
+    <value>Configuration</value>
+  </data>
+  <data name="Distances" xml:space="preserve">
+    <value>Distances</value>
+  </data>
+  <data name="ADS flags" xml:space="preserve">
+    <value>Indicateurs ADS</value>
+  </data>
+  <data name="Not logged in" xml:space="preserve">
+    <value>Non connecté</value>
+  </data>
+  <data name="Logged in, local player unavailable" xml:space="preserve">
+    <value>Connecté, joueur local indisponible</value>
+  </data>
+  <data name="No account loaded" xml:space="preserve">
+    <value>Aucun compte chargé</value>
+  </data>
+  <data name="No account loaded." xml:space="preserve">
+    <value>Aucun compte chargé.</value>
+  </data>
+  <data name="No fren configured" xml:space="preserve">
+    <value>Aucun ami configuré</value>
+  </data>
+  <data name="Inactive" xml:space="preserve">
+    <value>Inactif</value>
+  </data>
+  <data name="In party but not visible" xml:space="preserve">
+    <value>Dans l'équipe, mais invisible</value>
+  </data>
+  <data name="Fren not found" xml:space="preserve">
+    <value>Ami introuvable</value>
+  </data>
+  <data name="in party" xml:space="preserve">
+    <value>dans l'équipe</value>
+  </data>
+  <data name="not in party" xml:space="preserve">
+    <value>hors équipe</value>
+  </data>
+  <data name="Not in a party" xml:space="preserve">
+    <value>Pas dans une équipe</value>
+  </data>
+  <data name="Mounted" xml:space="preserve">
+    <value>En monture</value>
+  </data>
+  <data name="On foot" xml:space="preserve">
+    <value>À pied</value>
+  </data>
+  <data name="Not visible" xml:space="preserve">
+    <value>Invisible</value>
+  </data>
+  <data name="Active checks running" xml:space="preserve">
+    <value>Vérifications en cours</value>
+  </data>
+  <data name="Idle; last {0}" xml:space="preserve">
+    <value>Inactif ; dernier : {0}</value>
+  </data>
+  <data name="Slot {0}" xml:space="preserve">
+    <value>Place {0}</value>
+  </data>
+  <data name="All FR on" xml:space="preserve">
+    <value>Activer tous les FR</value>
+  </data>
+  <data name="All FR off" xml:space="preserve">
+    <value>Désactiver tous les FR</value>
+  </data>
+  <data name="Fren Rider Mini" xml:space="preserve">
+    <value>Fren Rider Mini</value>
+  </data>
+  <data name="Attack" xml:space="preserve">
+    <value>Attaque</value>
+  </data>
+  <data name="Defense" xml:space="preserve">
+    <value>Défense</value>
+  </data>
+  <data name="&lt;none&gt;" xml:space="preserve">
+    <value>&lt;aucun&gt;</value>
+  </data>
+  <data name="UI / About" xml:space="preserve">
+    <value>Interface / À propos</value>
+  </data>
+  <data name="DEFAULT CONFIG" xml:space="preserve">
+    <value>CONFIGURATION PAR DÉFAUT</value>
+  </data>
+  <data name="REMOTE PROFILES (DAD)" xml:space="preserve">
+    <value>PROFILS DISTANTS (DAD)</value>
+  </data>
+  <data name="REMOTE DAD PROFILE" xml:space="preserve">
+    <value>PROFIL DAD DISTANT</value>
+  </data>
+  <data name="REMOTE: {0}" xml:space="preserve">
+    <value>DISTANT : {0}</value>
+  </data>
+  <data name="Fren Rider Settings - {0}" xml:space="preserve">
+    <value>Paramètres Fren Rider - {0}</value>
+  </data>
+  <data name="DELETE" xml:space="preserve">
+    <value>SUPPRIMER</value>
+  </data>
+  <data name="DELETE REMOTE" xml:space="preserve">
+    <value>SUPPRIMER LE PROFIL DISTANT</value>
+  </data>
+  <data name="Everything Sync" xml:space="preserve">
+    <value>Tout synchroniser</value>
+  </data>
+  <data name="Full Tab Sync" xml:space="preserve">
+    <value>Synchroniser l'onglet</value>
+  </data>
+  <data name="Reset All" xml:space="preserve">
+    <value>Tout réinitialiser</value>
+  </data>
+  <data name="Reset This" xml:space="preserve">
+    <value>Réinitialiser l'onglet</value>
+  </data>
+  <data name="Sync all" xml:space="preserve">
+    <value>Tout synchroniser</value>
+  </data>
+  <data name="Fren Name" xml:space="preserve">
+    <value>Nom de l'ami</value>
+  </data>
+  <data name="DAD Profile Acceptance" xml:space="preserve">
+    <value>Acceptation des profils DAD</value>
+  </data>
+  <data name="Temporary" xml:space="preserve">
+    <value>Temporaire</value>
+  </data>
+  <data name="Permanent" xml:space="preserve">
+    <value>Permanent</value>
+  </data>
+  <data name="Fren Rider enabled by default" xml:space="preserve">
+    <value>Fren Rider activé par défaut</value>
+  </data>
+  <data name="Enabled when transferred" xml:space="preserve">
+    <value>Activé lors du transfert</value>
+  </data>
+  <data name="Display label" xml:space="preserve">
+    <value>Libellé affiché</value>
+  </data>
+  <data name="Show Fren Rider status in the server info bar." xml:space="preserve">
+    <value>Afficher l'état de Fren Rider dans la barre d'informations.</value>
+  </data>
+  <data name="Obfuscate character names in FrenRider UI." xml:space="preserve">
+    <value>Masquer les noms des personnages dans FrenRider.</value>
+  </data>
+  <data name="Not logged in. FrenRider waits until a character is loaded." xml:space="preserve">
+    <value>Non connecté. FrenRider attend le chargement d'un personnage.</value>
+  </data>
+  <data name="AutoDuty detected while FrenRider is enabled." xml:space="preserve">
+    <value>AutoDuty détecté alors que FrenRider est actif.</value>
+  </data>
+  <data name="Set DEFAULT CONFIG and every local character in the current account, including the active temporary profile." xml:space="preserve">
+    <value>Modifier la configuration par défaut et tous les personnages locaux du compte courant, y compris le profil temporaire actif.</value>
+  </data>
+  <data name="Fly You Fools (fly alongside instead of pillion)" xml:space="preserve">
+    <value>Voler à côté plutôt qu'en tandem</value>
+  </data>
+  <data name="Try Teleport to Fren When Out of Zone" xml:space="preserve">
+    <value>Téléporter vers l'ami dans une autre zone</value>
+  </data>
+  <data name="Follow local aetheryte networks" xml:space="preserve">
+    <value>Suivre les réseaux d'éthérites locaux</value>
+  </data>
+  <data name="Teleport Delay (seconds)" xml:space="preserve">
+    <value>Délai de téléportation (secondes)</value>
+  </data>
+  <data name="Nudge in duty when fren not nearby/in-zone" xml:space="preserve">
+    <value>Avancer dans l'instance si l'ami est absent</value>
+  </data>
+  <data name="Use Phoenix Downs for recovery" xml:space="preserve">
+    <value>Utiliser des queues de phénix</value>
+  </data>
+  <data name="Revive anyone within range outdoors" xml:space="preserve">
+    <value>Réanimer tous les joueurs proches à l'extérieur</value>
+  </data>
+  <data name="Allow Phoenix Down use during combat" xml:space="preserve">
+    <value>Autoriser les queues de phénix en combat</value>
+  </data>
+  <data name="Respawn after death outside duties after" xml:space="preserve">
+    <value>Réapparaître hors instance après</value>
+  </data>
+  <data name="Respawn after death inside duties after" xml:space="preserve">
+    <value>Réapparaître en instance après</value>
+  </data>
+  <data name="seconds" xml:space="preserve">
+    <value>secondes</value>
+  </data>
+  <data name="Mount-up to chase fren if &gt;" xml:space="preserve">
+    <value>Monter pour rattraper l'ami si &gt;</value>
+  </data>
+  <data name="y from fren" xml:space="preserve">
+    <value>y de l'ami</value>
+  </data>
+  <data name="after" xml:space="preserve">
+    <value>après</value>
+  </data>
+  <data name="Mount Name (if flying solo)" xml:space="preserve">
+    <value>Monture (vol en solo)</value>
+  </data>
+  <data name="(none)" xml:space="preserve">
+    <value>(aucun)</value>
+  </data>
+  <data name="Mount Roulette" xml:space="preserve">
+    <value>Monture aléatoire</value>
+  </data>
+  <data name="Summon Chocobo" xml:space="preserve">
+    <value>Invoquer le chocobo</value>
+  </data>
+  <data name="Gysahl Greens: {0}" xml:space="preserve">
+    <value>Légumes de Gysahl : {0}</value>
+  </data>
+  <data name="Companion Stance" xml:space="preserve">
+    <value>Posture du compagnon</value>
+  </data>
+  <data name="Free Stance" xml:space="preserve">
+    <value>Posture libre</value>
+  </data>
+  <data name="Defender Stance" xml:space="preserve">
+    <value>Posture défensive</value>
+  </data>
+  <data name="Attacker Stance" xml:space="preserve">
+    <value>Posture offensive</value>
+  </data>
+  <data name="Healer Stance" xml:space="preserve">
+    <value>Posture de soin</value>
+  </data>
+  <data name="Auto Discard (/ays discard)" xml:space="preserve">
+    <value>Jeter automatiquement (/ays discard)</value>
+  </data>
+  <data name="Update Interval (seconds)" xml:space="preserve">
+    <value>Intervalle de mise à jour (secondes)</value>
+  </data>
+  <data name="WARNING: Very low update interval may impact game performance!" xml:space="preserve">
+    <value>ATTENTION : un intervalle très court peut nuire aux performances !</value>
+  </data>
+  <data name="Cling Distance" xml:space="preserve">
+    <value>Distance de suivi</value>
+  </data>
+  <data name="Cling Type" xml:space="preserve">
+    <value>Méthode de suivi</value>
+  </data>
+  <data name="Cling Type (Duty)" xml:space="preserve">
+    <value>Méthode de suivi (instance)</value>
+  </data>
+  <data name="BossMod Follow" xml:space="preserve">
+    <value>Suivi BossMod</value>
+  </data>
+  <data name="Vanilla Follow" xml:space="preserve">
+    <value>Suivi natif du jeu</value>
+  </data>
+  <data name="Social Distancing" xml:space="preserve">
+    <value>Espacement</value>
+  </data>
+  <data name="Social Distance (yalms)" xml:space="preserve">
+    <value>Espacement (yalms)</value>
+  </data>
+  <data name="Social Distance Indoors" xml:space="preserve">
+    <value>Espacement à l'intérieur</value>
+  </data>
+  <data name="X Wiggle (+/- yalms)" xml:space="preserve">
+    <value>Variation X (+/- yalms)</value>
+  </data>
+  <data name="Z Wiggle (+/- yalms)" xml:space="preserve">
+    <value>Variation Z (+/- yalms)</value>
+  </data>
+  <data name="Max Distances" xml:space="preserve">
+    <value>Distances maximales</value>
+  </data>
+  <data name="Max Follow Distance" xml:space="preserve">
+    <value>Distance maximale de suivi</value>
+  </data>
+  <data name="Max Follow Distance (Foray)" xml:space="preserve">
+    <value>Distance de suivi maximale (expédition)</value>
+  </data>
+  <data name="Deep Dungeon Extra Cling" xml:space="preserve">
+    <value>Distance supplémentaire en donjon sans fond</value>
+  </data>
+  <data name="FATE Extra Cling" xml:space="preserve">
+    <value>Distance supplémentaire en ALÉA</value>
+  </data>
+  <data name="Auto Sync FATE" xml:space="preserve">
+    <value>Synchronisation automatique en ALÉA</value>
+  </data>
+  <data name="Formation Following" xml:space="preserve">
+    <value>Suivi en formation</value>
+  </data>
+  <data name="Follow in Combat" xml:space="preserve">
+    <value>Suivre en combat</value>
+  </data>
+  <data name="Harmonized Cling Reset Ticks" xml:space="preserve">
+    <value>Cycles avant réinitialisation de la distance</value>
+  </data>
+  <data name="Rotation Plugin" xml:space="preserve">
+    <value>Plugin de rotation</value>
+  </data>
+  <data name="Rotation Plugin (Foray)" xml:space="preserve">
+    <value>Plugin de rotation (expédition)</value>
+  </data>
+  <data name="Daedalus Party Mode" xml:space="preserve">
+    <value>Mode d'équipe Daedalus</value>
+  </data>
+  <data name="None" xml:space="preserve">
+    <value>Aucun</value>
+  </data>
+  <data name="Focus" xml:space="preserve">
+    <value>Concentration</value>
+  </data>
+  <data name="Split" xml:space="preserve">
+    <value>Répartir</value>
+  </data>
+  <data name="Kill Adds" xml:space="preserve">
+    <value>Éliminer les renforts</value>
+  </data>
+  <data name="Autorot Presets" xml:space="preserve">
+    <value>Préréglages de rotation</value>
+  </data>
+  <data name="Configure rotation preset manually" xml:space="preserve">
+    <value>Configurer le préréglage manuellement</value>
+  </data>
+  <data name="BM Rotation Preset" xml:space="preserve">
+    <value>Préréglage de rotation BM</value>
+  </data>
+  <data name="BM Rotation Preset (DD)" xml:space="preserve">
+    <value>Préréglage BM (donjon sans fond)</value>
+  </data>
+  <data name="BM Rotation Preset (FATE)" xml:space="preserve">
+    <value>Préréglage BM (ALÉA)</value>
+  </data>
+  <data name="Force BossMod preset regardless of rotation" xml:space="preserve">
+    <value>Forcer le préréglage BossMod quelle que soit la rotation</value>
+  </data>
+  <data name="Push Presets Now" xml:space="preserve">
+    <value>Envoyer les préréglages</value>
+  </data>
+  <data name="Cleanup Mode" xml:space="preserve">
+    <value>Mode de restauration</value>
+  </data>
+  <data name="Restore snapshot" xml:space="preserve">
+    <value>Restaurer l'état sauvegardé</value>
+  </data>
+  <data name="Turn everything off" xml:space="preserve">
+    <value>Tout désactiver</value>
+  </data>
+  <data name="RSR Operating Mode" xml:space="preserve">
+    <value>Mode de fonctionnement RSR</value>
+  </data>
+  <data name="RSR Aggro Type" xml:space="preserve">
+    <value>Sélection des cibles RSR</value>
+  </data>
+  <data name="All Attackable Targets" xml:space="preserve">
+    <value>Toutes les cibles attaquables</value>
+  </data>
+  <data name="Previously Engaged Targets" xml:space="preserve">
+    <value>Cibles déjà engagées</value>
+  </data>
+  <data name="All Targets When Solo in Duty" xml:space="preserve">
+    <value>Toutes les cibles en instance solo</value>
+  </data>
+  <data name="All Targets When Solo" xml:space="preserve">
+    <value>Toutes les cibles en solo</value>
+  </data>
+  <data name="Solo Deep Dungeon Smart" xml:space="preserve">
+    <value>Donjon sans fond solo intelligent</value>
+  </data>
+  <data name="Manual" xml:space="preserve">
+    <value>Manuel</value>
+  </data>
+  <data name="Support" xml:space="preserve">
+    <value>Assistance</value>
+  </data>
+  <data name="Don't move while casting" xml:space="preserve">
+    <value>Ne pas bouger pendant l'incantation</value>
+  </data>
+  <data name="Positional" xml:space="preserve">
+    <value>Positionnement</value>
+  </data>
+  <data name="Front" xml:space="preserve">
+    <value>Avant</value>
+  </data>
+  <data name="Rear" xml:space="preserve">
+    <value>Arrière</value>
+  </data>
+  <data name="Any" xml:space="preserve">
+    <value>Indifférent</value>
+  </data>
+  <data name="Combat Max Distance" xml:space="preserve">
+    <value>Distance maximale de combat</value>
+  </data>
+  <data name="Limit Break HP %" xml:space="preserve">
+    <value>PV % pour Transcendance</value>
+  </data>
+  <data name="Beastmaster Capture" xml:space="preserve">
+    <value>Capture du belluaire</value>
+  </data>
+  <data name="Try to catch beasts" xml:space="preserve">
+    <value>Tenter de capturer des bêtes</value>
+  </data>
+  <data name="Capture HP: within 5 levels below you or equal" xml:space="preserve">
+    <value>PV de capture : au plus 5 niveaux inférieurs ou égal</value>
+  </data>
+  <data name="Capture HP: more than 5 levels below you" xml:space="preserve">
+    <value>PV de capture : plus de 5 niveaux inférieurs</value>
+  </data>
+  <data name="Saved beasts" xml:space="preserve">
+    <value>Bêtes sauvegardées</value>
+  </data>
+  <data name="Select a local character to browse their saved beasts." xml:space="preserve">
+    <value>Sélectionnez un personnage local pour voir ses bêtes sauvegardées.</value>
+  </data>
+  <data name="Obstacle maps on" xml:space="preserve">
+    <value>Activer les cartes d'obstacles</value>
+  </data>
+  <data name="BMR reduce activation range for outdoor areas" xml:space="preserve">
+    <value>Réduire la portée d'activation BMR en extérieur</value>
+  </data>
+  <data name="BMR Disable Hunt Modules" xml:space="preserve">
+    <value>Désactiver les modules de chasse BMR</value>
+  </data>
+  <data name="BMR Disable Queen Lunatender" xml:space="preserve">
+    <value>Désactiver Queen Lunatender dans BMR</value>
+  </data>
+  <data name="ADS Duty Handoff" xml:space="preserve">
+    <value>Transfert d'instance à ADS</value>
+  </data>
+  <data name="Duty Families" xml:space="preserve">
+    <value>Catégories d'instances</value>
+  </data>
+  <data name="sec ready" xml:space="preserve">
+    <value>s prêt</value>
+  </data>
+  <data name="Seed family rows from legacy values" xml:space="preserve">
+    <value>Initialiser les catégories depuis les anciens réglages</value>
+  </data>
+  <data name="Temporarily controlled by DAD" xml:space="preserve">
+    <value>Temporairement contrôlé par DAD</value>
+  </data>
+  <data name="Equip job stone for current class" xml:space="preserve">
+    <value>Équiper le cristal de la classe actuelle</value>
+  </data>
+  <data name="Loot" xml:space="preserve">
+    <value>Butin</value>
+  </data>
+  <data name="Loot Type" xml:space="preserve">
+    <value>Choix du butin</value>
+  </data>
+  <data name="unchanged" xml:space="preserve">
+    <value>inchangé</value>
+  </data>
+  <data name="need" xml:space="preserve">
+    <value>besoin</value>
+  </data>
+  <data name="greed" xml:space="preserve">
+    <value>cupidité</value>
+  </data>
+  <data name="pass" xml:space="preserve">
+    <value>passer</value>
+  </data>
+  <data name="OPEN ADS LOOT OPTIONS" xml:space="preserve">
+    <value>OUVRIR LES OPTIONS DE BUTIN ADS</value>
+  </data>
+  <data name="Use HQ food" xml:space="preserve">
+    <value>Utiliser des plats HQ</value>
+  </data>
+  <data name="Search for Food if Depleted" xml:space="preserve">
+    <value>Chercher d'autres plats si épuisés</value>
+  </data>
+  <data name="Clear Food" xml:space="preserve">
+    <value>Retirer le plat</value>
+  </data>
+  <data name="No food selected. Food is optional." xml:space="preserve">
+    <value>Aucun plat choisi. La nourriture est facultative.</value>
+  </data>
+  <data name="Type at least 2 characters to search..." xml:space="preserve">
+    <value>Saisissez au moins 2 caractères...</value>
+  </data>
+  <data name="No results. Try a different search term." xml:space="preserve">
+    <value>Aucun résultat. Essayez un autre terme.</value>
+  </data>
+  <data name="Repair Mode" xml:space="preserve">
+    <value>Mode de réparation</value>
+  </data>
+  <data name="Self" xml:space="preserve">
+    <value>Soi-même</value>
+  </data>
+  <data name="NPC no-inn" xml:space="preserve">
+    <value>PNJ sans auberge</value>
+  </data>
+  <data name="NPC No Inn + No TP" xml:space="preserve">
+    <value>PNJ sans auberge ni téléportation</value>
+  </data>
+  <data name="NPC repair + inn room" xml:space="preserve">
+    <value>Réparation PNJ et chambre d'auberge</value>
+  </data>
+  <data name="Repair At % Durability" xml:space="preserve">
+    <value>Réparer sous durabilité %</value>
+  </data>
+  <data name="Test ADS NPC No-Inn Repair" xml:space="preserve">
+    <value>Essayer la réparation ADS sans auberge</value>
+  </data>
+  <data name="Desynthesis" xml:space="preserve">
+    <value>Recyclage</value>
+  </data>
+  <data name="Enable Auto Desynth" xml:space="preserve">
+    <value>Activer le recyclage automatique</value>
+  </data>
+  <data name="OPEN DESYNTH CONFIG" xml:space="preserve">
+    <value>OUVRIR LES RÉGLAGES DE RECYCLAGE</value>
+  </data>
+  <data name="Idle Behavior" xml:space="preserve">
+    <value>Comportement au repos</value>
+  </data>
+  <data name="Idle Mode" xml:space="preserve">
+    <value>Mode de repos</value>
+  </data>
+  <data name="Specific Action" xml:space="preserve">
+    <value>Action précise</value>
+  </data>
+  <data name="Action From List" xml:space="preserve">
+    <value>Action d'une liste</value>
+  </data>
+  <data name="Idle Command" xml:space="preserve">
+    <value>Commande de repos</value>
+  </data>
+  <data name="List Source" xml:space="preserve">
+    <value>Source de la liste</value>
+  </data>
+  <data name="Default List" xml:space="preserve">
+    <value>Liste par défaut</value>
+  </data>
+  <data name="Custom List" xml:space="preserve">
+    <value>Liste personnalisée</value>
+  </data>
+  <data name="Idle Ticks Before Action" xml:space="preserve">
+    <value>Cycles au repos avant action</value>
+  </data>
+  <data name="Echo Messages" xml:space="preserve">
+    <value>Messages de chat</value>
+  </data>
+  <data name="Invite Whitelist" xml:space="preserve">
+    <value>Liste d'invitations autorisées</value>
+  </data>
+  <data name="Trusted inviters" xml:space="preserve">
+    <value>Inviteurs autorisés</value>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>Ajouter</value>
+  </data>
+  <data name="Auto-Yes Dialogs" xml:space="preserve">
+    <value>Confirmation automatique</value>
+  </data>
+  <data name="Teleport offers" xml:space="preserve">
+    <value>Propositions de téléportation</value>
+  </data>
+  <data name="Party invites (backup)" xml:space="preserve">
+    <value>Invitations d'équipe (secours)</value>
+  </data>
+  <data name="Raise offers are accepted automatically while FrenRider is enabled." xml:space="preserve">
+    <value>Les propositions de résurrection sont acceptées lorsque FrenRider est actif.</value>
+  </data>
+  <data name="Exit Behaviour" xml:space="preserve">
+    <value>Comportement de sortie</value>
+  </data>
+  <data name="Duty-end delay" xml:space="preserve">
+    <value>Délai après fin d'instance</value>
+  </data>
+  <data name="seconds after duty ends" xml:space="preserve">
+    <value>secondes après la fin</value>
+  </data>
+  <data name="UI Settings" xml:space="preserve">
+    <value>Réglages de l'interface</value>
+  </data>
+  <data name="Video Notifications" xml:space="preserve">
+    <value>Notifications vidéo</value>
+  </data>
+  <data name="Movable Config Window" xml:space="preserve">
+    <value>Fenêtre des paramètres mobile</value>
+  </data>
+  <data name="DTR Bar Enabled" xml:space="preserve">
+    <value>Activer la barre DTR</value>
+  </data>
+  <data name="DTR Bar Mode" xml:space="preserve">
+    <value>Mode de barre DTR</value>
+  </data>
+  <data name="Icon+Text" xml:space="preserve">
+    <value>Icône et texte</value>
+  </data>
+  <data name="DTR Icons (max 3 characters)" xml:space="preserve">
+    <value>Icônes DTR (3 caractères max.)</value>
+  </data>
+  <data name="Copy Icon Guide Link" xml:space="preserve">
+    <value>Copier le guide des icônes</value>
+  </data>
+  <data name="VLC not found" xml:space="preserve">
+    <value>VLC introuvable</value>
+  </data>
+  <data name="Download VLC" xml:space="preserve">
+    <value>Télécharger VLC</value>
+  </data>
+  <data name="Advanced" xml:space="preserve">
+    <value>Avancé</value>
+  </data>
+  <data name="Debug / Logging" xml:space="preserve">
+    <value>Débogage / Journal</value>
+  </data>
+  <data name="Presets" xml:space="preserve">
+    <value>Préréglages</value>
+  </data>
+  <data name="Behavior" xml:space="preserve">
+    <value>Comportement</value>
+  </data>
+  <data name="Hacks" xml:space="preserve">
+    <value>Fonctions spéciales</value>
+  </data>
+  <data name="DISABLE PANDORA's BOX" xml:space="preserve">
+    <value>DÉSACTIVER PANDORA's BOX</value>
+  </data>
+  <data name="Commands:" xml:space="preserve">
+    <value>Commandes :</value>
+  </data>
+  <data name="Required Dependencies:" xml:space="preserve">
+    <value>Dépendances requises :</value>
+  </data>
+  <data name="Optional Plugins:" xml:space="preserve">
+    <value>Plugins facultatifs :</value>
+  </data>
+  <data name="Multiplayer Guide:" xml:space="preserve">
+    <value>Guide multijoueur :</value>
+  </data>
+  <data name="Made by McVaxius" xml:space="preserve">
+    <value>Créé par McVaxius</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Fermer</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>État</value>
+  </data>
+  <data name="Beast" xml:space="preserve">
+    <value>Bête</value>
+  </data>
+  <data name="Saved ownership" xml:space="preserve">
+    <value>Possession sauvegardée</value>
+  </data>
+  <data name="DD Extra Distance" xml:space="preserve">
+    <value>Distance supplémentaire DD</value>
+  </data>
+  <data name="FATE Extra Distance" xml:space="preserve">
+    <value>Distance supplémentaire ALÉA</value>
+  </data>
+  <data name="Max AI Distance" xml:space="preserve">
+    <value>Distance IA maximale</value>
+  </data>
+  <data name="LB Threshold %" xml:space="preserve">
+    <value>Seuil Transcendance %</value>
+  </data>
+  <data name="ADS Exit Method" xml:space="preserve">
+    <value>Méthode de sortie ADS</value>
+  </data>
+  <data name="FrenRider Exit method" xml:space="preserve">
+    <value>Méthode de sortie FrenRider</value>
+  </data>
+  <data name="Exit after N seconds" xml:space="preserve">
+    <value>Sortir après N secondes</value>
+  </data>
+  <data name="Leave when all others left" xml:space="preserve">
+    <value>Sortir quand les autres sont partis</value>
+  </data>
+  <data name="No automatic exit" xml:space="preserve">
+    <value>Aucune sortie automatique</value>
+  </data>
+  <data name="Food Item Name" xml:space="preserve">
+    <value>Nom du plat</value>
+  </data>
+  <data name="Add command" xml:space="preserve">
+    <value>Ajouter une commande</value>
+  </data>
+  <data name="Remove command" xml:space="preserve">
+    <value>Retirer une commande</value>
+  </data>
+  <data name="Click to copy Daedalus repository URL" xml:space="preserve">
+    <value>Cliquer pour copier l'URL du dépôt Daedalus</value>
+  </data>
+  <data name="Click to copy URL to clipboard" xml:space="preserve">
+    <value>Cliquer pour copier l'URL</value>
+  </data>
+  <data name="Click to download VLC media player" xml:space="preserve">
+    <value>Cliquer pour télécharger VLC</value>
+  </data>
+  <data name="Copies the Lodestone blog link with suggested glyphs" xml:space="preserve">
+    <value>Copier le lien Lodestone proposant des symboles</value>
+  </data>
+  <data name="Disable Krangle to edit fren name." xml:space="preserve">
+    <value>Désactivez Krangle pour modifier le nom de l'ami.</value>
+  </data>
+  <data name="Disable Krangle to edit the account alias." xml:space="preserve">
+    <value>Désactivez Krangle pour modifier l'alias du compte.</value>
+  </data>
+  <data name="Select from current party members" xml:space="preserve">
+    <value>Choisir dans l'équipe actuelle</value>
+  </data>
+  <data name="Hold CTRL and click to delete this remote profile." xml:space="preserve">
+    <value>Maintenez CTRL et cliquez pour supprimer ce profil distant.</value>
+  </data>
+  <data name="The currently active character profile cannot be deleted while logged in." xml:space="preserve">
+    <value>Le profil actif ne peut pas être supprimé pendant la connexion.</value>
+  </data>
+  <data name="Hold CTRL and click to delete this character's config.&#10;This cannot be undone." xml:space="preserve">
+    <value>Maintenez CTRL et cliquez pour supprimer la configuration.
+Cette action est irréversible.</value>
+  </data>
+  <data name="Log in to a character to create one." xml:space="preserve">
+    <value>Connectez un personnage pour créer un compte.</value>
+  </data>
+  <data name="Separate profiles for exact remote identities. They never become local character rows." xml:space="preserve">
+    <value>Profils distincts pour les identités distantes exactes. Ils ne deviennent jamais des personnages locaux.</value>
+  </data>
+  <data name="This row is separate from local characters and can never become the active-character profile." xml:space="preserve">
+    <value>Cette ligne est distincte des personnages locaux et ne peut jamais devenir le profil actif.</value>
+  </data>
+  <data name="Incoming DAD profiles will replace this character's saved profile." xml:space="preserve">
+    <value>Les profils DAD reçus remplaceront le profil sauvegardé de ce personnage.</value>
+  </data>
+  <data name="FrenRider installs BossMod presets whenever it is enabled." xml:space="preserve">
+    <value>FrenRider installe les préréglages BossMod à chaque activation.</value>
+  </data>
+  <data name="Managed presets: BMR/VBM use FRENRIDER role presets; RSR/WRATH/DAEDALUS use passive role presets." xml:space="preserve">
+    <value>BMR/VBM utilisent les rôles FRENRIDER ; RSR/WRATH/DAEDALUS les rôles passifs.</value>
+  </data>
+  <data name="Copy DEFAULT CONFIG character-profile settings to every character profile in this account." xml:space="preserve">
+    <value>Copier les paramètres par défaut vers tous les profils du compte.</value>
+  </data>
+  <data name="Copy this DEFAULT CONFIG tab to every character profile in this account." xml:space="preserve">
+    <value>Copier cet onglet par défaut vers tous les profils.</value>
+  </data>
+  <data name="UI / About uses global settings and is not copied to character profiles." xml:space="preserve">
+    <value>Interface / À propos utilise des réglages globaux non copiés aux profils.</value>
+  </data>
+  <data name="Set DEFAULT CONFIG and every local character in this account, including the active temporary profile." xml:space="preserve">
+    <value>Modifier la configuration par défaut et tous les personnages locaux, y compris le profil temporaire actif.</value>
+  </data>
+  <data name="Copy '{0}' from DEFAULT CONFIG to every character profile in this account." xml:space="preserve">
+    <value>Copier « {0} » depuis la configuration par défaut vers tous les profils.</value>
+  </data>
+  <data name="AutoDuty Detected - Action Required" xml:space="preserve">
+    <value>AutoDuty détecté - Action requise</value>
+  </data>
+  <data name="AutoDuty is enabled and may cause issues:" xml:space="preserve">
+    <value>AutoDuty est actif et peut causer des problèmes :</value>
+  </data>
+  <data name="FrenRider requires AutoDuty to be disabled for proper operation." xml:space="preserve">
+    <value>AutoDuty doit être désactivé pour le bon fonctionnement de FrenRider.</value>
+  </data>
+  <data name="Disable AutoDuty" xml:space="preserve">
+    <value>Désactiver AutoDuty</value>
+  </data>
+  <data name="This window will close automatically after disabling AutoDuty." xml:space="preserve">
+    <value>Cette fenêtre se fermera après la désactivation d'AutoDuty.</value>
+  </data>
+  <data name="0 = disabled.&#10;1 = ADS self repair.&#10;2 = ADS NPC repair without inn fallback.&#10;3 = ADS NPC repair only when a mender is within 120y.&#10;4 = ADS NPC repair near an inn, then enter the inn room." xml:space="preserve">
+    <value>0 : désactivé ; 1 : autoréparation ADS ; 2 : PNJ sans auberge ; 3 : PNJ à moins de 120y uniquement ; 4 : PNJ près d'une auberge puis entrée dans la chambre.</value>
+  </data>
+  <data name="Additionally revive non-party players within 15 yalms outdoors. Party members and healers have priority. Never approach strangers." xml:space="preserve">
+    <value>Réanimer aussi les joueurs hors équipe à moins de 15y en extérieur. Priorité aux équipiers et soigneurs. Ne jamais approcher les inconnus.</value>
+  </data>
+  <data name="After DutyCompleted and duty exit, ask ADS to run configured desynthesis. FrenRider pauses automatic actions until completion or the 180s timeout." xml:space="preserve">
+    <value>Après DutyCompleted et la sortie, lancer le recyclage ADS configuré. FrenRider attend la fin ou le délai de 180s.</value>
+  </data>
+  <data name="After remaining continuously unconscious inside duties for this delay, open the Return prompt and accept it. Duty scope is selected only by BoundByDuty. Minimum: 1 second. Default: 60." xml:space="preserve">
+    <value>Après ce délai d'inconscience continue en instance, ouvrir et accepter Retour. Seul BoundByDuty détermine l'instance. Minimum 1s, défaut 60s.</value>
+  </data>
+  <data name="After remaining continuously unconscious outside duties for this delay, open the Return prompt and accept it. Minimum: 1 second. Default: 60." xml:space="preserve">
+    <value>Après ce délai d'inconscience continue hors instance, ouvrir et accepter Retour. Minimum 1s, défaut 60s.</value>
+  </data>
+  <data name="Applies in dungeons and outdoors. Off waits for the rescuer to leave combat before approaching or using an item; current combat may finish, but new pulls stay blocked. On still respects native item availability and every other recovery gate." xml:space="preserve">
+    <value>En donjon et en extérieur. Désactivé : attendre la fin du combat du sauveteur avant approche ou objet ; combat actuel autorisé, nouveaux engagements bloqués. Activé : disponibilité native et autres conditions toujours requises.</value>
+  </data>
+  <data name="Auto-summon chocobo companion using Gysahl Greens when timer is low.&#10;Will not summon in sanctuaries or duties." xml:space="preserve">
+    <value>Invoquer le chocobo avec des légumes de Gysahl quand le temps est faible. Pas en sanctuaire ni en instance.</value>
+  </data>
+  <data name="Automatically accept teleport offers (e.g., Return, Teleport to).&#10;Note: Party invites are handled by the whitelist system below." xml:space="preserve">
+    <value>Accepter automatiquement les téléportations, dont Retour. Les invitations utilisent la liste autorisée ci-dessous.</value>
+  </data>
+  <data name="Automatically accept teleport offers." xml:space="preserve">
+    <value>Accepter automatiquement les téléportations.</value>
+  </data>
+  <data name="Automatically click Yes on specific dialog types when FrenRider is enabled.&#10;Works alongside YesAlready - FrenRider pauses YesAlready and handles these dialogs itself." xml:space="preserve">
+    <value>Confirmer certains dialogues lorsque FrenRider est actif. YesAlready est suspendu et FrenRider traite ces dialogues.</value>
+  </data>
+  <data name="Automatically leave the duty N seconds after it completes." xml:space="preserve">
+    <value>Sortir automatiquement N secondes après la fin de l'instance.</value>
+  </data>
+  <data name="Backup auto-accept for party invites.&#10;Primary invite handling uses the whitelist system above." xml:space="preserve">
+    <value>Acceptation de secours des invitations. La liste autorisée ci-dessus reste prioritaire.</value>
+  </data>
+  <data name="Backup auto-accept for party invites. Primary invite handling uses the whitelist." xml:space="preserve">
+    <value>Acceptation de secours des invitations. La liste autorisée reste prioritaire.</value>
+  </data>
+  <data name="Both HP thresholds accept 1–100%. Exactly five levels below uses this second threshold.&#10;100% permits Capture on a full-health beast and may initiate combat." xml:space="preserve">
+    <value>Deux seuils de PV de 1–100%. Exactement cinq niveaux inférieurs utilise le second seuil. 100% permet la capture à pleine vie et peut engager le combat.</value>
+  </data>
+  <data name="Chocobo companion battle stance.&#10;Controls how your companion behaves in combat." xml:space="preserve">
+    <value>Posture du chocobo. Définit son comportement au combat.</value>
+  </data>
+  <data name="Combat positional preference.&#10;Front: Stay in front of target&#10;Rear: Stay behind target&#10;Any: No preference&#10;Auto: Let plugin decide based on job" xml:space="preserve">
+    <value>Avant : devant la cible ; arrière : derrière ; indifférent : sans préférence ; auto : selon le job.</value>
+  </data>
+  <data name="Controls BossMod Reborn only. Default: off. Applies when FrenRider is enabled, regardless of combat provider." xml:space="preserve">
+    <value>BossMod Reborn uniquement. Désactivé par défaut. Actif avec FrenRider quel que soit le fournisseur de combat.</value>
+  </data>
+  <data name="Customize the glyphs used for enabled/disabled icon modes." xml:space="preserve">
+    <value>Personnaliser les symboles actif/inactif.</value>
+  </data>
+  <data name="DTR bar display mode:&#10;Text Only: 'FR: On/Off'&#10;Icon+Text: '⚫ FR'&#10;Icon Only: '⚫'" xml:space="preserve">
+    <value>Affichage DTR : texte «FR: actif/inactif», icône et texte «● FR», ou icône «●».</value>
+  </data>
+  <data name="Default List: Built-in emote list&#10;Custom List: Your own list of commands" xml:space="preserve">
+    <value>Liste par défaut : emotes intégrées. Personnalisée : vos commandes.</value>
+  </data>
+  <data name="Default List: built-in emotes&#10;Custom List: your own command list" xml:space="preserve">
+    <value>Liste par défaut : emotes intégrées. Personnalisée : vos commandes.</value>
+  </data>
+  <data name="Delay before opening the party window and teleporting. Allowed range: 5-300 seconds. Default: 30." xml:space="preserve">
+    <value>Délai avant fenêtre d'équipe et téléportation. 5–300s, défaut 30s.</value>
+  </data>
+  <data name="Distance threshold (yalms) to start following fren.&#10;When you are farther than this from fren, navigation begins." xml:space="preserve">
+    <value>Distance en yalms déclenchant la navigation vers l'ami.</value>
+  </data>
+  <data name="Each family has its own enable toggle, maturity threshold, and continuous-ready handoff delay.&#10;0 = not cleared, 1 = unsync cleared, 2 = duty support cleared, 3 = proven sync clear.&#10;Handoff delay range: 2-300 seconds." xml:space="preserve">
+    <value>Chaque catégorie a activation, seuil et délai de disponibilité continue. 0 : non réussi, 1 : désynchronisé, 2 : soutien, 3 : synchronisé prouvé. Délai 2–300s.</value>
+  </data>
+  <data name="Enable social distancing indoors too.&#10;Off by default. Turn on if you want spacing in dungeons." xml:space="preserve">
+    <value>Espacement aussi en intérieur. Désactivé par défaut ; activer pour les donjons.</value>
+  </data>
+  <data name="Extra distance added to cling in Deep Dungeons.&#10;Prevents constant chasing in PotD/HoH." xml:space="preserve">
+    <value>Distance supplémentaire en donjon sans fond pour éviter une poursuite constante dans PotD/HoH.</value>
+  </data>
+  <data name="Follow in a formation pattern (8-person grid).&#10;Positions based on party slot number.&#10;Disabled during mounting." xml:space="preserve">
+    <value>Formation en grille de 8 selon la place d'équipe. Désactivée pendant la montée.</value>
+  </data>
+  <data name="Garble all identifying text (character names, fren names, servers)&#10;with military/exercise words. Useful for taking screenshots&#10;to report issues without revealing personal info." xml:space="preserve">
+    <value>Remplacer les noms de personnages, amis et serveurs par des mots militaires pour partager des captures sans données personnelles.</value>
+  </data>
+  <data name="Global setting. On plugin load and whenever it changes, applies casting movement lock to currently loaded BMR, VBM, and RSR plugins." xml:space="preserve">
+    <value>Réglage global. Au chargement et à chaque modification, bloque le mouvement pendant l'incantation pour BMR/VBM/RSR chargés.</value>
+  </data>
+  <data name="Hostile target selection sent to RotationSolver Reborn through its typed settings IPC." xml:space="preserve">
+    <value>Envoyer la sélection des cibles hostiles à RotationSolver Reborn via son IPC typé.</value>
+  </data>
+  <data name="How loot is handled if LazyLoot is installed.&#10;'unchanged' = Don't modify loot settings." xml:space="preserve">
+    <value>Choix du butin si LazyLoot est installé. «inchangé» conserve ses réglages.</value>
+  </data>
+  <data name="How often the plugin runs its main logic loop.&#10;Lower values = more responsive but higher CPU usage.&#10;Default: 0.3s. WARNING: Values below 0.1 may impact performance." xml:space="preserve">
+    <value>Intervalle de logique. Plus court : plus réactif et plus de CPU. Défaut 0,3s ; sous 0,1s peut réduire les performances.</value>
+  </data>
+  <data name="Human-readable alias for this account group. Linked to account ID internally." xml:space="preserve">
+    <value>Alias lisible de ce groupe de comptes, lié à l'identifiant interne.</value>
+  </data>
+  <data name="If configured food runs out, search inventory for any food starting from lowest item ID." xml:space="preserve">
+    <value>Si le plat configuré est épuisé, chercher toute nourriture dans l'inventaire par ID croissant.</value>
+  </data>
+  <data name="If enabled, you will summon your own mount instead of pillion riding.&#10;Useful for flying zones.&#10;&#10;⚠️ IMPORTANT: This feature requires you to be grouped with your fren.&#10;It will not work properly if ungrouped (won't jump into air to follow)." xml:space="preserve">
+    <value>Invoquer votre monture plutôt que monter en tandem, utile en vol. Vous devez être groupé avec l'ami ; sinon le saut pour suivre en vol ne fonctionne pas.</value>
+  </data>
+  <data name="If your configured food runs out, search inventory for any food starting from lowest item ID." xml:space="preserve">
+    <value>Si le plat configuré est épuisé, chercher toute nourriture dans l'inventaire par ID croissant.</value>
+  </data>
+  <data name="Immediately follow a fren's aethernet jump through Lifestream when you are at the same origin. Supports connected city, residential, and custom networks, including Bozja and Eureka." xml:space="preserve">
+    <value>Suivre immédiatement le saut d'éthernet de l'ami via Lifestream depuis la même origine. Réseaux urbains, résidentiels et spéciaux, dont Bozja/Eureka.</value>
+  </data>
+  <data name="Leave the duty if no other party members are visible in the zone." xml:space="preserve">
+    <value>Sortir si aucun autre équipier n'est visible dans la zone.</value>
+  </data>
+  <data name="Max distance to targets for combat AI.&#10;424242 = Auto (plugin decides based on job: melee 2.6, caster 10)." xml:space="preserve">
+    <value>Distance maximale IA. 424242 = auto selon job : mêlée 2,6 ; lanceur 10.</value>
+  </data>
+  <data name="Max follow distance in forays (Eureka/Bozja).&#10;Lower value to avoid mini-aetheryte transition issues." xml:space="preserve">
+    <value>Distance maximale dans Eureka/Bozja. Réduire pour éviter les problèmes de transition des petites éthérites.</value>
+  </data>
+  <data name="Maximum distance (yalms) to chase fren.&#10;Beyond this, stop following to avoid zone-hopping." xml:space="preserve">
+    <value>Distance maximale de poursuite. Au-delà, arrêt du suivi pour éviter les changements de zone.</value>
+  </data>
+  <data name="Minimum distance to maintain from fren in outdoor/foray zones.&#10;Prevents characters from stacking on top of each other (less bot-like).&#10;Set to 0 to disable." xml:space="preserve">
+    <value>Distance minimale de l'ami en extérieur/expédition pour éviter la superposition. 0 désactive.</value>
+  </data>
+  <data name="Name of food to auto-consume.&#10;Full item search from game data planned for a future update." xml:space="preserve">
+    <value>Nom du plat à consommer. La recherche complète des objets du jeu est prévue ultérieurement.</value>
+  </data>
+  <data name="Name of the auto-rotation preset for general content.&#10;Must match a preset name in your rotation plugin.&#10;Use 'none' to not change the preset." xml:space="preserve">
+    <value>Préréglage pour contenu général, dont le nom doit exister dans le plugin. «none» conserve le préréglage actuel.</value>
+  </data>
+  <data name="Name of the party member to follow. Can be partial if unique.&#10;The @Server part is cosmetic for display; targeting uses the name before @.&#10;Names are auto-capitalized. Select from party or type manually." xml:space="preserve">
+    <value>Nom de l'ami, partiel si unique. @Serveur sert à l'affichage ; ciblage par nom avant @. Majuscules automatiques. Choisir dans l'équipe ou saisir.</value>
+  </data>
+  <data name="Navigation method to reach fren.&#10;NavMesh: VNavmesh plugin pathfinding (recommended)&#10;Visland: Alternative navigation&#10;BossMod Follow: Uses BossMod's follow leader&#10;Vanilla Follow: Game's built-in /follow" xml:space="preserve">
+    <value>NavMesh : VNavmesh (recommandé). Visland : alternative. BossMod Follow : chef BossMod. Vanilla Follow : /follow natif.</value>
+  </data>
+  <data name="Navigation method to use inside duties.&#10;May need a different method than overworld." xml:space="preserve">
+    <value>Navigation en instance, qui peut différer de l'extérieur.</value>
+  </data>
+  <data name="New character profiles inherit this setting. Existing characters change only when you use a sync action." xml:space="preserve">
+    <value>Les nouveaux profils héritent de ce réglage. Les existants changent uniquement via synchronisation.</value>
+  </data>
+  <data name="Number of ticks before harmonized cling resets to 0.&#10;Handles special logic like DD/FATE force cling." xml:space="preserve">
+    <value>Cycles avant remise à 0 de la distance harmonisée. Gère les règles DD/ALÉA.</value>
+  </data>
+  <data name="Number of update ticks before idle action triggers." xml:space="preserve">
+    <value>Nombre de cycles au repos avant une action.</value>
+  </data>
+  <data name="Off: FrenRider chooses the BossMod preset from current job and selected rotation plugin.&#10;On: use the preset name fields below." xml:space="preserve">
+    <value>Désactivé : choisir selon job et rotation. Activé : utiliser les noms ci-dessous.</value>
+  </data>
+  <data name="On: enable the selected BossMod AI implementation for combat.&#10;Off: send BMR and VBM AI off commands while preserving the rest of FrenRider's combat setup." xml:space="preserve">
+    <value>Activé : IA BossMod sélectionnée. Désactivé : envoyer BMR/VBM AI off sans modifier les autres réglages.</value>
+  </data>
+  <data name="Outside duties, summon your configured own mount and fly toward a visible fren after horizontal XZ distance exceeds this threshold continuously for the configured delay. Existing zone-specific Max Follow Distance still applies. Distance minimum: 1y. Delay range: 0-300 seconds; 0 means immediate. Defaults: 100y and 30 seconds." xml:space="preserve">
+    <value>Hors instance, monter et voler vers l'ami visible si la distance XZ reste au-dessus du seuil durant le délai. Maximum de zone conservé. Minimum 1y, délai 0–300s (0 immédiat). Défaut 100y/30s.</value>
+  </data>
+  <data name="Party engage mode sent through Daedalus LAN coordination.&#10;Focus requires a living enemy hard target.&#10;None, Split, and Kill Adds preserve Daedalus's current focus and off-tank assignments." xml:space="preserve">
+    <value>Mode d'équipe via LAN Daedalus. Concentration exige une cible ennemie vivante. Aucun/répartir/renforts conservent les affectations de focus et tank secondaire.</value>
+  </data>
+  <data name="Per-duty-family ADS handoff.&#10;Duty name, category, support, and clearance come only from ADS CurrentDuty. FrenRider accepts that snapshot only when ADS catalog metadata is complete and its territory/CFC matches live GameMain; otherwise local duty logic stays active.&#10;The handoff delay counts only while the character remains continuously ready: logged in, present, alive, conscious, out of area transitions, and out of cutscenes.&#10;Runtime ADS ownership is authoritative even after manual Start Inside. FrenRider pauses local duty systems while handoff is pending or ADS owns the run; configured exit takeover remains available after duty completion." xml:space="preserve">
+    <value>Transfert ADS par catégorie. Données CurrentDuty complètes avec territoire/CFC identiques à GameMain, sinon logique locale. Délai uniquement pendant disponibilité continue : connecté, présent, vivant, conscient, sans transition ni cinématique. Contrôle ADS effectif fait autorité même après Start Inside manuel. Pause locale pendant transfert/contrôle ADS ; reprise de sortie configurée après fin.</value>
+  </data>
+  <data name="Play videos when Fren Rider is enabled or disabled.&#10;Requires VLC media player." xml:space="preserve">
+    <value>Lire des vidéos à l'activation/désactivation de Fren Rider. VLC requis.</value>
+  </data>
+  <data name="Play videos when Fren Rider is enabled/disabled.&#10;Requires VLC media player to be installed.&#10;Videos are embedded with the plugin distribution." xml:space="preserve">
+    <value>Lire des vidéos à l'activation/désactivation. VLC installé requis ; vidéos incluses.</value>
+  </data>
+  <data name="Players in this list will have party invites automatically accepted when you are not in a group.&#10;Names should omit the @Server part." xml:space="preserve">
+    <value>Accepter les invitations de ces joueurs hors équipe. Noms sans @Serveur.</value>
+  </data>
+  <data name="Players in this list will have their party invites automatically accepted when you're not in a group.&#10;When you join a party via whitelist invite, the inviter will automatically be set as your Fren.&#10;Enter names without the @Server part." xml:space="preserve">
+    <value>Accepter leurs invitations hors équipe et définir l'inviteur comme ami. Noms sans @Serveur.</value>
+  </data>
+  <data name="Preset name for Deep Dungeon content.&#10;Use 'none' to not change the preset." xml:space="preserve">
+    <value>Préréglage de donjon sans fond. «none» conserve le préréglage.</value>
+  </data>
+  <data name="Preset name for FATE content.&#10;Use 'none' to not change the preset." xml:space="preserve">
+    <value>Préréglage d'ALÉA. «none» conserve le préréglage.</value>
+  </data>
+  <data name="Print status messages to game chat.&#10;Useful for debugging but fills chat quickly." xml:space="preserve">
+    <value>Afficher l'état dans le chat du jeu. Utile au débogage, remplit vite le chat.</value>
+  </data>
+  <data name="RSR operating mode when RSR is the selected rotation plugin.&#10;Auto: Full auto.&#10;Manual: Manual targeting mode.&#10;None: Don't let FrenRider change the current rotation state.&#10;Support: Uses RSR's plugin-managed support mode." xml:space="preserve">
+    <value>Mode RSR : Auto automatique complet ; Manual ciblage manuel ; None conserve l'état ; Support assistance gérée par RSR.</value>
+  </data>
+  <data name="Random variance on X axis during social distancing.&#10;Adds natural-looking movement variance." xml:space="preserve">
+    <value>Variation X aléatoire pour un déplacement plus naturel.</value>
+  </data>
+  <data name="Random variance on Z axis during social distancing." xml:space="preserve">
+    <value>Variation Z aléatoire lors de l'espacement.</value>
+  </data>
+  <data name="Recover party members in regular four-player dungeons and outdoors. A living healer within 20 yalms of the corpse blocks item use. Party recovery pauses progression and defers Return while a living party rescuer remains." xml:space="preserve">
+    <value>Réanimer les équipiers en donjons ordinaires à 4 et dehors. Un soigneur vivant à moins de 20y du corps bloque l'objet. Progression et Retour attendent tant qu'un sauveteur du groupe vit.</value>
+  </data>
+  <data name="Reserved for future autosync FATE behavior.&#10;Current follow distance does not change on FATE join or leave." xml:space="preserve">
+    <value>Réservé à une future synchronisation ALÉA. La distance actuelle ne change pas à l'entrée/sortie.</value>
+  </data>
+  <data name="Reset ALL tabs for this character to default values.&#10;If editing DEFAULT CONFIG, resets to plugin defaults." xml:space="preserve">
+    <value>Réinitialiser tous les onglets. Pour la configuration par défaut, restaurer les valeurs du plugin.</value>
+  </data>
+  <data name="Reset only the current tab for this character to default values." xml:space="preserve">
+    <value>Réinitialiser uniquement l'onglet actuel du personnage.</value>
+  </data>
+  <data name="Restore snapshot: put captured BMR/VBM AI on/off, follow, movement, CBT fields, and Daedalus enabled state back on /fr off.&#10;Turn everything off: disable BMR/VBM AI, CBT AutoFollow, RotationSolverReborn, Daedalus, and Wrath auto if FrenRider started it." xml:space="preserve">
+    <value>Restaurer : sur /fr off, rétablir IA BMR/VBM, suivi, mouvement, champs CBT et Daedalus capturés. Tout désactiver : couper IA BMR/VBM, CBT AutoFollow, RotationSolverReborn, Daedalus et Wrath auto démarré par FrenRider.</value>
+  </data>
+  <data name="Rotation plugin for foray content (Eureka/Bozja).&#10;WRATH recommended for phantom job support." xml:space="preserve">
+    <value>Plugin de rotation Eureka/Bozja. WRATH recommandé pour les jobs fantômes.</value>
+  </data>
+  <data name="Runs /ays discard every 10s only while mounted and in a safe idle window.&#10;FrenRider defers discard during combat, cutscenes, and area transitions.&#10;Requires AutoRetainer plugin." xml:space="preserve">
+    <value>Exécuter /ays discard toutes les 10s uniquement monté et au repos sûr. Suspendu en combat, cinématique ou transition. AutoRetainer requis.</value>
+  </data>
+  <data name="Runs /ays discard while mounted and in a safe idle window.&#10;Requires AutoRetainer plugin." xml:space="preserve">
+    <value>Exécuter /ays discard uniquement monté et au repos sûr. AutoRetainer requis.</value>
+  </data>
+  <data name="Runs /levelsync on after joining a FATE.&#10;Defers while mounted or riding pillion." xml:space="preserve">
+    <value>Après entrée en ALÉA, envoyer /levelsync on. Attendre si monté ou passager.</value>
+  </data>
+  <data name="Select the mount to use when flying solo.&#10;'Mount Roulette' picks a random mount.&#10;Type to search the list." xml:space="preserve">
+    <value>Choisir une monture solo. Mount Roulette choisit au hasard. Saisir pour rechercher.</value>
+  </data>
+  <data name="Send /ads leave after the configured duty-end delay. FrenRider does not also run its own Leave Duty flow." xml:space="preserve">
+    <value>Envoyer /ads leave après le délai de fin. FrenRider ne lance pas sa propre sortie en plus.</value>
+  </data>
+  <data name="Show or hide the DTR bar entry." xml:space="preserve">
+    <value>Afficher ou masquer l'entrée DTR.</value>
+  </data>
+  <data name="Show/hide the DTR bar entry (server info bar)." xml:space="preserve">
+    <value>Afficher ou masquer DTR dans la barre serveur.</value>
+  </data>
+  <data name="Slash command to execute when idle.&#10;Examples: /tomescroll, /dance, /snd run scriptname" xml:space="preserve">
+    <value>Commande au repos, p. ex. /tomescroll, /dance, /snd run scriptname.</value>
+  </data>
+  <data name="Target HP percentage to use Limit Break.&#10;-1 = Disabled.&#10;Automatically uses LB3 if available, otherwise LB2." xml:space="preserve">
+    <value>PV cible pour Transcendance. -1 désactive. LB3 si disponible, sinon LB2.</value>
+  </data>
+  <data name="Temporary uses an in-memory profile only for the exact DAD proposal. Off opts this local character out. Permanent replaces this local character's profile while keeping this choice." xml:space="preserve">
+    <value>Temporaire : profil en mémoire pour la proposition DAD exacte. Désactivé : refuser pour ce personnage. Permanent : remplacer le profil sauvegardé en conservant ce choix.</value>
+  </data>
+  <data name="Trigger repair when gear durability falls below this percentage." xml:space="preserve">
+    <value>Réparer si la durabilité passe sous ce pourcentage.</value>
+  </data>
+  <data name="Use FrenRider's local Leave Duty flow after the configured duty-end condition." xml:space="preserve">
+    <value>Utiliser la sortie locale FrenRider après la condition de fin configurée.</value>
+  </data>
+  <data name="VLC media player is required for video notifications.&#10;Click to download and install VLC." xml:space="preserve">
+    <value>Les vidéos nécessitent VLC. Cliquer pour télécharger et installer.</value>
+  </data>
+  <data name="What to do when idle.&#10;Specific Action: Execute a single command&#10;Action From List: Pick randomly from a list" xml:space="preserve">
+    <value>Action au repos : commande précise ou choix aléatoire d'une liste.</value>
+  </data>
+  <data name="What to do when idle.&#10;Specific Action: execute one command&#10;Action From List: rotate through a list" xml:space="preserve">
+    <value>Action au repos : commande précise ou actions alternées d'une liste.</value>
+  </data>
+  <data name="When RSR, WRATH, or DAEDALUS is selected, also force BMR to the configured zone preset." xml:space="preserve">
+    <value>Avec RSR/WRATH/DAEDALUS, forcer aussi le préréglage de zone BMR.</value>
+  </data>
+  <data name="When enabled, FrenRider asks ADS to disable BMR hunt modules." xml:space="preserve">
+    <value>Demander à ADS de désactiver les modules de chasse BMR.</value>
+  </data>
+  <data name="When enabled, FrenRider asks ADS to disable the BMR Queen Lunatender module." xml:space="preserve">
+    <value>Demander à ADS de désactiver le module Queen Lunatender BMR.</value>
+  </data>
+  <data name="When enabled, FrenRider may issue the fallback forward nudge inside duties even if the configured fren is not visible in your party/object table. Leave disabled for safer duty movement." xml:space="preserve">
+    <value>Autoriser une avance en instance même sans ami visible dans équipe/table d'objets. Laisser désactivé pour plus de sécurité.</value>
+  </data>
+  <data name="When enabled, FrenRider waits after your configured fren is still in party but no longer visible, then asks Lifestream to teleport to a random unlocked aetheryte in that zone." xml:space="preserve">
+    <value>Si l'ami reste en équipe mais invisible, attendre puis demander à Lifestream une éthérite débloquée aléatoire de sa zone.</value>
+  </data>
+  <data name="Whether to follow fren during combat.&#10;Auto: Let the plugin decide based on your job/role." xml:space="preserve">
+    <value>Suivre l'ami au combat. Auto choisit selon job/rôle.</value>
+  </data>
+  <data name="Which rotation automation plugin to use.&#10;BMR: BossModReborn&#10;VBM: VanillaBossMod&#10;RSR: RotationSolver Reborn&#10;WRATH: Wrath&#10;DAEDALUS: Daedalus" xml:space="preserve">
+    <value>Plugin de rotation : BMR=BossModReborn, VBM=VanillaBossMod, RSR=RotationSolver Reborn, WRATH=Wrath, DAEDALUS=Daedalus.</value>
+  </data>
+  <data name="While Fren Rider is enabled, equip the first matching armoury-chest soul crystal when the current character is on a level 30+ base class and equipment can be changed safely. The current gearset is updated after the equip is confirmed." xml:space="preserve">
+    <value>Fren Rider actif, classe de base niveau 30+ et équipement modifiable : équiper le premier cristal correspondant de l'arsenal. Mettre à jour le set après confirmation.</value>
+  </data>
+  <data name="While FrenRider is enabled on Beastmaster, try Capture on eligible living beasts closer than 10 yalms, including passive beasts outside combat.&#10;Prefers an eligible current target; otherwise automatically targets the nearest eligible beast when Capture is ready.&#10;Skips owned beasts and enemies above your effective level, and respects both HP thresholds.&#10;Retries on later cooldowns, including already marked beasts." xml:space="preserve">
+    <value>Belluaire actif : capturer les bêtes admissibles vivantes à moins de 10y, même passives hors combat. Priorité à la cible actuelle, sinon la plus proche quand prêt. Exclure possédées et niveau supérieur, respecter les deux seuils PV. Réessayer aux prochains délais, même marquées.</value>
+  </data>
+  <data name="Disabled" xml:space="preserve">
+    <value>Désactivé</value>
+  </data>
+  <data name="Auto" xml:space="preserve">
+    <value>Automatique</value>
+  </data>
+  <data name="BossMod AI" xml:space="preserve">
+    <value>IA BossMod</value>
+  </data>
+  <data name="Owned" xml:space="preserve">
+    <value>Possédé</value>
+  </data>
+  <data name="Missing" xml:space="preserve">
+    <value>Manquant</value>
+  </data>
+  <data name="At least one command required" xml:space="preserve">
+    <value>Au moins une commande requise</value>
+  </data>
+  <data name="0 - Not Cleared" xml:space="preserve">
+    <value>0 - Non terminé</value>
+  </data>
+  <data name="1 - 1P Unsync Cleared" xml:space="preserve">
+    <value>1 - Solo désynchronisé terminé</value>
+  </data>
+  <data name="2 - 1P Duty Support" xml:space="preserve">
+    <value>2 - Solo soutien d'instance</value>
+  </data>
+  <data name="3 - 4P Sync Cleared" xml:space="preserve">
+    <value>3 - 4 joueurs synchronisé terminé</value>
+  </data>
+  <data name="A Dalamud plugin for FFXIV multiplayer follow/combat automation." xml:space="preserve">
+    <value>Plugin Dalamud de suivi et combat multijoueur pour FFXIV.</value>
+  </data>
+  <data name="/frenrider - Open main window" xml:space="preserve">
+    <value>/frenrider - Ouvrir la fenêtre principale</value>
+  </data>
+  <data name="/fr - Open main window (alias)" xml:space="preserve">
+    <value>/fr - Ouvrir la fenêtre principale (alias)</value>
+  </data>
+  <data name="/fr on - Enable Fren Rider" xml:space="preserve">
+    <value>/fr on - Activer Fren Rider</value>
+  </data>
+  <data name="/fr off - Disable Fren Rider" xml:space="preserve">
+    <value>/fr off - Désactiver Fren Rider</value>
+  </data>
+  <data name="/fr settings or /fr s - Toggle settings" xml:space="preserve">
+    <value>/fr settings ou /fr s - Basculer les paramètres</value>
+  </data>
+  <data name="/fr mini or /fr m - Toggle MAGIA mini window" xml:space="preserve">
+    <value>/fr mini ou /fr m - Basculer la mini-fenêtre MAGIA</value>
+  </data>
+  <data name="/fr debug - Toggle debug controls" xml:space="preserve">
+    <value>/fr debug - Basculer le débogage</value>
+  </data>
+  <data name="vnavmesh - Navigation and pathfinding" xml:space="preserve">
+    <value>vnavmesh - Navigation et recherche de chemin</value>
+  </data>
+  <data name="Visland - Alternative navigation (if vnavmesh unavailable)" xml:space="preserve">
+    <value>Visland - Navigation alternative (sans vnavmesh)</value>
+  </data>
+  <data name="BossMod / BossModReborn - Combat AI and following" xml:space="preserve">
+    <value>BossMod / BossModReborn - IA de combat et suivi</value>
+  </data>
+  <data name="Rotation Solver Reborn - Combat rotation automation" xml:space="preserve">
+    <value>Rotation Solver Reborn - Rotation automatique</value>
+  </data>
+  <data name="WRATH - Combat rotation automation" xml:space="preserve">
+    <value>WRATH - Rotation automatique</value>
+  </data>
+  <data name="Daedalus - Combat rotation automation" xml:space="preserve">
+    <value>Daedalus - Rotation automatique</value>
+  </data>
+  <data name="Questionable - Quest automation integration" xml:space="preserve">
+    <value>Questionable - Intégration des quêtes automatiques</value>
+  </data>
+  <data name="Automaton (CBT) by Croizat - Enhanced duty start/end, auto-leave" xml:space="preserve">
+    <value>Automaton (CBT) par Croizat - Début/fin et sortie automatique</value>
+  </data>
+  <data name="Owner: {0}" xml:space="preserve">
+    <value>Propriétaire : {0}</value>
+  </data>
+  <data name="Island: {0}" xml:space="preserve">
+    <value>Île : {0}</value>
+  </data>
+  <data name="Opaque character: {0}" xml:space="preserve">
+    <value>Identité opaque : {0}</value>
+  </data>
+  <data name="Row ID: {0}" xml:space="preserve">
+    <value>ID de ligne : {0}</value>
+  </data>
+  <data name="{0} Icon" xml:space="preserve">
+    <value>Icône {0}</value>
+  </data>
+  <data name="{0} Icon Code" xml:space="preserve">
+    <value>Code de l'icône {0}</value>
+  </data>
+  <data name="Shown when Fren Rider is {0}" xml:space="preserve">
+    <value>Affiché quand Fren Rider est {0}</value>
+  </data>
+  <data name="ADS reflection: {0}" xml:space="preserve">
+    <value>Réflexion ADS : {0}</value>
+  </data>
+  <data name="ADS Status: {0}" xml:space="preserve">
+    <value>État ADS : {0}</value>
+  </data>
+  <data name="When enabled, FrenRider asks ADS to set BMR MaxLoadDistance to {0:0}." xml:space="preserve">
+    <value>FrenRider demande à ADS de fixer BMR MaxLoadDistance à {0:0}.</value>
+  </data>
+  <data name="Solo" xml:space="preserve">
+    <value>Solo</value>
+  </data>
+  <data name="4-Man" xml:space="preserve">
+    <value>4 joueurs</value>
+  </data>
+  <data name="8-Man" xml:space="preserve">
+    <value>8 joueurs</value>
+  </data>
+  <data name="Alliance" xml:space="preserve">
+    <value>Alliance</value>
+  </data>
+  <data name="Guild Hest" xml:space="preserve">
+    <value>Opération de guilde</value>
+  </data>
+  <data name="Deep Dungeon" xml:space="preserve">
+    <value>Donjon sans fond</value>
+  </data>
+  <data name="Treasure Dungeon" xml:space="preserve">
+    <value>Donjon au trésor</value>
+  </data>
+  <data name="Other" xml:space="preserve">
+    <value>Autre</value>
+  </data>
+  <data name="ADS Handoff" xml:space="preserve">
+    <value>Transfert ADS</value>
+  </data>
+  <data name="Exit Behavior" xml:space="preserve">
+    <value>Comportement de sortie</value>
+  </data>
+  <data name="Equipment" xml:space="preserve">
+    <value>Équipement</value>
+  </data>
+  <data name="Maintenance" xml:space="preserve">
+    <value>Entretien</value>
+  </data>
+  <data name="Debug" xml:space="preserve">
+    <value>Débogage</value>
+  </data>
+  <data name="Following" xml:space="preserve">
+    <value>Suit</value>
+  </data>
+  <data name="InRange" xml:space="preserve">
+    <value>À portée</value>
+  </data>
+  <data name="TooFar" xml:space="preserve">
+    <value>Trop loin</value>
+  </data>
+  <data name="InCombat" xml:space="preserve">
+    <value>En combat</value>
+  </data>
+  <data name="WaitingToMount" xml:space="preserve">
+    <value>Attente de montée</value>
+  </data>
+  <data name="Mounting" xml:space="preserve">
+    <value>Monte</value>
+  </data>
+  <data name="Dismounting" xml:space="preserve">
+    <value>Descend</value>
+  </data>
+  <data name="OutOfCombat" xml:space="preserve">
+    <value>Hors combat</value>
+  </data>
+  <data name="EnteringCombat" xml:space="preserve">
+    <value>Début du combat</value>
+  </data>
+  <data name="LeavingCombat" xml:space="preserve">
+    <value>Fin du combat</value>
+  </data>
+  <data name="Unconscious" xml:space="preserve">
+    <value>inconscient</value>
+  </data>
+  <data name="Area transition" xml:space="preserve">
+    <value>changement de zone</value>
+  </data>
+  <data name="Zone transition" xml:space="preserve">
+    <value>Transition de zone</value>
+  </data>
+  <data name="No fren found" xml:space="preserve">
+    <value>Ami introuvable</value>
+  </data>
+  <data name="Fren not visible" xml:space="preserve">
+    <value>Ami invisible</value>
+  </data>
+  <data name="No fren" xml:space="preserve">
+    <value>Aucun ami</value>
+  </data>
+  <data name="ADS utility active" xml:space="preserve">
+    <value>Outil ADS actif</value>
+  </data>
+  <data name="Teleport active" xml:space="preserve">
+    <value>Téléportation active</value>
+  </data>
+  <data name="Teleport or dialog active" xml:space="preserve">
+    <value>Téléportation ou dialogue actif</value>
+  </data>
+  <data name="Paused (in combat)" xml:space="preserve">
+    <value>En pause (combat)</value>
+  </data>
+  <data name="Phoenix Down recovery" xml:space="preserve">
+    <value>Résurrection par queue de phénix</value>
+  </data>
+  <data name="Waiting for party revival; Return deferred" xml:space="preserve">
+    <value>Attente de résurrection d'équipe ; Retour différé</value>
+  </data>
+  <data name="No living party rescuer" xml:space="preserve">
+    <value>Aucun sauveteur vivant</value>
+  </data>
+  <data name="Casting Phoenix Down" xml:space="preserve">
+    <value>Utilisation de queue de phénix</value>
+  </data>
+  <data name="Cast ended; checking revival" xml:space="preserve">
+    <value>Utilisation terminée ; vérification de résurrection</value>
+  </data>
+  <data name="Attempt did not start; rechecking readiness" xml:space="preserve">
+    <value>Tentative non démarrée ; revérification</value>
+  </data>
+  <data name="Waiting for healer, Raise cast or pending revival" xml:space="preserve">
+    <value>Attente de soigneur, incantation ou résurrection</value>
+  </data>
+  <data name="Dismounting for recovery" xml:space="preserve">
+    <value>Descente pour résurrection</value>
+  </data>
+  <data name="Approaching party corpse" xml:space="preserve">
+    <value>Approche du corps d'équipier</value>
+  </data>
+  <data name="Waiting for recovery attempt slot" xml:space="preserve">
+    <value>Attente du tour de résurrection</value>
+  </data>
+  <data name="Phoenix Down requested; waiting for actual cast" xml:space="preserve">
+    <value>Queue de phénix demandée ; attente d'incantation</value>
+  </data>
+  <data name="Item attempt rejected; rechecking in one second" xml:space="preserve">
+    <value>Objet refusé ; nouvelle vérification dans 1s</value>
+  </data>
+  <data name="Ready" xml:space="preserve">
+    <value>Prêt</value>
+  </data>
+  <data name="Blocked: {0}" xml:space="preserve">
+    <value>Bloqué : {0}</value>
+  </data>
+  <data name="Waiting: {0}" xml:space="preserve">
+    <value>Attente : {0}</value>
+  </data>
+  <data name="Running: {0}" xml:space="preserve">
+    <value>En cours : {0}</value>
+  </data>
+  <data name="Completed: {0}" xml:space="preserve">
+    <value>Terminé : {0}</value>
+  </data>
+  <data name="Failed: {0}" xml:space="preserve">
+    <value>Échec : {0}</value>
+  </data>
+  <data name="Cooldown: retry in {0}s" xml:space="preserve">
+    <value>Recharge : réessayer dans {0}s</value>
+  </data>
+  <data name="Fren out of zone; teleport in {0}s" xml:space="preserve">
+    <value>Ami hors zone ; téléportation dans {0}s</value>
+  </data>
+  <data name="FrenRider disabled" xml:space="preserve">
+    <value>FrenRider désactivé</value>
+  </data>
+  <data name="Zone changed" xml:space="preserve">
+    <value>Zone modifiée</value>
+  </data>
+  <data name="Fren not in party" xml:space="preserve">
+    <value>Ami hors équipe</value>
+  </data>
+  <data name="Fren visible" xml:space="preserve">
+    <value>Ami visible</value>
+  </data>
+  <data name="Reading party window" xml:space="preserve">
+    <value>Lecture de l'équipe</value>
+  </data>
+  <data name="Following local aetheryte network" xml:space="preserve">
+    <value>Suivi du réseau local</value>
+  </data>
+  <data name="Duty scope changed" xml:space="preserve">
+    <value>Portée d'instance modifiée</value>
+  </data>
+  <data name="Setting changed" xml:space="preserve">
+    <value>Réglage modifié</value>
+  </data>
+  <data name="Unconscious; return in {0}s" xml:space="preserve">
+    <value>Inconscient ; Retour dans {0}s</value>
+  </data>
+  <data name="Handling revive/Return notification" xml:space="preserve">
+    <value>Traitement résurrection/Retour</value>
+  </data>
+  <data name="Opening Return prompt" xml:space="preserve">
+    <value>Ouverture du dialogue Retour</value>
+  </data>
+  <data name="Revive/Return confirmed; waiting for transition" xml:space="preserve">
+    <value>Résurrection/Retour confirmé ; attente de transition</value>
+  </data>
+  <data name="Waiting for readable Return confirmation" xml:space="preserve">
+    <value>Attente d'une confirmation Retour lisible</value>
+  </data>
+  <data name="Return agent unavailable" xml:space="preserve">
+    <value>Agent Retour indisponible</value>
+  </data>
+  <data name="Opened Return prompt" xml:space="preserve">
+    <value>Dialogue Retour ouvert</value>
+  </data>
+  <data name="Waiting for Return confirmation" xml:space="preserve">
+    <value>Attente de confirmation Retour</value>
+  </data>
+  <data name="Return prompt failed" xml:space="preserve">
+    <value>Échec du dialogue Retour</value>
+  </data>
+  <data name="ADS Hyper Focus ended outside duty" xml:space="preserve">
+    <value>ADS Hyper Focus terminé hors instance</value>
+  </data>
+  <data name="ADS Hyper Focus ended without ADS duty ownership" xml:space="preserve">
+    <value>ADS Hyper Focus terminé sans contrôle ADS</value>
+  </data>
+  <data name="ADS Hyper Focus ended; combat bootstrap pending" xml:space="preserve">
+    <value>ADS Hyper Focus terminé ; initialisation du combat en attente</value>
+  </data>
+  <data name="ADS Hyper Focus lease active; RSR Manual" xml:space="preserve">
+    <value>ADS Hyper Focus actif ; RSR manuel</value>
+  </data>
+  <data name="ADS active" xml:space="preserve">
+    <value>ADS actif</value>
+  </data>
+  <data name="ADS active; FrenRider combat authoritative" xml:space="preserve">
+    <value>ADS actif ; combat contrôlé par FrenRider</value>
+  </data>
+  <data name="ADS did not accept {0} repair: {1}" xml:space="preserve">
+    <value>ADS a refusé la réparation {0} : {1}</value>
+  </data>
+  <data name="ADS duty ownership active; FrenRider rotation disabled" xml:space="preserve">
+    <value>Contrôle d'instance ADS ; rotation FrenRider désactivée</value>
+  </data>
+  <data name="ADS duty progression paused; configured FrenRider exit takeover active ({0})." xml:space="preserve">
+    <value>Progression ADS suspendue ; sortie FrenRider active ({0}).</value>
+  </data>
+  <data name="ADS handoff off; FrenRider local duty logic active." xml:space="preserve">
+    <value>Transfert ADS désactivé ; logique locale FrenRider active.</value>
+  </data>
+  <data name="ADS handoff pending" xml:space="preserve">
+    <value>Transfert ADS en attente</value>
+  </data>
+  <data name="ADS handoff pending; FrenRider combat authoritative" xml:space="preserve">
+    <value>Transfert ADS en attente ; FrenRider contrôle le combat</value>
+  </data>
+  <data name="ADS loaded; waiting for duty. FrenRider local logic active." xml:space="preserve">
+    <value>ADS chargé ; attente d'instance. FrenRider local actif.</value>
+  </data>
+  <data name="ADS not loaded." xml:space="preserve">
+    <value>ADS non chargé.</value>
+  </data>
+  <data name="ADS not loaded. FrenRider local logic active." xml:space="preserve">
+    <value>ADS non chargé. FrenRider local actif.</value>
+  </data>
+  <data name="ADS reflection applied; no reassert pending." xml:space="preserve">
+    <value>Réflexion ADS appliquée ; rien à réappliquer.</value>
+  </data>
+  <data name="ADS reflection applied; waiting for desired-state change or ADS reload." xml:space="preserve">
+    <value>Réflexion ADS appliquée ; attente d'état souhaité ou rechargement ADS.</value>
+  </data>
+  <data name="ADS reflection hacks reset." xml:space="preserve">
+    <value>Fonctions spéciales ADS réinitialisées.</value>
+  </data>
+  <data name="ADS reflection idle." xml:space="preserve">
+    <value>Réflexion ADS inactive.</value>
+  </data>
+  <data name="ADS released duty ownership via {0}; FrenRider local duty logic active." xml:space="preserve">
+    <value>Contrôle ADS libéré via {0} ; FrenRider local actif.</value>
+  </data>
+  <data name="ADS released duty progression; configured FrenRider exit takeover active via {0}." xml:space="preserve">
+    <value>Progression ADS libérée via {0} ; FrenRider reprend la sortie.</value>
+  </data>
+  <data name="ADS runtime ownership active via {0}; FrenRider duty systems paused." xml:space="preserve">
+    <value>ADS contrôle via {0} ; systèmes FrenRider suspendus.</value>
+  </data>
+  <data name="ADS runtime ownership active via {0}; FrenRider exit takeover active." xml:space="preserve">
+    <value>ADS contrôle via {0} ; sortie FrenRider active.</value>
+  </data>
+  <data name="ADS runtime ownership confirmed via {0}; solo combat delay complete." xml:space="preserve">
+    <value>Contrôle ADS confirmé via {0} ; délai de combat solo terminé.</value>
+  </data>
+  <data name="ADS solo combat held; waiting for readable ownership confirmation." xml:space="preserve">
+    <value>Combat solo ADS suspendu ; attente de contrôle lisible.</value>
+  </data>
+  <data name="ADS solo combat held; {0}." xml:space="preserve">
+    <value>Combat solo ADS suspendu ; {0}.</value>
+  </data>
+  <data name="ADS utility dialog active" xml:space="preserve">
+    <value>Dialogue d'outil ADS actif</value>
+  </data>
+  <data name="Approaching exit '{0}' ({1:F1}y)" xml:space="preserve">
+    <value>Approche de sortie «{0}» ({1:F1}y)</value>
+  </data>
+  <data name="Ate {0} [{1}] ({2} left)" xml:space="preserve">
+    <value>{0} [{1}] consommé ({2} restants)</value>
+  </data>
+  <data name="Blocked: Phoenix Down readiness changed" xml:space="preserve">
+    <value>Bloqué : disponibilité queue de phénix modifiée</value>
+  </data>
+  <data name="Blocked: navigation unavailable or corpse unreachable" xml:space="preserve">
+    <value>Bloqué : navigation indisponible ou corps inaccessible</value>
+  </data>
+  <data name="Blocked: recovery state unavailable" xml:space="preserve">
+    <value>Bloqué : état de résurrection indisponible</value>
+  </data>
+  <data name="Blocked: waiting for a visible, confirmed party corpse" xml:space="preserve">
+    <value>Bloqué : attente d'un corps d'équipier visible confirmé</value>
+  </data>
+  <data name="Can't pillion: fren not found" xml:space="preserve">
+    <value>Tandem impossible : ami introuvable</value>
+  </data>
+  <data name="Can't pillion: fren not in ObjectTable" xml:space="preserve">
+    <value>Tandem impossible : ami absent de la table d'objets</value>
+  </data>
+  <data name="Can't summon (mounted/duty)" xml:space="preserve">
+    <value>Invocation impossible (monté/instance)</value>
+  </data>
+  <data name="Captured automation snapshot ({0})." xml:space="preserve">
+    <value>État d'automatisation capturé ({0}).</value>
+  </data>
+  <data name="Cleanup failed: no captured automation state was available to restore." xml:space="preserve">
+    <value>Restauration échouée : aucun état sauvegardé.</value>
+  </data>
+  <data name="Cleanup failed: {0}/{1} commands failed." xml:space="preserve">
+    <value>Restauration échouée : {0}/{1} commandes refusées.</value>
+  </data>
+  <data name="Clicking Commence on duty popup" xml:space="preserve">
+    <value>Clic sur Commencer dans le dialogue d'instance</value>
+  </data>
+  <data name="Combat held: {0}" xml:space="preserve">
+    <value>Combat suspendu : {0}</value>
+  </data>
+  <data name="Companion: {0}m{1:D2}s" xml:space="preserve">
+    <value>Compagnon : {0}m{1:D2}s</value>
+  </data>
+  <data name="Coppelia PowerlevelBot lease active" xml:space="preserve">
+    <value>Contrôle Coppelia PowerlevelBot actif</value>
+  </data>
+  <data name="Dismounting..." xml:space="preserve">
+    <value>Descente...</value>
+  </data>
+  <data name="Duty completed; automatic ADS handoff stopped." xml:space="preserve">
+    <value>Instance terminée ; transfert ADS automatique arrêté.</value>
+  </data>
+  <data name="Duty completed; configured FrenRider exit takeover active." xml:space="preserve">
+    <value>Instance terminée ; sortie FrenRider active.</value>
+  </data>
+  <data name="Duty exit requested; waiting to leave duty." xml:space="preserve">
+    <value>Sortie demandée ; attente de sortie d'instance.</value>
+  </data>
+  <data name="Failed to eat {0} [{1}]" xml:space="preserve">
+    <value>Échec de consommation de {0} [{1}]</value>
+  </data>
+  <data name="Failed to summon chocobo" xml:space="preserve">
+    <value>Échec d'invocation du chocobo</value>
+  </data>
+  <data name="Failed: timed out after {0}s." xml:space="preserve">
+    <value>Échec : délai dépassé après {0}s.</value>
+  </data>
+  <data name="Far chase ({0:F1}y XZ, max {1:F0}y)" xml:space="preserve">
+    <value>Poursuite lointaine ({0:F1}y XZ, max {1:F0}y)</value>
+  </data>
+  <data name="Far chase blocked: {0}" xml:space="preserve">
+    <value>Poursuite bloquée : {0}</value>
+  </data>
+  <data name="Far chase mount cooldown ({0:F1}s)" xml:space="preserve">
+    <value>Recharge de monture poursuite lointaine ({0:F1}s)</value>
+  </data>
+  <data name="Far chase pillion cooldown ({0:F1}s)" xml:space="preserve">
+    <value>Recharge tandem poursuite lointaine ({0:F1}s)</value>
+  </data>
+  <data name="Far chase preempted: {0}" xml:space="preserve">
+    <value>Poursuite lointaine interrompue : {0}</value>
+  </data>
+  <data name="Far chase settings changed" xml:space="preserve">
+    <value>Paramètres de poursuite lointaine modifiés</value>
+  </data>
+  <data name="Far chase: flying" xml:space="preserve">
+    <value>Poursuite lointaine : en vol</value>
+  </data>
+  <data name="Far chase: leaving pillion" xml:space="preserve">
+    <value>Poursuite lointaine : quitte le tandem</value>
+  </data>
+  <data name="Far chase: mounted; taking off" xml:space="preserve">
+    <value>Poursuite lointaine : monté ; décollage</value>
+  </data>
+  <data name="Far chase: mounting ({0:F1}y XZ)" xml:space="preserve">
+    <value>Poursuite lointaine : monte ({0:F1}y XZ)</value>
+  </data>
+  <data name="Far chase: mounting own mount" xml:space="preserve">
+    <value>Poursuite lointaine : monte sa monture</value>
+  </data>
+  <data name="Far chase: requesting mount ({0:F1}y XZ)" xml:space="preserve">
+    <value>Poursuite lointaine : demande de monture ({0:F1}y XZ)</value>
+  </data>
+  <data name="Flying alongside fren" xml:space="preserve">
+    <value>Vol aux côtés de l'ami</value>
+  </data>
+  <data name="Flying stuck escape: ascend ({0}s)" xml:space="preserve">
+    <value>Déblocage en vol : monter ({0}s)</value>
+  </data>
+  <data name="Flying stuck escape: automove ({0}s)" xml:space="preserve">
+    <value>Déblocage en vol : déplacement auto ({0}s)</value>
+  </data>
+  <data name="Following ({0:F1}y, cling {1:F1}y)" xml:space="preserve">
+    <value>Suit ({0:F1}y, distance {1:F1}y)</value>
+  </data>
+  <data name="Formation slot {0} ({1:F1}y)" xml:space="preserve">
+    <value>Position de formation {0} ({1:F1}y)</value>
+  </data>
+  <data name="Found: {0} ({1:F1}y)" xml:space="preserve">
+    <value>Trouvé : {0} ({1:F1}y)</value>
+  </data>
+  <data name="Fren mounted (FlyYouFools), mounting..." xml:space="preserve">
+    <value>Ami monté (FlyYouFools), monte...</value>
+  </data>
+  <data name="Fren mounted, riding pillion..." xml:space="preserve">
+    <value>Ami monté, monte en tandem...</value>
+  </data>
+  <data name="FrenRider disabled." xml:space="preserve">
+    <value>FrenRider désactivé.</value>
+  </data>
+  <data name="FrenRider duty authority; rotation disabled" xml:space="preserve">
+    <value>FrenRider contrôle l'instance ; rotation désactivée</value>
+  </data>
+  <data name="Grace period ({0:F0}s)..." xml:space="preserve">
+    <value>Délai de grâce ({0:F0}s)...</value>
+  </data>
+  <data name="In duty (out of combat) - rotation active" xml:space="preserve">
+    <value>En instance (hors combat) - rotation active</value>
+  </data>
+  <data name="In range ({0:F1}y)" xml:space="preserve">
+    <value>À portée ({0:F1}y)</value>
+  </data>
+  <data name="In sanctuary" xml:space="preserve">
+    <value>En sanctuaire</value>
+  </data>
+  <data name="Interacting with exit '{0}' ({1:F1}y)" xml:space="preserve">
+    <value>Interaction avec la sortie «{0}» ({1:F1}y)</value>
+  </data>
+  <data name="Landing..." xml:space="preserve">
+    <value>Atterrissage...</value>
+  </data>
+  <data name="Leaving duty (attempt #{0}) - {1}" xml:space="preserve">
+    <value>Sortie d'instance (essai n°{0}) - {1}</value>
+  </data>
+  <data name="Mount cooldown ({0:F1}s)" xml:space="preserve">
+    <value>Recharge de monture ({0:F1}s)</value>
+  </data>
+  <data name="Mount correction cooldown ({0:F1}s)" xml:space="preserve">
+    <value>Recharge de correction de monture ({0:F1}s)</value>
+  </data>
+  <data name="Mount state preserved: {0}" xml:space="preserve">
+    <value>État de monture conservé : {0}</value>
+  </data>
+  <data name="Mounted - rotations suppressed" xml:space="preserve">
+    <value>Monté - rotations suspendues</value>
+  </data>
+  <data name="Mounted alongside fren" xml:space="preserve">
+    <value>Monté aux côtés de l'ami</value>
+  </data>
+  <data name="Mounting for: {0} ({1:F1}y)" xml:space="preserve">
+    <value>Monte pour : {0} ({1:F1}y)</value>
+  </data>
+  <data name="Mounting..." xml:space="preserve">
+    <value>Monte...</value>
+  </data>
+  <data name="Moving to: {0}" xml:space="preserve">
+    <value>Déplacement vers : {0}</value>
+  </data>
+  <data name="NPC repair + inn room failed: {0}" xml:space="preserve">
+    <value>Réparation PNJ et chambre d'auberge échouées : {0}</value>
+  </data>
+  <data name="Navigating to exit '{0}' ({1:F1}y)" xml:space="preserve">
+    <value>Navigation vers sortie «{0}» ({1:F1}y)</value>
+  </data>
+  <data name="Near fren on foot; dismounting" xml:space="preserve">
+    <value>Près de l'ami à pied ; descend</value>
+  </data>
+  <data name="Near fren on foot; landing to dismount" xml:space="preserve">
+    <value>Près de l'ami à pied ; atterrit pour descendre</value>
+  </data>
+  <data name="Near mounted fren; dismounting to ride pillion" xml:space="preserve">
+    <value>Près de l'ami monté ; descend pour tandem</value>
+  </data>
+  <data name="Near mounted fren; landing to ride pillion" xml:space="preserve">
+    <value>Près de l'ami monté ; atterrit pour tandem</value>
+  </data>
+  <data name="Need companion (cooldown {0:F1}s)" xml:space="preserve">
+    <value>Compagnon requis (recharge {0:F1}s)</value>
+  </data>
+  <data name="Need food (cooldown {0:F1}s)" xml:space="preserve">
+    <value>Nourriture requise (recharge {0:F1}s)</value>
+  </data>
+  <data name="Need food but in duty+combat" xml:space="preserve">
+    <value>Nourriture requise, mais en instance et combat</value>
+  </data>
+  <data name="No ADS reflection hacks enabled." xml:space="preserve">
+    <value>Aucune fonction de réflexion ADS activée.</value>
+  </data>
+  <data name="No Gysahl Greens" xml:space="preserve">
+    <value>Aucun Gysahl Greens</value>
+  </data>
+  <data name="No equipped gear below {0}%." xml:space="preserve">
+    <value>Aucun équipement porté sous {0} %.</value>
+  </data>
+  <data name="No food in inventory" xml:space="preserve">
+    <value>Aucune nourriture dans l'inventaire</value>
+  </data>
+  <data name="No food item resolved" xml:space="preserve">
+    <value>Nourriture non identifiée</value>
+  </data>
+  <data name="No interactables found, nudging forward..." xml:space="preserve">
+    <value>Aucun objet interactif ; avance légèrement...</value>
+  </data>
+  <data name="Out of {0} [{1}]" xml:space="preserve">
+    <value>{0} [{1}] épuisé</value>
+  </data>
+  <data name="Own mount retained: {0}" xml:space="preserve">
+    <value>Monture personnelle conservée : {0}</value>
+  </data>
+  <data name="Partial cleanup: {0}/{1} commands failed." xml:space="preserve">
+    <value>Nettoyage partiel : {0}/{1} commandes échouées.</value>
+  </data>
+  <data name="Paused for ADS utility" xml:space="preserve">
+    <value>Suspendu pour outil ADS</value>
+  </data>
+  <data name="Pending duty exit after completed territory {0}." xml:space="preserve">
+    <value>Sortie en attente après territoire {0} terminé.</value>
+  </data>
+  <data name="Pending duty exit." xml:space="preserve">
+    <value>Sortie d'instance en attente.</value>
+  </data>
+  <data name="QuestionableSolo authority; FrenRider combat suppressed" xml:space="preserve">
+    <value>QuestionableSolo contrôle ; combat FrenRider suspendu</value>
+  </data>
+  <data name="Repair complete; no equipped gear below {0}%." xml:space="preserve">
+    <value>Réparation terminée ; aucun équipement sous {0} %.</value>
+  </data>
+  <data name="Repair timed out after {0}s; ADS: {1}" xml:space="preserve">
+    <value>Délai de réparation dépassé après {0}s ; ADS : {1}</value>
+  </data>
+  <data name="Restore failed: no automation snapshot captured for this account/character." xml:space="preserve">
+    <value>Restauration échouée : aucun état d'automatisation enregistré pour ce compte/personnage.</value>
+  </data>
+  <data name="Retry wait after ADS failure: {0}" xml:space="preserve">
+    <value>Attente de reprise après échec ADS : {0}</value>
+  </data>
+  <data name="Retry wait after rejected start: {0}" xml:space="preserve">
+    <value>Attente de reprise après démarrage refusé : {0}</value>
+  </data>
+  <data name="Retry wait: ADS not loaded." xml:space="preserve">
+    <value>Reprise en attente : ADS non chargé.</value>
+  </data>
+  <data name="Retry wait: ADS utility active ({0})." xml:space="preserve">
+    <value>Reprise en attente : outil ADS actif ({0}).</value>
+  </data>
+  <data name="Retry wait: {0}s." xml:space="preserve">
+    <value>Reprise dans {0}s.</value>
+  </data>
+  <data name="Revive/Return accept attempted; waiting for dialog to close" xml:space="preserve">
+    <value>Résurrection/Return acceptée ; attente de fermeture</value>
+  </data>
+  <data name="Revive/Return accept callback failed; waiting to retry" xml:space="preserve">
+    <value>Callback résurrection/Return échoué ; reprise en attente</value>
+  </data>
+  <data name="Riding pillion on fren's mount" xml:space="preserve">
+    <value>En tandem sur la monture de l'ami</value>
+  </data>
+  <data name="Scanning for interactables..." xml:space="preserve">
+    <value>Recherche d'objets interactifs...</value>
+  </data>
+  <data name="Summoning chocobo ({0} greens left)" xml:space="preserve">
+    <value>Invocation du chocobo ({0} Greens restants)</value>
+  </data>
+  <data name="Suppressed by Coppelia PowerlevelBot" xml:space="preserve">
+    <value>Suspendu par Coppelia PowerlevelBot</value>
+  </data>
+  <data name="Surfacing revive/Return prompt" xml:space="preserve">
+    <value>Affichage du dialogue résurrection/Return</value>
+  </data>
+  <data name="Surfacing teleport prompt" xml:space="preserve">
+    <value>Affichage du dialogue de téléportation</value>
+  </data>
+  <data name="Switched to {0} [{1}]" xml:space="preserve">
+    <value>Passé à {0} [{1}]</value>
+  </data>
+  <data name="Teleport decline attempted; waiting for dialog to close" xml:space="preserve">
+    <value>Téléportation refusée ; attente de fermeture</value>
+  </data>
+  <data name="Teleport decline callback failed; waiting to retry" xml:space="preserve">
+    <value>Callback téléportation échoué ; reprise en attente</value>
+  </data>
+  <data name="Too far ({0:F1}y &gt; {1:F0}y max)" xml:space="preserve">
+    <value>Trop loin ({0:F1}y &gt; {1:F0}y max)</value>
+  </data>
+  <data name="Waiting for ADS desynthesis to start." xml:space="preserve">
+    <value>Attente de démarrage du recyclage ADS.</value>
+  </data>
+  <data name="Waiting for revive/Return notification" xml:space="preserve">
+    <value>Attente de notification résurrection/Return</value>
+  </data>
+  <data name="Waiting for revive/Return prompt" xml:space="preserve">
+    <value>Attente du dialogue résurrection/Return</value>
+  </data>
+  <data name="Waiting for teleport prompt" xml:space="preserve">
+    <value>Attente du dialogue de téléportation</value>
+  </data>
+  <data name="Waiting for {0} SelectYesno dialog" xml:space="preserve">
+    <value>Attente du dialogue SelectYesno {0}</value>
+  </data>
+  <data name="Waiting start: configured desynthesis requested (attempt {0})." xml:space="preserve">
+    <value>Démarrage en attente : recyclage demandé (essai {0}).</value>
+  </data>
+  <data name="Waiting to mount..." xml:space="preserve">
+    <value>Attente de monture...</value>
+  </data>
+  <data name="Waiting: ADS not loaded." xml:space="preserve">
+    <value>Attente : ADS non chargé.</value>
+  </data>
+  <data name="Waiting: ADS utility active ({0})." xml:space="preserve">
+    <value>Attente : outil ADS actif ({0}).</value>
+  </data>
+  <data name="Waiting: {0}." xml:space="preserve">
+    <value>Attente : {0}.</value>
+  </data>
+  <data name="⚠️ WARNING: AutoDuty Plugin Detected" xml:space="preserve">
+    <value>ATTENTION : plugin AutoDuty détecté</value>
+  </data>
+  <data name="• Force respawn at entrance" xml:space="preserve">
+    <value>• Forcer la réapparition à l'entrée</value>
+  </data>
+  <data name="• Leave instances at random times" xml:space="preserve">
+    <value>• Sortir des instances de façon aléatoire</value>
+  </data>
+  <data name="• Interfere with FrenRider automation" xml:space="preserve">
+    <value>• Perturber l'automatisation FrenRider</value>
+  </data>
+  <data name="⚠ VLC Not Found" xml:space="preserve">
+    <value>VLC introuvable</value>
+  </data>
+  <data name="Well Fed: {0:F0}s ({1} [{2}])" xml:space="preserve">
+    <value>Bien nourri : {0:F0}s ({1} [{2}])</value>
+  </data>
+  <data name="Zone transition (rotation disabled)" xml:space="preserve">
+    <value>Changement de zone (rotation désactivée)</value>
+  </data>
+  <data name="handoff in {0:F1}s of continuous readiness" xml:space="preserve">
+    <value>Transfert après {0:F1}s de disponibilité continue</value>
+  </data>
+  <data name="handoff retry backoff until {0:HH:mm:ss}" xml:space="preserve">
+    <value>Reprise du transfert bloquée jusqu'à {0:HH:mm:ss}</value>
+  </data>
+  <data name="waiting for duty start seam" xml:space="preserve">
+    <value>attente du point de démarrage d'instance</value>
+  </data>
+  <data name="waiting {0:F1}s for ADS ownership confirmation" xml:space="preserve">
+    <value>attente de confirmation ADS pendant {0:F1}s</value>
+  </data>
+  <data name="{0} active" xml:space="preserve">
+    <value>{0} actif</value>
+  </data>
+  <data name="{0} auto" xml:space="preserve">
+    <value>{0} auto</value>
+  </data>
+  <data name="{0} repair enabled; threshold is 0%." xml:space="preserve">
+    <value>Réparation {0} activée ; seuil de 0 %.</value>
+  </data>
+  <data name="{0} repair needed below {1}%; dismounting first." xml:space="preserve">
+    <value>Réparation {0} requise sous {1} % ; descend d'abord.</value>
+  </data>
+  <data name="{0} repair needed below {1}%; waiting for mount transition." xml:space="preserve">
+    <value>Réparation {0} requise sous {1} % ; attend la transition de monture.</value>
+  </data>
+  <data name="{0} repair needed below {1}%; waiting to dismount." xml:space="preserve">
+    <value>Réparation {0} requise sous {1} % ; attend de descendre.</value>
+  </data>
+  <data name="{0} repair needed below {1}%; waiting while {2}." xml:space="preserve">
+    <value>Réparation {0} requise sous {1} % ; attend pendant {2}.</value>
+  </data>
+  <data name="{0} repair requested below {1}%; FrenRider paused." xml:space="preserve">
+    <value>Réparation {0} demandée sous {1} % ; FrenRider suspendu.</value>
+  </data>
+  <data name="{0} repair requested; waiting for ADS status." xml:space="preserve">
+    <value>Réparation {0} demandée ; attente de statut ADS.</value>
+  </data>
+  <data name="{0} repair requested; waiting for ADS to start." xml:space="preserve">
+    <value>Réparation {0} demandée ; attente de démarrage ADS.</value>
+  </data>
+  <data name="{0} repair running; FrenRider paused. ADS: {1}" xml:space="preserve">
+    <value>Réparation {0} en cours ; FrenRider suspendu. ADS : {1}</value>
+  </data>
+  <data name="{0} repair still needed below {1}%; automatic dismount timed out." xml:space="preserve">
+    <value>Réparation {0} toujours requise sous {1} % ; délai de descente auto dépassé.</value>
+  </data>
+  <data name="{0} repair still needed below {1}%; retry in {2}s. ADS: {3}" xml:space="preserve">
+    <value>Réparation {0} toujours requise sous {1} % ; reprise dans {2}s. ADS : {3}</value>
+  </data>
+  <data name="{0} repair still needed below {1}%; waiting while {2}. ADS: {3}" xml:space="preserve">
+    <value>Réparation {0} toujours requise sous {1} % ; attend pendant {2}. ADS : {3}</value>
+  </data>
+  <data name="{0}: mounting {1}" xml:space="preserve">
+    <value>{0} : monte {1}</value>
+  </data>
+  <data name="{0}; restarting readiness delay with 5s retry backoff" xml:space="preserve">
+    <value>{0} ; délai de disponibilité repris avec 5s de pause</value>
+  </data>
+  <data name="{0}; waiting for authoritative ownership" xml:space="preserve">
+    <value>{0} ; attente de contrôle effectif</value>
+  </data>
+  <data name="True" xml:space="preserve">
+    <value>Oui</value>
+  </data>
+  <data name="False" xml:space="preserve">
+    <value>Non</value>
+  </data>
+  <data name="ADS recovery hold IPC unavailable; update ADS" xml:space="preserve">
+    <value>IPC de pause récupération ADS indisponible ; mettre à jour ADS</value>
+  </data>
+  <data name="Waiting for ADS recovery hold acknowledgement" xml:space="preserve">
+    <value>Attente d'accusé de pause récupération ADS</value>
+  </data>
+  <data name="Waiting to leave combat before approaching or using Phoenix Down" xml:space="preserve">
+    <value>Attente de fin de combat avant approche ou queue de phénix</value>
+  </data>
+  <data name="Waiting to land" xml:space="preserve">
+    <value>Attente d'atterrissage</value>
+  </data>
+  <data name="No Phoenix Downs; waiting for party recovery" xml:space="preserve">
+    <value>Aucune queue de phénix ; attente de récupération du groupe</value>
+  </data>
+  <data name="Medicine cooldown; waiting for recovery" xml:space="preserve">
+    <value>Recharge de médicament ; attente de récupération</value>
+  </data>
+  <data name="Waiting for current cast" xml:space="preserve">
+    <value>Attente du sort en cours</value>
+  </data>
+  <data name="FR: On" xml:space="preserve">
+    <value>FR : Activé</value>
+  </data>
+  <data name="FR: Off" xml:space="preserve">
+    <value>FR : Désactivé</value>
+  </data>
+  <data name="Fren Rider active - Following {0}. Coppelia: {1}. Cleanup: {2}" xml:space="preserve">
+    <value>Fren Rider actif - Suit {0}. Coppelia : {1}. Nettoyage : {2}</value>
+  </data>
+  <data name="Fren Rider disabled - Click to toggle. Coppelia: {0}. Cleanup: {1}" xml:space="preserve">
+    <value>Fren Rider désactivé - Cliquez pour basculer. Coppelia : {0}. Nettoyage : {1}</value>
+  </data>
+  <data name="No compatible BossMod preset IPC responded" xml:space="preserve">
+    <value>Aucune IPC de préréglage BossMod compatible n'a répondu</value>
+  </data>
+  <data name="No packaged presets found" xml:space="preserve">
+    <value>Aucun préréglage fourni trouvé</value>
+  </data>
+  <data name="Preset push partially succeeded ({0}/{1})" xml:space="preserve">
+    <value>Envoi des préréglages partiellement réussi ({0}/{1})</value>
+  </data>
+  <data name="Six BossMod presets pushed" xml:space="preserve">
+    <value>Six préréglages BossMod envoyés</value>
+  </data>
+  <data name=", FATE {0}" xml:space="preserve">
+    <value>, ALÉA {0}</value>
+  </data>
+  <data name=", indoors" xml:space="preserve">
+    <value>, en intérieur</value>
+  </data>
+  <data name="{0} (territory {1}{2})" xml:space="preserve">
+    <value>{0} (territoire {1}{2})</value>
+  </data>
+  <data name="ADS Exit Method ({0}s)" xml:space="preserve">
+    <value>Méthode de sortie ADS ({0}s)</value>
+  </data>
+  <data name="FrenRider: leave after {0}s" xml:space="preserve">
+    <value>FrenRider : sortir après {0}s</value>
+  </data>
+  <data name="FrenRider: leave when party leaves" xml:space="preserve">
+    <value>FrenRider : sortir après le groupe</value>
+  </data>
+  <data name="Timer: {0}" xml:space="preserve">
+    <value>Durée : {0}</value>
+  </data>
+  <data name="Next retry/reassert in {0}s." xml:space="preserve">
+    <value>Prochaine reprise/réapplication dans {0}s.</value>
+  </data>
+  <data name="Legacy seed active: {0} at threshold {1}." xml:space="preserve">
+    <value>Ancienne configuration active : {0} au seuil {1}.</value>
+  </data>
+  <data name="global handoff on" xml:space="preserve">
+    <value>transfert global activé</value>
+  </data>
+  <data name="global handoff off" xml:space="preserve">
+    <value>transfert global désactivé</value>
+  </data>
+  <data name="Authority source: {0}; readable={1}; exit takeover={2}" xml:space="preserve">
+    <value>Source de contrôle : {0} ; lisible={1} ; reprise sortie={2}</value>
+  </data>
+  <data name="Selected: {0} {1} (ID: {2})" xml:space="preserve">
+    <value>Sélection : {0} {1} (ID : {2})</value>
+  </data>
+  <data name="{0} in party but not visible" xml:space="preserve">
+    <value>{0} dans le groupe, non visible</value>
+  </data>
+  <data name="Active, {0}m {1:D2}s remaining" xml:space="preserve">
+    <value>Actif, reste {0}m {1:D2}s</value>
+  </data>
+  <data name="Inactive, {0} Gysahl Greens" xml:space="preserve">
+    <value>Inactif, {0} Gysahl Greens</value>
+  </data>
+  <data name="Run={0}, FlyYouFools={1}, FarChase={2}, FollowMode={3}/{4}" xml:space="preserve">
+    <value>Marche={0}, FlyYouFools={1}, PoursuiteLointaine={2}, ModeSuivi={3}/{4}</value>
+  </data>
+  <data name="Cling={0:F1}, Max={1:F0}, ForayMax={2:F0}" xml:space="preserve">
+    <value>Distance={0:F1}, Max={1:F0}, MaxForay={2:F0}</value>
+  </data>
+  <data name="Loaded={0}, Pending={1}, RuntimeOwned={2}, Readable={3}, Source={4}, ExitTakeover={5}" xml:space="preserve">
+    <value>Chargé={0}, EnAttente={1}, Contrôlé={2}, Lisible={3}, Source={4}, RepriseSortie={5}</value>
+  </data>
+  <data name="Source={0}, Readable={1}, ExitTakeover={2}" xml:space="preserve">
+    <value>Source={0}, Lisible={1}, RepriseSortie={2}</value>
+  </data>
+  <data name="Saved fren is outside the current party." xml:space="preserve">
+    <value>L'ami enregistré est hors du groupe actuel.</value>
+  </data>
+  <data name="ADS Hyper Focus heartbeat received." xml:space="preserve">
+    <value>Signal de vie ADS Hyper Focus reçu.</value>
+  </data>
+  <data name="ADS Hyper Focus lease active." xml:space="preserve">
+    <value>Contrôle ADS Hyper Focus actif.</value>
+  </data>
+  <data name="ActionManager unavailable" xml:space="preserve">
+    <value>ActionManager indisponible</value>
+  </data>
+  <data name="Aetheryte sheet unavailable for {0} (candidate count=0)" xml:space="preserve">
+    <value>Données d'éthérite indisponibles pour {0} (candidats=0)</value>
+  </data>
+  <data name="Coppelia Powerlevel heartbeat received." xml:space="preserve">
+    <value>Signal de vie Coppelia Powerlevel reçu.</value>
+  </data>
+  <data name="Coppelia Powerlevel lease active." xml:space="preserve">
+    <value>Contrôle Coppelia Powerlevel actif.</value>
+  </data>
+  <data name="Exit after duty ends - {0:F0}s elapsed (configured: {1}s)" xml:space="preserve">
+    <value>Sortie après fin d'instance - {0:F0}s écoulées (réglage : {1}s)</value>
+  </data>
+  <data name="Failed to open /partycmd" xml:space="preserve">
+    <value>Échec d'ouverture de /partycmd</value>
+  </data>
+  <data name="Leave when all party members left" xml:space="preserve">
+    <value>Sortir après tous les membres du groupe</value>
+  </data>
+  <data name="Matched {0} ({1})" xml:space="preserve">
+    <value>{0} reconnu ({1})</value>
+  </data>
+  <data name="No interactables found; fren not visible in duty" xml:space="preserve">
+    <value>Aucun objet interactif ; ami invisible en instance</value>
+  </data>
+  <data name="No interactables found; not bound by duty" xml:space="preserve">
+    <value>Aucun objet interactif ; hors instance liée</value>
+  </data>
+  <data name="No party row found for {0} ({1})" xml:space="preserve">
+    <value>Aucune ligne de groupe pour {0} ({1})</value>
+  </data>
+  <data name="No unlocked Lifestream aetherytes matched {0} " xml:space="preserve">
+    <value>Aucune éthérite Lifestream débloquée pour {0} </value>
+  </data>
+  <data name="Opening party window" xml:space="preserve">
+    <value>Ouverture de la fenêtre de groupe</value>
+  </data>
+  <data name="Party row found for {0}, but no zone name matched ({1})" xml:space="preserve">
+    <value>Ligne de groupe pour {0}, mais zone non reconnue ({1})</value>
+  </data>
+  <data name="Party window did not open (addon visible=false, opened by FrenRider=true)" xml:space="preserve">
+    <value>Fenêtre de groupe non ouverte (addon visible=non, ouvert par FrenRider=oui)</value>
+  </data>
+  <data name="Party window had no readable rows ({0})" xml:space="preserve">
+    <value>Fenêtre de groupe sans lignes lisibles ({0})</value>
+  </data>
+  <data name="Party window not visible" xml:space="preserve">
+    <value>Fenêtre de groupe invisible</value>
+  </data>
+  <data name="Party window read failed: {0}" xml:space="preserve">
+    <value>Lecture de fenêtre de groupe échouée : {0}</value>
+  </data>
+  <data name="Reading party window ({0})" xml:space="preserve">
+    <value>Lecture de fenêtre de groupe ({0})</value>
+  </data>
+  <data name="SelectYesno dialog" xml:space="preserve">
+    <value>Dialogue SelectYesno</value>
+  </data>
+  <data name="Telepo unavailable for {0} (candidate count=0)" xml:space="preserve">
+    <value>Telepo indisponible pour {0} (candidats=0)</value>
+  </data>
+  <data name="Teleport list read failed for {0}: {1} (candidate count=0)" xml:space="preserve">
+    <value>Lecture des téléportations pour {0} échouée : {1} (candidats=0)</value>
+  </data>
+  <data name="Transient IPC failure; preserving owned state. Typed: {0}; JSON: {1}" xml:space="preserve">
+    <value>Échec IPC temporaire ; contrôle conservé. Typé : {0} ; JSON : {1}</value>
+  </data>
+  <data name="UI manager unavailable" xml:space="preserve">
+    <value>Gestionnaire UI indisponible</value>
+  </data>
+  <data name="Validated ADS current-duty snapshot for territory/CFC {0}/{1}." xml:space="preserve">
+    <value>État d'instance ADS validé pour territoire/CFC {0}/{1}.</value>
+  </data>
+  <data name="Waiting for party window" xml:space="preserve">
+    <value>Attente de fenêtre de groupe</value>
+  </data>
+  <data name="addon hidden" xml:space="preserve">
+    <value>Addon masqué</value>
+  </data>
+  <data name="addon not found" xml:space="preserve">
+    <value>Addon introuvable</value>
+  </data>
+  <data name="already mounted" xml:space="preserve">
+    <value>déjà monté</value>
+  </data>
+  <data name="already mounting" xml:space="preserve">
+    <value>déjà en train de monter</value>
+  </data>
+  <data name="automation preempted" xml:space="preserve">
+    <value>automatisation interrompue</value>
+  </data>
+  <data name="between areas" xml:space="preserve">
+    <value>changement de zone</value>
+  </data>
+  <data name="casting" xml:space="preserve">
+    <value>incantation</value>
+  </data>
+  <data name="casting or occupied" xml:space="preserve">
+    <value>incantation ou occupé</value>
+  </data>
+  <data name="duty confirm popup" xml:space="preserve">
+    <value>confirmation d'instance</value>
+  </data>
+  <data name="event null" xml:space="preserve">
+    <value>événement null</value>
+  </data>
+  <data name="exception: {0}" xml:space="preserve">
+    <value>Exception : {0}</value>
+  </data>
+  <data name="far chase active" xml:space="preserve">
+    <value>poursuite lointaine active</value>
+  </data>
+  <data name="flying stuck escape (dX={0:F1} dY={1:F1} dZ={2:F1}, all &lt;{3}y in {4}s)" xml:space="preserve">
+    <value>Déblocage en vol (dX={0:F1} dY={1:F1} dZ={2:F1}, tous &lt;{3}y en {4}s)</value>
+  </data>
+  <data name="fren flying" xml:space="preserve">
+    <value>ami en vol</value>
+  </data>
+  <data name="fren unavailable" xml:space="preserve">
+    <value>ami indisponible</value>
+  </data>
+  <data name="in combat" xml:space="preserve">
+    <value>en combat</value>
+  </data>
+  <data name="in duty" xml:space="preserve">
+    <value>en instance</value>
+  </data>
+  <data name="local player unavailable" xml:space="preserve">
+    <value>joueur local indisponible</value>
+  </data>
+  <data name="mount action check failed: {0}" xml:space="preserve">
+    <value>Vérification d'action de monture échouée : {0}</value>
+  </data>
+  <data name="mount action unavailable (status={0})" xml:space="preserve">
+    <value>Action de monture indisponible (statut={0})</value>
+  </data>
+  <data name="mounted or riding pillion" xml:space="preserve">
+    <value>monté ou en tandem</value>
+  </data>
+  <data name="near fren on foot" xml:space="preserve">
+    <value>près de l'ami à pied</value>
+  </data>
+  <data name="near mounted fren with Fly You Fools disabled" xml:space="preserve">
+    <value>près de l'ami monté avec Fly You Fools désactivé</value>
+  </data>
+  <data name="near mounted fren with Fly You Fools enabled" xml:space="preserve">
+    <value>près de l'ami monté avec Fly You Fools activé</value>
+  </data>
+  <data name="node index out of range" xml:space="preserve">
+    <value>indice de nœud hors limites</value>
+  </data>
+  <data name="node null" xml:space="preserve">
+    <value>nœud null</value>
+  </data>
+  <data name="not mounted or riding" xml:space="preserve">
+    <value>ni monté ni en tandem</value>
+  </data>
+  <data name="occupied or in cutscene" xml:space="preserve">
+    <value>occupé ou en cinématique</value>
+  </data>
+  <data name="outside sanctuary" xml:space="preserve">
+    <value>hors sanctuaire</value>
+  </data>
+  <data name="player busy" xml:space="preserve">
+    <value>joueur occupé</value>
+  </data>
+  <data name="player dead" xml:space="preserve">
+    <value>joueur mort</value>
+  </data>
+  <data name="riding pillion" xml:space="preserve">
+    <value>en tandem</value>
+  </data>
+  <data name="safe and in cling range" xml:space="preserve">
+    <value>en sécurité et à distance de suivi</value>
+  </data>
+  <data name="stuck repath (dX={0:F1} dY={1:F1} dZ={2:F1}, all &lt;{3}y in {4}s)" xml:space="preserve">
+    <value>Nouveau chemin si bloqué (dX={0:F1} dY={1:F1} dZ={2:F1}, tous &lt;{3}y en {4}s)</value>
+  </data>
+  <data name="stuck repath (moved {0:F1}y &lt; {1:F1}y in {2:F0}s)" xml:space="preserve">
+    <value>Nouveau chemin si bloqué (déplacement {0:F1}y &lt; {1:F1}y en {2:F0}s)</value>
+  </data>
+  <data name="teleport or dialog" xml:space="preserve">
+    <value>téléportation ou dialogue</value>
+  </data>
+  <data name="unit manager not found" xml:space="preserve">
+    <value>gestionnaire d'unités introuvable</value>
+  </data>
+  <data name="unsupported arg type" xml:space="preserve">
+    <value>type d'argument non pris en charge</value>
+  </data>
+  <data name="{0:F1}y XZ from fren, handoff {1:F1}y" xml:space="preserve">
+    <value>{0:F1}y XZ de l'ami, transfert {1:F1}y</value>
+  </data>
+  <data name="Overworld" xml:space="preserve">
+    <value>Monde ouvert</value>
+  </data>
+  <data name="Town" xml:space="preserve">
+    <value>Ville</value>
+  </data>
+  <data name="Duty" xml:space="preserve">
+    <value>Instance</value>
+  </data>
+  <data name="DeepDungeon" xml:space="preserve">
+    <value>Donjon sans fond</value>
+  </data>
+  <data name="Foray" xml:space="preserve">
+    <value>Zone d'exploration</value>
+  </data>
+  <data name="Typed" xml:space="preserve">
+    <value>Typé</value>
+  </data>
+  <data name="JsonFallback" xml:space="preserve">
+    <value>Secours JSON</value>
+  </data>
+  <data name="StaleHold" xml:space="preserve">
+    <value>Pause périmée</value>
+  </data>
+  <data name="Unloaded" xml:space="preserve">
+    <value>Non chargé</value>
+  </data>
+  <data name="Unreadable" xml:space="preserve">
+    <value>Illisible</value>
+  </data>
+  <data name="Following local aetheryte network to {0}{1}" xml:space="preserve">
+    <value>Suit le réseau local d'éthérites vers {0}{1}</value>
+  </data>
+  <data name="Found {0} aetherytes for {1}" xml:space="preserve">
+    <value>{0} éthérites trouvées pour {1}</value>
+  </data>
+  <data name="Matched {0}" xml:space="preserve">
+    <value>{0} reconnu</value>
+  </data>
+  <data name="Sent {0}; matched {1}; found {2} aetherytes{3}" xml:space="preserve">
+    <value>{0} envoyé ; {1} reconnu ; {2} éthérites trouvées{3}</value>
+  </data>
+  <data name="{0}{1}; retry in {2}s" xml:space="preserve">
+    <value>{0}{1} ; reprise dans {2}s</value>
+  </data>
+  <data name="ADS loaded; ready." xml:space="preserve">
+    <value>ADS chargé ; prêt.</value>
+  </data>
+  <data name="ADS loaded; {0}." xml:space="preserve">
+    <value>ADS chargé ; {0}.</value>
+  </data>
+  <data name="{0} {1}: M{2}/T{3}, {4}." xml:space="preserve">
+    <value>{0} {1} : M{2}/T{3}, {4}.</value>
+  </data>
+  <data name="ADS is not loaded" xml:space="preserve">
+    <value>ADS n’est pas chargé</value>
+  </data>
+  <data name="{0}; FrenRider local duty logic stays active" xml:space="preserve">
+    <value>{0} ; la logique locale de contenu de FrenRider reste active</value>
+  </data>
+  <data name="ADS current-duty identity does not match live GameMain territory/CFC {0}/{1}; FrenRider local duty logic stays active" xml:space="preserve">
+    <value>L’identité du contenu actuel d’ADS ne correspond pas au territoire/CFC GameMain actuel {0}/{1} ; la logique locale de contenu de FrenRider reste active</value>
+  </data>
+  <data name="{0} handoff is off; FrenRider local duty logic stays active" xml:space="preserve">
+    <value>Le transfert pour {0} est désactivé ; la logique locale de contenu de FrenRider reste active</value>
+  </data>
+  <data name="{0} has ADS clearance {1} (M{2}), below threshold {3}; FrenRider local duty logic stays active" xml:space="preserve">
+    <value>{0} a l’autorisation ADS {1} (M{2}), sous le seuil {3} ; la logique locale de contenu de FrenRider reste active</value>
+  </data>
+  <data name="ADS current-duty identity {0}/{1} does not match live GameMain identity {2}/{3}." xml:space="preserve">
+    <value>L’identité du contenu actuel d’ADS {0}/{1} ne correspond pas à l’identité GameMain actuelle {2}/{3}.</value>
+  </data>
+  <data name="Live duty identity changed from territory/CFC {0}/{1} to {2}/{3}." xml:space="preserve">
+    <value>L’identité du contenu actuel est passée du territoire/CFC {0}/{1} à {2}/{3}.</value>
+  </data>
+  <data name="No validated ADS current-duty snapshot." xml:space="preserve">
+    <value>Aucun instantané validé du contenu actuel d’ADS.</value>
+  </data>
+  <data name="Live client is outside an instanced duty." xml:space="preserve">
+    <value>Le client actuel est hors d’un contenu instancié.</value>
+  </data>
+  <data name="GameMain did not provide a live duty territory identity." xml:space="preserve">
+    <value>GameMain n’a pas fourni d’identité de territoire pour le contenu actuel.</value>
+  </data>
+  <data name="ADS unloaded." xml:space="preserve">
+    <value>ADS déchargé.</value>
+  </data>
+  <data name="ADS.GetStatusJson returned an empty payload" xml:space="preserve">
+    <value>ADS.GetStatusJson a renvoyé des données vides</value>
+  </data>
+  <data name="ADS status does not identify an active instanced duty" xml:space="preserve">
+    <value>Le statut ADS n’identifie aucun contenu instancié actif</value>
+  </data>
+  <data name="ADS current duty has no catalog metadata" xml:space="preserve">
+    <value>Le contenu actuel d’ADS n’a pas de métadonnées de catalogue</value>
+  </data>
+  <data name="ADS current-duty catalog row has no duty name" xml:space="preserve">
+    <value>L’entrée du catalogue du contenu actuel d’ADS n’a pas de nom de contenu</value>
+  </data>
+  <data name="ADS current-duty catalog row has no territory identity" xml:space="preserve">
+    <value>L’entrée du catalogue du contenu actuel d’ADS n’a pas d’identité de territoire</value>
+  </data>
+  <data name="ADS current-duty catalog row has no CFC identity" xml:space="preserve">
+    <value>L’entrée du catalogue du contenu actuel d’ADS n’a pas d’identité CFC</value>
+  </data>
+  <data name="ADS current-duty catalog row has unsupported category '{0}'" xml:space="preserve">
+    <value>L’entrée du catalogue du contenu actuel d’ADS a une catégorie non prise en charge '{0}'</value>
+  </data>
+  <data name="ADS current-duty catalog row has unsupported support level '{0}'" xml:space="preserve">
+    <value>L’entrée du catalogue du contenu actuel d’ADS a un niveau de prise en charge non reconnu '{0}'</value>
+  </data>
+  <data name="ADS current-duty catalog row has unsupported clearance status '{0}'" xml:space="preserve">
+    <value>L’entrée du catalogue du contenu actuel d’ADS a un statut d’autorisation non pris en charge '{0}'</value>
+  </data>
+  <data name="ADS.GetStatusJson was invalid JSON: {0}" xml:space="preserve">
+    <value>ADS.GetStatusJson contenait un JSON invalide : {0}</value>
+  </data>
+  <data name="ADS.GetStatusJson unavailable: {0}" xml:space="preserve">
+    <value>ADS.GetStatusJson indisponible : {0}</value>
+  </data>
+  <data name="ADS.GetStatusJson unavailable; retaining the validated current-duty snapshot for the same live identity: {0}" xml:space="preserve">
+    <value>ADS.GetStatusJson indisponible ; conservation de l’instantané validé du contenu actuel pour la même identité actuelle : {0}</value>
+  </data>
+  <data name="waiting for login" xml:space="preserve">
+    <value>en attente de connexion</value>
+  </data>
+  <data name="waiting for local player" xml:space="preserve">
+    <value>en attente du joueur local</value>
+  </data>
+  <data name="waiting for unconscious state to clear" xml:space="preserve">
+    <value>en attente de la fin de l’état inconscient</value>
+  </data>
+  <data name="waiting for local player to be alive" xml:space="preserve">
+    <value>en attente du retour en vie du joueur local</value>
+  </data>
+  <data name="waiting for area transition to finish" xml:space="preserve">
+    <value>en attente de la fin du changement de zone</value>
+  </data>
+  <data name="waiting for cutscene to finish" xml:space="preserve">
+    <value>en attente de la fin de la cinématique</value>
+  </data>
+  <data name="waiting for cutscene event to finish" xml:space="preserve">
+    <value>en attente de la fin de l’événement de cinématique</value>
+  </data>
+  <data name="NPC no-inn/no-teleport" xml:space="preserve">
+    <value>NPC sans auberge/sans téléportation</value>
+  </data>
+  <data name="applied" xml:space="preserve">
+    <value>appliqué</value>
+  </data>
+  <data name="already set" xml:space="preserve">
+    <value>déjà défini</value>
+  </data>
+  <data name="not loaded" xml:space="preserve">
+    <value>non chargé</value>
+  </data>
+  <data name="unavailable" xml:space="preserve">
+    <value>indisponible</value>
+  </data>
+  <data name="failed" xml:space="preserve">
+    <value>échec</value>
+  </data>
+  <data name="RSR {0}{1}" xml:space="preserve">
+    <value>RSR {0}{1}</value>
+  </data>
+  <data name="{0} active{1}" xml:space="preserve">
+    <value>{0} actif{1}</value>
+  </data>
+  <data name="{0} auto{1}" xml:space="preserve">
+    <value>{0} auto{1}</value>
+  </data>
+  <data name="{0} unavailable{1}" xml:space="preserve">
+    <value>{0} indisponible{1}</value>
+  </data>
+  <data name="{0} captured" xml:space="preserve">
+    <value>{0} capturé</value>
+  </data>
+  <data name="{0} unavailable" xml:space="preserve">
+    <value>{0} indisponible</value>
+  </data>
+  <data name="{0} unavailable: {1}" xml:space="preserve">
+    <value>{0} indisponible : {1}</value>
+  </data>
+  <data name="Partial restore ({0})." xml:space="preserve">
+    <value>Restauration partielle ({0}).</value>
+  </data>
+  <data name="Far chase" xml:space="preserve">
+    <value>Poursuite lointaine</value>
+  </data>
+  <data name="Fly You Fools" xml:space="preserve">
+    <value>Voler à côté</value>
+  </data>
+  <data name="outside effective cling range" xml:space="preserve">
+    <value>hors de la portée d’accrochage effective</value>
+  </data>
+  <data name="Failed to send {0}" xml:space="preserve">
+    <value>Échec de l’envoi de {0}</value>
+  </data>
+  <data name="; Party window left open" xml:space="preserve">
+    <value>; fenêtre d’équipe laissée ouverte</value>
+  </data>
+  <data name="No unlocked Lifestream aetherytes matched {0} (candidate count=0; {1})" xml:space="preserve">
+    <value>Aucun éthérite Lifestream débloqué ne correspond à {0} (nombre de candidats=0 ; {1})</value>
+  </data>
+  <data name="ADS.StartDutyFromInside accepted" xml:space="preserve">
+    <value>ADS.StartDutyFromInside accepté</value>
+  </data>
+  <data name="ADS.StartDutyFromInside rejected; command fallback suppressed" xml:space="preserve">
+    <value>ADS.StartDutyFromInside rejeté ; commande de secours supprimée</value>
+  </data>
+  <data name="typed endpoint unavailable; sent /ads inside fallback" xml:space="preserve">
+    <value>Point de terminaison typé indisponible ; /ads inside envoyé en secours</value>
+  </data>
+  <data name="typed endpoint unavailable and /ads inside fallback failed" xml:space="preserve">
+    <value>Point de terminaison typé indisponible et échec de /ads inside en secours</value>
+  </data>
+  <data name="DeathReturn" xml:space="preserve">
+    <value>Retour après la mort</value>
+  </data>
+  <data name="Raise" xml:space="preserve">
+    <value>Résurrection</value>
+  </data>
+  <data name="Teleport" xml:space="preserve">
+    <value>Téléportation</value>
+  </data>
+  <data name="Duty completed, {0}leaving in {1:F0}s..." xml:space="preserve">
+    <value>Contenu terminé, {0}départ dans {1:F0}s...</value>
+  </data>
+  <data name="ADS authority active" xml:space="preserve">
+    <value>Contrôle ADS actif</value>
+  </data>
+  <data name="local aethernet travel active" xml:space="preserve">
+    <value>trajet local par réseau éthéré actif</value>
+  </data>
+  <data name="settings changed" xml:space="preserve">
+    <value>paramètres modifiés</value>
+  </data>
+  <data name="typed IPC unavailable" xml:space="preserve">
+    <value>IPC typé indisponible</value>
+  </data>
+  <data name="live AutoFollow read unavailable" xml:space="preserve">
+    <value>lecture actuelle d’AutoFollow indisponible</value>
+  </data>
+  <data name="BossMod.Service not found" xml:space="preserve">
+    <value>BossMod.Service introuvable</value>
+  </data>
+  <data name="BossMod.Service.Config unavailable" xml:space="preserve">
+    <value>BossMod.Service.Config indisponible</value>
+  </data>
+  <data name="BossMod.AI.AIConfig not found" xml:space="preserve">
+    <value>BossMod.AI.AIConfig introuvable</value>
+  </data>
+  <data name="live instance discovery failed: {0}" xml:space="preserve">
+    <value>Échec de la découverte de l’instance actuelle : {0}</value>
+  </data>
+  <data name="Dalamud LocalPlugin wrapper was not reachable from IExposedPlugin" xml:space="preserve">
+    <value>Le wrapper Dalamud LocalPlugin n’était pas accessible depuis IExposedPlugin</value>
+  </data>
+  <data name="Dalamud LocalPlugin had no live instance" xml:space="preserve">
+    <value>Dalamud LocalPlugin n’avait pas d’instance actuelle</value>
+  </data>
+  <data name="Dalamud LocalPlugin had no live assembly" xml:space="preserve">
+    <value>Dalamud LocalPlugin n’avait pas d’assembly actuel</value>
+  </data>
+  <data name="Dalamud LocalPlugin instance and assembly did not match" xml:space="preserve">
+    <value>L’instance et l’assembly de Dalamud LocalPlugin ne correspondaient pas</value>
+  </data>
+  <data name="ADS unavailable/pending: {0}." xml:space="preserve">
+    <value>ADS indisponible/en attente : {0}.</value>
+  </data>
+  <data name="range" xml:space="preserve">
+    <value>portée</value>
+  </data>
+  <data name="range reset" xml:space="preserve">
+    <value>portée réinitialisée</value>
+  </data>
+  <data name="hunts" xml:space="preserve">
+    <value>chasses</value>
+  </data>
+  <data name="hunts reset" xml:space="preserve">
+    <value>chasses réinitialisées</value>
+  </data>
+  <data name="queen" xml:space="preserve">
+    <value>reine</value>
+  </data>
+  <data name="queen reset" xml:space="preserve">
+    <value>reine réinitialisée</value>
+  </data>
+  <data name="Misc" xml:space="preserve">
+    <value>Divers</value>
+  </data>
+  <data name="ADS returned false" xml:space="preserve">
+    <value>ADS a renvoyé false</value>
+  </data>
+  <data name="ADS unavailable; reflection hacks pending." xml:space="preserve">
+    <value>ADS indisponible ; contournements par réflexion en attente.</value>
+  </data>
+  <data name="No ADS utility status." xml:space="preserve">
+    <value>Aucun état d’utilitaire ADS.</value>
+  </data>
+  <data name="ADS repair running" xml:space="preserve">
+    <value>Réparation ADS en cours</value>
+  </data>
+  <data name="ADS did not accept the utility request." xml:space="preserve">
+    <value>ADS n’a pas accepté la demande d’utilitaire.</value>
+  </data>
+  <data name="ADS status was not readable." xml:space="preserve">
+    <value>L’état ADS n’était pas lisible.</value>
+  </data>
+  <data name="Members" xml:space="preserve">
+    <value>Membres</value>
+  </data>
+  <data name="Jobs" xml:space="preserve">
+    <value>Jobs</value>
+  </data>
+  <data name="{0} total, {1} visible, {2} mounted" xml:space="preserve">
+    <value>{0} au total, {1} visibles, {2} en monture</value>
+  </data>
+  <data name="Tank" xml:space="preserve">
+    <value>Tank</value>
+  </data>
+  <data name="Healer" xml:space="preserve">
+    <value>Soigneur</value>
+  </data>
+  <data name="Melee" xml:space="preserve">
+    <value>Mêlée</value>
+  </data>
+  <data name="Ranged" xml:space="preserve">
+    <value>Distance</value>
+  </data>
+  <data name="Caster" xml:space="preserve">
+    <value>Mage</value>
+  </data>
+  <data name="Select {0}..." xml:space="preserve">
+    <value>Sélectionner : {0}...</value>
+  </data>
+  <data name="Window appearance" xml:space="preserve"><value>Apparence de la fenêtre</value></data>
+  <data name="Compact visible on main window" xml:space="preserve"><value>Afficher le mode compact dans la fenêtre principale</value></data>
+  <data name="Language visible on main window" xml:space="preserve"><value>Afficher la langue dans la fenêtre principale</value></data>
+  <data name="Transparency" xml:space="preserve"><value>Transparence</value></data>
+  <data name="Opacity (%)" xml:space="preserve"><value>Opacité (%)</value></data>
+  <data name="Auto-fade when unfocused" xml:space="preserve"><value>Atténuer automatiquement sans focus</value></data>
+  <data name="Unfocused opacity (%)" xml:space="preserve"><value>Opacité sans focus (%)</value></data>
+  <data name="Unfocused delay (seconds)" xml:space="preserve"><value>Délai sans focus (secondes)</value></data>
+</root>

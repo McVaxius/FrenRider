@@ -61,6 +61,9 @@ public class CharacterConfig
         set => respawnOutsideDutiesDelaySeconds = Math.Max(1, value);
     }
     public bool RespawnInsideDuties { get; set; } = false;
+    public bool UsePhoenixDownsForRecovery { get; set; } = true;
+    public bool ReviveAnyoneOutdoors { get; set; } = true;
+    public bool AllowPhoenixDownInCombat { get; set; } = false;
     public int RespawnInsideDutiesDelaySeconds
     {
         get => respawnInsideDutiesDelaySeconds;
@@ -247,6 +250,9 @@ public class CharacterConfig
             RespawnOutsideDuties = RespawnOutsideDuties,
             RespawnOutsideDutiesDelaySeconds = RespawnOutsideDutiesDelaySeconds,
             RespawnInsideDuties = RespawnInsideDuties,
+            UsePhoenixDownsForRecovery = UsePhoenixDownsForRecovery,
+            ReviveAnyoneOutdoors = ReviveAnyoneOutdoors,
+            AllowPhoenixDownInCombat = AllowPhoenixDownInCombat,
             RespawnInsideDutiesDelaySeconds = RespawnInsideDutiesDelaySeconds,
             MountUpToChaseFren = MountUpToChaseFren,
             MountUpToChaseFrenDistance = MountUpToChaseFrenDistance,

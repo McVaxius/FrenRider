@@ -1,4 +1,66 @@
+2026-10-06 - Actions dependency revision
+
+- Pin both existing Actions library checkouts to published AethertekUI revision `6c193cf06ac67f954c549cafc2033ac0efdd630a`, which contains the Hindi text host used by the current source. Preserve the existing build/release routes; the last successful remote run predates this UI adoption.
+
+2026-10-06 - Hindi text shaping
+
+- Append हिन्दी after the fourteen existing language choices and embed all 904 Hindi catalog entries, including displayed service diagnostics. Use the shared Windows shaping renderer for retained text, captions, measurement, tooltips and editors, reserving natural line height for native controls and the Settings tab owner. Retain original control identities, font roles, field formats and steps, configuration and automation. Game-rendered DTR text remains English for Hindi; all other DTR locales and configured values retain their existing behavior. Debug x64 builds with zero warnings/errors; the focused native probe passes 4,833 assertions against identical product/checker core bytes, including catalog structure, placeholders, whitespace, newlines, original glyph-role sizes, controls, editors and scope restoration. Game, GPU, managed-font and IME acceptance remain separate.
+
+2026-10-06 - Window appearance and transparency
+
+- Move colour, compact and language controls into Window appearance in the existing UI Settings section, with independent main-header compact/language visibility and a transparency toggle. Remember normal opacity (100%) and automatic unfocused fade (50% after 10 seconds) through the existing configuration, applying complete-window opacity once after native motion restore on Main, Mini, Settings, warning and font status. Preserve active/editing account selection, Mini data, automation, fonts and native actions. Translate the eight new labels in all fourteen catalogs. The unchanged local launcher builds successfully with zero warnings and errors. Native appearance/persistence checks and game acceptance remain pending.
+
 # Fren Rider - Changelog
+
+## 2026-10-05 - Rounded outer window chrome
+
+- Apply the shared theme's rounded outer corners around the existing native window lifecycle, retaining control identities, layout, saved geometry and actions.
+
+## 2026-10-05 - Main reference spacing
+
+- Align regular and compact Main card padding, section gaps, table columns and field text insets with their approved references. Keep translated content and retained extra rows accessible through native scrolling.
+- Verify fourteen locales at 100%/150% with the original font roles, stable control IDs and unchanged Mini lifecycle. Preserve the existing first-use window size, automation, Phoenix Down recovery and version 1.4.0.1. Complete reference and in-game visual acceptance remain open.
+
+## 2026-10-04 - Food and Settings text readability
+
+- Translate the food-selection hint and empty placeholder while retaining raw game item names and the original selection IDs.
+- Reserve translated Settings tab widths through native tab sizing and scroll overflowing tabs. Keep ADS family ready-delay and temporary-owner annotations on one translated line while paragraph diagnostics retain wrapping. Retain native window and column text clips for selectable rows so fractional font heights and glyph bearings do not cut off ink; native hit areas and actions remain unchanged.
+
+## 2026-10-04 - AutoDuty warning sizing
+
+- Establish the warning's scaled, measured width before native window sizing, and center its actual wrapped content when first shown or reopened after a density change.
+- Verify 336 Mini lifecycle cases, 112 warning cases, 336 Settings tab cases, Main scrolling and appearance popups across fourteen locales, both densities and scales 1/1.5, using the original six font roles within the existing native process bounds. Local reference and text readability, managed-host and in-game acceptance remain separate.
+
+## 2026-10-04 - Five additional UI languages
+
+- Add complete Vietnamese, Brazilian Portuguese, Indonesian, Polish, and Turkish embedded catalogs, including Phoenix Down recovery, ADS handoff, settings help, and diagnostics. Append the five native language choices after the original nine without changing existing selection order, configuration version, or plugin version.
+- Verify the Release build, 49 focused configuration/profile checks, all 895 compiled phrases in each of fourteen catalogs, and bounded native selector interactions with the original six font roles for every added language. Whole-window, managed-host, reference, and in-game visual acceptance remain separate.
+
+## 2026-10-03 - Main and Mini display completion
+
+- Restore the tracked fren's job/name details, party totals and role composition, retaining the original tracking colours and collapsed debug ID. Localize the restored party summaries across all nine languages.
+- Match the reference's status badge, empty party slots and primary Mini Attack action. Place the colour swatch before Settings/Ko-fi and the language field afterward, retaining the appearance IDs. Retain the original minimum window size, measure translated party columns and Duty labels, and keep long rows reachable through native scrolling. Paint table-header translations once over transparent surfaces. Preserve all existing commands, saves and control IDs.
+
+## 2026-10-03 - Mini auto-resize repair
+
+- Establish Mini's required width before native window sizing to prevent empty narrow columns. Keep the toggle, saved fren and Eureka actions visible, and measure translated MAGIA labels at the active UI scale so all three actions stay on one row.
+
+## 2026-10-03 - Readable settings fields
+
+- Keep settings editors wide enough for their values and both native step buttons, including Duty/ADS/Exit seconds. Translate labels above fields without adding invisible English width; retain native IDs, values and increment actions.
+- Fit every settings input, slider and combo through the shared measured-width helper, and retain combo popup scopes. Show the current assembly version in the main title without changing the saved window ID.
+
+## 2026-10-03 - UI service-value preservation
+
+- Keep already-formatted service values, IDs, leading zeroes, clock text, empty arguments and numbered placeholders intact during localization. Typed UI numbers/dates and authored status labels retain their selected-culture formatting and translations.
+
+
+## 2026-10-02 - Build and release repair
+
+- Pin GitHub builds to SDK 10.0.201 and pass the downloaded Dalamud library path. Restore and build plugin projects with matching configuration, platform and runtime; stop on restore failure.
+- Keep build tokens read-only and release writes in a separate job. Use packaged manifest versions for untagged releases.
+- Consolidate tag releases in build-release.yml and retain the read-only CI build.
+- Local launchers build the plugin directly in the pinned environment and return its exit status.
 
 All notable changes to this project will be documented in this file.
 
@@ -10,6 +72,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Adopted the approved regular and compact AethertekUI main and mini designs with plugin-owned vector branding, read-only Operator and Automation fields, native party/status tables, responsive groups, and collapsed diagnostics. Settings and the blocking AutoDuty alert retain their layouts with shared typography, theme, and necessary scrolling/wrapping.
+- Added consumer-owned `UiLanguage`, `UiAccentRgb`, and `UiCompact` preferences without changing the configuration version. All fourteen languages use embedded keyed resources, selected-locale formatting, and stable native control/window IDs. Relative OKLCH colours update the whole decorative theme while preserving semantic status colours.
+- Added managed Segoe UI weight roles with host-managed CJK and Windows symbol merges, explicit font readiness/glyph checks, and disposal. The mini retains saved fren identities outside the current party and shows MAGIA actions only in Eureka. Local build/source validation is separate from pending game visual acceptance.
+- Retained the main Close action and companion timer/inventory fallback; narrow party tables scroll horizontally. Translated tabs, radios, and disclosure arrows respect disabled appearance.
+- Added per-character Phoenix Down recovery (on), nearby outdoor stranger revival (on), and combat item use (off), including legacy defaults and all profile operations. Regular four-player dungeons and outdoor areas use item 4570 against confirmed corpses only when no living healer is within 20 yalms; party members and dead healers take priority.
+- Party recovery holds progression and movement, approaches visible party corpses through vnavmesh to 14.5 yalms, checks inventory/native readiness/shared medicine cooldown/range/line of sight, and staggers clients by sorted party Content IDs. Combat-off recovery waits before approaching or using an item; other survivors retain current combat actions. Track actual casts separately from revival, defer Return while a living party rescuer remains, and release only recovery-owned controls during cleanup.
+- Added `FrenRider.PhoenixDown.ShouldPauseDutyProgression` and the ADS recovery acknowledgement handshake. Missing ADS support blocks recovery approach/item use in owned dungeons. Offline verification covers recovery and profile behavior; live cast, revival, and ADS resumption remain pending mcvaxius-controlled testing.
 - Added Beastmaster automatic Capture for eligible Combatant beasts closer than 10 yalms while FrenRider is enabled, including outside combat. **Try to catch beasts** defaults to on, with independent 1–100% HP thresholds of 90% for enemies more than five levels below and 40% for enemies within five levels below or equal. A threshold of 100% permits Capture on a full-health beast and may initiate combat. More distant targets are skipped before beast resolution. Higher-level and unresolved beasts, and models without any confirmed unowned candidate, are skipped; attempts respect native availability, cooldowns, combat authority, utility holds, and leases without changing another rotation plugin.
 - Added a collapsed **Saved beasts** list in Combat settings. Confirmed native XBMPet unlocks refresh on Beastmaster after login/job changes, area changes, and combat exit, even with automatic Capture disabled. Catches stay in local character account data through settings copies, resets, and profile transfers, and remain browsable on other jobs.
 

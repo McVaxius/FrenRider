@@ -1,0 +1,2811 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms</value>
+  </resheader>
+  <data name="Blue" xml:space="preserve">
+    <value>Xanh dương</value>
+  </data>
+  <data name="Character" xml:space="preserve">
+    <value>Nhân vật</value>
+  </data>
+  <data name="Color" xml:space="preserve">
+    <value>Màu</value>
+  </data>
+  <data name="Custom RGB" xml:space="preserve">
+    <value>RGB tùy chỉnh</value>
+  </data>
+  <data name="Enabled" xml:space="preserve">
+    <value>Đã bật</value>
+  </data>
+  <data name="Forced / On" xml:space="preserve">
+    <value>Ép / Bật</value>
+  </data>
+  <data name="Icon only" xml:space="preserve">
+    <value>Chỉ biểu tượng</value>
+  </data>
+  <data name="Interactive" xml:space="preserve">
+    <value>Tương tác</value>
+  </data>
+  <data name="Job" xml:space="preserve">
+    <value>Nghề</value>
+  </data>
+  <data name="Ko-fi" xml:space="preserve">
+    <value>Ko-fi</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>Ngôn ngữ</value>
+  </data>
+  <data name="Loading UI fonts..." xml:space="preserve">
+    <value>Đang tải phông UI...</value>
+  </data>
+  <data name="N" xml:space="preserve">
+    <value>K</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>Không</value>
+  </data>
+  <data name="Off" xml:space="preserve">
+    <value>Tắt</value>
+  </data>
+  <data name="On" xml:space="preserve">
+    <value>Bật</value>
+  </data>
+  <data name="Override Off" xml:space="preserve">
+    <value>Ép tắt</value>
+  </data>
+  <data name="Passive" xml:space="preserve">
+    <value>Thụ động</value>
+  </data>
+  <data name="Pink" xml:space="preserve">
+    <value>Hồng</value>
+  </data>
+  <data name="Profile" xml:space="preserve">
+    <value>Hồ sơ</value>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>Tìm kiếm</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>Cài đặt</value>
+  </data>
+  <data name="Teal" xml:space="preserve">
+    <value>Xanh ngọc</value>
+  </data>
+  <data name="Text only" xml:space="preserve">
+    <value>Chỉ văn bản</value>
+  </data>
+  <data name="UI fonts failed to load. See the plugin log." xml:space="preserve">
+    <value>Không tải được phông UI. Xem log plugin.</value>
+  </data>
+  <data name="Unknown" xml:space="preserve">
+    <value>Không rõ</value>
+  </data>
+  <data name="Y" xml:space="preserve">
+    <value>C</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>Có</value>
+  </data>
+  <data name="Compact mode" xml:space="preserve">
+    <value>Chế độ gọn</value>
+  </data>
+  <data name="Run" xml:space="preserve">
+    <value>Chạy</value>
+  </data>
+  <data name="Operator" xml:space="preserve">
+    <value>Người điều khiển</value>
+  </data>
+  <data name="Party" xml:space="preserve">
+    <value>Tổ đội</value>
+  </data>
+  <data name="Automation" xml:space="preserve">
+    <value>Tự động hóa</value>
+  </data>
+  <data name="Account" xml:space="preserve">
+    <value>Tài khoản</value>
+  </data>
+  <data name="Fren" xml:space="preserve">
+    <value>Fren</value>
+  </data>
+  <data name="Tracking" xml:space="preserve">
+    <value>Theo dõi</value>
+  </data>
+  <data name="Position" xml:space="preserve">
+    <value>Vị trí</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Tên</value>
+  </data>
+  <data name="Distance" xml:space="preserve">
+    <value>Khoảng cách</value>
+  </data>
+  <data name="Follow" xml:space="preserve">
+    <value>Theo</value>
+  </data>
+  <data name="Mount" xml:space="preserve">
+    <value>Thú cưỡi</value>
+  </data>
+  <data name="Combat" xml:space="preserve">
+    <value>Chiến đấu</value>
+  </data>
+  <data name="Cleanup" xml:space="preserve">
+    <value>Dọn dẹp</value>
+  </data>
+  <data name="Idle" xml:space="preserve">
+    <value>Chờ</value>
+  </data>
+  <data name="Fren teleport" xml:space="preserve">
+    <value>Dịch chuyển đến fren</value>
+  </data>
+  <data name="Phoenix Down" xml:space="preserve">
+    <value>Phoenix Down</value>
+  </data>
+  <data name="Respawn" xml:space="preserve">
+    <value>Hồi sinh</value>
+  </data>
+  <data name="Food" xml:space="preserve">
+    <value>Thức ăn</value>
+  </data>
+  <data name="Repair" xml:space="preserve">
+    <value>Sửa chữa</value>
+  </data>
+  <data name="Desynth" xml:space="preserve">
+    <value>Phân giải</value>
+  </data>
+  <data name="Companion" xml:space="preserve">
+    <value>Bạn đồng hành</value>
+  </data>
+  <data name="Formation" xml:space="preserve">
+    <value>Đội hình</value>
+  </data>
+  <data name="Duty / ADS / Exit" xml:space="preserve">
+    <value>Phụ bản / ADS / Rời</value>
+  </data>
+  <data name="Zone" xml:space="preserve">
+    <value>Khu vực</value>
+  </data>
+  <data name="Exit method" xml:space="preserve">
+    <value>Cách rời</value>
+  </data>
+  <data name="Exit" xml:space="preserve">
+    <value>Rời</value>
+  </data>
+  <data name="Duty interact" xml:space="preserve">
+    <value>Tương tác phụ bản</value>
+  </data>
+  <data name="ADS authority" xml:space="preserve">
+    <value>Quyền điều khiển ADS</value>
+  </data>
+  <data name="Compact debug" xml:space="preserve">
+    <value>Debug gọn</value>
+  </data>
+  <data name="Config" xml:space="preserve">
+    <value>Cấu hình</value>
+  </data>
+  <data name="Distances" xml:space="preserve">
+    <value>Khoảng cách</value>
+  </data>
+  <data name="ADS flags" xml:space="preserve">
+    <value>Cờ ADS</value>
+  </data>
+  <data name="Not logged in" xml:space="preserve">
+    <value>Chưa đăng nhập</value>
+  </data>
+  <data name="Logged in, local player unavailable" xml:space="preserve">
+    <value>Đã đăng nhập, người chơi cục bộ không khả dụng</value>
+  </data>
+  <data name="No account loaded" xml:space="preserve">
+    <value>Chưa tải tài khoản</value>
+  </data>
+  <data name="No account loaded." xml:space="preserve">
+    <value>Chưa tải tài khoản.</value>
+  </data>
+  <data name="No fren configured" xml:space="preserve">
+    <value>Chưa cấu hình fren</value>
+  </data>
+  <data name="Inactive" xml:space="preserve">
+    <value>Không hoạt động</value>
+  </data>
+  <data name="In party but not visible" xml:space="preserve">
+    <value>Trong tổ đội nhưng không hiển thị</value>
+  </data>
+  <data name="Fren not found" xml:space="preserve">
+    <value>Không tìm thấy fren</value>
+  </data>
+  <data name="in party" xml:space="preserve">
+    <value>trong tổ đội</value>
+  </data>
+  <data name="not in party" xml:space="preserve">
+    <value>ngoài tổ đội</value>
+  </data>
+  <data name="Not in a party" xml:space="preserve">
+    <value>Không trong tổ đội</value>
+  </data>
+  <data name="Mounted" xml:space="preserve">
+    <value>Đang cưỡi</value>
+  </data>
+  <data name="On foot" xml:space="preserve">
+    <value>Đi bộ</value>
+  </data>
+  <data name="Not visible" xml:space="preserve">
+    <value>Không hiển thị</value>
+  </data>
+  <data name="Active checks running" xml:space="preserve">
+    <value>Đang chạy kiểm tra</value>
+  </data>
+  <data name="Idle; last {0}" xml:space="preserve">
+    <value>Chờ; lần cuối {0}</value>
+  </data>
+  <data name="Slot {0}" xml:space="preserve">
+    <value>Ô {0}</value>
+  </data>
+  <data name="All FR on" xml:space="preserve">
+    <value>Bật toàn bộ FR</value>
+  </data>
+  <data name="All FR off" xml:space="preserve">
+    <value>Tắt toàn bộ FR</value>
+  </data>
+  <data name="Fren Rider Mini" xml:space="preserve">
+    <value>Fren Rider Mini</value>
+  </data>
+  <data name="Attack" xml:space="preserve">
+    <value>Tấn công</value>
+  </data>
+  <data name="Defense" xml:space="preserve">
+    <value>Phòng thủ</value>
+  </data>
+  <data name="&lt;none&gt;" xml:space="preserve">
+    <value>&lt;không có&gt;</value>
+  </data>
+  <data name="UI / About" xml:space="preserve">
+    <value>UI / Giới thiệu</value>
+  </data>
+  <data name="DEFAULT CONFIG" xml:space="preserve">
+    <value>CẤU HÌNH MẶC ĐỊNH</value>
+  </data>
+  <data name="REMOTE PROFILES (DAD)" xml:space="preserve">
+    <value>HỒ SƠ TỪ XA (DAD)</value>
+  </data>
+  <data name="REMOTE DAD PROFILE" xml:space="preserve">
+    <value>HỒ SƠ DAD TỪ XA</value>
+  </data>
+  <data name="REMOTE: {0}" xml:space="preserve">
+    <value>TỪ XA: {0}</value>
+  </data>
+  <data name="Fren Rider Settings - {0}" xml:space="preserve">
+    <value>Cài đặt Fren Rider - {0}</value>
+  </data>
+  <data name="DELETE" xml:space="preserve">
+    <value>XÓA</value>
+  </data>
+  <data name="DELETE REMOTE" xml:space="preserve">
+    <value>XÓA HỒ SƠ TỪ XA</value>
+  </data>
+  <data name="Everything Sync" xml:space="preserve">
+    <value>Đồng bộ mọi thứ</value>
+  </data>
+  <data name="Full Tab Sync" xml:space="preserve">
+    <value>Đồng bộ toàn thẻ</value>
+  </data>
+  <data name="Reset All" xml:space="preserve">
+    <value>Đặt lại tất cả</value>
+  </data>
+  <data name="Reset This" xml:space="preserve">
+    <value>Đặt lại mục này</value>
+  </data>
+  <data name="Sync all" xml:space="preserve">
+    <value>Đồng bộ tất cả</value>
+  </data>
+  <data name="Fren Name" xml:space="preserve">
+    <value>Tên fren</value>
+  </data>
+  <data name="DAD Profile Acceptance" xml:space="preserve">
+    <value>Chấp nhận hồ sơ DAD</value>
+  </data>
+  <data name="Temporary" xml:space="preserve">
+    <value>Tạm thời</value>
+  </data>
+  <data name="Permanent" xml:space="preserve">
+    <value>Vĩnh viễn</value>
+  </data>
+  <data name="Fren Rider enabled by default" xml:space="preserve">
+    <value>Mặc định bật Fren Rider</value>
+  </data>
+  <data name="Enabled when transferred" xml:space="preserve">
+    <value>Bật khi chuyển giao</value>
+  </data>
+  <data name="Display label" xml:space="preserve">
+    <value>Nhãn hiển thị</value>
+  </data>
+  <data name="Show Fren Rider status in the server info bar." xml:space="preserve">
+    <value>Hiện trạng thái Fren Rider trên thanh thông tin máy chủ.</value>
+  </data>
+  <data name="Obfuscate character names in FrenRider UI." xml:space="preserve">
+    <value>Che tên nhân vật trong UI FrenRider.</value>
+  </data>
+  <data name="Not logged in. FrenRider waits until a character is loaded." xml:space="preserve">
+    <value>Chưa đăng nhập. FrenRider chờ đến khi tải nhân vật.</value>
+  </data>
+  <data name="AutoDuty detected while FrenRider is enabled." xml:space="preserve">
+    <value>Phát hiện AutoDuty khi FrenRider đang bật.</value>
+  </data>
+  <data name="Set DEFAULT CONFIG and every local character in the current account, including the active temporary profile." xml:space="preserve">
+    <value>Đặt CẤU HÌNH MẶC ĐỊNH và mọi nhân vật cục bộ trong tài khoản hiện tại, kể cả hồ sơ tạm thời đang hoạt động.</value>
+  </data>
+  <data name="Fly You Fools (fly alongside instead of pillion)" xml:space="preserve">
+    <value>Fly You Fools (bay bên cạnh thay vì ngồi sau)</value>
+  </data>
+  <data name="Try Teleport to Fren When Out of Zone" xml:space="preserve">
+    <value>Thử dịch chuyển đến fren khi khác khu vực</value>
+  </data>
+  <data name="Follow local aetheryte networks" xml:space="preserve">
+    <value>Theo mạng aetheryte cục bộ</value>
+  </data>
+  <data name="Teleport Delay (seconds)" xml:space="preserve">
+    <value>Độ trễ dịch chuyển (giây)</value>
+  </data>
+  <data name="Nudge in duty when fren not nearby/in-zone" xml:space="preserve">
+    <value>Nhích tới trong phụ bản khi fren không gần/cùng khu</value>
+  </data>
+  <data name="Use Phoenix Downs for recovery" xml:space="preserve">
+    <value>Dùng Phoenix Down để cứu hồi</value>
+  </data>
+  <data name="Revive anyone within range outdoors" xml:space="preserve">
+    <value>Hồi sinh bất kỳ ai trong phạm vi ngoài trời</value>
+  </data>
+  <data name="Allow Phoenix Down use during combat" xml:space="preserve">
+    <value>Cho phép dùng Phoenix Down khi chiến đấu</value>
+  </data>
+  <data name="Respawn after death outside duties after" xml:space="preserve">
+    <value>Hồi sinh sau khi chết ngoài phụ bản sau</value>
+  </data>
+  <data name="Respawn after death inside duties after" xml:space="preserve">
+    <value>Hồi sinh sau khi chết trong phụ bản sau</value>
+  </data>
+  <data name="seconds" xml:space="preserve">
+    <value>giây</value>
+  </data>
+  <data name="Mount-up to chase fren if &gt;" xml:space="preserve">
+    <value>Cưỡi để đuổi theo fren nếu hơn</value>
+  </data>
+  <data name="y from fren" xml:space="preserve">
+    <value>y từ fren</value>
+  </data>
+  <data name="after" xml:space="preserve">
+    <value>sau</value>
+  </data>
+  <data name="Mount Name (if flying solo)" xml:space="preserve">
+    <value>Tên thú cưỡi (khi bay một mình)</value>
+  </data>
+  <data name="(none)" xml:space="preserve">
+    <value>(không có)</value>
+  </data>
+  <data name="Mount Roulette" xml:space="preserve">
+    <value>Chọn thú cưỡi ngẫu nhiên</value>
+  </data>
+  <data name="Summon Chocobo" xml:space="preserve">
+    <value>Triệu hồi chocobo</value>
+  </data>
+  <data name="Gysahl Greens: {0}" xml:space="preserve">
+    <value>Gysahl Greens: {0}</value>
+  </data>
+  <data name="Companion Stance" xml:space="preserve">
+    <value>Tư thế bạn đồng hành</value>
+  </data>
+  <data name="Free Stance" xml:space="preserve">
+    <value>Tư thế tự do</value>
+  </data>
+  <data name="Defender Stance" xml:space="preserve">
+    <value>Tư thế phòng thủ</value>
+  </data>
+  <data name="Attacker Stance" xml:space="preserve">
+    <value>Tư thế tấn công</value>
+  </data>
+  <data name="Healer Stance" xml:space="preserve">
+    <value>Tư thế chữa trị</value>
+  </data>
+  <data name="Auto Discard (/ays discard)" xml:space="preserve">
+    <value>Tự vứt bỏ (/ays discard)</value>
+  </data>
+  <data name="Update Interval (seconds)" xml:space="preserve">
+    <value>Khoảng cập nhật (giây)</value>
+  </data>
+  <data name="WARNING: Very low update interval may impact game performance!" xml:space="preserve">
+    <value>CẢNH BÁO: Khoảng cập nhật quá thấp có thể ảnh hưởng hiệu suất game!</value>
+  </data>
+  <data name="Cling Distance" xml:space="preserve">
+    <value>Khoảng cách bám</value>
+  </data>
+  <data name="Cling Type" xml:space="preserve">
+    <value>Kiểu bám</value>
+  </data>
+  <data name="Cling Type (Duty)" xml:space="preserve">
+    <value>Kiểu bám (phụ bản)</value>
+  </data>
+  <data name="BossMod Follow" xml:space="preserve">
+    <value>Theo bằng BossMod</value>
+  </data>
+  <data name="Vanilla Follow" xml:space="preserve">
+    <value>Theo mặc định</value>
+  </data>
+  <data name="Social Distancing" xml:space="preserve">
+    <value>Giữ khoảng cách</value>
+  </data>
+  <data name="Social Distance (yalms)" xml:space="preserve">
+    <value>Khoảng cách xã hội (yalms)</value>
+  </data>
+  <data name="Social Distance Indoors" xml:space="preserve">
+    <value>Giữ khoảng cách trong nhà</value>
+  </data>
+  <data name="X Wiggle (+/- yalms)" xml:space="preserve">
+    <value>Dao động X (+/- yalms)</value>
+  </data>
+  <data name="Z Wiggle (+/- yalms)" xml:space="preserve">
+    <value>Dao động Z (+/- yalms)</value>
+  </data>
+  <data name="Max Distances" xml:space="preserve">
+    <value>Khoảng cách tối đa</value>
+  </data>
+  <data name="Max Follow Distance" xml:space="preserve">
+    <value>Khoảng theo tối đa</value>
+  </data>
+  <data name="Max Follow Distance (Foray)" xml:space="preserve">
+    <value>Khoảng theo tối đa (Foray)</value>
+  </data>
+  <data name="Deep Dungeon Extra Cling" xml:space="preserve">
+    <value>Khoảng bám thêm Deep Dungeon</value>
+  </data>
+  <data name="FATE Extra Cling" xml:space="preserve">
+    <value>Khoảng bám thêm FATE</value>
+  </data>
+  <data name="Auto Sync FATE" xml:space="preserve">
+    <value>Tự đồng bộ FATE</value>
+  </data>
+  <data name="Formation Following" xml:space="preserve">
+    <value>Theo đội hình</value>
+  </data>
+  <data name="Follow in Combat" xml:space="preserve">
+    <value>Theo khi chiến đấu</value>
+  </data>
+  <data name="Harmonized Cling Reset Ticks" xml:space="preserve">
+    <value>Tick đặt lại bám hài hòa</value>
+  </data>
+  <data name="Rotation Plugin" xml:space="preserve">
+    <value>Plugin chuỗi kỹ năng</value>
+  </data>
+  <data name="Rotation Plugin (Foray)" xml:space="preserve">
+    <value>Plugin chuỗi kỹ năng (Foray)</value>
+  </data>
+  <data name="Daedalus Party Mode" xml:space="preserve">
+    <value>Chế độ tổ đội Daedalus</value>
+  </data>
+  <data name="None" xml:space="preserve">
+    <value>Không có</value>
+  </data>
+  <data name="Focus" xml:space="preserve">
+    <value>Tập trung</value>
+  </data>
+  <data name="Split" xml:space="preserve">
+    <value>Chia</value>
+  </data>
+  <data name="Kill Adds" xml:space="preserve">
+    <value>Hạ lính phụ</value>
+  </data>
+  <data name="Autorot Presets" xml:space="preserve">
+    <value>Bộ thiết lập kỹ năng tự động</value>
+  </data>
+  <data name="Configure rotation preset manually" xml:space="preserve">
+    <value>Cấu hình bộ thiết lập kỹ năng thủ công</value>
+  </data>
+  <data name="BM Rotation Preset" xml:space="preserve">
+    <value>Bộ thiết lập kỹ năng BM</value>
+  </data>
+  <data name="BM Rotation Preset (DD)" xml:space="preserve">
+    <value>Bộ thiết lập kỹ năng BM (DD)</value>
+  </data>
+  <data name="BM Rotation Preset (FATE)" xml:space="preserve">
+    <value>Bộ thiết lập kỹ năng BM (FATE)</value>
+  </data>
+  <data name="Force BossMod preset regardless of rotation" xml:space="preserve">
+    <value>Ép bộ thiết lập BossMod bất kể chuỗi kỹ năng</value>
+  </data>
+  <data name="Push Presets Now" xml:space="preserve">
+    <value>Gửi bộ thiết lập ngay</value>
+  </data>
+  <data name="Cleanup Mode" xml:space="preserve">
+    <value>Chế độ dọn dẹp</value>
+  </data>
+  <data name="Restore snapshot" xml:space="preserve">
+    <value>Khôi phục trạng thái đã chụp</value>
+  </data>
+  <data name="Turn everything off" xml:space="preserve">
+    <value>Tắt mọi thứ</value>
+  </data>
+  <data name="RSR Operating Mode" xml:space="preserve">
+    <value>Chế độ vận hành RSR</value>
+  </data>
+  <data name="RSR Aggro Type" xml:space="preserve">
+    <value>Kiểu aggro RSR</value>
+  </data>
+  <data name="All Attackable Targets" xml:space="preserve">
+    <value>Mọi mục tiêu có thể tấn công</value>
+  </data>
+  <data name="Previously Engaged Targets" xml:space="preserve">
+    <value>Mục tiêu từng giao chiến</value>
+  </data>
+  <data name="All Targets When Solo in Duty" xml:space="preserve">
+    <value>Mọi mục tiêu khi một mình trong phụ bản</value>
+  </data>
+  <data name="All Targets When Solo" xml:space="preserve">
+    <value>Mọi mục tiêu khi một mình</value>
+  </data>
+  <data name="Solo Deep Dungeon Smart" xml:space="preserve">
+    <value>Deep Dungeon solo thông minh</value>
+  </data>
+  <data name="Manual" xml:space="preserve">
+    <value>Thủ công</value>
+  </data>
+  <data name="Support" xml:space="preserve">
+    <value>Hỗ trợ</value>
+  </data>
+  <data name="Don't move while casting" xml:space="preserve">
+    <value>Không di chuyển khi thi triển</value>
+  </data>
+  <data name="Positional" xml:space="preserve">
+    <value>Vị trí tấn công</value>
+  </data>
+  <data name="Front" xml:space="preserve">
+    <value>Phía trước</value>
+  </data>
+  <data name="Rear" xml:space="preserve">
+    <value>Phía sau</value>
+  </data>
+  <data name="Any" xml:space="preserve">
+    <value>Bất kỳ</value>
+  </data>
+  <data name="Combat Max Distance" xml:space="preserve">
+    <value>Khoảng chiến đấu tối đa</value>
+  </data>
+  <data name="Limit Break HP %" xml:space="preserve">
+    <value>HP % Limit Break</value>
+  </data>
+  <data name="Beastmaster Capture" xml:space="preserve">
+    <value>Bắt Beastmaster</value>
+  </data>
+  <data name="Try to catch beasts" xml:space="preserve">
+    <value>Thử bắt thú</value>
+  </data>
+  <data name="Capture HP: within 5 levels below you or equal" xml:space="preserve">
+    <value>HP bắt: thấp hơn tối đa 5 cấp hoặc bằng</value>
+  </data>
+  <data name="Capture HP: more than 5 levels below you" xml:space="preserve">
+    <value>HP bắt: thấp hơn hơn 5 cấp</value>
+  </data>
+  <data name="Saved beasts" xml:space="preserve">
+    <value>Thú đã lưu</value>
+  </data>
+  <data name="Select a local character to browse their saved beasts." xml:space="preserve">
+    <value>Chọn nhân vật cục bộ để xem thú đã lưu.</value>
+  </data>
+  <data name="Obstacle maps on" xml:space="preserve">
+    <value>Bật bản đồ chướng ngại</value>
+  </data>
+  <data name="BMR reduce activation range for outdoor areas" xml:space="preserve">
+    <value>BMR giảm phạm vi kích hoạt ngoài trời</value>
+  </data>
+  <data name="BMR Disable Hunt Modules" xml:space="preserve">
+    <value>BMR tắt mô-đun Hunt</value>
+  </data>
+  <data name="BMR Disable Queen Lunatender" xml:space="preserve">
+    <value>BMR tắt Queen Lunatender</value>
+  </data>
+  <data name="ADS Duty Handoff" xml:space="preserve">
+    <value>Chuyển giao phụ bản ADS</value>
+  </data>
+  <data name="Duty Families" xml:space="preserve">
+    <value>Nhóm phụ bản</value>
+  </data>
+  <data name="sec ready" xml:space="preserve">
+    <value>giây sẵn sàng</value>
+  </data>
+  <data name="Seed family rows from legacy values" xml:space="preserve">
+    <value>Điền nhóm từ giá trị cũ</value>
+  </data>
+  <data name="Temporarily controlled by DAD" xml:space="preserve">
+    <value>Được DAD điều khiển tạm thời</value>
+  </data>
+  <data name="Equip job stone for current class" xml:space="preserve">
+    <value>Trang bị đá nghề cho lớp hiện tại</value>
+  </data>
+  <data name="Loot" xml:space="preserve">
+    <value>Chiến lợi phẩm</value>
+  </data>
+  <data name="Loot Type" xml:space="preserve">
+    <value>Kiểu chiến lợi phẩm</value>
+  </data>
+  <data name="unchanged" xml:space="preserve">
+    <value>không đổi</value>
+  </data>
+  <data name="need" xml:space="preserve">
+    <value>Cần</value>
+  </data>
+  <data name="greed" xml:space="preserve">
+    <value>Tham</value>
+  </data>
+  <data name="pass" xml:space="preserve">
+    <value>Bỏ qua</value>
+  </data>
+  <data name="OPEN ADS LOOT OPTIONS" xml:space="preserve">
+    <value>MỞ TÙY CHỌN CHIẾN LỢI PHẨM ADS</value>
+  </data>
+  <data name="Use HQ food" xml:space="preserve">
+    <value>Dùng thức ăn HQ</value>
+  </data>
+  <data name="Search for Food if Depleted" xml:space="preserve">
+    <value>Tìm thức ăn nếu hết</value>
+  </data>
+  <data name="Clear Food" xml:space="preserve">
+    <value>Xóa thức ăn</value>
+  </data>
+  <data name="No food selected. Food is optional." xml:space="preserve">
+    <value>Chưa chọn thức ăn. Thức ăn là tùy chọn.</value>
+  </data>
+  <data name="Type at least 2 characters to search..." xml:space="preserve">
+    <value>Nhập ít nhất 2 ký tự để tìm...</value>
+  </data>
+  <data name="No results. Try a different search term." xml:space="preserve">
+    <value>Không có kết quả. Thử từ khóa khác.</value>
+  </data>
+  <data name="Repair Mode" xml:space="preserve">
+    <value>Chế độ sửa chữa</value>
+  </data>
+  <data name="Self" xml:space="preserve">
+    <value>Tự sửa</value>
+  </data>
+  <data name="NPC no-inn" xml:space="preserve">
+    <value>NPC không nhà trọ</value>
+  </data>
+  <data name="NPC No Inn + No TP" xml:space="preserve">
+    <value>NPC không nhà trọ + không TP</value>
+  </data>
+  <data name="NPC repair + inn room" xml:space="preserve">
+    <value>Sửa NPC + phòng nhà trọ</value>
+  </data>
+  <data name="Repair At % Durability" xml:space="preserve">
+    <value>Sửa ở % độ bền</value>
+  </data>
+  <data name="Test ADS NPC No-Inn Repair" xml:space="preserve">
+    <value>Thử sửa ADS NPC không nhà trọ</value>
+  </data>
+  <data name="Desynthesis" xml:space="preserve">
+    <value>Phân giải</value>
+  </data>
+  <data name="Enable Auto Desynth" xml:space="preserve">
+    <value>Bật tự phân giải</value>
+  </data>
+  <data name="OPEN DESYNTH CONFIG" xml:space="preserve">
+    <value>MỞ CẤU HÌNH PHÂN GIẢI</value>
+  </data>
+  <data name="Idle Behavior" xml:space="preserve">
+    <value>Hành vi chờ</value>
+  </data>
+  <data name="Idle Mode" xml:space="preserve">
+    <value>Chế độ chờ</value>
+  </data>
+  <data name="Specific Action" xml:space="preserve">
+    <value>Hành động cụ thể</value>
+  </data>
+  <data name="Action From List" xml:space="preserve">
+    <value>Hành động từ danh sách</value>
+  </data>
+  <data name="Idle Command" xml:space="preserve">
+    <value>Lệnh khi chờ</value>
+  </data>
+  <data name="List Source" xml:space="preserve">
+    <value>Nguồn danh sách</value>
+  </data>
+  <data name="Default List" xml:space="preserve">
+    <value>Danh sách mặc định</value>
+  </data>
+  <data name="Custom List" xml:space="preserve">
+    <value>Danh sách tùy chỉnh</value>
+  </data>
+  <data name="Idle Ticks Before Action" xml:space="preserve">
+    <value>Tick chờ trước hành động</value>
+  </data>
+  <data name="Echo Messages" xml:space="preserve">
+    <value>Tin nhắn chat</value>
+  </data>
+  <data name="Invite Whitelist" xml:space="preserve">
+    <value>Danh sách người mời cho phép</value>
+  </data>
+  <data name="Trusted inviters" xml:space="preserve">
+    <value>Người mời tin cậy</value>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>Thêm</value>
+  </data>
+  <data name="Auto-Yes Dialogs" xml:space="preserve">
+    <value>Tự chọn Có trong hộp thoại</value>
+  </data>
+  <data name="Teleport offers" xml:space="preserve">
+    <value>Đề nghị dịch chuyển</value>
+  </data>
+  <data name="Party invites (backup)" xml:space="preserve">
+    <value>Lời mời tổ đội (dự phòng)</value>
+  </data>
+  <data name="Raise offers are accepted automatically while FrenRider is enabled." xml:space="preserve">
+    <value>Tự chấp nhận đề nghị hồi sinh khi FrenRider đang bật.</value>
+  </data>
+  <data name="Exit Behaviour" xml:space="preserve">
+    <value>Hành vi rời</value>
+  </data>
+  <data name="Duty-end delay" xml:space="preserve">
+    <value>Độ trễ cuối phụ bản</value>
+  </data>
+  <data name="seconds after duty ends" xml:space="preserve">
+    <value>giây sau khi phụ bản kết thúc</value>
+  </data>
+  <data name="UI Settings" xml:space="preserve">
+    <value>Cài đặt UI</value>
+  </data>
+  <data name="Video Notifications" xml:space="preserve">
+    <value>Thông báo video</value>
+  </data>
+  <data name="Movable Config Window" xml:space="preserve">
+    <value>Cửa sổ cấu hình di chuyển được</value>
+  </data>
+  <data name="DTR Bar Enabled" xml:space="preserve">
+    <value>Bật thanh DTR</value>
+  </data>
+  <data name="DTR Bar Mode" xml:space="preserve">
+    <value>Chế độ thanh DTR</value>
+  </data>
+  <data name="Icon+Text" xml:space="preserve">
+    <value>Biểu tượng+văn bản</value>
+  </data>
+  <data name="DTR Icons (max 3 characters)" xml:space="preserve">
+    <value>Biểu tượng DTR (tối đa 3 ký tự)</value>
+  </data>
+  <data name="Copy Icon Guide Link" xml:space="preserve">
+    <value>Sao chép liên kết hướng dẫn biểu tượng</value>
+  </data>
+  <data name="VLC not found" xml:space="preserve">
+    <value>Không tìm thấy VLC</value>
+  </data>
+  <data name="Download VLC" xml:space="preserve">
+    <value>Tải VLC</value>
+  </data>
+  <data name="Advanced" xml:space="preserve">
+    <value>Nâng cao</value>
+  </data>
+  <data name="Debug / Logging" xml:space="preserve">
+    <value>Debug / Log</value>
+  </data>
+  <data name="Presets" xml:space="preserve">
+    <value>Bộ thiết lập</value>
+  </data>
+  <data name="Behavior" xml:space="preserve">
+    <value>Hành vi</value>
+  </data>
+  <data name="Hacks" xml:space="preserve">
+    <value>Tinh chỉnh</value>
+  </data>
+  <data name="DISABLE PANDORA's BOX" xml:space="preserve">
+    <value>TẮT PANDORA's BOX</value>
+  </data>
+  <data name="Commands:" xml:space="preserve">
+    <value>Lệnh:</value>
+  </data>
+  <data name="Required Dependencies:" xml:space="preserve">
+    <value>Thành phần bắt buộc:</value>
+  </data>
+  <data name="Optional Plugins:" xml:space="preserve">
+    <value>Plugin tùy chọn:</value>
+  </data>
+  <data name="Multiplayer Guide:" xml:space="preserve">
+    <value>Hướng dẫn nhiều người chơi:</value>
+  </data>
+  <data name="Made by McVaxius" xml:space="preserve">
+    <value>Tạo bởi mcvaxius</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Đóng</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>Trạng thái</value>
+  </data>
+  <data name="Beast" xml:space="preserve">
+    <value>Thú</value>
+  </data>
+  <data name="Saved ownership" xml:space="preserve">
+    <value>Quyền sở hữu đã lưu</value>
+  </data>
+  <data name="DD Extra Distance" xml:space="preserve">
+    <value>Khoảng thêm DD</value>
+  </data>
+  <data name="FATE Extra Distance" xml:space="preserve">
+    <value>Khoảng thêm FATE</value>
+  </data>
+  <data name="Max AI Distance" xml:space="preserve">
+    <value>Khoảng AI tối đa</value>
+  </data>
+  <data name="LB Threshold %" xml:space="preserve">
+    <value>Ngưỡng LB %</value>
+  </data>
+  <data name="ADS Exit Method" xml:space="preserve">
+    <value>Cách rời ADS</value>
+  </data>
+  <data name="FrenRider Exit method" xml:space="preserve">
+    <value>Cách rời FrenRider</value>
+  </data>
+  <data name="Exit after N seconds" xml:space="preserve">
+    <value>Rời sau N giây</value>
+  </data>
+  <data name="Leave when all others left" xml:space="preserve">
+    <value>Rời khi mọi người khác đã rời</value>
+  </data>
+  <data name="No automatic exit" xml:space="preserve">
+    <value>Không tự rời</value>
+  </data>
+  <data name="Food Item Name" xml:space="preserve">
+    <value>Tên vật phẩm thức ăn</value>
+  </data>
+  <data name="Add command" xml:space="preserve">
+    <value>Thêm lệnh</value>
+  </data>
+  <data name="Remove command" xml:space="preserve">
+    <value>Xóa lệnh</value>
+  </data>
+  <data name="Click to copy Daedalus repository URL" xml:space="preserve">
+    <value>Nhấp để sao chép URL kho Daedalus</value>
+  </data>
+  <data name="Click to copy URL to clipboard" xml:space="preserve">
+    <value>Nhấp để sao chép URL vào bộ nhớ tạm</value>
+  </data>
+  <data name="Click to download VLC media player" xml:space="preserve">
+    <value>Nhấp để tải trình phát VLC</value>
+  </data>
+  <data name="Copies the Lodestone blog link with suggested glyphs" xml:space="preserve">
+    <value>Sao chép liên kết blog Lodestone với gợi ý ký tự</value>
+  </data>
+  <data name="Disable Krangle to edit fren name." xml:space="preserve">
+    <value>Tắt Krangle để sửa tên fren.</value>
+  </data>
+  <data name="Disable Krangle to edit the account alias." xml:space="preserve">
+    <value>Tắt Krangle để sửa bí danh tài khoản.</value>
+  </data>
+  <data name="Select from current party members" xml:space="preserve">
+    <value>Chọn từ thành viên tổ đội hiện tại</value>
+  </data>
+  <data name="Hold CTRL and click to delete this remote profile." xml:space="preserve">
+    <value>Giữ CTRL và nhấp để xóa hồ sơ từ xa này.</value>
+  </data>
+  <data name="The currently active character profile cannot be deleted while logged in." xml:space="preserve">
+    <value>Không thể xóa hồ sơ nhân vật đang hoạt động khi đăng nhập.</value>
+  </data>
+  <data name="Hold CTRL and click to delete this character's config.&#xA;This cannot be undone." xml:space="preserve">
+    <value>Giữ CTRL và nhấp để xóa cấu hình nhân vật này.
+Không thể hoàn tác.</value>
+  </data>
+  <data name="Log in to a character to create one." xml:space="preserve">
+    <value>Đăng nhập nhân vật để tạo hồ sơ.</value>
+  </data>
+  <data name="Separate profiles for exact remote identities. They never become local character rows." xml:space="preserve">
+    <value>Hồ sơ riêng cho định danh từ xa chính xác. Không bao giờ thành hàng nhân vật cục bộ.</value>
+  </data>
+  <data name="This row is separate from local characters and can never become the active-character profile." xml:space="preserve">
+    <value>Hàng này tách khỏi nhân vật cục bộ và không bao giờ trở thành hồ sơ nhân vật đang hoạt động.</value>
+  </data>
+  <data name="Incoming DAD profiles will replace this character's saved profile." xml:space="preserve">
+    <value>Hồ sơ DAD nhận được sẽ thay thế hồ sơ đã lưu của nhân vật này.</value>
+  </data>
+  <data name="FrenRider installs BossMod presets whenever it is enabled." xml:space="preserve">
+    <value>FrenRider cài bộ thiết lập BossMod mỗi khi bật.</value>
+  </data>
+  <data name="Managed presets: BMR/VBM use FRENRIDER role presets; RSR/WRATH/DAEDALUS use passive role presets." xml:space="preserve">
+    <value>Các cấu hình đặt sẵn được quản lý: BMR/VBM dùng cấu hình vai trò FRENRIDER; RSR/WRATH/DAEDALUS dùng cấu hình vai trò thụ động.</value>
+  </data>
+  <data name="Copy DEFAULT CONFIG character-profile settings to every character profile in this account." xml:space="preserve">
+    <value>Sao chép thiết lập hồ sơ nhân vật của DEFAULT CONFIG sang mọi hồ sơ nhân vật trong tài khoản này.</value>
+  </data>
+  <data name="Copy this DEFAULT CONFIG tab to every character profile in this account." xml:space="preserve">
+    <value>Sao chép thẻ DEFAULT CONFIG này sang mọi hồ sơ nhân vật trong tài khoản này.</value>
+  </data>
+  <data name="UI / About uses global settings and is not copied to character profiles." xml:space="preserve">
+    <value>Giao diện / Giới thiệu dùng thiết lập toàn cục và không được sao chép sang hồ sơ nhân vật.</value>
+  </data>
+  <data name="Set DEFAULT CONFIG and every local character in this account, including the active temporary profile." xml:space="preserve">
+    <value>Áp dụng cho DEFAULT CONFIG và mọi nhân vật cục bộ trong tài khoản này, kể cả hồ sơ tạm thời đang dùng.</value>
+  </data>
+  <data name="Copy '{0}' from DEFAULT CONFIG to every character profile in this account." xml:space="preserve">
+    <value>Sao chép '{0}' từ DEFAULT CONFIG sang mọi hồ sơ nhân vật trong tài khoản này.</value>
+  </data>
+  <data name="AutoDuty Detected - Action Required" xml:space="preserve">
+    <value>Phát hiện AutoDuty - Cần xử lý</value>
+  </data>
+  <data name="AutoDuty is enabled and may cause issues:" xml:space="preserve">
+    <value>AutoDuty đang bật và có thể gây sự cố:</value>
+  </data>
+  <data name="FrenRider requires AutoDuty to be disabled for proper operation." xml:space="preserve">
+    <value>FrenRider cần tắt AutoDuty để hoạt động đúng.</value>
+  </data>
+  <data name="Disable AutoDuty" xml:space="preserve">
+    <value>Tắt AutoDuty</value>
+  </data>
+  <data name="This window will close automatically after disabling AutoDuty." xml:space="preserve">
+    <value>Cửa sổ này sẽ tự đóng sau khi tắt AutoDuty.</value>
+  </data>
+  <data name="0 = disabled.&#xA;1 = ADS self repair.&#xA;2 = ADS NPC repair without inn fallback.&#xA;3 = ADS NPC repair only when a mender is within 120y.&#xA;4 = ADS NPC repair near an inn, then enter the inn room." xml:space="preserve">
+    <value>0 = tắt.
+1 = ADS tự sửa.
+2 = ADS sửa tại NPC, không dùng phương án nhà trọ dự phòng.
+3 = ADS chỉ sửa tại NPC khi thợ sửa ở trong phạm vi 120y.
+4 = ADS sửa tại NPC gần nhà trọ, rồi vào phòng trọ.</value>
+  </data>
+  <data name="Additionally revive non-party players within 15 yalms outdoors. Party members and healers have priority. Never approach strangers." xml:space="preserve">
+    <value>Hồi sinh thêm người chơi ngoài tổ đội trong phạm vi 15 yalm ở ngoài trời. Ưu tiên thành viên tổ đội và người hồi máu. Không bao giờ tiếp cận người lạ.</value>
+  </data>
+  <data name="After DutyCompleted and duty exit, ask ADS to run configured desynthesis. FrenRider pauses automatic actions until completion or the 180s timeout." xml:space="preserve">
+    <value>Sau DutyCompleted và khi ra khỏi nhiệm vụ, yêu cầu ADS chạy phân giải đã cấu hình. FrenRider tạm dừng hành động tự động đến khi hoàn tất hoặc hết 180 giây.</value>
+  </data>
+  <data name="After remaining continuously unconscious inside duties for this delay, open the Return prompt and accept it. Duty scope is selected only by BoundByDuty. Minimum: 1 second. Default: 60." xml:space="preserve">
+    <value>Sau khi liên tục bất tỉnh trong nhiệm vụ đủ thời gian này, mở lời nhắc Return và chấp nhận. Phạm vi nhiệm vụ chỉ được xác định bởi BoundByDuty. Tối thiểu: 1 giây. Mặc định: 60.</value>
+  </data>
+  <data name="After remaining continuously unconscious outside duties for this delay, open the Return prompt and accept it. Minimum: 1 second. Default: 60." xml:space="preserve">
+    <value>Sau khi liên tục bất tỉnh ngoài nhiệm vụ đủ thời gian này, mở lời nhắc Return và chấp nhận. Tối thiểu: 1 giây. Mặc định: 60.</value>
+  </data>
+  <data name="Applies in dungeons and outdoors. Off waits for the rescuer to leave combat before approaching or using an item; current combat may finish, but new pulls stay blocked. On still respects native item availability and every other recovery gate." xml:space="preserve">
+    <value>Áp dụng trong hầm ngục và ngoài trời. Khi tắt, đợi người cứu thoát chiến đấu trước khi tiếp cận hoặc dùng vật phẩm; trận chiến hiện tại có thể kết thúc nhưng chặn lượt kéo mới. Khi bật, vẫn tuân theo khả năng dùng vật phẩm của trò chơi và mọi điều kiện hồi phục khác.</value>
+  </data>
+  <data name="Auto-summon chocobo companion using Gysahl Greens when timer is low.&#xA;Will not summon in sanctuaries or duties." xml:space="preserve">
+    <value>Tự triệu hồi bạn đồng hành chocobo bằng Gysahl Greens khi thời gian còn ít.
+Không triệu hồi trong khu an toàn hoặc nhiệm vụ.</value>
+  </data>
+  <data name="Automatically accept teleport offers (e.g., Return, Teleport to).&#xA;Note: Party invites are handled by the whitelist system below." xml:space="preserve">
+    <value>Tự chấp nhận lời mời dịch chuyển (ví dụ: Return, Teleport to).
+Lưu ý: Lời mời tổ đội do hệ thống danh sách cho phép bên dưới xử lý.</value>
+  </data>
+  <data name="Automatically accept teleport offers." xml:space="preserve">
+    <value>Tự chấp nhận lời mời dịch chuyển.</value>
+  </data>
+  <data name="Automatically click Yes on specific dialog types when FrenRider is enabled.&#xA;Works alongside YesAlready - FrenRider pauses YesAlready and handles these dialogs itself." xml:space="preserve">
+    <value>Tự nhấn Yes trên các loại hộp thoại cụ thể khi FrenRider bật.
+Hoạt động cùng YesAlready - FrenRider tạm dừng YesAlready và tự xử lý các hộp thoại này.</value>
+  </data>
+  <data name="Automatically leave the duty N seconds after it completes." xml:space="preserve">
+    <value>Tự rời nhiệm vụ N giây sau khi hoàn thành.</value>
+  </data>
+  <data name="Backup auto-accept for party invites.&#xA;Primary invite handling uses the whitelist system above." xml:space="preserve">
+    <value>Tự chấp nhận lời mời tổ đội dự phòng.
+Cách xử lý chính dùng hệ thống danh sách cho phép ở trên.</value>
+  </data>
+  <data name="Backup auto-accept for party invites. Primary invite handling uses the whitelist." xml:space="preserve">
+    <value>Tự chấp nhận lời mời tổ đội dự phòng. Cách xử lý chính dùng danh sách cho phép.</value>
+  </data>
+  <data name="Both HP thresholds accept 1–100%. Exactly five levels below uses this second threshold.&#xA;100% permits Capture on a full-health beast and may initiate combat." xml:space="preserve">
+    <value>Cả hai ngưỡng HP chấp nhận 1–100%. Dùng ngưỡng thứ hai khi thấp hơn đúng năm cấp.
+100% cho phép Capture thú đầy máu và có thể bắt đầu chiến đấu.</value>
+  </data>
+  <data name="Chocobo companion battle stance.&#xA;Controls how your companion behaves in combat." xml:space="preserve">
+    <value>Tư thế chiến đấu của bạn đồng hành chocobo.
+Điều khiển hành vi của bạn đồng hành trong chiến đấu.</value>
+  </data>
+  <data name="Combat positional preference.&#xA;Front: Stay in front of target&#xA;Rear: Stay behind target&#xA;Any: No preference&#xA;Auto: Let plugin decide based on job" xml:space="preserve">
+    <value>Vị trí chiến đấu ưu tiên.
+Phía trước: Ở trước mục tiêu
+Phía sau: Ở sau mục tiêu
+Bất kỳ: Không ưu tiên
+Tự động: Plugin quyết định theo nghề</value>
+  </data>
+  <data name="Controls BossMod Reborn only. Default: off. Applies when FrenRider is enabled, regardless of combat provider." xml:space="preserve">
+    <value>Chỉ điều khiển BossMod Reborn. Mặc định: tắt. Áp dụng khi FrenRider bật, bất kể công cụ chiến đấu.</value>
+  </data>
+  <data name="Customize the glyphs used for enabled/disabled icon modes." xml:space="preserve">
+    <value>Tùy chỉnh ký hiệu dùng cho chế độ biểu tượng bật/tắt.</value>
+  </data>
+  <data name="DTR bar display mode:&#xA;Text Only: 'FR: On/Off'&#xA;Icon+Text: '⚫ FR'&#xA;Icon Only: '⚫'" xml:space="preserve">
+    <value>Chế độ hiển thị thanh DTR:
+Chỉ chữ: 'FR: Bật/Tắt'
+Biểu tượng+Chữ: '⚫ FR'
+Chỉ biểu tượng: '⚫'</value>
+  </data>
+  <data name="Default List: Built-in emote list&#xA;Custom List: Your own list of commands" xml:space="preserve">
+    <value>Danh sách mặc định: Danh sách biểu cảm có sẵn
+Danh sách tùy chỉnh: Danh sách lệnh của bạn</value>
+  </data>
+  <data name="Default List: built-in emotes&#xA;Custom List: your own command list" xml:space="preserve">
+    <value>Danh sách mặc định: biểu cảm có sẵn
+Danh sách tùy chỉnh: danh sách lệnh của bạn</value>
+  </data>
+  <data name="Delay before opening the party window and teleporting. Allowed range: 5-300 seconds. Default: 30." xml:space="preserve">
+    <value>Thời gian chờ trước khi mở cửa sổ tổ đội và dịch chuyển. Phạm vi: 5-300 giây. Mặc định: 30.</value>
+  </data>
+  <data name="Distance threshold (yalms) to start following fren.&#xA;When you are farther than this from fren, navigation begins." xml:space="preserve">
+    <value>Ngưỡng khoảng cách (yalm) để bắt đầu theo fren.
+Khi xa fren hơn mức này, bắt đầu dẫn đường.</value>
+  </data>
+  <data name="Each family has its own enable toggle, maturity threshold, and continuous-ready handoff delay.&#xA;0 = not cleared, 1 = unsync cleared, 2 = duty support cleared, 3 = proven sync clear.&#xA;Handoff delay range: 2-300 seconds." xml:space="preserve">
+    <value>Mỗi nhóm có nút bật, ngưỡng độ thành thạo và thời gian chờ bàn giao khi liên tục sẵn sàng riêng.
+0 = chưa hoàn thành, 1 = hoàn thành không đồng bộ, 2 = hoàn thành với hỗ trợ nhiệm vụ, 3 = đã chứng minh hoàn thành đồng bộ.
+Thời gian chờ bàn giao: 2-300 giây.</value>
+  </data>
+  <data name="Enable social distancing indoors too.&#xA;Off by default. Turn on if you want spacing in dungeons." xml:space="preserve">
+    <value>Bật giãn cách trong nhà.
+Mặc định tắt. Bật nếu muốn giữ khoảng cách trong hầm ngục.</value>
+  </data>
+  <data name="Extra distance added to cling in Deep Dungeons.&#xA;Prevents constant chasing in PotD/HoH." xml:space="preserve">
+    <value>Khoảng cách thêm vào bám sát trong Deep Dungeon.
+Tránh đuổi theo liên tục trong PotD/HoH.</value>
+  </data>
+  <data name="Follow in a formation pattern (8-person grid).&#xA;Positions based on party slot number.&#xA;Disabled during mounting." xml:space="preserve">
+    <value>Theo đội hình (lưới 8 người).
+Vị trí dựa trên số ô tổ đội.
+Tắt khi lên thú cưỡi.</value>
+  </data>
+  <data name="Garble all identifying text (character names, fren names, servers)&#xA;with military/exercise words. Useful for taking screenshots&#xA;to report issues without revealing personal info." xml:space="preserve">
+    <value>Làm rối mọi chữ nhận dạng (tên nhân vật, tên fren, máy chủ)
+bằng từ ngữ quân sự/huấn luyện. Hữu ích khi chụp ảnh
+báo lỗi mà không tiết lộ thông tin cá nhân.</value>
+  </data>
+  <data name="Global setting. On plugin load and whenever it changes, applies casting movement lock to currently loaded BMR, VBM, and RSR plugins." xml:space="preserve">
+    <value>Thiết lập toàn cục. Khi tải plugin và mỗi lần thay đổi, áp dụng khóa di chuyển khi niệm phép cho các plugin BMR, VBM và RSR đang tải.</value>
+  </data>
+  <data name="Hostile target selection sent to RotationSolver Reborn through its typed settings IPC." xml:space="preserve">
+    <value>Lựa chọn mục tiêu thù địch gửi tới RotationSolver Reborn qua IPC thiết lập có kiểu.</value>
+  </data>
+  <data name="How loot is handled if LazyLoot is installed.&#xA;'unchanged' = Don't modify loot settings." xml:space="preserve">
+    <value>Cách xử lý chiến lợi phẩm nếu đã cài LazyLoot.
+'unchanged' = Không đổi thiết lập chiến lợi phẩm.</value>
+  </data>
+  <data name="How often the plugin runs its main logic loop.&#xA;Lower values = more responsive but higher CPU usage.&#xA;Default: 0.3s. WARNING: Values below 0.1 may impact performance." xml:space="preserve">
+    <value>Tần suất chạy vòng lặp logic chính của plugin.
+Giá trị thấp = phản hồi nhanh hơn nhưng dùng CPU nhiều hơn.
+Mặc định: 0.3 giây. CẢNH BÁO: Dưới 0.1 có thể ảnh hưởng hiệu năng.</value>
+  </data>
+  <data name="Human-readable alias for this account group. Linked to account ID internally." xml:space="preserve">
+    <value>Bí danh dễ đọc cho nhóm tài khoản này. Liên kết nội bộ với ID tài khoản.</value>
+  </data>
+  <data name="If configured food runs out, search inventory for any food starting from lowest item ID." xml:space="preserve">
+    <value>Nếu hết thức ăn đã cấu hình, tìm bất kỳ thức ăn nào trong túi từ ID vật phẩm thấp nhất.</value>
+  </data>
+  <data name="If enabled, you will summon your own mount instead of pillion riding.&#xA;Useful for flying zones.&#xA;&#xA;⚠️ IMPORTANT: This feature requires you to be grouped with your fren.&#xA;It will not work properly if ungrouped (won't jump into air to follow)." xml:space="preserve">
+    <value>Nếu bật, bạn sẽ triệu hồi thú cưỡi riêng thay vì ngồi sau.
+Hữu ích trong khu vực bay.
+
+⚠ QUAN TRỌNG: Tính năng này cần bạn ở cùng tổ đội với fren.
+Không hoạt động đúng khi không cùng tổ đội (không nhảy lên không để theo).</value>
+  </data>
+  <data name="If your configured food runs out, search inventory for any food starting from lowest item ID." xml:space="preserve">
+    <value>Nếu hết thức ăn đã cấu hình, tìm bất kỳ thức ăn nào trong túi từ ID vật phẩm thấp nhất.</value>
+  </data>
+  <data name="Immediately follow a fren's aethernet jump through Lifestream when you are at the same origin. Supports connected city, residential, and custom networks, including Bozja and Eureka." xml:space="preserve">
+    <value>Lập tức theo bước nhảy aethernet của fren qua Lifestream khi ở cùng điểm xuất phát. Hỗ trợ mạng thành phố, khu nhà ở và tùy chỉnh được kết nối, gồm Bozja và Eureka.</value>
+  </data>
+  <data name="Leave the duty if no other party members are visible in the zone." xml:space="preserve">
+    <value>Rời nhiệm vụ nếu không thấy thành viên tổ đội nào khác trong khu vực.</value>
+  </data>
+  <data name="Max distance to targets for combat AI.&#xA;424242 = Auto (plugin decides based on job: melee 2.6, caster 10)." xml:space="preserve">
+    <value>Khoảng cách tối đa tới mục tiêu cho AI chiến đấu.
+424242 = Tự động (plugin quyết định theo nghề: cận chiến 2.6, niệm phép 10).</value>
+  </data>
+  <data name="Max follow distance in forays (Eureka/Bozja).&#xA;Lower value to avoid mini-aetheryte transition issues." xml:space="preserve">
+    <value>Khoảng cách theo tối đa trong foray (Eureka/Bozja).
+Giảm giá trị để tránh sự cố chuyển tiếp aetheryte nhỏ.</value>
+  </data>
+  <data name="Maximum distance (yalms) to chase fren.&#xA;Beyond this, stop following to avoid zone-hopping." xml:space="preserve">
+    <value>Khoảng cách tối đa (yalm) để đuổi theo fren.
+Vượt mức này thì ngừng theo để tránh nhảy khu vực.</value>
+  </data>
+  <data name="Minimum distance to maintain from fren in outdoor/foray zones.&#xA;Prevents characters from stacking on top of each other (less bot-like).&#xA;Set to 0 to disable." xml:space="preserve">
+    <value>Khoảng cách tối thiểu giữ với fren trong khu ngoài trời/foray.
+Tránh nhân vật chồng lên nhau (trông ít giống bot hơn).
+Đặt 0 để tắt.</value>
+  </data>
+  <data name="Name of food to auto-consume.&#xA;Full item search from game data planned for a future update." xml:space="preserve">
+    <value>Tên thức ăn tự dùng.
+Dự kiến bổ sung tìm vật phẩm đầy đủ từ dữ liệu trò chơi trong bản cập nhật sau.</value>
+  </data>
+  <data name="Name of the auto-rotation preset for general content.&#xA;Must match a preset name in your rotation plugin.&#xA;Use 'none' to not change the preset." xml:space="preserve">
+    <value>Tên cấu hình tự xoay kỹ năng cho nội dung chung.
+Phải khớp tên cấu hình trong plugin xoay kỹ năng.
+Dùng 'none' để không đổi cấu hình.</value>
+  </data>
+  <data name="Name of the party member to follow. Can be partial if unique.&#xA;The @Server part is cosmetic for display; targeting uses the name before @.&#xA;Names are auto-capitalized. Select from party or type manually." xml:space="preserve">
+    <value>Tên thành viên tổ đội cần theo. Có thể nhập một phần nếu duy nhất.
+Phần @Server chỉ để hiển thị; nhắm mục tiêu dùng tên trước @.
+Tên tự viết hoa chữ đầu. Chọn từ tổ đội hoặc nhập tay.</value>
+  </data>
+  <data name="Navigation method to reach fren.&#xA;NavMesh: VNavmesh plugin pathfinding (recommended)&#xA;Visland: Alternative navigation&#xA;BossMod Follow: Uses BossMod's follow leader&#xA;Vanilla Follow: Game's built-in /follow" xml:space="preserve">
+    <value>Cách dẫn đường để tới fren.
+NavMesh: tìm đường bằng plugin VNavmesh (khuyên dùng)
+Visland: dẫn đường thay thế
+BossMod Follow: dùng theo trưởng nhóm của BossMod
+Vanilla Follow: /follow có sẵn trong trò chơi</value>
+  </data>
+  <data name="Navigation method to use inside duties.&#xA;May need a different method than overworld." xml:space="preserve">
+    <value>Cách dẫn đường dùng trong nhiệm vụ.
+Có thể cần khác với ngoài thế giới.</value>
+  </data>
+  <data name="New character profiles inherit this setting. Existing characters change only when you use a sync action." xml:space="preserve">
+    <value>Hồ sơ nhân vật mới kế thừa thiết lập này. Nhân vật hiện có chỉ đổi khi bạn dùng hành động đồng bộ.</value>
+  </data>
+  <data name="Number of ticks before harmonized cling resets to 0.&#xA;Handles special logic like DD/FATE force cling." xml:space="preserve">
+    <value>Số nhịp trước khi bám sát hài hòa đặt lại về 0.
+Xử lý logic đặc biệt như ép bám sát DD/FATE.</value>
+  </data>
+  <data name="Number of update ticks before idle action triggers." xml:space="preserve">
+    <value>Số nhịp cập nhật trước khi kích hoạt hành động nhàn rỗi.</value>
+  </data>
+  <data name="Off: FrenRider chooses the BossMod preset from current job and selected rotation plugin.&#xA;On: use the preset name fields below." xml:space="preserve">
+    <value>Tắt: FrenRider chọn cấu hình BossMod theo nghề hiện tại và plugin xoay kỹ năng đã chọn.
+Bật: dùng các trường tên cấu hình bên dưới.</value>
+  </data>
+  <data name="On: enable the selected BossMod AI implementation for combat.&#xA;Off: send BMR and VBM AI off commands while preserving the rest of FrenRider's combat setup." xml:space="preserve">
+    <value>Bật: bật triển khai BossMod AI đã chọn cho chiến đấu.
+Tắt: gửi lệnh tắt AI BMR và VBM nhưng giữ phần còn lại của thiết lập chiến đấu FrenRider.</value>
+  </data>
+  <data name="Outside duties, summon your configured own mount and fly toward a visible fren after horizontal XZ distance exceeds this threshold continuously for the configured delay. Existing zone-specific Max Follow Distance still applies. Distance minimum: 1y. Delay range: 0-300 seconds; 0 means immediate. Defaults: 100y and 30 seconds." xml:space="preserve">
+    <value>Ngoài nhiệm vụ, triệu hồi thú cưỡi riêng đã cấu hình và bay về fren nhìn thấy sau khi khoảng cách ngang XZ liên tục vượt ngưỡng trong thời gian chờ đã cấu hình. Khoảng cách theo tối đa riêng của khu vực vẫn áp dụng. Khoảng cách tối thiểu: 1y. Thời gian chờ: 0-300 giây; 0 là ngay lập tức. Mặc định: 100y và 30 giây.</value>
+  </data>
+  <data name="Party engage mode sent through Daedalus LAN coordination.&#xA;Focus requires a living enemy hard target.&#xA;None, Split, and Kill Adds preserve Daedalus's current focus and off-tank assignments." xml:space="preserve">
+    <value>Chế độ giao chiến tổ đội gửi qua điều phối LAN của Daedalus.
+Focus cần mục tiêu cứng là kẻ địch còn sống.
+None, Split và Kill Adds giữ phân công tập trung và tank phụ hiện tại của Daedalus.</value>
+  </data>
+  <data name="Per-duty-family ADS handoff.&#xA;Duty name, category, support, and clearance come only from ADS CurrentDuty. FrenRider accepts that snapshot only when ADS catalog metadata is complete and its territory/CFC matches live GameMain; otherwise local duty logic stays active.&#xA;The handoff delay counts only while the character remains continuously ready: logged in, present, alive, conscious, out of area transitions, and out of cutscenes.&#xA;Runtime ADS ownership is authoritative even after manual Start Inside. FrenRider pauses local duty systems while handoff is pending or ADS owns the run; configured exit takeover remains available after duty completion." xml:space="preserve">
+    <value>Bàn giao ADS theo nhóm nhiệm vụ.
+Tên, loại, hỗ trợ và hoàn thành nhiệm vụ chỉ lấy từ ADS CurrentDuty. FrenRider chỉ nhận bản chụp đó khi siêu dữ liệu danh mục ADS đầy đủ và territory/CFC khớp GameMain trực tiếp; nếu không, logic nhiệm vụ cục bộ vẫn hoạt động.
+Thời gian chờ bàn giao chỉ tính khi nhân vật liên tục sẵn sàng: đăng nhập, hiện diện, còn sống, tỉnh táo, không chuyển khu và không xem cảnh cắt.
+Quyền kiểm soát ADS lúc chạy là quyết định, kể cả sau Start Inside thủ công. FrenRider tạm dừng hệ thống nhiệm vụ cục bộ khi chờ bàn giao hoặc ADS kiểm soát lượt chạy; tiếp quản thoát đã cấu hình vẫn dùng được sau khi hoàn thành nhiệm vụ.</value>
+  </data>
+  <data name="Play videos when Fren Rider is enabled or disabled.&#xA;Requires VLC media player." xml:space="preserve">
+    <value>Phát video khi bật hoặc tắt Fren Rider.
+Cần VLC media player.</value>
+  </data>
+  <data name="Play videos when Fren Rider is enabled/disabled.&#xA;Requires VLC media player to be installed.&#xA;Videos are embedded with the plugin distribution." xml:space="preserve">
+    <value>Phát video khi bật/tắt Fren Rider.
+Cần cài VLC media player.
+Video được nhúng trong bản phân phối plugin.</value>
+  </data>
+  <data name="Players in this list will have party invites automatically accepted when you are not in a group.&#xA;Names should omit the @Server part." xml:space="preserve">
+    <value>Tự chấp nhận lời mời tổ đội từ người chơi trong danh sách này khi bạn chưa ở nhóm.
+Tên phải bỏ phần @Server.</value>
+  </data>
+  <data name="Players in this list will have their party invites automatically accepted when you're not in a group.&#xA;When you join a party via whitelist invite, the inviter will automatically be set as your Fren.&#xA;Enter names without the @Server part." xml:space="preserve">
+    <value>Tự chấp nhận lời mời tổ đội từ người chơi trong danh sách này khi bạn chưa ở nhóm.
+Khi tham gia qua lời mời trong danh sách cho phép, người mời sẽ tự được đặt làm Fren.
+Nhập tên không có phần @Server.</value>
+  </data>
+  <data name="Preset name for Deep Dungeon content.&#xA;Use 'none' to not change the preset." xml:space="preserve">
+    <value>Tên cấu hình cho nội dung Deep Dungeon.
+Dùng 'none' để không đổi cấu hình.</value>
+  </data>
+  <data name="Preset name for FATE content.&#xA;Use 'none' to not change the preset." xml:space="preserve">
+    <value>Tên cấu hình cho nội dung FATE.
+Dùng 'none' để không đổi cấu hình.</value>
+  </data>
+  <data name="Print status messages to game chat.&#xA;Useful for debugging but fills chat quickly." xml:space="preserve">
+    <value>In thông báo trạng thái vào chat trò chơi.
+Hữu ích để gỡ lỗi nhưng nhanh làm đầy chat.</value>
+  </data>
+  <data name="RSR operating mode when RSR is the selected rotation plugin.&#xA;Auto: Full auto.&#xA;Manual: Manual targeting mode.&#xA;None: Don't let FrenRider change the current rotation state.&#xA;Support: Uses RSR's plugin-managed support mode." xml:space="preserve">
+    <value>Chế độ RSR khi RSR là plugin xoay kỹ năng được chọn.
+Auto: Tự động hoàn toàn.
+Manual: Chế độ nhắm mục tiêu thủ công.
+None: Không để FrenRider đổi trạng thái xoay hiện tại.
+Support: Dùng chế độ hỗ trợ do plugin RSR quản lý.</value>
+  </data>
+  <data name="Random variance on X axis during social distancing.&#xA;Adds natural-looking movement variance." xml:space="preserve">
+    <value>Độ lệch ngẫu nhiên trục X khi giãn cách.
+Tạo biến thiên di chuyển tự nhiên.</value>
+  </data>
+  <data name="Random variance on Z axis during social distancing." xml:space="preserve">
+    <value>Độ lệch ngẫu nhiên trục Z khi giãn cách.</value>
+  </data>
+  <data name="Recover party members in regular four-player dungeons and outdoors. A living healer within 20 yalms of the corpse blocks item use. Party recovery pauses progression and defers Return while a living party rescuer remains." xml:space="preserve">
+    <value>Hồi phục thành viên tổ đội trong hầm ngục thường bốn người và ngoài trời. Người hồi máu còn sống trong phạm vi 20 yalm quanh thi thể chặn dùng vật phẩm. Hồi phục tổ đội tạm dừng tiến trình và hoãn Return khi còn người cứu trong tổ đội sống.</value>
+  </data>
+  <data name="Reserved for future autosync FATE behavior.&#xA;Current follow distance does not change on FATE join or leave." xml:space="preserve">
+    <value>Dành cho hành vi tự đồng bộ FATE trong tương lai.
+Khoảng cách theo hiện tại không đổi khi vào hoặc rời FATE.</value>
+  </data>
+  <data name="Reset ALL tabs for this character to default values.&#xA;If editing DEFAULT CONFIG, resets to plugin defaults." xml:space="preserve">
+    <value>Đặt lại TẤT CẢ thẻ của nhân vật này về mặc định.
+Nếu sửa DEFAULT CONFIG, đặt lại về mặc định plugin.</value>
+  </data>
+  <data name="Reset only the current tab for this character to default values." xml:space="preserve">
+    <value>Chỉ đặt lại thẻ hiện tại của nhân vật này về mặc định.</value>
+  </data>
+  <data name="Restore snapshot: put captured BMR/VBM AI on/off, follow, movement, CBT fields, and Daedalus enabled state back on /fr off.&#xA;Turn everything off: disable BMR/VBM AI, CBT AutoFollow, RotationSolverReborn, Daedalus, and Wrath auto if FrenRider started it." xml:space="preserve">
+    <value>Khôi phục bản chụp: trả trạng thái bật/tắt AI BMR/VBM, theo, di chuyển, trường CBT và trạng thái bật Daedalus khi /fr off.
+Tắt mọi thứ: tắt AI BMR/VBM, CBT AutoFollow, RotationSolverReborn, Daedalus và tự động Wrath nếu FrenRider đã bật nó.</value>
+  </data>
+  <data name="Rotation plugin for foray content (Eureka/Bozja).&#xA;WRATH recommended for phantom job support." xml:space="preserve">
+    <value>Plugin xoay kỹ năng cho nội dung foray (Eureka/Bozja).
+Khuyên dùng WRATH để hỗ trợ nghề phantom.</value>
+  </data>
+  <data name="Runs /ays discard every 10s only while mounted and in a safe idle window.&#xA;FrenRider defers discard during combat, cutscenes, and area transitions.&#xA;Requires AutoRetainer plugin." xml:space="preserve">
+    <value>Chạy /ays discard mỗi 10 giây chỉ khi đang cưỡi và trong khoảng nhàn rỗi an toàn.
+FrenRider hoãn discard khi chiến đấu, cảnh cắt và chuyển khu.
+Cần plugin AutoRetainer.</value>
+  </data>
+  <data name="Runs /ays discard while mounted and in a safe idle window.&#xA;Requires AutoRetainer plugin." xml:space="preserve">
+    <value>Chạy /ays discard khi đang cưỡi và trong khoảng nhàn rỗi an toàn.
+Cần plugin AutoRetainer.</value>
+  </data>
+  <data name="Runs /levelsync on after joining a FATE.&#xA;Defers while mounted or riding pillion." xml:space="preserve">
+    <value>Chạy /levelsync on sau khi vào FATE.
+Hoãn khi đang cưỡi hoặc ngồi sau.</value>
+  </data>
+  <data name="Select the mount to use when flying solo.&#xA;'Mount Roulette' picks a random mount.&#xA;Type to search the list." xml:space="preserve">
+    <value>Chọn thú cưỡi dùng khi bay một mình.
+'Mount Roulette' chọn thú cưỡi ngẫu nhiên.
+Nhập để tìm trong danh sách.</value>
+  </data>
+  <data name="Send /ads leave after the configured duty-end delay. FrenRider does not also run its own Leave Duty flow." xml:space="preserve">
+    <value>Gửi /ads leave sau thời gian chờ kết thúc nhiệm vụ đã cấu hình. FrenRider không chạy thêm quy trình Leave Duty riêng.</value>
+  </data>
+  <data name="Show or hide the DTR bar entry." xml:space="preserve">
+    <value>Hiện hoặc ẩn mục trên thanh DTR.</value>
+  </data>
+  <data name="Show/hide the DTR bar entry (server info bar)." xml:space="preserve">
+    <value>Hiện/ẩn mục trên thanh DTR (thanh thông tin máy chủ).</value>
+  </data>
+  <data name="Slash command to execute when idle.&#xA;Examples: /tomescroll, /dance, /snd run scriptname" xml:space="preserve">
+    <value>Lệnh gạch chéo chạy khi nhàn rỗi.
+Ví dụ: /tomescroll, /dance, /snd run scriptname</value>
+  </data>
+  <data name="Target HP percentage to use Limit Break.&#xA;-1 = Disabled.&#xA;Automatically uses LB3 if available, otherwise LB2." xml:space="preserve">
+    <value>Phần trăm HP mục tiêu để dùng Limit Break.
+-1 = Tắt.
+Tự dùng LB3 nếu có, nếu không dùng LB2.</value>
+  </data>
+  <data name="Temporary uses an in-memory profile only for the exact DAD proposal. Off opts this local character out. Permanent replaces this local character's profile while keeping this choice." xml:space="preserve">
+    <value>Temporary chỉ dùng hồ sơ trong bộ nhớ cho đúng đề xuất DAD. Off loại nhân vật cục bộ này. Permanent thay hồ sơ nhân vật cục bộ này nhưng giữ lựa chọn này.</value>
+  </data>
+  <data name="Trigger repair when gear durability falls below this percentage." xml:space="preserve">
+    <value>Kích hoạt sửa khi độ bền trang bị xuống dưới phần trăm này.</value>
+  </data>
+  <data name="Use FrenRider's local Leave Duty flow after the configured duty-end condition." xml:space="preserve">
+    <value>Dùng quy trình Leave Duty cục bộ của FrenRider sau điều kiện kết thúc nhiệm vụ đã cấu hình.</value>
+  </data>
+  <data name="VLC media player is required for video notifications.&#xA;Click to download and install VLC." xml:space="preserve">
+    <value>Cần VLC media player cho thông báo video.
+Nhấn để tải và cài VLC.</value>
+  </data>
+  <data name="What to do when idle.&#xA;Specific Action: Execute a single command&#xA;Action From List: Pick randomly from a list" xml:space="preserve">
+    <value>Làm gì khi nhàn rỗi.
+Hành động cụ thể: Chạy một lệnh
+Hành động từ danh sách: Chọn ngẫu nhiên từ danh sách</value>
+  </data>
+  <data name="What to do when idle.&#xA;Specific Action: execute one command&#xA;Action From List: rotate through a list" xml:space="preserve">
+    <value>Làm gì khi nhàn rỗi.
+Hành động cụ thể: chạy một lệnh
+Hành động từ danh sách: luân phiên qua danh sách</value>
+  </data>
+  <data name="When RSR, WRATH, or DAEDALUS is selected, also force BMR to the configured zone preset." xml:space="preserve">
+    <value>Khi chọn RSR, WRATH hoặc DAEDALUS, cũng ép BMR dùng cấu hình khu vực đã cấu hình.</value>
+  </data>
+  <data name="When enabled, FrenRider asks ADS to disable BMR hunt modules." xml:space="preserve">
+    <value>Khi bật, FrenRider yêu cầu ADS tắt các mô-đun săn của BMR.</value>
+  </data>
+  <data name="When enabled, FrenRider asks ADS to disable the BMR Queen Lunatender module." xml:space="preserve">
+    <value>Khi bật, FrenRider yêu cầu ADS tắt mô-đun Queen Lunatender của BMR.</value>
+  </data>
+  <data name="When enabled, FrenRider may issue the fallback forward nudge inside duties even if the configured fren is not visible in your party/object table. Leave disabled for safer duty movement." xml:space="preserve">
+    <value>Khi bật, FrenRider có thể phát lệnh đẩy tiến dự phòng trong nhiệm vụ ngay cả khi không thấy fren đã cấu hình trong tổ đội/bảng đối tượng. Giữ tắt để di chuyển nhiệm vụ an toàn hơn.</value>
+  </data>
+  <data name="When enabled, FrenRider waits after your configured fren is still in party but no longer visible, then asks Lifestream to teleport to a random unlocked aetheryte in that zone." xml:space="preserve">
+    <value>Khi bật, FrenRider đợi khi fren đã cấu hình vẫn trong tổ đội nhưng không còn nhìn thấy, rồi yêu cầu Lifestream dịch chuyển tới aetheryte đã mở ngẫu nhiên trong khu đó.</value>
+  </data>
+  <data name="Whether to follow fren during combat.&#xA;Auto: Let the plugin decide based on your job/role." xml:space="preserve">
+    <value>Có theo fren khi chiến đấu không.
+Tự động: Plugin quyết định theo nghề/vai trò của bạn.</value>
+  </data>
+  <data name="Which rotation automation plugin to use.&#xA;BMR: BossModReborn&#xA;VBM: VanillaBossMod&#xA;RSR: RotationSolver Reborn&#xA;WRATH: Wrath&#xA;DAEDALUS: Daedalus" xml:space="preserve">
+    <value>Chọn plugin tự động xoay kỹ năng.
+BMR: BossModReborn
+VBM: VanillaBossMod
+RSR: RotationSolver Reborn
+WRATH: Wrath
+DAEDALUS: Daedalus</value>
+  </data>
+  <data name="While Fren Rider is enabled, equip the first matching armoury-chest soul crystal when the current character is on a level 30+ base class and equipment can be changed safely. The current gearset is updated after the equip is confirmed." xml:space="preserve">
+    <value>Khi Fren Rider bật, trang bị soul crystal khớp đầu tiên trong rương trang bị nếu nhân vật hiện tại ở lớp cơ bản cấp 30+ và có thể đổi trang bị an toàn. Cập nhật bộ trang bị hiện tại sau khi xác nhận trang bị.</value>
+  </data>
+  <data name="While FrenRider is enabled on Beastmaster, try Capture on eligible living beasts closer than 10 yalms, including passive beasts outside combat.&#xA;Prefers an eligible current target; otherwise automatically targets the nearest eligible beast when Capture is ready.&#xA;Skips owned beasts and enemies above your effective level, and respects both HP thresholds.&#xA;Retries on later cooldowns, including already marked beasts." xml:space="preserve">
+    <value>Khi FrenRider bật trên Beastmaster, thử Capture các thú còn sống đủ điều kiện gần hơn 10 yalm, kể cả thú thụ động ngoài chiến đấu.
+Ưu tiên mục tiêu hiện tại đủ điều kiện; nếu không, tự nhắm thú đủ điều kiện gần nhất khi Capture sẵn sàng.
+Bỏ qua thú đã có chủ và kẻ địch trên cấp hiệu lực của bạn, đồng thời tuân theo cả hai ngưỡng HP.
+Thử lại ở lần hồi chiêu sau, kể cả thú đã đánh dấu.</value>
+  </data>
+  <data name="Disabled" xml:space="preserve">
+    <value>Đã tắt</value>
+  </data>
+  <data name="Auto" xml:space="preserve">
+    <value>Tự động</value>
+  </data>
+  <data name="BossMod AI" xml:space="preserve">
+    <value>BossMod AI</value>
+  </data>
+  <data name="Owned" xml:space="preserve">
+    <value>Có chủ</value>
+  </data>
+  <data name="Missing" xml:space="preserve">
+    <value>Thiếu</value>
+  </data>
+  <data name="At least one command required" xml:space="preserve">
+    <value>Cần ít nhất một lệnh</value>
+  </data>
+  <data name="0 - Not Cleared" xml:space="preserve">
+    <value>0 - Chưa hoàn thành</value>
+  </data>
+  <data name="1 - 1P Unsync Cleared" xml:space="preserve">
+    <value>1 - Hoàn thành không đồng bộ 1 người</value>
+  </data>
+  <data name="2 - 1P Duty Support" xml:space="preserve">
+    <value>2 - Hỗ trợ nhiệm vụ 1 người</value>
+  </data>
+  <data name="3 - 4P Sync Cleared" xml:space="preserve">
+    <value>3 - Hoàn thành đồng bộ 4 người</value>
+  </data>
+  <data name="A Dalamud plugin for FFXIV multiplayer follow/combat automation." xml:space="preserve">
+    <value>Plugin Dalamud cho tự động theo/chiến đấu nhiều người trong FFXIV.</value>
+  </data>
+  <data name="/frenrider - Open main window" xml:space="preserve">
+    <value>/frenrider - Mở cửa sổ chính</value>
+  </data>
+  <data name="/fr - Open main window (alias)" xml:space="preserve">
+    <value>/fr - Mở cửa sổ chính (bí danh)</value>
+  </data>
+  <data name="/fr on - Enable Fren Rider" xml:space="preserve">
+    <value>/fr on - Bật Fren Rider</value>
+  </data>
+  <data name="/fr off - Disable Fren Rider" xml:space="preserve">
+    <value>/fr off - Tắt Fren Rider</value>
+  </data>
+  <data name="/fr settings or /fr s - Toggle settings" xml:space="preserve">
+    <value>/fr settings hoặc /fr s - Bật/tắt thiết lập</value>
+  </data>
+  <data name="/fr mini or /fr m - Toggle MAGIA mini window" xml:space="preserve">
+    <value>/fr mini hoặc /fr m - Bật/tắt cửa sổ nhỏ MAGIA</value>
+  </data>
+  <data name="/fr debug - Toggle debug controls" xml:space="preserve">
+    <value>/fr debug - Bật/tắt điều khiển gỡ lỗi</value>
+  </data>
+  <data name="vnavmesh - Navigation and pathfinding" xml:space="preserve">
+    <value>vnavmesh - Dẫn đường và tìm đường</value>
+  </data>
+  <data name="Visland - Alternative navigation (if vnavmesh unavailable)" xml:space="preserve">
+    <value>Visland - Dẫn đường thay thế (nếu không có vnavmesh)</value>
+  </data>
+  <data name="BossMod / BossModReborn - Combat AI and following" xml:space="preserve">
+    <value>BossMod / BossModReborn - AI chiến đấu và theo</value>
+  </data>
+  <data name="Rotation Solver Reborn - Combat rotation automation" xml:space="preserve">
+    <value>Rotation Solver Reborn - Tự động xoay kỹ năng chiến đấu</value>
+  </data>
+  <data name="WRATH - Combat rotation automation" xml:space="preserve">
+    <value>WRATH - Tự động xoay kỹ năng chiến đấu</value>
+  </data>
+  <data name="Daedalus - Combat rotation automation" xml:space="preserve">
+    <value>Daedalus - Tự động xoay kỹ năng chiến đấu</value>
+  </data>
+  <data name="Questionable - Quest automation integration" xml:space="preserve">
+    <value>Questionable - Tích hợp tự động nhiệm vụ</value>
+  </data>
+  <data name="Automaton (CBT) by Croizat - Enhanced duty start/end, auto-leave" xml:space="preserve">
+    <value>Automaton (CBT) của Croizat - Tăng cường bắt đầu/kết thúc nhiệm vụ, tự rời</value>
+  </data>
+  <data name="Owner: {0}" xml:space="preserve">
+    <value>Chủ sở hữu: {0}</value>
+  </data>
+  <data name="Island: {0}" xml:space="preserve">
+    <value>Đảo: {0}</value>
+  </data>
+  <data name="Opaque character: {0}" xml:space="preserve">
+    <value>Nhân vật mờ: {0}</value>
+  </data>
+  <data name="Row ID: {0}" xml:space="preserve">
+    <value>ID dòng: {0}</value>
+  </data>
+  <data name="{0} Icon" xml:space="preserve">
+    <value>Biểu tượng {0}</value>
+  </data>
+  <data name="{0} Icon Code" xml:space="preserve">
+    <value>Mã biểu tượng {0}</value>
+  </data>
+  <data name="Shown when Fren Rider is {0}" xml:space="preserve">
+    <value>Hiển thị khi Fren Rider {0}</value>
+  </data>
+  <data name="ADS reflection: {0}" xml:space="preserve">
+    <value>Phản chiếu ADS: {0}</value>
+  </data>
+  <data name="ADS Status: {0}" xml:space="preserve">
+    <value>Trạng thái ADS: {0}</value>
+  </data>
+  <data name="When enabled, FrenRider asks ADS to set BMR MaxLoadDistance to {0:0}." xml:space="preserve">
+    <value>Khi bật, FrenRider yêu cầu ADS đặt BMR MaxLoadDistance thành {0:0}.</value>
+  </data>
+  <data name="Solo" xml:space="preserve">
+    <value>Một người</value>
+  </data>
+  <data name="4-Man" xml:space="preserve">
+    <value>4 người</value>
+  </data>
+  <data name="8-Man" xml:space="preserve">
+    <value>8 người</value>
+  </data>
+  <data name="Alliance" xml:space="preserve">
+    <value>Liên minh</value>
+  </data>
+  <data name="Guild Hest" xml:space="preserve">
+    <value>Guild Hest</value>
+  </data>
+  <data name="Deep Dungeon" xml:space="preserve">
+    <value>Deep Dungeon</value>
+  </data>
+  <data name="Treasure Dungeon" xml:space="preserve">
+    <value>Hầm ngục kho báu</value>
+  </data>
+  <data name="Other" xml:space="preserve">
+    <value>Khác</value>
+  </data>
+  <data name="ADS Handoff" xml:space="preserve">
+    <value>Bàn giao ADS</value>
+  </data>
+  <data name="Exit Behavior" xml:space="preserve">
+    <value>Hành vi thoát</value>
+  </data>
+  <data name="Equipment" xml:space="preserve">
+    <value>Trang bị</value>
+  </data>
+  <data name="Maintenance" xml:space="preserve">
+    <value>Bảo trì</value>
+  </data>
+  <data name="Debug" xml:space="preserve">
+    <value>Gỡ lỗi</value>
+  </data>
+  <data name="Following" xml:space="preserve">
+    <value>Đang theo</value>
+  </data>
+  <data name="InRange" xml:space="preserve">
+    <value>Trong phạm vi</value>
+  </data>
+  <data name="TooFar" xml:space="preserve">
+    <value>Quá xa</value>
+  </data>
+  <data name="InCombat" xml:space="preserve">
+    <value>Trong chiến đấu</value>
+  </data>
+  <data name="WaitingToMount" xml:space="preserve">
+    <value>Đợi lên thú cưỡi</value>
+  </data>
+  <data name="Mounting" xml:space="preserve">
+    <value>Đang lên thú cưỡi</value>
+  </data>
+  <data name="Dismounting" xml:space="preserve">
+    <value>Đang xuống thú cưỡi</value>
+  </data>
+  <data name="OutOfCombat" xml:space="preserve">
+    <value>Ngoài chiến đấu</value>
+  </data>
+  <data name="EnteringCombat" xml:space="preserve">
+    <value>Đang vào chiến đấu</value>
+  </data>
+  <data name="LeavingCombat" xml:space="preserve">
+    <value>Đang rời chiến đấu</value>
+  </data>
+  <data name="Unconscious" xml:space="preserve">
+    <value>Bất tỉnh</value>
+  </data>
+  <data name="Area transition" xml:space="preserve">
+    <value>Chuyển khu vực</value>
+  </data>
+  <data name="Zone transition" xml:space="preserve">
+    <value>Chuyển vùng</value>
+  </data>
+  <data name="No fren found" xml:space="preserve">
+    <value>Không tìm thấy fren</value>
+  </data>
+  <data name="Fren not visible" xml:space="preserve">
+    <value>Không thấy fren</value>
+  </data>
+  <data name="No fren" xml:space="preserve">
+    <value>Không có fren</value>
+  </data>
+  <data name="ADS utility active" xml:space="preserve">
+    <value>Tiện ích ADS đang hoạt động</value>
+  </data>
+  <data name="Teleport active" xml:space="preserve">
+    <value>Dịch chuyển đang hoạt động</value>
+  </data>
+  <data name="Teleport or dialog active" xml:space="preserve">
+    <value>Dịch chuyển hoặc hộp thoại đang hoạt động</value>
+  </data>
+  <data name="Paused (in combat)" xml:space="preserve">
+    <value>Tạm dừng (đang chiến đấu)</value>
+  </data>
+  <data name="Phoenix Down recovery" xml:space="preserve">
+    <value>Hồi phục bằng Phoenix Down</value>
+  </data>
+  <data name="Waiting for party revival; Return deferred" xml:space="preserve">
+    <value>Đợi hồi sinh tổ đội; hoãn Return</value>
+  </data>
+  <data name="No living party rescuer" xml:space="preserve">
+    <value>Không còn người cứu trong tổ đội sống</value>
+  </data>
+  <data name="Casting Phoenix Down" xml:space="preserve">
+    <value>Đang dùng Phoenix Down</value>
+  </data>
+  <data name="Cast ended; checking revival" xml:space="preserve">
+    <value>Đã dùng xong; kiểm tra hồi sinh</value>
+  </data>
+  <data name="Attempt did not start; rechecking readiness" xml:space="preserve">
+    <value>Lần thử chưa bắt đầu; kiểm tra lại độ sẵn sàng</value>
+  </data>
+  <data name="Waiting for healer, Raise cast or pending revival" xml:space="preserve">
+    <value>Đợi người hồi máu, niệm Raise hoặc hồi sinh đang chờ</value>
+  </data>
+  <data name="Dismounting for recovery" xml:space="preserve">
+    <value>Xuống thú cưỡi để hồi phục</value>
+  </data>
+  <data name="Approaching party corpse" xml:space="preserve">
+    <value>Tiếp cận thi thể trong tổ đội</value>
+  </data>
+  <data name="Waiting for recovery attempt slot" xml:space="preserve">
+    <value>Đợi lượt thử hồi phục</value>
+  </data>
+  <data name="Phoenix Down requested; waiting for actual cast" xml:space="preserve">
+    <value>Đã yêu cầu Phoenix Down; đợi lần dùng thực tế</value>
+  </data>
+  <data name="Item attempt rejected; rechecking in one second" xml:space="preserve">
+    <value>Lần dùng vật phẩm bị từ chối; kiểm tra lại sau một giây</value>
+  </data>
+  <data name="Ready" xml:space="preserve">
+    <value>Sẵn sàng</value>
+  </data>
+  <data name="Blocked: {0}" xml:space="preserve">
+    <value>Bị chặn: {0}</value>
+  </data>
+  <data name="Waiting: {0}" xml:space="preserve">
+    <value>Đang đợi: {0}</value>
+  </data>
+  <data name="Running: {0}" xml:space="preserve">
+    <value>Đang chạy: {0}</value>
+  </data>
+  <data name="Completed: {0}" xml:space="preserve">
+    <value>Hoàn tất: {0}</value>
+  </data>
+  <data name="Failed: {0}" xml:space="preserve">
+    <value>Thất bại: {0}</value>
+  </data>
+  <data name="Cooldown: retry in {0}s" xml:space="preserve">
+    <value>Hồi chiêu: thử lại sau {0} giây</value>
+  </data>
+  <data name="Fren out of zone; teleport in {0}s" xml:space="preserve">
+    <value>Fren ngoài vùng; dịch chuyển sau {0} giây</value>
+  </data>
+  <data name="FrenRider disabled" xml:space="preserve">
+    <value>FrenRider đã tắt</value>
+  </data>
+  <data name="Zone changed" xml:space="preserve">
+    <value>Đã đổi vùng</value>
+  </data>
+  <data name="Fren not in party" xml:space="preserve">
+    <value>Fren không trong tổ đội</value>
+  </data>
+  <data name="Fren visible" xml:space="preserve">
+    <value>Thấy fren</value>
+  </data>
+  <data name="Reading party window" xml:space="preserve">
+    <value>Đang đọc cửa sổ tổ đội</value>
+  </data>
+  <data name="Following local aetheryte network" xml:space="preserve">
+    <value>Đang theo mạng aetheryte cục bộ</value>
+  </data>
+  <data name="Duty scope changed" xml:space="preserve">
+    <value>Phạm vi nhiệm vụ đã đổi</value>
+  </data>
+  <data name="Setting changed" xml:space="preserve">
+    <value>Thiết lập đã đổi</value>
+  </data>
+  <data name="Unconscious; return in {0}s" xml:space="preserve">
+    <value>Bất tỉnh; Return sau {0} giây</value>
+  </data>
+  <data name="Handling revive/Return notification" xml:space="preserve">
+    <value>Đang xử lý thông báo hồi sinh/Return</value>
+  </data>
+  <data name="Opening Return prompt" xml:space="preserve">
+    <value>Đang mở lời nhắc Return</value>
+  </data>
+  <data name="Revive/Return confirmed; waiting for transition" xml:space="preserve">
+    <value>Đã xác nhận hồi sinh/Return; đợi chuyển khu</value>
+  </data>
+  <data name="Waiting for readable Return confirmation" xml:space="preserve">
+    <value>Đợi xác nhận Return đọc được</value>
+  </data>
+  <data name="Return agent unavailable" xml:space="preserve">
+    <value>Không có tác nhân Return</value>
+  </data>
+  <data name="Opened Return prompt" xml:space="preserve">
+    <value>Đã mở lời nhắc Return</value>
+  </data>
+  <data name="Waiting for Return confirmation" xml:space="preserve">
+    <value>Đợi xác nhận Return</value>
+  </data>
+  <data name="Return prompt failed" xml:space="preserve">
+    <value>Lời nhắc Return thất bại</value>
+  </data>
+  <data name="ADS Hyper Focus ended outside duty" xml:space="preserve">
+    <value>ADS Hyper Focus kết thúc ngoài nhiệm vụ</value>
+  </data>
+  <data name="ADS Hyper Focus ended without ADS duty ownership" xml:space="preserve">
+    <value>ADS Hyper Focus kết thúc khi ADS không kiểm soát nhiệm vụ</value>
+  </data>
+  <data name="ADS Hyper Focus ended; combat bootstrap pending" xml:space="preserve">
+    <value>ADS Hyper Focus kết thúc; chờ khởi tạo chiến đấu</value>
+  </data>
+  <data name="ADS Hyper Focus lease active; RSR Manual" xml:space="preserve">
+    <value>Phiên ADS Hyper Focus đang hoạt động; RSR Manual</value>
+  </data>
+  <data name="ADS active" xml:space="preserve">
+    <value>ADS đang hoạt động</value>
+  </data>
+  <data name="ADS active; FrenRider combat authoritative" xml:space="preserve">
+    <value>ADS đang hoạt động; FrenRider quyết định chiến đấu</value>
+  </data>
+  <data name="ADS did not accept {0} repair: {1}" xml:space="preserve">
+    <value>ADS không chấp nhận sửa {0}: {1}</value>
+  </data>
+  <data name="ADS duty ownership active; FrenRider rotation disabled" xml:space="preserve">
+    <value>ADS đang kiểm soát nhiệm vụ; đã tắt xoay kỹ năng FrenRider</value>
+  </data>
+  <data name="ADS duty progression paused; configured FrenRider exit takeover active ({0})." xml:space="preserve">
+    <value>Tiến trình nhiệm vụ ADS tạm dừng; tiếp quản thoát FrenRider đã cấu hình đang hoạt động ({0}).</value>
+  </data>
+  <data name="ADS handoff off; FrenRider local duty logic active." xml:space="preserve">
+    <value>Tắt bàn giao ADS; logic nhiệm vụ cục bộ FrenRider hoạt động.</value>
+  </data>
+  <data name="ADS handoff pending" xml:space="preserve">
+    <value>Đang chờ bàn giao ADS</value>
+  </data>
+  <data name="ADS handoff pending; FrenRider combat authoritative" xml:space="preserve">
+    <value>Đang chờ bàn giao ADS; FrenRider quyết định chiến đấu</value>
+  </data>
+  <data name="ADS loaded; waiting for duty. FrenRider local logic active." xml:space="preserve">
+    <value>Đã tải ADS; đợi nhiệm vụ. Logic cục bộ FrenRider hoạt động.</value>
+  </data>
+  <data name="ADS not loaded." xml:space="preserve">
+    <value>Chưa tải ADS.</value>
+  </data>
+  <data name="ADS not loaded. FrenRider local logic active." xml:space="preserve">
+    <value>Chưa tải ADS. Logic cục bộ FrenRider hoạt động.</value>
+  </data>
+  <data name="ADS reflection applied; no reassert pending." xml:space="preserve">
+    <value>Đã áp dụng phản chiếu ADS; không chờ tái áp dụng.</value>
+  </data>
+  <data name="ADS reflection applied; waiting for desired-state change or ADS reload." xml:space="preserve">
+    <value>Đã áp dụng phản chiếu ADS; đợi thay đổi trạng thái mong muốn hoặc tải lại ADS.</value>
+  </data>
+  <data name="ADS reflection hacks reset." xml:space="preserve">
+    <value>Đã đặt lại các chỉnh sửa phản chiếu ADS.</value>
+  </data>
+  <data name="ADS reflection idle." xml:space="preserve">
+    <value>Phản chiếu ADS nhàn rỗi.</value>
+  </data>
+  <data name="ADS released duty ownership via {0}; FrenRider local duty logic active." xml:space="preserve">
+    <value>ADS đã nhả quyền kiểm soát nhiệm vụ qua {0}; logic nhiệm vụ cục bộ FrenRider hoạt động.</value>
+  </data>
+  <data name="ADS released duty progression; configured FrenRider exit takeover active via {0}." xml:space="preserve">
+    <value>ADS đã nhả tiến trình nhiệm vụ; tiếp quản thoát FrenRider đã cấu hình hoạt động qua {0}.</value>
+  </data>
+  <data name="ADS runtime ownership active via {0}; FrenRider duty systems paused." xml:space="preserve">
+    <value>ADS đang kiểm soát lúc chạy qua {0}; hệ thống nhiệm vụ FrenRider tạm dừng.</value>
+  </data>
+  <data name="ADS runtime ownership active via {0}; FrenRider exit takeover active." xml:space="preserve">
+    <value>ADS đang kiểm soát lúc chạy qua {0}; tiếp quản thoát FrenRider hoạt động.</value>
+  </data>
+  <data name="ADS runtime ownership confirmed via {0}; solo combat delay complete." xml:space="preserve">
+    <value>Đã xác nhận ADS kiểm soát lúc chạy qua {0}; hoàn tất thời gian chờ chiến đấu một người.</value>
+  </data>
+  <data name="ADS solo combat held; waiting for readable ownership confirmation." xml:space="preserve">
+    <value>Giữ chiến đấu ADS một người; đợi xác nhận quyền kiểm soát đọc được.</value>
+  </data>
+  <data name="ADS solo combat held; {0}." xml:space="preserve">
+    <value>Giữ chiến đấu ADS một người; {0}.</value>
+  </data>
+  <data name="ADS utility dialog active" xml:space="preserve">
+    <value>Hộp thoại tiện ích ADS đang hoạt động</value>
+  </data>
+  <data name="Approaching exit '{0}' ({1:F1}y)" xml:space="preserve">
+    <value>Tiếp cận lối ra '{0}' ({1:F1}y)</value>
+  </data>
+  <data name="Ate {0} [{1}] ({2} left)" xml:space="preserve">
+    <value>Đã ăn {0} [{1}] (còn {2})</value>
+  </data>
+  <data name="Blocked: Phoenix Down readiness changed" xml:space="preserve">
+    <value>Bị chặn: độ sẵn sàng Phoenix Down đã đổi</value>
+  </data>
+  <data name="Blocked: navigation unavailable or corpse unreachable" xml:space="preserve">
+    <value>Bị chặn: không có dẫn đường hoặc không tới được thi thể</value>
+  </data>
+  <data name="Blocked: recovery state unavailable" xml:space="preserve">
+    <value>Bị chặn: không có trạng thái hồi phục</value>
+  </data>
+  <data name="Blocked: waiting for a visible, confirmed party corpse" xml:space="preserve">
+    <value>Bị chặn: đợi thi thể tổ đội nhìn thấy và đã xác nhận</value>
+  </data>
+  <data name="Can't pillion: fren not found" xml:space="preserve">
+    <value>Không thể ngồi sau: không tìm thấy fren</value>
+  </data>
+  <data name="Can't pillion: fren not in ObjectTable" xml:space="preserve">
+    <value>Không thể ngồi sau: fren không trong ObjectTable</value>
+  </data>
+  <data name="Can't summon (mounted/duty)" xml:space="preserve">
+    <value>Không thể triệu hồi (đang cưỡi/trong nhiệm vụ)</value>
+  </data>
+  <data name="Captured automation snapshot ({0})." xml:space="preserve">
+    <value>Đã chụp trạng thái tự động ({0}).</value>
+  </data>
+  <data name="Cleanup failed: no captured automation state was available to restore." xml:space="preserve">
+    <value>Dọn dẹp thất bại: không có trạng thái tự động đã chụp để khôi phục.</value>
+  </data>
+  <data name="Cleanup failed: {0}/{1} commands failed." xml:space="preserve">
+    <value>Dọn dẹp thất bại: {0}/{1} lệnh thất bại.</value>
+  </data>
+  <data name="Clicking Commence on duty popup" xml:space="preserve">
+    <value>Đang nhấn Commence trên cửa sổ nhiệm vụ</value>
+  </data>
+  <data name="Combat held: {0}" xml:space="preserve">
+    <value>Giữ chiến đấu: {0}</value>
+  </data>
+  <data name="Companion: {0}m{1:D2}s" xml:space="preserve">
+    <value>Bạn đồng hành: {0} phút {1:D2} giây</value>
+  </data>
+  <data name="Coppelia PowerlevelBot lease active" xml:space="preserve">
+    <value>Phiên Coppelia PowerlevelBot đang hoạt động</value>
+  </data>
+  <data name="Dismounting..." xml:space="preserve">
+    <value>Đang xuống thú cưỡi...</value>
+  </data>
+  <data name="Duty completed; automatic ADS handoff stopped." xml:space="preserve">
+    <value>Nhiệm vụ hoàn tất; đã ngừng tự bàn giao ADS.</value>
+  </data>
+  <data name="Duty completed; configured FrenRider exit takeover active." xml:space="preserve">
+    <value>Nhiệm vụ hoàn tất; tiếp quản thoát FrenRider đã cấu hình hoạt động.</value>
+  </data>
+  <data name="Duty exit requested; waiting to leave duty." xml:space="preserve">
+    <value>Đã yêu cầu thoát nhiệm vụ; đợi rời nhiệm vụ.</value>
+  </data>
+  <data name="Failed to eat {0} [{1}]" xml:space="preserve">
+    <value>Không ăn được {0} [{1}]</value>
+  </data>
+  <data name="Failed to summon chocobo" xml:space="preserve">
+    <value>Không triệu hồi được chocobo</value>
+  </data>
+  <data name="Failed: timed out after {0}s." xml:space="preserve">
+    <value>Thất bại: hết thời gian sau {0} giây.</value>
+  </data>
+  <data name="Far chase ({0:F1}y XZ, max {1:F0}y)" xml:space="preserve">
+    <value>Đuổi xa ({0:F1}y XZ, tối đa {1:F0}y)</value>
+  </data>
+  <data name="Far chase blocked: {0}" xml:space="preserve">
+    <value>Đuổi xa bị chặn: {0}</value>
+  </data>
+  <data name="Far chase mount cooldown ({0:F1}s)" xml:space="preserve">
+    <value>Hồi chiêu thú cưỡi khi đuổi xa ({0:F1} giây)</value>
+  </data>
+  <data name="Far chase pillion cooldown ({0:F1}s)" xml:space="preserve">
+    <value>Hồi chiêu ngồi sau khi đuổi xa ({0:F1} giây)</value>
+  </data>
+  <data name="Far chase preempted: {0}" xml:space="preserve">
+    <value>Đuổi xa bị ngắt bởi: {0}</value>
+  </data>
+  <data name="Far chase settings changed" xml:space="preserve">
+    <value>Thiết lập đuổi xa đã đổi</value>
+  </data>
+  <data name="Far chase: flying" xml:space="preserve">
+    <value>Đuổi xa: đang bay</value>
+  </data>
+  <data name="Far chase: leaving pillion" xml:space="preserve">
+    <value>Đuổi xa: rời ghế sau</value>
+  </data>
+  <data name="Far chase: mounted; taking off" xml:space="preserve">
+    <value>Đuổi xa: đang cưỡi; cất cánh</value>
+  </data>
+  <data name="Far chase: mounting ({0:F1}y XZ)" xml:space="preserve">
+    <value>Đuổi xa: lên thú cưỡi ({0:F1}y XZ)</value>
+  </data>
+  <data name="Far chase: mounting own mount" xml:space="preserve">
+    <value>Đuổi xa: lên thú cưỡi riêng</value>
+  </data>
+  <data name="Far chase: requesting mount ({0:F1}y XZ)" xml:space="preserve">
+    <value>Đuổi xa: yêu cầu thú cưỡi ({0:F1}y XZ)</value>
+  </data>
+  <data name="Flying alongside fren" xml:space="preserve">
+    <value>Bay bên cạnh fren</value>
+  </data>
+  <data name="Flying stuck escape: ascend ({0}s)" xml:space="preserve">
+    <value>Thoát kẹt khi bay: bay lên ({0} giây)</value>
+  </data>
+  <data name="Flying stuck escape: automove ({0}s)" xml:space="preserve">
+    <value>Thoát kẹt khi bay: tự di chuyển ({0} giây)</value>
+  </data>
+  <data name="Following ({0:F1}y, cling {1:F1}y)" xml:space="preserve">
+    <value>Đang theo ({0:F1}y, bám sát {1:F1}y)</value>
+  </data>
+  <data name="Formation slot {0} ({1:F1}y)" xml:space="preserve">
+    <value>Ô đội hình {0} ({1:F1}y)</value>
+  </data>
+  <data name="Found: {0} ({1:F1}y)" xml:space="preserve">
+    <value>Tìm thấy: {0} ({1:F1}y)</value>
+  </data>
+  <data name="Fren mounted (FlyYouFools), mounting..." xml:space="preserve">
+    <value>Fren đang cưỡi (FlyYouFools), đang lên thú cưỡi...</value>
+  </data>
+  <data name="Fren mounted, riding pillion..." xml:space="preserve">
+    <value>Fren đang cưỡi, đang ngồi sau...</value>
+  </data>
+  <data name="FrenRider disabled." xml:space="preserve">
+    <value>FrenRider đã tắt.</value>
+  </data>
+  <data name="FrenRider duty authority; rotation disabled" xml:space="preserve">
+    <value>FrenRider kiểm soát nhiệm vụ; đã tắt xoay kỹ năng</value>
+  </data>
+  <data name="Grace period ({0:F0}s)..." xml:space="preserve">
+    <value>Thời gian ân hạn ({0:F0} giây)...</value>
+  </data>
+  <data name="In duty (out of combat) - rotation active" xml:space="preserve">
+    <value>Trong nhiệm vụ (ngoài chiến đấu) - xoay kỹ năng hoạt động</value>
+  </data>
+  <data name="In range ({0:F1}y)" xml:space="preserve">
+    <value>Trong phạm vi ({0:F1}y)</value>
+  </data>
+  <data name="In sanctuary" xml:space="preserve">
+    <value>Trong khu an toàn</value>
+  </data>
+  <data name="Interacting with exit '{0}' ({1:F1}y)" xml:space="preserve">
+    <value>Tương tác với lối ra '{0}' ({1:F1}y)</value>
+  </data>
+  <data name="Landing..." xml:space="preserve">
+    <value>Đang hạ cánh...</value>
+  </data>
+  <data name="Leaving duty (attempt #{0}) - {1}" xml:space="preserve">
+    <value>Rời nhiệm vụ (lần thử #{0}) - {1}</value>
+  </data>
+  <data name="Mount cooldown ({0:F1}s)" xml:space="preserve">
+    <value>Hồi chiêu thú cưỡi ({0:F1} giây)</value>
+  </data>
+  <data name="Mount correction cooldown ({0:F1}s)" xml:space="preserve">
+    <value>Hồi chiêu chỉnh thú cưỡi ({0:F1} giây)</value>
+  </data>
+  <data name="Mount state preserved: {0}" xml:space="preserve">
+    <value>Giữ trạng thái thú cưỡi: {0}</value>
+  </data>
+  <data name="Mounted - rotations suppressed" xml:space="preserve">
+    <value>Đang cưỡi - chặn xoay kỹ năng</value>
+  </data>
+  <data name="Mounted alongside fren" xml:space="preserve">
+    <value>Cưỡi bên cạnh fren</value>
+  </data>
+  <data name="Mounting for: {0} ({1:F1}y)" xml:space="preserve">
+    <value>Lên thú cưỡi để: {0} ({1:F1}y)</value>
+  </data>
+  <data name="Mounting..." xml:space="preserve">
+    <value>Đang lên thú cưỡi...</value>
+  </data>
+  <data name="Moving to: {0}" xml:space="preserve">
+    <value>Di chuyển tới: {0}</value>
+  </data>
+  <data name="NPC repair + inn room failed: {0}" xml:space="preserve">
+    <value>Sửa tại NPC + phòng trọ thất bại: {0}</value>
+  </data>
+  <data name="Navigating to exit '{0}' ({1:F1}y)" xml:space="preserve">
+    <value>Dẫn đường tới lối ra '{0}' ({1:F1}y)</value>
+  </data>
+  <data name="Near fren on foot; dismounting" xml:space="preserve">
+    <value>Gần fren đi bộ; xuống thú cưỡi</value>
+  </data>
+  <data name="Near fren on foot; landing to dismount" xml:space="preserve">
+    <value>Gần fren đi bộ; hạ cánh để xuống thú cưỡi</value>
+  </data>
+  <data name="Near mounted fren; dismounting to ride pillion" xml:space="preserve">
+    <value>Gần fren đang cưỡi; xuống để ngồi sau</value>
+  </data>
+  <data name="Near mounted fren; landing to ride pillion" xml:space="preserve">
+    <value>Gần fren đang cưỡi; hạ cánh để ngồi sau</value>
+  </data>
+  <data name="Need companion (cooldown {0:F1}s)" xml:space="preserve">
+    <value>Cần bạn đồng hành (hồi chiêu {0:F1} giây)</value>
+  </data>
+  <data name="Need food (cooldown {0:F1}s)" xml:space="preserve">
+    <value>Cần thức ăn (hồi chiêu {0:F1} giây)</value>
+  </data>
+  <data name="Need food but in duty+combat" xml:space="preserve">
+    <value>Cần thức ăn nhưng đang trong nhiệm vụ và chiến đấu</value>
+  </data>
+  <data name="No ADS reflection hacks enabled." xml:space="preserve">
+    <value>Không bật chỉnh sửa phản chiếu ADS nào.</value>
+  </data>
+  <data name="No Gysahl Greens" xml:space="preserve">
+    <value>Không có Gysahl Greens</value>
+  </data>
+  <data name="No equipped gear below {0}%." xml:space="preserve">
+    <value>Không có trang bị đang mặc dưới {0}%.</value>
+  </data>
+  <data name="No food in inventory" xml:space="preserve">
+    <value>Không có thức ăn trong túi</value>
+  </data>
+  <data name="No food item resolved" xml:space="preserve">
+    <value>Không xác định được vật phẩm thức ăn</value>
+  </data>
+  <data name="No interactables found, nudging forward..." xml:space="preserve">
+    <value>Không tìm thấy vật tương tác, đẩy tiến...</value>
+  </data>
+  <data name="Out of {0} [{1}]" xml:space="preserve">
+    <value>Hết {0} [{1}]</value>
+  </data>
+  <data name="Own mount retained: {0}" xml:space="preserve">
+    <value>Giữ thú cưỡi riêng: {0}</value>
+  </data>
+  <data name="Partial cleanup: {0}/{1} commands failed." xml:space="preserve">
+    <value>Dọn dẹp một phần: {0}/{1} lệnh thất bại.</value>
+  </data>
+  <data name="Paused for ADS utility" xml:space="preserve">
+    <value>Tạm dừng vì tiện ích ADS</value>
+  </data>
+  <data name="Pending duty exit after completed territory {0}." xml:space="preserve">
+    <value>Chờ thoát nhiệm vụ sau khu vực đã hoàn thành {0}.</value>
+  </data>
+  <data name="Pending duty exit." xml:space="preserve">
+    <value>Chờ thoát nhiệm vụ.</value>
+  </data>
+  <data name="QuestionableSolo authority; FrenRider combat suppressed" xml:space="preserve">
+    <value>QuestionableSolo kiểm soát; chặn chiến đấu FrenRider</value>
+  </data>
+  <data name="Repair complete; no equipped gear below {0}%." xml:space="preserve">
+    <value>Sửa xong; không có trang bị đang mặc dưới {0}%.</value>
+  </data>
+  <data name="Repair timed out after {0}s; ADS: {1}" xml:space="preserve">
+    <value>Sửa hết thời gian sau {0} giây; ADS: {1}</value>
+  </data>
+  <data name="Restore failed: no automation snapshot captured for this account/character." xml:space="preserve">
+    <value>Khôi phục thất bại: chưa chụp trạng thái tự động cho tài khoản/nhân vật này.</value>
+  </data>
+  <data name="Retry wait after ADS failure: {0}" xml:space="preserve">
+    <value>Đợi thử lại sau lỗi ADS: {0}</value>
+  </data>
+  <data name="Retry wait after rejected start: {0}" xml:space="preserve">
+    <value>Đợi thử lại sau khởi động bị từ chối: {0}</value>
+  </data>
+  <data name="Retry wait: ADS not loaded." xml:space="preserve">
+    <value>Đợi thử lại: chưa tải ADS.</value>
+  </data>
+  <data name="Retry wait: ADS utility active ({0})." xml:space="preserve">
+    <value>Đợi thử lại: tiện ích ADS hoạt động ({0}).</value>
+  </data>
+  <data name="Retry wait: {0}s." xml:space="preserve">
+    <value>Đợi thử lại: {0} giây.</value>
+  </data>
+  <data name="Revive/Return accept attempted; waiting for dialog to close" xml:space="preserve">
+    <value>Đã thử chấp nhận hồi sinh/Return; đợi hộp thoại đóng</value>
+  </data>
+  <data name="Revive/Return accept callback failed; waiting to retry" xml:space="preserve">
+    <value>Callback chấp nhận hồi sinh/Return thất bại; đợi thử lại</value>
+  </data>
+  <data name="Riding pillion on fren's mount" xml:space="preserve">
+    <value>Ngồi sau trên thú cưỡi của fren</value>
+  </data>
+  <data name="Scanning for interactables..." xml:space="preserve">
+    <value>Đang quét vật tương tác...</value>
+  </data>
+  <data name="Summoning chocobo ({0} greens left)" xml:space="preserve">
+    <value>Đang triệu hồi chocobo (còn {0} greens)</value>
+  </data>
+  <data name="Suppressed by Coppelia PowerlevelBot" xml:space="preserve">
+    <value>Bị chặn bởi Coppelia PowerlevelBot</value>
+  </data>
+  <data name="Surfacing revive/Return prompt" xml:space="preserve">
+    <value>Đưa lời nhắc hồi sinh/Return lên</value>
+  </data>
+  <data name="Surfacing teleport prompt" xml:space="preserve">
+    <value>Đưa lời nhắc dịch chuyển lên</value>
+  </data>
+  <data name="Switched to {0} [{1}]" xml:space="preserve">
+    <value>Đã chuyển sang {0} [{1}]</value>
+  </data>
+  <data name="Teleport decline attempted; waiting for dialog to close" xml:space="preserve">
+    <value>Đã thử từ chối dịch chuyển; đợi hộp thoại đóng</value>
+  </data>
+  <data name="Teleport decline callback failed; waiting to retry" xml:space="preserve">
+    <value>Callback từ chối dịch chuyển thất bại; đợi thử lại</value>
+  </data>
+  <data name="Too far ({0:F1}y &gt; {1:F0}y max)" xml:space="preserve">
+    <value>Quá xa ({0:F1}y &gt; tối đa {1:F0}y)</value>
+  </data>
+  <data name="Waiting for ADS desynthesis to start." xml:space="preserve">
+    <value>Đợi phân giải ADS bắt đầu.</value>
+  </data>
+  <data name="Waiting for revive/Return notification" xml:space="preserve">
+    <value>Đợi thông báo hồi sinh/Return</value>
+  </data>
+  <data name="Waiting for revive/Return prompt" xml:space="preserve">
+    <value>Đợi lời nhắc hồi sinh/Return</value>
+  </data>
+  <data name="Waiting for teleport prompt" xml:space="preserve">
+    <value>Đợi lời nhắc dịch chuyển</value>
+  </data>
+  <data name="Waiting for {0} SelectYesno dialog" xml:space="preserve">
+    <value>Đợi hộp thoại SelectYesno {0}</value>
+  </data>
+  <data name="Waiting start: configured desynthesis requested (attempt {0})." xml:space="preserve">
+    <value>Đợi bắt đầu: đã yêu cầu phân giải đã cấu hình (lần thử {0}).</value>
+  </data>
+  <data name="Waiting to mount..." xml:space="preserve">
+    <value>Đợi lên thú cưỡi...</value>
+  </data>
+  <data name="Waiting: ADS not loaded." xml:space="preserve">
+    <value>Đang đợi: chưa tải ADS.</value>
+  </data>
+  <data name="Waiting: ADS utility active ({0})." xml:space="preserve">
+    <value>Đang đợi: tiện ích ADS hoạt động ({0}).</value>
+  </data>
+  <data name="Waiting: {0}." xml:space="preserve">
+    <value>Đang đợi: {0}.</value>
+  </data>
+  <data name="⚠️ WARNING: AutoDuty Plugin Detected" xml:space="preserve">
+    <value>⚠ CẢNH BÁO: Phát hiện plugin AutoDuty</value>
+  </data>
+  <data name="• Force respawn at entrance" xml:space="preserve">
+    <value>• Ép hồi sinh tại lối vào</value>
+  </data>
+  <data name="• Leave instances at random times" xml:space="preserve">
+    <value>• Rời phiên bản vào lúc ngẫu nhiên</value>
+  </data>
+  <data name="• Interfere with FrenRider automation" xml:space="preserve">
+    <value>• Can thiệp tự động hóa FrenRider</value>
+  </data>
+  <data name="⚠ VLC Not Found" xml:space="preserve">
+    <value>⚠ Không tìm thấy VLC</value>
+  </data>
+  <data name="Well Fed: {0:F0}s ({1} [{2}])" xml:space="preserve">
+    <value>Well Fed: {0:F0} giây ({1} [{2}])</value>
+  </data>
+  <data name="Zone transition (rotation disabled)" xml:space="preserve">
+    <value>Chuyển vùng (đã tắt xoay kỹ năng)</value>
+  </data>
+  <data name="handoff in {0:F1}s of continuous readiness" xml:space="preserve">
+    <value>bàn giao sau {0:F1} giây liên tục sẵn sàng</value>
+  </data>
+  <data name="handoff retry backoff until {0:HH:mm:ss}" xml:space="preserve">
+    <value>hoãn thử lại bàn giao đến {0:HH:mm:ss}</value>
+  </data>
+  <data name="waiting for duty start seam" xml:space="preserve">
+    <value>đợi thời điểm bắt đầu nhiệm vụ</value>
+  </data>
+  <data name="waiting {0:F1}s for ADS ownership confirmation" xml:space="preserve">
+    <value>đợi {0:F1} giây để xác nhận quyền kiểm soát ADS</value>
+  </data>
+  <data name="{0} active" xml:space="preserve">
+    <value>{0} đang hoạt động</value>
+  </data>
+  <data name="{0} auto" xml:space="preserve">
+    <value>{0} tự động</value>
+  </data>
+  <data name="{0} repair enabled; threshold is 0%." xml:space="preserve">
+    <value>Đã bật sửa {0}; ngưỡng là 0%.</value>
+  </data>
+  <data name="{0} repair needed below {1}%; dismounting first." xml:space="preserve">
+    <value>Cần sửa {0} dưới {1}%; xuống thú cưỡi trước.</value>
+  </data>
+  <data name="{0} repair needed below {1}%; waiting for mount transition." xml:space="preserve">
+    <value>Cần sửa {0} dưới {1}%; đợi chuyển trạng thái thú cưỡi.</value>
+  </data>
+  <data name="{0} repair needed below {1}%; waiting to dismount." xml:space="preserve">
+    <value>Cần sửa {0} dưới {1}%; đợi xuống thú cưỡi.</value>
+  </data>
+  <data name="{0} repair needed below {1}%; waiting while {2}." xml:space="preserve">
+    <value>Cần sửa {0} dưới {1}%; đợi trong khi {2}.</value>
+  </data>
+  <data name="{0} repair requested below {1}%; FrenRider paused." xml:space="preserve">
+    <value>Đã yêu cầu sửa {0} dưới {1}%; FrenRider tạm dừng.</value>
+  </data>
+  <data name="{0} repair requested; waiting for ADS status." xml:space="preserve">
+    <value>Đã yêu cầu sửa {0}; đợi trạng thái ADS.</value>
+  </data>
+  <data name="{0} repair requested; waiting for ADS to start." xml:space="preserve">
+    <value>Đã yêu cầu sửa {0}; đợi ADS bắt đầu.</value>
+  </data>
+  <data name="{0} repair running; FrenRider paused. ADS: {1}" xml:space="preserve">
+    <value>Đang sửa {0}; FrenRider tạm dừng. ADS: {1}</value>
+  </data>
+  <data name="{0} repair still needed below {1}%; automatic dismount timed out." xml:space="preserve">
+    <value>Vẫn cần sửa {0} dưới {1}%; tự xuống thú cưỡi hết thời gian.</value>
+  </data>
+  <data name="{0} repair still needed below {1}%; retry in {2}s. ADS: {3}" xml:space="preserve">
+    <value>Vẫn cần sửa {0} dưới {1}%; thử lại sau {2} giây. ADS: {3}</value>
+  </data>
+  <data name="{0} repair still needed below {1}%; waiting while {2}. ADS: {3}" xml:space="preserve">
+    <value>Vẫn cần sửa {0} dưới {1}%; đợi trong khi {2}. ADS: {3}</value>
+  </data>
+  <data name="{0}: mounting {1}" xml:space="preserve">
+    <value>{0}: lên thú cưỡi {1}</value>
+  </data>
+  <data name="{0}; restarting readiness delay with 5s retry backoff" xml:space="preserve">
+    <value>{0}; bắt đầu lại thời gian chờ sẵn sàng với hoãn thử lại 5 giây</value>
+  </data>
+  <data name="{0}; waiting for authoritative ownership" xml:space="preserve">
+    <value>{0}; đợi quyền kiểm soát có thẩm quyền</value>
+  </data>
+  <data name="True" xml:space="preserve">
+    <value>Đúng</value>
+  </data>
+  <data name="False" xml:space="preserve">
+    <value>Sai</value>
+  </data>
+  <data name="ADS recovery hold IPC unavailable; update ADS" xml:space="preserve">
+    <value>Không có IPC giữ hồi phục ADS; hãy cập nhật ADS</value>
+  </data>
+  <data name="Waiting for ADS recovery hold acknowledgement" xml:space="preserve">
+    <value>Đợi ADS xác nhận giữ hồi phục</value>
+  </data>
+  <data name="Waiting to leave combat before approaching or using Phoenix Down" xml:space="preserve">
+    <value>Đợi rời chiến đấu trước khi tiếp cận hoặc dùng Phoenix Down</value>
+  </data>
+  <data name="Waiting to land" xml:space="preserve">
+    <value>Đợi hạ cánh</value>
+  </data>
+  <data name="No Phoenix Downs; waiting for party recovery" xml:space="preserve">
+    <value>Không có Phoenix Down; đợi hồi phục tổ đội</value>
+  </data>
+  <data name="Medicine cooldown; waiting for recovery" xml:space="preserve">
+    <value>Hồi chiêu thuốc; đợi hồi phục</value>
+  </data>
+  <data name="Waiting for current cast" xml:space="preserve">
+    <value>Đợi lần niệm hiện tại</value>
+  </data>
+  <data name="FR: On" xml:space="preserve">
+    <value>FR: Bật</value>
+  </data>
+  <data name="FR: Off" xml:space="preserve">
+    <value>FR: Tắt</value>
+  </data>
+  <data name="Fren Rider active - Following {0}. Coppelia: {1}. Cleanup: {2}" xml:space="preserve">
+    <value>Fren Rider hoạt động - Theo {0}. Coppelia: {1}. Dọn dẹp: {2}</value>
+  </data>
+  <data name="Fren Rider disabled - Click to toggle. Coppelia: {0}. Cleanup: {1}" xml:space="preserve">
+    <value>Fren Rider đã tắt - Nhấn để bật/tắt. Coppelia: {0}. Dọn dẹp: {1}</value>
+  </data>
+  <data name="No compatible BossMod preset IPC responded" xml:space="preserve">
+    <value>Không có IPC cấu hình BossMod tương thích phản hồi</value>
+  </data>
+  <data name="No packaged presets found" xml:space="preserve">
+    <value>Không tìm thấy cấu hình đóng gói</value>
+  </data>
+  <data name="Preset push partially succeeded ({0}/{1})" xml:space="preserve">
+    <value>Gửi cấu hình thành công một phần ({0}/{1})</value>
+  </data>
+  <data name="Six BossMod presets pushed" xml:space="preserve">
+    <value>Đã gửi sáu cấu hình BossMod</value>
+  </data>
+  <data name=", FATE {0}" xml:space="preserve">
+    <value>, FATE {0}</value>
+  </data>
+  <data name=", indoors" xml:space="preserve">
+    <value>, trong nhà</value>
+  </data>
+  <data name="{0} (territory {1}{2})" xml:space="preserve">
+    <value>{0} (khu vực {1}{2})</value>
+  </data>
+  <data name="ADS Exit Method ({0}s)" xml:space="preserve">
+    <value>Cách thoát ADS ({0} giây)</value>
+  </data>
+  <data name="FrenRider: leave after {0}s" xml:space="preserve">
+    <value>FrenRider: rời sau {0} giây</value>
+  </data>
+  <data name="FrenRider: leave when party leaves" xml:space="preserve">
+    <value>FrenRider: rời khi tổ đội rời</value>
+  </data>
+  <data name="Timer: {0}" xml:space="preserve">
+    <value>Bộ đếm: {0}</value>
+  </data>
+  <data name="Next retry/reassert in {0}s." xml:space="preserve">
+    <value>Thử lại/tái áp dụng sau {0} giây.</value>
+  </data>
+  <data name="Legacy seed active: {0} at threshold {1}." xml:space="preserve">
+    <value>Giá trị khởi tạo cũ hoạt động: {0} ở ngưỡng {1}.</value>
+  </data>
+  <data name="global handoff on" xml:space="preserve">
+    <value>bật bàn giao toàn cục</value>
+  </data>
+  <data name="global handoff off" xml:space="preserve">
+    <value>tắt bàn giao toàn cục</value>
+  </data>
+  <data name="Authority source: {0}; readable={1}; exit takeover={2}" xml:space="preserve">
+    <value>Nguồn quyền kiểm soát: {0}; đọc được={1}; tiếp quản thoát={2}</value>
+  </data>
+  <data name="Selected: {0} {1} (ID: {2})" xml:space="preserve">
+    <value>Đã chọn: {0} {1} (ID: {2})</value>
+  </data>
+  <data name="{0} in party but not visible" xml:space="preserve">
+    <value>{0} trong tổ đội nhưng không nhìn thấy</value>
+  </data>
+  <data name="Active, {0}m {1:D2}s remaining" xml:space="preserve">
+    <value>Hoạt động, còn {0} phút {1:D2} giây</value>
+  </data>
+  <data name="Inactive, {0} Gysahl Greens" xml:space="preserve">
+    <value>Không hoạt động, {0} Gysahl Greens</value>
+  </data>
+  <data name="Run={0}, FlyYouFools={1}, FarChase={2}, FollowMode={3}/{4}" xml:space="preserve">
+    <value>Chạy={0}, FlyYouFools={1}, ĐuổiXa={2}, ChếĐộTheo={3}/{4}</value>
+  </data>
+  <data name="Cling={0:F1}, Max={1:F0}, ForayMax={2:F0}" xml:space="preserve">
+    <value>BámSát={0:F1}, TốiĐa={1:F0}, TốiĐaForay={2:F0}</value>
+  </data>
+  <data name="Loaded={0}, Pending={1}, RuntimeOwned={2}, Readable={3}, Source={4}, ExitTakeover={5}" xml:space="preserve">
+    <value>ĐãTải={0}, ĐangChờ={1}, KiểmSoátLúcChạy={2}, ĐọcĐược={3}, Nguồn={4}, TiếpQuảnThoát={5}</value>
+  </data>
+  <data name="Source={0}, Readable={1}, ExitTakeover={2}" xml:space="preserve">
+    <value>Nguồn={0}, ĐọcĐược={1}, TiếpQuảnThoát={2}</value>
+  </data>
+  <data name="Saved fren is outside the current party." xml:space="preserve">
+    <value>Fren đã lưu nằm ngoài tổ đội hiện tại.</value>
+  </data>
+  <data name="ADS Hyper Focus heartbeat received." xml:space="preserve">
+    <value>Đã nhận nhịp duy trì ADS Hyper Focus.</value>
+  </data>
+  <data name="ADS Hyper Focus lease active." xml:space="preserve">
+    <value>Phiên ADS Hyper Focus đang hoạt động.</value>
+  </data>
+  <data name="ActionManager unavailable" xml:space="preserve">
+    <value>Không có ActionManager</value>
+  </data>
+  <data name="Aetheryte sheet unavailable for {0} (candidate count=0)" xml:space="preserve">
+    <value>Không có bảng aetheryte cho {0} (số ứng viên=0)</value>
+  </data>
+  <data name="Coppelia Powerlevel heartbeat received." xml:space="preserve">
+    <value>Đã nhận nhịp duy trì Coppelia Powerlevel.</value>
+  </data>
+  <data name="Coppelia Powerlevel lease active." xml:space="preserve">
+    <value>Phiên Coppelia Powerlevel đang hoạt động.</value>
+  </data>
+  <data name="Exit after duty ends - {0:F0}s elapsed (configured: {1}s)" xml:space="preserve">
+    <value>Thoát sau khi nhiệm vụ kết thúc - đã qua {0:F0} giây (cấu hình: {1} giây)</value>
+  </data>
+  <data name="Failed to open /partycmd" xml:space="preserve">
+    <value>Không mở được /partycmd</value>
+  </data>
+  <data name="Leave when all party members left" xml:space="preserve">
+    <value>Rời khi mọi thành viên tổ đội đã rời</value>
+  </data>
+  <data name="Matched {0} ({1})" xml:space="preserve">
+    <value>Khớp {0} ({1})</value>
+  </data>
+  <data name="No interactables found; fren not visible in duty" xml:space="preserve">
+    <value>Không tìm thấy vật tương tác; không thấy fren trong nhiệm vụ</value>
+  </data>
+  <data name="No interactables found; not bound by duty" xml:space="preserve">
+    <value>Không tìm thấy vật tương tác; không bị ràng buộc bởi nhiệm vụ</value>
+  </data>
+  <data name="No party row found for {0} ({1})" xml:space="preserve">
+    <value>Không tìm thấy dòng tổ đội cho {0} ({1})</value>
+  </data>
+  <data name="No unlocked Lifestream aetherytes matched {0} " xml:space="preserve">
+    <value>Không có aetheryte Lifestream đã mở khớp {0} </value>
+  </data>
+  <data name="Opening party window" xml:space="preserve">
+    <value>Đang mở cửa sổ tổ đội</value>
+  </data>
+  <data name="Party row found for {0}, but no zone name matched ({1})" xml:space="preserve">
+    <value>Tìm thấy dòng tổ đội cho {0}, nhưng không khớp tên vùng nào ({1})</value>
+  </data>
+  <data name="Party window did not open (addon visible=false, opened by FrenRider=true)" xml:space="preserve">
+    <value>Cửa sổ tổ đội không mở (addon hiển thị=false, FrenRider mở=true)</value>
+  </data>
+  <data name="Party window had no readable rows ({0})" xml:space="preserve">
+    <value>Cửa sổ tổ đội không có dòng đọc được ({0})</value>
+  </data>
+  <data name="Party window not visible" xml:space="preserve">
+    <value>Cửa sổ tổ đội không hiển thị</value>
+  </data>
+  <data name="Party window read failed: {0}" xml:space="preserve">
+    <value>Đọc cửa sổ tổ đội thất bại: {0}</value>
+  </data>
+  <data name="Reading party window ({0})" xml:space="preserve">
+    <value>Đang đọc cửa sổ tổ đội ({0})</value>
+  </data>
+  <data name="SelectYesno dialog" xml:space="preserve">
+    <value>Hộp thoại SelectYesno</value>
+  </data>
+  <data name="Telepo unavailable for {0} (candidate count=0)" xml:space="preserve">
+    <value>Không có Telepo cho {0} (số ứng viên=0)</value>
+  </data>
+  <data name="Teleport list read failed for {0}: {1} (candidate count=0)" xml:space="preserve">
+    <value>Đọc danh sách dịch chuyển thất bại cho {0}: {1} (số ứng viên=0)</value>
+  </data>
+  <data name="Transient IPC failure; preserving owned state. Typed: {0}; JSON: {1}" xml:space="preserve">
+    <value>Lỗi IPC tạm thời; giữ trạng thái đang kiểm soát. Có kiểu: {0}; JSON: {1}</value>
+  </data>
+  <data name="UI manager unavailable" xml:space="preserve">
+    <value>Không có trình quản lý giao diện</value>
+  </data>
+  <data name="Validated ADS current-duty snapshot for territory/CFC {0}/{1}." xml:space="preserve">
+    <value>Đã xác thực bản chụp nhiệm vụ hiện tại ADS cho territory/CFC {0}/{1}.</value>
+  </data>
+  <data name="Waiting for party window" xml:space="preserve">
+    <value>Đợi cửa sổ tổ đội</value>
+  </data>
+  <data name="addon hidden" xml:space="preserve">
+    <value>addon bị ẩn</value>
+  </data>
+  <data name="addon not found" xml:space="preserve">
+    <value>không tìm thấy addon</value>
+  </data>
+  <data name="already mounted" xml:space="preserve">
+    <value>đã cưỡi</value>
+  </data>
+  <data name="already mounting" xml:space="preserve">
+    <value>đang lên thú cưỡi</value>
+  </data>
+  <data name="automation preempted" xml:space="preserve">
+    <value>tự động hóa bị ngắt</value>
+  </data>
+  <data name="between areas" xml:space="preserve">
+    <value>giữa các khu vực</value>
+  </data>
+  <data name="casting" xml:space="preserve">
+    <value>đang niệm</value>
+  </data>
+  <data name="casting or occupied" xml:space="preserve">
+    <value>đang niệm hoặc bận</value>
+  </data>
+  <data name="duty confirm popup" xml:space="preserve">
+    <value>cửa sổ xác nhận nhiệm vụ</value>
+  </data>
+  <data name="event null" xml:space="preserve">
+    <value>sự kiện null</value>
+  </data>
+  <data name="exception: {0}" xml:space="preserve">
+    <value>ngoại lệ: {0}</value>
+  </data>
+  <data name="far chase active" xml:space="preserve">
+    <value>đuổi xa hoạt động</value>
+  </data>
+  <data name="flying stuck escape (dX={0:F1} dY={1:F1} dZ={2:F1}, all &lt;{3}y in {4}s)" xml:space="preserve">
+    <value>thoát kẹt khi bay (dX={0:F1} dY={1:F1} dZ={2:F1}, tất cả &lt;{3}y trong {4} giây)</value>
+  </data>
+  <data name="fren flying" xml:space="preserve">
+    <value>fren đang bay</value>
+  </data>
+  <data name="fren unavailable" xml:space="preserve">
+    <value>không có fren</value>
+  </data>
+  <data name="in combat" xml:space="preserve">
+    <value>đang chiến đấu</value>
+  </data>
+  <data name="in duty" xml:space="preserve">
+    <value>trong nhiệm vụ</value>
+  </data>
+  <data name="local player unavailable" xml:space="preserve">
+    <value>không có người chơi cục bộ</value>
+  </data>
+  <data name="mount action check failed: {0}" xml:space="preserve">
+    <value>kiểm tra hành động thú cưỡi thất bại: {0}</value>
+  </data>
+  <data name="mount action unavailable (status={0})" xml:space="preserve">
+    <value>không có hành động thú cưỡi (trạng thái={0})</value>
+  </data>
+  <data name="mounted or riding pillion" xml:space="preserve">
+    <value>đang cưỡi hoặc ngồi sau</value>
+  </data>
+  <data name="near fren on foot" xml:space="preserve">
+    <value>gần fren đi bộ</value>
+  </data>
+  <data name="near mounted fren with Fly You Fools disabled" xml:space="preserve">
+    <value>gần fren đang cưỡi với Fly You Fools tắt</value>
+  </data>
+  <data name="near mounted fren with Fly You Fools enabled" xml:space="preserve">
+    <value>gần fren đang cưỡi với Fly You Fools bật</value>
+  </data>
+  <data name="node index out of range" xml:space="preserve">
+    <value>chỉ mục node ngoài phạm vi</value>
+  </data>
+  <data name="node null" xml:space="preserve">
+    <value>node rỗng</value>
+  </data>
+  <data name="not mounted or riding" xml:space="preserve">
+    <value>không cưỡi hoặc ngồi sau</value>
+  </data>
+  <data name="occupied or in cutscene" xml:space="preserve">
+    <value>bận hoặc trong cảnh cắt</value>
+  </data>
+  <data name="outside sanctuary" xml:space="preserve">
+    <value>ngoài khu an toàn</value>
+  </data>
+  <data name="player busy" xml:space="preserve">
+    <value>người chơi bận</value>
+  </data>
+  <data name="player dead" xml:space="preserve">
+    <value>người chơi đã chết</value>
+  </data>
+  <data name="riding pillion" xml:space="preserve">
+    <value>ngồi sau</value>
+  </data>
+  <data name="safe and in cling range" xml:space="preserve">
+    <value>an toàn và trong phạm vi bám sát</value>
+  </data>
+  <data name="stuck repath (dX={0:F1} dY={1:F1} dZ={2:F1}, all &lt;{3}y in {4}s)" xml:space="preserve">
+    <value>tìm đường lại khi kẹt (dX={0:F1} dY={1:F1} dZ={2:F1}, tất cả &lt;{3}y trong {4} giây)</value>
+  </data>
+  <data name="stuck repath (moved {0:F1}y &lt; {1:F1}y in {2:F0}s)" xml:space="preserve">
+    <value>tìm đường lại khi kẹt (đã đi {0:F1}y &lt; {1:F1}y trong {2:F0} giây)</value>
+  </data>
+  <data name="teleport or dialog" xml:space="preserve">
+    <value>dịch chuyển hoặc hộp thoại</value>
+  </data>
+  <data name="unit manager not found" xml:space="preserve">
+    <value>không tìm thấy trình quản lý đơn vị</value>
+  </data>
+  <data name="unsupported arg type" xml:space="preserve">
+    <value>kiểu đối số không hỗ trợ</value>
+  </data>
+  <data name="{0:F1}y XZ from fren, handoff {1:F1}y" xml:space="preserve">
+    <value>cách fren {0:F1}y XZ, bàn giao {1:F1}y</value>
+  </data>
+  <data name="Overworld" xml:space="preserve">
+    <value>Ngoài thế giới</value>
+  </data>
+  <data name="Town" xml:space="preserve">
+    <value>Thành phố</value>
+  </data>
+  <data name="Duty" xml:space="preserve">
+    <value>Nhiệm vụ</value>
+  </data>
+  <data name="DeepDungeon" xml:space="preserve">
+    <value>DeepDungeon</value>
+  </data>
+  <data name="Foray" xml:space="preserve">
+    <value>Foray</value>
+  </data>
+  <data name="Typed" xml:space="preserve">
+    <value>Có kiểu</value>
+  </data>
+  <data name="JsonFallback" xml:space="preserve">
+    <value>Dự phòng JSON</value>
+  </data>
+  <data name="StaleHold" xml:space="preserve">
+    <value>Giữ trạng thái cũ</value>
+  </data>
+  <data name="Unloaded" xml:space="preserve">
+    <value>Chưa tải</value>
+  </data>
+  <data name="Unreadable" xml:space="preserve">
+    <value>Không đọc được</value>
+  </data>
+  <data name="Following local aetheryte network to {0}{1}" xml:space="preserve">
+    <value>Theo mạng aetheryte cục bộ tới {0}{1}</value>
+  </data>
+  <data name="Found {0} aetherytes for {1}" xml:space="preserve">
+    <value>Tìm thấy {0} aetheryte cho {1}</value>
+  </data>
+  <data name="Matched {0}" xml:space="preserve">
+    <value>Khớp {0}</value>
+  </data>
+  <data name="Sent {0}; matched {1}; found {2} aetherytes{3}" xml:space="preserve">
+    <value>Đã gửi {0}; khớp {1}; tìm thấy {2} aetheryte{3}</value>
+  </data>
+  <data name="{0}{1}; retry in {2}s" xml:space="preserve">
+    <value>{0}{1}; thử lại sau {2} giây</value>
+  </data>
+  <data name="ADS loaded; ready." xml:space="preserve">
+    <value>Đã tải ADS; sẵn sàng.</value>
+  </data>
+  <data name="ADS loaded; {0}." xml:space="preserve">
+    <value>Đã tải ADS; {0}.</value>
+  </data>
+  <data name="{0} {1}: M{2}/T{3}, {4}." xml:space="preserve">
+    <value>{0} {1}: M{2}/T{3}, {4}.</value>
+  </data>
+  <data name="ADS is not loaded" xml:space="preserve">
+    <value>Chưa tải ADS</value>
+  </data>
+  <data name="{0}; FrenRider local duty logic stays active" xml:space="preserve">
+    <value>{0}; logic nhiệm vụ cục bộ FrenRider tiếp tục hoạt động</value>
+  </data>
+  <data name="ADS current-duty identity does not match live GameMain territory/CFC {0}/{1}; FrenRider local duty logic stays active" xml:space="preserve">
+    <value>Danh tính nhiệm vụ hiện tại ADS không khớp territory/CFC GameMain trực tiếp {0}/{1}; logic nhiệm vụ cục bộ FrenRider tiếp tục hoạt động</value>
+  </data>
+  <data name="{0} handoff is off; FrenRider local duty logic stays active" xml:space="preserve">
+    <value>Bàn giao {0} đang tắt; logic nhiệm vụ cục bộ FrenRider tiếp tục hoạt động</value>
+  </data>
+  <data name="{0} has ADS clearance {1} (M{2}), below threshold {3}; FrenRider local duty logic stays active" xml:space="preserve">
+    <value>{0} có mức hoàn thành ADS {1} (M{2}), dưới ngưỡng {3}; logic nhiệm vụ cục bộ FrenRider tiếp tục hoạt động</value>
+  </data>
+  <data name="ADS current-duty identity {0}/{1} does not match live GameMain identity {2}/{3}." xml:space="preserve">
+    <value>Danh tính nhiệm vụ hiện tại ADS {0}/{1} không khớp danh tính GameMain trực tiếp {2}/{3}.</value>
+  </data>
+  <data name="Live duty identity changed from territory/CFC {0}/{1} to {2}/{3}." xml:space="preserve">
+    <value>Danh tính nhiệm vụ trực tiếp đổi từ territory/CFC {0}/{1} sang {2}/{3}.</value>
+  </data>
+  <data name="No validated ADS current-duty snapshot." xml:space="preserve">
+    <value>Không có bản chụp nhiệm vụ hiện tại ADS đã xác thực.</value>
+  </data>
+  <data name="Live client is outside an instanced duty." xml:space="preserve">
+    <value>Client trực tiếp nằm ngoài nhiệm vụ phiên bản.</value>
+  </data>
+  <data name="GameMain did not provide a live duty territory identity." xml:space="preserve">
+    <value>GameMain không cung cấp danh tính khu vực nhiệm vụ trực tiếp.</value>
+  </data>
+  <data name="ADS unloaded." xml:space="preserve">
+    <value>Đã gỡ ADS.</value>
+  </data>
+  <data name="ADS.GetStatusJson returned an empty payload" xml:space="preserve">
+    <value>ADS.GetStatusJson trả về nội dung rỗng</value>
+  </data>
+  <data name="ADS status does not identify an active instanced duty" xml:space="preserve">
+    <value>Trạng thái ADS không xác định nhiệm vụ phiên bản đang hoạt động</value>
+  </data>
+  <data name="ADS current duty has no catalog metadata" xml:space="preserve">
+    <value>Nhiệm vụ hiện tại ADS không có siêu dữ liệu danh mục</value>
+  </data>
+  <data name="ADS current-duty catalog row has no duty name" xml:space="preserve">
+    <value>Dòng danh mục nhiệm vụ hiện tại ADS không có tên nhiệm vụ</value>
+  </data>
+  <data name="ADS current-duty catalog row has no territory identity" xml:space="preserve">
+    <value>Dòng danh mục nhiệm vụ hiện tại ADS không có danh tính khu vực</value>
+  </data>
+  <data name="ADS current-duty catalog row has no CFC identity" xml:space="preserve">
+    <value>Dòng danh mục nhiệm vụ hiện tại ADS không có danh tính CFC</value>
+  </data>
+  <data name="ADS current-duty catalog row has unsupported category '{0}'" xml:space="preserve">
+    <value>Dòng danh mục nhiệm vụ hiện tại ADS có loại không hỗ trợ '{0}'</value>
+  </data>
+  <data name="ADS current-duty catalog row has unsupported support level '{0}'" xml:space="preserve">
+    <value>Dòng danh mục nhiệm vụ hiện tại ADS có mức hỗ trợ không hỗ trợ '{0}'</value>
+  </data>
+  <data name="ADS current-duty catalog row has unsupported clearance status '{0}'" xml:space="preserve">
+    <value>Dòng danh mục nhiệm vụ hiện tại ADS có trạng thái hoàn thành không hỗ trợ '{0}'</value>
+  </data>
+  <data name="ADS.GetStatusJson was invalid JSON: {0}" xml:space="preserve">
+    <value>ADS.GetStatusJson là JSON không hợp lệ: {0}</value>
+  </data>
+  <data name="ADS.GetStatusJson unavailable: {0}" xml:space="preserve">
+    <value>Không có ADS.GetStatusJson: {0}</value>
+  </data>
+  <data name="ADS.GetStatusJson unavailable; retaining the validated current-duty snapshot for the same live identity: {0}" xml:space="preserve">
+    <value>Không có ADS.GetStatusJson; giữ bản chụp nhiệm vụ hiện tại đã xác thực cho cùng danh tính trực tiếp: {0}</value>
+  </data>
+  <data name="waiting for login" xml:space="preserve">
+    <value>đợi đăng nhập</value>
+  </data>
+  <data name="waiting for local player" xml:space="preserve">
+    <value>đợi người chơi cục bộ</value>
+  </data>
+  <data name="waiting for unconscious state to clear" xml:space="preserve">
+    <value>đợi hết trạng thái bất tỉnh</value>
+  </data>
+  <data name="waiting for local player to be alive" xml:space="preserve">
+    <value>đợi người chơi cục bộ sống</value>
+  </data>
+  <data name="waiting for area transition to finish" xml:space="preserve">
+    <value>đợi chuyển khu hoàn tất</value>
+  </data>
+  <data name="waiting for cutscene to finish" xml:space="preserve">
+    <value>đợi cảnh cắt hoàn tất</value>
+  </data>
+  <data name="waiting for cutscene event to finish" xml:space="preserve">
+    <value>đợi sự kiện cảnh cắt hoàn tất</value>
+  </data>
+  <data name="NPC no-inn/no-teleport" xml:space="preserve">
+    <value>NPC không nhà trọ/không dịch chuyển</value>
+  </data>
+  <data name="applied" xml:space="preserve">
+    <value>đã áp dụng</value>
+  </data>
+  <data name="already set" xml:space="preserve">
+    <value>đã đặt</value>
+  </data>
+  <data name="not loaded" xml:space="preserve">
+    <value>chưa tải</value>
+  </data>
+  <data name="unavailable" xml:space="preserve">
+    <value>không có</value>
+  </data>
+  <data name="failed" xml:space="preserve">
+    <value>thất bại</value>
+  </data>
+  <data name="RSR {0}{1}" xml:space="preserve">
+    <value>RSR {0}{1}</value>
+  </data>
+  <data name="{0} active{1}" xml:space="preserve">
+    <value>{0} hoạt động{1}</value>
+  </data>
+  <data name="{0} auto{1}" xml:space="preserve">
+    <value>{0} tự động{1}</value>
+  </data>
+  <data name="{0} unavailable{1}" xml:space="preserve">
+    <value>{0} không có{1}</value>
+  </data>
+  <data name="{0} captured" xml:space="preserve">
+    <value>đã chụp {0}</value>
+  </data>
+  <data name="{0} unavailable" xml:space="preserve">
+    <value>{0} không có</value>
+  </data>
+  <data name="{0} unavailable: {1}" xml:space="preserve">
+    <value>{0} không có: {1}</value>
+  </data>
+  <data name="Partial restore ({0})." xml:space="preserve">
+    <value>Khôi phục một phần ({0}).</value>
+  </data>
+  <data name="Far chase" xml:space="preserve">
+    <value>Đuổi xa</value>
+  </data>
+  <data name="Fly You Fools" xml:space="preserve">
+    <value>Fly You Fools</value>
+  </data>
+  <data name="outside effective cling range" xml:space="preserve">
+    <value>ngoài phạm vi bám sát hiệu lực</value>
+  </data>
+  <data name="Failed to send {0}" xml:space="preserve">
+    <value>Không gửi được {0}</value>
+  </data>
+  <data name="; Party window left open" xml:space="preserve">
+    <value>; Cửa sổ tổ đội để mở</value>
+  </data>
+  <data name="No unlocked Lifestream aetherytes matched {0} (candidate count=0; {1})" xml:space="preserve">
+    <value>Không có aetheryte Lifestream đã mở khớp {0} (số ứng viên=0; {1})</value>
+  </data>
+  <data name="ADS.StartDutyFromInside accepted" xml:space="preserve">
+    <value>ADS.StartDutyFromInside chấp nhận</value>
+  </data>
+  <data name="ADS.StartDutyFromInside rejected; command fallback suppressed" xml:space="preserve">
+    <value>ADS.StartDutyFromInside từ chối; chặn lệnh dự phòng</value>
+  </data>
+  <data name="typed endpoint unavailable; sent /ads inside fallback" xml:space="preserve">
+    <value>không có endpoint có kiểu; đã gửi /ads inside dự phòng</value>
+  </data>
+  <data name="typed endpoint unavailable and /ads inside fallback failed" xml:space="preserve">
+    <value>không có endpoint có kiểu và /ads inside dự phòng thất bại</value>
+  </data>
+  <data name="DeathReturn" xml:space="preserve">
+    <value>Return khi chết</value>
+  </data>
+  <data name="Raise" xml:space="preserve">
+    <value>Raise</value>
+  </data>
+  <data name="Teleport" xml:space="preserve">
+    <value>Dịch chuyển</value>
+  </data>
+  <data name="Duty completed, {0}leaving in {1:F0}s..." xml:space="preserve">
+    <value>Nhiệm vụ hoàn tất, {0}rời sau {1:F0} giây...</value>
+  </data>
+  <data name="ADS authority active" xml:space="preserve">
+    <value>quyền kiểm soát ADS hoạt động</value>
+  </data>
+  <data name="local aethernet travel active" xml:space="preserve">
+    <value>di chuyển aethernet cục bộ hoạt động</value>
+  </data>
+  <data name="settings changed" xml:space="preserve">
+    <value>thiết lập đã đổi</value>
+  </data>
+  <data name="typed IPC unavailable" xml:space="preserve">
+    <value>không có IPC có kiểu</value>
+  </data>
+  <data name="live AutoFollow read unavailable" xml:space="preserve">
+    <value>không đọc được AutoFollow trực tiếp</value>
+  </data>
+  <data name="BossMod.Service not found" xml:space="preserve">
+    <value>Không tìm thấy BossMod.Service</value>
+  </data>
+  <data name="BossMod.Service.Config unavailable" xml:space="preserve">
+    <value>Không có BossMod.Service.Config</value>
+  </data>
+  <data name="BossMod.AI.AIConfig not found" xml:space="preserve">
+    <value>Không tìm thấy BossMod.AI.AIConfig</value>
+  </data>
+  <data name="live instance discovery failed: {0}" xml:space="preserve">
+    <value>khám phá phiên bản trực tiếp thất bại: {0}</value>
+  </data>
+  <data name="Dalamud LocalPlugin wrapper was not reachable from IExposedPlugin" xml:space="preserve">
+    <value>Không truy cập được lớp bọc Dalamud LocalPlugin từ IExposedPlugin</value>
+  </data>
+  <data name="Dalamud LocalPlugin had no live instance" xml:space="preserve">
+    <value>Dalamud LocalPlugin không có phiên bản trực tiếp</value>
+  </data>
+  <data name="Dalamud LocalPlugin had no live assembly" xml:space="preserve">
+    <value>Dalamud LocalPlugin không có assembly trực tiếp</value>
+  </data>
+  <data name="Dalamud LocalPlugin instance and assembly did not match" xml:space="preserve">
+    <value>Phiên bản và assembly Dalamud LocalPlugin không khớp</value>
+  </data>
+  <data name="ADS unavailable/pending: {0}." xml:space="preserve">
+    <value>ADS không có/đang chờ: {0}.</value>
+  </data>
+  <data name="range" xml:space="preserve">
+    <value>phạm vi</value>
+  </data>
+  <data name="range reset" xml:space="preserve">
+    <value>đặt lại phạm vi</value>
+  </data>
+  <data name="hunts" xml:space="preserve">
+    <value>săn</value>
+  </data>
+  <data name="hunts reset" xml:space="preserve">
+    <value>đặt lại săn</value>
+  </data>
+  <data name="queen" xml:space="preserve">
+    <value>queen</value>
+  </data>
+  <data name="queen reset" xml:space="preserve">
+    <value>đặt lại queen</value>
+  </data>
+  <data name="Misc" xml:space="preserve">
+    <value>Khác</value>
+  </data>
+  <data name="ADS returned false" xml:space="preserve">
+    <value>ADS trả về false</value>
+  </data>
+  <data name="ADS unavailable; reflection hacks pending." xml:space="preserve">
+    <value>Không có ADS; chỉnh sửa phản chiếu đang chờ.</value>
+  </data>
+  <data name="No ADS utility status." xml:space="preserve">
+    <value>Không có trạng thái tiện ích ADS.</value>
+  </data>
+  <data name="ADS repair running" xml:space="preserve">
+    <value>ADS đang sửa</value>
+  </data>
+  <data name="ADS did not accept the utility request." xml:space="preserve">
+    <value>ADS không chấp nhận yêu cầu tiện ích.</value>
+  </data>
+  <data name="ADS status was not readable." xml:space="preserve">
+    <value>Không đọc được trạng thái ADS.</value>
+  </data>
+  <data name="Members" xml:space="preserve">
+    <value>Thành viên</value>
+  </data>
+  <data name="Jobs" xml:space="preserve">
+    <value>Nghề</value>
+  </data>
+  <data name="{0} total, {1} visible, {2} mounted" xml:space="preserve">
+    <value>tổng {0}, nhìn thấy {1}, đang cưỡi {2}</value>
+  </data>
+  <data name="Tank" xml:space="preserve">
+    <value>Đỡ đòn</value>
+  </data>
+  <data name="Healer" xml:space="preserve">
+    <value>Hồi máu</value>
+  </data>
+  <data name="Melee" xml:space="preserve">
+    <value>Cận chiến</value>
+  </data>
+  <data name="Ranged" xml:space="preserve">
+    <value>Tầm xa</value>
+  </data>
+  <data name="Caster" xml:space="preserve">
+    <value>Niệm phép</value>
+  </data>
+  <data name="Select {0}..." xml:space="preserve">
+    <value>Chọn {0}...</value>
+  </data>
+  <data name="Window appearance" xml:space="preserve"><value>Giao diện cửa sổ</value></data>
+  <data name="Compact visible on main window" xml:space="preserve"><value>Hiển thị chế độ gọn trên cửa sổ chính</value></data>
+  <data name="Language visible on main window" xml:space="preserve"><value>Hiển thị lựa chọn ngôn ngữ trên cửa sổ chính</value></data>
+  <data name="Transparency" xml:space="preserve"><value>Độ trong suốt</value></data>
+  <data name="Opacity (%)" xml:space="preserve"><value>Độ đục (%)</value></data>
+  <data name="Auto-fade when unfocused" xml:space="preserve"><value>Tự giảm độ đục khi mất tiêu điểm</value></data>
+  <data name="Unfocused opacity (%)" xml:space="preserve"><value>Độ đục khi mất tiêu điểm (%)</value></data>
+  <data name="Unfocused delay (seconds)" xml:space="preserve"><value>Độ trễ khi mất tiêu điểm (giây)</value></data>
+</root>

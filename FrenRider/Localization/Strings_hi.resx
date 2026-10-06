@@ -1,0 +1,2717 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <data name="Blue" xml:space="preserve">
+    <value>नीला</value>
+  </data>
+  <data name="Character" xml:space="preserve">
+    <value>कैरेक्टर</value>
+  </data>
+  <data name="Color" xml:space="preserve">
+    <value>रंग</value>
+  </data>
+  <data name="Custom RGB" xml:space="preserve">
+    <value>कस्टम RGB</value>
+  </data>
+  <data name="Enabled" xml:space="preserve">
+    <value>चालू</value>
+  </data>
+  <data name="Forced / On" xml:space="preserve">
+    <value>बलपूर्वक / चालू</value>
+  </data>
+  <data name="Icon only" xml:space="preserve">
+    <value>केवल आइकन</value>
+  </data>
+  <data name="Interactive" xml:space="preserve">
+    <value>इंटरैक्टिव</value>
+  </data>
+  <data name="Job" xml:space="preserve">
+    <value>जॉब</value>
+  </data>
+  <data name="Ko-fi" xml:space="preserve">
+    <value>Ko-fi</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>भाषा</value>
+  </data>
+  <data name="Loading UI fonts..." xml:space="preserve">
+    <value>UI फ़ॉन्ट लोड हो रहे हैं...</value>
+  </data>
+  <data name="N" xml:space="preserve">
+    <value>नहीं</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>नहीं</value>
+  </data>
+  <data name="Off" xml:space="preserve">
+    <value>बंद</value>
+  </data>
+  <data name="On" xml:space="preserve">
+    <value>चालू</value>
+  </data>
+  <data name="Override Off" xml:space="preserve">
+    <value>ओवरराइड बंद</value>
+  </data>
+  <data name="Passive" xml:space="preserve">
+    <value>निष्क्रिय</value>
+  </data>
+  <data name="Pink" xml:space="preserve">
+    <value>गुलाबी</value>
+  </data>
+  <data name="Profile" xml:space="preserve">
+    <value>प्रोफ़ाइल</value>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>खोज</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>सेटिंग</value>
+  </data>
+  <data name="Teal" xml:space="preserve">
+    <value>नीलहरित</value>
+  </data>
+  <data name="Text only" xml:space="preserve">
+    <value>केवल टेक्स्ट</value>
+  </data>
+  <data name="UI fonts failed to load. See the plugin log." xml:space="preserve">
+    <value>UI फ़ॉन्ट लोड नहीं हुए। प्लगइन लॉग देखें।</value>
+  </data>
+  <data name="Unknown" xml:space="preserve">
+    <value>अज्ञात</value>
+  </data>
+  <data name="Y" xml:space="preserve">
+    <value>हाँ</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>हाँ</value>
+  </data>
+  <data name="Compact mode" xml:space="preserve">
+    <value>संक्षिप्त मोड</value>
+  </data>
+  <data name="Run" xml:space="preserve">
+    <value>चलाएँ</value>
+  </data>
+  <data name="Operator" xml:space="preserve">
+    <value>ऑपरेटर</value>
+  </data>
+  <data name="Party" xml:space="preserve">
+    <value>पार्टी</value>
+  </data>
+  <data name="Automation" xml:space="preserve">
+    <value>ऑटोमेशन</value>
+  </data>
+  <data name="Account" xml:space="preserve">
+    <value>खाता</value>
+  </data>
+  <data name="Fren" xml:space="preserve">
+    <value>Fren</value>
+  </data>
+  <data name="Tracking" xml:space="preserve">
+    <value>निगरानी</value>
+  </data>
+  <data name="Position" xml:space="preserve">
+    <value>स्थिति</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>नाम</value>
+  </data>
+  <data name="Distance" xml:space="preserve">
+    <value>दूरी</value>
+  </data>
+  <data name="Follow" xml:space="preserve">
+    <value>साथ चलें</value>
+  </data>
+  <data name="Mount" xml:space="preserve">
+    <value>माउंट</value>
+  </data>
+  <data name="Combat" xml:space="preserve">
+    <value>लड़ाई</value>
+  </data>
+  <data name="Cleanup" xml:space="preserve">
+    <value>सफ़ाई</value>
+  </data>
+  <data name="Idle" xml:space="preserve">
+    <value>निष्क्रिय</value>
+  </data>
+  <data name="Fren teleport" xml:space="preserve">
+    <value>Fren टेलीपोर्ट</value>
+  </data>
+  <data name="Phoenix Down" xml:space="preserve">
+    <value>Phoenix Down</value>
+  </data>
+  <data name="Respawn" xml:space="preserve">
+    <value>दोबारा प्रकट होना</value>
+  </data>
+  <data name="Food" xml:space="preserve">
+    <value>भोजन</value>
+  </data>
+  <data name="Repair" xml:space="preserve">
+    <value>मरम्मत</value>
+  </data>
+  <data name="Desynth" xml:space="preserve">
+    <value>विघटन</value>
+  </data>
+  <data name="Companion" xml:space="preserve">
+    <value>साथी</value>
+  </data>
+  <data name="Formation" xml:space="preserve">
+    <value>विन्यास</value>
+  </data>
+  <data name="Duty / ADS / Exit" xml:space="preserve">
+    <value>ड्यूटी / ADS / निकास</value>
+  </data>
+  <data name="Zone" xml:space="preserve">
+    <value>ज़ोन</value>
+  </data>
+  <data name="Exit method" xml:space="preserve">
+    <value>बाहर निकलने का तरीका</value>
+  </data>
+  <data name="Exit" xml:space="preserve">
+    <value>निकास</value>
+  </data>
+  <data name="Duty interact" xml:space="preserve">
+    <value>ड्यूटी में बातचीत</value>
+  </data>
+  <data name="ADS authority" xml:space="preserve">
+    <value>ADS अधिकार</value>
+  </data>
+  <data name="Compact debug" xml:space="preserve">
+    <value>डिबग विवरण</value>
+  </data>
+  <data name="Config" xml:space="preserve">
+    <value>कॉन्फ़िगरेशन</value>
+  </data>
+  <data name="Distances" xml:space="preserve">
+    <value>दूरियाँ</value>
+  </data>
+  <data name="ADS flags" xml:space="preserve">
+    <value>ADS फ़्लैग</value>
+  </data>
+  <data name="Not logged in" xml:space="preserve">
+    <value>लॉग इन नहीं है</value>
+  </data>
+  <data name="Logged in, local player unavailable" xml:space="preserve">
+    <value>लॉगिन है, स्थानीय खिलाड़ी उपलब्ध नहीं</value>
+  </data>
+  <data name="No account loaded" xml:space="preserve">
+    <value>कोई खाता लोड नहीं है</value>
+  </data>
+  <data name="No account loaded." xml:space="preserve">
+    <value>कोई खाता लोड नहीं है.</value>
+  </data>
+  <data name="No fren configured" xml:space="preserve">
+    <value>कोई Fren कॉन्फ़िगर नहीं है</value>
+  </data>
+  <data name="Inactive" xml:space="preserve">
+    <value>निष्क्रिय</value>
+  </data>
+  <data name="In party but not visible" xml:space="preserve">
+    <value>पार्टी में है, लेकिन दिखाई नहीं दे रहा</value>
+  </data>
+  <data name="Fren not found" xml:space="preserve">
+    <value>Fren नहीं मिला</value>
+  </data>
+  <data name="in party" xml:space="preserve">
+    <value>पार्टी में</value>
+  </data>
+  <data name="not in party" xml:space="preserve">
+    <value>पार्टी में नहीं</value>
+  </data>
+  <data name="Not in a party" xml:space="preserve">
+    <value>पार्टी में नहीं हैं</value>
+  </data>
+  <data name="Mounted" xml:space="preserve">
+    <value>सवारी पर</value>
+  </data>
+  <data name="On foot" xml:space="preserve">
+    <value>पैदल</value>
+  </data>
+  <data name="Not visible" xml:space="preserve">
+    <value>दिखाई नहीं दे रहा</value>
+  </data>
+  <data name="Active checks running" xml:space="preserve">
+    <value>सक्रिय जाँचें चल रही हैं</value>
+  </data>
+  <data name="Idle; last {0}" xml:space="preserve">
+    <value>निष्क्रिय; पिछला {0}</value>
+  </data>
+  <data name="Slot {0}" xml:space="preserve">
+    <value>स्लॉट {0}</value>
+  </data>
+  <data name="All FR on" xml:space="preserve">
+    <value>सभी FR चालू</value>
+  </data>
+  <data name="All FR off" xml:space="preserve">
+    <value>सभी FR बंद</value>
+  </data>
+  <data name="Fren Rider Mini" xml:space="preserve">
+    <value>Fren Rider मिनी</value>
+  </data>
+  <data name="Attack" xml:space="preserve">
+    <value>आक्रमण</value>
+  </data>
+  <data name="Defense" xml:space="preserve">
+    <value>रक्षा</value>
+  </data>
+  <data name="&lt;none&gt;" xml:space="preserve">
+    <value>&lt;कोई नहीं&gt;</value>
+  </data>
+  <data name="UI / About" xml:space="preserve">
+    <value>UI / परिचय</value>
+  </data>
+  <data name="DEFAULT CONFIG" xml:space="preserve">
+    <value>डिफ़ॉल्ट कॉन्फ़िगरेशन</value>
+  </data>
+  <data name="REMOTE PROFILES (DAD)" xml:space="preserve">
+    <value>रिमोट प्रोफ़ाइल (DAD)</value>
+  </data>
+  <data name="REMOTE DAD PROFILE" xml:space="preserve">
+    <value>रिमोट DAD प्रोफ़ाइल</value>
+  </data>
+  <data name="REMOTE: {0}" xml:space="preserve">
+    <value>रिमोट: {0}</value>
+  </data>
+  <data name="Fren Rider Settings - {0}" xml:space="preserve">
+    <value>Fren Rider सेटिंग्स - {0}</value>
+  </data>
+  <data name="DELETE" xml:space="preserve">
+    <value>हटाएँ</value>
+  </data>
+  <data name="DELETE REMOTE" xml:space="preserve">
+    <value>रिमोट हटाएँ</value>
+  </data>
+  <data name="Everything Sync" xml:space="preserve">
+    <value>सब कुछ सिंक करें</value>
+  </data>
+  <data name="Full Tab Sync" xml:space="preserve">
+    <value>पूरा टैब सिंक करें</value>
+  </data>
+  <data name="Reset All" xml:space="preserve">
+    <value>सब रीसेट करें</value>
+  </data>
+  <data name="Reset This" xml:space="preserve">
+    <value>इसे रीसेट करें</value>
+  </data>
+  <data name="Sync all" xml:space="preserve">
+    <value>सभी सिंक करें</value>
+  </data>
+  <data name="Fren Name" xml:space="preserve">
+    <value>Fren नाम</value>
+  </data>
+  <data name="DAD Profile Acceptance" xml:space="preserve">
+    <value>DAD प्रोफ़ाइल की स्वीकृति</value>
+  </data>
+  <data name="Temporary" xml:space="preserve">
+    <value>अस्थायी</value>
+  </data>
+  <data name="Permanent" xml:space="preserve">
+    <value>स्थायी</value>
+  </data>
+  <data name="Fren Rider enabled by default" xml:space="preserve">
+    <value>Fren Rider डिफ़ॉल्ट रूप से सक्षम</value>
+  </data>
+  <data name="Enabled when transferred" xml:space="preserve">
+    <value>स्थानांतरण पर सक्षम</value>
+  </data>
+  <data name="Display label" xml:space="preserve">
+    <value>प्रदर्शित लेबल</value>
+  </data>
+  <data name="Show Fren Rider status in the server info bar." xml:space="preserve">
+    <value>सर्वर जानकारी बार में Fren Rider स्थिति दिखाएँ.</value>
+  </data>
+  <data name="Obfuscate character names in FrenRider UI." xml:space="preserve">
+    <value>FrenRider UI में पात्र के नाम छिपाएँ.</value>
+  </data>
+  <data name="Not logged in. FrenRider waits until a character is loaded." xml:space="preserve">
+    <value>लॉगिन नहीं है. पात्र लोड होने तक FrenRider प्रतीक्षा करता है.</value>
+  </data>
+  <data name="AutoDuty detected while FrenRider is enabled." xml:space="preserve">
+    <value>FrenRider सक्षम रहते हुए AutoDuty मिला.</value>
+  </data>
+  <data name="Set DEFAULT CONFIG and every local character in the current account, including the active temporary profile." xml:space="preserve">
+    <value>डिफ़ॉल्ट कॉन्फ़िगरेशन और मौजूदा खाते के हर स्थानीय पात्र को सेट करें, सक्रिय अस्थायी प्रोफ़ाइल सहित.</value>
+  </data>
+  <data name="Fly You Fools (fly alongside instead of pillion)" xml:space="preserve">
+    <value>Fly You Fools (पीछे बैठने के बजाय साथ उड़ें)</value>
+  </data>
+  <data name="Try Teleport to Fren When Out of Zone" xml:space="preserve">
+    <value>क्षेत्र से बाहर होने पर Fren तक टेलीपोर्ट आज़माएँ</value>
+  </data>
+  <data name="Follow local aetheryte networks" xml:space="preserve">
+    <value>स्थानीय aetheryte नेटवर्क पर साथ चलें</value>
+  </data>
+  <data name="Teleport Delay (seconds)" xml:space="preserve">
+    <value>टेलीपोर्ट देरी (सेकंड)</value>
+  </data>
+  <data name="Nudge in duty when fren not nearby/in-zone" xml:space="preserve">
+    <value>Fren पास/क्षेत्र में न हो तो ड्यूटी में थोड़ा चलें</value>
+  </data>
+  <data name="Use Phoenix Downs for recovery" xml:space="preserve">
+    <value>पुनर्प्राप्ति के लिए Phoenix Down इस्तेमाल करें</value>
+  </data>
+  <data name="Revive anyone within range outdoors" xml:space="preserve">
+    <value>बाहर सीमा में किसी को भी पुनर्जीवित करें</value>
+  </data>
+  <data name="Allow Phoenix Down use during combat" xml:space="preserve">
+    <value>लड़ाई में Phoenix Down इस्तेमाल करने दें</value>
+  </data>
+  <data name="Respawn after death outside duties after" xml:space="preserve">
+    <value>ड्यूटी से बाहर मौत के बाद दोबारा प्रकट हों</value>
+  </data>
+  <data name="Respawn after death inside duties after" xml:space="preserve">
+    <value>ड्यूटी में मौत के बाद दोबारा प्रकट हों</value>
+  </data>
+  <data name="seconds" xml:space="preserve">
+    <value>सेकंड</value>
+  </data>
+  <data name="Mount-up to chase fren if &gt;" xml:space="preserve">
+    <value>Fren का पीछा करने के लिए सवारी लें यदि दूरी &gt;</value>
+  </data>
+  <data name="y from fren" xml:space="preserve">
+    <value>Fren से y</value>
+  </data>
+  <data name="after" xml:space="preserve">
+    <value>बाद</value>
+  </data>
+  <data name="Mount Name (if flying solo)" xml:space="preserve">
+    <value>सवारी का नाम (अकेले उड़ने पर)</value>
+  </data>
+  <data name="(none)" xml:space="preserve">
+    <value>(कोई नहीं)</value>
+  </data>
+  <data name="Mount Roulette" xml:space="preserve">
+    <value>सवारी रूलेट</value>
+  </data>
+  <data name="Summon Chocobo" xml:space="preserve">
+    <value>Chocobo बुलाएँ</value>
+  </data>
+  <data name="Gysahl Greens: {0}" xml:space="preserve">
+    <value>Gysahl Greens: {0}</value>
+  </data>
+  <data name="Companion Stance" xml:space="preserve">
+    <value>साथी की मुद्रा</value>
+  </data>
+  <data name="Free Stance" xml:space="preserve">
+    <value>स्वतंत्र मुद्रा</value>
+  </data>
+  <data name="Defender Stance" xml:space="preserve">
+    <value>रक्षात्मक मुद्रा</value>
+  </data>
+  <data name="Attacker Stance" xml:space="preserve">
+    <value>आक्रामक मुद्रा</value>
+  </data>
+  <data name="Healer Stance" xml:space="preserve">
+    <value>उपचारक मुद्रा</value>
+  </data>
+  <data name="Auto Discard (/ays discard)" xml:space="preserve">
+    <value>अपने आप फेंकें (/ays discard)</value>
+  </data>
+  <data name="Update Interval (seconds)" xml:space="preserve">
+    <value>अपडेट अंतराल (सेकंड)</value>
+  </data>
+  <data name="WARNING: Very low update interval may impact game performance!" xml:space="preserve">
+    <value>चेतावनी: बहुत कम अपडेट अंतराल खेल के प्रदर्शन को प्रभावित कर सकता है!</value>
+  </data>
+  <data name="Cling Distance" xml:space="preserve">
+    <value>पास रहने की दूरी</value>
+  </data>
+  <data name="Cling Type" xml:space="preserve">
+    <value>पास रहने का प्रकार</value>
+  </data>
+  <data name="Cling Type (Duty)" xml:space="preserve">
+    <value>पास रहने का प्रकार (ड्यूटी)</value>
+  </data>
+  <data name="BossMod Follow" xml:space="preserve">
+    <value>BossMod से साथ चलें</value>
+  </data>
+  <data name="Vanilla Follow" xml:space="preserve">
+    <value>मूल Follow</value>
+  </data>
+  <data name="Social Distancing" xml:space="preserve">
+    <value>आपसी दूरी</value>
+  </data>
+  <data name="Social Distance (yalms)" xml:space="preserve">
+    <value>आपसी दूरी (yalms)</value>
+  </data>
+  <data name="Social Distance Indoors" xml:space="preserve">
+    <value>अंदर आपसी दूरी</value>
+  </data>
+  <data name="X Wiggle (+/- yalms)" xml:space="preserve">
+    <value>X पर हलचल (+/- yalms)</value>
+  </data>
+  <data name="Z Wiggle (+/- yalms)" xml:space="preserve">
+    <value>Z पर हलचल (+/- yalms)</value>
+  </data>
+  <data name="Max Distances" xml:space="preserve">
+    <value>अधिकतम दूरियाँ</value>
+  </data>
+  <data name="Max Follow Distance" xml:space="preserve">
+    <value>साथ चलने की अधिकतम दूरी</value>
+  </data>
+  <data name="Max Follow Distance (Foray)" xml:space="preserve">
+    <value>साथ चलने की अधिकतम दूरी (Foray)</value>
+  </data>
+  <data name="Deep Dungeon Extra Cling" xml:space="preserve">
+    <value>Deep Dungeon में अतिरिक्त पास रहना</value>
+  </data>
+  <data name="FATE Extra Cling" xml:space="preserve">
+    <value>FATE में अतिरिक्त पास रहना</value>
+  </data>
+  <data name="Auto Sync FATE" xml:space="preserve">
+    <value>FATE अपने आप सिंक करें</value>
+  </data>
+  <data name="Formation Following" xml:space="preserve">
+    <value>विन्यास में साथ चलें</value>
+  </data>
+  <data name="Follow in Combat" xml:space="preserve">
+    <value>लड़ाई में साथ चलें</value>
+  </data>
+  <data name="Harmonized Cling Reset Ticks" xml:space="preserve">
+    <value>एक समान पास रहने को रीसेट करने के टिक</value>
+  </data>
+  <data name="Rotation Plugin" xml:space="preserve">
+    <value>रोटेशन प्लगइन</value>
+  </data>
+  <data name="Rotation Plugin (Foray)" xml:space="preserve">
+    <value>रोटेशन प्लगइन (Foray)</value>
+  </data>
+  <data name="Daedalus Party Mode" xml:space="preserve">
+    <value>Daedalus पार्टी मोड</value>
+  </data>
+  <data name="None" xml:space="preserve">
+    <value>कोई नहीं</value>
+  </data>
+  <data name="Focus" xml:space="preserve">
+    <value>फ़ोकस</value>
+  </data>
+  <data name="Split" xml:space="preserve">
+    <value>बँटें</value>
+  </data>
+  <data name="Kill Adds" xml:space="preserve">
+    <value>अतिरिक्त दुश्मन मारें</value>
+  </data>
+  <data name="Autorot Presets" xml:space="preserve">
+    <value>Autorot प्रीसेट</value>
+  </data>
+  <data name="Configure rotation preset manually" xml:space="preserve">
+    <value>रोटेशन प्रीसेट मैनुअल कॉन्फ़िगर करें</value>
+  </data>
+  <data name="BM Rotation Preset" xml:space="preserve">
+    <value>BM रोटेशन प्रीसेट</value>
+  </data>
+  <data name="BM Rotation Preset (DD)" xml:space="preserve">
+    <value>BM रोटेशन प्रीसेट (DD)</value>
+  </data>
+  <data name="BM Rotation Preset (FATE)" xml:space="preserve">
+    <value>BM रोटेशन प्रीसेट (FATE)</value>
+  </data>
+  <data name="Force BossMod preset regardless of rotation" xml:space="preserve">
+    <value>रोटेशन की परवाह किए बिना BossMod प्रीसेट लागू करें</value>
+  </data>
+  <data name="Push Presets Now" xml:space="preserve">
+    <value>अभी प्रीसेट भेजें</value>
+  </data>
+  <data name="Cleanup Mode" xml:space="preserve">
+    <value>सफ़ाई मोड</value>
+  </data>
+  <data name="Restore snapshot" xml:space="preserve">
+    <value>स्नैपशॉट बहाल करें</value>
+  </data>
+  <data name="Turn everything off" xml:space="preserve">
+    <value>सब कुछ बंद करें</value>
+  </data>
+  <data name="RSR Operating Mode" xml:space="preserve">
+    <value>RSR संचालन मोड</value>
+  </data>
+  <data name="RSR Aggro Type" xml:space="preserve">
+    <value>RSR आक्रमण प्रकार</value>
+  </data>
+  <data name="All Attackable Targets" xml:space="preserve">
+    <value>सभी आक्रमण योग्य लक्ष्य</value>
+  </data>
+  <data name="Previously Engaged Targets" xml:space="preserve">
+    <value>पहले लड़ाई में शामिल लक्ष्य</value>
+  </data>
+  <data name="All Targets When Solo in Duty" xml:space="preserve">
+    <value>ड्यूटी में अकेले होने पर सभी लक्ष्य</value>
+  </data>
+  <data name="All Targets When Solo" xml:space="preserve">
+    <value>अकेले होने पर सभी लक्ष्य</value>
+  </data>
+  <data name="Solo Deep Dungeon Smart" xml:space="preserve">
+    <value>अकेले Deep Dungeon में समझदारी</value>
+  </data>
+  <data name="Manual" xml:space="preserve">
+    <value>मैनुअल</value>
+  </data>
+  <data name="Support" xml:space="preserve">
+    <value>सहायता</value>
+  </data>
+  <data name="Don't move while casting" xml:space="preserve">
+    <value>कास्ट करते समय न चलें</value>
+  </data>
+  <data name="Positional" xml:space="preserve">
+    <value>दिशा</value>
+  </data>
+  <data name="Front" xml:space="preserve">
+    <value>सामने</value>
+  </data>
+  <data name="Rear" xml:space="preserve">
+    <value>पीछे</value>
+  </data>
+  <data name="Any" xml:space="preserve">
+    <value>कोई भी</value>
+  </data>
+  <data name="Combat Max Distance" xml:space="preserve">
+    <value>लड़ाई की अधिकतम दूरी</value>
+  </data>
+  <data name="Limit Break HP %" xml:space="preserve">
+    <value>लिमिट ब्रेक HP %</value>
+  </data>
+  <data name="Beastmaster Capture" xml:space="preserve">
+    <value>Beastmaster Capture</value>
+  </data>
+  <data name="Try to catch beasts" xml:space="preserve">
+    <value>जानवर पकड़ने की कोशिश करें</value>
+  </data>
+  <data name="Capture HP: within 5 levels below you or equal" xml:space="preserve">
+    <value>Capture HP: आपके बराबर या अधिकतम 5 स्तर नीचे</value>
+  </data>
+  <data name="Capture HP: more than 5 levels below you" xml:space="preserve">
+    <value>Capture HP: आपसे 5 से अधिक स्तर नीचे</value>
+  </data>
+  <data name="Saved beasts" xml:space="preserve">
+    <value>सहेजे गए जानवर</value>
+  </data>
+  <data name="Select a local character to browse their saved beasts." xml:space="preserve">
+    <value>उनके सहेजे गए जानवर देखने के लिए स्थानीय पात्र चुनें.</value>
+  </data>
+  <data name="Obstacle maps on" xml:space="preserve">
+    <value>बाधा मानचित्र चालू</value>
+  </data>
+  <data name="BMR reduce activation range for outdoor areas" xml:space="preserve">
+    <value>बाहरी क्षेत्रों में BMR सक्रिय होने की सीमा घटाएँ</value>
+  </data>
+  <data name="BMR Disable Hunt Modules" xml:space="preserve">
+    <value>BMR Hunt मॉड्यूल बंद करें</value>
+  </data>
+  <data name="BMR Disable Queen Lunatender" xml:space="preserve">
+    <value>BMR Queen Lunatender बंद करें</value>
+  </data>
+  <data name="ADS Duty Handoff" xml:space="preserve">
+    <value>ADS ड्यूटी हस्तांतरण</value>
+  </data>
+  <data name="Duty Families" xml:space="preserve">
+    <value>ड्यूटी समूह</value>
+  </data>
+  <data name="sec ready" xml:space="preserve">
+    <value>सेकंड तैयार</value>
+  </data>
+  <data name="Seed family rows from legacy values" xml:space="preserve">
+    <value>पुराने मानों से समूह की पंक्तियाँ भरें</value>
+  </data>
+  <data name="Temporarily controlled by DAD" xml:space="preserve">
+    <value>DAD का अस्थायी नियंत्रण</value>
+  </data>
+  <data name="Equip job stone for current class" xml:space="preserve">
+    <value>मौजूदा वर्ग का जॉब स्टोन पहनें</value>
+  </data>
+  <data name="Loot" xml:space="preserve">
+    <value>लूट</value>
+  </data>
+  <data name="Loot Type" xml:space="preserve">
+    <value>लूट प्रकार</value>
+  </data>
+  <data name="unchanged" xml:space="preserve">
+    <value>बिना बदलाव</value>
+  </data>
+  <data name="need" xml:space="preserve">
+    <value>ज़रूरत</value>
+  </data>
+  <data name="greed" xml:space="preserve">
+    <value>लालच</value>
+  </data>
+  <data name="pass" xml:space="preserve">
+    <value>छोड़ें</value>
+  </data>
+  <data name="OPEN ADS LOOT OPTIONS" xml:space="preserve">
+    <value>ADS लूट विकल्प खोलें</value>
+  </data>
+  <data name="Use HQ food" xml:space="preserve">
+    <value>HQ भोजन इस्तेमाल करें</value>
+  </data>
+  <data name="Search for Food if Depleted" xml:space="preserve">
+    <value>खत्म होने पर भोजन खोजें</value>
+  </data>
+  <data name="Clear Food" xml:space="preserve">
+    <value>भोजन चयन हटाएँ</value>
+  </data>
+  <data name="No food selected. Food is optional." xml:space="preserve">
+    <value>कोई भोजन नहीं चुना गया. भोजन वैकल्पिक है.</value>
+  </data>
+  <data name="Type at least 2 characters to search..." xml:space="preserve">
+    <value>खोजने के लिए कम से कम 2 अक्षर लिखें...</value>
+  </data>
+  <data name="No results. Try a different search term." xml:space="preserve">
+    <value>कोई परिणाम नहीं. अलग खोज शब्द आज़माएँ.</value>
+  </data>
+  <data name="Repair Mode" xml:space="preserve">
+    <value>मरम्मत मोड</value>
+  </data>
+  <data name="Self" xml:space="preserve">
+    <value>खुद</value>
+  </data>
+  <data name="NPC no-inn" xml:space="preserve">
+    <value>NPC बिना सराय</value>
+  </data>
+  <data name="NPC No Inn + No TP" xml:space="preserve">
+    <value>NPC बिना सराय + बिना TP</value>
+  </data>
+  <data name="NPC repair + inn room" xml:space="preserve">
+    <value>NPC मरम्मत + सराय कमरा</value>
+  </data>
+  <data name="Repair At % Durability" xml:space="preserve">
+    <value>% टिकाऊपन पर मरम्मत</value>
+  </data>
+  <data name="Test ADS NPC No-Inn Repair" xml:space="preserve">
+    <value>ADS की बिना सराय NPC मरम्मत जाँचें</value>
+  </data>
+  <data name="Desynthesis" xml:space="preserve">
+    <value>विघटन</value>
+  </data>
+  <data name="Enable Auto Desynth" xml:space="preserve">
+    <value>स्वचालित विघटन सक्षम करें</value>
+  </data>
+  <data name="OPEN DESYNTH CONFIG" xml:space="preserve">
+    <value>विघटन कॉन्फ़िगरेशन खोलें</value>
+  </data>
+  <data name="Idle Behavior" xml:space="preserve">
+    <value>निष्क्रिय व्यवहार</value>
+  </data>
+  <data name="Idle Mode" xml:space="preserve">
+    <value>निष्क्रिय मोड</value>
+  </data>
+  <data name="Specific Action" xml:space="preserve">
+    <value>विशिष्ट कार्रवाई</value>
+  </data>
+  <data name="Action From List" xml:space="preserve">
+    <value>सूची से कार्रवाई</value>
+  </data>
+  <data name="Idle Command" xml:space="preserve">
+    <value>निष्क्रिय कमांड</value>
+  </data>
+  <data name="List Source" xml:space="preserve">
+    <value>सूची का स्रोत</value>
+  </data>
+  <data name="Default List" xml:space="preserve">
+    <value>डिफ़ॉल्ट सूची</value>
+  </data>
+  <data name="Custom List" xml:space="preserve">
+    <value>अपनी सूची</value>
+  </data>
+  <data name="Idle Ticks Before Action" xml:space="preserve">
+    <value>कार्रवाई से पहले निष्क्रिय टिक</value>
+  </data>
+  <data name="Echo Messages" xml:space="preserve">
+    <value>संदेश दोहराएँ</value>
+  </data>
+  <data name="Invite Whitelist" xml:space="preserve">
+    <value>निमंत्रण स्वीकृति सूची</value>
+  </data>
+  <data name="Trusted inviters" xml:space="preserve">
+    <value>विश्वसनीय निमंत्रण भेजने वाले</value>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>जोड़ें</value>
+  </data>
+  <data name="Auto-Yes Dialogs" xml:space="preserve">
+    <value>स्वचालित हाँ संवाद</value>
+  </data>
+  <data name="Teleport offers" xml:space="preserve">
+    <value>टेलीपोर्ट प्रस्ताव</value>
+  </data>
+  <data name="Party invites (backup)" xml:space="preserve">
+    <value>पार्टी निमंत्रण (अतिरिक्त व्यवस्था)</value>
+  </data>
+  <data name="Raise offers are accepted automatically while FrenRider is enabled." xml:space="preserve">
+    <value>FrenRider सक्षम होने पर पुनर्जीवन प्रस्ताव अपने आप स्वीकार होते हैं.</value>
+  </data>
+  <data name="Exit Behaviour" xml:space="preserve">
+    <value>निकास व्यवहार</value>
+  </data>
+  <data name="Duty-end delay" xml:space="preserve">
+    <value>ड्यूटी खत्म होने की देरी</value>
+  </data>
+  <data name="seconds after duty ends" xml:space="preserve">
+    <value>ड्यूटी खत्म होने के बाद सेकंड</value>
+  </data>
+  <data name="UI Settings" xml:space="preserve">
+    <value>UI सेटिंग्स</value>
+  </data>
+  <data name="Video Notifications" xml:space="preserve">
+    <value>वीडियो सूचनाएँ</value>
+  </data>
+  <data name="Movable Config Window" xml:space="preserve">
+    <value>सेटिंग्स विंडो खिसकाने की अनुमति</value>
+  </data>
+  <data name="DTR Bar Enabled" xml:space="preserve">
+    <value>DTR बार चालू</value>
+  </data>
+  <data name="DTR Bar Mode" xml:space="preserve">
+    <value>DTR बार मोड</value>
+  </data>
+  <data name="Icon+Text" xml:space="preserve">
+    <value>आइकन और टेक्स्ट</value>
+  </data>
+  <data name="DTR Icons (max 3 characters)" xml:space="preserve">
+    <value>DTR आइकन (अधिकतम 3 अक्षर)</value>
+  </data>
+  <data name="Copy Icon Guide Link" xml:space="preserve">
+    <value>आइकन गाइड लिंक कॉपी करें</value>
+  </data>
+  <data name="VLC not found" xml:space="preserve">
+    <value>VLC नहीं मिला</value>
+  </data>
+  <data name="Download VLC" xml:space="preserve">
+    <value>VLC डाउनलोड करें</value>
+  </data>
+  <data name="Advanced" xml:space="preserve">
+    <value>उन्नत</value>
+  </data>
+  <data name="Debug / Logging" xml:space="preserve">
+    <value>डिबग / लॉग</value>
+  </data>
+  <data name="Presets" xml:space="preserve">
+    <value>प्रीसेट</value>
+  </data>
+  <data name="Behavior" xml:space="preserve">
+    <value>व्यवहार</value>
+  </data>
+  <data name="Hacks" xml:space="preserve">
+    <value>विशेष बदलाव</value>
+  </data>
+  <data name="DISABLE PANDORA's BOX" xml:space="preserve">
+    <value>PANDORA's BOX बंद करें</value>
+  </data>
+  <data name="Commands:" xml:space="preserve">
+    <value>कमांड:</value>
+  </data>
+  <data name="Required Dependencies:" xml:space="preserve">
+    <value>ज़रूरी निर्भरताएँ:</value>
+  </data>
+  <data name="Optional Plugins:" xml:space="preserve">
+    <value>वैकल्पिक प्लगइन:</value>
+  </data>
+  <data name="Multiplayer Guide:" xml:space="preserve">
+    <value>मल्टीप्लेयर मार्गदर्शिका:</value>
+  </data>
+  <data name="Made by McVaxius" xml:space="preserve">
+    <value>mcvaxius द्वारा निर्मित</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>बंद करें</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>स्थिति</value>
+  </data>
+  <data name="Beast" xml:space="preserve">
+    <value>जानवर</value>
+  </data>
+  <data name="Saved ownership" xml:space="preserve">
+    <value>सहेजा हुआ स्वामित्व</value>
+  </data>
+  <data name="DD Extra Distance" xml:space="preserve">
+    <value>DD अतिरिक्त दूरी</value>
+  </data>
+  <data name="FATE Extra Distance" xml:space="preserve">
+    <value>FATE अतिरिक्त दूरी</value>
+  </data>
+  <data name="Max AI Distance" xml:space="preserve">
+    <value>अधिकतम AI दूरी</value>
+  </data>
+  <data name="LB Threshold %" xml:space="preserve">
+    <value>LB सीमा %</value>
+  </data>
+  <data name="ADS Exit Method" xml:space="preserve">
+    <value>ADS निकास तरीका</value>
+  </data>
+  <data name="FrenRider Exit method" xml:space="preserve">
+    <value>FrenRider निकास तरीका</value>
+  </data>
+  <data name="Exit after N seconds" xml:space="preserve">
+    <value>N सेकंड बाद बाहर निकलें</value>
+  </data>
+  <data name="Leave when all others left" xml:space="preserve">
+    <value>बाकी सभी चले जाएँ तो निकलें</value>
+  </data>
+  <data name="No automatic exit" xml:space="preserve">
+    <value>अपने आप बाहर न निकलें</value>
+  </data>
+  <data name="Food Item Name" xml:space="preserve">
+    <value>भोजन वस्तु का नाम</value>
+  </data>
+  <data name="Add command" xml:space="preserve">
+    <value>कमांड जोड़ें</value>
+  </data>
+  <data name="Remove command" xml:space="preserve">
+    <value>कमांड हटाएँ</value>
+  </data>
+  <data name="Click to copy Daedalus repository URL" xml:space="preserve">
+    <value>Daedalus रिपॉज़िटरी URL कॉपी करने के लिए क्लिक करें</value>
+  </data>
+  <data name="Click to copy URL to clipboard" xml:space="preserve">
+    <value>URL क्लिपबोर्ड पर कॉपी करने के लिए क्लिक करें</value>
+  </data>
+  <data name="Click to download VLC media player" xml:space="preserve">
+    <value>VLC मीडिया प्लेयर डाउनलोड करने के लिए क्लिक करें</value>
+  </data>
+  <data name="Copies the Lodestone blog link with suggested glyphs" xml:space="preserve">
+    <value>सुझाए गए ग्लिफ़ वाला Lodestone ब्लॉग लिंक कॉपी करता है</value>
+  </data>
+  <data name="Disable Krangle to edit fren name." xml:space="preserve">
+    <value>Fren नाम बदलने के लिए Krangle बंद करें.</value>
+  </data>
+  <data name="Disable Krangle to edit the account alias." xml:space="preserve">
+    <value>खाते का उपनाम बदलने के लिए Krangle बंद करें.</value>
+  </data>
+  <data name="Select from current party members" xml:space="preserve">
+    <value>मौजूदा पार्टी सदस्यों में से चुनें</value>
+  </data>
+  <data name="Hold CTRL and click to delete this remote profile." xml:space="preserve">
+    <value>यह रिमोट प्रोफ़ाइल हटाने के लिए CTRL दबाकर क्लिक करें.</value>
+  </data>
+  <data name="The currently active character profile cannot be deleted while logged in." xml:space="preserve">
+    <value>लॉगिन रहते हुए अभी सक्रिय पात्र की प्रोफ़ाइल नहीं हटाई जा सकती.</value>
+  </data>
+  <data name="Hold CTRL and click to delete this character's config.&#xA;This cannot be undone." xml:space="preserve">
+    <value>इस पात्र की कॉन्फ़िगरेशन हटाने के लिए CTRL दबाकर क्लिक करें.&#xA;इसे वापस नहीं किया जा सकता.</value>
+  </data>
+  <data name="Log in to a character to create one." xml:space="preserve">
+    <value>बनाने के लिए किसी पात्र से लॉगिन करें.</value>
+  </data>
+  <data name="Separate profiles for exact remote identities. They never become local character rows." xml:space="preserve">
+    <value>सटीक रिमोट पहचानों के लिए अलग प्रोफ़ाइल. वे कभी स्थानीय पात्र की पंक्ति नहीं बनतीं.</value>
+  </data>
+  <data name="This row is separate from local characters and can never become the active-character profile." xml:space="preserve">
+    <value>यह पंक्ति स्थानीय पात्रों से अलग है और कभी सक्रिय पात्र की प्रोफ़ाइल नहीं बन सकती.</value>
+  </data>
+  <data name="Incoming DAD profiles will replace this character's saved profile." xml:space="preserve">
+    <value>आने वाली DAD प्रोफ़ाइल इस पात्र की सहेजी हुई प्रोफ़ाइल बदलेंगी.</value>
+  </data>
+  <data name="FrenRider installs BossMod presets whenever it is enabled." xml:space="preserve">
+    <value>सक्षम होने पर FrenRider हमेशा BossMod प्रीसेट स्थापित करता है.</value>
+  </data>
+  <data name="Managed presets: BMR/VBM use FRENRIDER role presets; RSR/WRATH/DAEDALUS use passive role presets." xml:space="preserve">
+    <value>प्रबंधित प्रीसेट: BMR/VBM, FRENRIDER भूमिका प्रीसेट इस्तेमाल करते हैं; RSR/WRATH/DAEDALUS निष्क्रिय भूमिका प्रीसेट इस्तेमाल करते हैं.</value>
+  </data>
+  <data name="Copy DEFAULT CONFIG character-profile settings to every character profile in this account." xml:space="preserve">
+    <value>डिफ़ॉल्ट कॉन्फ़िगरेशन की पात्र प्रोफ़ाइल सेटिंग्स इस खाते की हर पात्र प्रोफ़ाइल में कॉपी करें.</value>
+  </data>
+  <data name="Copy this DEFAULT CONFIG tab to every character profile in this account." xml:space="preserve">
+    <value>यह डिफ़ॉल्ट कॉन्फ़िगरेशन टैब इस खाते की हर पात्र प्रोफ़ाइल में कॉपी करें.</value>
+  </data>
+  <data name="UI / About uses global settings and is not copied to character profiles." xml:space="preserve">
+    <value>UI / परिचय वैश्विक सेटिंग्स इस्तेमाल करता है और पात्र प्रोफ़ाइल में कॉपी नहीं होता.</value>
+  </data>
+  <data name="Set DEFAULT CONFIG and every local character in this account, including the active temporary profile." xml:space="preserve">
+    <value>इस खाते की डिफ़ॉल्ट कॉन्फ़िगरेशन और हर स्थानीय पात्र को सेट करें, सक्रिय अस्थायी प्रोफ़ाइल सहित.</value>
+  </data>
+  <data name="Copy '{0}' from DEFAULT CONFIG to every character profile in this account." xml:space="preserve">
+    <value>डिफ़ॉल्ट कॉन्फ़िगरेशन से '{0}' इस खाते की हर पात्र प्रोफ़ाइल में कॉपी करें.</value>
+  </data>
+  <data name="AutoDuty Detected - Action Required" xml:space="preserve">
+    <value>AutoDuty मिला - कार्रवाई ज़रूरी</value>
+  </data>
+  <data name="AutoDuty is enabled and may cause issues:" xml:space="preserve">
+    <value>AutoDuty सक्षम है और समस्याएँ पैदा कर सकता है:</value>
+  </data>
+  <data name="FrenRider requires AutoDuty to be disabled for proper operation." xml:space="preserve">
+    <value>सही संचालन के लिए FrenRider को AutoDuty बंद चाहिए.</value>
+  </data>
+  <data name="Disable AutoDuty" xml:space="preserve">
+    <value>AutoDuty बंद करें</value>
+  </data>
+  <data name="This window will close automatically after disabling AutoDuty." xml:space="preserve">
+    <value>AutoDuty बंद करने के बाद यह विंडो अपने आप बंद होगी.</value>
+  </data>
+  <data name="0 = disabled.&#xA;1 = ADS self repair.&#xA;2 = ADS NPC repair without inn fallback.&#xA;3 = ADS NPC repair only when a mender is within 120y.&#xA;4 = ADS NPC repair near an inn, then enter the inn room." xml:space="preserve">
+    <value>0 = बंद.&#xA;1 = ADS से खुद मरम्मत.&#xA;2 = ADS NPC मरम्मत, सराय वाले विकल्प के बिना.&#xA;3 = ADS NPC मरम्मत केवल जब मरम्मतकर्ता 120y के भीतर हो.&#xA;4 = ADS NPC मरम्मत सराय के पास, फिर सराय कमरे में प्रवेश.</value>
+  </data>
+  <data name="Additionally revive non-party players within 15 yalms outdoors. Party members and healers have priority. Never approach strangers." xml:space="preserve">
+    <value>बाहर 15 yalms के भीतर गैर-पार्टी खिलाड़ियों को भी पुनर्जीवित करें. पार्टी सदस्यों और उपचारकों को प्राथमिकता है. अजनबियों के पास कभी न जाएँ.</value>
+  </data>
+  <data name="After DutyCompleted and duty exit, ask ADS to run configured desynthesis. FrenRider pauses automatic actions until completion or the 180s timeout." xml:space="preserve">
+    <value>DutyCompleted और ड्यूटी निकास के बाद ADS से कॉन्फ़िगर किया हुआ विघटन चलाने को कहें. पूरा होने या 180s की समय सीमा तक FrenRider स्वचालित कार्रवाइयाँ रोकता है.</value>
+  </data>
+  <data name="After remaining continuously unconscious inside duties for this delay, open the Return prompt and accept it. Duty scope is selected only by BoundByDuty. Minimum: 1 second. Default: 60." xml:space="preserve">
+    <value>ड्यूटी में इस देरी तक लगातार बेहोश रहने के बाद Return प्रस्ताव खोलें और स्वीकार करें. ड्यूटी का दायरा केवल BoundByDuty से तय होता है. न्यूनतम: 1 सेकंड. डिफ़ॉल्ट: 60.</value>
+  </data>
+  <data name="After remaining continuously unconscious outside duties for this delay, open the Return prompt and accept it. Minimum: 1 second. Default: 60." xml:space="preserve">
+    <value>ड्यूटी से बाहर इस देरी तक लगातार बेहोश रहने के बाद Return प्रस्ताव खोलें और स्वीकार करें. न्यूनतम: 1 सेकंड. डिफ़ॉल्ट: 60.</value>
+  </data>
+  <data name="Applies in dungeons and outdoors. Off waits for the rescuer to leave combat before approaching or using an item; current combat may finish, but new pulls stay blocked. On still respects native item availability and every other recovery gate." xml:space="preserve">
+    <value>डंजन और बाहर लागू है. बंद होने पर मदद करने वाले के लड़ाई से बाहर आने तक पास जाने या वस्तु इस्तेमाल करने की प्रतीक्षा होती है; मौजूदा लड़ाई खत्म हो सकती है, लेकिन नए दुश्मन शुरू नहीं किए जाते. चालू होने पर भी मूल वस्तु उपलब्धता और अन्य पुनर्प्राप्ति शर्तें लागू रहती हैं.</value>
+  </data>
+  <data name="Auto-summon chocobo companion using Gysahl Greens when timer is low.&#xA;Will not summon in sanctuaries or duties." xml:space="preserve">
+    <value>समय कम होने पर Gysahl Greens से Chocobo साथी अपने आप बुलाएँ.&#xA;सुरक्षित क्षेत्रों या ड्यूटी में नहीं बुलाएगा.</value>
+  </data>
+  <data name="Automatically accept teleport offers (e.g., Return, Teleport to).&#xA;Note: Party invites are handled by the whitelist system below." xml:space="preserve">
+    <value>टेलीपोर्ट प्रस्ताव अपने आप स्वीकार करें (जैसे Return, Teleport to).&#xA;नोट: पार्टी निमंत्रण नीचे की स्वीकृति सूची से संभाले जाते हैं.</value>
+  </data>
+  <data name="Automatically accept teleport offers." xml:space="preserve">
+    <value>टेलीपोर्ट प्रस्ताव अपने आप स्वीकार करें.</value>
+  </data>
+  <data name="Automatically click Yes on specific dialog types when FrenRider is enabled.&#xA;Works alongside YesAlready - FrenRider pauses YesAlready and handles these dialogs itself." xml:space="preserve">
+    <value>FrenRider सक्षम होने पर खास प्रकार के संवादों में अपने आप Yes क्लिक करें.&#xA;YesAlready के साथ काम करता है - FrenRider, YesAlready रोककर इन संवादों को खुद संभालता है.</value>
+  </data>
+  <data name="Automatically leave the duty N seconds after it completes." xml:space="preserve">
+    <value>ड्यूटी पूरी होने के N सेकंड बाद अपने आप बाहर निकलें.</value>
+  </data>
+  <data name="Backup auto-accept for party invites.&#xA;Primary invite handling uses the whitelist system above." xml:space="preserve">
+    <value>पार्टी निमंत्रण की अतिरिक्त स्वचालित स्वीकृति.&#xA;मुख्य निमंत्रण प्रबंधन ऊपर की स्वीकृति सूची इस्तेमाल करता है.</value>
+  </data>
+  <data name="Backup auto-accept for party invites. Primary invite handling uses the whitelist." xml:space="preserve">
+    <value>पार्टी निमंत्रण की अतिरिक्त स्वचालित स्वीकृति. मुख्य निमंत्रण प्रबंधन स्वीकृति सूची इस्तेमाल करता है.</value>
+  </data>
+  <data name="Both HP thresholds accept 1–100%. Exactly five levels below uses this second threshold.&#xA;100% permits Capture on a full-health beast and may initiate combat." xml:space="preserve">
+    <value>दोनों HP सीमाएँ 1–100% स्वीकार करती हैं. ठीक पाँच स्तर नीचे होने पर यह दूसरी सीमा लागू होती है.&#xA;100% से पूरे स्वास्थ्य वाले जानवर पर Capture संभव है और लड़ाई शुरू हो सकती है.</value>
+  </data>
+  <data name="Chocobo companion battle stance.&#xA;Controls how your companion behaves in combat." xml:space="preserve">
+    <value>Chocobo साथी की लड़ाई की मुद्रा.&#xA;नियंत्रित करता है कि साथी लड़ाई में कैसे व्यवहार करता है.</value>
+  </data>
+  <data name="Combat positional preference.&#xA;Front: Stay in front of target&#xA;Rear: Stay behind target&#xA;Any: No preference&#xA;Auto: Let plugin decide based on job" xml:space="preserve">
+    <value>लड़ाई में दिशा की पसंद.&#xA;सामने: लक्ष्य के सामने रहें&#xA;पीछे: लक्ष्य के पीछे रहें&#xA;कोई भी: कोई पसंद नहीं&#xA;स्वचालित: जॉब के अनुसार प्लगइन तय करे</value>
+  </data>
+  <data name="Controls BossMod Reborn only. Default: off. Applies when FrenRider is enabled, regardless of combat provider." xml:space="preserve">
+    <value>केवल BossMod Reborn नियंत्रित करता है. डिफ़ॉल्ट: बंद. FrenRider सक्षम होने पर लागू होता है, लड़ाई प्रदाता की परवाह किए बिना.</value>
+  </data>
+  <data name="Customize the glyphs used for enabled/disabled icon modes." xml:space="preserve">
+    <value>सक्षम/बंद आइकन मोड में इस्तेमाल चिह्न बदलें.</value>
+  </data>
+  <data name="DTR bar display mode:&#xA;Text Only: 'FR: On/Off'&#xA;Icon+Text: '⚫ FR'&#xA;Icon Only: '⚫'" xml:space="preserve">
+    <value>DTR बार प्रदर्शन मोड:&#xA;केवल पाठ: 'FR: On/Off'&#xA;आइकन+पाठ: '⚫ FR'&#xA;केवल आइकन: '⚫'</value>
+  </data>
+  <data name="Default List: Built-in emote list&#xA;Custom List: Your own list of commands" xml:space="preserve">
+    <value>डिफ़ॉल्ट सूची: अंतर्निहित emote सूची&#xA;अपनी सूची: आपकी अपनी कमांड सूची</value>
+  </data>
+  <data name="Default List: built-in emotes&#xA;Custom List: your own command list" xml:space="preserve">
+    <value>डिफ़ॉल्ट सूची: अंतर्निहित emote&#xA;अपनी सूची: आपकी अपनी कमांड सूची</value>
+  </data>
+  <data name="Delay before opening the party window and teleporting. Allowed range: 5-300 seconds. Default: 30." xml:space="preserve">
+    <value>पार्टी विंडो खोलने और टेलीपोर्ट से पहले की देरी. मान्य सीमा: 5-300 सेकंड. डिफ़ॉल्ट: 30.</value>
+  </data>
+  <data name="Distance threshold (yalms) to start following fren.&#xA;When you are farther than this from fren, navigation begins." xml:space="preserve">
+    <value>Fren के साथ चलना शुरू करने की दूरी सीमा (yalms).&#xA;Fren से इससे अधिक दूर होने पर रास्ते पर चलना शुरू होता है.</value>
+  </data>
+  <data name="Each family has its own enable toggle, maturity threshold, and continuous-ready handoff delay.&#xA;0 = not cleared, 1 = unsync cleared, 2 = duty support cleared, 3 = proven sync clear.&#xA;Handoff delay range: 2-300 seconds." xml:space="preserve">
+    <value>हर समूह का अपना सक्षम टॉगल, अनुभव सीमा और लगातार तैयार रहने के बाद हस्तांतरण की देरी है.&#xA;0 = पूरा नहीं, 1 = unsync में पूरा, 2 = duty support में पूरा, 3 = sync में पूरा होने का प्रमाण.&#xA;हस्तांतरण देरी की सीमा: 2-300 सेकंड.</value>
+  </data>
+  <data name="Enable social distancing indoors too.&#xA;Off by default. Turn on if you want spacing in dungeons." xml:space="preserve">
+    <value>अंदर भी आपसी दूरी सक्षम करें.&#xA;डिफ़ॉल्ट रूप से बंद. डंजन में अंतर रखना चाहें तो चालू करें.</value>
+  </data>
+  <data name="Extra distance added to cling in Deep Dungeons.&#xA;Prevents constant chasing in PotD/HoH." xml:space="preserve">
+    <value>Deep Dungeon में पास रहने की अतिरिक्त दूरी.&#xA;PotD/HoH में लगातार पीछा करने से रोकती है.</value>
+  </data>
+  <data name="Follow in a formation pattern (8-person grid).&#xA;Positions based on party slot number.&#xA;Disabled during mounting." xml:space="preserve">
+    <value>विन्यास में साथ चलें (8 लोगों की ग्रिड).&#xA;स्थान पार्टी स्लॉट संख्या से तय होते हैं.&#xA;सवारी लेते समय बंद रहता है.</value>
+  </data>
+  <data name="Garble all identifying text (character names, fren names, servers)&#xA;with military/exercise words. Useful for taking screenshots&#xA;to report issues without revealing personal info." xml:space="preserve">
+    <value>सभी पहचान वाले पाठ (पात्र नाम, Fren नाम, सर्वर) को&#xA;सैनिक/अभ्यास शब्दों से बदलें. निजी जानकारी बताए बिना&#xA;समस्या के स्क्रीनशॉट लेने के लिए उपयोगी है.</value>
+  </data>
+  <data name="Global setting. On plugin load and whenever it changes, applies casting movement lock to currently loaded BMR, VBM, and RSR plugins." xml:space="preserve">
+    <value>वैश्विक सेटिंग. प्लगइन लोड होने और हर बदलाव पर अभी लोड हुए BMR, VBM और RSR प्लगइन में कास्ट करते समय चलने का लॉक लागू करती है.</value>
+  </data>
+  <data name="Hostile target selection sent to RotationSolver Reborn through its typed settings IPC." xml:space="preserve">
+    <value>दुश्मन लक्ष्य का चयन RotationSolver Reborn को उसके typed settings IPC से भेजा जाता है.</value>
+  </data>
+  <data name="How loot is handled if LazyLoot is installed.&#xA;'unchanged' = Don't modify loot settings." xml:space="preserve">
+    <value>LazyLoot स्थापित हो तो लूट कैसे संभाली जाए.&#xA;'unchanged' = लूट सेटिंग्स न बदलें.</value>
+  </data>
+  <data name="How often the plugin runs its main logic loop.&#xA;Lower values = more responsive but higher CPU usage.&#xA;Default: 0.3s. WARNING: Values below 0.1 may impact performance." xml:space="preserve">
+    <value>प्लगइन की मुख्य प्रक्रिया कितनी बार चलती है.&#xA;कम मान = तेज़ प्रतिक्रिया, लेकिन अधिक CPU उपयोग.&#xA;डिफ़ॉल्ट: 0.3s. चेतावनी: 0.1 से कम मान प्रदर्शन को प्रभावित कर सकते हैं.</value>
+  </data>
+  <data name="Human-readable alias for this account group. Linked to account ID internally." xml:space="preserve">
+    <value>इस खाता समूह का पढ़ने योग्य उपनाम. अंदर खाते के ID से जुड़ा है.</value>
+  </data>
+  <data name="If configured food runs out, search inventory for any food starting from lowest item ID." xml:space="preserve">
+    <value>कॉन्फ़िगर किया भोजन खत्म हो तो सबसे कम वस्तु ID से शुरू करके सूची में कोई भी भोजन खोजें.</value>
+  </data>
+  <data name="If enabled, you will summon your own mount instead of pillion riding.&#xA;Useful for flying zones.&#xA;&#xA;⚠️ IMPORTANT: This feature requires you to be grouped with your fren.&#xA;It will not work properly if ungrouped (won't jump into air to follow)." xml:space="preserve">
+    <value>सक्षम होने पर पीछे बैठने के बजाय अपनी सवारी बुलाएँगे.&#xA;उड़ने वाले क्षेत्रों के लिए उपयोगी.&#xA;&#xA;⚠️ ध्यान दें: इस सुविधा के लिए Fren के साथ समूह में होना ज़रूरी है.&#xA;समूह से बाहर सही काम नहीं करेगी (पीछा करने के लिए हवा में नहीं कूदेगी).</value>
+  </data>
+  <data name="If your configured food runs out, search inventory for any food starting from lowest item ID." xml:space="preserve">
+    <value>आपका कॉन्फ़िगर किया भोजन खत्म हो तो सबसे कम वस्तु ID से शुरू करके सूची में कोई भी भोजन खोजें.</value>
+  </data>
+  <data name="Immediately follow a fren's aethernet jump through Lifestream when you are at the same origin. Supports connected city, residential, and custom networks, including Bozja and Eureka." xml:space="preserve">
+    <value>एक ही शुरुआती स्थान पर होने पर Lifestream से Fren के aethernet बदलाव के पीछे तुरंत जाएँ. Bozja और Eureka सहित जुड़े शहर, आवासीय और खास नेटवर्क समर्थित हैं.</value>
+  </data>
+  <data name="Leave the duty if no other party members are visible in the zone." xml:space="preserve">
+    <value>क्षेत्र में कोई दूसरा पार्टी सदस्य दिखाई न दे तो ड्यूटी से बाहर निकलें.</value>
+  </data>
+  <data name="Max distance to targets for combat AI.&#xA;424242 = Auto (plugin decides based on job: melee 2.6, caster 10)." xml:space="preserve">
+    <value>लड़ाई AI के लिए लक्ष्यों की अधिकतम दूरी.&#xA;424242 = स्वचालित (प्लगइन जॉब से तय करता है: melee 2.6, caster 10).</value>
+  </data>
+  <data name="Max follow distance in forays (Eureka/Bozja).&#xA;Lower value to avoid mini-aetheryte transition issues." xml:space="preserve">
+    <value>Foray (Eureka/Bozja) में साथ चलने की अधिकतम दूरी.&#xA;छोटे aetheryte बदलाव की समस्याओं से बचने के लिए मान घटाएँ.</value>
+  </data>
+  <data name="Maximum distance (yalms) to chase fren.&#xA;Beyond this, stop following to avoid zone-hopping." xml:space="preserve">
+    <value>Fren का पीछा करने की अधिकतम दूरी (yalms).&#xA;इससे आगे क्षेत्र बदलते रहने से बचने के लिए साथ चलना रोकें.</value>
+  </data>
+  <data name="Minimum distance to maintain from fren in outdoor/foray zones.&#xA;Prevents characters from stacking on top of each other (less bot-like).&#xA;Set to 0 to disable." xml:space="preserve">
+    <value>बाहरी/Foray क्षेत्रों में Fren से रखी जाने वाली न्यूनतम दूरी.&#xA;पात्रों को एक जगह जमा होने से रोकती है (कम bot-जैसा).&#xA;बंद करने के लिए 0 करें.</value>
+  </data>
+  <data name="Name of food to auto-consume.&#xA;Full item search from game data planned for a future update." xml:space="preserve">
+    <value>अपने आप खाने वाले भोजन का नाम.&#xA;भविष्य के अपडेट में गेम डेटा से पूरी वस्तु खोज की योजना है.</value>
+  </data>
+  <data name="Name of the auto-rotation preset for general content.&#xA;Must match a preset name in your rotation plugin.&#xA;Use 'none' to not change the preset." xml:space="preserve">
+    <value>सामान्य सामग्री के लिए ऑटो-रोटेशन प्रीसेट का नाम.&#xA;आपके रोटेशन प्लगइन के प्रीसेट नाम से मेल खाना चाहिए.&#xA;प्रीसेट न बदलने के लिए 'none' इस्तेमाल करें.</value>
+  </data>
+  <data name="Name of the party member to follow. Can be partial if unique.&#xA;The @Server part is cosmetic for display; targeting uses the name before @.&#xA;Names are auto-capitalized. Select from party or type manually." xml:space="preserve">
+    <value>साथ चलने वाले पार्टी सदस्य का नाम. अनोखा हो तो आंशिक नाम भी चलेगा.&#xA;@Server केवल दिखाने के लिए है; लक्ष्य चयन @ से पहले के नाम से होता है.&#xA;नाम अपने आप बड़े शुरुआती अक्षर में होते हैं. पार्टी से चुनें या मैनुअल लिखें.</value>
+  </data>
+  <data name="Navigation method to reach fren.&#xA;NavMesh: VNavmesh plugin pathfinding (recommended)&#xA;Visland: Alternative navigation&#xA;BossMod Follow: Uses BossMod's follow leader&#xA;Vanilla Follow: Game's built-in /follow" xml:space="preserve">
+    <value>Fren तक पहुँचने का तरीका.&#xA;NavMesh: VNavmesh प्लगइन से रास्ता खोजना (सुझाया गया)&#xA;Visland: वैकल्पिक रास्ता&#xA;BossMod Follow: BossMod का follow leader इस्तेमाल करता है&#xA;Vanilla Follow: गेम का अंतर्निहित /follow</value>
+  </data>
+  <data name="Navigation method to use inside duties.&#xA;May need a different method than overworld." xml:space="preserve">
+    <value>ड्यूटी के अंदर इस्तेमाल होने वाला रास्ता तरीका.&#xA;बाहरी दुनिया से अलग तरीका ज़रूरी हो सकता है.</value>
+  </data>
+  <data name="New character profiles inherit this setting. Existing characters change only when you use a sync action." xml:space="preserve">
+    <value>नई पात्र प्रोफ़ाइल यह सेटिंग पाती हैं. मौजूदा पात्र केवल सिंक कार्रवाई करने पर बदलते हैं.</value>
+  </data>
+  <data name="Number of ticks before harmonized cling resets to 0.&#xA;Handles special logic like DD/FATE force cling." xml:space="preserve">
+    <value>एक समान पास रहने की दूरी 0 पर रीसेट होने से पहले टिक की संख्या.&#xA;DD/FATE में ज़बरन पास रहने जैसी विशेष प्रक्रिया संभालती है.</value>
+  </data>
+  <data name="Number of update ticks before idle action triggers." xml:space="preserve">
+    <value>निष्क्रिय कार्रवाई शुरू होने से पहले अपडेट टिक की संख्या.</value>
+  </data>
+  <data name="Off: FrenRider chooses the BossMod preset from current job and selected rotation plugin.&#xA;On: use the preset name fields below." xml:space="preserve">
+    <value>बंद: FrenRider मौजूदा जॉब और चुने हुए रोटेशन प्लगइन से BossMod प्रीसेट चुनता है.&#xA;चालू: नीचे के प्रीसेट नाम फ़ील्ड इस्तेमाल करें.</value>
+  </data>
+  <data name="On: enable the selected BossMod AI implementation for combat.&#xA;Off: send BMR and VBM AI off commands while preserving the rest of FrenRider's combat setup." xml:space="preserve">
+    <value>चालू: लड़ाई के लिए चुना हुआ BossMod AI सक्षम करें.&#xA;बंद: FrenRider की बाकी लड़ाई सेटिंग्स रखते हुए BMR और VBM को AI बंद कमांड भेजें.</value>
+  </data>
+  <data name="Outside duties, summon your configured own mount and fly toward a visible fren after horizontal XZ distance exceeds this threshold continuously for the configured delay. Existing zone-specific Max Follow Distance still applies. Distance minimum: 1y. Delay range: 0-300 seconds; 0 means immediate. Defaults: 100y and 30 seconds." xml:space="preserve">
+    <value>ड्यूटी से बाहर अपनी कॉन्फ़िगर की गई सवारी बुलाएँ और दिखते Fren की ओर उड़ें, जब क्षैतिज XZ दूरी लगातार तय देरी तक इस सीमा से ऊपर रहे. क्षेत्र की मौजूदा अधिकतम साथ चलने की दूरी अब भी लागू है. न्यूनतम दूरी: 1y. देरी सीमा: 0-300 सेकंड; 0 का मतलब तुरंत. डिफ़ॉल्ट: 100y और 30 सेकंड.</value>
+  </data>
+  <data name="Party engage mode sent through Daedalus LAN coordination.&#xA;Focus requires a living enemy hard target.&#xA;None, Split, and Kill Adds preserve Daedalus's current focus and off-tank assignments." xml:space="preserve">
+    <value>Daedalus LAN समन्वय से भेजा जाने वाला पार्टी आक्रमण मोड.&#xA;Focus के लिए जीवित दुश्मन का hard target चाहिए.&#xA;None, Split और Kill Adds, Daedalus के मौजूदा focus और off-tank चयन रखते हैं.</value>
+  </data>
+  <data name="Per-duty-family ADS handoff.&#xA;Duty name, category, support, and clearance come only from ADS CurrentDuty. FrenRider accepts that snapshot only when ADS catalog metadata is complete and its territory/CFC matches live GameMain; otherwise local duty logic stays active.&#xA;The handoff delay counts only while the character remains continuously ready: logged in, present, alive, conscious, out of area transitions, and out of cutscenes.&#xA;Runtime ADS ownership is authoritative even after manual Start Inside. FrenRider pauses local duty systems while handoff is pending or ADS owns the run; configured exit takeover remains available after duty completion." xml:space="preserve">
+    <value>हर ड्यूटी समूह का ADS हस्तांतरण.&#xA;ड्यूटी नाम, श्रेणी, support और पूरा होने की जानकारी केवल ADS CurrentDuty से आती है. FrenRider यह स्नैपशॉट तभी स्वीकार करता है जब ADS कैटलॉग की जानकारी पूरी हो और उसका territory/CFC लाइव GameMain से मेल खाए; अन्यथा स्थानीय ड्यूटी प्रक्रिया सक्रिय रहती है.&#xA;हस्तांतरण देरी केवल लगातार तैयार रहने पर गिनी जाती है: लॉगिन, मौजूद, जीवित, होश में, क्षेत्र बदलाव से बाहर और दृश्यों से बाहर.&#xA;मैनुअल Start Inside के बाद भी रनटाइम ADS स्वामित्व निर्णायक है. हस्तांतरण लंबित रहने या ADS के रन संभालने पर FrenRider स्थानीय ड्यूटी प्रणालियाँ रोकता है; ड्यूटी पूरी होने के बाद कॉन्फ़िगर किया निकास नियंत्रण उपलब्ध रहता है.</value>
+  </data>
+  <data name="Play videos when Fren Rider is enabled or disabled.&#xA;Requires VLC media player." xml:space="preserve">
+    <value>Fren Rider सक्षम या बंद होने पर वीडियो चलाएँ.&#xA;VLC मीडिया प्लेयर चाहिए.</value>
+  </data>
+  <data name="Play videos when Fren Rider is enabled/disabled.&#xA;Requires VLC media player to be installed.&#xA;Videos are embedded with the plugin distribution." xml:space="preserve">
+    <value>Fren Rider सक्षम/बंद होने पर वीडियो चलाएँ.&#xA;VLC मीडिया प्लेयर स्थापित होना चाहिए.&#xA;वीडियो प्लगइन वितरण में अंतर्निहित हैं.</value>
+  </data>
+  <data name="Players in this list will have party invites automatically accepted when you are not in a group.&#xA;Names should omit the @Server part." xml:space="preserve">
+    <value>समूह में न होने पर इस सूची के खिलाड़ियों के पार्टी निमंत्रण अपने आप स्वीकार होंगे.&#xA;नामों में @Server हिस्सा न रखें.</value>
+  </data>
+  <data name="Players in this list will have their party invites automatically accepted when you're not in a group.&#xA;When you join a party via whitelist invite, the inviter will automatically be set as your Fren.&#xA;Enter names without the @Server part." xml:space="preserve">
+    <value>समूह में न होने पर इस सूची के खिलाड़ियों के पार्टी निमंत्रण अपने आप स्वीकार होंगे.&#xA;स्वीकृति सूची के निमंत्रण से पार्टी जुड़ने पर निमंत्रण देने वाला अपने आप आपका Fren बनेगा.&#xA;@Server के बिना नाम लिखें.</value>
+  </data>
+  <data name="Preset name for Deep Dungeon content.&#xA;Use 'none' to not change the preset." xml:space="preserve">
+    <value>Deep Dungeon सामग्री के प्रीसेट का नाम.&#xA;प्रीसेट न बदलने के लिए 'none' इस्तेमाल करें.</value>
+  </data>
+  <data name="Preset name for FATE content.&#xA;Use 'none' to not change the preset." xml:space="preserve">
+    <value>FATE सामग्री के प्रीसेट का नाम.&#xA;प्रीसेट न बदलने के लिए 'none' इस्तेमाल करें.</value>
+  </data>
+  <data name="Print status messages to game chat.&#xA;Useful for debugging but fills chat quickly." xml:space="preserve">
+    <value>गेम चैट में स्थिति संदेश लिखें.&#xA;डिबग के लिए उपयोगी, लेकिन चैट जल्दी भर जाती है.</value>
+  </data>
+  <data name="RSR operating mode when RSR is the selected rotation plugin.&#xA;Auto: Full auto.&#xA;Manual: Manual targeting mode.&#xA;None: Don't let FrenRider change the current rotation state.&#xA;Support: Uses RSR's plugin-managed support mode." xml:space="preserve">
+    <value>RSR चुना हुआ रोटेशन प्लगइन हो तो उसका संचालन मोड.&#xA;Auto: पूरी तरह स्वचालित.&#xA;Manual: मैनुअल लक्ष्य मोड.&#xA;None: FrenRider को मौजूदा रोटेशन स्थिति न बदलने दें.&#xA;Support: RSR का प्लगइन द्वारा प्रबंधित सहायता मोड इस्तेमाल करता है.</value>
+  </data>
+  <data name="Random variance on X axis during social distancing.&#xA;Adds natural-looking movement variance." xml:space="preserve">
+    <value>आपसी दूरी में X अक्ष पर बेतरतीब अंतर.&#xA;स्वाभाविक दिखने वाली चाल का अंतर जोड़ता है.</value>
+  </data>
+  <data name="Random variance on Z axis during social distancing." xml:space="preserve">
+    <value>आपसी दूरी में Z अक्ष पर बेतरतीब अंतर.</value>
+  </data>
+  <data name="Recover party members in regular four-player dungeons and outdoors. A living healer within 20 yalms of the corpse blocks item use. Party recovery pauses progression and defers Return while a living party rescuer remains." xml:space="preserve">
+    <value>सामान्य चार खिलाड़ी डंजन और बाहर पार्टी सदस्यों को पुनर्जीवित करें. शव से 20 yalms के भीतर जीवित उपचारक वस्तु इस्तेमाल रोकता है. पार्टी पुनर्प्राप्ति आगे बढ़ना रोकती है और जीवित पार्टी मददगार होने तक Return टालती है.</value>
+  </data>
+  <data name="Reserved for future autosync FATE behavior.&#xA;Current follow distance does not change on FATE join or leave." xml:space="preserve">
+    <value>भविष्य के स्वचालित FATE सिंक व्यवहार के लिए आरक्षित.&#xA;FATE में जुड़ने या छोड़ने पर साथ चलने की मौजूदा दूरी नहीं बदलती.</value>
+  </data>
+  <data name="Reset ALL tabs for this character to default values.&#xA;If editing DEFAULT CONFIG, resets to plugin defaults." xml:space="preserve">
+    <value>इस पात्र के सभी टैब डिफ़ॉल्ट मानों पर रीसेट करें.&#xA;डिफ़ॉल्ट कॉन्फ़िगरेशन बदलते समय प्लगइन डिफ़ॉल्ट पर रीसेट होता है.</value>
+  </data>
+  <data name="Reset only the current tab for this character to default values." xml:space="preserve">
+    <value>इस पात्र का केवल मौजूदा टैब डिफ़ॉल्ट मानों पर रीसेट करें.</value>
+  </data>
+  <data name="Restore snapshot: put captured BMR/VBM AI on/off, follow, movement, CBT fields, and Daedalus enabled state back on /fr off.&#xA;Turn everything off: disable BMR/VBM AI, CBT AutoFollow, RotationSolverReborn, Daedalus, and Wrath auto if FrenRider started it." xml:space="preserve">
+    <value>स्नैपशॉट बहाल करें: /fr off पर कैप्चर किए BMR/VBM AI चालू/बंद, follow, movement, CBT फ़ील्ड और Daedalus सक्षम स्थिति वापस रखें.&#xA;सब बंद करें: BMR/VBM AI, CBT AutoFollow, RotationSolverReborn, Daedalus और FrenRider द्वारा शुरू किए Wrath auto को बंद करें.</value>
+  </data>
+  <data name="Rotation plugin for foray content (Eureka/Bozja).&#xA;WRATH recommended for phantom job support." xml:space="preserve">
+    <value>Foray सामग्री (Eureka/Bozja) के लिए रोटेशन प्लगइन.&#xA;phantom job सहायता के लिए WRATH सुझाया गया है.</value>
+  </data>
+  <data name="Runs /ays discard every 10s only while mounted and in a safe idle window.&#xA;FrenRider defers discard during combat, cutscenes, and area transitions.&#xA;Requires AutoRetainer plugin." xml:space="preserve">
+    <value>केवल सवारी पर और सुरक्षित निष्क्रिय समय में हर 10s पर /ays discard चलाता है.&#xA;लड़ाई, दृश्य और क्षेत्र बदलाव के दौरान FrenRider फेंकना टालता है.&#xA;AutoRetainer प्लगइन चाहिए.</value>
+  </data>
+  <data name="Runs /ays discard while mounted and in a safe idle window.&#xA;Requires AutoRetainer plugin." xml:space="preserve">
+    <value>सवारी पर और सुरक्षित निष्क्रिय समय में /ays discard चलाता है.&#xA;AutoRetainer प्लगइन चाहिए.</value>
+  </data>
+  <data name="Runs /levelsync on after joining a FATE.&#xA;Defers while mounted or riding pillion." xml:space="preserve">
+    <value>FATE में जुड़ने के बाद /levelsync on चलाता है.&#xA;सवारी पर या पीछे बैठे होने पर टालता है.</value>
+  </data>
+  <data name="Select the mount to use when flying solo.&#xA;'Mount Roulette' picks a random mount.&#xA;Type to search the list." xml:space="preserve">
+    <value>अकेले उड़ने के लिए सवारी चुनें.&#xA;'Mount Roulette' बेतरतीब सवारी चुनता है.&#xA;सूची खोजने के लिए लिखें.</value>
+  </data>
+  <data name="Send /ads leave after the configured duty-end delay. FrenRider does not also run its own Leave Duty flow." xml:space="preserve">
+    <value>कॉन्फ़िगर की गई ड्यूटी खत्म देरी के बाद /ads leave भेजें. FrenRider अपना Leave Duty प्रवाह भी नहीं चलाता.</value>
+  </data>
+  <data name="Show or hide the DTR bar entry." xml:space="preserve">
+    <value>DTR बार प्रविष्टि दिखाएँ या छिपाएँ.</value>
+  </data>
+  <data name="Show/hide the DTR bar entry (server info bar)." xml:space="preserve">
+    <value>DTR बार प्रविष्टि (सर्वर जानकारी बार) दिखाएँ/छिपाएँ.</value>
+  </data>
+  <data name="Slash command to execute when idle.&#xA;Examples: /tomescroll, /dance, /snd run scriptname" xml:space="preserve">
+    <value>निष्क्रिय रहने पर चलने वाला स्लैश कमांड.&#xA;उदाहरण: /tomescroll, /dance, /snd run scriptname</value>
+  </data>
+  <data name="Target HP percentage to use Limit Break.&#xA;-1 = Disabled.&#xA;Automatically uses LB3 if available, otherwise LB2." xml:space="preserve">
+    <value>Limit Break इस्तेमाल करने के लिए लक्ष्य का HP प्रतिशत.&#xA;-1 = बंद.&#xA;उपलब्ध होने पर अपने आप LB3 इस्तेमाल करता है, अन्यथा LB2.</value>
+  </data>
+  <data name="Temporary uses an in-memory profile only for the exact DAD proposal. Off opts this local character out. Permanent replaces this local character's profile while keeping this choice." xml:space="preserve">
+    <value>अस्थायी चयन केवल सटीक DAD प्रस्ताव के लिए मेमोरी में प्रोफ़ाइल इस्तेमाल करता है. बंद इस स्थानीय पात्र को बाहर रखता है. स्थायी चयन यह पसंद रखते हुए स्थानीय पात्र की प्रोफ़ाइल बदलता है.</value>
+  </data>
+  <data name="Trigger repair when gear durability falls below this percentage." xml:space="preserve">
+    <value>उपकरण टिकाऊपन इस प्रतिशत से नीचे आए तो मरम्मत शुरू करें.</value>
+  </data>
+  <data name="Use FrenRider's local Leave Duty flow after the configured duty-end condition." xml:space="preserve">
+    <value>कॉन्फ़िगर की गई ड्यूटी खत्म शर्त के बाद FrenRider का स्थानीय Leave Duty प्रवाह इस्तेमाल करें.</value>
+  </data>
+  <data name="VLC media player is required for video notifications.&#xA;Click to download and install VLC." xml:space="preserve">
+    <value>वीडियो सूचनाओं के लिए VLC मीडिया प्लेयर चाहिए.&#xA;VLC डाउनलोड और स्थापित करने के लिए क्लिक करें.</value>
+  </data>
+  <data name="What to do when idle.&#xA;Specific Action: Execute a single command&#xA;Action From List: Pick randomly from a list" xml:space="preserve">
+    <value>निष्क्रिय रहने पर क्या करें.&#xA;विशिष्ट कार्रवाई: एक कमांड चलाएँ&#xA;सूची से कार्रवाई: सूची से बेतरतीब चुनें</value>
+  </data>
+  <data name="What to do when idle.&#xA;Specific Action: execute one command&#xA;Action From List: rotate through a list" xml:space="preserve">
+    <value>निष्क्रिय रहने पर क्या करें.&#xA;विशिष्ट कार्रवाई: एक कमांड चलाएँ&#xA;सूची से कार्रवाई: सूची में बारी-बारी चलाएँ</value>
+  </data>
+  <data name="When RSR, WRATH, or DAEDALUS is selected, also force BMR to the configured zone preset." xml:space="preserve">
+    <value>RSR, WRATH या DAEDALUS चुना हो तो BMR पर भी कॉन्फ़िगर किया क्षेत्र प्रीसेट लागू करें.</value>
+  </data>
+  <data name="When enabled, FrenRider asks ADS to disable BMR hunt modules." xml:space="preserve">
+    <value>सक्षम होने पर FrenRider, ADS से BMR hunt मॉड्यूल बंद करने को कहता है.</value>
+  </data>
+  <data name="When enabled, FrenRider asks ADS to disable the BMR Queen Lunatender module." xml:space="preserve">
+    <value>सक्षम होने पर FrenRider, ADS से BMR Queen Lunatender मॉड्यूल बंद करने को कहता है.</value>
+  </data>
+  <data name="When enabled, FrenRider may issue the fallback forward nudge inside duties even if the configured fren is not visible in your party/object table. Leave disabled for safer duty movement." xml:space="preserve">
+    <value>सक्षम होने पर कॉन्फ़िगर किया Fren पार्टी/ऑब्जेक्ट सूची में दिखाई न देने पर भी FrenRider ड्यूटी के अंदर आगे थोड़ा चल सकता है. अधिक सुरक्षित ड्यूटी चाल के लिए बंद रखें.</value>
+  </data>
+  <data name="When enabled, FrenRider waits after your configured fren is still in party but no longer visible, then asks Lifestream to teleport to a random unlocked aetheryte in that zone." xml:space="preserve">
+    <value>सक्षम होने पर कॉन्फ़िगर किया Fren पार्टी में होने पर भी दिखाई न दे तो FrenRider प्रतीक्षा करता है, फिर Lifestream से उस क्षेत्र के बेतरतीब खुले aetheryte तक टेलीपोर्ट करने को कहता है.</value>
+  </data>
+  <data name="Whether to follow fren during combat.&#xA;Auto: Let the plugin decide based on your job/role." xml:space="preserve">
+    <value>लड़ाई में Fren के साथ चलें या नहीं.&#xA;स्वचालित: प्लगइन आपकी जॉब/भूमिका से तय करे.</value>
+  </data>
+  <data name="Which rotation automation plugin to use.&#xA;BMR: BossModReborn&#xA;VBM: VanillaBossMod&#xA;RSR: RotationSolver Reborn&#xA;WRATH: Wrath&#xA;DAEDALUS: Daedalus" xml:space="preserve">
+    <value>कौन सा रोटेशन स्वचालन प्लगइन इस्तेमाल करें.&#xA;BMR: BossModReborn&#xA;VBM: VanillaBossMod&#xA;RSR: RotationSolver Reborn&#xA;WRATH: Wrath&#xA;DAEDALUS: Daedalus</value>
+  </data>
+  <data name="While Fren Rider is enabled, equip the first matching armoury-chest soul crystal when the current character is on a level 30+ base class and equipment can be changed safely. The current gearset is updated after the equip is confirmed." xml:space="preserve">
+    <value>Fren Rider सक्षम रहते हुए, मौजूदा पात्र स्तर 30+ के मूल वर्ग पर हो और उपकरण सुरक्षित बदल सकें तो armoury-chest का पहला मेल खाता soul crystal पहनें. पहनने की पुष्टि के बाद मौजूदा gearset अपडेट होता है.</value>
+  </data>
+  <data name="While FrenRider is enabled on Beastmaster, try Capture on eligible living beasts closer than 10 yalms, including passive beasts outside combat.&#xA;Prefers an eligible current target; otherwise automatically targets the nearest eligible beast when Capture is ready.&#xA;Skips owned beasts and enemies above your effective level, and respects both HP thresholds.&#xA;Retries on later cooldowns, including already marked beasts." xml:space="preserve">
+    <value>Beastmaster पर FrenRider सक्षम रहते हुए, 10 yalms से पास के योग्य जीवित जानवरों पर Capture आज़माएँ, लड़ाई से बाहर निष्क्रिय जानवरों सहित.&#xA;योग्य मौजूदा लक्ष्य को प्राथमिकता है; अन्यथा Capture तैयार होने पर सबसे पास के योग्य जानवर को अपने आप लक्ष्य करता है.&#xA;पहले से अपने जानवर और प्रभावी स्तर से ऊपर के दुश्मन छोड़ता है, तथा दोनों HP सीमाएँ मानता है.&#xA;बाद के विरामों पर फिर कोशिश करता है, पहले से चिह्नित जानवरों सहित.</value>
+  </data>
+  <data name="Disabled" xml:space="preserve">
+    <value>बंद</value>
+  </data>
+  <data name="Auto" xml:space="preserve">
+    <value>स्वचालित</value>
+  </data>
+  <data name="BossMod AI" xml:space="preserve">
+    <value>BossMod AI</value>
+  </data>
+  <data name="Owned" xml:space="preserve">
+    <value>मौजूद</value>
+  </data>
+  <data name="Missing" xml:space="preserve">
+    <value>अनुपलब्ध</value>
+  </data>
+  <data name="At least one command required" xml:space="preserve">
+    <value>कम से कम एक कमांड ज़रूरी है</value>
+  </data>
+  <data name="0 - Not Cleared" xml:space="preserve">
+    <value>0 - पूरा नहीं</value>
+  </data>
+  <data name="1 - 1P Unsync Cleared" xml:space="preserve">
+    <value>1 - 1P Unsync में पूरा</value>
+  </data>
+  <data name="2 - 1P Duty Support" xml:space="preserve">
+    <value>2 - 1P ड्यूटी सहायता</value>
+  </data>
+  <data name="3 - 4P Sync Cleared" xml:space="preserve">
+    <value>3 - 4P Sync में पूरा</value>
+  </data>
+  <data name="A Dalamud plugin for FFXIV multiplayer follow/combat automation." xml:space="preserve">
+    <value>FFXIV मल्टीप्लेयर में साथ चलने/लड़ाई के स्वचालन के लिए Dalamud प्लगइन.</value>
+  </data>
+  <data name="/frenrider - Open main window" xml:space="preserve">
+    <value>/frenrider - मुख्य विंडो खोलें</value>
+  </data>
+  <data name="/fr - Open main window (alias)" xml:space="preserve">
+    <value>/fr - मुख्य विंडो खोलें (उपनाम)</value>
+  </data>
+  <data name="/fr on - Enable Fren Rider" xml:space="preserve">
+    <value>/fr on - Fren Rider सक्षम करें</value>
+  </data>
+  <data name="/fr off - Disable Fren Rider" xml:space="preserve">
+    <value>/fr off - Fren Rider बंद करें</value>
+  </data>
+  <data name="/fr settings or /fr s - Toggle settings" xml:space="preserve">
+    <value>/fr settings or /fr s - सेटिंग्स टॉगल करें</value>
+  </data>
+  <data name="/fr mini or /fr m - Toggle MAGIA mini window" xml:space="preserve">
+    <value>/fr mini or /fr m - MAGIA मिनी विंडो टॉगल करें</value>
+  </data>
+  <data name="/fr debug - Toggle debug controls" xml:space="preserve">
+    <value>/fr debug - डिबग नियंत्रण टॉगल करें</value>
+  </data>
+  <data name="vnavmesh - Navigation and pathfinding" xml:space="preserve">
+    <value>vnavmesh - चलना और रास्ता खोजना</value>
+  </data>
+  <data name="Visland - Alternative navigation (if vnavmesh unavailable)" xml:space="preserve">
+    <value>Visland - वैकल्पिक रास्ता (vnavmesh उपलब्ध न हो तो)</value>
+  </data>
+  <data name="BossMod / BossModReborn - Combat AI and following" xml:space="preserve">
+    <value>BossMod / BossModReborn - लड़ाई AI और साथ चलना</value>
+  </data>
+  <data name="Rotation Solver Reborn - Combat rotation automation" xml:space="preserve">
+    <value>Rotation Solver Reborn - लड़ाई रोटेशन स्वचालन</value>
+  </data>
+  <data name="WRATH - Combat rotation automation" xml:space="preserve">
+    <value>WRATH - लड़ाई रोटेशन स्वचालन</value>
+  </data>
+  <data name="Daedalus - Combat rotation automation" xml:space="preserve">
+    <value>Daedalus - लड़ाई रोटेशन स्वचालन</value>
+  </data>
+  <data name="Questionable - Quest automation integration" xml:space="preserve">
+    <value>Questionable - क्वेस्ट स्वचालन एकीकरण</value>
+  </data>
+  <data name="Automaton (CBT) by Croizat - Enhanced duty start/end, auto-leave" xml:space="preserve">
+    <value>Croizat का Automaton (CBT) - उन्नत ड्यूटी शुरू/खत्म और स्वचालित निकास</value>
+  </data>
+  <data name="Owner: {0}" xml:space="preserve">
+    <value>स्वामी: {0}</value>
+  </data>
+  <data name="Island: {0}" xml:space="preserve">
+    <value>द्वीप: {0}</value>
+  </data>
+  <data name="Opaque character: {0}" xml:space="preserve">
+    <value>छिपा हुआ पात्र: {0}</value>
+  </data>
+  <data name="Row ID: {0}" xml:space="preserve">
+    <value>पंक्ति ID: {0}</value>
+  </data>
+  <data name="{0} Icon" xml:space="preserve">
+    <value>{0} का आइकन</value>
+  </data>
+  <data name="{0} Icon Code" xml:space="preserve">
+    <value>{0} के आइकन का कोड</value>
+  </data>
+  <data name="Shown when Fren Rider is {0}" xml:space="preserve">
+    <value>Fren Rider {0} होने पर दिखता है</value>
+  </data>
+  <data name="ADS reflection: {0}" xml:space="preserve">
+    <value>ADS प्रतिबिंब: {0}</value>
+  </data>
+  <data name="ADS Status: {0}" xml:space="preserve">
+    <value>ADS स्थिति: {0}</value>
+  </data>
+  <data name="When enabled, FrenRider asks ADS to set BMR MaxLoadDistance to {0:0}." xml:space="preserve">
+    <value>सक्षम होने पर FrenRider, ADS से BMR MaxLoadDistance को {0:0} सेट करने को कहता है.</value>
+  </data>
+  <data name="Solo" xml:space="preserve">
+    <value>एकल</value>
+  </data>
+  <data name="4-Man" xml:space="preserve">
+    <value>4 खिलाड़ी</value>
+  </data>
+  <data name="8-Man" xml:space="preserve">
+    <value>8 खिलाड़ी</value>
+  </data>
+  <data name="Alliance" xml:space="preserve">
+    <value>एलायंस</value>
+  </data>
+  <data name="Guild Hest" xml:space="preserve">
+    <value>Guild Hest</value>
+  </data>
+  <data name="Deep Dungeon" xml:space="preserve">
+    <value>Deep Dungeon</value>
+  </data>
+  <data name="Treasure Dungeon" xml:space="preserve">
+    <value>खज़ाना डंजन</value>
+  </data>
+  <data name="Other" xml:space="preserve">
+    <value>अन्य</value>
+  </data>
+  <data name="ADS Handoff" xml:space="preserve">
+    <value>ADS हस्तांतरण</value>
+  </data>
+  <data name="Exit Behavior" xml:space="preserve">
+    <value>निकास व्यवहार</value>
+  </data>
+  <data name="Equipment" xml:space="preserve">
+    <value>उपकरण</value>
+  </data>
+  <data name="Maintenance" xml:space="preserve">
+    <value>रखरखाव</value>
+  </data>
+  <data name="Debug" xml:space="preserve">
+    <value>डीबग</value>
+  </data>
+  <data name="Following" xml:space="preserve">
+    <value>साथ चल रहे हैं</value>
+  </data>
+  <data name="InRange" xml:space="preserve">
+    <value>सीमा में</value>
+  </data>
+  <data name="TooFar" xml:space="preserve">
+    <value>बहुत दूर</value>
+  </data>
+  <data name="InCombat" xml:space="preserve">
+    <value>लड़ाई में</value>
+  </data>
+  <data name="WaitingToMount" xml:space="preserve">
+    <value>सवारी की प्रतीक्षा</value>
+  </data>
+  <data name="Mounting" xml:space="preserve">
+    <value>सवारी ले रहे हैं</value>
+  </data>
+  <data name="Dismounting" xml:space="preserve">
+    <value>सवारी से उतर रहे हैं</value>
+  </data>
+  <data name="OutOfCombat" xml:space="preserve">
+    <value>लड़ाई से बाहर</value>
+  </data>
+  <data name="EnteringCombat" xml:space="preserve">
+    <value>लड़ाई में जा रहे हैं</value>
+  </data>
+  <data name="LeavingCombat" xml:space="preserve">
+    <value>लड़ाई से निकल रहे हैं</value>
+  </data>
+  <data name="Unconscious" xml:space="preserve">
+    <value>बेहोश</value>
+  </data>
+  <data name="Area transition" xml:space="preserve">
+    <value>क्षेत्र बदलाव</value>
+  </data>
+  <data name="Zone transition" xml:space="preserve">
+    <value>क्षेत्र बदलाव</value>
+  </data>
+  <data name="No fren found" xml:space="preserve">
+    <value>कोई Fren नहीं मिला</value>
+  </data>
+  <data name="Fren not visible" xml:space="preserve">
+    <value>Fren दिखाई नहीं दे रहा</value>
+  </data>
+  <data name="No fren" xml:space="preserve">
+    <value>कोई Fren नहीं</value>
+  </data>
+  <data name="ADS utility active" xml:space="preserve">
+    <value>ADS उपयोगिता सक्रिय</value>
+  </data>
+  <data name="Teleport active" xml:space="preserve">
+    <value>टेलीपोर्ट सक्रिय</value>
+  </data>
+  <data name="Teleport or dialog active" xml:space="preserve">
+    <value>टेलीपोर्ट या संवाद सक्रिय</value>
+  </data>
+  <data name="Paused (in combat)" xml:space="preserve">
+    <value>रुका (लड़ाई में)</value>
+  </data>
+  <data name="Phoenix Down recovery" xml:space="preserve">
+    <value>Phoenix Down पुनर्प्राप्ति</value>
+  </data>
+  <data name="Waiting for party revival; Return deferred" xml:space="preserve">
+    <value>पार्टी पुनर्जीवन की प्रतीक्षा; Return टाला गया</value>
+  </data>
+  <data name="No living party rescuer" xml:space="preserve">
+    <value>कोई जीवित पार्टी मददगार नहीं</value>
+  </data>
+  <data name="Casting Phoenix Down" xml:space="preserve">
+    <value>Phoenix Down कास्ट हो रहा है</value>
+  </data>
+  <data name="Cast ended; checking revival" xml:space="preserve">
+    <value>कास्ट खत्म; पुनर्जीवन की जाँच</value>
+  </data>
+  <data name="Attempt did not start; rechecking readiness" xml:space="preserve">
+    <value>प्रयास शुरू नहीं हुआ; तैयारी फिर जाँची जा रही है</value>
+  </data>
+  <data name="Waiting for healer, Raise cast or pending revival" xml:space="preserve">
+    <value>उपचारक, Raise कास्ट या लंबित पुनर्जीवन की प्रतीक्षा</value>
+  </data>
+  <data name="Dismounting for recovery" xml:space="preserve">
+    <value>पुनर्प्राप्ति के लिए सवारी से उतर रहे हैं</value>
+  </data>
+  <data name="Approaching party corpse" xml:space="preserve">
+    <value>पार्टी सदस्य के शव के पास जा रहे हैं</value>
+  </data>
+  <data name="Waiting for recovery attempt slot" xml:space="preserve">
+    <value>पुनर्प्राप्ति प्रयास स्लॉट की प्रतीक्षा</value>
+  </data>
+  <data name="Phoenix Down requested; waiting for actual cast" xml:space="preserve">
+    <value>Phoenix Down का अनुरोध हुआ; वास्तविक कास्ट की प्रतीक्षा</value>
+  </data>
+  <data name="Item attempt rejected; rechecking in one second" xml:space="preserve">
+    <value>वस्तु प्रयास अस्वीकार; एक सेकंड में फिर जाँच</value>
+  </data>
+  <data name="Ready" xml:space="preserve">
+    <value>तैयार</value>
+  </data>
+  <data name="Blocked: {0}" xml:space="preserve">
+    <value>अवरुद्ध: {0}</value>
+  </data>
+  <data name="Waiting: {0}" xml:space="preserve">
+    <value>प्रतीक्षा: {0}</value>
+  </data>
+  <data name="Running: {0}" xml:space="preserve">
+    <value>चल रहा है: {0}</value>
+  </data>
+  <data name="Completed: {0}" xml:space="preserve">
+    <value>पूरा हुआ: {0}</value>
+  </data>
+  <data name="Failed: {0}" xml:space="preserve">
+    <value>विफल: {0}</value>
+  </data>
+  <data name="Cooldown: retry in {0}s" xml:space="preserve">
+    <value>विराम: {0}s में फिर कोशिश</value>
+  </data>
+  <data name="Fren out of zone; teleport in {0}s" xml:space="preserve">
+    <value>Fren क्षेत्र से बाहर; {0}s में टेलीपोर्ट</value>
+  </data>
+  <data name="FrenRider disabled" xml:space="preserve">
+    <value>FrenRider बंद</value>
+  </data>
+  <data name="Zone changed" xml:space="preserve">
+    <value>क्षेत्र बदला</value>
+  </data>
+  <data name="Fren not in party" xml:space="preserve">
+    <value>Fren पार्टी में नहीं</value>
+  </data>
+  <data name="Fren visible" xml:space="preserve">
+    <value>Fren दिखाई दे रहा है</value>
+  </data>
+  <data name="Reading party window" xml:space="preserve">
+    <value>पार्टी विंडो पढ़ी जा रही है</value>
+  </data>
+  <data name="Following local aetheryte network" xml:space="preserve">
+    <value>स्थानीय aetheryte नेटवर्क पर साथ चल रहे हैं</value>
+  </data>
+  <data name="Duty scope changed" xml:space="preserve">
+    <value>ड्यूटी दायरा बदला</value>
+  </data>
+  <data name="Setting changed" xml:space="preserve">
+    <value>सेटिंग बदली</value>
+  </data>
+  <data name="Unconscious; return in {0}s" xml:space="preserve">
+    <value>बेहोश; {0}s में Return</value>
+  </data>
+  <data name="Handling revive/Return notification" xml:space="preserve">
+    <value>पुनर्जीवन/Return सूचना संभाली जा रही है</value>
+  </data>
+  <data name="Opening Return prompt" xml:space="preserve">
+    <value>Return प्रस्ताव खुल रहा है</value>
+  </data>
+  <data name="Revive/Return confirmed; waiting for transition" xml:space="preserve">
+    <value>पुनर्जीवन/Return की पुष्टि; बदलाव की प्रतीक्षा</value>
+  </data>
+  <data name="Waiting for readable Return confirmation" xml:space="preserve">
+    <value>पढ़ने योग्य Return पुष्टि की प्रतीक्षा</value>
+  </data>
+  <data name="Return agent unavailable" xml:space="preserve">
+    <value>Return एजेंट उपलब्ध नहीं</value>
+  </data>
+  <data name="Opened Return prompt" xml:space="preserve">
+    <value>Return प्रस्ताव खोला</value>
+  </data>
+  <data name="Waiting for Return confirmation" xml:space="preserve">
+    <value>Return पुष्टि की प्रतीक्षा</value>
+  </data>
+  <data name="Return prompt failed" xml:space="preserve">
+    <value>Return प्रस्ताव विफल</value>
+  </data>
+  <data name="ADS Hyper Focus ended outside duty" xml:space="preserve">
+    <value>ड्यूटी से बाहर ADS Hyper Focus खत्म हुआ</value>
+  </data>
+  <data name="ADS Hyper Focus ended without ADS duty ownership" xml:space="preserve">
+    <value>ADS ड्यूटी स्वामित्व के बिना ADS Hyper Focus खत्म हुआ</value>
+  </data>
+  <data name="ADS Hyper Focus ended; combat bootstrap pending" xml:space="preserve">
+    <value>ADS Hyper Focus खत्म; लड़ाई तैयारी लंबित</value>
+  </data>
+  <data name="ADS Hyper Focus lease active; RSR Manual" xml:space="preserve">
+    <value>ADS Hyper Focus नियंत्रण सक्रिय; RSR Manual</value>
+  </data>
+  <data name="ADS active" xml:space="preserve">
+    <value>ADS सक्रिय</value>
+  </data>
+  <data name="ADS active; FrenRider combat authoritative" xml:space="preserve">
+    <value>ADS सक्रिय; FrenRider लड़ाई का नियंत्रण</value>
+  </data>
+  <data name="ADS did not accept {0} repair: {1}" xml:space="preserve">
+    <value>ADS ने {0} मरम्मत स्वीकार नहीं की: {1}</value>
+  </data>
+  <data name="ADS duty ownership active; FrenRider rotation disabled" xml:space="preserve">
+    <value>ADS ड्यूटी स्वामित्व सक्रिय; FrenRider रोटेशन बंद</value>
+  </data>
+  <data name="ADS duty progression paused; configured FrenRider exit takeover active ({0})." xml:space="preserve">
+    <value>ADS ड्यूटी प्रगति रुकी; कॉन्फ़िगर किया FrenRider निकास नियंत्रण सक्रिय ({0}).</value>
+  </data>
+  <data name="ADS handoff off; FrenRider local duty logic active." xml:space="preserve">
+    <value>ADS हस्तांतरण बंद; FrenRider की स्थानीय ड्यूटी प्रक्रिया सक्रिय.</value>
+  </data>
+  <data name="ADS handoff pending" xml:space="preserve">
+    <value>ADS हस्तांतरण लंबित</value>
+  </data>
+  <data name="ADS handoff pending; FrenRider combat authoritative" xml:space="preserve">
+    <value>ADS हस्तांतरण लंबित; FrenRider लड़ाई का नियंत्रण</value>
+  </data>
+  <data name="ADS loaded; waiting for duty. FrenRider local logic active." xml:space="preserve">
+    <value>ADS लोड है; ड्यूटी की प्रतीक्षा. FrenRider की स्थानीय प्रक्रिया सक्रिय.</value>
+  </data>
+  <data name="ADS not loaded." xml:space="preserve">
+    <value>ADS लोड नहीं है.</value>
+  </data>
+  <data name="ADS not loaded. FrenRider local logic active." xml:space="preserve">
+    <value>ADS लोड नहीं है. FrenRider की स्थानीय प्रक्रिया सक्रिय.</value>
+  </data>
+  <data name="ADS reflection applied; no reassert pending." xml:space="preserve">
+    <value>ADS प्रतिबिंब लागू; दोबारा लागू करना लंबित नहीं.</value>
+  </data>
+  <data name="ADS reflection applied; waiting for desired-state change or ADS reload." xml:space="preserve">
+    <value>ADS प्रतिबिंब लागू; चाही गई स्थिति बदलने या ADS फिर लोड होने की प्रतीक्षा.</value>
+  </data>
+  <data name="ADS reflection hacks reset." xml:space="preserve">
+    <value>ADS प्रतिबिंब बदलाव रीसेट हुए.</value>
+  </data>
+  <data name="ADS reflection idle." xml:space="preserve">
+    <value>ADS प्रतिबिंब निष्क्रिय.</value>
+  </data>
+  <data name="ADS released duty ownership via {0}; FrenRider local duty logic active." xml:space="preserve">
+    <value>ADS ने {0} से ड्यूटी स्वामित्व छोड़ा; FrenRider की स्थानीय ड्यूटी प्रक्रिया सक्रिय.</value>
+  </data>
+  <data name="ADS released duty progression; configured FrenRider exit takeover active via {0}." xml:space="preserve">
+    <value>ADS ने ड्यूटी प्रगति छोड़ी; {0} से कॉन्फ़िगर किया FrenRider निकास नियंत्रण सक्रिय.</value>
+  </data>
+  <data name="ADS runtime ownership active via {0}; FrenRider duty systems paused." xml:space="preserve">
+    <value>{0} से ADS रनटाइम स्वामित्व सक्रिय; FrenRider ड्यूटी प्रणालियाँ रुकीं.</value>
+  </data>
+  <data name="ADS runtime ownership active via {0}; FrenRider exit takeover active." xml:space="preserve">
+    <value>{0} से ADS रनटाइम स्वामित्व सक्रिय; FrenRider निकास नियंत्रण सक्रिय.</value>
+  </data>
+  <data name="ADS runtime ownership confirmed via {0}; solo combat delay complete." xml:space="preserve">
+    <value>{0} से ADS रनटाइम स्वामित्व की पुष्टि; अकेले लड़ाई की देरी पूरी.</value>
+  </data>
+  <data name="ADS solo combat held; waiting for readable ownership confirmation." xml:space="preserve">
+    <value>ADS की अकेले लड़ाई रुकी; पढ़ने योग्य स्वामित्व पुष्टि की प्रतीक्षा.</value>
+  </data>
+  <data name="ADS solo combat held; {0}." xml:space="preserve">
+    <value>ADS की अकेले लड़ाई रुकी; {0}.</value>
+  </data>
+  <data name="ADS utility dialog active" xml:space="preserve">
+    <value>ADS उपयोगिता संवाद सक्रिय</value>
+  </data>
+  <data name="Approaching exit '{0}' ({1:F1}y)" xml:space="preserve">
+    <value>निकास '{0}' के पास जा रहे हैं ({1:F1}y)</value>
+  </data>
+  <data name="Ate {0} [{1}] ({2} left)" xml:space="preserve">
+    <value>{0} [{1}] खाया ({2} बचे)</value>
+  </data>
+  <data name="Blocked: Phoenix Down readiness changed" xml:space="preserve">
+    <value>अवरुद्ध: Phoenix Down की तैयारी बदली</value>
+  </data>
+  <data name="Blocked: navigation unavailable or corpse unreachable" xml:space="preserve">
+    <value>अवरुद्ध: रास्ता उपलब्ध नहीं या शव तक नहीं पहुँच सकते</value>
+  </data>
+  <data name="Blocked: recovery state unavailable" xml:space="preserve">
+    <value>अवरुद्ध: पुनर्प्राप्ति स्थिति उपलब्ध नहीं</value>
+  </data>
+  <data name="Blocked: waiting for a visible, confirmed party corpse" xml:space="preserve">
+    <value>अवरुद्ध: दिखने वाले पुष्टि किए पार्टी शव की प्रतीक्षा</value>
+  </data>
+  <data name="Can't pillion: fren not found" xml:space="preserve">
+    <value>पीछे नहीं बैठ सकते: Fren नहीं मिला</value>
+  </data>
+  <data name="Can't pillion: fren not in ObjectTable" xml:space="preserve">
+    <value>पीछे नहीं बैठ सकते: Fren ObjectTable में नहीं</value>
+  </data>
+  <data name="Can't summon (mounted/duty)" xml:space="preserve">
+    <value>नहीं बुला सकते (सवारी/ड्यूटी)</value>
+  </data>
+  <data name="Captured automation snapshot ({0})." xml:space="preserve">
+    <value>स्वचालन स्नैपशॉट लिया ({0}).</value>
+  </data>
+  <data name="Cleanup failed: no captured automation state was available to restore." xml:space="preserve">
+    <value>सफ़ाई विफल: बहाल करने के लिए कैप्चर की गई स्वचालन स्थिति नहीं थी.</value>
+  </data>
+  <data name="Cleanup failed: {0}/{1} commands failed." xml:space="preserve">
+    <value>सफ़ाई विफल: {0}/{1} कमांड विफल हुए.</value>
+  </data>
+  <data name="Clicking Commence on duty popup" xml:space="preserve">
+    <value>ड्यूटी पॉपअप में Commence क्लिक हो रहा है</value>
+  </data>
+  <data name="Combat held: {0}" xml:space="preserve">
+    <value>लड़ाई रोकी गई: {0}</value>
+  </data>
+  <data name="Companion: {0}m{1:D2}s" xml:space="preserve">
+    <value>साथी: {0}m{1:D2}s</value>
+  </data>
+  <data name="Coppelia PowerlevelBot lease active" xml:space="preserve">
+    <value>Coppelia PowerlevelBot नियंत्रण सक्रिय</value>
+  </data>
+  <data name="Dismounting..." xml:space="preserve">
+    <value>सवारी से उतर रहे हैं...</value>
+  </data>
+  <data name="Duty completed; automatic ADS handoff stopped." xml:space="preserve">
+    <value>ड्यूटी पूरी; स्वचालित ADS हस्तांतरण रुका.</value>
+  </data>
+  <data name="Duty completed; configured FrenRider exit takeover active." xml:space="preserve">
+    <value>ड्यूटी पूरी; कॉन्फ़िगर किया FrenRider निकास नियंत्रण सक्रिय.</value>
+  </data>
+  <data name="Duty exit requested; waiting to leave duty." xml:space="preserve">
+    <value>ड्यूटी निकास अनुरोध हुआ; बाहर निकलने की प्रतीक्षा.</value>
+  </data>
+  <data name="Failed to eat {0} [{1}]" xml:space="preserve">
+    <value>{0} [{1}] खाने में विफल</value>
+  </data>
+  <data name="Failed to summon chocobo" xml:space="preserve">
+    <value>Chocobo बुलाने में विफल</value>
+  </data>
+  <data name="Failed: timed out after {0}s." xml:space="preserve">
+    <value>विफल: {0}s बाद समय सीमा खत्म.</value>
+  </data>
+  <data name="Far chase ({0:F1}y XZ, max {1:F0}y)" xml:space="preserve">
+    <value>दूर पीछा ({0:F1}y XZ, अधिकतम {1:F0}y)</value>
+  </data>
+  <data name="Far chase blocked: {0}" xml:space="preserve">
+    <value>दूर पीछा अवरुद्ध: {0}</value>
+  </data>
+  <data name="Far chase mount cooldown ({0:F1}s)" xml:space="preserve">
+    <value>दूर पीछा सवारी विराम ({0:F1}s)</value>
+  </data>
+  <data name="Far chase pillion cooldown ({0:F1}s)" xml:space="preserve">
+    <value>दूर पीछा पीछे बैठने का विराम ({0:F1}s)</value>
+  </data>
+  <data name="Far chase preempted: {0}" xml:space="preserve">
+    <value>दूर पीछा दूसरी कार्रवाई से रुका: {0}</value>
+  </data>
+  <data name="Far chase settings changed" xml:space="preserve">
+    <value>दूर पीछा सेटिंग्स बदलीं</value>
+  </data>
+  <data name="Far chase: flying" xml:space="preserve">
+    <value>दूर पीछा: उड़ रहे हैं</value>
+  </data>
+  <data name="Far chase: leaving pillion" xml:space="preserve">
+    <value>दूर पीछा: पीछे से उतर रहे हैं</value>
+  </data>
+  <data name="Far chase: mounted; taking off" xml:space="preserve">
+    <value>दूर पीछा: सवारी पर; उड़ान भर रहे हैं</value>
+  </data>
+  <data name="Far chase: mounting ({0:F1}y XZ)" xml:space="preserve">
+    <value>दूर पीछा: सवारी ले रहे हैं ({0:F1}y XZ)</value>
+  </data>
+  <data name="Far chase: mounting own mount" xml:space="preserve">
+    <value>दूर पीछा: अपनी सवारी ले रहे हैं</value>
+  </data>
+  <data name="Far chase: requesting mount ({0:F1}y XZ)" xml:space="preserve">
+    <value>दूर पीछा: सवारी अनुरोध ({0:F1}y XZ)</value>
+  </data>
+  <data name="Flying alongside fren" xml:space="preserve">
+    <value>Fren के साथ उड़ रहे हैं</value>
+  </data>
+  <data name="Flying stuck escape: ascend ({0}s)" xml:space="preserve">
+    <value>उड़ान में अटकने से निकलना: ऊपर जाएँ ({0}s)</value>
+  </data>
+  <data name="Flying stuck escape: automove ({0}s)" xml:space="preserve">
+    <value>उड़ान में अटकने से निकलना: automove ({0}s)</value>
+  </data>
+  <data name="Following ({0:F1}y, cling {1:F1}y)" xml:space="preserve">
+    <value>साथ चल रहे हैं ({0:F1}y, पास दूरी {1:F1}y)</value>
+  </data>
+  <data name="Formation slot {0} ({1:F1}y)" xml:space="preserve">
+    <value>विन्यास स्लॉट {0} ({1:F1}y)</value>
+  </data>
+  <data name="Found: {0} ({1:F1}y)" xml:space="preserve">
+    <value>मिला: {0} ({1:F1}y)</value>
+  </data>
+  <data name="Fren mounted (FlyYouFools), mounting..." xml:space="preserve">
+    <value>Fren सवारी पर है (FlyYouFools), सवारी ले रहे हैं...</value>
+  </data>
+  <data name="Fren mounted, riding pillion..." xml:space="preserve">
+    <value>Fren सवारी पर है, पीछे बैठ रहे हैं...</value>
+  </data>
+  <data name="FrenRider disabled." xml:space="preserve">
+    <value>FrenRider बंद.</value>
+  </data>
+  <data name="FrenRider duty authority; rotation disabled" xml:space="preserve">
+    <value>FrenRider का ड्यूटी नियंत्रण; रोटेशन बंद</value>
+  </data>
+  <data name="Grace period ({0:F0}s)..." xml:space="preserve">
+    <value>प्रतीक्षा अवधि ({0:F0}s)...</value>
+  </data>
+  <data name="In duty (out of combat) - rotation active" xml:space="preserve">
+    <value>ड्यूटी में (लड़ाई से बाहर) - रोटेशन सक्रिय</value>
+  </data>
+  <data name="In range ({0:F1}y)" xml:space="preserve">
+    <value>सीमा में ({0:F1}y)</value>
+  </data>
+  <data name="In sanctuary" xml:space="preserve">
+    <value>सुरक्षित क्षेत्र में</value>
+  </data>
+  <data name="Interacting with exit '{0}' ({1:F1}y)" xml:space="preserve">
+    <value>निकास '{0}' से बातचीत ({1:F1}y)</value>
+  </data>
+  <data name="Landing..." xml:space="preserve">
+    <value>उतर रहे हैं...</value>
+  </data>
+  <data name="Leaving duty (attempt #{0}) - {1}" xml:space="preserve">
+    <value>ड्यूटी छोड़ रहे हैं (प्रयास #{0}) - {1}</value>
+  </data>
+  <data name="Mount cooldown ({0:F1}s)" xml:space="preserve">
+    <value>सवारी विराम ({0:F1}s)</value>
+  </data>
+  <data name="Mount correction cooldown ({0:F1}s)" xml:space="preserve">
+    <value>सवारी सुधार विराम ({0:F1}s)</value>
+  </data>
+  <data name="Mount state preserved: {0}" xml:space="preserve">
+    <value>सवारी स्थिति रखी गई: {0}</value>
+  </data>
+  <data name="Mounted - rotations suppressed" xml:space="preserve">
+    <value>सवारी पर - रोटेशन रोके गए</value>
+  </data>
+  <data name="Mounted alongside fren" xml:space="preserve">
+    <value>Fren के साथ सवारी पर</value>
+  </data>
+  <data name="Mounting for: {0} ({1:F1}y)" xml:space="preserve">
+    <value>इसके लिए सवारी ले रहे हैं: {0} ({1:F1}y)</value>
+  </data>
+  <data name="Mounting..." xml:space="preserve">
+    <value>सवारी ले रहे हैं...</value>
+  </data>
+  <data name="Moving to: {0}" xml:space="preserve">
+    <value>यहाँ जा रहे हैं: {0}</value>
+  </data>
+  <data name="NPC repair + inn room failed: {0}" xml:space="preserve">
+    <value>NPC मरम्मत + सराय कमरा विफल: {0}</value>
+  </data>
+  <data name="Navigating to exit '{0}' ({1:F1}y)" xml:space="preserve">
+    <value>निकास '{0}' तक जा रहे हैं ({1:F1}y)</value>
+  </data>
+  <data name="Near fren on foot; dismounting" xml:space="preserve">
+    <value>पैदल Fren के पास; सवारी से उतर रहे हैं</value>
+  </data>
+  <data name="Near fren on foot; landing to dismount" xml:space="preserve">
+    <value>पैदल Fren के पास; सवारी से उतरने के लिए ज़मीन पर आ रहे हैं</value>
+  </data>
+  <data name="Near mounted fren; dismounting to ride pillion" xml:space="preserve">
+    <value>सवारी वाले Fren के पास; पीछे बैठने के लिए उतर रहे हैं</value>
+  </data>
+  <data name="Near mounted fren; landing to ride pillion" xml:space="preserve">
+    <value>सवारी वाले Fren के पास; पीछे बैठने के लिए ज़मीन पर आ रहे हैं</value>
+  </data>
+  <data name="Need companion (cooldown {0:F1}s)" xml:space="preserve">
+    <value>साथी चाहिए (विराम {0:F1}s)</value>
+  </data>
+  <data name="Need food (cooldown {0:F1}s)" xml:space="preserve">
+    <value>भोजन चाहिए (विराम {0:F1}s)</value>
+  </data>
+  <data name="Need food but in duty+combat" xml:space="preserve">
+    <value>भोजन चाहिए लेकिन ड्यूटी+लड़ाई में हैं</value>
+  </data>
+  <data name="No ADS reflection hacks enabled." xml:space="preserve">
+    <value>कोई ADS प्रतिबिंब बदलाव सक्षम नहीं.</value>
+  </data>
+  <data name="No Gysahl Greens" xml:space="preserve">
+    <value>Gysahl Greens नहीं</value>
+  </data>
+  <data name="No equipped gear below {0}%." xml:space="preserve">
+    <value>पहने हुए उपकरण में कोई {0}% से नीचे नहीं.</value>
+  </data>
+  <data name="No food in inventory" xml:space="preserve">
+    <value>वस्तु सूची में भोजन नहीं</value>
+  </data>
+  <data name="No food item resolved" xml:space="preserve">
+    <value>भोजन वस्तु निर्धारित नहीं हुई</value>
+  </data>
+  <data name="No interactables found, nudging forward..." xml:space="preserve">
+    <value>बातचीत योग्य कुछ नहीं मिला, आगे थोड़ा चल रहे हैं...</value>
+  </data>
+  <data name="Out of {0} [{1}]" xml:space="preserve">
+    <value>{0} [{1}] खत्म</value>
+  </data>
+  <data name="Own mount retained: {0}" xml:space="preserve">
+    <value>अपनी सवारी रखी गई: {0}</value>
+  </data>
+  <data name="Partial cleanup: {0}/{1} commands failed." xml:space="preserve">
+    <value>आंशिक सफ़ाई: {0}/{1} कमांड विफल हुए.</value>
+  </data>
+  <data name="Paused for ADS utility" xml:space="preserve">
+    <value>ADS उपयोगिता के लिए रुका</value>
+  </data>
+  <data name="Pending duty exit after completed territory {0}." xml:space="preserve">
+    <value>पूरे हुए क्षेत्र {0} के बाद ड्यूटी निकास लंबित.</value>
+  </data>
+  <data name="Pending duty exit." xml:space="preserve">
+    <value>ड्यूटी निकास लंबित.</value>
+  </data>
+  <data name="QuestionableSolo authority; FrenRider combat suppressed" xml:space="preserve">
+    <value>QuestionableSolo का नियंत्रण; FrenRider लड़ाई रोकी गई</value>
+  </data>
+  <data name="Repair complete; no equipped gear below {0}%." xml:space="preserve">
+    <value>मरम्मत पूरी; पहने हुए उपकरण में कोई {0}% से नीचे नहीं.</value>
+  </data>
+  <data name="Repair timed out after {0}s; ADS: {1}" xml:space="preserve">
+    <value>{0}s बाद मरम्मत समय सीमा खत्म; ADS: {1}</value>
+  </data>
+  <data name="Restore failed: no automation snapshot captured for this account/character." xml:space="preserve">
+    <value>बहाली विफल: इस खाते/पात्र का स्वचालन स्नैपशॉट नहीं लिया गया.</value>
+  </data>
+  <data name="Retry wait after ADS failure: {0}" xml:space="preserve">
+    <value>ADS विफलता के बाद दोबारा प्रयास की प्रतीक्षा: {0}</value>
+  </data>
+  <data name="Retry wait after rejected start: {0}" xml:space="preserve">
+    <value>शुरुआत अस्वीकार होने के बाद दोबारा प्रयास की प्रतीक्षा: {0}</value>
+  </data>
+  <data name="Retry wait: ADS not loaded." xml:space="preserve">
+    <value>दोबारा प्रयास की प्रतीक्षा: ADS लोड नहीं है.</value>
+  </data>
+  <data name="Retry wait: ADS utility active ({0})." xml:space="preserve">
+    <value>दोबारा प्रयास की प्रतीक्षा: ADS उपयोगिता सक्रिय ({0}).</value>
+  </data>
+  <data name="Retry wait: {0}s." xml:space="preserve">
+    <value>दोबारा प्रयास की प्रतीक्षा: {0}s.</value>
+  </data>
+  <data name="Revive/Return accept attempted; waiting for dialog to close" xml:space="preserve">
+    <value>पुनर्जीवन/Return स्वीकार करने का प्रयास हुआ; संवाद बंद होने की प्रतीक्षा</value>
+  </data>
+  <data name="Revive/Return accept callback failed; waiting to retry" xml:space="preserve">
+    <value>पुनर्जीवन/Return स्वीकृति callback विफल; दोबारा प्रयास की प्रतीक्षा</value>
+  </data>
+  <data name="Riding pillion on fren's mount" xml:space="preserve">
+    <value>Fren की सवारी पर पीछे बैठे हैं</value>
+  </data>
+  <data name="Scanning for interactables..." xml:space="preserve">
+    <value>बातचीत योग्य वस्तुएँ खोजी जा रही हैं...</value>
+  </data>
+  <data name="Summoning chocobo ({0} greens left)" xml:space="preserve">
+    <value>Chocobo बुलाया जा रहा है ({0} greens बचे)</value>
+  </data>
+  <data name="Suppressed by Coppelia PowerlevelBot" xml:space="preserve">
+    <value>Coppelia PowerlevelBot ने रोका</value>
+  </data>
+  <data name="Surfacing revive/Return prompt" xml:space="preserve">
+    <value>पुनर्जीवन/Return प्रस्ताव सामने लाया जा रहा है</value>
+  </data>
+  <data name="Surfacing teleport prompt" xml:space="preserve">
+    <value>टेलीपोर्ट प्रस्ताव सामने लाया जा रहा है</value>
+  </data>
+  <data name="Switched to {0} [{1}]" xml:space="preserve">
+    <value>{0} [{1}] पर बदला</value>
+  </data>
+  <data name="Teleport decline attempted; waiting for dialog to close" xml:space="preserve">
+    <value>टेलीपोर्ट अस्वीकार करने का प्रयास हुआ; संवाद बंद होने की प्रतीक्षा</value>
+  </data>
+  <data name="Teleport decline callback failed; waiting to retry" xml:space="preserve">
+    <value>टेलीपोर्ट अस्वीकृति callback विफल; दोबारा प्रयास की प्रतीक्षा</value>
+  </data>
+  <data name="Too far ({0:F1}y &gt; {1:F0}y max)" xml:space="preserve">
+    <value>बहुत दूर ({0:F1}y &gt; अधिकतम {1:F0}y)</value>
+  </data>
+  <data name="Waiting for ADS desynthesis to start." xml:space="preserve">
+    <value>ADS विघटन शुरू होने की प्रतीक्षा.</value>
+  </data>
+  <data name="Waiting for revive/Return notification" xml:space="preserve">
+    <value>पुनर्जीवन/Return सूचना की प्रतीक्षा</value>
+  </data>
+  <data name="Waiting for revive/Return prompt" xml:space="preserve">
+    <value>पुनर्जीवन/Return प्रस्ताव की प्रतीक्षा</value>
+  </data>
+  <data name="Waiting for teleport prompt" xml:space="preserve">
+    <value>टेलीपोर्ट प्रस्ताव की प्रतीक्षा</value>
+  </data>
+  <data name="Waiting for {0} SelectYesno dialog" xml:space="preserve">
+    <value>{0} SelectYesno संवाद की प्रतीक्षा</value>
+  </data>
+  <data name="Waiting start: configured desynthesis requested (attempt {0})." xml:space="preserve">
+    <value>शुरुआत की प्रतीक्षा: कॉन्फ़िगर किए विघटन का अनुरोध (प्रयास {0}).</value>
+  </data>
+  <data name="Waiting to mount..." xml:space="preserve">
+    <value>सवारी लेने की प्रतीक्षा...</value>
+  </data>
+  <data name="Waiting: ADS not loaded." xml:space="preserve">
+    <value>प्रतीक्षा: ADS लोड नहीं है.</value>
+  </data>
+  <data name="Waiting: ADS utility active ({0})." xml:space="preserve">
+    <value>प्रतीक्षा: ADS उपयोगिता सक्रिय ({0}).</value>
+  </data>
+  <data name="Waiting: {0}." xml:space="preserve">
+    <value>प्रतीक्षा: {0}.</value>
+  </data>
+  <data name="⚠️ WARNING: AutoDuty Plugin Detected" xml:space="preserve">
+    <value>⚠️ चेतावनी: AutoDuty प्लगइन मिला</value>
+  </data>
+  <data name="• Force respawn at entrance" xml:space="preserve">
+    <value>• प्रवेश पर ज़बरन दोबारा प्रकट होना</value>
+  </data>
+  <data name="• Leave instances at random times" xml:space="preserve">
+    <value>• बेतरतीब समय पर इंस्टेंस छोड़ना</value>
+  </data>
+  <data name="• Interfere with FrenRider automation" xml:space="preserve">
+    <value>• FrenRider स्वचालन में दखल देना</value>
+  </data>
+  <data name="⚠ VLC Not Found" xml:space="preserve">
+    <value>⚠ VLC नहीं मिला</value>
+  </data>
+  <data name="Well Fed: {0:F0}s ({1} [{2}])" xml:space="preserve">
+    <value>Well Fed: {0:F0} सेकंड ({1} [{2}])</value>
+  </data>
+  <data name="Zone transition (rotation disabled)" xml:space="preserve">
+    <value>क्षेत्र बदलाव (रोटेशन बंद)</value>
+  </data>
+  <data name="handoff in {0:F1}s of continuous readiness" xml:space="preserve">
+    <value>लगातार तैयार रहने के {0:F1}s में हस्तांतरण</value>
+  </data>
+  <data name="handoff retry backoff until {0:HH:mm:ss}" xml:space="preserve">
+    <value>{0:HH:mm:ss} तक हस्तांतरण के दोबारा प्रयास का विराम</value>
+  </data>
+  <data name="waiting for duty start seam" xml:space="preserve">
+    <value>ड्यूटी शुरू होने के क्षण की प्रतीक्षा</value>
+  </data>
+  <data name="waiting {0:F1}s for ADS ownership confirmation" xml:space="preserve">
+    <value>ADS स्वामित्व पुष्टि के लिए {0:F1}s की प्रतीक्षा</value>
+  </data>
+  <data name="{0} active" xml:space="preserve">
+    <value>{0} सक्रिय</value>
+  </data>
+  <data name="{0} auto" xml:space="preserve">
+    <value>{0} स्वचालित</value>
+  </data>
+  <data name="{0} repair enabled; threshold is 0%." xml:space="preserve">
+    <value>{0} मरम्मत सक्षम; सीमा 0% है.</value>
+  </data>
+  <data name="{0} repair needed below {1}%; dismounting first." xml:space="preserve">
+    <value>{1}% से नीचे {0} मरम्मत चाहिए; पहले सवारी से उतर रहे हैं.</value>
+  </data>
+  <data name="{0} repair needed below {1}%; waiting for mount transition." xml:space="preserve">
+    <value>{1}% से नीचे {0} मरम्मत चाहिए; सवारी बदलाव की प्रतीक्षा.</value>
+  </data>
+  <data name="{0} repair needed below {1}%; waiting to dismount." xml:space="preserve">
+    <value>{1}% से नीचे {0} मरम्मत चाहिए; उतरने की प्रतीक्षा.</value>
+  </data>
+  <data name="{0} repair needed below {1}%; waiting while {2}." xml:space="preserve">
+    <value>{1}% से नीचे {0} मरम्मत चाहिए; {2} रहते प्रतीक्षा.</value>
+  </data>
+  <data name="{0} repair requested below {1}%; FrenRider paused." xml:space="preserve">
+    <value>{1}% से नीचे {0} मरम्मत का अनुरोध; FrenRider रुका.</value>
+  </data>
+  <data name="{0} repair requested; waiting for ADS status." xml:space="preserve">
+    <value>{0} की मरम्मत का अनुरोध किया गया; ADS स्थिति की प्रतीक्षा है।</value>
+  </data>
+  <data name="{0} repair requested; waiting for ADS to start." xml:space="preserve">
+    <value>{0} की मरम्मत का अनुरोध किया गया; ADS शुरू होने की प्रतीक्षा है।</value>
+  </data>
+  <data name="{0} repair running; FrenRider paused. ADS: {1}" xml:space="preserve">
+    <value>{0} की मरम्मत जारी है; FrenRider रुका हुआ है। ADS: {1}</value>
+  </data>
+  <data name="{0} repair still needed below {1}%; automatic dismount timed out." xml:space="preserve">
+    <value>{0} की मरम्मत अभी भी {1}% से नीचे आवश्यक है; स्वचालित उतरने का समय समाप्त हुआ।</value>
+  </data>
+  <data name="{0} repair still needed below {1}%; retry in {2}s. ADS: {3}" xml:space="preserve">
+    <value>{0} की मरम्मत अभी भी {1}% से नीचे आवश्यक है; {2} सेकंड में फिर प्रयास करें। ADS: {3}</value>
+  </data>
+  <data name="{0} repair still needed below {1}%; waiting while {2}. ADS: {3}" xml:space="preserve">
+    <value>{0} की मरम्मत अभी भी {1}% से नीचे आवश्यक है; {2} के दौरान प्रतीक्षा है। ADS: {3}</value>
+  </data>
+  <data name="{0}: mounting {1}" xml:space="preserve">
+    <value>{0}: {1} पर सवार हो रहा है</value>
+  </data>
+  <data name="{0}; restarting readiness delay with 5s retry backoff" xml:space="preserve">
+    <value>{0}; 5 सेकंड के पुनः प्रयास अंतराल के साथ तैयार होने की देरी फिर शुरू हो रही है</value>
+  </data>
+  <data name="{0}; waiting for authoritative ownership" xml:space="preserve">
+    <value>{0}; प्रामाणिक नियंत्रण की प्रतीक्षा है</value>
+  </data>
+  <data name="True" xml:space="preserve">
+    <value>सही</value>
+  </data>
+  <data name="False" xml:space="preserve">
+    <value>ग़लत</value>
+  </data>
+  <data name="ADS recovery hold IPC unavailable; update ADS" xml:space="preserve">
+    <value>ADS recovery hold IPC उपलब्ध नहीं है; ADS अपडेट करें</value>
+  </data>
+  <data name="Waiting for ADS recovery hold acknowledgement" xml:space="preserve">
+    <value>ADS recovery hold की पुष्टि की प्रतीक्षा है</value>
+  </data>
+  <data name="Waiting to leave combat before approaching or using Phoenix Down" xml:space="preserve">
+    <value>पास जाने या Phoenix Down का उपयोग करने से पहले युद्ध समाप्त होने की प्रतीक्षा है</value>
+  </data>
+  <data name="Waiting to land" xml:space="preserve">
+    <value>उतरने की प्रतीक्षा है</value>
+  </data>
+  <data name="No Phoenix Downs; waiting for party recovery" xml:space="preserve">
+    <value>Phoenix Down नहीं हैं; पार्टी के उबरने की प्रतीक्षा है</value>
+  </data>
+  <data name="Medicine cooldown; waiting for recovery" xml:space="preserve">
+    <value>दवा का कूलडाउन; उबरने की प्रतीक्षा है</value>
+  </data>
+  <data name="Waiting for current cast" xml:space="preserve">
+    <value>वर्तमान कास्ट की प्रतीक्षा है</value>
+  </data>
+  <data name="FR: On" xml:space="preserve">
+    <value>FR: चालू</value>
+  </data>
+  <data name="FR: Off" xml:space="preserve">
+    <value>FR: बंद</value>
+  </data>
+  <data name="Fren Rider active - Following {0}. Coppelia: {1}. Cleanup: {2}" xml:space="preserve">
+    <value>Fren Rider सक्रिय - {0} का अनुसरण। Coppelia: {1}। सफाई: {2}</value>
+  </data>
+  <data name="Fren Rider disabled - Click to toggle. Coppelia: {0}. Cleanup: {1}" xml:space="preserve">
+    <value>Fren Rider अक्षम - बदलने के लिए क्लिक करें। Coppelia: {0}। सफाई: {1}</value>
+  </data>
+  <data name="No compatible BossMod preset IPC responded" xml:space="preserve">
+    <value>किसी संगत BossMod preset IPC ने उत्तर नहीं दिया</value>
+  </data>
+  <data name="No packaged presets found" xml:space="preserve">
+    <value>पैकेज में कोई प्रीसेट नहीं मिला</value>
+  </data>
+  <data name="Preset push partially succeeded ({0}/{1})" xml:space="preserve">
+    <value>प्रीसेट भेजना आंशिक रूप से सफल हुआ ({0}/{1})</value>
+  </data>
+  <data name="Six BossMod presets pushed" xml:space="preserve">
+    <value>छह BossMod प्रीसेट भेजे गए</value>
+  </data>
+  <data name=", FATE {0}" xml:space="preserve">
+    <value>, FATE {0}</value>
+  </data>
+  <data name=", indoors" xml:space="preserve">
+    <value>, भीतर</value>
+  </data>
+  <data name="{0} (territory {1}{2})" xml:space="preserve">
+    <value>{0} (क्षेत्र {1}{2})</value>
+  </data>
+  <data name="ADS Exit Method ({0}s)" xml:space="preserve">
+    <value>ADS निकलने का तरीका ({0} सेकंड)</value>
+  </data>
+  <data name="FrenRider: leave after {0}s" xml:space="preserve">
+    <value>FrenRider: {0} सेकंड बाद निकलें</value>
+  </data>
+  <data name="FrenRider: leave when party leaves" xml:space="preserve">
+    <value>FrenRider: पार्टी के निकलने पर निकलें</value>
+  </data>
+  <data name="Timer: {0}" xml:space="preserve">
+    <value>टाइमर: {0}</value>
+  </data>
+  <data name="Next retry/reassert in {0}s." xml:space="preserve">
+    <value>अगला पुनः प्रयास/पुनः दावा {0} सेकंड में।</value>
+  </data>
+  <data name="Legacy seed active: {0} at threshold {1}." xml:space="preserve">
+    <value>पुराना seed सक्रिय: {1} सीमा पर {0}।</value>
+  </data>
+  <data name="global handoff on" xml:space="preserve">
+    <value>वैश्विक नियंत्रण हस्तांतरण चालू</value>
+  </data>
+  <data name="global handoff off" xml:space="preserve">
+    <value>वैश्विक नियंत्रण हस्तांतरण बंद</value>
+  </data>
+  <data name="Authority source: {0}; readable={1}; exit takeover={2}" xml:space="preserve">
+    <value>नियंत्रण स्रोत: {0}; पढ़ने योग्य={1}; निकलने का नियंत्रण={2}</value>
+  </data>
+  <data name="Selected: {0} {1} (ID: {2})" xml:space="preserve">
+    <value>चयनित: {0} {1} (ID: {2})</value>
+  </data>
+  <data name="{0} in party but not visible" xml:space="preserve">
+    <value>{0} पार्टी में है, पर दिखाई नहीं देता</value>
+  </data>
+  <data name="Active, {0}m {1:D2}s remaining" xml:space="preserve">
+    <value>सक्रिय, {0} मिनट {1:D2} सेकंड शेष</value>
+  </data>
+  <data name="Inactive, {0} Gysahl Greens" xml:space="preserve">
+    <value>निष्क्रिय, {0} Gysahl Greens</value>
+  </data>
+  <data name="Run={0}, FlyYouFools={1}, FarChase={2}, FollowMode={3}/{4}" xml:space="preserve">
+    <value>रन={0}, FlyYouFools={1}, दूर से पीछा={2}, अनुसरण मोड={3}/{4}</value>
+  </data>
+  <data name="Cling={0:F1}, Max={1:F0}, ForayMax={2:F0}" xml:space="preserve">
+    <value>पास रहने की सीमा={0:F1}, अधिकतम={1:F0}, फ़ोरे अधिकतम={2:F0}</value>
+  </data>
+  <data name="Loaded={0}, Pending={1}, RuntimeOwned={2}, Readable={3}, Source={4}, ExitTakeover={5}" xml:space="preserve">
+    <value>लोडेड={0}, लंबित={1}, रनटाइम नियंत्रण={2}, पढ़ने योग्य={3}, स्रोत={4}, निकलने का नियंत्रण={5}</value>
+  </data>
+  <data name="Source={0}, Readable={1}, ExitTakeover={2}" xml:space="preserve">
+    <value>स्रोत={0}, पढ़ने योग्य={1}, निकलने का नियंत्रण={2}</value>
+  </data>
+  <data name="Saved fren is outside the current party." xml:space="preserve">
+    <value>सहेजा गया Fren वर्तमान पार्टी से बाहर है।</value>
+  </data>
+  <data name="ADS Hyper Focus heartbeat received." xml:space="preserve">
+    <value>ADS Hyper Focus heartbeat प्राप्त हुई।</value>
+  </data>
+  <data name="ADS Hyper Focus lease active." xml:space="preserve">
+    <value>ADS Hyper Focus नियंत्रण अवधि सक्रिय है।</value>
+  </data>
+  <data name="ActionManager unavailable" xml:space="preserve">
+    <value>ActionManager उपलब्ध नहीं है</value>
+  </data>
+  <data name="Aetheryte sheet unavailable for {0} (candidate count=0)" xml:space="preserve">
+    <value>{0} के लिए Aetheryte शीट उपलब्ध नहीं है (उम्मीदवार संख्या=0)</value>
+  </data>
+  <data name="Coppelia Powerlevel heartbeat received." xml:space="preserve">
+    <value>Coppelia Powerlevel heartbeat प्राप्त हुई।</value>
+  </data>
+  <data name="Coppelia Powerlevel lease active." xml:space="preserve">
+    <value>Coppelia Powerlevel नियंत्रण अवधि सक्रिय है।</value>
+  </data>
+  <data name="Exit after duty ends - {0:F0}s elapsed (configured: {1}s)" xml:space="preserve">
+    <value>ड्यूटी समाप्त होने के बाद निकलें - {0:F0} सेकंड बीते (कॉन्फ़िगर: {1} सेकंड)</value>
+  </data>
+  <data name="Failed to open /partycmd" xml:space="preserve">
+    <value>/partycmd खोलने में विफल</value>
+  </data>
+  <data name="Leave when all party members left" xml:space="preserve">
+    <value>पार्टी के सभी सदस्यों के निकलने पर निकलें</value>
+  </data>
+  <data name="Matched {0} ({1})" xml:space="preserve">
+    <value>{0} ({1}) का मिलान हुआ</value>
+  </data>
+  <data name="No interactables found; fren not visible in duty" xml:space="preserve">
+    <value>कोई इंटरैक्ट करने योग्य वस्तु नहीं मिली; Fren ड्यूटी में दिखाई नहीं देता</value>
+  </data>
+  <data name="No interactables found; not bound by duty" xml:space="preserve">
+    <value>कोई इंटरैक्ट करने योग्य वस्तु नहीं मिली; ड्यूटी में बंधा नहीं है</value>
+  </data>
+  <data name="No party row found for {0} ({1})" xml:space="preserve">
+    <value>{0} ({1}) के लिए पार्टी पंक्ति नहीं मिली</value>
+  </data>
+  <data name="No unlocked Lifestream aetherytes matched {0} " xml:space="preserve">
+    <value>{0} से कोई अनलॉक किया हुआ Lifestream aetheryte नहीं मिला </value>
+  </data>
+  <data name="Opening party window" xml:space="preserve">
+    <value>पार्टी विंडो खोली जा रही है</value>
+  </data>
+  <data name="Party row found for {0}, but no zone name matched ({1})" xml:space="preserve">
+    <value>{0} के लिए पार्टी पंक्ति मिली, पर क्षेत्र नाम का मिलान नहीं हुआ ({1})</value>
+  </data>
+  <data name="Party window did not open (addon visible=false, opened by FrenRider=true)" xml:space="preserve">
+    <value>पार्टी विंडो नहीं खुली (addon visible=false, opened by FrenRider=true)</value>
+  </data>
+  <data name="Party window had no readable rows ({0})" xml:space="preserve">
+    <value>पार्टी विंडो में पढ़ने योग्य पंक्तियाँ नहीं थीं ({0})</value>
+  </data>
+  <data name="Party window not visible" xml:space="preserve">
+    <value>पार्टी विंडो दिखाई नहीं देती</value>
+  </data>
+  <data name="Party window read failed: {0}" xml:space="preserve">
+    <value>पार्टी विंडो पढ़ने में विफल: {0}</value>
+  </data>
+  <data name="Reading party window ({0})" xml:space="preserve">
+    <value>पार्टी विंडो पढ़ी जा रही है ({0})</value>
+  </data>
+  <data name="SelectYesno dialog" xml:space="preserve">
+    <value>SelectYesno संवाद</value>
+  </data>
+  <data name="Telepo unavailable for {0} (candidate count=0)" xml:space="preserve">
+    <value>{0} के लिए Telepo उपलब्ध नहीं है (उम्मीदवार संख्या=0)</value>
+  </data>
+  <data name="Teleport list read failed for {0}: {1} (candidate count=0)" xml:space="preserve">
+    <value>{0} की टेलीपोर्ट सूची पढ़ने में विफल: {1} (उम्मीदवार संख्या=0)</value>
+  </data>
+  <data name="Transient IPC failure; preserving owned state. Typed: {0}; JSON: {1}" xml:space="preserve">
+    <value>अस्थायी IPC विफलता; अपने नियंत्रण की स्थिति बनी रहेगी। Typed: {0}; JSON: {1}</value>
+  </data>
+  <data name="UI manager unavailable" xml:space="preserve">
+    <value>UI manager उपलब्ध नहीं है</value>
+  </data>
+  <data name="Validated ADS current-duty snapshot for territory/CFC {0}/{1}." xml:space="preserve">
+    <value>क्षेत्र/CFC {0}/{1} के ADS वर्तमान ड्यूटी स्नैपशॉट का सत्यापन हुआ।</value>
+  </data>
+  <data name="Waiting for party window" xml:space="preserve">
+    <value>पार्टी विंडो की प्रतीक्षा है</value>
+  </data>
+  <data name="addon hidden" xml:space="preserve">
+    <value>addon छिपा हुआ है</value>
+  </data>
+  <data name="addon not found" xml:space="preserve">
+    <value>addon नहीं मिला</value>
+  </data>
+  <data name="already mounted" xml:space="preserve">
+    <value>पहले से सवार है</value>
+  </data>
+  <data name="already mounting" xml:space="preserve">
+    <value>पहले से सवार हो रहा है</value>
+  </data>
+  <data name="automation preempted" xml:space="preserve">
+    <value>ऑटोमेशन का नियंत्रण ले लिया गया</value>
+  </data>
+  <data name="between areas" xml:space="preserve">
+    <value>क्षेत्रों के बीच</value>
+  </data>
+  <data name="casting" xml:space="preserve">
+    <value>कास्ट कर रहा है</value>
+  </data>
+  <data name="casting or occupied" xml:space="preserve">
+    <value>कास्ट कर रहा है या व्यस्त है</value>
+  </data>
+  <data name="duty confirm popup" xml:space="preserve">
+    <value>ड्यूटी पुष्टि पॉपअप</value>
+  </data>
+  <data name="event null" xml:space="preserve">
+    <value>event null है</value>
+  </data>
+  <data name="exception: {0}" xml:space="preserve">
+    <value>अपवाद: {0}</value>
+  </data>
+  <data name="far chase active" xml:space="preserve">
+    <value>दूर से पीछा सक्रिय</value>
+  </data>
+  <data name="flying stuck escape (dX={0:F1} dY={1:F1} dZ={2:F1}, all &lt;{3}y in {4}s)" xml:space="preserve">
+    <value>उड़ते हुए फँसने से निकलना (dX={0:F1} dY={1:F1} dZ={2:F1}, सभी {4} सेकंड में &lt;{3}y)</value>
+  </data>
+  <data name="fren flying" xml:space="preserve">
+    <value>Fren उड़ रहा है</value>
+  </data>
+  <data name="fren unavailable" xml:space="preserve">
+    <value>Fren उपलब्ध नहीं है</value>
+  </data>
+  <data name="in combat" xml:space="preserve">
+    <value>युद्ध में</value>
+  </data>
+  <data name="in duty" xml:space="preserve">
+    <value>ड्यूटी में</value>
+  </data>
+  <data name="local player unavailable" xml:space="preserve">
+    <value>स्थानीय खिलाड़ी उपलब्ध नहीं है</value>
+  </data>
+  <data name="mount action check failed: {0}" xml:space="preserve">
+    <value>माउंट ऐक्शन जाँच विफल: {0}</value>
+  </data>
+  <data name="mount action unavailable (status={0})" xml:space="preserve">
+    <value>माउंट ऐक्शन उपलब्ध नहीं है (status={0})</value>
+  </data>
+  <data name="mounted or riding pillion" xml:space="preserve">
+    <value>सवार है या पीछे की सीट पर बैठा है</value>
+  </data>
+  <data name="near fren on foot" xml:space="preserve">
+    <value>पैदल Fren के पास</value>
+  </data>
+  <data name="near mounted fren with Fly You Fools disabled" xml:space="preserve">
+    <value>Fly You Fools अक्षम रहते सवार Fren के पास</value>
+  </data>
+  <data name="near mounted fren with Fly You Fools enabled" xml:space="preserve">
+    <value>Fly You Fools सक्षम रहते सवार Fren के पास</value>
+  </data>
+  <data name="node index out of range" xml:space="preserve">
+    <value>node index सीमा से बाहर है</value>
+  </data>
+  <data name="node null" xml:space="preserve">
+    <value>node null है</value>
+  </data>
+  <data name="not mounted or riding" xml:space="preserve">
+    <value>सवार नहीं है</value>
+  </data>
+  <data name="occupied or in cutscene" xml:space="preserve">
+    <value>व्यस्त है या कटसीन में है</value>
+  </data>
+  <data name="outside sanctuary" xml:space="preserve">
+    <value>विश्राम क्षेत्र से बाहर</value>
+  </data>
+  <data name="player busy" xml:space="preserve">
+    <value>खिलाड़ी व्यस्त है</value>
+  </data>
+  <data name="player dead" xml:space="preserve">
+    <value>खिलाड़ी मृत है</value>
+  </data>
+  <data name="riding pillion" xml:space="preserve">
+    <value>पीछे की सीट पर सवार है</value>
+  </data>
+  <data name="safe and in cling range" xml:space="preserve">
+    <value>सुरक्षित और पास रहने की सीमा में</value>
+  </data>
+  <data name="stuck repath (dX={0:F1} dY={1:F1} dZ={2:F1}, all &lt;{3}y in {4}s)" xml:space="preserve">
+    <value>फँसने पर रास्ता फिर बनाना (dX={0:F1} dY={1:F1} dZ={2:F1}, सभी {4} सेकंड में &lt;{3}y)</value>
+  </data>
+  <data name="stuck repath (moved {0:F1}y &lt; {1:F1}y in {2:F0}s)" xml:space="preserve">
+    <value>फँसने पर रास्ता फिर बनाना ({2:F0} सेकंड में {0:F1}y चला &lt; {1:F1}y)</value>
+  </data>
+  <data name="teleport or dialog" xml:space="preserve">
+    <value>टेलीपोर्ट या संवाद</value>
+  </data>
+  <data name="unit manager not found" xml:space="preserve">
+    <value>unit manager नहीं मिला</value>
+  </data>
+  <data name="unsupported arg type" xml:space="preserve">
+    <value>असमर्थित argument type</value>
+  </data>
+  <data name="{0:F1}y XZ from fren, handoff {1:F1}y" xml:space="preserve">
+    <value>Fren से XZ में {0:F1}y, नियंत्रण हस्तांतरण {1:F1}y</value>
+  </data>
+  <data name="Overworld" xml:space="preserve">
+    <value>खुला संसार</value>
+  </data>
+  <data name="Town" xml:space="preserve">
+    <value>नगर</value>
+  </data>
+  <data name="Duty" xml:space="preserve">
+    <value>ड्यूटी</value>
+  </data>
+  <data name="DeepDungeon" xml:space="preserve">
+    <value>Deep Dungeon</value>
+  </data>
+  <data name="Foray" xml:space="preserve">
+    <value>फ़ोरे</value>
+  </data>
+  <data name="Typed" xml:space="preserve">
+    <value>टाइप्ड</value>
+  </data>
+  <data name="JsonFallback" xml:space="preserve">
+    <value>JSON वैकल्पिक मार्ग</value>
+  </data>
+  <data name="StaleHold" xml:space="preserve">
+    <value>पुरानी स्थिति बनाए रखना</value>
+  </data>
+  <data name="Unloaded" xml:space="preserve">
+    <value>अनलोड किया गया</value>
+  </data>
+  <data name="Unreadable" xml:space="preserve">
+    <value>पढ़ने योग्य नहीं</value>
+  </data>
+  <data name="Following local aetheryte network to {0}{1}" xml:space="preserve">
+    <value>स्थानीय aetheryte नेटवर्क से {0}{1} की ओर जा रहा है</value>
+  </data>
+  <data name="Found {0} aetherytes for {1}" xml:space="preserve">
+    <value>{1} के लिए {0} aetheryte मिले</value>
+  </data>
+  <data name="Matched {0}" xml:space="preserve">
+    <value>{0} का मिलान हुआ</value>
+  </data>
+  <data name="Sent {0}; matched {1}; found {2} aetherytes{3}" xml:space="preserve">
+    <value>{0} भेजा; {1} का मिलान हुआ; {2} aetheryte मिले{3}</value>
+  </data>
+  <data name="{0}{1}; retry in {2}s" xml:space="preserve">
+    <value>{0}{1}; {2} सेकंड में फिर प्रयास</value>
+  </data>
+  <data name="ADS loaded; ready." xml:space="preserve">
+    <value>ADS लोड है; तैयार।</value>
+  </data>
+  <data name="ADS loaded; {0}." xml:space="preserve">
+    <value>ADS लोड है; {0}।</value>
+  </data>
+  <data name="{0} {1}: M{2}/T{3}, {4}." xml:space="preserve">
+    <value>{0} {1}: M{2}/T{3}, {4}।</value>
+  </data>
+  <data name="ADS is not loaded" xml:space="preserve">
+    <value>ADS लोड नहीं है</value>
+  </data>
+  <data name="{0}; FrenRider local duty logic stays active" xml:space="preserve">
+    <value>{0}; FrenRider का स्थानीय ड्यूटी तर्क सक्रिय रहेगा</value>
+  </data>
+  <data name="ADS current-duty identity does not match live GameMain territory/CFC {0}/{1}; FrenRider local duty logic stays active" xml:space="preserve">
+    <value>ADS की वर्तमान ड्यूटी पहचान लाइव GameMain क्षेत्र/CFC {0}/{1} से नहीं मिलती; FrenRider का स्थानीय ड्यूटी तर्क सक्रिय रहेगा</value>
+  </data>
+  <data name="{0} handoff is off; FrenRider local duty logic stays active" xml:space="preserve">
+    <value>{0} का नियंत्रण हस्तांतरण बंद है; FrenRider का स्थानीय ड्यूटी तर्क सक्रिय रहेगा</value>
+  </data>
+  <data name="{0} has ADS clearance {1} (M{2}), below threshold {3}; FrenRider local duty logic stays active" xml:space="preserve">
+    <value>{0} का ADS clearance {1} (M{2}) है, जो {3} सीमा से नीचे है; FrenRider का स्थानीय ड्यूटी तर्क सक्रिय रहेगा</value>
+  </data>
+  <data name="ADS current-duty identity {0}/{1} does not match live GameMain identity {2}/{3}." xml:space="preserve">
+    <value>ADS की वर्तमान ड्यूटी पहचान {0}/{1} लाइव GameMain पहचान {2}/{3} से नहीं मिलती।</value>
+  </data>
+  <data name="Live duty identity changed from territory/CFC {0}/{1} to {2}/{3}." xml:space="preserve">
+    <value>लाइव ड्यूटी पहचान क्षेत्र/CFC {0}/{1} से {2}/{3} में बदली।</value>
+  </data>
+  <data name="No validated ADS current-duty snapshot." xml:space="preserve">
+    <value>ADS का सत्यापित वर्तमान ड्यूटी स्नैपशॉट नहीं है।</value>
+  </data>
+  <data name="Live client is outside an instanced duty." xml:space="preserve">
+    <value>लाइव क्लाइंट इंस्टेंस ड्यूटी से बाहर है।</value>
+  </data>
+  <data name="GameMain did not provide a live duty territory identity." xml:space="preserve">
+    <value>GameMain ने लाइव ड्यूटी क्षेत्र पहचान नहीं दी।</value>
+  </data>
+  <data name="ADS unloaded." xml:space="preserve">
+    <value>ADS अनलोड है।</value>
+  </data>
+  <data name="ADS.GetStatusJson returned an empty payload" xml:space="preserve">
+    <value>ADS.GetStatusJson ने खाली payload लौटाया</value>
+  </data>
+  <data name="ADS status does not identify an active instanced duty" xml:space="preserve">
+    <value>ADS स्थिति सक्रिय इंस्टेंस ड्यूटी की पहचान नहीं करती</value>
+  </data>
+  <data name="ADS current duty has no catalog metadata" xml:space="preserve">
+    <value>ADS की वर्तमान ड्यूटी में कैटलॉग मेटाडेटा नहीं है</value>
+  </data>
+  <data name="ADS current-duty catalog row has no duty name" xml:space="preserve">
+    <value>ADS वर्तमान ड्यूटी कैटलॉग पंक्ति में ड्यूटी नाम नहीं है</value>
+  </data>
+  <data name="ADS current-duty catalog row has no territory identity" xml:space="preserve">
+    <value>ADS वर्तमान ड्यूटी कैटलॉग पंक्ति में क्षेत्र पहचान नहीं है</value>
+  </data>
+  <data name="ADS current-duty catalog row has no CFC identity" xml:space="preserve">
+    <value>ADS वर्तमान ड्यूटी कैटलॉग पंक्ति में CFC पहचान नहीं है</value>
+  </data>
+  <data name="ADS current-duty catalog row has unsupported category '{0}'" xml:space="preserve">
+    <value>ADS वर्तमान ड्यूटी कैटलॉग पंक्ति में असमर्थित श्रेणी '{0}' है</value>
+  </data>
+  <data name="ADS current-duty catalog row has unsupported support level '{0}'" xml:space="preserve">
+    <value>ADS वर्तमान ड्यूटी कैटलॉग पंक्ति में असमर्थित सहायता स्तर '{0}' है</value>
+  </data>
+  <data name="ADS current-duty catalog row has unsupported clearance status '{0}'" xml:space="preserve">
+    <value>ADS वर्तमान ड्यूटी कैटलॉग पंक्ति में असमर्थित clearance स्थिति '{0}' है</value>
+  </data>
+  <data name="ADS.GetStatusJson was invalid JSON: {0}" xml:space="preserve">
+    <value>ADS.GetStatusJson का JSON अमान्य था: {0}</value>
+  </data>
+  <data name="ADS.GetStatusJson unavailable: {0}" xml:space="preserve">
+    <value>ADS.GetStatusJson उपलब्ध नहीं है: {0}</value>
+  </data>
+  <data name="ADS.GetStatusJson unavailable; retaining the validated current-duty snapshot for the same live identity: {0}" xml:space="preserve">
+    <value>ADS.GetStatusJson उपलब्ध नहीं है; उसी लाइव पहचान का सत्यापित वर्तमान ड्यूटी स्नैपशॉट बना रहेगा: {0}</value>
+  </data>
+  <data name="waiting for login" xml:space="preserve">
+    <value>लॉगिन की प्रतीक्षा है</value>
+  </data>
+  <data name="waiting for local player" xml:space="preserve">
+    <value>स्थानीय खिलाड़ी की प्रतीक्षा</value>
+  </data>
+  <data name="waiting for unconscious state to clear" xml:space="preserve">
+    <value>बेहोशी समाप्त होने की प्रतीक्षा है</value>
+  </data>
+  <data name="waiting for local player to be alive" xml:space="preserve">
+    <value>स्थानीय खिलाड़ी के जीवित होने की प्रतीक्षा है</value>
+  </data>
+  <data name="waiting for area transition to finish" xml:space="preserve">
+    <value>क्षेत्र परिवर्तन समाप्त होने की प्रतीक्षा है</value>
+  </data>
+  <data name="waiting for cutscene to finish" xml:space="preserve">
+    <value>कटसीन समाप्त होने की प्रतीक्षा है</value>
+  </data>
+  <data name="waiting for cutscene event to finish" xml:space="preserve">
+    <value>कटसीन event समाप्त होने की प्रतीक्षा है</value>
+  </data>
+  <data name="NPC no-inn/no-teleport" xml:space="preserve">
+    <value>NPC बिना सराय/बिना टेलीपोर्ट</value>
+  </data>
+  <data name="applied" xml:space="preserve">
+    <value>लागू किया गया</value>
+  </data>
+  <data name="already set" xml:space="preserve">
+    <value>पहले से सेट है</value>
+  </data>
+  <data name="not loaded" xml:space="preserve">
+    <value>लोड नहीं है</value>
+  </data>
+  <data name="unavailable" xml:space="preserve">
+    <value>उपलब्ध नहीं</value>
+  </data>
+  <data name="failed" xml:space="preserve">
+    <value>असफल</value>
+  </data>
+  <data name="RSR {0}{1}" xml:space="preserve">
+    <value>RSR {0}{1}</value>
+  </data>
+  <data name="{0} active{1}" xml:space="preserve">
+    <value>{0} सक्रिय{1}</value>
+  </data>
+  <data name="{0} auto{1}" xml:space="preserve">
+    <value>{0} स्वचालित{1}</value>
+  </data>
+  <data name="{0} unavailable{1}" xml:space="preserve">
+    <value>{0} उपलब्ध नहीं{1}</value>
+  </data>
+  <data name="{0} captured" xml:space="preserve">
+    <value>{0} प्राप्त हुआ</value>
+  </data>
+  <data name="{0} unavailable" xml:space="preserve">
+    <value>{0} उपलब्ध नहीं है</value>
+  </data>
+  <data name="{0} unavailable: {1}" xml:space="preserve">
+    <value>{0} उपलब्ध नहीं है: {1}</value>
+  </data>
+  <data name="Partial restore ({0})." xml:space="preserve">
+    <value>आंशिक बहाली ({0})।</value>
+  </data>
+  <data name="Far chase" xml:space="preserve">
+    <value>दूर से पीछा</value>
+  </data>
+  <data name="Fly You Fools" xml:space="preserve">
+    <value>Fly You Fools</value>
+  </data>
+  <data name="outside effective cling range" xml:space="preserve">
+    <value>प्रभावी पास रहने की सीमा से बाहर</value>
+  </data>
+  <data name="Failed to send {0}" xml:space="preserve">
+    <value>{0} भेजने में विफल</value>
+  </data>
+  <data name="; Party window left open" xml:space="preserve">
+    <value>; पार्टी विंडो खुली छोड़ी गई</value>
+  </data>
+  <data name="No unlocked Lifestream aetherytes matched {0} (candidate count=0; {1})" xml:space="preserve">
+    <value>{0} से कोई अनलॉक किया हुआ Lifestream aetheryte नहीं मिला (उम्मीदवार संख्या=0; {1})</value>
+  </data>
+  <data name="ADS.StartDutyFromInside accepted" xml:space="preserve">
+    <value>ADS.StartDutyFromInside स्वीकार हुआ</value>
+  </data>
+  <data name="ADS.StartDutyFromInside rejected; command fallback suppressed" xml:space="preserve">
+    <value>ADS.StartDutyFromInside अस्वीकार हुआ; वैकल्पिक कमांड रोका गया</value>
+  </data>
+  <data name="typed endpoint unavailable; sent /ads inside fallback" xml:space="preserve">
+    <value>typed endpoint उपलब्ध नहीं है; वैकल्पिक /ads inside भेजा गया</value>
+  </data>
+  <data name="typed endpoint unavailable and /ads inside fallback failed" xml:space="preserve">
+    <value>typed endpoint उपलब्ध नहीं है और वैकल्पिक /ads inside विफल हुआ</value>
+  </data>
+  <data name="DeathReturn" xml:space="preserve">
+    <value>मृत्यु के बाद वापसी</value>
+  </data>
+  <data name="Raise" xml:space="preserve">
+    <value>पुनर्जीवन</value>
+  </data>
+  <data name="Teleport" xml:space="preserve">
+    <value>टेलीपोर्ट</value>
+  </data>
+  <data name="Duty completed, {0}leaving in {1:F0}s..." xml:space="preserve">
+    <value>ड्यूटी पूरी हुई, {0}{1:F0} सेकंड में निकल रहे हैं...</value>
+  </data>
+  <data name="ADS authority active" xml:space="preserve">
+    <value>ADS नियंत्रण सक्रिय</value>
+  </data>
+  <data name="local aethernet travel active" xml:space="preserve">
+    <value>स्थानीय aethernet यात्रा सक्रिय</value>
+  </data>
+  <data name="settings changed" xml:space="preserve">
+    <value>सेटिंग्स बदली गईं</value>
+  </data>
+  <data name="typed IPC unavailable" xml:space="preserve">
+    <value>typed IPC उपलब्ध नहीं है</value>
+  </data>
+  <data name="live AutoFollow read unavailable" xml:space="preserve">
+    <value>लाइव AutoFollow पढ़ना उपलब्ध नहीं है</value>
+  </data>
+  <data name="BossMod.Service not found" xml:space="preserve">
+    <value>BossMod.Service नहीं मिला</value>
+  </data>
+  <data name="BossMod.Service.Config unavailable" xml:space="preserve">
+    <value>BossMod.Service.Config उपलब्ध नहीं है</value>
+  </data>
+  <data name="BossMod.AI.AIConfig not found" xml:space="preserve">
+    <value>BossMod.AI.AIConfig नहीं मिला</value>
+  </data>
+  <data name="live instance discovery failed: {0}" xml:space="preserve">
+    <value>लाइव instance खोज विफल: {0}</value>
+  </data>
+  <data name="Dalamud LocalPlugin wrapper was not reachable from IExposedPlugin" xml:space="preserve">
+    <value>IExposedPlugin से Dalamud LocalPlugin wrapper तक नहीं पहुँचा जा सका</value>
+  </data>
+  <data name="Dalamud LocalPlugin had no live instance" xml:space="preserve">
+    <value>Dalamud LocalPlugin में लाइव instance नहीं था</value>
+  </data>
+  <data name="Dalamud LocalPlugin had no live assembly" xml:space="preserve">
+    <value>Dalamud LocalPlugin में लाइव assembly नहीं थी</value>
+  </data>
+  <data name="Dalamud LocalPlugin instance and assembly did not match" xml:space="preserve">
+    <value>Dalamud LocalPlugin instance और assembly मेल नहीं खाते थे</value>
+  </data>
+  <data name="ADS unavailable/pending: {0}." xml:space="preserve">
+    <value>ADS उपलब्ध नहीं/लंबित: {0}।</value>
+  </data>
+  <data name="range" xml:space="preserve">
+    <value>सीमा</value>
+  </data>
+  <data name="range reset" xml:space="preserve">
+    <value>सीमा रीसेट</value>
+  </data>
+  <data name="hunts" xml:space="preserve">
+    <value>हंट</value>
+  </data>
+  <data name="hunts reset" xml:space="preserve">
+    <value>हंट रीसेट</value>
+  </data>
+  <data name="queen" xml:space="preserve">
+    <value>क्वीन</value>
+  </data>
+  <data name="queen reset" xml:space="preserve">
+    <value>queen रीसेट</value>
+  </data>
+  <data name="Misc" xml:space="preserve">
+    <value>विविध</value>
+  </data>
+  <data name="ADS returned false" xml:space="preserve">
+    <value>ADS ने false लौटाया</value>
+  </data>
+  <data name="ADS unavailable; reflection hacks pending." xml:space="preserve">
+    <value>ADS उपलब्ध नहीं है; reflection hacks लंबित हैं।</value>
+  </data>
+  <data name="No ADS utility status." xml:space="preserve">
+    <value>ADS utility स्थिति नहीं है।</value>
+  </data>
+  <data name="ADS repair running" xml:space="preserve">
+    <value>ADS मरम्मत जारी है</value>
+  </data>
+  <data name="ADS did not accept the utility request." xml:space="preserve">
+    <value>ADS ने utility अनुरोध स्वीकार नहीं किया।</value>
+  </data>
+  <data name="ADS status was not readable." xml:space="preserve">
+    <value>ADS स्थिति पढ़ने योग्य नहीं थी।</value>
+  </data>
+  <data name="Members" xml:space="preserve">
+    <value>सदस्य</value>
+  </data>
+  <data name="Jobs" xml:space="preserve">
+    <value>जॉब</value>
+  </data>
+  <data name="{0} total, {1} visible, {2} mounted" xml:space="preserve">
+    <value>कुल {0}, दिखाई देने वाले {1}, सवार {2}</value>
+  </data>
+  <data name="Tank" xml:space="preserve">
+    <value>टैंक</value>
+  </data>
+  <data name="Healer" xml:space="preserve">
+    <value>हीलर</value>
+  </data>
+  <data name="Melee" xml:space="preserve">
+    <value>हाथापाई</value>
+  </data>
+  <data name="Ranged" xml:space="preserve">
+    <value>दूर से हमला</value>
+  </data>
+  <data name="Caster" xml:space="preserve">
+    <value>जादूगर</value>
+  </data>
+  <data name="Select {0}..." xml:space="preserve">
+    <value>{0} चुनें...</value>
+  </data>
+  <data name="Window appearance" xml:space="preserve">
+    <value>विंडो की दिखावट</value>
+  </data>
+  <data name="Compact visible on main window" xml:space="preserve">
+    <value>मुख्य विंडो पर संक्षिप्त मोड दिखाएँ</value>
+  </data>
+  <data name="Language visible on main window" xml:space="preserve">
+    <value>मुख्य विंडो पर भाषा चयन दिखाएँ</value>
+  </data>
+  <data name="Transparency" xml:space="preserve">
+    <value>पारदर्शिता</value>
+  </data>
+  <data name="Opacity (%)" xml:space="preserve">
+    <value>अपारदर्शिता (%)</value>
+  </data>
+  <data name="Auto-fade when unfocused" xml:space="preserve">
+    <value>फ़ोकस हटने पर अपने आप हल्का करें</value>
+  </data>
+  <data name="Unfocused opacity (%)" xml:space="preserve">
+    <value>फ़ोकस हटने पर अपारदर्शिता (%)</value>
+  </data>
+  <data name="Unfocused delay (seconds)" xml:space="preserve">
+    <value>फ़ोकस हटने पर विलंब (सेकंड)</value>
+  </data>
+</root>

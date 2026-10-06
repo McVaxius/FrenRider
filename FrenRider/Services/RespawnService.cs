@@ -44,6 +44,12 @@ public sealed class RespawnService
             return;
         }
 
+        if (plugin.PhoenixDownRecoveryService.DeferReturn)
+        {
+            Reset(RespawnState.Waiting, "Waiting for party recovery; Return deferred");
+            return;
+        }
+
         var config = plugin.ConfigManager.GetActiveConfig();
         var inDuty = IsInDuty();
         var respawnEnabled = RespawnNotificationRecoveryPolicy.IsRespawnEnabledForDutyState(
@@ -175,6 +181,8 @@ public sealed class RespawnService
 
     public bool ShouldOwnCurrentUnconsciousReviveFlow(CharacterConfig config)
     {
+        if (plugin.PhoenixDownRecoveryService.DeferReturn)
+            return false;
         var visiblePromptKind = TryGetVisibleSelectYesnoPromptKind(out _);
 
         return RespawnNotificationRecoveryPolicy.ShouldOwnFlow(

@@ -38,7 +38,11 @@ Common commands:
 
 `/frenrider` always opens the main window. `/fr` opens the main window when no recognized argument is supplied. `/fr settings` and `/fr s` toggle the settings window. `/fr mini` and `/fr m` toggle a separate auto-sized **MAGIA** window whose Attack, Defense, and Off buttons send `/magiaauto attack`, `/magiaauto defense`, and `/magiaauto off`. The mini window does not enable anything automatically. `/fr debug` toggles debug controls for the active character config.
 
-The main window shows run state, configured fren, party status, follow/mount/idle/teleport/respawn state, ADS state, exit mode, and debug details when enabled.
+The main window shows run state, a read-only operator profile, party status, follow/mount/idle/teleport/respawn/Phoenix Down state, ADS state, exit mode, and collapsed debug details. Account and character selection stays in Settings; browsing another profile does not change the active automation profile.
+
+The header colour swatch and language selector apply to every Fren Rider window and popup. English, German, French, Spanish, Italian, Russian, Japanese, Korean, Simplified Chinese, Vietnamese, Brazilian Portuguese, Indonesian, Polish, and Turkish are included. Colours are calculated relative to the approved mint theme across panels, fields, borders, and foregrounds; warning and automation status colours keep their meaning. The native **C** checkbox selects compact spacing across the main, mini, Settings, and AutoDuty alert windows. Appearance preferences are also available in Settings under UI/About and save through the existing configuration.
+
+The mini keeps the enable switch and exact saved fren identity available outside Eureka; its MAGIA Attack, Defense, and Off actions appear only in Eureka. Segoe UI and host-managed CJK/symbol fonts load through Dalamud's managed atlas and are never distributed with the plugin. Font readiness and missing glyphs are reported explicitly. The approved regular and compact layouts still require mcvaxius's in-game screenshot acceptance.
 
 ## Core Features
 
@@ -76,6 +80,20 @@ Exit behavior supports:
 - Leave when all other party members have left the duty zone.
 - ADS exit method, which sends `/ads leave` after the configured delay.
 - No auto-exit, which prevents Fren Rider from initiating a duty leave.
+
+## Phoenix Down Recovery
+
+The Profile tab has three per-character settings: **Use Phoenix Downs for recovery** (on), **Revive anyone within range outdoors** (on), and **Allow Phoenix Down use during combat** (off). Existing profiles missing these fields receive the same defaults; profile copies, synchronization, resets, and transfers include all three.
+
+Recovery supports regular four-player dungeons identified from live duty metadata and outdoor areas. Other instances are excluded. Party members take priority, with dead healers first. Outdoor strangers are eligible only when the outdoor setting is on and they are within 15 yalms; Fren Rider never approaches them. A living healer, including a non-party healer, at or within 20 yalms of the corpse blocks Phoenix Down use. Dead healers do not block it.
+
+Party recovery pauses follow, formation, far chase, mounting, duty objectives, and competing automatic movement. A rescuer with an item can approach a visible party corpse through vnavmesh and stop within 14.5 yalms. Grounded rescuers dismount; flying rescuers wait to land. With combat use off, rescuers wait to leave combat before approaching or attempting an item. Survivors can finish the current fight, while new pulls stay blocked. Inventory, native availability, shared medicine cooldown, range, line of sight, pending Raise, and observed casts are checked before each attempt. Party clients stagger attempts by 500 milliseconds per rank in sorted party Content IDs; an empty inventory on one survivor does not block another.
+
+The main window's **Phoenix Down** row reports waiting, approach, cast, and compatibility blockers. Actual casting and revival are tracked separately. Rejected or interrupted attempts wait at least one second before rechecking. Return is deferred for a dead party member while a living party rescuer remains, including while items are missing or on cooldown. Full party wipes retain the existing respawn behavior. Recovery releases its temporary controls after revival, disabling the feature, logout, character changes, transitions, and unload.
+
+ADS must support `ADS.IsPhoenixDownRecoveryHoldActive` before Fren Rider approaches or uses an item in an ADS-owned dungeon. Fren Rider publishes `FrenRider.PhoenixDown.ShouldPauseDutyProgression`; ADS stops its movement once, retains ownership, and replans from fresh state after recovery. Missing acknowledgement support appears as a compatibility blocker. No automatic Stop/Resume cycle is required; explicit ADS Stop or Leave remains authoritative.
+
+Offline checks cannot confirm native item execution. Live acceptance requires an actual Phoenix Down cast, revival, and ADS resumption; mcvaxius controls live testing and deployment.
 
 ## AutoYes And Respawn
 

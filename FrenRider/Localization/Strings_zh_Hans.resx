@@ -1,0 +1,2706 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="Blue" xml:space="preserve">
+    <value>蓝色</value>
+  </data>
+  <data name="Character" xml:space="preserve">
+    <value>角色</value>
+  </data>
+  <data name="Color" xml:space="preserve">
+    <value>颜色</value>
+  </data>
+  <data name="Custom RGB" xml:space="preserve">
+    <value>自定义RGB</value>
+  </data>
+  <data name="Enabled" xml:space="preserve">
+    <value>已启用</value>
+  </data>
+  <data name="Forced / On" xml:space="preserve">
+    <value>强制/开启</value>
+  </data>
+  <data name="Icon only" xml:space="preserve">
+    <value>仅图标</value>
+  </data>
+  <data name="Interactive" xml:space="preserve">
+    <value>交互</value>
+  </data>
+  <data name="Job" xml:space="preserve">
+    <value>职业</value>
+  </data>
+  <data name="Ko-fi" xml:space="preserve">
+    <value>Ko-fi</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>语言</value>
+  </data>
+  <data name="Loading UI fonts..." xml:space="preserve">
+    <value>正在加载界面字体...</value>
+  </data>
+  <data name="N" xml:space="preserve">
+    <value>否</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>否</value>
+  </data>
+  <data name="Off" xml:space="preserve">
+    <value>关闭</value>
+  </data>
+  <data name="On" xml:space="preserve">
+    <value>开启</value>
+  </data>
+  <data name="Override Off" xml:space="preserve">
+    <value>强制关闭</value>
+  </data>
+  <data name="Passive" xml:space="preserve">
+    <value>被动</value>
+  </data>
+  <data name="Pink" xml:space="preserve">
+    <value>粉色</value>
+  </data>
+  <data name="Profile" xml:space="preserve">
+    <value>配置档</value>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>搜索</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>设置</value>
+  </data>
+  <data name="Teal" xml:space="preserve">
+    <value>青色</value>
+  </data>
+  <data name="Text only" xml:space="preserve">
+    <value>仅文字</value>
+  </data>
+  <data name="UI fonts failed to load. See the plugin log." xml:space="preserve">
+    <value>界面字体加载失败，请查看插件日志。</value>
+  </data>
+  <data name="Unknown" xml:space="preserve">
+    <value>未知</value>
+  </data>
+  <data name="Y" xml:space="preserve">
+    <value>是</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>是</value>
+  </data>
+  <data name="Compact mode" xml:space="preserve">
+    <value>紧凑模式</value>
+  </data>
+  <data name="Run" xml:space="preserve">
+    <value>运行</value>
+  </data>
+  <data name="Operator" xml:space="preserve">
+    <value>操作信息</value>
+  </data>
+  <data name="Party" xml:space="preserve">
+    <value>小队</value>
+  </data>
+  <data name="Automation" xml:space="preserve">
+    <value>自动化</value>
+  </data>
+  <data name="Account" xml:space="preserve">
+    <value>账号</value>
+  </data>
+  <data name="Fren" xml:space="preserve">
+    <value>好友</value>
+  </data>
+  <data name="Tracking" xml:space="preserve">
+    <value>追踪</value>
+  </data>
+  <data name="Position" xml:space="preserve">
+    <value>位置</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>名称</value>
+  </data>
+  <data name="Distance" xml:space="preserve">
+    <value>距离</value>
+  </data>
+  <data name="Follow" xml:space="preserve">
+    <value>跟随</value>
+  </data>
+  <data name="Mount" xml:space="preserve">
+    <value>坐骑</value>
+  </data>
+  <data name="Combat" xml:space="preserve">
+    <value>战斗</value>
+  </data>
+  <data name="Cleanup" xml:space="preserve">
+    <value>恢复</value>
+  </data>
+  <data name="Idle" xml:space="preserve">
+    <value>空闲</value>
+  </data>
+  <data name="Fren teleport" xml:space="preserve">
+    <value>传送到好友</value>
+  </data>
+  <data name="Phoenix Down" xml:space="preserve">
+    <value>不死鸟之尾</value>
+  </data>
+  <data name="Respawn" xml:space="preserve">
+    <value>重生</value>
+  </data>
+  <data name="Food" xml:space="preserve">
+    <value>食物</value>
+  </data>
+  <data name="Repair" xml:space="preserve">
+    <value>修理</value>
+  </data>
+  <data name="Desynth" xml:space="preserve">
+    <value>分解</value>
+  </data>
+  <data name="Companion" xml:space="preserve">
+    <value>搭档</value>
+  </data>
+  <data name="Formation" xml:space="preserve">
+    <value>队形</value>
+  </data>
+  <data name="Duty / ADS / Exit" xml:space="preserve">
+    <value>副本 / ADS / 退出</value>
+  </data>
+  <data name="Zone" xml:space="preserve">
+    <value>区域</value>
+  </data>
+  <data name="Exit method" xml:space="preserve">
+    <value>退出方式</value>
+  </data>
+  <data name="Exit" xml:space="preserve">
+    <value>退出</value>
+  </data>
+  <data name="Duty interact" xml:space="preserve">
+    <value>副本交互</value>
+  </data>
+  <data name="ADS authority" xml:space="preserve">
+    <value>ADS控制权</value>
+  </data>
+  <data name="Compact debug" xml:space="preserve">
+    <value>调试详情</value>
+  </data>
+  <data name="Config" xml:space="preserve">
+    <value>配置</value>
+  </data>
+  <data name="Distances" xml:space="preserve">
+    <value>距离设置</value>
+  </data>
+  <data name="ADS flags" xml:space="preserve">
+    <value>ADS标志</value>
+  </data>
+  <data name="Not logged in" xml:space="preserve">
+    <value>尚未登录</value>
+  </data>
+  <data name="Logged in, local player unavailable" xml:space="preserve">
+    <value>已登录，当前角色不可用</value>
+  </data>
+  <data name="No account loaded" xml:space="preserve">
+    <value>未加载账号</value>
+  </data>
+  <data name="No account loaded." xml:space="preserve">
+    <value>尚未加载账号。</value>
+  </data>
+  <data name="No fren configured" xml:space="preserve">
+    <value>未设置好友</value>
+  </data>
+  <data name="Inactive" xml:space="preserve">
+    <value>未激活</value>
+  </data>
+  <data name="In party but not visible" xml:space="preserve">
+    <value>在小队中但不可见</value>
+  </data>
+  <data name="Fren not found" xml:space="preserve">
+    <value>未找到好友</value>
+  </data>
+  <data name="in party" xml:space="preserve">
+    <value>在小队中</value>
+  </data>
+  <data name="not in party" xml:space="preserve">
+    <value>不在小队中</value>
+  </data>
+  <data name="Not in a party" xml:space="preserve">
+    <value>不在小队中</value>
+  </data>
+  <data name="Mounted" xml:space="preserve">
+    <value>已骑乘</value>
+  </data>
+  <data name="On foot" xml:space="preserve">
+    <value>步行</value>
+  </data>
+  <data name="Not visible" xml:space="preserve">
+    <value>不可见</value>
+  </data>
+  <data name="Active checks running" xml:space="preserve">
+    <value>正在检查</value>
+  </data>
+  <data name="Idle; last {0}" xml:space="preserve">
+    <value>空闲，上次：{0}</value>
+  </data>
+  <data name="Slot {0}" xml:space="preserve">
+    <value>槽位 {0}</value>
+  </data>
+  <data name="All FR on" xml:space="preserve">
+    <value>启用全部FR</value>
+  </data>
+  <data name="All FR off" xml:space="preserve">
+    <value>关闭全部FR</value>
+  </data>
+  <data name="Fren Rider Mini" xml:space="preserve">
+    <value>Fren Rider迷你</value>
+  </data>
+  <data name="Attack" xml:space="preserve">
+    <value>攻击</value>
+  </data>
+  <data name="Defense" xml:space="preserve">
+    <value>防御</value>
+  </data>
+  <data name="&lt;none&gt;" xml:space="preserve">
+    <value>&lt;无&gt;</value>
+  </data>
+  <data name="UI / About" xml:space="preserve">
+    <value>界面 / 关于</value>
+  </data>
+  <data name="DEFAULT CONFIG" xml:space="preserve">
+    <value>默认配置</value>
+  </data>
+  <data name="REMOTE PROFILES (DAD)" xml:space="preserve">
+    <value>远程配置档 (DAD)</value>
+  </data>
+  <data name="REMOTE DAD PROFILE" xml:space="preserve">
+    <value>DAD远程配置档</value>
+  </data>
+  <data name="REMOTE: {0}" xml:space="preserve">
+    <value>远程：{0}</value>
+  </data>
+  <data name="Fren Rider Settings - {0}" xml:space="preserve">
+    <value>Fren Rider设置 - {0}</value>
+  </data>
+  <data name="DELETE" xml:space="preserve">
+    <value>删除</value>
+  </data>
+  <data name="DELETE REMOTE" xml:space="preserve">
+    <value>删除远程配置</value>
+  </data>
+  <data name="Everything Sync" xml:space="preserve">
+    <value>同步全部</value>
+  </data>
+  <data name="Full Tab Sync" xml:space="preserve">
+    <value>同步整个选项卡</value>
+  </data>
+  <data name="Reset All" xml:space="preserve">
+    <value>重置全部</value>
+  </data>
+  <data name="Reset This" xml:space="preserve">
+    <value>重置当前选项卡</value>
+  </data>
+  <data name="Sync all" xml:space="preserve">
+    <value>同步所有角色</value>
+  </data>
+  <data name="Fren Name" xml:space="preserve">
+    <value>好友名称</value>
+  </data>
+  <data name="DAD Profile Acceptance" xml:space="preserve">
+    <value>DAD配置档接收</value>
+  </data>
+  <data name="Temporary" xml:space="preserve">
+    <value>临时</value>
+  </data>
+  <data name="Permanent" xml:space="preserve">
+    <value>永久</value>
+  </data>
+  <data name="Fren Rider enabled by default" xml:space="preserve">
+    <value>默认启用Fren Rider</value>
+  </data>
+  <data name="Enabled when transferred" xml:space="preserve">
+    <value>传输时启用</value>
+  </data>
+  <data name="Display label" xml:space="preserve">
+    <value>显示标签</value>
+  </data>
+  <data name="Show Fren Rider status in the server info bar." xml:space="preserve">
+    <value>在服务器信息栏显示Fren Rider状态。</value>
+  </data>
+  <data name="Obfuscate character names in FrenRider UI." xml:space="preserve">
+    <value>在FrenRider界面中匿名显示角色名称。</value>
+  </data>
+  <data name="Not logged in. FrenRider waits until a character is loaded." xml:space="preserve">
+    <value>尚未登录，FrenRider正在等待角色加载。</value>
+  </data>
+  <data name="AutoDuty detected while FrenRider is enabled." xml:space="preserve">
+    <value>FrenRider启用时检测到AutoDuty。</value>
+  </data>
+  <data name="Set DEFAULT CONFIG and every local character in the current account, including the active temporary profile." xml:space="preserve">
+    <value>修改默认配置和当前账号的全部本地角色，包括当前临时配置档。</value>
+  </data>
+  <data name="Fly You Fools (fly alongside instead of pillion)" xml:space="preserve">
+    <value>并行飞行而非双人同乘</value>
+  </data>
+  <data name="Try Teleport to Fren When Out of Zone" xml:space="preserve">
+    <value>传送到其他区域的好友</value>
+  </data>
+  <data name="Follow local aetheryte networks" xml:space="preserve">
+    <value>跟随区域以太之光网络</value>
+  </data>
+  <data name="Teleport Delay (seconds)" xml:space="preserve">
+    <value>传送延迟（秒）</value>
+  </data>
+  <data name="Nudge in duty when fren not nearby/in-zone" xml:space="preserve">
+    <value>副本中好友不在附近时前移</value>
+  </data>
+  <data name="Use Phoenix Downs for recovery" xml:space="preserve">
+    <value>使用不死鸟之尾复活</value>
+  </data>
+  <data name="Revive anyone within range outdoors" xml:space="preserve">
+    <value>在野外复活范围内所有人</value>
+  </data>
+  <data name="Allow Phoenix Down use during combat" xml:space="preserve">
+    <value>允许战斗中使用不死鸟之尾</value>
+  </data>
+  <data name="Respawn after death outside duties after" xml:space="preserve">
+    <value>副本外死亡后重生等待</value>
+  </data>
+  <data name="Respawn after death inside duties after" xml:space="preserve">
+    <value>副本内死亡后重生等待</value>
+  </data>
+  <data name="seconds" xml:space="preserve">
+    <value>秒</value>
+  </data>
+  <data name="Mount-up to chase fren if &gt;" xml:space="preserve">
+    <value>超过此距离后骑乘追赶 &gt;</value>
+  </data>
+  <data name="y from fren" xml:space="preserve">
+    <value>y（距好友）</value>
+  </data>
+  <data name="after" xml:space="preserve">
+    <value>后</value>
+  </data>
+  <data name="Mount Name (if flying solo)" xml:space="preserve">
+    <value>单独飞行时的坐骑名称</value>
+  </data>
+  <data name="(none)" xml:space="preserve">
+    <value>（无）</value>
+  </data>
+  <data name="Mount Roulette" xml:space="preserve">
+    <value>随机坐骑</value>
+  </data>
+  <data name="Summon Chocobo" xml:space="preserve">
+    <value>召唤陆行鸟</value>
+  </data>
+  <data name="Gysahl Greens: {0}" xml:space="preserve">
+    <value>基萨尔野菜：{0}</value>
+  </data>
+  <data name="Companion Stance" xml:space="preserve">
+    <value>搭档姿态</value>
+  </data>
+  <data name="Free Stance" xml:space="preserve">
+    <value>自由姿态</value>
+  </data>
+  <data name="Defender Stance" xml:space="preserve">
+    <value>防护姿态</value>
+  </data>
+  <data name="Attacker Stance" xml:space="preserve">
+    <value>进攻姿态</value>
+  </data>
+  <data name="Healer Stance" xml:space="preserve">
+    <value>治疗姿态</value>
+  </data>
+  <data name="Auto Discard (/ays discard)" xml:space="preserve">
+    <value>自动丢弃 (/ays discard)</value>
+  </data>
+  <data name="Update Interval (seconds)" xml:space="preserve">
+    <value>更新间隔（秒）</value>
+  </data>
+  <data name="WARNING: Very low update interval may impact game performance!" xml:space="preserve">
+    <value>警告：更新间隔过短可能影响游戏性能！</value>
+  </data>
+  <data name="Cling Distance" xml:space="preserve">
+    <value>跟随距离</value>
+  </data>
+  <data name="Cling Type" xml:space="preserve">
+    <value>跟随方式</value>
+  </data>
+  <data name="Cling Type (Duty)" xml:space="preserve">
+    <value>副本内跟随方式</value>
+  </data>
+  <data name="BossMod Follow" xml:space="preserve">
+    <value>BossMod跟随</value>
+  </data>
+  <data name="Vanilla Follow" xml:space="preserve">
+    <value>游戏原生跟随</value>
+  </data>
+  <data name="Social Distancing" xml:space="preserve">
+    <value>保持间距</value>
+  </data>
+  <data name="Social Distance (yalms)" xml:space="preserve">
+    <value>保持间距（y）</value>
+  </data>
+  <data name="Social Distance Indoors" xml:space="preserve">
+    <value>室内保持间距</value>
+  </data>
+  <data name="X Wiggle (+/- yalms)" xml:space="preserve">
+    <value>X轴偏移（±y）</value>
+  </data>
+  <data name="Z Wiggle (+/- yalms)" xml:space="preserve">
+    <value>Z轴偏移（±y）</value>
+  </data>
+  <data name="Max Distances" xml:space="preserve">
+    <value>最大距离</value>
+  </data>
+  <data name="Max Follow Distance" xml:space="preserve">
+    <value>最大跟随距离</value>
+  </data>
+  <data name="Max Follow Distance (Foray)" xml:space="preserve">
+    <value>特殊探索最大跟随距离</value>
+  </data>
+  <data name="Deep Dungeon Extra Cling" xml:space="preserve">
+    <value>深层迷宫额外距离</value>
+  </data>
+  <data name="FATE Extra Cling" xml:space="preserve">
+    <value>危命任务额外距离</value>
+  </data>
+  <data name="Auto Sync FATE" xml:space="preserve">
+    <value>危命任务自动同步等级</value>
+  </data>
+  <data name="Formation Following" xml:space="preserve">
+    <value>队形跟随</value>
+  </data>
+  <data name="Follow in Combat" xml:space="preserve">
+    <value>战斗中跟随</value>
+  </data>
+  <data name="Harmonized Cling Reset Ticks" xml:space="preserve">
+    <value>跟随距离重置周期</value>
+  </data>
+  <data name="Rotation Plugin" xml:space="preserve">
+    <value>循环插件</value>
+  </data>
+  <data name="Rotation Plugin (Foray)" xml:space="preserve">
+    <value>特殊探索循环插件</value>
+  </data>
+  <data name="Daedalus Party Mode" xml:space="preserve">
+    <value>Daedalus小队模式</value>
+  </data>
+  <data name="None" xml:space="preserve">
+    <value>无</value>
+  </data>
+  <data name="Focus" xml:space="preserve">
+    <value>集火</value>
+  </data>
+  <data name="Split" xml:space="preserve">
+    <value>分散</value>
+  </data>
+  <data name="Kill Adds" xml:space="preserve">
+    <value>击杀增援</value>
+  </data>
+  <data name="Autorot Presets" xml:space="preserve">
+    <value>循环预设</value>
+  </data>
+  <data name="Configure rotation preset manually" xml:space="preserve">
+    <value>手动配置循环预设</value>
+  </data>
+  <data name="BM Rotation Preset" xml:space="preserve">
+    <value>BM循环预设</value>
+  </data>
+  <data name="BM Rotation Preset (DD)" xml:space="preserve">
+    <value>BM预设（深层迷宫）</value>
+  </data>
+  <data name="BM Rotation Preset (FATE)" xml:space="preserve">
+    <value>BM预设（危命任务）</value>
+  </data>
+  <data name="Force BossMod preset regardless of rotation" xml:space="preserve">
+    <value>不论循环设置均强制应用BossMod预设</value>
+  </data>
+  <data name="Push Presets Now" xml:space="preserve">
+    <value>立即发送预设</value>
+  </data>
+  <data name="Cleanup Mode" xml:space="preserve">
+    <value>恢复模式</value>
+  </data>
+  <data name="Restore snapshot" xml:space="preserve">
+    <value>恢复已保存状态</value>
+  </data>
+  <data name="Turn everything off" xml:space="preserve">
+    <value>关闭全部</value>
+  </data>
+  <data name="RSR Operating Mode" xml:space="preserve">
+    <value>RSR工作模式</value>
+  </data>
+  <data name="RSR Aggro Type" xml:space="preserve">
+    <value>RSR目标选择</value>
+  </data>
+  <data name="All Attackable Targets" xml:space="preserve">
+    <value>全部可攻击目标</value>
+  </data>
+  <data name="Previously Engaged Targets" xml:space="preserve">
+    <value>已交战目标</value>
+  </data>
+  <data name="All Targets When Solo in Duty" xml:space="preserve">
+    <value>副本内单人时全部目标</value>
+  </data>
+  <data name="All Targets When Solo" xml:space="preserve">
+    <value>单人时全部目标</value>
+  </data>
+  <data name="Solo Deep Dungeon Smart" xml:space="preserve">
+    <value>单人深层迷宫智能选择</value>
+  </data>
+  <data name="Manual" xml:space="preserve">
+    <value>手动</value>
+  </data>
+  <data name="Support" xml:space="preserve">
+    <value>辅助</value>
+  </data>
+  <data name="Don't move while casting" xml:space="preserve">
+    <value>咏唱期间不移动</value>
+  </data>
+  <data name="Positional" xml:space="preserve">
+    <value>身位</value>
+  </data>
+  <data name="Front" xml:space="preserve">
+    <value>正面</value>
+  </data>
+  <data name="Rear" xml:space="preserve">
+    <value>背面</value>
+  </data>
+  <data name="Any" xml:space="preserve">
+    <value>任意</value>
+  </data>
+  <data name="Combat Max Distance" xml:space="preserve">
+    <value>最大战斗距离</value>
+  </data>
+  <data name="Limit Break HP %" xml:space="preserve">
+    <value>极限技HP百分比</value>
+  </data>
+  <data name="Beastmaster Capture" xml:space="preserve">
+    <value>驯兽师捕获</value>
+  </data>
+  <data name="Try to catch beasts" xml:space="preserve">
+    <value>尝试捕获野兽</value>
+  </data>
+  <data name="Capture HP: within 5 levels below you or equal" xml:space="preserve">
+    <value>捕获HP：同级或低5级以内</value>
+  </data>
+  <data name="Capture HP: more than 5 levels below you" xml:space="preserve">
+    <value>捕获HP：低于5级以上</value>
+  </data>
+  <data name="Saved beasts" xml:space="preserve">
+    <value>已保存野兽</value>
+  </data>
+  <data name="Select a local character to browse their saved beasts." xml:space="preserve">
+    <value>选择本地角色以查看已保存的野兽。</value>
+  </data>
+  <data name="Obstacle maps on" xml:space="preserve">
+    <value>启用障碍地图</value>
+  </data>
+  <data name="BMR reduce activation range for outdoor areas" xml:space="preserve">
+    <value>缩小室外BMR激活范围</value>
+  </data>
+  <data name="BMR Disable Hunt Modules" xml:space="preserve">
+    <value>禁用BMR狩猎模块</value>
+  </data>
+  <data name="BMR Disable Queen Lunatender" xml:space="preserve">
+    <value>禁用BMR的Queen Lunatender</value>
+  </data>
+  <data name="ADS Duty Handoff" xml:space="preserve">
+    <value>ADS副本交接</value>
+  </data>
+  <data name="Duty Families" xml:space="preserve">
+    <value>副本类别</value>
+  </data>
+  <data name="sec ready" xml:space="preserve">
+    <value>秒就绪</value>
+  </data>
+  <data name="Seed family rows from legacy values" xml:space="preserve">
+    <value>用旧值初始化类别</value>
+  </data>
+  <data name="Temporarily controlled by DAD" xml:space="preserve">
+    <value>暂时由DAD控制</value>
+  </data>
+  <data name="Equip job stone for current class" xml:space="preserve">
+    <value>装备当前职业的灵魂水晶</value>
+  </data>
+  <data name="Loot" xml:space="preserve">
+    <value>战利品</value>
+  </data>
+  <data name="Loot Type" xml:space="preserve">
+    <value>战利品选项</value>
+  </data>
+  <data name="unchanged" xml:space="preserve">
+    <value>不更改</value>
+  </data>
+  <data name="need" xml:space="preserve">
+    <value>需求</value>
+  </data>
+  <data name="greed" xml:space="preserve">
+    <value>贪婪</value>
+  </data>
+  <data name="pass" xml:space="preserve">
+    <value>放弃</value>
+  </data>
+  <data name="OPEN ADS LOOT OPTIONS" xml:space="preserve">
+    <value>打开ADS战利品选项</value>
+  </data>
+  <data name="Use HQ food" xml:space="preserve">
+    <value>使用HQ食物</value>
+  </data>
+  <data name="Search for Food if Depleted" xml:space="preserve">
+    <value>食物耗尽时寻找替代品</value>
+  </data>
+  <data name="Clear Food" xml:space="preserve">
+    <value>清除食物</value>
+  </data>
+  <data name="No food selected. Food is optional." xml:space="preserve">
+    <value>未选择食物，食物为可选项。</value>
+  </data>
+  <data name="Type at least 2 characters to search..." xml:space="preserve">
+    <value>请输入至少2个字符进行搜索…</value>
+  </data>
+  <data name="No results. Try a different search term." xml:space="preserve">
+    <value>无结果，请尝试其他关键词。</value>
+  </data>
+  <data name="Repair Mode" xml:space="preserve">
+    <value>修理模式</value>
+  </data>
+  <data name="Self" xml:space="preserve">
+    <value>自行修理</value>
+  </data>
+  <data name="NPC no-inn" xml:space="preserve">
+    <value>NPC修理（无旅馆）</value>
+  </data>
+  <data name="NPC No Inn + No TP" xml:space="preserve">
+    <value>NPC修理（无旅馆及传送）</value>
+  </data>
+  <data name="NPC repair + inn room" xml:space="preserve">
+    <value>NPC修理及旅馆房间</value>
+  </data>
+  <data name="Repair At % Durability" xml:space="preserve">
+    <value>修理耐久度百分比</value>
+  </data>
+  <data name="Test ADS NPC No-Inn Repair" xml:space="preserve">
+    <value>执行ADS的NPC修理（无旅馆）</value>
+  </data>
+  <data name="Desynthesis" xml:space="preserve">
+    <value>分解</value>
+  </data>
+  <data name="Enable Auto Desynth" xml:space="preserve">
+    <value>启用自动分解</value>
+  </data>
+  <data name="OPEN DESYNTH CONFIG" xml:space="preserve">
+    <value>打开分解设置</value>
+  </data>
+  <data name="Idle Behavior" xml:space="preserve">
+    <value>空闲行为</value>
+  </data>
+  <data name="Idle Mode" xml:space="preserve">
+    <value>空闲模式</value>
+  </data>
+  <data name="Specific Action" xml:space="preserve">
+    <value>指定动作</value>
+  </data>
+  <data name="Action From List" xml:space="preserve">
+    <value>从列表选择</value>
+  </data>
+  <data name="Idle Command" xml:space="preserve">
+    <value>空闲命令</value>
+  </data>
+  <data name="List Source" xml:space="preserve">
+    <value>列表来源</value>
+  </data>
+  <data name="Default List" xml:space="preserve">
+    <value>默认列表</value>
+  </data>
+  <data name="Custom List" xml:space="preserve">
+    <value>自定义列表</value>
+  </data>
+  <data name="Idle Ticks Before Action" xml:space="preserve">
+    <value>动作前等待周期</value>
+  </data>
+  <data name="Echo Messages" xml:space="preserve">
+    <value>聊天消息</value>
+  </data>
+  <data name="Invite Whitelist" xml:space="preserve">
+    <value>邀请白名单</value>
+  </data>
+  <data name="Trusted inviters" xml:space="preserve">
+    <value>可信邀请者</value>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>添加</value>
+  </data>
+  <data name="Auto-Yes Dialogs" xml:space="preserve">
+    <value>自动确认对话框</value>
+  </data>
+  <data name="Teleport offers" xml:space="preserve">
+    <value>传送邀请</value>
+  </data>
+  <data name="Party invites (backup)" xml:space="preserve">
+    <value>小队邀请（备用）</value>
+  </data>
+  <data name="Raise offers are accepted automatically while FrenRider is enabled." xml:space="preserve">
+    <value>FrenRider启用时自动接受复活请求。</value>
+  </data>
+  <data name="Exit Behaviour" xml:space="preserve">
+    <value>退出行为</value>
+  </data>
+  <data name="Duty-end delay" xml:space="preserve">
+    <value>副本结束后延迟</value>
+  </data>
+  <data name="seconds after duty ends" xml:space="preserve">
+    <value>秒（副本结束后）</value>
+  </data>
+  <data name="UI Settings" xml:space="preserve">
+    <value>界面设置</value>
+  </data>
+  <data name="Video Notifications" xml:space="preserve">
+    <value>视频通知</value>
+  </data>
+  <data name="Movable Config Window" xml:space="preserve">
+    <value>允许移动设置窗口</value>
+  </data>
+  <data name="DTR Bar Enabled" xml:space="preserve">
+    <value>启用DTR信息栏</value>
+  </data>
+  <data name="DTR Bar Mode" xml:space="preserve">
+    <value>DTR显示模式</value>
+  </data>
+  <data name="Icon+Text" xml:space="preserve">
+    <value>图标加文字</value>
+  </data>
+  <data name="DTR Icons (max 3 characters)" xml:space="preserve">
+    <value>DTR图标（最多3个字符）</value>
+  </data>
+  <data name="Copy Icon Guide Link" xml:space="preserve">
+    <value>复制图标指南链接</value>
+  </data>
+  <data name="VLC not found" xml:space="preserve">
+    <value>未找到VLC</value>
+  </data>
+  <data name="Download VLC" xml:space="preserve">
+    <value>下载VLC</value>
+  </data>
+  <data name="Advanced" xml:space="preserve">
+    <value>高级</value>
+  </data>
+  <data name="Debug / Logging" xml:space="preserve">
+    <value>调试 / 日志</value>
+  </data>
+  <data name="Presets" xml:space="preserve">
+    <value>预设</value>
+  </data>
+  <data name="Behavior" xml:space="preserve">
+    <value>行为</value>
+  </data>
+  <data name="Hacks" xml:space="preserve">
+    <value>特殊功能</value>
+  </data>
+  <data name="DISABLE PANDORA's BOX" xml:space="preserve">
+    <value>禁用PANDORA's BOX</value>
+  </data>
+  <data name="Commands:" xml:space="preserve">
+    <value>命令：</value>
+  </data>
+  <data name="Required Dependencies:" xml:space="preserve">
+    <value>必需依赖：</value>
+  </data>
+  <data name="Optional Plugins:" xml:space="preserve">
+    <value>可选插件：</value>
+  </data>
+  <data name="Multiplayer Guide:" xml:space="preserve">
+    <value>多人指南：</value>
+  </data>
+  <data name="Made by McVaxius" xml:space="preserve">
+    <value>作者：McVaxius</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>关闭</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>状态</value>
+  </data>
+  <data name="Beast" xml:space="preserve">
+    <value>野兽</value>
+  </data>
+  <data name="Saved ownership" xml:space="preserve">
+    <value>已保存归属</value>
+  </data>
+  <data name="DD Extra Distance" xml:space="preserve">
+    <value>深层迷宫额外距离</value>
+  </data>
+  <data name="FATE Extra Distance" xml:space="preserve">
+    <value>危命任务额外距离</value>
+  </data>
+  <data name="Max AI Distance" xml:space="preserve">
+    <value>AI最大距离</value>
+  </data>
+  <data name="LB Threshold %" xml:space="preserve">
+    <value>极限技阈值百分比</value>
+  </data>
+  <data name="ADS Exit Method" xml:space="preserve">
+    <value>ADS退出方式</value>
+  </data>
+  <data name="FrenRider Exit method" xml:space="preserve">
+    <value>FrenRider退出方式</value>
+  </data>
+  <data name="Exit after N seconds" xml:space="preserve">
+    <value>N秒后退出</value>
+  </data>
+  <data name="Leave when all others left" xml:space="preserve">
+    <value>其他人全部离开后退出</value>
+  </data>
+  <data name="No automatic exit" xml:space="preserve">
+    <value>不自动退出</value>
+  </data>
+  <data name="Food Item Name" xml:space="preserve">
+    <value>食物名称</value>
+  </data>
+  <data name="Add command" xml:space="preserve">
+    <value>添加命令</value>
+  </data>
+  <data name="Remove command" xml:space="preserve">
+    <value>删除命令</value>
+  </data>
+  <data name="Click to copy Daedalus repository URL" xml:space="preserve">
+    <value>点击复制Daedalus仓库链接</value>
+  </data>
+  <data name="Click to copy URL to clipboard" xml:space="preserve">
+    <value>点击复制链接</value>
+  </data>
+  <data name="Click to download VLC media player" xml:space="preserve">
+    <value>点击下载VLC播放器</value>
+  </data>
+  <data name="Copies the Lodestone blog link with suggested glyphs" xml:space="preserve">
+    <value>复制提供建议字符的Lodestone博客链接</value>
+  </data>
+  <data name="Disable Krangle to edit fren name." xml:space="preserve">
+    <value>关闭Krangle后才能编辑好友名称。</value>
+  </data>
+  <data name="Disable Krangle to edit the account alias." xml:space="preserve">
+    <value>关闭Krangle后才能编辑账号别名。</value>
+  </data>
+  <data name="Select from current party members" xml:space="preserve">
+    <value>从当前小队成员选择</value>
+  </data>
+  <data name="Hold CTRL and click to delete this remote profile." xml:space="preserve">
+    <value>按住CTRL并点击以删除此远程配置档。</value>
+  </data>
+  <data name="The currently active character profile cannot be deleted while logged in." xml:space="preserve">
+    <value>登录时无法删除当前角色的配置档。</value>
+  </data>
+  <data name="Hold CTRL and click to delete this character's config.&#10;This cannot be undone." xml:space="preserve">
+    <value>按住CTRL并点击以删除角色配置。
+此操作无法撤销。</value>
+  </data>
+  <data name="Log in to a character to create one." xml:space="preserve">
+    <value>登录角色以创建账号。</value>
+  </data>
+  <data name="Separate profiles for exact remote identities. They never become local character rows." xml:space="preserve">
+    <value>按准确远程身份独立保存，绝不会成为本地角色条目。</value>
+  </data>
+  <data name="This row is separate from local characters and can never become the active-character profile." xml:space="preserve">
+    <value>此条目独立于本地角色，永远不会成为当前角色配置档。</value>
+  </data>
+  <data name="Incoming DAD profiles will replace this character's saved profile." xml:space="preserve">
+    <value>接收的DAD配置档将替换该角色已保存的配置。</value>
+  </data>
+  <data name="FrenRider installs BossMod presets whenever it is enabled." xml:space="preserve">
+    <value>FrenRider每次启用时都会安装BossMod预设。</value>
+  </data>
+  <data name="Managed presets: BMR/VBM use FRENRIDER role presets; RSR/WRATH/DAEDALUS use passive role presets." xml:space="preserve">
+    <value>BMR/VBM使用FRENRIDER职能预设；RSR/WRATH/DAEDALUS使用被动职能预设。</value>
+  </data>
+  <data name="Copy DEFAULT CONFIG character-profile settings to every character profile in this account." xml:space="preserve">
+    <value>将默认角色配置复制到该账号的全部角色配置档。</value>
+  </data>
+  <data name="Copy this DEFAULT CONFIG tab to every character profile in this account." xml:space="preserve">
+    <value>将默认配置的当前选项卡复制到全部角色配置档。</value>
+  </data>
+  <data name="UI / About uses global settings and is not copied to character profiles." xml:space="preserve">
+    <value>界面 / 关于为全局设置，不会复制到角色配置档。</value>
+  </data>
+  <data name="Set DEFAULT CONFIG and every local character in this account, including the active temporary profile." xml:space="preserve">
+    <value>修改默认配置和全部本地角色，包括当前临时配置档。</value>
+  </data>
+  <data name="Copy '{0}' from DEFAULT CONFIG to every character profile in this account." xml:space="preserve">
+    <value>将默认配置中的“{0}”复制到全部角色配置档。</value>
+  </data>
+  <data name="AutoDuty Detected - Action Required" xml:space="preserve">
+    <value>检测到AutoDuty - 需要操作</value>
+  </data>
+  <data name="AutoDuty is enabled and may cause issues:" xml:space="preserve">
+    <value>AutoDuty已启用，可能导致以下问题：</value>
+  </data>
+  <data name="FrenRider requires AutoDuty to be disabled for proper operation." xml:space="preserve">
+    <value>FrenRider正常运行需要禁用AutoDuty。</value>
+  </data>
+  <data name="Disable AutoDuty" xml:space="preserve">
+    <value>禁用AutoDuty</value>
+  </data>
+  <data name="This window will close automatically after disabling AutoDuty." xml:space="preserve">
+    <value>禁用AutoDuty后，此窗口将自动关闭。</value>
+  </data>
+  <data name="0 = disabled.&#10;1 = ADS self repair.&#10;2 = ADS NPC repair without inn fallback.&#10;3 = ADS NPC repair only when a mender is within 120y.&#10;4 = ADS NPC repair near an inn, then enter the inn room." xml:space="preserve">
+    <value>0：禁用；1：ADS自行修理；2：NPC修理，无旅馆备用；3：仅120y内有修理NPC时修理；4：旅馆附近修理后进入房间。</value>
+  </data>
+  <data name="Additionally revive non-party players within 15 yalms outdoors. Party members and healers have priority. Never approach strangers." xml:space="preserve">
+    <value>野外也复活15y内的小队外玩家。优先小队成员与治疗职业，绝不靠近陌生人。</value>
+  </data>
+  <data name="After DutyCompleted and duty exit, ask ADS to run configured desynthesis. FrenRider pauses automatic actions until completion or the 180s timeout." xml:space="preserve">
+    <value>DutyCompleted并退出副本后请求ADS执行分解。完成或180秒超时前暂停FrenRider自动行为。</value>
+  </data>
+  <data name="After remaining continuously unconscious inside duties for this delay, open the Return prompt and accept it. Duty scope is selected only by BoundByDuty. Minimum: 1 second. Default: 60." xml:space="preserve">
+    <value>副本内持续失去意识后打开并接受返回提示。副本范围仅由BoundByDuty判定。最少1秒，默认60秒。</value>
+  </data>
+  <data name="After remaining continuously unconscious outside duties for this delay, open the Return prompt and accept it. Minimum: 1 second. Default: 60." xml:space="preserve">
+    <value>副本外持续失去意识后打开并接受返回提示。最少1秒，默认60秒。</value>
+  </data>
+  <data name="Applies in dungeons and outdoors. Off waits for the rescuer to leave combat before approaching or using an item; current combat may finish, but new pulls stay blocked. On still respects native item availability and every other recovery gate." xml:space="preserve">
+    <value>适用于地下城与野外。关闭时等待救助者脱战后靠近或使用物品；可结束当前战斗，但阻止新拉怪。开启仍遵守原生物品可用性及所有其他救援条件。</value>
+  </data>
+  <data name="Auto-summon chocobo companion using Gysahl Greens when timer is low.&#10;Will not summon in sanctuaries or duties." xml:space="preserve">
+    <value>剩余时间较短时使用基萨尔野菜召唤陆行鸟。休息区与副本中不召唤。</value>
+  </data>
+  <data name="Automatically accept teleport offers (e.g., Return, Teleport to).&#10;Note: Party invites are handled by the whitelist system below." xml:space="preserve">
+    <value>自动接受返回等传送邀请。小队邀请由下方白名单处理。</value>
+  </data>
+  <data name="Automatically accept teleport offers." xml:space="preserve">
+    <value>自动接受传送邀请。</value>
+  </data>
+  <data name="Automatically click Yes on specific dialog types when FrenRider is enabled.&#10;Works alongside YesAlready - FrenRider pauses YesAlready and handles these dialogs itself." xml:space="preserve">
+    <value>FrenRider启用时自动确认特定对话框。暂停YesAlready，由FrenRider自行处理。</value>
+  </data>
+  <data name="Automatically leave the duty N seconds after it completes." xml:space="preserve">
+    <value>副本完成N秒后自动退出。</value>
+  </data>
+  <data name="Backup auto-accept for party invites.&#10;Primary invite handling uses the whitelist system above." xml:space="preserve">
+    <value>小队邀请备用自动接受。主要通过上方白名单处理。</value>
+  </data>
+  <data name="Backup auto-accept for party invites. Primary invite handling uses the whitelist." xml:space="preserve">
+    <value>小队邀请备用自动接受。主要通过白名单处理。</value>
+  </data>
+  <data name="Both HP thresholds accept 1–100%. Exactly five levels below uses this second threshold.&#10;100% permits Capture on a full-health beast and may initiate combat." xml:space="preserve">
+    <value>两个HP阈值均为1–100%。恰好低5级时使用第二阈值。100%允许满血捕获，可能开启战斗。</value>
+  </data>
+  <data name="Chocobo companion battle stance.&#10;Controls how your companion behaves in combat." xml:space="preserve">
+    <value>设置陆行鸟搭档的战斗姿态与行为。</value>
+  </data>
+  <data name="Combat positional preference.&#10;Front: Stay in front of target&#10;Rear: Stay behind target&#10;Any: No preference&#10;Auto: Let plugin decide based on job" xml:space="preserve">
+    <value>正面：站在目标前；背面：站在目标后；任意：无偏好；自动：按职业决定。</value>
+  </data>
+  <data name="Controls BossMod Reborn only. Default: off. Applies when FrenRider is enabled, regardless of combat provider." xml:space="preserve">
+    <value>仅控制BossMod Reborn，默认关闭。FrenRider启用时生效，不受战斗插件选择影响。</value>
+  </data>
+  <data name="Customize the glyphs used for enabled/disabled icon modes." xml:space="preserve">
+    <value>自定义启用和禁用状态的图标字符。</value>
+  </data>
+  <data name="DTR bar display mode:&#10;Text Only: 'FR: On/Off'&#10;Icon+Text: '⚫ FR'&#10;Icon Only: '⚫'" xml:space="preserve">
+    <value>DTR显示：仅文字“FR：开/关”、图标加文字“● FR”或仅图标“●”。</value>
+  </data>
+  <data name="Default List: Built-in emote list&#10;Custom List: Your own list of commands" xml:space="preserve">
+    <value>默认列表为内置表情，自定义列表为用户命令。</value>
+  </data>
+  <data name="Default List: built-in emotes&#10;Custom List: your own command list" xml:space="preserve">
+    <value>默认列表为内置表情，自定义列表为用户命令。</value>
+  </data>
+  <data name="Delay before opening the party window and teleporting. Allowed range: 5-300 seconds. Default: 30." xml:space="preserve">
+    <value>打开小队窗口并传送前的等待时间。5–300秒，默认30秒。</value>
+  </data>
+  <data name="Distance threshold (yalms) to start following fren.&#10;When you are farther than this from fren, navigation begins." xml:space="preserve">
+    <value>距离好友超过此值（y）后开始导航跟随。</value>
+  </data>
+  <data name="Each family has its own enable toggle, maturity threshold, and continuous-ready handoff delay.&#10;0 = not cleared, 1 = unsync cleared, 2 = duty support cleared, 3 = proven sync clear.&#10;Handoff delay range: 2-300 seconds." xml:space="preserve">
+    <value>每类都有启用、成熟度阈值和持续就绪延迟。0：未完成；1：解除同步完成；2：任务支援；3：已证实同步完成。延迟2–300秒。</value>
+  </data>
+  <data name="Enable social distancing indoors too.&#10;Off by default. Turn on if you want spacing in dungeons." xml:space="preserve">
+    <value>室内也保持间距。默认关闭，需要地下城内间距时启用。</value>
+  </data>
+  <data name="Extra distance added to cling in Deep Dungeons.&#10;Prevents constant chasing in PotD/HoH." xml:space="preserve">
+    <value>深层迷宫追加跟随距离，避免PotD/HoH中不断追赶。</value>
+  </data>
+  <data name="Follow in a formation pattern (8-person grid).&#10;Positions based on party slot number.&#10;Disabled during mounting." xml:space="preserve">
+    <value>按小队位置组成8人网格队形。骑乘过程中禁用。</value>
+  </data>
+  <data name="Garble all identifying text (character names, fren names, servers)&#10;with military/exercise words. Useful for taking screenshots&#10;to report issues without revealing personal info." xml:space="preserve">
+    <value>将角色、好友与服务器名称替换为军事训练用词，以便截图报告问题而不暴露个人信息。</value>
+  </data>
+  <data name="Global setting. On plugin load and whenever it changes, applies casting movement lock to currently loaded BMR, VBM, and RSR plugins." xml:space="preserve">
+    <value>全局设置。加载及修改时向已加载的BMR/VBM/RSR应用咏唱移动锁定。</value>
+  </data>
+  <data name="Hostile target selection sent to RotationSolver Reborn through its typed settings IPC." xml:space="preserve">
+    <value>通过类型化设置IPC向RotationSolver Reborn发送敌对目标选择。</value>
+  </data>
+  <data name="How loot is handled if LazyLoot is installed.&#10;'unchanged' = Don't modify loot settings." xml:space="preserve">
+    <value>安装LazyLoot时的战利品处理方式。“不更改”保持原设置。</value>
+  </data>
+  <data name="How often the plugin runs its main logic loop.&#10;Lower values = more responsive but higher CPU usage.&#10;Default: 0.3s. WARNING: Values below 0.1 may impact performance." xml:space="preserve">
+    <value>主逻辑执行间隔。越小响应越快但CPU占用越高。默认0.3秒，低于0.1秒可能影响性能。</value>
+  </data>
+  <data name="Human-readable alias for this account group. Linked to account ID internally." xml:space="preserve">
+    <value>此账号组的易读别名，内部关联账号ID。</value>
+  </data>
+  <data name="If configured food runs out, search inventory for any food starting from lowest item ID." xml:space="preserve">
+    <value>配置食物耗尽后，从最低物品ID开始在背包中查找其他食物。</value>
+  </data>
+  <data name="If enabled, you will summon your own mount instead of pillion riding.&#10;Useful for flying zones.&#10;&#10;⚠️ IMPORTANT: This feature requires you to be grouped with your fren.&#10;It will not work properly if ungrouped (won't jump into air to follow)." xml:space="preserve">
+    <value>召唤自己的坐骑而非双人同乘，适合飞行区域。必须与好友组队；未组队时无法起飞跟随。</value>
+  </data>
+  <data name="If your configured food runs out, search inventory for any food starting from lowest item ID." xml:space="preserve">
+    <value>配置食物耗尽后，从最低物品ID开始在背包中查找其他食物。</value>
+  </data>
+  <data name="Immediately follow a fren's aethernet jump through Lifestream when you are at the same origin. Supports connected city, residential, and custom networks, including Bozja and Eureka." xml:space="preserve">
+    <value>从同一起点通过Lifestream立即跟随好友的以太网络移动。支持城市、住宅与自定义网络，包括Bozja/Eureka。</value>
+  </data>
+  <data name="Leave the duty if no other party members are visible in the zone." xml:space="preserve">
+    <value>区域内没有其他可见小队成员时退出。</value>
+  </data>
+  <data name="Max distance to targets for combat AI.&#10;424242 = Auto (plugin decides based on job: melee 2.6, caster 10)." xml:space="preserve">
+    <value>战斗AI的最大目标距离。424242为按职业自动决定：近战2.6、法系10。</value>
+  </data>
+  <data name="Max follow distance in forays (Eureka/Bozja).&#10;Lower value to avoid mini-aetheryte transition issues." xml:space="preserve">
+    <value>Eureka/Bozja最大跟随距离。调小可避免小型以太之光切换问题。</value>
+  </data>
+  <data name="Maximum distance (yalms) to chase fren.&#10;Beyond this, stop following to avoid zone-hopping." xml:space="preserve">
+    <value>最大追赶距离（y）。超过后停止跟随以防反复切换区域。</value>
+  </data>
+  <data name="Minimum distance to maintain from fren in outdoor/foray zones.&#10;Prevents characters from stacking on top of each other (less bot-like).&#10;Set to 0 to disable." xml:space="preserve">
+    <value>野外及探索区域保持好友最小间距，避免角色重叠。0为禁用。</value>
+  </data>
+  <data name="Name of food to auto-consume.&#10;Full item search from game data planned for a future update." xml:space="preserve">
+    <value>自动食用的食物名称。完整游戏物品搜索计划于后续更新提供。</value>
+  </data>
+  <data name="Name of the auto-rotation preset for general content.&#10;Must match a preset name in your rotation plugin.&#10;Use 'none' to not change the preset." xml:space="preserve">
+    <value>普通内容的循环预设名称，必须匹配循环插件中的预设。“none”表示不更改。</value>
+  </data>
+  <data name="Name of the party member to follow. Can be partial if unique.&#10;The @Server part is cosmetic for display; targeting uses the name before @.&#10;Names are auto-capitalized. Select from party or type manually." xml:space="preserve">
+    <value>跟随成员名称，唯一时可输入部分名称。@Server仅用于显示，定位使用@前的名称。自动规范首字母，可从小队选择或手动输入。</value>
+  </data>
+  <data name="Navigation method to reach fren.&#10;NavMesh: VNavmesh plugin pathfinding (recommended)&#10;Visland: Alternative navigation&#10;BossMod Follow: Uses BossMod's follow leader&#10;Vanilla Follow: Game's built-in /follow" xml:space="preserve">
+    <value>NavMesh：VNavmesh寻路（推荐）；Visland：替代导航；BossMod Follow：跟随BossMod领队；Vanilla Follow：游戏原生/follow。</value>
+  </data>
+  <data name="Navigation method to use inside duties.&#10;May need a different method than overworld." xml:space="preserve">
+    <value>副本内的导航方式，可能需与野外不同。</value>
+  </data>
+  <data name="New character profiles inherit this setting. Existing characters change only when you use a sync action." xml:space="preserve">
+    <value>新角色配置档继承此设置。现有角色仅在执行同步时修改。</value>
+  </data>
+  <data name="Number of ticks before harmonized cling resets to 0.&#10;Handles special logic like DD/FATE force cling." xml:space="preserve">
+    <value>协调跟随距离重置为0前的周期数，用于DD/FATE等特殊逻辑。</value>
+  </data>
+  <data name="Number of update ticks before idle action triggers." xml:space="preserve">
+    <value>执行空闲动作前的更新周期数。</value>
+  </data>
+  <data name="Off: FrenRider chooses the BossMod preset from current job and selected rotation plugin.&#10;On: use the preset name fields below." xml:space="preserve">
+    <value>关闭：按职业与循环选择BossMod预设。开启：使用下方预设名称。</value>
+  </data>
+  <data name="On: enable the selected BossMod AI implementation for combat.&#10;Off: send BMR and VBM AI off commands while preserving the rest of FrenRider's combat setup." xml:space="preserve">
+    <value>开启：启用所选BossMod战斗AI。关闭：发送BMR/VBM AI off并保持其他战斗配置。</value>
+  </data>
+  <data name="Outside duties, summon your configured own mount and fly toward a visible fren after horizontal XZ distance exceeds this threshold continuously for the configured delay. Existing zone-specific Max Follow Distance still applies. Distance minimum: 1y. Delay range: 0-300 seconds; 0 means immediate. Defaults: 100y and 30 seconds." xml:space="preserve">
+    <value>副本外水平XZ距离在指定延迟内持续超阈值后，召唤自己的坐骑飞向可见好友。保留区域最大跟随距离。最少1y，延迟0–300秒（0为立即），默认100y及30秒。</value>
+  </data>
+  <data name="Party engage mode sent through Daedalus LAN coordination.&#10;Focus requires a living enemy hard target.&#10;None, Split, and Kill Adds preserve Daedalus's current focus and off-tank assignments." xml:space="preserve">
+    <value>通过Daedalus LAN协调发送小队交战模式。集火需选中存活敌人。无、分散及击杀增援保留已有集火与副坦分配。</value>
+  </data>
+  <data name="Per-duty-family ADS handoff.&#10;Duty name, category, support, and clearance come only from ADS CurrentDuty. FrenRider accepts that snapshot only when ADS catalog metadata is complete and its territory/CFC matches live GameMain; otherwise local duty logic stays active.&#10;The handoff delay counts only while the character remains continuously ready: logged in, present, alive, conscious, out of area transitions, and out of cutscenes.&#10;Runtime ADS ownership is authoritative even after manual Start Inside. FrenRider pauses local duty systems while handoff is pending or ADS owns the run; configured exit takeover remains available after duty completion." xml:space="preserve">
+    <value>按副本类别交接ADS。名称、分类、支援与完成度仅来自ADS CurrentDuty；目录元数据完整且territory/CFC匹配GameMain才接受，否则保留本地逻辑。只有持续登录、在场、存活、有意识且无区域切换或过场时计时。手动Start Inside后仍以运行时ADS控制权为准。交接中或ADS控制时暂停本地系统，完成后仍可接管配置的退出流程。</value>
+  </data>
+  <data name="Play videos when Fren Rider is enabled or disabled.&#10;Requires VLC media player." xml:space="preserve">
+    <value>启用及关闭Fren Rider时播放视频。需要VLC。</value>
+  </data>
+  <data name="Play videos when Fren Rider is enabled/disabled.&#10;Requires VLC media player to be installed.&#10;Videos are embedded with the plugin distribution." xml:space="preserve">
+    <value>启用及关闭时播放视频。需要安装VLC，视频随插件内置。</value>
+  </data>
+  <data name="Players in this list will have party invites automatically accepted when you are not in a group.&#10;Names should omit the @Server part." xml:space="preserve">
+    <value>未组队时自动接受列表玩家的邀请。名称不包含@Server。</value>
+  </data>
+  <data name="Players in this list will have their party invites automatically accepted when you're not in a group.&#10;When you join a party via whitelist invite, the inviter will automatically be set as your Fren.&#10;Enter names without the @Server part." xml:space="preserve">
+    <value>未组队时自动接受白名单邀请，并将邀请者设为好友。名称不包含@Server。</value>
+  </data>
+  <data name="Preset name for Deep Dungeon content.&#10;Use 'none' to not change the preset." xml:space="preserve">
+    <value>深层迷宫预设名称。“none”表示不更改。</value>
+  </data>
+  <data name="Preset name for FATE content.&#10;Use 'none' to not change the preset." xml:space="preserve">
+    <value>危命任务预设名称。“none”表示不更改。</value>
+  </data>
+  <data name="Print status messages to game chat.&#10;Useful for debugging but fills chat quickly." xml:space="preserve">
+    <value>在游戏聊天输出状态。适合调试但会快速填满聊天。</value>
+  </data>
+  <data name="RSR operating mode when RSR is the selected rotation plugin.&#10;Auto: Full auto.&#10;Manual: Manual targeting mode.&#10;None: Don't let FrenRider change the current rotation state.&#10;Support: Uses RSR's plugin-managed support mode." xml:space="preserve">
+    <value>RSR模式：Auto全自动；Manual手动目标；None不修改循环状态；Support为RSR管理的支援模式。</value>
+  </data>
+  <data name="Random variance on X axis during social distancing.&#10;Adds natural-looking movement variance." xml:space="preserve">
+    <value>保持间距时的X轴随机偏差，使移动更自然。</value>
+  </data>
+  <data name="Random variance on Z axis during social distancing." xml:space="preserve">
+    <value>保持间距时的Z轴随机偏差。</value>
+  </data>
+  <data name="Recover party members in regular four-player dungeons and outdoors. A living healer within 20 yalms of the corpse blocks item use. Party recovery pauses progression and defers Return while a living party rescuer remains." xml:space="preserve">
+    <value>普通4人地下城及野外复活小队成员。尸体20y内有存活治疗职业时禁止物品使用。存在存活的小队救助者时暂停推进并延后返回。</value>
+  </data>
+  <data name="Reserved for future autosync FATE behavior.&#10;Current follow distance does not change on FATE join or leave." xml:space="preserve">
+    <value>预留危命任务自动同步行为。当前加入或离开时不会更改跟随距离。</value>
+  </data>
+  <data name="Reset ALL tabs for this character to default values.&#10;If editing DEFAULT CONFIG, resets to plugin defaults." xml:space="preserve">
+    <value>重置该角色全部选项卡。编辑默认配置时恢复插件默认值。</value>
+  </data>
+  <data name="Reset only the current tab for this character to default values." xml:space="preserve">
+    <value>仅重置该角色当前选项卡。</value>
+  </data>
+  <data name="Restore snapshot: put captured BMR/VBM AI on/off, follow, movement, CBT fields, and Daedalus enabled state back on /fr off.&#10;Turn everything off: disable BMR/VBM AI, CBT AutoFollow, RotationSolverReborn, Daedalus, and Wrath auto if FrenRider started it." xml:space="preserve">
+    <value>恢复：/fr off时还原已捕获的BMR/VBM AI、跟随、移动、CBT字段及Daedalus启用状态。全关：禁用BMR/VBM AI、CBT AutoFollow、RotationSolverReborn、Daedalus及由FrenRider开启的Wrath auto。</value>
+  </data>
+  <data name="Rotation plugin for foray content (Eureka/Bozja).&#10;WRATH recommended for phantom job support." xml:space="preserve">
+    <value>Eureka/Bozja循环插件。幻影职业支持推荐WRATH。</value>
+  </data>
+  <data name="Runs /ays discard every 10s only while mounted and in a safe idle window.&#10;FrenRider defers discard during combat, cutscenes, and area transitions.&#10;Requires AutoRetainer plugin." xml:space="preserve">
+    <value>仅骑乘且安全空闲时每10秒执行/ays discard。战斗、过场与区域切换时延后。需要AutoRetainer。</value>
+  </data>
+  <data name="Runs /ays discard while mounted and in a safe idle window.&#10;Requires AutoRetainer plugin." xml:space="preserve">
+    <value>仅骑乘且安全空闲时执行/ays discard。需要AutoRetainer。</value>
+  </data>
+  <data name="Runs /levelsync on after joining a FATE.&#10;Defers while mounted or riding pillion." xml:space="preserve">
+    <value>加入危命任务后执行/levelsync on。骑乘或同乘时延后。</value>
+  </data>
+  <data name="Select the mount to use when flying solo.&#10;'Mount Roulette' picks a random mount.&#10;Type to search the list." xml:space="preserve">
+    <value>选择单独飞行坐骑。Mount Roulette随机选择。输入可搜索列表。</value>
+  </data>
+  <data name="Send /ads leave after the configured duty-end delay. FrenRider does not also run its own Leave Duty flow." xml:space="preserve">
+    <value>配置的副本结束延迟后发送/ads leave。FrenRider不会同时执行自身退出流程。</value>
+  </data>
+  <data name="Show or hide the DTR bar entry." xml:space="preserve">
+    <value>显示或隐藏DTR信息栏条目。</value>
+  </data>
+  <data name="Show/hide the DTR bar entry (server info bar)." xml:space="preserve">
+    <value>显示或隐藏服务器信息栏的DTR条目。</value>
+  </data>
+  <data name="Slash command to execute when idle.&#10;Examples: /tomescroll, /dance, /snd run scriptname" xml:space="preserve">
+    <value>空闲时执行的斜杠命令。例如/tomescroll、/dance、/snd run scriptname。</value>
+  </data>
+  <data name="Target HP percentage to use Limit Break.&#10;-1 = Disabled.&#10;Automatically uses LB3 if available, otherwise LB2." xml:space="preserve">
+    <value>目标HP百分比低于此值使用极限技。-1为禁用。有LB3时优先，否则LB2。</value>
+  </data>
+  <data name="Temporary uses an in-memory profile only for the exact DAD proposal. Off opts this local character out. Permanent replaces this local character's profile while keeping this choice." xml:space="preserve">
+    <value>临时：仅对准确DAD提案使用内存配置。关闭：本地角色不接受。永久：替换已保存配置，但保留接收选择。</value>
+  </data>
+  <data name="Trigger repair when gear durability falls below this percentage." xml:space="preserve">
+    <value>装备耐久度低于此百分比时触发修理。</value>
+  </data>
+  <data name="Use FrenRider's local Leave Duty flow after the configured duty-end condition." xml:space="preserve">
+    <value>配置的副本结束条件满足后使用FrenRider本地退出流程。</value>
+  </data>
+  <data name="VLC media player is required for video notifications.&#10;Click to download and install VLC." xml:space="preserve">
+    <value>视频通知需要VLC。点击下载并安装。</value>
+  </data>
+  <data name="What to do when idle.&#10;Specific Action: Execute a single command&#10;Action From List: Pick randomly from a list" xml:space="preserve">
+    <value>空闲行为：执行指定命令或从列表随机选择。</value>
+  </data>
+  <data name="What to do when idle.&#10;Specific Action: execute one command&#10;Action From List: rotate through a list" xml:space="preserve">
+    <value>空闲行为：执行指定命令或轮换列表动作。</value>
+  </data>
+  <data name="When RSR, WRATH, or DAEDALUS is selected, also force BMR to the configured zone preset." xml:space="preserve">
+    <value>选择RSR/WRATH/DAEDALUS时仍向BMR强制应用区域预设。</value>
+  </data>
+  <data name="When enabled, FrenRider asks ADS to disable BMR hunt modules." xml:space="preserve">
+    <value>请求ADS禁用BMR狩猎模块。</value>
+  </data>
+  <data name="When enabled, FrenRider asks ADS to disable the BMR Queen Lunatender module." xml:space="preserve">
+    <value>请求ADS禁用BMR Queen Lunatender模块。</value>
+  </data>
+  <data name="When enabled, FrenRider may issue the fallback forward nudge inside duties even if the configured fren is not visible in your party/object table. Leave disabled for safer duty movement." xml:space="preserve">
+    <value>好友不在小队或对象表可见范围时也允许副本内备用前移。为更安全移动请保持关闭。</value>
+  </data>
+  <data name="When enabled, FrenRider waits after your configured fren is still in party but no longer visible, then asks Lifestream to teleport to a random unlocked aetheryte in that zone." xml:space="preserve">
+    <value>好友仍在小队但不可见时等待，再请求Lifestream传送到该区域随机已解锁以太之光。</value>
+  </data>
+  <data name="Whether to follow fren during combat.&#10;Auto: Let the plugin decide based on your job/role." xml:space="preserve">
+    <value>是否在战斗中跟随好友。自动按职业与职能决定。</value>
+  </data>
+  <data name="Which rotation automation plugin to use.&#10;BMR: BossModReborn&#10;VBM: VanillaBossMod&#10;RSR: RotationSolver Reborn&#10;WRATH: Wrath&#10;DAEDALUS: Daedalus" xml:space="preserve">
+    <value>循环插件：BMR=BossModReborn，VBM=VanillaBossMod，RSR=RotationSolver Reborn，WRATH=Wrath，DAEDALUS=Daedalus。</value>
+  </data>
+  <data name="While Fren Rider is enabled, equip the first matching armoury-chest soul crystal when the current character is on a level 30+ base class and equipment can be changed safely. The current gearset is updated after the equip is confirmed." xml:space="preserve">
+    <value>Fren Rider启用且为30级以上基础职业、可安全更换装备时，装备兵装库中首个匹配灵魂水晶。确认装备后更新当前套装。</value>
+  </data>
+  <data name="While FrenRider is enabled on Beastmaster, try Capture on eligible living beasts closer than 10 yalms, including passive beasts outside combat.&#10;Prefers an eligible current target; otherwise automatically targets the nearest eligible beast when Capture is ready.&#10;Skips owned beasts and enemies above your effective level, and respects both HP thresholds.&#10;Retries on later cooldowns, including already marked beasts." xml:space="preserve">
+    <value>驯兽师启用时尝试捕获10y内合格的存活野兽，包括战斗外被动野兽。优先合格当前目标，否则捕获就绪时自动选最近合格目标。跳过已拥有及超过有效等级的野兽，遵守两个HP阈值。后续冷却继续重试，包括已标记野兽。</value>
+  </data>
+  <data name="Disabled" xml:space="preserve">
+    <value>已禁用</value>
+  </data>
+  <data name="Auto" xml:space="preserve">
+    <value>自动</value>
+  </data>
+  <data name="BossMod AI" xml:space="preserve">
+    <value>BossMod AI</value>
+  </data>
+  <data name="Owned" xml:space="preserve">
+    <value>已拥有</value>
+  </data>
+  <data name="Missing" xml:space="preserve">
+    <value>未拥有</value>
+  </data>
+  <data name="At least one command required" xml:space="preserve">
+    <value>至少需要一条命令</value>
+  </data>
+  <data name="0 - Not Cleared" xml:space="preserve">
+    <value>0 - 未完成</value>
+  </data>
+  <data name="1 - 1P Unsync Cleared" xml:space="preserve">
+    <value>1 - 单人解除同步完成</value>
+  </data>
+  <data name="2 - 1P Duty Support" xml:space="preserve">
+    <value>2 - 单人任务支援</value>
+  </data>
+  <data name="3 - 4P Sync Cleared" xml:space="preserve">
+    <value>3 - 4人同步完成</value>
+  </data>
+  <data name="A Dalamud plugin for FFXIV multiplayer follow/combat automation." xml:space="preserve">
+    <value>FFXIV多人跟随及战斗自动化Dalamud插件。</value>
+  </data>
+  <data name="/frenrider - Open main window" xml:space="preserve">
+    <value>/frenrider - 打开主窗口</value>
+  </data>
+  <data name="/fr - Open main window (alias)" xml:space="preserve">
+    <value>/fr - 打开主窗口（别名）</value>
+  </data>
+  <data name="/fr on - Enable Fren Rider" xml:space="preserve">
+    <value>/fr on - 启用Fren Rider</value>
+  </data>
+  <data name="/fr off - Disable Fren Rider" xml:space="preserve">
+    <value>/fr off - 关闭Fren Rider</value>
+  </data>
+  <data name="/fr settings or /fr s - Toggle settings" xml:space="preserve">
+    <value>/fr settings 或 /fr s - 切换设置</value>
+  </data>
+  <data name="/fr mini or /fr m - Toggle MAGIA mini window" xml:space="preserve">
+    <value>/fr mini 或 /fr m - 切换MAGIA迷你</value>
+  </data>
+  <data name="/fr debug - Toggle debug controls" xml:space="preserve">
+    <value>/fr debug - 切换调试控件</value>
+  </data>
+  <data name="vnavmesh - Navigation and pathfinding" xml:space="preserve">
+    <value>vnavmesh - 导航与寻路</value>
+  </data>
+  <data name="Visland - Alternative navigation (if vnavmesh unavailable)" xml:space="preserve">
+    <value>Visland - 替代导航（vnavmesh不可用时）</value>
+  </data>
+  <data name="BossMod / BossModReborn - Combat AI and following" xml:space="preserve">
+    <value>BossMod / BossModReborn - 战斗AI及跟随</value>
+  </data>
+  <data name="Rotation Solver Reborn - Combat rotation automation" xml:space="preserve">
+    <value>Rotation Solver Reborn - 战斗循环自动化</value>
+  </data>
+  <data name="WRATH - Combat rotation automation" xml:space="preserve">
+    <value>WRATH - 战斗循环自动化</value>
+  </data>
+  <data name="Daedalus - Combat rotation automation" xml:space="preserve">
+    <value>Daedalus - 战斗循环自动化</value>
+  </data>
+  <data name="Questionable - Quest automation integration" xml:space="preserve">
+    <value>Questionable - 任务自动化集成</value>
+  </data>
+  <data name="Automaton (CBT) by Croizat - Enhanced duty start/end, auto-leave" xml:space="preserve">
+    <value>Croizat的Automaton (CBT) - 开始、结束与自动退出</value>
+  </data>
+  <data name="Owner: {0}" xml:space="preserve">
+    <value>所有者：{0}</value>
+  </data>
+  <data name="Island: {0}" xml:space="preserve">
+    <value>岛：{0}</value>
+  </data>
+  <data name="Opaque character: {0}" xml:space="preserve">
+    <value>匿名角色标识：{0}</value>
+  </data>
+  <data name="Row ID: {0}" xml:space="preserve">
+    <value>行ID：{0}</value>
+  </data>
+  <data name="{0} Icon" xml:space="preserve">
+    <value>{0}图标</value>
+  </data>
+  <data name="{0} Icon Code" xml:space="preserve">
+    <value>{0}图标编码</value>
+  </data>
+  <data name="Shown when Fren Rider is {0}" xml:space="preserve">
+    <value>Fren Rider为{0}时显示</value>
+  </data>
+  <data name="ADS reflection: {0}" xml:space="preserve">
+    <value>ADS反射：{0}</value>
+  </data>
+  <data name="ADS Status: {0}" xml:space="preserve">
+    <value>ADS状态：{0}</value>
+  </data>
+  <data name="When enabled, FrenRider asks ADS to set BMR MaxLoadDistance to {0:0}." xml:space="preserve">
+    <value>FrenRider请求ADS将BMR MaxLoadDistance设置为{0:0}。</value>
+  </data>
+  <data name="Solo" xml:space="preserve">
+    <value>单人</value>
+  </data>
+  <data name="4-Man" xml:space="preserve">
+    <value>4人</value>
+  </data>
+  <data name="8-Man" xml:space="preserve">
+    <value>8人</value>
+  </data>
+  <data name="Alliance" xml:space="preserve">
+    <value>团队</value>
+  </data>
+  <data name="Guild Hest" xml:space="preserve">
+    <value>行会令</value>
+  </data>
+  <data name="Deep Dungeon" xml:space="preserve">
+    <value>深层迷宫</value>
+  </data>
+  <data name="Treasure Dungeon" xml:space="preserve">
+    <value>藏宝迷宫</value>
+  </data>
+  <data name="Other" xml:space="preserve">
+    <value>其他</value>
+  </data>
+  <data name="ADS Handoff" xml:space="preserve">
+    <value>ADS交接</value>
+  </data>
+  <data name="Exit Behavior" xml:space="preserve">
+    <value>退出行为</value>
+  </data>
+  <data name="Equipment" xml:space="preserve">
+    <value>装备</value>
+  </data>
+  <data name="Maintenance" xml:space="preserve">
+    <value>维护</value>
+  </data>
+  <data name="Debug" xml:space="preserve">
+    <value>调试</value>
+  </data>
+  <data name="Following" xml:space="preserve">
+    <value>跟随中</value>
+  </data>
+  <data name="InRange" xml:space="preserve">
+    <value>范围内</value>
+  </data>
+  <data name="TooFar" xml:space="preserve">
+    <value>过远</value>
+  </data>
+  <data name="InCombat" xml:space="preserve">
+    <value>战斗中</value>
+  </data>
+  <data name="WaitingToMount" xml:space="preserve">
+    <value>等待骑乘</value>
+  </data>
+  <data name="Mounting" xml:space="preserve">
+    <value>正在骑乘</value>
+  </data>
+  <data name="Dismounting" xml:space="preserve">
+    <value>正在下坐骑</value>
+  </data>
+  <data name="OutOfCombat" xml:space="preserve">
+    <value>非战斗</value>
+  </data>
+  <data name="EnteringCombat" xml:space="preserve">
+    <value>进入战斗</value>
+  </data>
+  <data name="LeavingCombat" xml:space="preserve">
+    <value>离开战斗</value>
+  </data>
+  <data name="Unconscious" xml:space="preserve">
+    <value>失去意识</value>
+  </data>
+  <data name="Area transition" xml:space="preserve">
+    <value>区域切换</value>
+  </data>
+  <data name="Zone transition" xml:space="preserve">
+    <value>区域切换</value>
+  </data>
+  <data name="No fren found" xml:space="preserve">
+    <value>未找到好友</value>
+  </data>
+  <data name="Fren not visible" xml:space="preserve">
+    <value>好友不可见</value>
+  </data>
+  <data name="No fren" xml:space="preserve">
+    <value>无好友</value>
+  </data>
+  <data name="ADS utility active" xml:space="preserve">
+    <value>ADS实用工具执行中</value>
+  </data>
+  <data name="Teleport active" xml:space="preserve">
+    <value>传送中</value>
+  </data>
+  <data name="Teleport or dialog active" xml:space="preserve">
+    <value>传送或对话框开启中</value>
+  </data>
+  <data name="Paused (in combat)" xml:space="preserve">
+    <value>已暂停（战斗中）</value>
+  </data>
+  <data name="Phoenix Down recovery" xml:space="preserve">
+    <value>不死鸟之尾救援</value>
+  </data>
+  <data name="Waiting for party revival; Return deferred" xml:space="preserve">
+    <value>等待小队复活，延后返回</value>
+  </data>
+  <data name="No living party rescuer" xml:space="preserve">
+    <value>无存活小队救助者</value>
+  </data>
+  <data name="Casting Phoenix Down" xml:space="preserve">
+    <value>不死鸟之尾读条中</value>
+  </data>
+  <data name="Cast ended; checking revival" xml:space="preserve">
+    <value>读条结束，检查复活</value>
+  </data>
+  <data name="Attempt did not start; rechecking readiness" xml:space="preserve">
+    <value>尝试未开始，重新检查就绪</value>
+  </data>
+  <data name="Waiting for healer, Raise cast or pending revival" xml:space="preserve">
+    <value>等待治疗、复活读条或待处理复活</value>
+  </data>
+  <data name="Dismounting for recovery" xml:space="preserve">
+    <value>下坐骑进行救援</value>
+  </data>
+  <data name="Approaching party corpse" xml:space="preserve">
+    <value>靠近小队遗体</value>
+  </data>
+  <data name="Waiting for recovery attempt slot" xml:space="preserve">
+    <value>等待救援尝试顺序</value>
+  </data>
+  <data name="Phoenix Down requested; waiting for actual cast" xml:space="preserve">
+    <value>已请求不死鸟之尾，等待实际读条</value>
+  </data>
+  <data name="Item attempt rejected; rechecking in one second" xml:space="preserve">
+    <value>物品尝试被拒，1秒后重查</value>
+  </data>
+  <data name="Ready" xml:space="preserve">
+    <value>就绪</value>
+  </data>
+  <data name="Blocked: {0}" xml:space="preserve">
+    <value>受阻：{0}</value>
+  </data>
+  <data name="Waiting: {0}" xml:space="preserve">
+    <value>等待：{0}</value>
+  </data>
+  <data name="Running: {0}" xml:space="preserve">
+    <value>执行中：{0}</value>
+  </data>
+  <data name="Completed: {0}" xml:space="preserve">
+    <value>完成：{0}</value>
+  </data>
+  <data name="Failed: {0}" xml:space="preserve">
+    <value>失败：{0}</value>
+  </data>
+  <data name="Cooldown: retry in {0}s" xml:space="preserve">
+    <value>冷却：{0}秒后重试</value>
+  </data>
+  <data name="Fren out of zone; teleport in {0}s" xml:space="preserve">
+    <value>好友不在本区域，{0}秒后传送</value>
+  </data>
+  <data name="FrenRider disabled" xml:space="preserve">
+    <value>FrenRider已禁用</value>
+  </data>
+  <data name="Zone changed" xml:space="preserve">
+    <value>区域已改变</value>
+  </data>
+  <data name="Fren not in party" xml:space="preserve">
+    <value>好友不在小队</value>
+  </data>
+  <data name="Fren visible" xml:space="preserve">
+    <value>好友可见</value>
+  </data>
+  <data name="Reading party window" xml:space="preserve">
+    <value>读取小队窗口</value>
+  </data>
+  <data name="Following local aetheryte network" xml:space="preserve">
+    <value>跟随本地以太网络</value>
+  </data>
+  <data name="Duty scope changed" xml:space="preserve">
+    <value>副本范围已改变</value>
+  </data>
+  <data name="Setting changed" xml:space="preserve">
+    <value>设置已改变</value>
+  </data>
+  <data name="Unconscious; return in {0}s" xml:space="preserve">
+    <value>失去意识，{0}秒后返回</value>
+  </data>
+  <data name="Handling revive/Return notification" xml:space="preserve">
+    <value>处理复活及返回通知</value>
+  </data>
+  <data name="Opening Return prompt" xml:space="preserve">
+    <value>打开返回提示</value>
+  </data>
+  <data name="Revive/Return confirmed; waiting for transition" xml:space="preserve">
+    <value>复活或返回已确认，等待切换</value>
+  </data>
+  <data name="Waiting for readable Return confirmation" xml:space="preserve">
+    <value>等待可读取返回确认</value>
+  </data>
+  <data name="Return agent unavailable" xml:space="preserve">
+    <value>返回代理不可用</value>
+  </data>
+  <data name="Opened Return prompt" xml:space="preserve">
+    <value>返回提示已打开</value>
+  </data>
+  <data name="Waiting for Return confirmation" xml:space="preserve">
+    <value>等待返回确认</value>
+  </data>
+  <data name="Return prompt failed" xml:space="preserve">
+    <value>返回提示失败</value>
+  </data>
+  <data name="ADS Hyper Focus ended outside duty" xml:space="preserve">
+    <value>副本外ADS Hyper Focus结束</value>
+  </data>
+  <data name="ADS Hyper Focus ended without ADS duty ownership" xml:space="preserve">
+    <value>无ADS副本控制，Hyper Focus结束</value>
+  </data>
+  <data name="ADS Hyper Focus ended; combat bootstrap pending" xml:space="preserve">
+    <value>ADS Hyper Focus结束，等待战斗初始化</value>
+  </data>
+  <data name="ADS Hyper Focus lease active; RSR Manual" xml:space="preserve">
+    <value>ADS Hyper Focus控制中，RSR手动</value>
+  </data>
+  <data name="ADS active" xml:space="preserve">
+    <value>ADS运行中</value>
+  </data>
+  <data name="ADS active; FrenRider combat authoritative" xml:space="preserve">
+    <value>ADS运行中，FrenRider负责战斗</value>
+  </data>
+  <data name="ADS did not accept {0} repair: {1}" xml:space="preserve">
+    <value>ADS未接受{0}修理：{1}</value>
+  </data>
+  <data name="ADS duty ownership active; FrenRider rotation disabled" xml:space="preserve">
+    <value>ADS控制副本，FrenRider循环禁用</value>
+  </data>
+  <data name="ADS duty progression paused; configured FrenRider exit takeover active ({0})." xml:space="preserve">
+    <value>ADS推进暂停，FrenRider退出接管启用（{0}）。</value>
+  </data>
+  <data name="ADS handoff off; FrenRider local duty logic active." xml:space="preserve">
+    <value>ADS交接关闭，FrenRider本地副本逻辑启用。</value>
+  </data>
+  <data name="ADS handoff pending" xml:space="preserve">
+    <value>等待ADS交接</value>
+  </data>
+  <data name="ADS handoff pending; FrenRider combat authoritative" xml:space="preserve">
+    <value>等待ADS交接，FrenRider负责战斗</value>
+  </data>
+  <data name="ADS loaded; waiting for duty. FrenRider local logic active." xml:space="preserve">
+    <value>ADS已加载，等待副本。FrenRider本地逻辑启用。</value>
+  </data>
+  <data name="ADS not loaded." xml:space="preserve">
+    <value>ADS未加载。</value>
+  </data>
+  <data name="ADS not loaded. FrenRider local logic active." xml:space="preserve">
+    <value>ADS未加载。FrenRider本地逻辑启用。</value>
+  </data>
+  <data name="ADS reflection applied; no reassert pending." xml:space="preserve">
+    <value>ADS反射已应用，无待重新应用。</value>
+  </data>
+  <data name="ADS reflection applied; waiting for desired-state change or ADS reload." xml:space="preserve">
+    <value>ADS反射已应用，等待目标状态变化或ADS重新加载。</value>
+  </data>
+  <data name="ADS reflection hacks reset." xml:space="preserve">
+    <value>ADS特殊设置已重置。</value>
+  </data>
+  <data name="ADS reflection idle." xml:space="preserve">
+    <value>ADS反射空闲。</value>
+  </data>
+  <data name="ADS released duty ownership via {0}; FrenRider local duty logic active." xml:space="preserve">
+    <value>ADS通过{0}释放控制，FrenRider本地逻辑启用。</value>
+  </data>
+  <data name="ADS released duty progression; configured FrenRider exit takeover active via {0}." xml:space="preserve">
+    <value>ADS通过{0}释放推进，FrenRider退出接管启用。</value>
+  </data>
+  <data name="ADS runtime ownership active via {0}; FrenRider duty systems paused." xml:space="preserve">
+    <value>ADS通过{0}控制，FrenRider副本系统暂停。</value>
+  </data>
+  <data name="ADS runtime ownership active via {0}; FrenRider exit takeover active." xml:space="preserve">
+    <value>ADS通过{0}控制，FrenRider退出接管启用。</value>
+  </data>
+  <data name="ADS runtime ownership confirmed via {0}; solo combat delay complete." xml:space="preserve">
+    <value>ADS通过{0}确认控制，单人战斗延迟完成。</value>
+  </data>
+  <data name="ADS solo combat held; waiting for readable ownership confirmation." xml:space="preserve">
+    <value>ADS单人战斗暂停，等待可读取的控制确认。</value>
+  </data>
+  <data name="ADS solo combat held; {0}." xml:space="preserve">
+    <value>ADS单人战斗暂停，{0}。</value>
+  </data>
+  <data name="ADS utility dialog active" xml:space="preserve">
+    <value>ADS工具对话框开启</value>
+  </data>
+  <data name="Approaching exit '{0}' ({1:F1}y)" xml:space="preserve">
+    <value>靠近出口“{0}”（{1:F1}y）</value>
+  </data>
+  <data name="Ate {0} [{1}] ({2} left)" xml:space="preserve">
+    <value>已食用{0} [{1}]（剩余{2}）</value>
+  </data>
+  <data name="Blocked: Phoenix Down readiness changed" xml:space="preserve">
+    <value>受阻：不死鸟之尾就绪状态变化</value>
+  </data>
+  <data name="Blocked: navigation unavailable or corpse unreachable" xml:space="preserve">
+    <value>受阻：导航不可用或遗体无法到达</value>
+  </data>
+  <data name="Blocked: recovery state unavailable" xml:space="preserve">
+    <value>受阻：救援状态不可用</value>
+  </data>
+  <data name="Blocked: waiting for a visible, confirmed party corpse" xml:space="preserve">
+    <value>受阻：等待可见且已确认的小队遗体</value>
+  </data>
+  <data name="Can't pillion: fren not found" xml:space="preserve">
+    <value>无法同乘：未找到好友</value>
+  </data>
+  <data name="Can't pillion: fren not in ObjectTable" xml:space="preserve">
+    <value>无法同乘：对象表中无好友</value>
+  </data>
+  <data name="Can't summon (mounted/duty)" xml:space="preserve">
+    <value>无法召唤（骑乘或副本）</value>
+  </data>
+  <data name="Captured automation snapshot ({0})." xml:space="preserve">
+    <value>已捕获自动化状态（{0}）。</value>
+  </data>
+  <data name="Cleanup failed: no captured automation state was available to restore." xml:space="preserve">
+    <value>恢复失败：没有已捕获状态。</value>
+  </data>
+  <data name="Cleanup failed: {0}/{1} commands failed." xml:space="preserve">
+    <value>恢复失败：{0}/{1}条命令失败。</value>
+  </data>
+  <data name="Clicking Commence on duty popup" xml:space="preserve">
+    <value>点击副本提示的开始</value>
+  </data>
+  <data name="Combat held: {0}" xml:space="preserve">
+    <value>战斗暂停：{0}</value>
+  </data>
+  <data name="Companion: {0}m{1:D2}s" xml:space="preserve">
+    <value>搭档：{0}分{1:D2}秒</value>
+  </data>
+  <data name="Coppelia PowerlevelBot lease active" xml:space="preserve">
+    <value>Coppelia PowerlevelBot控制中</value>
+  </data>
+  <data name="Dismounting..." xml:space="preserve">
+    <value>正在下坐骑…</value>
+  </data>
+  <data name="Duty completed; automatic ADS handoff stopped." xml:space="preserve">
+    <value>副本完成，ADS自动交接停止。</value>
+  </data>
+  <data name="Duty completed; configured FrenRider exit takeover active." xml:space="preserve">
+    <value>副本完成，FrenRider退出接管启用。</value>
+  </data>
+  <data name="Duty exit requested; waiting to leave duty." xml:space="preserve">
+    <value>已请求退出，等待离开副本。</value>
+  </data>
+  <data name="Failed to eat {0} [{1}]" xml:space="preserve">
+    <value>食用{0} [{1}]失败</value>
+  </data>
+  <data name="Failed to summon chocobo" xml:space="preserve">
+    <value>召唤陆行鸟失败</value>
+  </data>
+  <data name="Failed: timed out after {0}s." xml:space="preserve">
+    <value>失败：{0}秒后超时。</value>
+  </data>
+  <data name="Far chase ({0:F1}y XZ, max {1:F0}y)" xml:space="preserve">
+    <value>远距离追赶（XZ {0:F1}y，最大{1:F0}y）</value>
+  </data>
+  <data name="Far chase blocked: {0}" xml:space="preserve">
+    <value>远距离追赶受阻：{0}</value>
+  </data>
+  <data name="Far chase mount cooldown ({0:F1}s)" xml:space="preserve">
+    <value>远距离追踪坐骑冷却（{0:F1}s）</value>
+  </data>
+  <data name="Far chase pillion cooldown ({0:F1}s)" xml:space="preserve">
+    <value>远距离追踪同乘冷却（{0:F1}s）</value>
+  </data>
+  <data name="Far chase preempted: {0}" xml:space="preserve">
+    <value>远距离追踪中断：{0}</value>
+  </data>
+  <data name="Far chase settings changed" xml:space="preserve">
+    <value>远距离追踪设置已更改</value>
+  </data>
+  <data name="Far chase: flying" xml:space="preserve">
+    <value>远距离追踪：飞行中</value>
+  </data>
+  <data name="Far chase: leaving pillion" xml:space="preserve">
+    <value>远距离追踪：结束同乘</value>
+  </data>
+  <data name="Far chase: mounted; taking off" xml:space="preserve">
+    <value>远距离追踪：已骑乘，起飞中</value>
+  </data>
+  <data name="Far chase: mounting ({0:F1}y XZ)" xml:space="preserve">
+    <value>远距离追踪：骑乘中（{0:F1}y XZ）</value>
+  </data>
+  <data name="Far chase: mounting own mount" xml:space="preserve">
+    <value>远距离追踪：骑乘自己的坐骑</value>
+  </data>
+  <data name="Far chase: requesting mount ({0:F1}y XZ)" xml:space="preserve">
+    <value>远距离追踪：请求坐骑（{0:F1}y XZ）</value>
+  </data>
+  <data name="Flying alongside fren" xml:space="preserve">
+    <value>在好友旁边飞行</value>
+  </data>
+  <data name="Flying stuck escape: ascend ({0}s)" xml:space="preserve">
+    <value>飞行脱困：上升（{0}s）</value>
+  </data>
+  <data name="Flying stuck escape: automove ({0}s)" xml:space="preserve">
+    <value>飞行脱困：自动移动（{0}s）</value>
+  </data>
+  <data name="Following ({0:F1}y, cling {1:F1}y)" xml:space="preserve">
+    <value>跟随中（{0:F1}y，间距{1:F1}y）</value>
+  </data>
+  <data name="Formation slot {0} ({1:F1}y)" xml:space="preserve">
+    <value>队形位置{0}（{1:F1}y）</value>
+  </data>
+  <data name="Found: {0} ({1:F1}y)" xml:space="preserve">
+    <value>已找到：{0}（{1:F1}y）</value>
+  </data>
+  <data name="Fren mounted (FlyYouFools), mounting..." xml:space="preserve">
+    <value>好友已骑乘（FlyYouFools），骑乘中...</value>
+  </data>
+  <data name="Fren mounted, riding pillion..." xml:space="preserve">
+    <value>好友已骑乘，同乘中...</value>
+  </data>
+  <data name="FrenRider disabled." xml:space="preserve">
+    <value>FrenRider已禁用。</value>
+  </data>
+  <data name="FrenRider duty authority; rotation disabled" xml:space="preserve">
+    <value>FrenRider控制副本，循环禁用</value>
+  </data>
+  <data name="Grace period ({0:F0}s)..." xml:space="preserve">
+    <value>宽限期（{0:F0}s）...</value>
+  </data>
+  <data name="In duty (out of combat) - rotation active" xml:space="preserve">
+    <value>副本内（非战斗）- 循环启用</value>
+  </data>
+  <data name="In range ({0:F1}y)" xml:space="preserve">
+    <value>范围内（{0:F1}y）</value>
+  </data>
+  <data name="In sanctuary" xml:space="preserve">
+    <value>在安全区</value>
+  </data>
+  <data name="Interacting with exit '{0}' ({1:F1}y)" xml:space="preserve">
+    <value>与出口“{0}”交互（{1:F1}y）</value>
+  </data>
+  <data name="Landing..." xml:space="preserve">
+    <value>降落中...</value>
+  </data>
+  <data name="Leaving duty (attempt #{0}) - {1}" xml:space="preserve">
+    <value>退出副本（尝试#{0}）- {1}</value>
+  </data>
+  <data name="Mount cooldown ({0:F1}s)" xml:space="preserve">
+    <value>坐骑冷却（{0:F1}s）</value>
+  </data>
+  <data name="Mount correction cooldown ({0:F1}s)" xml:space="preserve">
+    <value>坐骑校正冷却（{0:F1}s）</value>
+  </data>
+  <data name="Mount state preserved: {0}" xml:space="preserve">
+    <value>坐骑状态已保留：{0}</value>
+  </data>
+  <data name="Mounted - rotations suppressed" xml:space="preserve">
+    <value>骑乘中 - 循环已暂停</value>
+  </data>
+  <data name="Mounted alongside fren" xml:space="preserve">
+    <value>在好友旁边骑乘</value>
+  </data>
+  <data name="Mounting for: {0} ({1:F1}y)" xml:space="preserve">
+    <value>骑乘目的：{0}（{1:F1}y）</value>
+  </data>
+  <data name="Mounting..." xml:space="preserve">
+    <value>骑乘中...</value>
+  </data>
+  <data name="Moving to: {0}" xml:space="preserve">
+    <value>移动至：{0}</value>
+  </data>
+  <data name="NPC repair + inn room failed: {0}" xml:space="preserve">
+    <value>NPC修理与旅馆房间失败：{0}</value>
+  </data>
+  <data name="Navigating to exit '{0}' ({1:F1}y)" xml:space="preserve">
+    <value>前往出口“{0}”（{1:F1}y）</value>
+  </data>
+  <data name="Near fren on foot; dismounting" xml:space="preserve">
+    <value>靠近步行好友，下坐骑</value>
+  </data>
+  <data name="Near fren on foot; landing to dismount" xml:space="preserve">
+    <value>靠近步行好友，降落以下坐骑</value>
+  </data>
+  <data name="Near mounted fren; dismounting to ride pillion" xml:space="preserve">
+    <value>靠近骑乘好友，下坐骑准备同乘</value>
+  </data>
+  <data name="Near mounted fren; landing to ride pillion" xml:space="preserve">
+    <value>靠近骑乘好友，降落准备同乘</value>
+  </data>
+  <data name="Need companion (cooldown {0:F1}s)" xml:space="preserve">
+    <value>需要搭档（冷却{0:F1}s）</value>
+  </data>
+  <data name="Need food (cooldown {0:F1}s)" xml:space="preserve">
+    <value>需要食物（冷却{0:F1}s）</value>
+  </data>
+  <data name="Need food but in duty+combat" xml:space="preserve">
+    <value>需要食物，但处于副本战斗中</value>
+  </data>
+  <data name="No ADS reflection hacks enabled." xml:space="preserve">
+    <value>未启用ADS反射功能。</value>
+  </data>
+  <data name="No Gysahl Greens" xml:space="preserve">
+    <value>没有Gysahl Greens</value>
+  </data>
+  <data name="No equipped gear below {0}%." xml:space="preserve">
+    <value>没有耐久度低于{0}%的已装备物品。</value>
+  </data>
+  <data name="No food in inventory" xml:space="preserve">
+    <value>背包中没有食物</value>
+  </data>
+  <data name="No food item resolved" xml:space="preserve">
+    <value>未确定食物物品</value>
+  </data>
+  <data name="No interactables found, nudging forward..." xml:space="preserve">
+    <value>未找到可交互对象，稍微前进...</value>
+  </data>
+  <data name="Out of {0} [{1}]" xml:space="preserve">
+    <value>{0} [{1}]已用完</value>
+  </data>
+  <data name="Own mount retained: {0}" xml:space="preserve">
+    <value>已保留自己的坐骑：{0}</value>
+  </data>
+  <data name="Partial cleanup: {0}/{1} commands failed." xml:space="preserve">
+    <value>部分清理：{0}/{1}条命令失败。</value>
+  </data>
+  <data name="Paused for ADS utility" xml:space="preserve">
+    <value>因ADS工具而暂停</value>
+  </data>
+  <data name="Pending duty exit after completed territory {0}." xml:space="preserve">
+    <value>完成区域{0}后等待退出。</value>
+  </data>
+  <data name="Pending duty exit." xml:space="preserve">
+    <value>等待退出副本。</value>
+  </data>
+  <data name="QuestionableSolo authority; FrenRider combat suppressed" xml:space="preserve">
+    <value>QuestionableSolo控制，FrenRider战斗暂停</value>
+  </data>
+  <data name="Repair complete; no equipped gear below {0}%." xml:space="preserve">
+    <value>修理完成，没有耐久度低于{0}%的已装备物品。</value>
+  </data>
+  <data name="Repair timed out after {0}s; ADS: {1}" xml:space="preserve">
+    <value>修理在{0}s后超时，ADS：{1}</value>
+  </data>
+  <data name="Restore failed: no automation snapshot captured for this account/character." xml:space="preserve">
+    <value>恢复失败：未捕获此账号/角色的自动化状态。</value>
+  </data>
+  <data name="Retry wait after ADS failure: {0}" xml:space="preserve">
+    <value>ADS失败后等待重试：{0}</value>
+  </data>
+  <data name="Retry wait after rejected start: {0}" xml:space="preserve">
+    <value>启动被拒后等待重试：{0}</value>
+  </data>
+  <data name="Retry wait: ADS not loaded." xml:space="preserve">
+    <value>等待重试：ADS未加载。</value>
+  </data>
+  <data name="Retry wait: ADS utility active ({0})." xml:space="preserve">
+    <value>等待重试：ADS工具正在运行（{0}）。</value>
+  </data>
+  <data name="Retry wait: {0}s." xml:space="preserve">
+    <value>在{0}s后重试。</value>
+  </data>
+  <data name="Revive/Return accept attempted; waiting for dialog to close" xml:space="preserve">
+    <value>已尝试接受复活/Return，等待对话框关闭</value>
+  </data>
+  <data name="Revive/Return accept callback failed; waiting to retry" xml:space="preserve">
+    <value>复活/Return回调失败，等待重试</value>
+  </data>
+  <data name="Riding pillion on fren's mount" xml:space="preserve">
+    <value>与好友同乘坐骑</value>
+  </data>
+  <data name="Scanning for interactables..." xml:space="preserve">
+    <value>正在寻找可交互对象...</value>
+  </data>
+  <data name="Summoning chocobo ({0} greens left)" xml:space="preserve">
+    <value>召唤陆行鸟（剩余{0} Greens）</value>
+  </data>
+  <data name="Suppressed by Coppelia PowerlevelBot" xml:space="preserve">
+    <value>因Coppelia PowerlevelBot暂停</value>
+  </data>
+  <data name="Surfacing revive/Return prompt" xml:space="preserve">
+    <value>显示复活/Return提示</value>
+  </data>
+  <data name="Surfacing teleport prompt" xml:space="preserve">
+    <value>显示传送提示</value>
+  </data>
+  <data name="Switched to {0} [{1}]" xml:space="preserve">
+    <value>已切换至{0} [{1}]</value>
+  </data>
+  <data name="Teleport decline attempted; waiting for dialog to close" xml:space="preserve">
+    <value>已尝试拒绝传送，等待对话框关闭</value>
+  </data>
+  <data name="Teleport decline callback failed; waiting to retry" xml:space="preserve">
+    <value>传送回调失败，等待重试</value>
+  </data>
+  <data name="Too far ({0:F1}y &gt; {1:F0}y max)" xml:space="preserve">
+    <value>距离太远（{0:F1}y &gt; 最大{1:F0}y）</value>
+  </data>
+  <data name="Waiting for ADS desynthesis to start." xml:space="preserve">
+    <value>等待ADS精制开始。</value>
+  </data>
+  <data name="Waiting for revive/Return notification" xml:space="preserve">
+    <value>等待复活/Return通知</value>
+  </data>
+  <data name="Waiting for revive/Return prompt" xml:space="preserve">
+    <value>等待复活/Return提示</value>
+  </data>
+  <data name="Waiting for teleport prompt" xml:space="preserve">
+    <value>等待传送提示</value>
+  </data>
+  <data name="Waiting for {0} SelectYesno dialog" xml:space="preserve">
+    <value>等待{0} SelectYesno对话框</value>
+  </data>
+  <data name="Waiting start: configured desynthesis requested (attempt {0})." xml:space="preserve">
+    <value>等待启动：已请求配置的精制（尝试{0}）。</value>
+  </data>
+  <data name="Waiting to mount..." xml:space="preserve">
+    <value>等待骑乘...</value>
+  </data>
+  <data name="Waiting: ADS not loaded." xml:space="preserve">
+    <value>等待：ADS未加载。</value>
+  </data>
+  <data name="Waiting: ADS utility active ({0})." xml:space="preserve">
+    <value>等待：ADS工具正在运行（{0}）。</value>
+  </data>
+  <data name="Waiting: {0}." xml:space="preserve">
+    <value>等待：{0}。</value>
+  </data>
+  <data name="⚠️ WARNING: AutoDuty Plugin Detected" xml:space="preserve">
+    <value>警告：检测到AutoDuty插件</value>
+  </data>
+  <data name="• Force respawn at entrance" xml:space="preserve">
+    <value>• 强制在入口重生</value>
+  </data>
+  <data name="• Leave instances at random times" xml:space="preserve">
+    <value>• 随机退出副本</value>
+  </data>
+  <data name="• Interfere with FrenRider automation" xml:space="preserve">
+    <value>• 干扰FrenRider自动化</value>
+  </data>
+  <data name="⚠ VLC Not Found" xml:space="preserve">
+    <value>未找到VLC</value>
+  </data>
+  <data name="Well Fed: {0:F0}s ({1} [{2}])" xml:space="preserve">
+    <value>食物效果：{0:F0}s（{1} [{2}]）</value>
+  </data>
+  <data name="Zone transition (rotation disabled)" xml:space="preserve">
+    <value>区域切换（循环禁用）</value>
+  </data>
+  <data name="handoff in {0:F1}s of continuous readiness" xml:space="preserve">
+    <value>持续就绪{0:F1}s后交接</value>
+  </data>
+  <data name="handoff retry backoff until {0:HH:mm:ss}" xml:space="preserve">
+    <value>交接重试等待至{0:HH:mm:ss}</value>
+  </data>
+  <data name="waiting for duty start seam" xml:space="preserve">
+    <value>等待副本启动时机</value>
+  </data>
+  <data name="waiting {0:F1}s for ADS ownership confirmation" xml:space="preserve">
+    <value>等待ADS控制确认{0:F1}s</value>
+  </data>
+  <data name="{0} active" xml:space="preserve">
+    <value>{0}运行中</value>
+  </data>
+  <data name="{0} auto" xml:space="preserve">
+    <value>{0}自动</value>
+  </data>
+  <data name="{0} repair enabled; threshold is 0%." xml:space="preserve">
+    <value>{0}修理已启用，阈值为0%。</value>
+  </data>
+  <data name="{0} repair needed below {1}%; dismounting first." xml:space="preserve">
+    <value>低于{1}%需要{0}修理，先下坐骑。</value>
+  </data>
+  <data name="{0} repair needed below {1}%; waiting for mount transition." xml:space="preserve">
+    <value>低于{1}%需要{0}修理，等待坐骑状态切换。</value>
+  </data>
+  <data name="{0} repair needed below {1}%; waiting to dismount." xml:space="preserve">
+    <value>低于{1}%需要{0}修理，等待下坐骑。</value>
+  </data>
+  <data name="{0} repair needed below {1}%; waiting while {2}." xml:space="preserve">
+    <value>低于{1}%需要{0}修理，在{2}时等待。</value>
+  </data>
+  <data name="{0} repair requested below {1}%; FrenRider paused." xml:space="preserve">
+    <value>已请求低于{1}%的{0}修理，FrenRider暂停。</value>
+  </data>
+  <data name="{0} repair requested; waiting for ADS status." xml:space="preserve">
+    <value>已请求{0}修理，等待ADS状态。</value>
+  </data>
+  <data name="{0} repair requested; waiting for ADS to start." xml:space="preserve">
+    <value>已请求{0}修理，等待ADS启动。</value>
+  </data>
+  <data name="{0} repair running; FrenRider paused. ADS: {1}" xml:space="preserve">
+    <value>{0}修理中，FrenRider暂停。ADS：{1}</value>
+  </data>
+  <data name="{0} repair still needed below {1}%; automatic dismount timed out." xml:space="preserve">
+    <value>低于{1}%仍需要{0}修理，自动下坐骑超时。</value>
+  </data>
+  <data name="{0} repair still needed below {1}%; retry in {2}s. ADS: {3}" xml:space="preserve">
+    <value>低于{1}%仍需要{0}修理，{2}s后重试。ADS：{3}</value>
+  </data>
+  <data name="{0} repair still needed below {1}%; waiting while {2}. ADS: {3}" xml:space="preserve">
+    <value>低于{1}%仍需要{0}修理，在{2}时等待。ADS：{3}</value>
+  </data>
+  <data name="{0}: mounting {1}" xml:space="preserve">
+    <value>{0}：骑乘{1}</value>
+  </data>
+  <data name="{0}; restarting readiness delay with 5s retry backoff" xml:space="preserve">
+    <value>{0}；以5s重试等待重新开始就绪延迟</value>
+  </data>
+  <data name="{0}; waiting for authoritative ownership" xml:space="preserve">
+    <value>{0}；等待权威控制确认</value>
+  </data>
+  <data name="True" xml:space="preserve">
+    <value>是</value>
+  </data>
+  <data name="False" xml:space="preserve">
+    <value>否</value>
+  </data>
+  <data name="ADS recovery hold IPC unavailable; update ADS" xml:space="preserve">
+    <value>ADS救援暂停IPC不可用，请更新ADS</value>
+  </data>
+  <data name="Waiting for ADS recovery hold acknowledgement" xml:space="preserve">
+    <value>等待ADS确认救援暂停</value>
+  </data>
+  <data name="Waiting to leave combat before approaching or using Phoenix Down" xml:space="preserve">
+    <value>等待脱离战斗后靠近或使用不死鸟之尾</value>
+  </data>
+  <data name="Waiting to land" xml:space="preserve">
+    <value>等待降落</value>
+  </data>
+  <data name="No Phoenix Downs; waiting for party recovery" xml:space="preserve">
+    <value>没有不死鸟之尾，等待小队救援</value>
+  </data>
+  <data name="Medicine cooldown; waiting for recovery" xml:space="preserve">
+    <value>药品冷却，等待救援</value>
+  </data>
+  <data name="Waiting for current cast" xml:space="preserve">
+    <value>等待当前咏唱</value>
+  </data>
+  <data name="FR: On" xml:space="preserve">
+    <value>FR：开启</value>
+  </data>
+  <data name="FR: Off" xml:space="preserve">
+    <value>FR：关闭</value>
+  </data>
+  <data name="Fren Rider active - Following {0}. Coppelia: {1}. Cleanup: {2}" xml:space="preserve">
+    <value>Fren Rider已启用 - 跟随{0}。Coppelia：{1}。清理：{2}</value>
+  </data>
+  <data name="Fren Rider disabled - Click to toggle. Coppelia: {0}. Cleanup: {1}" xml:space="preserve">
+    <value>Fren Rider已禁用 - 点击切换。Coppelia：{0}。清理：{1}</value>
+  </data>
+  <data name="No compatible BossMod preset IPC responded" xml:space="preserve">
+    <value>兼容的BossMod预设IPC未响应</value>
+  </data>
+  <data name="No packaged presets found" xml:space="preserve">
+    <value>未找到随包预设</value>
+  </data>
+  <data name="Preset push partially succeeded ({0}/{1})" xml:space="preserve">
+    <value>预设推送部分成功（{0}/{1}）</value>
+  </data>
+  <data name="Six BossMod presets pushed" xml:space="preserve">
+    <value>已推送六个BossMod预设</value>
+  </data>
+  <data name=", FATE {0}" xml:space="preserve">
+    <value>，FATE {0}</value>
+  </data>
+  <data name=", indoors" xml:space="preserve">
+    <value>，室内</value>
+  </data>
+  <data name="{0} (territory {1}{2})" xml:space="preserve">
+    <value>{0}（区域{1}{2}）</value>
+  </data>
+  <data name="ADS Exit Method ({0}s)" xml:space="preserve">
+    <value>ADS退出方式（{0}s）</value>
+  </data>
+  <data name="FrenRider: leave after {0}s" xml:space="preserve">
+    <value>FrenRider：在{0}s后退出</value>
+  </data>
+  <data name="FrenRider: leave when party leaves" xml:space="preserve">
+    <value>FrenRider：小队离开时退出</value>
+  </data>
+  <data name="Timer: {0}" xml:space="preserve">
+    <value>计时：{0}</value>
+  </data>
+  <data name="Next retry/reassert in {0}s." xml:space="preserve">
+    <value>在{0}s后重试/重新应用。</value>
+  </data>
+  <data name="Legacy seed active: {0} at threshold {1}." xml:space="preserve">
+    <value>旧设置已启用：{0}，阈值{1}。</value>
+  </data>
+  <data name="global handoff on" xml:space="preserve">
+    <value>全局交接开启</value>
+  </data>
+  <data name="global handoff off" xml:space="preserve">
+    <value>全局交接关闭</value>
+  </data>
+  <data name="Authority source: {0}; readable={1}; exit takeover={2}" xml:space="preserve">
+    <value>控制来源：{0}；可读取={1}；退出接管={2}</value>
+  </data>
+  <data name="Selected: {0} {1} (ID: {2})" xml:space="preserve">
+    <value>已选择：{0} {1}（ID：{2}）</value>
+  </data>
+  <data name="{0} in party but not visible" xml:space="preserve">
+    <value>{0}在小队中，但不可见</value>
+  </data>
+  <data name="Active, {0}m {1:D2}s remaining" xml:space="preserve">
+    <value>已启用，剩余{0}m {1:D2}s</value>
+  </data>
+  <data name="Inactive, {0} Gysahl Greens" xml:space="preserve">
+    <value>未启用，{0} Gysahl Greens</value>
+  </data>
+  <data name="Run={0}, FlyYouFools={1}, FarChase={2}, FollowMode={3}/{4}" xml:space="preserve">
+    <value>运行={0}，FlyYouFools={1}，远距离追踪={2}，跟随模式={3}/{4}</value>
+  </data>
+  <data name="Cling={0:F1}, Max={1:F0}, ForayMax={2:F0}" xml:space="preserve">
+    <value>间距={0:F1}，最大={1:F0}，特殊区域最大={2:F0}</value>
+  </data>
+  <data name="Loaded={0}, Pending={1}, RuntimeOwned={2}, Readable={3}, Source={4}, ExitTakeover={5}" xml:space="preserve">
+    <value>已加载={0}，待处理={1}，运行控制={2}，可读取={3}，来源={4}，退出接管={5}</value>
+  </data>
+  <data name="Source={0}, Readable={1}, ExitTakeover={2}" xml:space="preserve">
+    <value>来源={0}，可读取={1}，退出接管={2}</value>
+  </data>
+  <data name="Saved fren is outside the current party." xml:space="preserve">
+    <value>保存的好友不在当前小队中。</value>
+  </data>
+  <data name="ADS Hyper Focus heartbeat received." xml:space="preserve">
+    <value>已收到ADS Hyper Focus心跳。</value>
+  </data>
+  <data name="ADS Hyper Focus lease active." xml:space="preserve">
+    <value>ADS Hyper Focus控制已启用。</value>
+  </data>
+  <data name="ActionManager unavailable" xml:space="preserve">
+    <value>ActionManager不可用</value>
+  </data>
+  <data name="Aetheryte sheet unavailable for {0} (candidate count=0)" xml:space="preserve">
+    <value>{0}的以太之光数据不可用（候选=0）</value>
+  </data>
+  <data name="Coppelia Powerlevel heartbeat received." xml:space="preserve">
+    <value>已收到Coppelia Powerlevel心跳。</value>
+  </data>
+  <data name="Coppelia Powerlevel lease active." xml:space="preserve">
+    <value>Coppelia Powerlevel控制已启用。</value>
+  </data>
+  <data name="Exit after duty ends - {0:F0}s elapsed (configured: {1}s)" xml:space="preserve">
+    <value>副本结束后退出 - 已过{0:F0}s（设置：{1}s）</value>
+  </data>
+  <data name="Failed to open /partycmd" xml:space="preserve">
+    <value>无法打开/partycmd</value>
+  </data>
+  <data name="Leave when all party members left" xml:space="preserve">
+    <value>所有小队成员离开后退出</value>
+  </data>
+  <data name="Matched {0} ({1})" xml:space="preserve">
+    <value>已匹配{0}（{1}）</value>
+  </data>
+  <data name="No interactables found; fren not visible in duty" xml:space="preserve">
+    <value>没有可交互对象，副本内好友不可见</value>
+  </data>
+  <data name="No interactables found; not bound by duty" xml:space="preserve">
+    <value>没有可交互对象，未受副本限制</value>
+  </data>
+  <data name="No party row found for {0} ({1})" xml:space="preserve">
+    <value>未找到{0}的小队行（{1}）</value>
+  </data>
+  <data name="No unlocked Lifestream aetherytes matched {0} " xml:space="preserve">
+    <value>没有匹配{0}的已解锁Lifestream以太之光 </value>
+  </data>
+  <data name="Opening party window" xml:space="preserve">
+    <value>正在打开小队窗口</value>
+  </data>
+  <data name="Party row found for {0}, but no zone name matched ({1})" xml:space="preserve">
+    <value>找到{0}的小队行，但无匹配的区域名（{1}）</value>
+  </data>
+  <data name="Party window did not open (addon visible=false, opened by FrenRider=true)" xml:space="preserve">
+    <value>小队窗口未打开（插件界面可见=否，FrenRider打开=是）</value>
+  </data>
+  <data name="Party window had no readable rows ({0})" xml:space="preserve">
+    <value>小队窗口没有可读取行（{0}）</value>
+  </data>
+  <data name="Party window not visible" xml:space="preserve">
+    <value>小队窗口不可见</value>
+  </data>
+  <data name="Party window read failed: {0}" xml:space="preserve">
+    <value>读取小队窗口失败：{0}</value>
+  </data>
+  <data name="Reading party window ({0})" xml:space="preserve">
+    <value>正在读取小队窗口（{0}）</value>
+  </data>
+  <data name="SelectYesno dialog" xml:space="preserve">
+    <value>SelectYesno对话框</value>
+  </data>
+  <data name="Telepo unavailable for {0} (candidate count=0)" xml:space="preserve">
+    <value>{0}的Telepo不可用（候选=0）</value>
+  </data>
+  <data name="Teleport list read failed for {0}: {1} (candidate count=0)" xml:space="preserve">
+    <value>读取{0}的传送列表失败：{1}（候选=0）</value>
+  </data>
+  <data name="Transient IPC failure; preserving owned state. Typed: {0}; JSON: {1}" xml:space="preserve">
+    <value>临时IPC失败，保留控制状态。类型化：{0}；JSON：{1}</value>
+  </data>
+  <data name="UI manager unavailable" xml:space="preserve">
+    <value>UI管理器不可用</value>
+  </data>
+  <data name="Validated ADS current-duty snapshot for territory/CFC {0}/{1}." xml:space="preserve">
+    <value>已验证区域/CFC {0}/{1}的ADS当前副本快照。</value>
+  </data>
+  <data name="Waiting for party window" xml:space="preserve">
+    <value>等待小队窗口</value>
+  </data>
+  <data name="addon hidden" xml:space="preserve">
+    <value>插件界面已隐藏</value>
+  </data>
+  <data name="addon not found" xml:space="preserve">
+    <value>未找到插件界面</value>
+  </data>
+  <data name="already mounted" xml:space="preserve">
+    <value>已经骑乘</value>
+  </data>
+  <data name="already mounting" xml:space="preserve">
+    <value>正在骑乘</value>
+  </data>
+  <data name="automation preempted" xml:space="preserve">
+    <value>自动化被中断</value>
+  </data>
+  <data name="between areas" xml:space="preserve">
+    <value>区域切换中</value>
+  </data>
+  <data name="casting" xml:space="preserve">
+    <value>咏唱中</value>
+  </data>
+  <data name="casting or occupied" xml:space="preserve">
+    <value>咏唱中或忙碌</value>
+  </data>
+  <data name="duty confirm popup" xml:space="preserve">
+    <value>副本确认弹窗</value>
+  </data>
+  <data name="event null" xml:space="preserve">
+    <value>事件为空</value>
+  </data>
+  <data name="exception: {0}" xml:space="preserve">
+    <value>异常：{0}</value>
+  </data>
+  <data name="far chase active" xml:space="preserve">
+    <value>远距离追踪启用</value>
+  </data>
+  <data name="flying stuck escape (dX={0:F1} dY={1:F1} dZ={2:F1}, all &lt;{3}y in {4}s)" xml:space="preserve">
+    <value>飞行脱困（dX={0:F1} dY={1:F1} dZ={2:F1}，{4}s内均&lt;{3}y）</value>
+  </data>
+  <data name="fren flying" xml:space="preserve">
+    <value>好友飞行中</value>
+  </data>
+  <data name="fren unavailable" xml:space="preserve">
+    <value>好友不可用</value>
+  </data>
+  <data name="in combat" xml:space="preserve">
+    <value>战斗中</value>
+  </data>
+  <data name="in duty" xml:space="preserve">
+    <value>副本内</value>
+  </data>
+  <data name="local player unavailable" xml:space="preserve">
+    <value>本地玩家不可用</value>
+  </data>
+  <data name="mount action check failed: {0}" xml:space="preserve">
+    <value>坐骑动作检查失败：{0}</value>
+  </data>
+  <data name="mount action unavailable (status={0})" xml:space="preserve">
+    <value>坐骑动作不可用（状态={0}）</value>
+  </data>
+  <data name="mounted or riding pillion" xml:space="preserve">
+    <value>骑乘或同乘</value>
+  </data>
+  <data name="near fren on foot" xml:space="preserve">
+    <value>靠近步行好友</value>
+  </data>
+  <data name="near mounted fren with Fly You Fools disabled" xml:space="preserve">
+    <value>靠近骑乘好友，Fly You Fools禁用</value>
+  </data>
+  <data name="near mounted fren with Fly You Fools enabled" xml:space="preserve">
+    <value>靠近骑乘好友，Fly You Fools启用</value>
+  </data>
+  <data name="node index out of range" xml:space="preserve">
+    <value>节点索引越界</value>
+  </data>
+  <data name="node null" xml:space="preserve">
+    <value>节点为空</value>
+  </data>
+  <data name="not mounted or riding" xml:space="preserve">
+    <value>未骑乘或同乘</value>
+  </data>
+  <data name="occupied or in cutscene" xml:space="preserve">
+    <value>忙碌或过场中</value>
+  </data>
+  <data name="outside sanctuary" xml:space="preserve">
+    <value>安全区外</value>
+  </data>
+  <data name="player busy" xml:space="preserve">
+    <value>玩家忙碌</value>
+  </data>
+  <data name="player dead" xml:space="preserve">
+    <value>玩家死亡</value>
+  </data>
+  <data name="riding pillion" xml:space="preserve">
+    <value>同乘中</value>
+  </data>
+  <data name="safe and in cling range" xml:space="preserve">
+    <value>安全且在跟随范围内</value>
+  </data>
+  <data name="stuck repath (dX={0:F1} dY={1:F1} dZ={2:F1}, all &lt;{3}y in {4}s)" xml:space="preserve">
+    <value>卡住时重新寻路（dX={0:F1} dY={1:F1} dZ={2:F1}，{4}s内均&lt;{3}y）</value>
+  </data>
+  <data name="stuck repath (moved {0:F1}y &lt; {1:F1}y in {2:F0}s)" xml:space="preserve">
+    <value>卡住时重新寻路（{2:F0}s内移动{0:F1}y &lt; {1:F1}y）</value>
+  </data>
+  <data name="teleport or dialog" xml:space="preserve">
+    <value>传送或对话框</value>
+  </data>
+  <data name="unit manager not found" xml:space="preserve">
+    <value>未找到单元管理器</value>
+  </data>
+  <data name="unsupported arg type" xml:space="preserve">
+    <value>不支持的参数类型</value>
+  </data>
+  <data name="{0:F1}y XZ from fren, handoff {1:F1}y" xml:space="preserve">
+    <value>距好友XZ {0:F1}y，交接{1:F1}y</value>
+  </data>
+  <data name="Overworld" xml:space="preserve">
+    <value>野外</value>
+  </data>
+  <data name="Town" xml:space="preserve">
+    <value>城镇</value>
+  </data>
+  <data name="Duty" xml:space="preserve">
+    <value>副本</value>
+  </data>
+  <data name="DeepDungeon" xml:space="preserve">
+    <value>深层迷宫</value>
+  </data>
+  <data name="Foray" xml:space="preserve">
+    <value>特殊战场</value>
+  </data>
+  <data name="Typed" xml:space="preserve">
+    <value>类型化</value>
+  </data>
+  <data name="JsonFallback" xml:space="preserve">
+    <value>JSON回退</value>
+  </data>
+  <data name="StaleHold" xml:space="preserve">
+    <value>旧状态保留</value>
+  </data>
+  <data name="Unloaded" xml:space="preserve">
+    <value>未加载</value>
+  </data>
+  <data name="Unreadable" xml:space="preserve">
+    <value>不可读取</value>
+  </data>
+  <data name="Following local aetheryte network to {0}{1}" xml:space="preserve">
+    <value>沿本地以太之光网络前往{0}{1}</value>
+  </data>
+  <data name="Found {0} aetherytes for {1}" xml:space="preserve">
+    <value>为{1}找到{0}个以太之光</value>
+  </data>
+  <data name="Matched {0}" xml:space="preserve">
+    <value>已匹配{0}</value>
+  </data>
+  <data name="Sent {0}; matched {1}; found {2} aetherytes{3}" xml:space="preserve">
+    <value>已发送{0}；匹配{1}；找到{2}个以太之光{3}</value>
+  </data>
+  <data name="{0}{1}; retry in {2}s" xml:space="preserve">
+    <value>{0}{1}；{2}s后重试</value>
+  </data>
+  <data name="ADS loaded; ready." xml:space="preserve">
+    <value>ADS 已加载；就绪。</value>
+  </data>
+  <data name="ADS loaded; {0}." xml:space="preserve">
+    <value>ADS 已加载；{0}。</value>
+  </data>
+  <data name="{0} {1}: M{2}/T{3}, {4}." xml:space="preserve">
+    <value>{0} {1}: M{2}/T{3}, {4}.</value>
+  </data>
+  <data name="ADS is not loaded" xml:space="preserve">
+    <value>ADS 未加载</value>
+  </data>
+  <data name="{0}; FrenRider local duty logic stays active" xml:space="preserve">
+    <value>{0}；FrenRider 的本地副本逻辑保持启用</value>
+  </data>
+  <data name="ADS current-duty identity does not match live GameMain territory/CFC {0}/{1}; FrenRider local duty logic stays active" xml:space="preserve">
+    <value>ADS 当前副本标识与实时 GameMain 区域/CFC {0}/{1} 不匹配；FrenRider 的本地副本逻辑保持启用</value>
+  </data>
+  <data name="{0} handoff is off; FrenRider local duty logic stays active" xml:space="preserve">
+    <value>{0} 控制权移交已关闭；FrenRider 的本地副本逻辑保持启用</value>
+  </data>
+  <data name="{0} has ADS clearance {1} (M{2}), below threshold {3}; FrenRider local duty logic stays active" xml:space="preserve">
+    <value>{0} 的 ADS 认证 {1} (M{2}) 低于阈值 {3}；FrenRider 的本地副本逻辑保持启用</value>
+  </data>
+  <data name="ADS current-duty identity {0}/{1} does not match live GameMain identity {2}/{3}." xml:space="preserve">
+    <value>ADS 当前副本标识 {0}/{1} 与实时 GameMain 标识 {2}/{3} 不匹配。</value>
+  </data>
+  <data name="Live duty identity changed from territory/CFC {0}/{1} to {2}/{3}." xml:space="preserve">
+    <value>实时副本标识已从区域/CFC {0}/{1} 变为 {2}/{3}。</value>
+  </data>
+  <data name="No validated ADS current-duty snapshot." xml:space="preserve">
+    <value>没有已验证的 ADS 当前副本快照。</value>
+  </data>
+  <data name="Live client is outside an instanced duty." xml:space="preserve">
+    <value>当前客户端位于实例副本之外。</value>
+  </data>
+  <data name="GameMain did not provide a live duty territory identity." xml:space="preserve">
+    <value>GameMain 未提供实时副本区域标识。</value>
+  </data>
+  <data name="ADS unloaded." xml:space="preserve">
+    <value>ADS 已卸载。</value>
+  </data>
+  <data name="ADS.GetStatusJson returned an empty payload" xml:space="preserve">
+    <value>ADS.GetStatusJson 返回了空数据</value>
+  </data>
+  <data name="ADS status does not identify an active instanced duty" xml:space="preserve">
+    <value>ADS 状态未标识活动的实例副本</value>
+  </data>
+  <data name="ADS current duty has no catalog metadata" xml:space="preserve">
+    <value>ADS 当前副本没有目录元数据</value>
+  </data>
+  <data name="ADS current-duty catalog row has no duty name" xml:space="preserve">
+    <value>ADS 当前副本的目录行没有副本名称</value>
+  </data>
+  <data name="ADS current-duty catalog row has no territory identity" xml:space="preserve">
+    <value>ADS 当前副本的目录行没有区域标识</value>
+  </data>
+  <data name="ADS current-duty catalog row has no CFC identity" xml:space="preserve">
+    <value>ADS 当前副本的目录行没有 CFC 标识</value>
+  </data>
+  <data name="ADS current-duty catalog row has unsupported category '{0}'" xml:space="preserve">
+    <value>ADS 当前副本的目录行包含不支持的类别 '{0}'</value>
+  </data>
+  <data name="ADS current-duty catalog row has unsupported support level '{0}'" xml:space="preserve">
+    <value>ADS 当前副本的目录行包含不支持的支持级别 '{0}'</value>
+  </data>
+  <data name="ADS current-duty catalog row has unsupported clearance status '{0}'" xml:space="preserve">
+    <value>ADS 当前副本的目录行包含不支持的认证状态 '{0}'</value>
+  </data>
+  <data name="ADS.GetStatusJson was invalid JSON: {0}" xml:space="preserve">
+    <value>ADS.GetStatusJson 包含无效的 JSON：{0}</value>
+  </data>
+  <data name="ADS.GetStatusJson unavailable: {0}" xml:space="preserve">
+    <value>ADS.GetStatusJson 不可用：{0}</value>
+  </data>
+  <data name="ADS.GetStatusJson unavailable; retaining the validated current-duty snapshot for the same live identity: {0}" xml:space="preserve">
+    <value>ADS.GetStatusJson 不可用；保留同一实时标识下已验证的当前副本快照：{0}</value>
+  </data>
+  <data name="waiting for login" xml:space="preserve">
+    <value>等待登录</value>
+  </data>
+  <data name="waiting for local player" xml:space="preserve">
+    <value>等待本地玩家</value>
+  </data>
+  <data name="waiting for unconscious state to clear" xml:space="preserve">
+    <value>等待战斗不能状态解除</value>
+  </data>
+  <data name="waiting for local player to be alive" xml:space="preserve">
+    <value>等待本地玩家存活</value>
+  </data>
+  <data name="waiting for area transition to finish" xml:space="preserve">
+    <value>等待区域切换完成</value>
+  </data>
+  <data name="waiting for cutscene to finish" xml:space="preserve">
+    <value>等待过场动画结束</value>
+  </data>
+  <data name="waiting for cutscene event to finish" xml:space="preserve">
+    <value>等待过场动画事件结束</value>
+  </data>
+  <data name="NPC no-inn/no-teleport" xml:space="preserve">
+    <value>NPC 不去旅馆/不传送</value>
+  </data>
+  <data name="applied" xml:space="preserve">
+    <value>已应用</value>
+  </data>
+  <data name="already set" xml:space="preserve">
+    <value>已设置</value>
+  </data>
+  <data name="not loaded" xml:space="preserve">
+    <value>未加载</value>
+  </data>
+  <data name="unavailable" xml:space="preserve">
+    <value>不可用</value>
+  </data>
+  <data name="failed" xml:space="preserve">
+    <value>失败</value>
+  </data>
+  <data name="RSR {0}{1}" xml:space="preserve">
+    <value>RSR {0}{1}</value>
+  </data>
+  <data name="{0} active{1}" xml:space="preserve">
+    <value>{0}运行中{1}</value>
+  </data>
+  <data name="{0} auto{1}" xml:space="preserve">
+    <value>{0}自动{1}</value>
+  </data>
+  <data name="{0} unavailable{1}" xml:space="preserve">
+    <value>{0}不可用{1}</value>
+  </data>
+  <data name="{0} captured" xml:space="preserve">
+    <value>{0}已捕获</value>
+  </data>
+  <data name="{0} unavailable" xml:space="preserve">
+    <value>{0}不可用</value>
+  </data>
+  <data name="{0} unavailable: {1}" xml:space="preserve">
+    <value>{0}不可用：{1}</value>
+  </data>
+  <data name="Partial restore ({0})." xml:space="preserve">
+    <value>部分恢复 ({0})。</value>
+  </data>
+  <data name="Far chase" xml:space="preserve">
+    <value>远距离追踪</value>
+  </data>
+  <data name="Fly You Fools" xml:space="preserve">
+    <value>并行飞行</value>
+  </data>
+  <data name="outside effective cling range" xml:space="preserve">
+    <value>超出有效贴近范围</value>
+  </data>
+  <data name="Failed to send {0}" xml:space="preserve">
+    <value>发送 {0} 失败</value>
+  </data>
+  <data name="; Party window left open" xml:space="preserve">
+    <value>; 队伍窗口保持打开</value>
+  </data>
+  <data name="No unlocked Lifestream aetherytes matched {0} (candidate count=0; {1})" xml:space="preserve">
+    <value>没有已解锁的 Lifestream 以太之光匹配 {0} (候选数=0; {1})</value>
+  </data>
+  <data name="ADS.StartDutyFromInside accepted" xml:space="preserve">
+    <value>ADS.StartDutyFromInside 已接受</value>
+  </data>
+  <data name="ADS.StartDutyFromInside rejected; command fallback suppressed" xml:space="preserve">
+    <value>ADS.StartDutyFromInside 已拒绝；已抑制备用命令</value>
+  </data>
+  <data name="typed endpoint unavailable; sent /ads inside fallback" xml:space="preserve">
+    <value>类型化端点不可用；已发送备用 /ads inside 命令</value>
+  </data>
+  <data name="typed endpoint unavailable and /ads inside fallback failed" xml:space="preserve">
+    <value>类型化端点不可用，且备用 /ads inside 命令失败</value>
+  </data>
+  <data name="DeathReturn" xml:space="preserve">
+    <value>死亡返回</value>
+  </data>
+  <data name="Raise" xml:space="preserve">
+    <value>复活</value>
+  </data>
+  <data name="Teleport" xml:space="preserve">
+    <value>传送</value>
+  </data>
+  <data name="Duty completed, {0}leaving in {1:F0}s..." xml:space="preserve">
+    <value>副本完成，{0}{1:F0}秒后退出...</value>
+  </data>
+  <data name="ADS authority active" xml:space="preserve">
+    <value>ADS 控制已启用</value>
+  </data>
+  <data name="local aethernet travel active" xml:space="preserve">
+    <value>本地以太之光网络移动已启用</value>
+  </data>
+  <data name="settings changed" xml:space="preserve">
+    <value>设置已更改</value>
+  </data>
+  <data name="typed IPC unavailable" xml:space="preserve">
+    <value>类型化 IPC 不可用</value>
+  </data>
+  <data name="live AutoFollow read unavailable" xml:space="preserve">
+    <value>无法读取实时 AutoFollow 设置</value>
+  </data>
+  <data name="BossMod.Service not found" xml:space="preserve">
+    <value>未找到 BossMod.Service</value>
+  </data>
+  <data name="BossMod.Service.Config unavailable" xml:space="preserve">
+    <value>BossMod.Service.Config 不可用</value>
+  </data>
+  <data name="BossMod.AI.AIConfig not found" xml:space="preserve">
+    <value>未找到 BossMod.AI.AIConfig</value>
+  </data>
+  <data name="live instance discovery failed: {0}" xml:space="preserve">
+    <value>实时实例发现失败：{0}</value>
+  </data>
+  <data name="Dalamud LocalPlugin wrapper was not reachable from IExposedPlugin" xml:space="preserve">
+    <value>无法从 IExposedPlugin 访问 Dalamud LocalPlugin 包装器</value>
+  </data>
+  <data name="Dalamud LocalPlugin had no live instance" xml:space="preserve">
+    <value>Dalamud LocalPlugin 没有实时实例</value>
+  </data>
+  <data name="Dalamud LocalPlugin had no live assembly" xml:space="preserve">
+    <value>Dalamud LocalPlugin 没有实时程序集</value>
+  </data>
+  <data name="Dalamud LocalPlugin instance and assembly did not match" xml:space="preserve">
+    <value>Dalamud LocalPlugin 的实例与程序集不匹配</value>
+  </data>
+  <data name="ADS unavailable/pending: {0}." xml:space="preserve">
+    <value>ADS 不可用/待处理：{0}。</value>
+  </data>
+  <data name="range" xml:space="preserve">
+    <value>范围</value>
+  </data>
+  <data name="range reset" xml:space="preserve">
+    <value>范围重置</value>
+  </data>
+  <data name="hunts" xml:space="preserve">
+    <value>狩猎</value>
+  </data>
+  <data name="hunts reset" xml:space="preserve">
+    <value>狩猎重置</value>
+  </data>
+  <data name="queen" xml:space="preserve">
+    <value>女王</value>
+  </data>
+  <data name="queen reset" xml:space="preserve">
+    <value>女王重置</value>
+  </data>
+  <data name="Misc" xml:space="preserve">
+    <value>其他</value>
+  </data>
+  <data name="ADS returned false" xml:space="preserve">
+    <value>ADS 返回了 false</value>
+  </data>
+  <data name="ADS unavailable; reflection hacks pending." xml:space="preserve">
+    <value>ADS 不可用；反射绕行处理待完成。</value>
+  </data>
+  <data name="No ADS utility status." xml:space="preserve">
+    <value>没有 ADS 实用工具状态。</value>
+  </data>
+  <data name="ADS repair running" xml:space="preserve">
+    <value>ADS 修理正在运行</value>
+  </data>
+  <data name="ADS did not accept the utility request." xml:space="preserve">
+    <value>ADS 未接受实用工具请求。</value>
+  </data>
+  <data name="ADS status was not readable." xml:space="preserve">
+    <value>无法读取 ADS 状态。</value>
+  </data>
+  <data name="Members" xml:space="preserve">
+    <value>成员</value>
+  </data>
+  <data name="Jobs" xml:space="preserve">
+    <value>职业</value>
+  </data>
+  <data name="{0} total, {1} visible, {2} mounted" xml:space="preserve">
+    <value>共 {0} 人，可见 {1} 人，骑乘 {2} 人</value>
+  </data>
+  <data name="Tank" xml:space="preserve">
+    <value>防护</value>
+  </data>
+  <data name="Healer" xml:space="preserve">
+    <value>治疗</value>
+  </data>
+  <data name="Melee" xml:space="preserve">
+    <value>近战</value>
+  </data>
+  <data name="Ranged" xml:space="preserve">
+    <value>远程</value>
+  </data>
+  <data name="Caster" xml:space="preserve">
+    <value>法系</value>
+  </data>
+  <data name="Select {0}..." xml:space="preserve">
+    <value>选择{0}...</value>
+  </data>
+  <data name="Window appearance" xml:space="preserve"><value>窗口外观</value></data>
+  <data name="Compact visible on main window" xml:space="preserve"><value>在主窗口显示紧凑模式开关</value></data>
+  <data name="Language visible on main window" xml:space="preserve"><value>在主窗口显示语言选择</value></data>
+  <data name="Transparency" xml:space="preserve"><value>透明度</value></data>
+  <data name="Opacity (%)" xml:space="preserve"><value>不透明度 (%)</value></data>
+  <data name="Auto-fade when unfocused" xml:space="preserve"><value>失去焦点后自动淡化</value></data>
+  <data name="Unfocused opacity (%)" xml:space="preserve"><value>未聚焦时的不透明度 (%)</value></data>
+  <data name="Unfocused delay (seconds)" xml:space="preserve"><value>失去焦点后的等待时间 (秒)</value></data>
+</root>

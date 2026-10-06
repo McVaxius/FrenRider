@@ -1,0 +1,2811 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms</value>
+  </resheader>
+  <data name="Blue" xml:space="preserve">
+    <value>Mavi</value>
+  </data>
+  <data name="Character" xml:space="preserve">
+    <value>Karakter</value>
+  </data>
+  <data name="Color" xml:space="preserve">
+    <value>Renk</value>
+  </data>
+  <data name="Custom RGB" xml:space="preserve">
+    <value>Özel RGB</value>
+  </data>
+  <data name="Enabled" xml:space="preserve">
+    <value>Etkin</value>
+  </data>
+  <data name="Forced / On" xml:space="preserve">
+    <value>Zorlanmış / Açık</value>
+  </data>
+  <data name="Icon only" xml:space="preserve">
+    <value>Yalnızca simge</value>
+  </data>
+  <data name="Interactive" xml:space="preserve">
+    <value>Etkileşimli</value>
+  </data>
+  <data name="Job" xml:space="preserve">
+    <value>Meslek</value>
+  </data>
+  <data name="Ko-fi" xml:space="preserve">
+    <value>Ko-fi</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>Dil</value>
+  </data>
+  <data name="Loading UI fonts..." xml:space="preserve">
+    <value>Arayüz yazı tipleri yükleniyor...</value>
+  </data>
+  <data name="N" xml:space="preserve">
+    <value>H</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>Hayır</value>
+  </data>
+  <data name="Off" xml:space="preserve">
+    <value>Kapalı</value>
+  </data>
+  <data name="On" xml:space="preserve">
+    <value>Açık</value>
+  </data>
+  <data name="Override Off" xml:space="preserve">
+    <value>Kapalıya zorla</value>
+  </data>
+  <data name="Passive" xml:space="preserve">
+    <value>Pasif</value>
+  </data>
+  <data name="Pink" xml:space="preserve">
+    <value>Pembe</value>
+  </data>
+  <data name="Profile" xml:space="preserve">
+    <value>Profil</value>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>Ara</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>Ayarlar</value>
+  </data>
+  <data name="Teal" xml:space="preserve">
+    <value>Turkuaz</value>
+  </data>
+  <data name="Text only" xml:space="preserve">
+    <value>Yalnızca metin</value>
+  </data>
+  <data name="UI fonts failed to load. See the plugin log." xml:space="preserve">
+    <value>Arayüz yazı tipleri yüklenemedi. Eklenti günlüğüne bakın.</value>
+  </data>
+  <data name="Unknown" xml:space="preserve">
+    <value>Bilinmiyor</value>
+  </data>
+  <data name="Y" xml:space="preserve">
+    <value>E</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>Evet</value>
+  </data>
+  <data name="Compact mode" xml:space="preserve">
+    <value>Kompakt mod</value>
+  </data>
+  <data name="Run" xml:space="preserve">
+    <value>Çalıştır</value>
+  </data>
+  <data name="Operator" xml:space="preserve">
+    <value>Operatör</value>
+  </data>
+  <data name="Party" xml:space="preserve">
+    <value>Grup</value>
+  </data>
+  <data name="Automation" xml:space="preserve">
+    <value>Otomasyon</value>
+  </data>
+  <data name="Account" xml:space="preserve">
+    <value>Hesap</value>
+  </data>
+  <data name="Fren" xml:space="preserve">
+    <value>Fren</value>
+  </data>
+  <data name="Tracking" xml:space="preserve">
+    <value>İzleme</value>
+  </data>
+  <data name="Position" xml:space="preserve">
+    <value>Konum</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Ad</value>
+  </data>
+  <data name="Distance" xml:space="preserve">
+    <value>Uzaklık</value>
+  </data>
+  <data name="Follow" xml:space="preserve">
+    <value>Takip</value>
+  </data>
+  <data name="Mount" xml:space="preserve">
+    <value>Binek</value>
+  </data>
+  <data name="Combat" xml:space="preserve">
+    <value>Savaş</value>
+  </data>
+  <data name="Cleanup" xml:space="preserve">
+    <value>Temizleme</value>
+  </data>
+  <data name="Idle" xml:space="preserve">
+    <value>Boşta</value>
+  </data>
+  <data name="Fren teleport" xml:space="preserve">
+    <value>Fren'e ışınlanma</value>
+  </data>
+  <data name="Phoenix Down" xml:space="preserve">
+    <value>Phoenix Down</value>
+  </data>
+  <data name="Respawn" xml:space="preserve">
+    <value>Yeniden doğma</value>
+  </data>
+  <data name="Food" xml:space="preserve">
+    <value>Yiyecek</value>
+  </data>
+  <data name="Repair" xml:space="preserve">
+    <value>Onarım</value>
+  </data>
+  <data name="Desynth" xml:space="preserve">
+    <value>Ayrıştırma</value>
+  </data>
+  <data name="Companion" xml:space="preserve">
+    <value>Yoldaş</value>
+  </data>
+  <data name="Formation" xml:space="preserve">
+    <value>Diziliş</value>
+  </data>
+  <data name="Duty / ADS / Exit" xml:space="preserve">
+    <value>Görev / ADS / Çıkış</value>
+  </data>
+  <data name="Zone" xml:space="preserve">
+    <value>Bölge</value>
+  </data>
+  <data name="Exit method" xml:space="preserve">
+    <value>Çıkış yöntemi</value>
+  </data>
+  <data name="Exit" xml:space="preserve">
+    <value>Çıkış</value>
+  </data>
+  <data name="Duty interact" xml:space="preserve">
+    <value>Görev etkileşimi</value>
+  </data>
+  <data name="ADS authority" xml:space="preserve">
+    <value>ADS denetimi</value>
+  </data>
+  <data name="Compact debug" xml:space="preserve">
+    <value>Kompakt hata ayıklama</value>
+  </data>
+  <data name="Config" xml:space="preserve">
+    <value>Yapılandırma</value>
+  </data>
+  <data name="Distances" xml:space="preserve">
+    <value>Uzaklıklar</value>
+  </data>
+  <data name="ADS flags" xml:space="preserve">
+    <value>ADS bayrakları</value>
+  </data>
+  <data name="Not logged in" xml:space="preserve">
+    <value>Oturum açılmadı</value>
+  </data>
+  <data name="Logged in, local player unavailable" xml:space="preserve">
+    <value>Oturum açık, yerel oyuncu kullanılamıyor</value>
+  </data>
+  <data name="No account loaded" xml:space="preserve">
+    <value>Hesap yüklenmedi</value>
+  </data>
+  <data name="No account loaded." xml:space="preserve">
+    <value>Hesap yüklenmedi.</value>
+  </data>
+  <data name="No fren configured" xml:space="preserve">
+    <value>Fren yapılandırılmadı</value>
+  </data>
+  <data name="Inactive" xml:space="preserve">
+    <value>Etkin değil</value>
+  </data>
+  <data name="In party but not visible" xml:space="preserve">
+    <value>Grupta ancak görünmüyor</value>
+  </data>
+  <data name="Fren not found" xml:space="preserve">
+    <value>Fren bulunamadı</value>
+  </data>
+  <data name="in party" xml:space="preserve">
+    <value>grupta</value>
+  </data>
+  <data name="not in party" xml:space="preserve">
+    <value>grupta değil</value>
+  </data>
+  <data name="Not in a party" xml:space="preserve">
+    <value>Bir grupta değil</value>
+  </data>
+  <data name="Mounted" xml:space="preserve">
+    <value>Binekte</value>
+  </data>
+  <data name="On foot" xml:space="preserve">
+    <value>Yaya</value>
+  </data>
+  <data name="Not visible" xml:space="preserve">
+    <value>Görünmüyor</value>
+  </data>
+  <data name="Active checks running" xml:space="preserve">
+    <value>Etkin kontroller çalışıyor</value>
+  </data>
+  <data name="Idle; last {0}" xml:space="preserve">
+    <value>Boşta; son {0}</value>
+  </data>
+  <data name="Slot {0}" xml:space="preserve">
+    <value>Yuva {0}</value>
+  </data>
+  <data name="All FR on" xml:space="preserve">
+    <value>Tüm FR'leri aç</value>
+  </data>
+  <data name="All FR off" xml:space="preserve">
+    <value>Tüm FR'leri kapat</value>
+  </data>
+  <data name="Fren Rider Mini" xml:space="preserve">
+    <value>Fren Rider Mini</value>
+  </data>
+  <data name="Attack" xml:space="preserve">
+    <value>Saldırı</value>
+  </data>
+  <data name="Defense" xml:space="preserve">
+    <value>Savunma</value>
+  </data>
+  <data name="&lt;none&gt;" xml:space="preserve">
+    <value>&lt;yok&gt;</value>
+  </data>
+  <data name="UI / About" xml:space="preserve">
+    <value>Arayüz / Hakkında</value>
+  </data>
+  <data name="DEFAULT CONFIG" xml:space="preserve">
+    <value>VARSAYILAN YAPILANDIRMA</value>
+  </data>
+  <data name="REMOTE PROFILES (DAD)" xml:space="preserve">
+    <value>UZAK PROFİLLER (DAD)</value>
+  </data>
+  <data name="REMOTE DAD PROFILE" xml:space="preserve">
+    <value>UZAK DAD PROFİLİ</value>
+  </data>
+  <data name="REMOTE: {0}" xml:space="preserve">
+    <value>UZAK: {0}</value>
+  </data>
+  <data name="Fren Rider Settings - {0}" xml:space="preserve">
+    <value>Fren Rider Ayarları - {0}</value>
+  </data>
+  <data name="DELETE" xml:space="preserve">
+    <value>SİL</value>
+  </data>
+  <data name="DELETE REMOTE" xml:space="preserve">
+    <value>UZAĞI SİL</value>
+  </data>
+  <data name="Everything Sync" xml:space="preserve">
+    <value>Her şeyi eşitle</value>
+  </data>
+  <data name="Full Tab Sync" xml:space="preserve">
+    <value>Tüm sekmeyi eşitle</value>
+  </data>
+  <data name="Reset All" xml:space="preserve">
+    <value>Tümünü sıfırla</value>
+  </data>
+  <data name="Reset This" xml:space="preserve">
+    <value>Bunu sıfırla</value>
+  </data>
+  <data name="Sync all" xml:space="preserve">
+    <value>Tümünü eşitle</value>
+  </data>
+  <data name="Fren Name" xml:space="preserve">
+    <value>Fren adı</value>
+  </data>
+  <data name="DAD Profile Acceptance" xml:space="preserve">
+    <value>DAD profil kabulü</value>
+  </data>
+  <data name="Temporary" xml:space="preserve">
+    <value>Geçici</value>
+  </data>
+  <data name="Permanent" xml:space="preserve">
+    <value>Kalıcı</value>
+  </data>
+  <data name="Fren Rider enabled by default" xml:space="preserve">
+    <value>Fren Rider varsayılan olarak etkin</value>
+  </data>
+  <data name="Enabled when transferred" xml:space="preserve">
+    <value>Aktarıldığında etkin</value>
+  </data>
+  <data name="Display label" xml:space="preserve">
+    <value>Görüntü etiketi</value>
+  </data>
+  <data name="Show Fren Rider status in the server info bar." xml:space="preserve">
+    <value>Sunucu bilgi çubuğunda Fren Rider durumunu göster.</value>
+  </data>
+  <data name="Obfuscate character names in FrenRider UI." xml:space="preserve">
+    <value>FrenRider arayüzünde karakter adlarını gizle.</value>
+  </data>
+  <data name="Not logged in. FrenRider waits until a character is loaded." xml:space="preserve">
+    <value>Oturum açılmadı. FrenRider bir karakter yüklenene kadar bekler.</value>
+  </data>
+  <data name="AutoDuty detected while FrenRider is enabled." xml:space="preserve">
+    <value>FrenRider etkinken AutoDuty algılandı.</value>
+  </data>
+  <data name="Set DEFAULT CONFIG and every local character in the current account, including the active temporary profile." xml:space="preserve">
+    <value>VARSAYILAN YAPILANDIRMA'yı ve etkin geçici profil dahil mevcut hesaptaki tüm yerel karakterleri ayarla.</value>
+  </data>
+  <data name="Fly You Fools (fly alongside instead of pillion)" xml:space="preserve">
+    <value>Fly You Fools (artçı yerine yanında uç)</value>
+  </data>
+  <data name="Try Teleport to Fren When Out of Zone" xml:space="preserve">
+    <value>Bölge dışındayken Fren'e ışınlanmayı dene</value>
+  </data>
+  <data name="Follow local aetheryte networks" xml:space="preserve">
+    <value>Yerel aetheryte ağlarını takip et</value>
+  </data>
+  <data name="Teleport Delay (seconds)" xml:space="preserve">
+    <value>Işınlanma gecikmesi (saniye)</value>
+  </data>
+  <data name="Nudge in duty when fren not nearby/in-zone" xml:space="preserve">
+    <value>Fren yakında/bölgede değilken görevde ileri it</value>
+  </data>
+  <data name="Use Phoenix Downs for recovery" xml:space="preserve">
+    <value>Kurtarma için Phoenix Down kullan</value>
+  </data>
+  <data name="Revive anyone within range outdoors" xml:space="preserve">
+    <value>Dışarıda menzildeki herkesi dirilt</value>
+  </data>
+  <data name="Allow Phoenix Down use during combat" xml:space="preserve">
+    <value>Savaş sırasında Phoenix Down kullanımına izin ver</value>
+  </data>
+  <data name="Respawn after death outside duties after" xml:space="preserve">
+    <value>Görev dışında ölümden sonra yeniden doğma süresi</value>
+  </data>
+  <data name="Respawn after death inside duties after" xml:space="preserve">
+    <value>Görev içinde ölümden sonra yeniden doğma süresi</value>
+  </data>
+  <data name="seconds" xml:space="preserve">
+    <value>saniye</value>
+  </data>
+  <data name="Mount-up to chase fren if &gt;" xml:space="preserve">
+    <value>Fren'i kovalamak için bineğe bin; uzaklık &gt;</value>
+  </data>
+  <data name="y from fren" xml:space="preserve">
+    <value>y fren'den</value>
+  </data>
+  <data name="after" xml:space="preserve">
+    <value>sonra</value>
+  </data>
+  <data name="Mount Name (if flying solo)" xml:space="preserve">
+    <value>Binek adı (tek başına uçarken)</value>
+  </data>
+  <data name="(none)" xml:space="preserve">
+    <value>(yok)</value>
+  </data>
+  <data name="Mount Roulette" xml:space="preserve">
+    <value>Rastgele binek</value>
+  </data>
+  <data name="Summon Chocobo" xml:space="preserve">
+    <value>Chocobo çağır</value>
+  </data>
+  <data name="Gysahl Greens: {0}" xml:space="preserve">
+    <value>Gysahl Greens: {0}</value>
+  </data>
+  <data name="Companion Stance" xml:space="preserve">
+    <value>Yoldaş duruşu</value>
+  </data>
+  <data name="Free Stance" xml:space="preserve">
+    <value>Serbest duruş</value>
+  </data>
+  <data name="Defender Stance" xml:space="preserve">
+    <value>Savunucu duruşu</value>
+  </data>
+  <data name="Attacker Stance" xml:space="preserve">
+    <value>Saldırgan duruşu</value>
+  </data>
+  <data name="Healer Stance" xml:space="preserve">
+    <value>Şifacı duruşu</value>
+  </data>
+  <data name="Auto Discard (/ays discard)" xml:space="preserve">
+    <value>Otomatik atma (/ays discard)</value>
+  </data>
+  <data name="Update Interval (seconds)" xml:space="preserve">
+    <value>Güncelleme aralığı (saniye)</value>
+  </data>
+  <data name="WARNING: Very low update interval may impact game performance!" xml:space="preserve">
+    <value>UYARI: Çok düşük güncelleme aralığı oyun performansını etkileyebilir!</value>
+  </data>
+  <data name="Cling Distance" xml:space="preserve">
+    <value>Yakın durma uzaklığı</value>
+  </data>
+  <data name="Cling Type" xml:space="preserve">
+    <value>Yakın durma türü</value>
+  </data>
+  <data name="Cling Type (Duty)" xml:space="preserve">
+    <value>Yakın durma türü (görev)</value>
+  </data>
+  <data name="BossMod Follow" xml:space="preserve">
+    <value>BossMod takibi</value>
+  </data>
+  <data name="Vanilla Follow" xml:space="preserve">
+    <value>Oyunun yerleşik takibi</value>
+  </data>
+  <data name="Social Distancing" xml:space="preserve">
+    <value>Mesafe koruma</value>
+  </data>
+  <data name="Social Distance (yalms)" xml:space="preserve">
+    <value>Korunan mesafe (yalm)</value>
+  </data>
+  <data name="Social Distance Indoors" xml:space="preserve">
+    <value>İç mekânda mesafe koruma</value>
+  </data>
+  <data name="X Wiggle (+/- yalms)" xml:space="preserve">
+    <value>X sapması (+/- yalm)</value>
+  </data>
+  <data name="Z Wiggle (+/- yalms)" xml:space="preserve">
+    <value>Z sapması (+/- yalm)</value>
+  </data>
+  <data name="Max Distances" xml:space="preserve">
+    <value>En fazla uzaklıklar</value>
+  </data>
+  <data name="Max Follow Distance" xml:space="preserve">
+    <value>En fazla takip uzaklığı</value>
+  </data>
+  <data name="Max Follow Distance (Foray)" xml:space="preserve">
+    <value>En fazla takip uzaklığı (foray)</value>
+  </data>
+  <data name="Deep Dungeon Extra Cling" xml:space="preserve">
+    <value>Deep Dungeon ek yakın durma</value>
+  </data>
+  <data name="FATE Extra Cling" xml:space="preserve">
+    <value>FATE ek yakın durma</value>
+  </data>
+  <data name="Auto Sync FATE" xml:space="preserve">
+    <value>FATE'i otomatik eşitle</value>
+  </data>
+  <data name="Formation Following" xml:space="preserve">
+    <value>Dizilişle takip</value>
+  </data>
+  <data name="Follow in Combat" xml:space="preserve">
+    <value>Savaşta takip</value>
+  </data>
+  <data name="Harmonized Cling Reset Ticks" xml:space="preserve">
+    <value>Uyumlu yakın durma sıfırlama tikleri</value>
+  </data>
+  <data name="Rotation Plugin" xml:space="preserve">
+    <value>Rotasyon eklentisi</value>
+  </data>
+  <data name="Rotation Plugin (Foray)" xml:space="preserve">
+    <value>Rotasyon eklentisi (foray)</value>
+  </data>
+  <data name="Daedalus Party Mode" xml:space="preserve">
+    <value>Daedalus grup modu</value>
+  </data>
+  <data name="None" xml:space="preserve">
+    <value>Yok</value>
+  </data>
+  <data name="Focus" xml:space="preserve">
+    <value>Odaklan</value>
+  </data>
+  <data name="Split" xml:space="preserve">
+    <value>Bölün</value>
+  </data>
+  <data name="Kill Adds" xml:space="preserve">
+    <value>Ek düşmanları öldür</value>
+  </data>
+  <data name="Autorot Presets" xml:space="preserve">
+    <value>Otomatik rotasyon ön ayarları</value>
+  </data>
+  <data name="Configure rotation preset manually" xml:space="preserve">
+    <value>Rotasyon ön ayarını elle yapılandır</value>
+  </data>
+  <data name="BM Rotation Preset" xml:space="preserve">
+    <value>BM rotasyon ön ayarı</value>
+  </data>
+  <data name="BM Rotation Preset (DD)" xml:space="preserve">
+    <value>BM rotasyon ön ayarı (DD)</value>
+  </data>
+  <data name="BM Rotation Preset (FATE)" xml:space="preserve">
+    <value>BM rotasyon ön ayarı (FATE)</value>
+  </data>
+  <data name="Force BossMod preset regardless of rotation" xml:space="preserve">
+    <value>Rotasyondan bağımsız BossMod ön ayarını zorla</value>
+  </data>
+  <data name="Push Presets Now" xml:space="preserve">
+    <value>Ön ayarları şimdi gönder</value>
+  </data>
+  <data name="Cleanup Mode" xml:space="preserve">
+    <value>Temizleme modu</value>
+  </data>
+  <data name="Restore snapshot" xml:space="preserve">
+    <value>Anlık görüntüyü geri yükle</value>
+  </data>
+  <data name="Turn everything off" xml:space="preserve">
+    <value>Her şeyi kapat</value>
+  </data>
+  <data name="RSR Operating Mode" xml:space="preserve">
+    <value>RSR çalışma modu</value>
+  </data>
+  <data name="RSR Aggro Type" xml:space="preserve">
+    <value>RSR aggro türü</value>
+  </data>
+  <data name="All Attackable Targets" xml:space="preserve">
+    <value>Saldırılabilir tüm hedefler</value>
+  </data>
+  <data name="Previously Engaged Targets" xml:space="preserve">
+    <value>Önceden çatışılan hedefler</value>
+  </data>
+  <data name="All Targets When Solo in Duty" xml:space="preserve">
+    <value>Görevde yalnızken tüm hedefler</value>
+  </data>
+  <data name="All Targets When Solo" xml:space="preserve">
+    <value>Yalnızken tüm hedefler</value>
+  </data>
+  <data name="Solo Deep Dungeon Smart" xml:space="preserve">
+    <value>Akıllı tek kişilik Deep Dungeon</value>
+  </data>
+  <data name="Manual" xml:space="preserve">
+    <value>Elle</value>
+  </data>
+  <data name="Support" xml:space="preserve">
+    <value>Destek</value>
+  </data>
+  <data name="Don't move while casting" xml:space="preserve">
+    <value>Büyü yaparken hareket etme</value>
+  </data>
+  <data name="Positional" xml:space="preserve">
+    <value>Konumsal</value>
+  </data>
+  <data name="Front" xml:space="preserve">
+    <value>Ön</value>
+  </data>
+  <data name="Rear" xml:space="preserve">
+    <value>Arka</value>
+  </data>
+  <data name="Any" xml:space="preserve">
+    <value>Herhangi</value>
+  </data>
+  <data name="Combat Max Distance" xml:space="preserve">
+    <value>Savaşta en fazla uzaklık</value>
+  </data>
+  <data name="Limit Break HP %" xml:space="preserve">
+    <value>Limit Break HP %</value>
+  </data>
+  <data name="Beastmaster Capture" xml:space="preserve">
+    <value>Beastmaster Capture</value>
+  </data>
+  <data name="Try to catch beasts" xml:space="preserve">
+    <value>Canavarları yakalamayı dene</value>
+  </data>
+  <data name="Capture HP: within 5 levels below you or equal" xml:space="preserve">
+    <value>Capture HP: en fazla 5 seviye düşük veya eşit</value>
+  </data>
+  <data name="Capture HP: more than 5 levels below you" xml:space="preserve">
+    <value>Capture HP: 5 seviyeden fazla düşük</value>
+  </data>
+  <data name="Saved beasts" xml:space="preserve">
+    <value>Kayıtlı canavarlar</value>
+  </data>
+  <data name="Select a local character to browse their saved beasts." xml:space="preserve">
+    <value>Kayıtlı canavarlarını görmek için yerel bir karakter seçin.</value>
+  </data>
+  <data name="Obstacle maps on" xml:space="preserve">
+    <value>Engel haritaları açık</value>
+  </data>
+  <data name="BMR reduce activation range for outdoor areas" xml:space="preserve">
+    <value>BMR açık alanlarda etkinleşme menzilini azalt</value>
+  </data>
+  <data name="BMR Disable Hunt Modules" xml:space="preserve">
+    <value>BMR av modüllerini kapat</value>
+  </data>
+  <data name="BMR Disable Queen Lunatender" xml:space="preserve">
+    <value>BMR Queen Lunatender'ı kapat</value>
+  </data>
+  <data name="ADS Duty Handoff" xml:space="preserve">
+    <value>ADS görev devri</value>
+  </data>
+  <data name="Duty Families" xml:space="preserve">
+    <value>Görev aileleri</value>
+  </data>
+  <data name="sec ready" xml:space="preserve">
+    <value>s hazır</value>
+  </data>
+  <data name="Seed family rows from legacy values" xml:space="preserve">
+    <value>Aile satırlarını eski değerlerle doldur</value>
+  </data>
+  <data name="Temporarily controlled by DAD" xml:space="preserve">
+    <value>Geçici olarak DAD denetiminde</value>
+  </data>
+  <data name="Equip job stone for current class" xml:space="preserve">
+    <value>Mevcut sınıfın meslek taşını tak</value>
+  </data>
+  <data name="Loot" xml:space="preserve">
+    <value>Ganimet</value>
+  </data>
+  <data name="Loot Type" xml:space="preserve">
+    <value>Ganimet türü</value>
+  </data>
+  <data name="unchanged" xml:space="preserve">
+    <value>değiştirme</value>
+  </data>
+  <data name="need" xml:space="preserve">
+    <value>ihtiyaç</value>
+  </data>
+  <data name="greed" xml:space="preserve">
+    <value>açgözlülük</value>
+  </data>
+  <data name="pass" xml:space="preserve">
+    <value>pas</value>
+  </data>
+  <data name="OPEN ADS LOOT OPTIONS" xml:space="preserve">
+    <value>ADS GANİMET SEÇENEKLERİNİ AÇ</value>
+  </data>
+  <data name="Use HQ food" xml:space="preserve">
+    <value>HQ yiyecek kullan</value>
+  </data>
+  <data name="Search for Food if Depleted" xml:space="preserve">
+    <value>Tükenirse yiyecek ara</value>
+  </data>
+  <data name="Clear Food" xml:space="preserve">
+    <value>Yiyeceği temizle</value>
+  </data>
+  <data name="No food selected. Food is optional." xml:space="preserve">
+    <value>Yiyecek seçilmedi. Yiyecek isteğe bağlıdır.</value>
+  </data>
+  <data name="Type at least 2 characters to search..." xml:space="preserve">
+    <value>Aramak için en az 2 karakter yazın...</value>
+  </data>
+  <data name="No results. Try a different search term." xml:space="preserve">
+    <value>Sonuç yok. Başka bir arama sözcüğü deneyin.</value>
+  </data>
+  <data name="Repair Mode" xml:space="preserve">
+    <value>Onarım modu</value>
+  </data>
+  <data name="Self" xml:space="preserve">
+    <value>Kendi</value>
+  </data>
+  <data name="NPC no-inn" xml:space="preserve">
+    <value>NPC, han yok</value>
+  </data>
+  <data name="NPC No Inn + No TP" xml:space="preserve">
+    <value>NPC, han yok + TP yok</value>
+  </data>
+  <data name="NPC repair + inn room" xml:space="preserve">
+    <value>NPC onarımı + han odası</value>
+  </data>
+  <data name="Repair At % Durability" xml:space="preserve">
+    <value>% dayanıklılıkta onar</value>
+  </data>
+  <data name="Test ADS NPC No-Inn Repair" xml:space="preserve">
+    <value>ADS NPC hansız onarımını test et</value>
+  </data>
+  <data name="Desynthesis" xml:space="preserve">
+    <value>Ayrıştırma</value>
+  </data>
+  <data name="Enable Auto Desynth" xml:space="preserve">
+    <value>Otomatik ayrıştırmayı aç</value>
+  </data>
+  <data name="OPEN DESYNTH CONFIG" xml:space="preserve">
+    <value>AYRIŞTIRMA YAPILANDIRMASINI AÇ</value>
+  </data>
+  <data name="Idle Behavior" xml:space="preserve">
+    <value>Boşta davranış</value>
+  </data>
+  <data name="Idle Mode" xml:space="preserve">
+    <value>Boşta modu</value>
+  </data>
+  <data name="Specific Action" xml:space="preserve">
+    <value>Belirli eylem</value>
+  </data>
+  <data name="Action From List" xml:space="preserve">
+    <value>Listeden eylem</value>
+  </data>
+  <data name="Idle Command" xml:space="preserve">
+    <value>Boşta komutu</value>
+  </data>
+  <data name="List Source" xml:space="preserve">
+    <value>Liste kaynağı</value>
+  </data>
+  <data name="Default List" xml:space="preserve">
+    <value>Varsayılan liste</value>
+  </data>
+  <data name="Custom List" xml:space="preserve">
+    <value>Özel liste</value>
+  </data>
+  <data name="Idle Ticks Before Action" xml:space="preserve">
+    <value>Eylem öncesi boşta tikleri</value>
+  </data>
+  <data name="Echo Messages" xml:space="preserve">
+    <value>Sohbet iletileri</value>
+  </data>
+  <data name="Invite Whitelist" xml:space="preserve">
+    <value>Davet izin listesi</value>
+  </data>
+  <data name="Trusted inviters" xml:space="preserve">
+    <value>Güvenilen davetçiler</value>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>Ekle</value>
+  </data>
+  <data name="Auto-Yes Dialogs" xml:space="preserve">
+    <value>Otomatik Evet diyalogları</value>
+  </data>
+  <data name="Teleport offers" xml:space="preserve">
+    <value>Işınlanma teklifleri</value>
+  </data>
+  <data name="Party invites (backup)" xml:space="preserve">
+    <value>Grup davetleri (yedek)</value>
+  </data>
+  <data name="Raise offers are accepted automatically while FrenRider is enabled." xml:space="preserve">
+    <value>FrenRider etkinken Raise teklifleri otomatik kabul edilir.</value>
+  </data>
+  <data name="Exit Behaviour" xml:space="preserve">
+    <value>Çıkış davranışı</value>
+  </data>
+  <data name="Duty-end delay" xml:space="preserve">
+    <value>Görev sonu gecikmesi</value>
+  </data>
+  <data name="seconds after duty ends" xml:space="preserve">
+    <value>görev bitiminden sonra saniye</value>
+  </data>
+  <data name="UI Settings" xml:space="preserve">
+    <value>Arayüz ayarları</value>
+  </data>
+  <data name="Video Notifications" xml:space="preserve">
+    <value>Video bildirimleri</value>
+  </data>
+  <data name="Movable Config Window" xml:space="preserve">
+    <value>Taşınabilir yapılandırma penceresi</value>
+  </data>
+  <data name="DTR Bar Enabled" xml:space="preserve">
+    <value>DTR çubuğu etkin</value>
+  </data>
+  <data name="DTR Bar Mode" xml:space="preserve">
+    <value>DTR çubuğu modu</value>
+  </data>
+  <data name="Icon+Text" xml:space="preserve">
+    <value>Simge+metin</value>
+  </data>
+  <data name="DTR Icons (max 3 characters)" xml:space="preserve">
+    <value>DTR simgeleri (en fazla 3 karakter)</value>
+  </data>
+  <data name="Copy Icon Guide Link" xml:space="preserve">
+    <value>Simge rehberi bağlantısını kopyala</value>
+  </data>
+  <data name="VLC not found" xml:space="preserve">
+    <value>VLC bulunamadı</value>
+  </data>
+  <data name="Download VLC" xml:space="preserve">
+    <value>VLC indir</value>
+  </data>
+  <data name="Advanced" xml:space="preserve">
+    <value>Gelişmiş</value>
+  </data>
+  <data name="Debug / Logging" xml:space="preserve">
+    <value>Hata ayıklama / Günlük</value>
+  </data>
+  <data name="Presets" xml:space="preserve">
+    <value>Ön ayarlar</value>
+  </data>
+  <data name="Behavior" xml:space="preserve">
+    <value>Davranış</value>
+  </data>
+  <data name="Hacks" xml:space="preserve">
+    <value>Değişiklikler</value>
+  </data>
+  <data name="DISABLE PANDORA's BOX" xml:space="preserve">
+    <value>PANDORA's BOX'I KAPAT</value>
+  </data>
+  <data name="Commands:" xml:space="preserve">
+    <value>Komutlar:</value>
+  </data>
+  <data name="Required Dependencies:" xml:space="preserve">
+    <value>Gerekli bağımlılıklar:</value>
+  </data>
+  <data name="Optional Plugins:" xml:space="preserve">
+    <value>İsteğe bağlı eklentiler:</value>
+  </data>
+  <data name="Multiplayer Guide:" xml:space="preserve">
+    <value>Çok oyunculu rehber:</value>
+  </data>
+  <data name="Made by McVaxius" xml:space="preserve">
+    <value>Hazırlayan: mcvaxius</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Kapat</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>Durum</value>
+  </data>
+  <data name="Beast" xml:space="preserve">
+    <value>Canavar</value>
+  </data>
+  <data name="Saved ownership" xml:space="preserve">
+    <value>Kayıtlı sahiplik</value>
+  </data>
+  <data name="DD Extra Distance" xml:space="preserve">
+    <value>DD ek uzaklık</value>
+  </data>
+  <data name="FATE Extra Distance" xml:space="preserve">
+    <value>FATE ek uzaklık</value>
+  </data>
+  <data name="Max AI Distance" xml:space="preserve">
+    <value>En fazla AI uzaklığı</value>
+  </data>
+  <data name="LB Threshold %" xml:space="preserve">
+    <value>LB eşiği %</value>
+  </data>
+  <data name="ADS Exit Method" xml:space="preserve">
+    <value>ADS çıkış yöntemi</value>
+  </data>
+  <data name="FrenRider Exit method" xml:space="preserve">
+    <value>FrenRider çıkış yöntemi</value>
+  </data>
+  <data name="Exit after N seconds" xml:space="preserve">
+    <value>N saniye sonra çık</value>
+  </data>
+  <data name="Leave when all others left" xml:space="preserve">
+    <value>Diğer herkes ayrılınca çık</value>
+  </data>
+  <data name="No automatic exit" xml:space="preserve">
+    <value>Otomatik çıkış yok</value>
+  </data>
+  <data name="Food Item Name" xml:space="preserve">
+    <value>Yiyecek öğesi adı</value>
+  </data>
+  <data name="Add command" xml:space="preserve">
+    <value>Komut ekle</value>
+  </data>
+  <data name="Remove command" xml:space="preserve">
+    <value>Komut kaldır</value>
+  </data>
+  <data name="Click to copy Daedalus repository URL" xml:space="preserve">
+    <value>Daedalus depo URL'sini kopyalamak için tıklayın</value>
+  </data>
+  <data name="Click to copy URL to clipboard" xml:space="preserve">
+    <value>URL'yi panoya kopyalamak için tıklayın</value>
+  </data>
+  <data name="Click to download VLC media player" xml:space="preserve">
+    <value>VLC media player'ı indirmek için tıklayın</value>
+  </data>
+  <data name="Copies the Lodestone blog link with suggested glyphs" xml:space="preserve">
+    <value>Önerilen gliflerin olduğu Lodestone blog bağlantısını kopyalar</value>
+  </data>
+  <data name="Disable Krangle to edit fren name." xml:space="preserve">
+    <value>Fren adını düzenlemek için Krangle'ı kapatın.</value>
+  </data>
+  <data name="Disable Krangle to edit the account alias." xml:space="preserve">
+    <value>Hesap takma adını düzenlemek için Krangle'ı kapatın.</value>
+  </data>
+  <data name="Select from current party members" xml:space="preserve">
+    <value>Mevcut grup üyelerinden seç</value>
+  </data>
+  <data name="Hold CTRL and click to delete this remote profile." xml:space="preserve">
+    <value>Bu uzak profili silmek için CTRL basılıyken tıklayın.</value>
+  </data>
+  <data name="The currently active character profile cannot be deleted while logged in." xml:space="preserve">
+    <value>Oturum açıkken etkin karakter profili silinemez.</value>
+  </data>
+  <data name="Hold CTRL and click to delete this character's config.&#xA;This cannot be undone." xml:space="preserve">
+    <value>Bu karakterin yapılandırmasını silmek için CTRL basılıyken tıklayın.
+Bu işlem geri alınamaz.</value>
+  </data>
+  <data name="Log in to a character to create one." xml:space="preserve">
+    <value>Bir profil oluşturmak için bir karakterle oturum açın.</value>
+  </data>
+  <data name="Separate profiles for exact remote identities. They never become local character rows." xml:space="preserve">
+    <value>Tam uzak kimlikler için ayrı profiller. Asla yerel karakter satırlarına dönüşmezler.</value>
+  </data>
+  <data name="This row is separate from local characters and can never become the active-character profile." xml:space="preserve">
+    <value>Bu satır yerel karakterlerden ayrıdır ve asla etkin karakter profili olamaz.</value>
+  </data>
+  <data name="Incoming DAD profiles will replace this character's saved profile." xml:space="preserve">
+    <value>Gelen DAD profilleri bu karakterin kayıtlı profilini değiştirecek.</value>
+  </data>
+  <data name="FrenRider installs BossMod presets whenever it is enabled." xml:space="preserve">
+    <value>FrenRider her etkinleştirildiğinde BossMod ön ayarlarını kurar.</value>
+  </data>
+  <data name="Managed presets: BMR/VBM use FRENRIDER role presets; RSR/WRATH/DAEDALUS use passive role presets." xml:space="preserve">
+    <value>Yönetilen ön ayarlar: BMR/VBM FRENRIDER rol ön ayarlarını; RSR/WRATH/DAEDALUS pasif rol ön ayarlarını kullanır.</value>
+  </data>
+  <data name="Copy DEFAULT CONFIG character-profile settings to every character profile in this account." xml:space="preserve">
+    <value>VARSAYILAN YAPILANDIRMA karakter profili ayarlarını bu hesaptaki tüm karakter profillerine kopyala.</value>
+  </data>
+  <data name="Copy this DEFAULT CONFIG tab to every character profile in this account." xml:space="preserve">
+    <value>Bu VARSAYILAN YAPILANDIRMA sekmesini bu hesaptaki tüm karakter profillerine kopyala.</value>
+  </data>
+  <data name="UI / About uses global settings and is not copied to character profiles." xml:space="preserve">
+    <value>Arayüz / Hakkında genel ayarları kullanır ve karakter profillerine kopyalanmaz.</value>
+  </data>
+  <data name="Set DEFAULT CONFIG and every local character in this account, including the active temporary profile." xml:space="preserve">
+    <value>VARSAYILAN YAPILANDIRMA'yı ve etkin geçici profil dahil bu hesaptaki tüm yerel karakterleri ayarla.</value>
+  </data>
+  <data name="Copy '{0}' from DEFAULT CONFIG to every character profile in this account." xml:space="preserve">
+    <value>'{0}' ayarını VARSAYILAN YAPILANDIRMA'dan bu hesaptaki tüm karakter profillerine kopyala.</value>
+  </data>
+  <data name="AutoDuty Detected - Action Required" xml:space="preserve">
+    <value>AutoDuty algılandı - İşlem gerekli</value>
+  </data>
+  <data name="AutoDuty is enabled and may cause issues:" xml:space="preserve">
+    <value>AutoDuty etkin ve sorunlara yol açabilir:</value>
+  </data>
+  <data name="FrenRider requires AutoDuty to be disabled for proper operation." xml:space="preserve">
+    <value>FrenRider'ın düzgün çalışması için AutoDuty kapatılmalıdır.</value>
+  </data>
+  <data name="Disable AutoDuty" xml:space="preserve">
+    <value>AutoDuty'yi kapat</value>
+  </data>
+  <data name="This window will close automatically after disabling AutoDuty." xml:space="preserve">
+    <value>AutoDuty kapatıldıktan sonra bu pencere otomatik kapanacak.</value>
+  </data>
+  <data name="0 = disabled.&#xA;1 = ADS self repair.&#xA;2 = ADS NPC repair without inn fallback.&#xA;3 = ADS NPC repair only when a mender is within 120y.&#xA;4 = ADS NPC repair near an inn, then enter the inn room." xml:space="preserve">
+    <value>0 = kapalı.
+1 = ADS kendi kendine onarım.
+2 = Han yedeği olmadan ADS NPC onarımı.
+3 = Yalnızca 120y içinde tamirci varsa ADS NPC onarımı.
+4 = Han yakınında ADS NPC onarımı, ardından han odasına giriş.</value>
+  </data>
+  <data name="Additionally revive non-party players within 15 yalms outdoors. Party members and healers have priority. Never approach strangers." xml:space="preserve">
+    <value>Ayrıca dışarıda 15 yalm içindeki grup dışı oyuncuları dirilt. Grup üyeleri ve şifacılar önceliklidir. Yabancılara asla yaklaşma.</value>
+  </data>
+  <data name="After DutyCompleted and duty exit, ask ADS to run configured desynthesis. FrenRider pauses automatic actions until completion or the 180s timeout." xml:space="preserve">
+    <value>DutyCompleted ve görevden çıkış sonrasında ADS'den yapılandırılmış ayrıştırmayı çalıştırmasını iste. FrenRider tamamlanana veya 180 s zaman aşımına kadar otomatik eylemleri duraklatır.</value>
+  </data>
+  <data name="After remaining continuously unconscious inside duties for this delay, open the Return prompt and accept it. Duty scope is selected only by BoundByDuty. Minimum: 1 second. Default: 60." xml:space="preserve">
+    <value>Görev içinde bu süre boyunca kesintisiz bilinçsiz kaldıktan sonra Return istemini aç ve kabul et. Görev kapsamı yalnızca BoundByDuty ile seçilir. En az: 1 saniye. Varsayılan: 60.</value>
+  </data>
+  <data name="After remaining continuously unconscious outside duties for this delay, open the Return prompt and accept it. Minimum: 1 second. Default: 60." xml:space="preserve">
+    <value>Görev dışında bu süre boyunca kesintisiz bilinçsiz kaldıktan sonra Return istemini aç ve kabul et. En az: 1 saniye. Varsayılan: 60.</value>
+  </data>
+  <data name="Applies in dungeons and outdoors. Off waits for the rescuer to leave combat before approaching or using an item; current combat may finish, but new pulls stay blocked. On still respects native item availability and every other recovery gate." xml:space="preserve">
+    <value>Zindanlarda ve dışarıda geçerlidir. Kapalıyken yaklaşmadan veya öğe kullanmadan önce kurtarıcının savaştan çıkmasını bekler; mevcut savaş bitebilir ancak yeni çekişler engellenir. Açıkken de oyunun öğe kullanılabilirliğine ve diğer tüm kurtarma koşullarına uyar.</value>
+  </data>
+  <data name="Auto-summon chocobo companion using Gysahl Greens when timer is low.&#xA;Will not summon in sanctuaries or duties." xml:space="preserve">
+    <value>Süre azaldığında Gysahl Greens kullanarak chocobo yoldaşını otomatik çağır.
+Güvenli alanlarda veya görevlerde çağırmaz.</value>
+  </data>
+  <data name="Automatically accept teleport offers (e.g., Return, Teleport to).&#xA;Note: Party invites are handled by the whitelist system below." xml:space="preserve">
+    <value>Işınlanma tekliflerini otomatik kabul et (ör. Return, Teleport to).
+Not: Grup davetlerini aşağıdaki izin listesi sistemi yönetir.</value>
+  </data>
+  <data name="Automatically accept teleport offers." xml:space="preserve">
+    <value>Işınlanma tekliflerini otomatik kabul et.</value>
+  </data>
+  <data name="Automatically click Yes on specific dialog types when FrenRider is enabled.&#xA;Works alongside YesAlready - FrenRider pauses YesAlready and handles these dialogs itself." xml:space="preserve">
+    <value>FrenRider etkinken belirli diyalog türlerinde otomatik Yes tıkla.
+YesAlready ile birlikte çalışır - FrenRider YesAlready'yi duraklatır ve bu diyalogları kendisi yönetir.</value>
+  </data>
+  <data name="Automatically leave the duty N seconds after it completes." xml:space="preserve">
+    <value>Görev tamamlandıktan N saniye sonra otomatik ayrıl.</value>
+  </data>
+  <data name="Backup auto-accept for party invites.&#xA;Primary invite handling uses the whitelist system above." xml:space="preserve">
+    <value>Grup davetleri için yedek otomatik kabul.
+Ana davet işleme yukarıdaki izin listesi sistemini kullanır.</value>
+  </data>
+  <data name="Backup auto-accept for party invites. Primary invite handling uses the whitelist." xml:space="preserve">
+    <value>Grup davetleri için yedek otomatik kabul. Ana davet işleme izin listesini kullanır.</value>
+  </data>
+  <data name="Both HP thresholds accept 1–100%. Exactly five levels below uses this second threshold.&#xA;100% permits Capture on a full-health beast and may initiate combat." xml:space="preserve">
+    <value>Her iki HP eşiği de %1–100 kabul eder. Tam beş seviye aşağıda ikinci eşik kullanılır.
+%100, tam canlı bir canavarda Capture'a izin verir ve savaş başlatabilir.</value>
+  </data>
+  <data name="Chocobo companion battle stance.&#xA;Controls how your companion behaves in combat." xml:space="preserve">
+    <value>Chocobo yoldaşının savaş duruşu.
+Yoldaşınızın savaştaki davranışını belirler.</value>
+  </data>
+  <data name="Combat positional preference.&#xA;Front: Stay in front of target&#xA;Rear: Stay behind target&#xA;Any: No preference&#xA;Auto: Let plugin decide based on job" xml:space="preserve">
+    <value>Savaş konumu tercihi.
+Ön: Hedefin önünde kal
+Arka: Hedefin arkasında kal
+Herhangi: Tercih yok
+Otomatik: Eklenti mesleğe göre karar verir</value>
+  </data>
+  <data name="Controls BossMod Reborn only. Default: off. Applies when FrenRider is enabled, regardless of combat provider." xml:space="preserve">
+    <value>Yalnızca BossMod Reborn'u yönetir. Varsayılan: kapalı. Savaş sağlayıcısından bağımsız olarak FrenRider etkinken uygulanır.</value>
+  </data>
+  <data name="Customize the glyphs used for enabled/disabled icon modes." xml:space="preserve">
+    <value>Etkin/kapalı simge modlarının gliflerini özelleştir.</value>
+  </data>
+  <data name="DTR bar display mode:&#xA;Text Only: 'FR: On/Off'&#xA;Icon+Text: '⚫ FR'&#xA;Icon Only: '⚫'" xml:space="preserve">
+    <value>DTR çubuğu görüntü modu:
+Yalnızca metin: 'FR: Açık/Kapalı'
+Simge+metin: '⚫ FR'
+Yalnızca simge: '⚫'</value>
+  </data>
+  <data name="Default List: Built-in emote list&#xA;Custom List: Your own list of commands" xml:space="preserve">
+    <value>Varsayılan liste: Yerleşik emote listesi
+Özel liste: Kendi komut listeniz</value>
+  </data>
+  <data name="Default List: built-in emotes&#xA;Custom List: your own command list" xml:space="preserve">
+    <value>Varsayılan liste: yerleşik emote'lar
+Özel liste: kendi komut listeniz</value>
+  </data>
+  <data name="Delay before opening the party window and teleporting. Allowed range: 5-300 seconds. Default: 30." xml:space="preserve">
+    <value>Grup penceresini açma ve ışınlanma öncesi gecikme. İzin verilen aralık: 5-300 saniye. Varsayılan: 30.</value>
+  </data>
+  <data name="Distance threshold (yalms) to start following fren.&#xA;When you are farther than this from fren, navigation begins." xml:space="preserve">
+    <value>Fren'i takip etmeye başlamak için uzaklık eşiği (yalm).
+Fren'den bu değerden uzak olduğunuzda gezinme başlar.</value>
+  </data>
+  <data name="Each family has its own enable toggle, maturity threshold, and continuous-ready handoff delay.&#xA;0 = not cleared, 1 = unsync cleared, 2 = duty support cleared, 3 = proven sync clear.&#xA;Handoff delay range: 2-300 seconds." xml:space="preserve">
+    <value>Her ailenin kendi etkinlik anahtarı, olgunluk eşiği ve sürekli hazır devir gecikmesi vardır.
+0 = tamamlanmadı, 1 = eşitlemesiz tamamlandı, 2 = görev desteğiyle tamamlandı, 3 = kanıtlanmış eşitlenmiş tamamlama.
+Devir gecikmesi aralığı: 2-300 saniye.</value>
+  </data>
+  <data name="Enable social distancing indoors too.&#xA;Off by default. Turn on if you want spacing in dungeons." xml:space="preserve">
+    <value>İç mekânda da mesafe korumayı aç.
+Varsayılan olarak kapalı. Zindanlarda aralık istiyorsanız açın.</value>
+  </data>
+  <data name="Extra distance added to cling in Deep Dungeons.&#xA;Prevents constant chasing in PotD/HoH." xml:space="preserve">
+    <value>Deep Dungeon'da yakın durmaya eklenen uzaklık.
+PotD/HoH içinde sürekli kovalamayı önler.</value>
+  </data>
+  <data name="Follow in a formation pattern (8-person grid).&#xA;Positions based on party slot number.&#xA;Disabled during mounting." xml:space="preserve">
+    <value>Diziliş düzeninde takip et (8 kişilik ızgara).
+Konumlar grup yuvası numarasına dayanır.
+Bineğe binerken kapalıdır.</value>
+  </data>
+  <data name="Garble all identifying text (character names, fren names, servers)&#xA;with military/exercise words. Useful for taking screenshots&#xA;to report issues without revealing personal info." xml:space="preserve">
+    <value>Tüm tanımlayıcı metni (karakter adları, fren adları, sunucular)
+askerî/tatbikat sözcükleriyle karıştır. Kişisel bilgileri açığa çıkarmadan
+sorun bildirmek için ekran görüntüsü alırken kullanışlıdır.</value>
+  </data>
+  <data name="Global setting. On plugin load and whenever it changes, applies casting movement lock to currently loaded BMR, VBM, and RSR plugins." xml:space="preserve">
+    <value>Genel ayar. Eklenti yüklenirken ve her değiştiğinde mevcut yüklü BMR, VBM ve RSR eklentilerine büyü sırasında hareket kilidi uygular.</value>
+  </data>
+  <data name="Hostile target selection sent to RotationSolver Reborn through its typed settings IPC." xml:space="preserve">
+    <value>Düşman hedef seçimi, türlenmiş ayarlar IPC'si üzerinden RotationSolver Reborn'a gönderilir.</value>
+  </data>
+  <data name="How loot is handled if LazyLoot is installed.&#xA;'unchanged' = Don't modify loot settings." xml:space="preserve">
+    <value>LazyLoot kuruluysa ganimetin nasıl işleneceği.
+'unchanged' = Ganimet ayarlarını değiştirme.</value>
+  </data>
+  <data name="How often the plugin runs its main logic loop.&#xA;Lower values = more responsive but higher CPU usage.&#xA;Default: 0.3s. WARNING: Values below 0.1 may impact performance." xml:space="preserve">
+    <value>Eklentinin ana mantık döngüsünün çalışma sıklığı.
+Düşük değer = daha hızlı tepki ancak daha fazla CPU kullanımı.
+Varsayılan: 0.3 s. UYARI: 0.1 altındaki değerler performansı etkileyebilir.</value>
+  </data>
+  <data name="Human-readable alias for this account group. Linked to account ID internally." xml:space="preserve">
+    <value>Bu hesap grubu için okunabilir takma ad. İçeride hesap ID'sine bağlıdır.</value>
+  </data>
+  <data name="If configured food runs out, search inventory for any food starting from lowest item ID." xml:space="preserve">
+    <value>Yapılandırılmış yiyecek biterse en düşük öğe ID'sinden başlayarak envanterde herhangi bir yiyecek ara.</value>
+  </data>
+  <data name="If enabled, you will summon your own mount instead of pillion riding.&#xA;Useful for flying zones.&#xA;&#xA;⚠️ IMPORTANT: This feature requires you to be grouped with your fren.&#xA;It will not work properly if ungrouped (won't jump into air to follow)." xml:space="preserve">
+    <value>Etkinse artçı olmak yerine kendi bineğinizi çağırırsınız.
+Uçuş bölgelerinde kullanışlıdır.
+
+⚠ ÖNEMLİ: Bu özellik fren'inizle aynı grupta olmanızı gerektirir.
+Grup dışında düzgün çalışmaz (takip için havaya zıplamaz).</value>
+  </data>
+  <data name="If your configured food runs out, search inventory for any food starting from lowest item ID." xml:space="preserve">
+    <value>Yapılandırılmış yiyeceğiniz biterse en düşük öğe ID'sinden başlayarak envanterde herhangi bir yiyecek ara.</value>
+  </data>
+  <data name="Immediately follow a fren's aethernet jump through Lifestream when you are at the same origin. Supports connected city, residential, and custom networks, including Bozja and Eureka." xml:space="preserve">
+    <value>Aynı başlangıç noktasındayken fren'in aethernet geçişini Lifestream üzerinden hemen takip et. Bozja ve Eureka dahil bağlı şehir, konut ve özel ağları destekler.</value>
+  </data>
+  <data name="Leave the duty if no other party members are visible in the zone." xml:space="preserve">
+    <value>Bölgede başka grup üyesi görünmüyorsa görevden ayrıl.</value>
+  </data>
+  <data name="Max distance to targets for combat AI.&#xA;424242 = Auto (plugin decides based on job: melee 2.6, caster 10)." xml:space="preserve">
+    <value>Savaş AI'sı için hedeflere en fazla uzaklık.
+424242 = Otomatik (eklenti mesleğe göre karar verir: yakın dövüş 2.6, büyücü 10).</value>
+  </data>
+  <data name="Max follow distance in forays (Eureka/Bozja).&#xA;Lower value to avoid mini-aetheryte transition issues." xml:space="preserve">
+    <value>Foray (Eureka/Bozja) içinde en fazla takip uzaklığı.
+Küçük aetheryte geçiş sorunlarını önlemek için azaltın.</value>
+  </data>
+  <data name="Maximum distance (yalms) to chase fren.&#xA;Beyond this, stop following to avoid zone-hopping." xml:space="preserve">
+    <value>Fren'i kovalamak için en fazla uzaklık (yalm).
+Bunun ötesinde bölge atlamayı önlemek için takibi durdur.</value>
+  </data>
+  <data name="Minimum distance to maintain from fren in outdoor/foray zones.&#xA;Prevents characters from stacking on top of each other (less bot-like).&#xA;Set to 0 to disable." xml:space="preserve">
+    <value>Dış alan/foray bölgelerinde fren'den korunacak en az uzaklık.
+Karakterlerin üst üste binmesini önler (daha az bot gibi görünür).
+Kapatmak için 0 yapın.</value>
+  </data>
+  <data name="Name of food to auto-consume.&#xA;Full item search from game data planned for a future update." xml:space="preserve">
+    <value>Otomatik yenilecek yiyeceğin adı.
+Oyun verisinden tam öğe araması gelecekteki güncelleme için planlanmıştır.</value>
+  </data>
+  <data name="Name of the auto-rotation preset for general content.&#xA;Must match a preset name in your rotation plugin.&#xA;Use 'none' to not change the preset." xml:space="preserve">
+    <value>Genel içerik için otomatik rotasyon ön ayarının adı.
+Rotasyon eklentinizdeki bir ön ayar adıyla eşleşmelidir.
+Ön ayarı değiştirmemek için 'none' kullanın.</value>
+  </data>
+  <data name="Name of the party member to follow. Can be partial if unique.&#xA;The @Server part is cosmetic for display; targeting uses the name before @.&#xA;Names are auto-capitalized. Select from party or type manually." xml:space="preserve">
+    <value>Takip edilecek grup üyesinin adı. Benzersizse kısmi olabilir.
+@Server bölümü yalnızca görüntü içindir; hedefleme @ öncesindeki adı kullanır.
+Adların ilk harfleri otomatik büyütülür. Gruptan seçin veya elle yazın.</value>
+  </data>
+  <data name="Navigation method to reach fren.&#xA;NavMesh: VNavmesh plugin pathfinding (recommended)&#xA;Visland: Alternative navigation&#xA;BossMod Follow: Uses BossMod's follow leader&#xA;Vanilla Follow: Game's built-in /follow" xml:space="preserve">
+    <value>Fren'e ulaşma gezinme yöntemi.
+NavMesh: VNavmesh eklentisi yol bulma (önerilen)
+Visland: alternatif gezinme
+BossMod Follow: BossMod lider takibini kullanır
+Vanilla Follow: oyunun yerleşik /follow komutu</value>
+  </data>
+  <data name="Navigation method to use inside duties.&#xA;May need a different method than overworld." xml:space="preserve">
+    <value>Görevlerde kullanılacak gezinme yöntemi.
+Açık dünyadan farklı bir yöntem gerekebilir.</value>
+  </data>
+  <data name="New character profiles inherit this setting. Existing characters change only when you use a sync action." xml:space="preserve">
+    <value>Yeni karakter profilleri bu ayarı devralır. Mevcut karakterler yalnızca bir eşitleme eylemi kullandığınızda değişir.</value>
+  </data>
+  <data name="Number of ticks before harmonized cling resets to 0.&#xA;Handles special logic like DD/FATE force cling." xml:space="preserve">
+    <value>Uyumlu yakın durma 0'a sıfırlanmadan önceki tik sayısı.
+DD/FATE zorunlu yakın durma gibi özel mantığı işler.</value>
+  </data>
+  <data name="Number of update ticks before idle action triggers." xml:space="preserve">
+    <value>Boşta eylemi tetiklenmeden önceki güncelleme tik sayısı.</value>
+  </data>
+  <data name="Off: FrenRider chooses the BossMod preset from current job and selected rotation plugin.&#xA;On: use the preset name fields below." xml:space="preserve">
+    <value>Kapalı: FrenRider mevcut meslek ve seçili rotasyon eklentisine göre BossMod ön ayarını seçer.
+Açık: aşağıdaki ön ayar adı alanlarını kullanır.</value>
+  </data>
+  <data name="On: enable the selected BossMod AI implementation for combat.&#xA;Off: send BMR and VBM AI off commands while preserving the rest of FrenRider's combat setup." xml:space="preserve">
+    <value>Açık: seçilen BossMod AI uygulamasını savaş için etkinleştir.
+Kapalı: FrenRider'ın diğer savaş ayarlarını koruyarak BMR ve VBM AI kapatma komutları gönder.</value>
+  </data>
+  <data name="Outside duties, summon your configured own mount and fly toward a visible fren after horizontal XZ distance exceeds this threshold continuously for the configured delay. Existing zone-specific Max Follow Distance still applies. Distance minimum: 1y. Delay range: 0-300 seconds; 0 means immediate. Defaults: 100y and 30 seconds." xml:space="preserve">
+    <value>Görev dışında yatay XZ uzaklığı yapılandırılmış gecikme boyunca sürekli bu eşiği aşarsa yapılandırılmış kendi bineğinizi çağırıp görünür fren'e doğru uçun. Mevcut bölgeye özel en fazla takip uzaklığı hâlâ geçerlidir. En az uzaklık: 1y. Gecikme: 0-300 saniye; 0 anındadır. Varsayılanlar: 100y ve 30 saniye.</value>
+  </data>
+  <data name="Party engage mode sent through Daedalus LAN coordination.&#xA;Focus requires a living enemy hard target.&#xA;None, Split, and Kill Adds preserve Daedalus's current focus and off-tank assignments." xml:space="preserve">
+    <value>Daedalus LAN koordinasyonu üzerinden gönderilen grup çatışma modu.
+Focus canlı bir düşman sert hedef gerektirir.
+None, Split ve Kill Adds, Daedalus'un mevcut odak ve yardımcı tank atamalarını korur.</value>
+  </data>
+  <data name="Per-duty-family ADS handoff.&#xA;Duty name, category, support, and clearance come only from ADS CurrentDuty. FrenRider accepts that snapshot only when ADS catalog metadata is complete and its territory/CFC matches live GameMain; otherwise local duty logic stays active.&#xA;The handoff delay counts only while the character remains continuously ready: logged in, present, alive, conscious, out of area transitions, and out of cutscenes.&#xA;Runtime ADS ownership is authoritative even after manual Start Inside. FrenRider pauses local duty systems while handoff is pending or ADS owns the run; configured exit takeover remains available after duty completion." xml:space="preserve">
+    <value>Görev ailesine göre ADS devri.
+Görev adı, kategorisi, desteği ve tamamlanması yalnızca ADS CurrentDuty'den gelir. FrenRider bu anlık görüntüyü ancak ADS katalog metaverisi tam ve territory/CFC canlı GameMain ile eşleşiyorsa kabul eder; aksi hâlde yerel görev mantığı etkin kalır.
+Devir gecikmesi yalnızca karakter kesintisiz hazırken sayılır: oturumu açık, mevcut, canlı, bilinçli, alan geçişleri ve ara sahneler dışında.
+Elle Start Inside sonrasında da çalışma anındaki ADS denetimi belirleyicidir. Devir beklerken veya ADS çalışmayı yönetirken FrenRider yerel görev sistemlerini duraklatır; görev tamamlanınca yapılandırılmış çıkış devralma kullanılabilir kalır.</value>
+  </data>
+  <data name="Play videos when Fren Rider is enabled or disabled.&#xA;Requires VLC media player." xml:space="preserve">
+    <value>Fren Rider açılırken veya kapanırken video oynat.
+VLC media player gerektirir.</value>
+  </data>
+  <data name="Play videos when Fren Rider is enabled/disabled.&#xA;Requires VLC media player to be installed.&#xA;Videos are embedded with the plugin distribution." xml:space="preserve">
+    <value>Fren Rider açılırken/kapanırken video oynat.
+VLC media player kurulu olmalıdır.
+Videolar eklenti dağıtımına gömülüdür.</value>
+  </data>
+  <data name="Players in this list will have party invites automatically accepted when you are not in a group.&#xA;Names should omit the @Server part." xml:space="preserve">
+    <value>Bu listedeki oyuncuların grup davetleri grupta değilken otomatik kabul edilir.
+Adlarda @Server bölümü olmamalıdır.</value>
+  </data>
+  <data name="Players in this list will have their party invites automatically accepted when you're not in a group.&#xA;When you join a party via whitelist invite, the inviter will automatically be set as your Fren.&#xA;Enter names without the @Server part." xml:space="preserve">
+    <value>Bu listedeki oyuncuların grup davetleri grupta değilken otomatik kabul edilir.
+İzin listesi davetiyle gruba katıldığınızda davetçi otomatik Fren olarak ayarlanır.
+Adları @Server bölümü olmadan girin.</value>
+  </data>
+  <data name="Preset name for Deep Dungeon content.&#xA;Use 'none' to not change the preset." xml:space="preserve">
+    <value>Deep Dungeon içeriğinin ön ayar adı.
+Ön ayarı değiştirmemek için 'none' kullanın.</value>
+  </data>
+  <data name="Preset name for FATE content.&#xA;Use 'none' to not change the preset." xml:space="preserve">
+    <value>FATE içeriğinin ön ayar adı.
+Ön ayarı değiştirmemek için 'none' kullanın.</value>
+  </data>
+  <data name="Print status messages to game chat.&#xA;Useful for debugging but fills chat quickly." xml:space="preserve">
+    <value>Durum iletilerini oyun sohbetine yaz.
+Hata ayıklama için kullanışlıdır ancak sohbeti hızla doldurur.</value>
+  </data>
+  <data name="RSR operating mode when RSR is the selected rotation plugin.&#xA;Auto: Full auto.&#xA;Manual: Manual targeting mode.&#xA;None: Don't let FrenRider change the current rotation state.&#xA;Support: Uses RSR's plugin-managed support mode." xml:space="preserve">
+    <value>RSR seçili rotasyon eklentisiyken çalışma modu.
+Auto: Tam otomatik.
+Manual: Elle hedefleme modu.
+None: FrenRider mevcut rotasyon durumunu değiştirmesin.
+Support: RSR'nin eklenti yönetimli destek modunu kullanır.</value>
+  </data>
+  <data name="Random variance on X axis during social distancing.&#xA;Adds natural-looking movement variance." xml:space="preserve">
+    <value>Mesafe korurken X ekseninde rastgele sapma.
+Doğal görünen hareket çeşitliliği ekler.</value>
+  </data>
+  <data name="Random variance on Z axis during social distancing." xml:space="preserve">
+    <value>Mesafe korurken Z ekseninde rastgele sapma.</value>
+  </data>
+  <data name="Recover party members in regular four-player dungeons and outdoors. A living healer within 20 yalms of the corpse blocks item use. Party recovery pauses progression and defers Return while a living party rescuer remains." xml:space="preserve">
+    <value>Normal dört kişilik zindanlarda ve dışarıda grup üyelerini kurtar. Cesedin 20 yalm yakınındaki canlı şifacı öğe kullanımını engeller. Grup kurtarma ilerlemeyi duraklatır ve canlı bir grup kurtarıcısı varken Return'ü erteler.</value>
+  </data>
+  <data name="Reserved for future autosync FATE behavior.&#xA;Current follow distance does not change on FATE join or leave." xml:space="preserve">
+    <value>Gelecekteki otomatik eşitleme FATE davranışı için ayrılmıştır.
+Mevcut takip uzaklığı FATE'e katılınca veya ayrılınca değişmez.</value>
+  </data>
+  <data name="Reset ALL tabs for this character to default values.&#xA;If editing DEFAULT CONFIG, resets to plugin defaults." xml:space="preserve">
+    <value>Bu karakterin TÜM sekmelerini varsayılan değerlere sıfırla.
+VARSAYILAN YAPILANDIRMA düzenleniyorsa eklenti varsayılanlarına sıfırlar.</value>
+  </data>
+  <data name="Reset only the current tab for this character to default values." xml:space="preserve">
+    <value>Yalnızca bu karakterin mevcut sekmesini varsayılan değerlere sıfırla.</value>
+  </data>
+  <data name="Restore snapshot: put captured BMR/VBM AI on/off, follow, movement, CBT fields, and Daedalus enabled state back on /fr off.&#xA;Turn everything off: disable BMR/VBM AI, CBT AutoFollow, RotationSolverReborn, Daedalus, and Wrath auto if FrenRider started it." xml:space="preserve">
+    <value>Anlık görüntüyü geri yükle: kaydedilen BMR/VBM AI açık/kapalı, takip, hareket, CBT alanları ve Daedalus etkinlik durumunu /fr off üzerinde geri getir.
+Her şeyi kapat: BMR/VBM AI, CBT AutoFollow, RotationSolverReborn, Daedalus ve FrenRider başlattıysa Wrath otomatiğini kapat.</value>
+  </data>
+  <data name="Rotation plugin for foray content (Eureka/Bozja).&#xA;WRATH recommended for phantom job support." xml:space="preserve">
+    <value>Foray (Eureka/Bozja) için rotasyon eklentisi.
+Phantom meslek desteği için WRATH önerilir.</value>
+  </data>
+  <data name="Runs /ays discard every 10s only while mounted and in a safe idle window.&#xA;FrenRider defers discard during combat, cutscenes, and area transitions.&#xA;Requires AutoRetainer plugin." xml:space="preserve">
+    <value>/ays discard komutunu yalnızca binekte güvenli boşta aralıkta her 10 s çalıştırır.
+FrenRider savaş, ara sahne ve alan geçişlerinde discard'ı erteler.
+AutoRetainer eklentisi gerekir.</value>
+  </data>
+  <data name="Runs /ays discard while mounted and in a safe idle window.&#xA;Requires AutoRetainer plugin." xml:space="preserve">
+    <value>/ays discard komutunu binekte güvenli boşta aralıkta çalıştırır.
+AutoRetainer eklentisi gerekir.</value>
+  </data>
+  <data name="Runs /levelsync on after joining a FATE.&#xA;Defers while mounted or riding pillion." xml:space="preserve">
+    <value>FATE'e katıldıktan sonra /levelsync on çalıştırır.
+Binekte veya artçı iken erteler.</value>
+  </data>
+  <data name="Select the mount to use when flying solo.&#xA;'Mount Roulette' picks a random mount.&#xA;Type to search the list." xml:space="preserve">
+    <value>Tek başına uçarken kullanılacak bineği seçin.
+'Mount Roulette' rastgele binek seçer.
+Listede aramak için yazın.</value>
+  </data>
+  <data name="Send /ads leave after the configured duty-end delay. FrenRider does not also run its own Leave Duty flow." xml:space="preserve">
+    <value>Yapılandırılmış görev sonu gecikmesinden sonra /ads leave gönder. FrenRider ayrıca kendi Leave Duty akışını çalıştırmaz.</value>
+  </data>
+  <data name="Show or hide the DTR bar entry." xml:space="preserve">
+    <value>DTR çubuğu girişini göster veya gizle.</value>
+  </data>
+  <data name="Show/hide the DTR bar entry (server info bar)." xml:space="preserve">
+    <value>DTR çubuğu girişini göster/gizle (sunucu bilgi çubuğu).</value>
+  </data>
+  <data name="Slash command to execute when idle.&#xA;Examples: /tomescroll, /dance, /snd run scriptname" xml:space="preserve">
+    <value>Boşta çalıştırılacak eğik çizgili komut.
+Örnekler: /tomescroll, /dance, /snd run scriptname</value>
+  </data>
+  <data name="Target HP percentage to use Limit Break.&#xA;-1 = Disabled.&#xA;Automatically uses LB3 if available, otherwise LB2." xml:space="preserve">
+    <value>Limit Break kullanma hedef HP yüzdesi.
+-1 = Kapalı.
+Varsa LB3, yoksa LB2 otomatik kullanılır.</value>
+  </data>
+  <data name="Temporary uses an in-memory profile only for the exact DAD proposal. Off opts this local character out. Permanent replaces this local character's profile while keeping this choice." xml:space="preserve">
+    <value>Temporary yalnızca tam DAD önerisi için bellekte profil kullanır. Off bu yerel karakteri dışlar. Permanent bu seçimi koruyarak bu yerel karakterin profilini değiştirir.</value>
+  </data>
+  <data name="Trigger repair when gear durability falls below this percentage." xml:space="preserve">
+    <value>Ekipman dayanıklılığı bu yüzdenin altına düşünce onarımı başlat.</value>
+  </data>
+  <data name="Use FrenRider's local Leave Duty flow after the configured duty-end condition." xml:space="preserve">
+    <value>Yapılandırılmış görev sonu koşulundan sonra FrenRider'ın yerel Leave Duty akışını kullan.</value>
+  </data>
+  <data name="VLC media player is required for video notifications.&#xA;Click to download and install VLC." xml:space="preserve">
+    <value>Video bildirimleri için VLC media player gereklidir.
+VLC'yi indirip kurmak için tıklayın.</value>
+  </data>
+  <data name="What to do when idle.&#xA;Specific Action: Execute a single command&#xA;Action From List: Pick randomly from a list" xml:space="preserve">
+    <value>Boştayken yapılacak eylem.
+Belirli eylem: Tek komut çalıştır
+Listeden eylem: Listeden rastgele seç</value>
+  </data>
+  <data name="What to do when idle.&#xA;Specific Action: execute one command&#xA;Action From List: rotate through a list" xml:space="preserve">
+    <value>Boştayken yapılacak eylem.
+Belirli eylem: tek komut çalıştır
+Listeden eylem: listede sırayla ilerle</value>
+  </data>
+  <data name="When RSR, WRATH, or DAEDALUS is selected, also force BMR to the configured zone preset." xml:space="preserve">
+    <value>RSR, WRATH veya DAEDALUS seçildiğinde BMR'yi de yapılandırılmış bölge ön ayarına zorla.</value>
+  </data>
+  <data name="When enabled, FrenRider asks ADS to disable BMR hunt modules." xml:space="preserve">
+    <value>Etkinse FrenRider ADS'den BMR av modüllerini kapatmasını ister.</value>
+  </data>
+  <data name="When enabled, FrenRider asks ADS to disable the BMR Queen Lunatender module." xml:space="preserve">
+    <value>Etkinse FrenRider ADS'den BMR Queen Lunatender modülünü kapatmasını ister.</value>
+  </data>
+  <data name="When enabled, FrenRider may issue the fallback forward nudge inside duties even if the configured fren is not visible in your party/object table. Leave disabled for safer duty movement." xml:space="preserve">
+    <value>Etkinse yapılandırılmış fren grup/nesne tablosunda görünmese bile FrenRider görevlerde yedek ileri itme yapabilir. Daha güvenli görev hareketi için kapalı bırakın.</value>
+  </data>
+  <data name="When enabled, FrenRider waits after your configured fren is still in party but no longer visible, then asks Lifestream to teleport to a random unlocked aetheryte in that zone." xml:space="preserve">
+    <value>Etkinse yapılandırılmış fren hâlâ gruptayken görünmez olduğunda FrenRider bekler, ardından Lifestream'den o bölgedeki rastgele açık aetheryte'a ışınlanmasını ister.</value>
+  </data>
+  <data name="Whether to follow fren during combat.&#xA;Auto: Let the plugin decide based on your job/role." xml:space="preserve">
+    <value>Savaşta fren takip edilsin mi.
+Otomatik: Eklenti mesleğinize/rolünüze göre karar verir.</value>
+  </data>
+  <data name="Which rotation automation plugin to use.&#xA;BMR: BossModReborn&#xA;VBM: VanillaBossMod&#xA;RSR: RotationSolver Reborn&#xA;WRATH: Wrath&#xA;DAEDALUS: Daedalus" xml:space="preserve">
+    <value>Kullanılacak rotasyon otomasyonu eklentisi.
+BMR: BossModReborn
+VBM: VanillaBossMod
+RSR: RotationSolver Reborn
+WRATH: Wrath
+DAEDALUS: Daedalus</value>
+  </data>
+  <data name="While Fren Rider is enabled, equip the first matching armoury-chest soul crystal when the current character is on a level 30+ base class and equipment can be changed safely. The current gearset is updated after the equip is confirmed." xml:space="preserve">
+    <value>Fren Rider etkinken mevcut karakter 30+ seviyeli temel sınıftaysa ve ekipman güvenle değiştirilebiliyorsa armory chest içindeki ilk eşleşen soul crystal'ı tak. Takıldığı doğrulandıktan sonra mevcut ekipman seti güncellenir.</value>
+  </data>
+  <data name="While FrenRider is enabled on Beastmaster, try Capture on eligible living beasts closer than 10 yalms, including passive beasts outside combat.&#xA;Prefers an eligible current target; otherwise automatically targets the nearest eligible beast when Capture is ready.&#xA;Skips owned beasts and enemies above your effective level, and respects both HP thresholds.&#xA;Retries on later cooldowns, including already marked beasts." xml:space="preserve">
+    <value>Beastmaster'da FrenRider etkinken savaş dışındaki pasifler dahil 10 yalm yakınındaki uygun canlı canavarlara Capture dene.
+Uygun mevcut hedefi tercih eder; yoksa Capture hazırken en yakın uygun canavarı otomatik hedefler.
+Sahipli canavarları ve etkin seviyenizin üzerindeki düşmanları atlar, iki HP eşiğine de uyar.
+İşaretlenmiş canavarlar dahil sonraki bekleme sürelerinde yeniden dener.</value>
+  </data>
+  <data name="Disabled" xml:space="preserve">
+    <value>Kapalı</value>
+  </data>
+  <data name="Auto" xml:space="preserve">
+    <value>Otomatik</value>
+  </data>
+  <data name="BossMod AI" xml:space="preserve">
+    <value>BossMod AI</value>
+  </data>
+  <data name="Owned" xml:space="preserve">
+    <value>Sahipli</value>
+  </data>
+  <data name="Missing" xml:space="preserve">
+    <value>Eksik</value>
+  </data>
+  <data name="At least one command required" xml:space="preserve">
+    <value>En az bir komut gerekli</value>
+  </data>
+  <data name="0 - Not Cleared" xml:space="preserve">
+    <value>0 - Tamamlanmadı</value>
+  </data>
+  <data name="1 - 1P Unsync Cleared" xml:space="preserve">
+    <value>1 - 1 kişi eşitlemesiz tamamladı</value>
+  </data>
+  <data name="2 - 1P Duty Support" xml:space="preserve">
+    <value>2 - 1 kişi görev desteği</value>
+  </data>
+  <data name="3 - 4P Sync Cleared" xml:space="preserve">
+    <value>3 - 4 kişi eşitlenmiş tamamladı</value>
+  </data>
+  <data name="A Dalamud plugin for FFXIV multiplayer follow/combat automation." xml:space="preserve">
+    <value>FFXIV çok oyunculu takip/savaş otomasyonu için bir Dalamud eklentisi.</value>
+  </data>
+  <data name="/frenrider - Open main window" xml:space="preserve">
+    <value>/frenrider - Ana pencereyi aç</value>
+  </data>
+  <data name="/fr - Open main window (alias)" xml:space="preserve">
+    <value>/fr - Ana pencereyi aç (takma komut)</value>
+  </data>
+  <data name="/fr on - Enable Fren Rider" xml:space="preserve">
+    <value>/fr on - Fren Rider'ı aç</value>
+  </data>
+  <data name="/fr off - Disable Fren Rider" xml:space="preserve">
+    <value>/fr off - Fren Rider'ı kapat</value>
+  </data>
+  <data name="/fr settings or /fr s - Toggle settings" xml:space="preserve">
+    <value>/fr settings veya /fr s - Ayarları aç/kapat</value>
+  </data>
+  <data name="/fr mini or /fr m - Toggle MAGIA mini window" xml:space="preserve">
+    <value>/fr mini veya /fr m - MAGIA mini penceresini aç/kapat</value>
+  </data>
+  <data name="/fr debug - Toggle debug controls" xml:space="preserve">
+    <value>/fr debug - Hata ayıklama kontrollerini aç/kapat</value>
+  </data>
+  <data name="vnavmesh - Navigation and pathfinding" xml:space="preserve">
+    <value>vnavmesh - Gezinme ve yol bulma</value>
+  </data>
+  <data name="Visland - Alternative navigation (if vnavmesh unavailable)" xml:space="preserve">
+    <value>Visland - Alternatif gezinme (vnavmesh yoksa)</value>
+  </data>
+  <data name="BossMod / BossModReborn - Combat AI and following" xml:space="preserve">
+    <value>BossMod / BossModReborn - Savaş AI'sı ve takip</value>
+  </data>
+  <data name="Rotation Solver Reborn - Combat rotation automation" xml:space="preserve">
+    <value>Rotation Solver Reborn - Savaş rotasyonu otomasyonu</value>
+  </data>
+  <data name="WRATH - Combat rotation automation" xml:space="preserve">
+    <value>WRATH - Savaş rotasyonu otomasyonu</value>
+  </data>
+  <data name="Daedalus - Combat rotation automation" xml:space="preserve">
+    <value>Daedalus - Savaş rotasyonu otomasyonu</value>
+  </data>
+  <data name="Questionable - Quest automation integration" xml:space="preserve">
+    <value>Questionable - Görev otomasyonu entegrasyonu</value>
+  </data>
+  <data name="Automaton (CBT) by Croizat - Enhanced duty start/end, auto-leave" xml:space="preserve">
+    <value>Croizat'ın Automaton (CBT) eklentisi - Gelişmiş görev başlangıcı/sonu, otomatik ayrılma</value>
+  </data>
+  <data name="Owner: {0}" xml:space="preserve">
+    <value>Sahip: {0}</value>
+  </data>
+  <data name="Island: {0}" xml:space="preserve">
+    <value>Ada: {0}</value>
+  </data>
+  <data name="Opaque character: {0}" xml:space="preserve">
+    <value>Gizli karakter: {0}</value>
+  </data>
+  <data name="Row ID: {0}" xml:space="preserve">
+    <value>Satır ID'si: {0}</value>
+  </data>
+  <data name="{0} Icon" xml:space="preserve">
+    <value>{0} simgesi</value>
+  </data>
+  <data name="{0} Icon Code" xml:space="preserve">
+    <value>{0} simge kodu</value>
+  </data>
+  <data name="Shown when Fren Rider is {0}" xml:space="preserve">
+    <value>Fren Rider {0} olduğunda gösterilir</value>
+  </data>
+  <data name="ADS reflection: {0}" xml:space="preserve">
+    <value>ADS yansıtması: {0}</value>
+  </data>
+  <data name="ADS Status: {0}" xml:space="preserve">
+    <value>ADS durumu: {0}</value>
+  </data>
+  <data name="When enabled, FrenRider asks ADS to set BMR MaxLoadDistance to {0:0}." xml:space="preserve">
+    <value>Etkinse FrenRider ADS'den BMR MaxLoadDistance değerini {0:0} yapmasını ister.</value>
+  </data>
+  <data name="Solo" xml:space="preserve">
+    <value>Tek kişi</value>
+  </data>
+  <data name="4-Man" xml:space="preserve">
+    <value>4 kişi</value>
+  </data>
+  <data name="8-Man" xml:space="preserve">
+    <value>8 kişi</value>
+  </data>
+  <data name="Alliance" xml:space="preserve">
+    <value>İttifak</value>
+  </data>
+  <data name="Guild Hest" xml:space="preserve">
+    <value>Guild Hest</value>
+  </data>
+  <data name="Deep Dungeon" xml:space="preserve">
+    <value>Deep Dungeon</value>
+  </data>
+  <data name="Treasure Dungeon" xml:space="preserve">
+    <value>Hazine zindanı</value>
+  </data>
+  <data name="Other" xml:space="preserve">
+    <value>Diğer</value>
+  </data>
+  <data name="ADS Handoff" xml:space="preserve">
+    <value>ADS devri</value>
+  </data>
+  <data name="Exit Behavior" xml:space="preserve">
+    <value>Çıkış davranışı</value>
+  </data>
+  <data name="Equipment" xml:space="preserve">
+    <value>Ekipman</value>
+  </data>
+  <data name="Maintenance" xml:space="preserve">
+    <value>Bakım</value>
+  </data>
+  <data name="Debug" xml:space="preserve">
+    <value>Hata ayıklama</value>
+  </data>
+  <data name="Following" xml:space="preserve">
+    <value>Takip ediyor</value>
+  </data>
+  <data name="InRange" xml:space="preserve">
+    <value>Menzilde</value>
+  </data>
+  <data name="TooFar" xml:space="preserve">
+    <value>Çok uzakta</value>
+  </data>
+  <data name="InCombat" xml:space="preserve">
+    <value>Savaşta</value>
+  </data>
+  <data name="WaitingToMount" xml:space="preserve">
+    <value>Bineğe binmeyi bekliyor</value>
+  </data>
+  <data name="Mounting" xml:space="preserve">
+    <value>Bineğe biniyor</value>
+  </data>
+  <data name="Dismounting" xml:space="preserve">
+    <value>Binekten iniyor</value>
+  </data>
+  <data name="OutOfCombat" xml:space="preserve">
+    <value>Savaş dışında</value>
+  </data>
+  <data name="EnteringCombat" xml:space="preserve">
+    <value>Savaşa giriyor</value>
+  </data>
+  <data name="LeavingCombat" xml:space="preserve">
+    <value>Savaştan çıkıyor</value>
+  </data>
+  <data name="Unconscious" xml:space="preserve">
+    <value>Bilinçsiz</value>
+  </data>
+  <data name="Area transition" xml:space="preserve">
+    <value>Alan geçişi</value>
+  </data>
+  <data name="Zone transition" xml:space="preserve">
+    <value>Bölge geçişi</value>
+  </data>
+  <data name="No fren found" xml:space="preserve">
+    <value>Fren bulunamadı</value>
+  </data>
+  <data name="Fren not visible" xml:space="preserve">
+    <value>Fren görünmüyor</value>
+  </data>
+  <data name="No fren" xml:space="preserve">
+    <value>Fren yok</value>
+  </data>
+  <data name="ADS utility active" xml:space="preserve">
+    <value>ADS yardımcı işlemi etkin</value>
+  </data>
+  <data name="Teleport active" xml:space="preserve">
+    <value>Işınlanma etkin</value>
+  </data>
+  <data name="Teleport or dialog active" xml:space="preserve">
+    <value>Işınlanma veya diyalog etkin</value>
+  </data>
+  <data name="Paused (in combat)" xml:space="preserve">
+    <value>Duraklatıldı (savaşta)</value>
+  </data>
+  <data name="Phoenix Down recovery" xml:space="preserve">
+    <value>Phoenix Down kurtarması</value>
+  </data>
+  <data name="Waiting for party revival; Return deferred" xml:space="preserve">
+    <value>Grup dirilişi bekleniyor; Return ertelendi</value>
+  </data>
+  <data name="No living party rescuer" xml:space="preserve">
+    <value>Canlı grup kurtarıcısı yok</value>
+  </data>
+  <data name="Casting Phoenix Down" xml:space="preserve">
+    <value>Phoenix Down kullanılıyor</value>
+  </data>
+  <data name="Cast ended; checking revival" xml:space="preserve">
+    <value>Kullanım bitti; diriliş kontrol ediliyor</value>
+  </data>
+  <data name="Attempt did not start; rechecking readiness" xml:space="preserve">
+    <value>Deneme başlamadı; hazır olma durumu yeniden kontrol ediliyor</value>
+  </data>
+  <data name="Waiting for healer, Raise cast or pending revival" xml:space="preserve">
+    <value>Şifacı, Raise büyüsü veya bekleyen diriliş bekleniyor</value>
+  </data>
+  <data name="Dismounting for recovery" xml:space="preserve">
+    <value>Kurtarma için binekten iniliyor</value>
+  </data>
+  <data name="Approaching party corpse" xml:space="preserve">
+    <value>Grup cesedine yaklaşılıyor</value>
+  </data>
+  <data name="Waiting for recovery attempt slot" xml:space="preserve">
+    <value>Kurtarma denemesi yuvası bekleniyor</value>
+  </data>
+  <data name="Phoenix Down requested; waiting for actual cast" xml:space="preserve">
+    <value>Phoenix Down istendi; gerçek kullanım bekleniyor</value>
+  </data>
+  <data name="Item attempt rejected; rechecking in one second" xml:space="preserve">
+    <value>Öğe denemesi reddedildi; bir saniye sonra yeniden kontrol edilecek</value>
+  </data>
+  <data name="Ready" xml:space="preserve">
+    <value>Hazır</value>
+  </data>
+  <data name="Blocked: {0}" xml:space="preserve">
+    <value>Engellendi: {0}</value>
+  </data>
+  <data name="Waiting: {0}" xml:space="preserve">
+    <value>Bekliyor: {0}</value>
+  </data>
+  <data name="Running: {0}" xml:space="preserve">
+    <value>Çalışıyor: {0}</value>
+  </data>
+  <data name="Completed: {0}" xml:space="preserve">
+    <value>Tamamlandı: {0}</value>
+  </data>
+  <data name="Failed: {0}" xml:space="preserve">
+    <value>Başarısız: {0}</value>
+  </data>
+  <data name="Cooldown: retry in {0}s" xml:space="preserve">
+    <value>Bekleme süresi: {0} s sonra yeniden dene</value>
+  </data>
+  <data name="Fren out of zone; teleport in {0}s" xml:space="preserve">
+    <value>Fren bölge dışında; {0} s sonra ışınlan</value>
+  </data>
+  <data name="FrenRider disabled" xml:space="preserve">
+    <value>FrenRider kapalı</value>
+  </data>
+  <data name="Zone changed" xml:space="preserve">
+    <value>Bölge değişti</value>
+  </data>
+  <data name="Fren not in party" xml:space="preserve">
+    <value>Fren grupta değil</value>
+  </data>
+  <data name="Fren visible" xml:space="preserve">
+    <value>Fren görünür</value>
+  </data>
+  <data name="Reading party window" xml:space="preserve">
+    <value>Grup penceresi okunuyor</value>
+  </data>
+  <data name="Following local aetheryte network" xml:space="preserve">
+    <value>Yerel aetheryte ağı takip ediliyor</value>
+  </data>
+  <data name="Duty scope changed" xml:space="preserve">
+    <value>Görev kapsamı değişti</value>
+  </data>
+  <data name="Setting changed" xml:space="preserve">
+    <value>Ayar değişti</value>
+  </data>
+  <data name="Unconscious; return in {0}s" xml:space="preserve">
+    <value>Bilinçsiz; {0} s sonra Return</value>
+  </data>
+  <data name="Handling revive/Return notification" xml:space="preserve">
+    <value>Diriliş/Return bildirimi işleniyor</value>
+  </data>
+  <data name="Opening Return prompt" xml:space="preserve">
+    <value>Return istemi açılıyor</value>
+  </data>
+  <data name="Revive/Return confirmed; waiting for transition" xml:space="preserve">
+    <value>Diriliş/Return doğrulandı; geçiş bekleniyor</value>
+  </data>
+  <data name="Waiting for readable Return confirmation" xml:space="preserve">
+    <value>Okunabilir Return onayı bekleniyor</value>
+  </data>
+  <data name="Return agent unavailable" xml:space="preserve">
+    <value>Return aracısı kullanılamıyor</value>
+  </data>
+  <data name="Opened Return prompt" xml:space="preserve">
+    <value>Return istemi açıldı</value>
+  </data>
+  <data name="Waiting for Return confirmation" xml:space="preserve">
+    <value>Return onayı bekleniyor</value>
+  </data>
+  <data name="Return prompt failed" xml:space="preserve">
+    <value>Return istemi başarısız</value>
+  </data>
+  <data name="ADS Hyper Focus ended outside duty" xml:space="preserve">
+    <value>ADS Hyper Focus görev dışında sona erdi</value>
+  </data>
+  <data name="ADS Hyper Focus ended without ADS duty ownership" xml:space="preserve">
+    <value>ADS Hyper Focus ADS görev denetimi olmadan sona erdi</value>
+  </data>
+  <data name="ADS Hyper Focus ended; combat bootstrap pending" xml:space="preserve">
+    <value>ADS Hyper Focus sona erdi; savaş başlatma bekleniyor</value>
+  </data>
+  <data name="ADS Hyper Focus lease active; RSR Manual" xml:space="preserve">
+    <value>ADS Hyper Focus kirası etkin; RSR Manual</value>
+  </data>
+  <data name="ADS active" xml:space="preserve">
+    <value>ADS etkin</value>
+  </data>
+  <data name="ADS active; FrenRider combat authoritative" xml:space="preserve">
+    <value>ADS etkin; savaşı FrenRider yönetiyor</value>
+  </data>
+  <data name="ADS did not accept {0} repair: {1}" xml:space="preserve">
+    <value>ADS {0} onarımını kabul etmedi: {1}</value>
+  </data>
+  <data name="ADS duty ownership active; FrenRider rotation disabled" xml:space="preserve">
+    <value>ADS görev denetimi etkin; FrenRider rotasyonu kapalı</value>
+  </data>
+  <data name="ADS duty progression paused; configured FrenRider exit takeover active ({0})." xml:space="preserve">
+    <value>ADS görev ilerlemesi duraklatıldı; yapılandırılmış FrenRider çıkış devralma etkin ({0}).</value>
+  </data>
+  <data name="ADS handoff off; FrenRider local duty logic active." xml:space="preserve">
+    <value>ADS devri kapalı; FrenRider yerel görev mantığı etkin.</value>
+  </data>
+  <data name="ADS handoff pending" xml:space="preserve">
+    <value>ADS devri bekleniyor</value>
+  </data>
+  <data name="ADS handoff pending; FrenRider combat authoritative" xml:space="preserve">
+    <value>ADS devri bekleniyor; savaşı FrenRider yönetiyor</value>
+  </data>
+  <data name="ADS loaded; waiting for duty. FrenRider local logic active." xml:space="preserve">
+    <value>ADS yüklü; görev bekleniyor. FrenRider yerel mantığı etkin.</value>
+  </data>
+  <data name="ADS not loaded." xml:space="preserve">
+    <value>ADS yüklü değil.</value>
+  </data>
+  <data name="ADS not loaded. FrenRider local logic active." xml:space="preserve">
+    <value>ADS yüklü değil. FrenRider yerel mantığı etkin.</value>
+  </data>
+  <data name="ADS reflection applied; no reassert pending." xml:space="preserve">
+    <value>ADS yansıtması uygulandı; yeniden uygulama beklenmiyor.</value>
+  </data>
+  <data name="ADS reflection applied; waiting for desired-state change or ADS reload." xml:space="preserve">
+    <value>ADS yansıtması uygulandı; istenen durum değişikliği veya ADS yeniden yüklemesi bekleniyor.</value>
+  </data>
+  <data name="ADS reflection hacks reset." xml:space="preserve">
+    <value>ADS yansıtma değişiklikleri sıfırlandı.</value>
+  </data>
+  <data name="ADS reflection idle." xml:space="preserve">
+    <value>ADS yansıtması boşta.</value>
+  </data>
+  <data name="ADS released duty ownership via {0}; FrenRider local duty logic active." xml:space="preserve">
+    <value>ADS {0} üzerinden görev denetimini bıraktı; FrenRider yerel görev mantığı etkin.</value>
+  </data>
+  <data name="ADS released duty progression; configured FrenRider exit takeover active via {0}." xml:space="preserve">
+    <value>ADS görev ilerlemesini bıraktı; yapılandırılmış FrenRider çıkış devralma {0} üzerinden etkin.</value>
+  </data>
+  <data name="ADS runtime ownership active via {0}; FrenRider duty systems paused." xml:space="preserve">
+    <value>Çalışma anında ADS denetimi {0} üzerinden etkin; FrenRider görev sistemleri duraklatıldı.</value>
+  </data>
+  <data name="ADS runtime ownership active via {0}; FrenRider exit takeover active." xml:space="preserve">
+    <value>Çalışma anında ADS denetimi {0} üzerinden etkin; FrenRider çıkış devralma etkin.</value>
+  </data>
+  <data name="ADS runtime ownership confirmed via {0}; solo combat delay complete." xml:space="preserve">
+    <value>Çalışma anında ADS denetimi {0} üzerinden doğrulandı; tek kişilik savaş gecikmesi tamamlandı.</value>
+  </data>
+  <data name="ADS solo combat held; waiting for readable ownership confirmation." xml:space="preserve">
+    <value>ADS tek kişilik savaş bekletiliyor; okunabilir denetim onayı bekleniyor.</value>
+  </data>
+  <data name="ADS solo combat held; {0}." xml:space="preserve">
+    <value>ADS tek kişilik savaş bekletiliyor; {0}.</value>
+  </data>
+  <data name="ADS utility dialog active" xml:space="preserve">
+    <value>ADS yardımcı işlem diyaloğu etkin</value>
+  </data>
+  <data name="Approaching exit '{0}' ({1:F1}y)" xml:space="preserve">
+    <value>'{0}' çıkışına yaklaşılıyor ({1:F1}y)</value>
+  </data>
+  <data name="Ate {0} [{1}] ({2} left)" xml:space="preserve">
+    <value>{0} [{1}] yenildi ({2} kaldı)</value>
+  </data>
+  <data name="Blocked: Phoenix Down readiness changed" xml:space="preserve">
+    <value>Engellendi: Phoenix Down hazır olma durumu değişti</value>
+  </data>
+  <data name="Blocked: navigation unavailable or corpse unreachable" xml:space="preserve">
+    <value>Engellendi: gezinme yok veya cesede ulaşılamıyor</value>
+  </data>
+  <data name="Blocked: recovery state unavailable" xml:space="preserve">
+    <value>Engellendi: kurtarma durumu kullanılamıyor</value>
+  </data>
+  <data name="Blocked: waiting for a visible, confirmed party corpse" xml:space="preserve">
+    <value>Engellendi: görünür, doğrulanmış grup cesedi bekleniyor</value>
+  </data>
+  <data name="Can't pillion: fren not found" xml:space="preserve">
+    <value>Artçı olunamıyor: fren bulunamadı</value>
+  </data>
+  <data name="Can't pillion: fren not in ObjectTable" xml:space="preserve">
+    <value>Artçı olunamıyor: fren ObjectTable'da değil</value>
+  </data>
+  <data name="Can't summon (mounted/duty)" xml:space="preserve">
+    <value>Çağrılamıyor (binekte/görevde)</value>
+  </data>
+  <data name="Captured automation snapshot ({0})." xml:space="preserve">
+    <value>Otomasyon anlık görüntüsü alındı ({0}).</value>
+  </data>
+  <data name="Cleanup failed: no captured automation state was available to restore." xml:space="preserve">
+    <value>Temizleme başarısız: geri yüklenecek kayıtlı otomasyon durumu yoktu.</value>
+  </data>
+  <data name="Cleanup failed: {0}/{1} commands failed." xml:space="preserve">
+    <value>Temizleme başarısız: {0}/{1} komut başarısız oldu.</value>
+  </data>
+  <data name="Clicking Commence on duty popup" xml:space="preserve">
+    <value>Görev açılır penceresinde Commence tıklanıyor</value>
+  </data>
+  <data name="Combat held: {0}" xml:space="preserve">
+    <value>Savaş bekletiliyor: {0}</value>
+  </data>
+  <data name="Companion: {0}m{1:D2}s" xml:space="preserve">
+    <value>Yoldaş: {0} dk {1:D2} s</value>
+  </data>
+  <data name="Coppelia PowerlevelBot lease active" xml:space="preserve">
+    <value>Coppelia PowerlevelBot kirası etkin</value>
+  </data>
+  <data name="Dismounting..." xml:space="preserve">
+    <value>Binekten iniliyor...</value>
+  </data>
+  <data name="Duty completed; automatic ADS handoff stopped." xml:space="preserve">
+    <value>Görev tamamlandı; otomatik ADS devri durduruldu.</value>
+  </data>
+  <data name="Duty completed; configured FrenRider exit takeover active." xml:space="preserve">
+    <value>Görev tamamlandı; yapılandırılmış FrenRider çıkış devralma etkin.</value>
+  </data>
+  <data name="Duty exit requested; waiting to leave duty." xml:space="preserve">
+    <value>Görev çıkışı istendi; görevden ayrılma bekleniyor.</value>
+  </data>
+  <data name="Failed to eat {0} [{1}]" xml:space="preserve">
+    <value>{0} [{1}] yenilemedi</value>
+  </data>
+  <data name="Failed to summon chocobo" xml:space="preserve">
+    <value>Chocobo çağrılamadı</value>
+  </data>
+  <data name="Failed: timed out after {0}s." xml:space="preserve">
+    <value>Başarısız: {0} s sonra zaman aşımı.</value>
+  </data>
+  <data name="Far chase ({0:F1}y XZ, max {1:F0}y)" xml:space="preserve">
+    <value>Uzak kovalamaca ({0:F1}y XZ, en fazla {1:F0}y)</value>
+  </data>
+  <data name="Far chase blocked: {0}" xml:space="preserve">
+    <value>Uzak kovalamaca engellendi: {0}</value>
+  </data>
+  <data name="Far chase mount cooldown ({0:F1}s)" xml:space="preserve">
+    <value>Uzak kovalamaca binek bekleme süresi ({0:F1} s)</value>
+  </data>
+  <data name="Far chase pillion cooldown ({0:F1}s)" xml:space="preserve">
+    <value>Uzak kovalamaca artçı bekleme süresi ({0:F1} s)</value>
+  </data>
+  <data name="Far chase preempted: {0}" xml:space="preserve">
+    <value>Uzak kovalamaca kesildi: {0}</value>
+  </data>
+  <data name="Far chase settings changed" xml:space="preserve">
+    <value>Uzak kovalamaca ayarları değişti</value>
+  </data>
+  <data name="Far chase: flying" xml:space="preserve">
+    <value>Uzak kovalamaca: uçuyor</value>
+  </data>
+  <data name="Far chase: leaving pillion" xml:space="preserve">
+    <value>Uzak kovalamaca: artçıdan ayrılıyor</value>
+  </data>
+  <data name="Far chase: mounted; taking off" xml:space="preserve">
+    <value>Uzak kovalamaca: binekte; havalanıyor</value>
+  </data>
+  <data name="Far chase: mounting ({0:F1}y XZ)" xml:space="preserve">
+    <value>Uzak kovalamaca: bineğe biniyor ({0:F1}y XZ)</value>
+  </data>
+  <data name="Far chase: mounting own mount" xml:space="preserve">
+    <value>Uzak kovalamaca: kendi bineğine biniyor</value>
+  </data>
+  <data name="Far chase: requesting mount ({0:F1}y XZ)" xml:space="preserve">
+    <value>Uzak kovalamaca: binek isteniyor ({0:F1}y XZ)</value>
+  </data>
+  <data name="Flying alongside fren" xml:space="preserve">
+    <value>Fren'in yanında uçuyor</value>
+  </data>
+  <data name="Flying stuck escape: ascend ({0}s)" xml:space="preserve">
+    <value>Uçuşta sıkışmadan kaçış: yüksel ({0} s)</value>
+  </data>
+  <data name="Flying stuck escape: automove ({0}s)" xml:space="preserve">
+    <value>Uçuşta sıkışmadan kaçış: otomatik hareket ({0} s)</value>
+  </data>
+  <data name="Following ({0:F1}y, cling {1:F1}y)" xml:space="preserve">
+    <value>Takip ediyor ({0:F1}y, yakın durma {1:F1}y)</value>
+  </data>
+  <data name="Formation slot {0} ({1:F1}y)" xml:space="preserve">
+    <value>Diziliş yuvası {0} ({1:F1}y)</value>
+  </data>
+  <data name="Found: {0} ({1:F1}y)" xml:space="preserve">
+    <value>Bulundu: {0} ({1:F1}y)</value>
+  </data>
+  <data name="Fren mounted (FlyYouFools), mounting..." xml:space="preserve">
+    <value>Fren binekte (FlyYouFools), bineğe biniliyor...</value>
+  </data>
+  <data name="Fren mounted, riding pillion..." xml:space="preserve">
+    <value>Fren binekte, artçı olunuyor...</value>
+  </data>
+  <data name="FrenRider disabled." xml:space="preserve">
+    <value>FrenRider kapalı.</value>
+  </data>
+  <data name="FrenRider duty authority; rotation disabled" xml:space="preserve">
+    <value>FrenRider görev denetimi; rotasyon kapalı</value>
+  </data>
+  <data name="Grace period ({0:F0}s)..." xml:space="preserve">
+    <value>Ek süre ({0:F0} s)...</value>
+  </data>
+  <data name="In duty (out of combat) - rotation active" xml:space="preserve">
+    <value>Görevde (savaş dışında) - rotasyon etkin</value>
+  </data>
+  <data name="In range ({0:F1}y)" xml:space="preserve">
+    <value>Menzilde ({0:F1}y)</value>
+  </data>
+  <data name="In sanctuary" xml:space="preserve">
+    <value>Güvenli alanda</value>
+  </data>
+  <data name="Interacting with exit '{0}' ({1:F1}y)" xml:space="preserve">
+    <value>'{0}' çıkışıyla etkileşim ({1:F1}y)</value>
+  </data>
+  <data name="Landing..." xml:space="preserve">
+    <value>İniliyor...</value>
+  </data>
+  <data name="Leaving duty (attempt #{0}) - {1}" xml:space="preserve">
+    <value>Görevden ayrılıyor (deneme #{0}) - {1}</value>
+  </data>
+  <data name="Mount cooldown ({0:F1}s)" xml:space="preserve">
+    <value>Binek bekleme süresi ({0:F1} s)</value>
+  </data>
+  <data name="Mount correction cooldown ({0:F1}s)" xml:space="preserve">
+    <value>Binek düzeltme bekleme süresi ({0:F1} s)</value>
+  </data>
+  <data name="Mount state preserved: {0}" xml:space="preserve">
+    <value>Binek durumu korundu: {0}</value>
+  </data>
+  <data name="Mounted - rotations suppressed" xml:space="preserve">
+    <value>Binekte - rotasyonlar engellendi</value>
+  </data>
+  <data name="Mounted alongside fren" xml:space="preserve">
+    <value>Fren'in yanında binekte</value>
+  </data>
+  <data name="Mounting for: {0} ({1:F1}y)" xml:space="preserve">
+    <value>Şunun için bineğe biniliyor: {0} ({1:F1}y)</value>
+  </data>
+  <data name="Mounting..." xml:space="preserve">
+    <value>Bineğe biniliyor...</value>
+  </data>
+  <data name="Moving to: {0}" xml:space="preserve">
+    <value>Şuraya hareket: {0}</value>
+  </data>
+  <data name="NPC repair + inn room failed: {0}" xml:space="preserve">
+    <value>NPC onarımı + han odası başarısız: {0}</value>
+  </data>
+  <data name="Navigating to exit '{0}' ({1:F1}y)" xml:space="preserve">
+    <value>'{0}' çıkışına gidiliyor ({1:F1}y)</value>
+  </data>
+  <data name="Near fren on foot; dismounting" xml:space="preserve">
+    <value>Yaya fren yakında; binekten iniliyor</value>
+  </data>
+  <data name="Near fren on foot; landing to dismount" xml:space="preserve">
+    <value>Yaya fren yakında; inmek için yere iniliyor</value>
+  </data>
+  <data name="Near mounted fren; dismounting to ride pillion" xml:space="preserve">
+    <value>Binekteki fren yakında; artçı olmak için iniliyor</value>
+  </data>
+  <data name="Near mounted fren; landing to ride pillion" xml:space="preserve">
+    <value>Binekteki fren yakında; artçı olmak için yere iniliyor</value>
+  </data>
+  <data name="Need companion (cooldown {0:F1}s)" xml:space="preserve">
+    <value>Yoldaş gerekli (bekleme süresi {0:F1} s)</value>
+  </data>
+  <data name="Need food (cooldown {0:F1}s)" xml:space="preserve">
+    <value>Yiyecek gerekli (bekleme süresi {0:F1} s)</value>
+  </data>
+  <data name="Need food but in duty+combat" xml:space="preserve">
+    <value>Yiyecek gerekli ancak görev+savaş var</value>
+  </data>
+  <data name="No ADS reflection hacks enabled." xml:space="preserve">
+    <value>Etkin ADS yansıtma değişikliği yok.</value>
+  </data>
+  <data name="No Gysahl Greens" xml:space="preserve">
+    <value>Gysahl Greens yok</value>
+  </data>
+  <data name="No equipped gear below {0}%." xml:space="preserve">
+    <value>Takılı ekipmanda %{0} altında öğe yok.</value>
+  </data>
+  <data name="No food in inventory" xml:space="preserve">
+    <value>Envanterde yiyecek yok</value>
+  </data>
+  <data name="No food item resolved" xml:space="preserve">
+    <value>Yiyecek öğesi çözümlenemedi</value>
+  </data>
+  <data name="No interactables found, nudging forward..." xml:space="preserve">
+    <value>Etkileşimli nesne bulunamadı, ileri itiliyor...</value>
+  </data>
+  <data name="Out of {0} [{1}]" xml:space="preserve">
+    <value>{0} [{1}] bitti</value>
+  </data>
+  <data name="Own mount retained: {0}" xml:space="preserve">
+    <value>Kendi binek korundu: {0}</value>
+  </data>
+  <data name="Partial cleanup: {0}/{1} commands failed." xml:space="preserve">
+    <value>Kısmi temizleme: {0}/{1} komut başarısız oldu.</value>
+  </data>
+  <data name="Paused for ADS utility" xml:space="preserve">
+    <value>ADS yardımcı işlemi için duraklatıldı</value>
+  </data>
+  <data name="Pending duty exit after completed territory {0}." xml:space="preserve">
+    <value>Tamamlanan {0} bölgesinden sonra görev çıkışı bekleniyor.</value>
+  </data>
+  <data name="Pending duty exit." xml:space="preserve">
+    <value>Görev çıkışı bekleniyor.</value>
+  </data>
+  <data name="QuestionableSolo authority; FrenRider combat suppressed" xml:space="preserve">
+    <value>QuestionableSolo denetimi; FrenRider savaşı engellendi</value>
+  </data>
+  <data name="Repair complete; no equipped gear below {0}%." xml:space="preserve">
+    <value>Onarım tamamlandı; takılı ekipmanda %{0} altında öğe yok.</value>
+  </data>
+  <data name="Repair timed out after {0}s; ADS: {1}" xml:space="preserve">
+    <value>Onarım {0} s sonra zaman aşımına uğradı; ADS: {1}</value>
+  </data>
+  <data name="Restore failed: no automation snapshot captured for this account/character." xml:space="preserve">
+    <value>Geri yükleme başarısız: bu hesap/karakter için otomasyon anlık görüntüsü alınmadı.</value>
+  </data>
+  <data name="Retry wait after ADS failure: {0}" xml:space="preserve">
+    <value>ADS hatasından sonra yeniden deneme beklemesi: {0}</value>
+  </data>
+  <data name="Retry wait after rejected start: {0}" xml:space="preserve">
+    <value>Reddedilen başlangıçtan sonra yeniden deneme beklemesi: {0}</value>
+  </data>
+  <data name="Retry wait: ADS not loaded." xml:space="preserve">
+    <value>Yeniden deneme beklemesi: ADS yüklü değil.</value>
+  </data>
+  <data name="Retry wait: ADS utility active ({0})." xml:space="preserve">
+    <value>Yeniden deneme beklemesi: ADS yardımcı işlemi etkin ({0}).</value>
+  </data>
+  <data name="Retry wait: {0}s." xml:space="preserve">
+    <value>Yeniden deneme beklemesi: {0} s.</value>
+  </data>
+  <data name="Revive/Return accept attempted; waiting for dialog to close" xml:space="preserve">
+    <value>Diriliş/Return kabulü denendi; diyaloğun kapanması bekleniyor</value>
+  </data>
+  <data name="Revive/Return accept callback failed; waiting to retry" xml:space="preserve">
+    <value>Diriliş/Return kabul callback'i başarısız; yeniden deneme bekleniyor</value>
+  </data>
+  <data name="Riding pillion on fren's mount" xml:space="preserve">
+    <value>Fren'in bineğinde artçı</value>
+  </data>
+  <data name="Scanning for interactables..." xml:space="preserve">
+    <value>Etkileşimli nesneler taranıyor...</value>
+  </data>
+  <data name="Summoning chocobo ({0} greens left)" xml:space="preserve">
+    <value>Chocobo çağrılıyor ({0} greens kaldı)</value>
+  </data>
+  <data name="Suppressed by Coppelia PowerlevelBot" xml:space="preserve">
+    <value>Coppelia PowerlevelBot tarafından engellendi</value>
+  </data>
+  <data name="Surfacing revive/Return prompt" xml:space="preserve">
+    <value>Diriliş/Return istemi gösteriliyor</value>
+  </data>
+  <data name="Surfacing teleport prompt" xml:space="preserve">
+    <value>Işınlanma istemi gösteriliyor</value>
+  </data>
+  <data name="Switched to {0} [{1}]" xml:space="preserve">
+    <value>{0} [{1}] öğesine geçildi</value>
+  </data>
+  <data name="Teleport decline attempted; waiting for dialog to close" xml:space="preserve">
+    <value>Işınlanmayı reddetme denendi; diyaloğun kapanması bekleniyor</value>
+  </data>
+  <data name="Teleport decline callback failed; waiting to retry" xml:space="preserve">
+    <value>Işınlanmayı reddetme callback'i başarısız; yeniden deneme bekleniyor</value>
+  </data>
+  <data name="Too far ({0:F1}y &gt; {1:F0}y max)" xml:space="preserve">
+    <value>Çok uzakta ({0:F1}y &gt; en fazla {1:F0}y)</value>
+  </data>
+  <data name="Waiting for ADS desynthesis to start." xml:space="preserve">
+    <value>ADS ayrıştırmasının başlaması bekleniyor.</value>
+  </data>
+  <data name="Waiting for revive/Return notification" xml:space="preserve">
+    <value>Diriliş/Return bildirimi bekleniyor</value>
+  </data>
+  <data name="Waiting for revive/Return prompt" xml:space="preserve">
+    <value>Diriliş/Return istemi bekleniyor</value>
+  </data>
+  <data name="Waiting for teleport prompt" xml:space="preserve">
+    <value>Işınlanma istemi bekleniyor</value>
+  </data>
+  <data name="Waiting for {0} SelectYesno dialog" xml:space="preserve">
+    <value>{0} SelectYesno diyaloğu bekleniyor</value>
+  </data>
+  <data name="Waiting start: configured desynthesis requested (attempt {0})." xml:space="preserve">
+    <value>Başlangıç bekleniyor: yapılandırılmış ayrıştırma istendi (deneme {0}).</value>
+  </data>
+  <data name="Waiting to mount..." xml:space="preserve">
+    <value>Bineğe binme bekleniyor...</value>
+  </data>
+  <data name="Waiting: ADS not loaded." xml:space="preserve">
+    <value>Bekliyor: ADS yüklü değil.</value>
+  </data>
+  <data name="Waiting: ADS utility active ({0})." xml:space="preserve">
+    <value>Bekliyor: ADS yardımcı işlemi etkin ({0}).</value>
+  </data>
+  <data name="Waiting: {0}." xml:space="preserve">
+    <value>Bekliyor: {0}.</value>
+  </data>
+  <data name="⚠️ WARNING: AutoDuty Plugin Detected" xml:space="preserve">
+    <value>⚠ UYARI: AutoDuty eklentisi algılandı</value>
+  </data>
+  <data name="• Force respawn at entrance" xml:space="preserve">
+    <value>• Girişte zorla yeniden doğurur</value>
+  </data>
+  <data name="• Leave instances at random times" xml:space="preserve">
+    <value>• Rastgele zamanlarda örneklerden ayrılır</value>
+  </data>
+  <data name="• Interfere with FrenRider automation" xml:space="preserve">
+    <value>• FrenRider otomasyonuna müdahale eder</value>
+  </data>
+  <data name="⚠ VLC Not Found" xml:space="preserve">
+    <value>⚠ VLC bulunamadı</value>
+  </data>
+  <data name="Well Fed: {0:F0}s ({1} [{2}])" xml:space="preserve">
+    <value>Well Fed: {0:F0} s ({1} [{2}])</value>
+  </data>
+  <data name="Zone transition (rotation disabled)" xml:space="preserve">
+    <value>Bölge geçişi (rotasyon kapalı)</value>
+  </data>
+  <data name="handoff in {0:F1}s of continuous readiness" xml:space="preserve">
+    <value>{0:F1} s sürekli hazır olma sonrası devir</value>
+  </data>
+  <data name="handoff retry backoff until {0:HH:mm:ss}" xml:space="preserve">
+    <value>devir yeniden denemesi {0:HH:mm:ss} saatine ertelendi</value>
+  </data>
+  <data name="waiting for duty start seam" xml:space="preserve">
+    <value>görev başlangıç noktası bekleniyor</value>
+  </data>
+  <data name="waiting {0:F1}s for ADS ownership confirmation" xml:space="preserve">
+    <value>ADS denetim onayı için {0:F1} s bekleniyor</value>
+  </data>
+  <data name="{0} active" xml:space="preserve">
+    <value>{0} etkin</value>
+  </data>
+  <data name="{0} auto" xml:space="preserve">
+    <value>{0} otomatik</value>
+  </data>
+  <data name="{0} repair enabled; threshold is 0%." xml:space="preserve">
+    <value>{0} onarımı etkin; eşik %0.</value>
+  </data>
+  <data name="{0} repair needed below {1}%; dismounting first." xml:space="preserve">
+    <value>%{1} altında {0} onarımı gerekli; önce binekten iniliyor.</value>
+  </data>
+  <data name="{0} repair needed below {1}%; waiting for mount transition." xml:space="preserve">
+    <value>%{1} altında {0} onarımı gerekli; binek geçişi bekleniyor.</value>
+  </data>
+  <data name="{0} repair needed below {1}%; waiting to dismount." xml:space="preserve">
+    <value>%{1} altında {0} onarımı gerekli; inme bekleniyor.</value>
+  </data>
+  <data name="{0} repair needed below {1}%; waiting while {2}." xml:space="preserve">
+    <value>%{1} altında {0} onarımı gerekli; {2} sırasında bekleniyor.</value>
+  </data>
+  <data name="{0} repair requested below {1}%; FrenRider paused." xml:space="preserve">
+    <value>%{1} altında {0} onarımı istendi; FrenRider duraklatıldı.</value>
+  </data>
+  <data name="{0} repair requested; waiting for ADS status." xml:space="preserve">
+    <value>{0} onarımı istendi; ADS durumu bekleniyor.</value>
+  </data>
+  <data name="{0} repair requested; waiting for ADS to start." xml:space="preserve">
+    <value>{0} onarımı istendi; ADS'nin başlaması bekleniyor.</value>
+  </data>
+  <data name="{0} repair running; FrenRider paused. ADS: {1}" xml:space="preserve">
+    <value>{0} onarımı çalışıyor; FrenRider duraklatıldı. ADS: {1}</value>
+  </data>
+  <data name="{0} repair still needed below {1}%; automatic dismount timed out." xml:space="preserve">
+    <value>%{1} altında {0} onarımı hâlâ gerekli; otomatik inme zaman aşımına uğradı.</value>
+  </data>
+  <data name="{0} repair still needed below {1}%; retry in {2}s. ADS: {3}" xml:space="preserve">
+    <value>%{1} altında {0} onarımı hâlâ gerekli; {2} s sonra yeniden dene. ADS: {3}</value>
+  </data>
+  <data name="{0} repair still needed below {1}%; waiting while {2}. ADS: {3}" xml:space="preserve">
+    <value>%{1} altında {0} onarımı hâlâ gerekli; {2} sırasında bekleniyor. ADS: {3}</value>
+  </data>
+  <data name="{0}: mounting {1}" xml:space="preserve">
+    <value>{0}: {1} bineğine biniliyor</value>
+  </data>
+  <data name="{0}; restarting readiness delay with 5s retry backoff" xml:space="preserve">
+    <value>{0}; 5 s yeniden deneme beklemesiyle hazır olma gecikmesi yeniden başlatılıyor</value>
+  </data>
+  <data name="{0}; waiting for authoritative ownership" xml:space="preserve">
+    <value>{0}; belirleyici denetim bekleniyor</value>
+  </data>
+  <data name="True" xml:space="preserve">
+    <value>Doğru</value>
+  </data>
+  <data name="False" xml:space="preserve">
+    <value>Yanlış</value>
+  </data>
+  <data name="ADS recovery hold IPC unavailable; update ADS" xml:space="preserve">
+    <value>ADS kurtarma bekletme IPC'si kullanılamıyor; ADS'yi güncelleyin</value>
+  </data>
+  <data name="Waiting for ADS recovery hold acknowledgement" xml:space="preserve">
+    <value>ADS kurtarma bekletme onayı bekleniyor</value>
+  </data>
+  <data name="Waiting to leave combat before approaching or using Phoenix Down" xml:space="preserve">
+    <value>Yaklaşmadan veya Phoenix Down kullanmadan önce savaştan çıkış bekleniyor</value>
+  </data>
+  <data name="Waiting to land" xml:space="preserve">
+    <value>Yere inme bekleniyor</value>
+  </data>
+  <data name="No Phoenix Downs; waiting for party recovery" xml:space="preserve">
+    <value>Phoenix Down yok; grup kurtarması bekleniyor</value>
+  </data>
+  <data name="Medicine cooldown; waiting for recovery" xml:space="preserve">
+    <value>İlaç bekleme süresi; kurtarma bekleniyor</value>
+  </data>
+  <data name="Waiting for current cast" xml:space="preserve">
+    <value>Mevcut büyü bekleniyor</value>
+  </data>
+  <data name="FR: On" xml:space="preserve">
+    <value>FR: Açık</value>
+  </data>
+  <data name="FR: Off" xml:space="preserve">
+    <value>FR: Kapalı</value>
+  </data>
+  <data name="Fren Rider active - Following {0}. Coppelia: {1}. Cleanup: {2}" xml:space="preserve">
+    <value>Fren Rider etkin - {0} takip ediliyor. Coppelia: {1}. Temizleme: {2}</value>
+  </data>
+  <data name="Fren Rider disabled - Click to toggle. Coppelia: {0}. Cleanup: {1}" xml:space="preserve">
+    <value>Fren Rider kapalı - Değiştirmek için tıklayın. Coppelia: {0}. Temizleme: {1}</value>
+  </data>
+  <data name="No compatible BossMod preset IPC responded" xml:space="preserve">
+    <value>Uyumlu BossMod ön ayar IPC'si yanıt vermedi</value>
+  </data>
+  <data name="No packaged presets found" xml:space="preserve">
+    <value>Paketlenmiş ön ayar bulunamadı</value>
+  </data>
+  <data name="Preset push partially succeeded ({0}/{1})" xml:space="preserve">
+    <value>Ön ayar gönderimi kısmen başarılı ({0}/{1})</value>
+  </data>
+  <data name="Six BossMod presets pushed" xml:space="preserve">
+    <value>Altı BossMod ön ayarı gönderildi</value>
+  </data>
+  <data name=", FATE {0}" xml:space="preserve">
+    <value>, FATE {0}</value>
+  </data>
+  <data name=", indoors" xml:space="preserve">
+    <value>, iç mekânda</value>
+  </data>
+  <data name="{0} (territory {1}{2})" xml:space="preserve">
+    <value>{0} (bölge {1}{2})</value>
+  </data>
+  <data name="ADS Exit Method ({0}s)" xml:space="preserve">
+    <value>ADS çıkış yöntemi ({0} s)</value>
+  </data>
+  <data name="FrenRider: leave after {0}s" xml:space="preserve">
+    <value>FrenRider: {0} s sonra ayrıl</value>
+  </data>
+  <data name="FrenRider: leave when party leaves" xml:space="preserve">
+    <value>FrenRider: grup ayrılınca ayrıl</value>
+  </data>
+  <data name="Timer: {0}" xml:space="preserve">
+    <value>Sayaç: {0}</value>
+  </data>
+  <data name="Next retry/reassert in {0}s." xml:space="preserve">
+    <value>Sonraki yeniden deneme/uygulama {0} s sonra.</value>
+  </data>
+  <data name="Legacy seed active: {0} at threshold {1}." xml:space="preserve">
+    <value>Eski başlangıç değeri etkin: {1} eşiğinde {0}.</value>
+  </data>
+  <data name="global handoff on" xml:space="preserve">
+    <value>genel devir açık</value>
+  </data>
+  <data name="global handoff off" xml:space="preserve">
+    <value>genel devir kapalı</value>
+  </data>
+  <data name="Authority source: {0}; readable={1}; exit takeover={2}" xml:space="preserve">
+    <value>Denetim kaynağı: {0}; okunabilir={1}; çıkış devralma={2}</value>
+  </data>
+  <data name="Selected: {0} {1} (ID: {2})" xml:space="preserve">
+    <value>Seçili: {0} {1} (ID: {2})</value>
+  </data>
+  <data name="{0} in party but not visible" xml:space="preserve">
+    <value>{0} grupta ancak görünmüyor</value>
+  </data>
+  <data name="Active, {0}m {1:D2}s remaining" xml:space="preserve">
+    <value>Etkin, {0} dk {1:D2} s kaldı</value>
+  </data>
+  <data name="Inactive, {0} Gysahl Greens" xml:space="preserve">
+    <value>Etkin değil, {0} Gysahl Greens</value>
+  </data>
+  <data name="Run={0}, FlyYouFools={1}, FarChase={2}, FollowMode={3}/{4}" xml:space="preserve">
+    <value>Çalışma={0}, FlyYouFools={1}, UzakKovalamaca={2}, TakipModu={3}/{4}</value>
+  </data>
+  <data name="Cling={0:F1}, Max={1:F0}, ForayMax={2:F0}" xml:space="preserve">
+    <value>YakınDurma={0:F1}, EnFazla={1:F0}, ForayEnFazla={2:F0}</value>
+  </data>
+  <data name="Loaded={0}, Pending={1}, RuntimeOwned={2}, Readable={3}, Source={4}, ExitTakeover={5}" xml:space="preserve">
+    <value>Yüklü={0}, Bekleyen={1}, ÇalışmaDenetimi={2}, Okunabilir={3}, Kaynak={4}, ÇıkışDevralma={5}</value>
+  </data>
+  <data name="Source={0}, Readable={1}, ExitTakeover={2}" xml:space="preserve">
+    <value>Kaynak={0}, Okunabilir={1}, ÇıkışDevralma={2}</value>
+  </data>
+  <data name="Saved fren is outside the current party." xml:space="preserve">
+    <value>Kayıtlı fren mevcut grubun dışında.</value>
+  </data>
+  <data name="ADS Hyper Focus heartbeat received." xml:space="preserve">
+    <value>ADS Hyper Focus yaşam sinyali alındı.</value>
+  </data>
+  <data name="ADS Hyper Focus lease active." xml:space="preserve">
+    <value>ADS Hyper Focus kirası etkin.</value>
+  </data>
+  <data name="ActionManager unavailable" xml:space="preserve">
+    <value>ActionManager kullanılamıyor</value>
+  </data>
+  <data name="Aetheryte sheet unavailable for {0} (candidate count=0)" xml:space="preserve">
+    <value>{0} için aetheryte tablosu yok (aday sayısı=0)</value>
+  </data>
+  <data name="Coppelia Powerlevel heartbeat received." xml:space="preserve">
+    <value>Coppelia Powerlevel yaşam sinyali alındı.</value>
+  </data>
+  <data name="Coppelia Powerlevel lease active." xml:space="preserve">
+    <value>Coppelia Powerlevel kirası etkin.</value>
+  </data>
+  <data name="Exit after duty ends - {0:F0}s elapsed (configured: {1}s)" xml:space="preserve">
+    <value>Görev bitince çık - {0:F0} s geçti (yapılandırılmış: {1} s)</value>
+  </data>
+  <data name="Failed to open /partycmd" xml:space="preserve">
+    <value>/partycmd açılamadı</value>
+  </data>
+  <data name="Leave when all party members left" xml:space="preserve">
+    <value>Tüm grup üyeleri ayrılınca ayrıl</value>
+  </data>
+  <data name="Matched {0} ({1})" xml:space="preserve">
+    <value>{0} eşleşti ({1})</value>
+  </data>
+  <data name="No interactables found; fren not visible in duty" xml:space="preserve">
+    <value>Etkileşimli nesne bulunamadı; fren görevde görünmüyor</value>
+  </data>
+  <data name="No interactables found; not bound by duty" xml:space="preserve">
+    <value>Etkileşimli nesne bulunamadı; göreve bağlı değil</value>
+  </data>
+  <data name="No party row found for {0} ({1})" xml:space="preserve">
+    <value>{0} için grup satırı bulunamadı ({1})</value>
+  </data>
+  <data name="No unlocked Lifestream aetherytes matched {0} " xml:space="preserve">
+    <value>{0} ile eşleşen açık Lifestream aetheryte'ı yok </value>
+  </data>
+  <data name="Opening party window" xml:space="preserve">
+    <value>Grup penceresi açılıyor</value>
+  </data>
+  <data name="Party row found for {0}, but no zone name matched ({1})" xml:space="preserve">
+    <value>{0} için grup satırı bulundu ancak bölge adı eşleşmedi ({1})</value>
+  </data>
+  <data name="Party window did not open (addon visible=false, opened by FrenRider=true)" xml:space="preserve">
+    <value>Grup penceresi açılmadı (addon görünür=false, FrenRider açtı=true)</value>
+  </data>
+  <data name="Party window had no readable rows ({0})" xml:space="preserve">
+    <value>Grup penceresinde okunabilir satır yoktu ({0})</value>
+  </data>
+  <data name="Party window not visible" xml:space="preserve">
+    <value>Grup penceresi görünmüyor</value>
+  </data>
+  <data name="Party window read failed: {0}" xml:space="preserve">
+    <value>Grup penceresi okunamadı: {0}</value>
+  </data>
+  <data name="Reading party window ({0})" xml:space="preserve">
+    <value>Grup penceresi okunuyor ({0})</value>
+  </data>
+  <data name="SelectYesno dialog" xml:space="preserve">
+    <value>SelectYesno diyaloğu</value>
+  </data>
+  <data name="Telepo unavailable for {0} (candidate count=0)" xml:space="preserve">
+    <value>{0} için Telepo yok (aday sayısı=0)</value>
+  </data>
+  <data name="Teleport list read failed for {0}: {1} (candidate count=0)" xml:space="preserve">
+    <value>{0} için ışınlanma listesi okunamadı: {1} (aday sayısı=0)</value>
+  </data>
+  <data name="Transient IPC failure; preserving owned state. Typed: {0}; JSON: {1}" xml:space="preserve">
+    <value>Geçici IPC hatası; denetlenen durum korunuyor. Türlenmiş: {0}; JSON: {1}</value>
+  </data>
+  <data name="UI manager unavailable" xml:space="preserve">
+    <value>Arayüz yöneticisi kullanılamıyor</value>
+  </data>
+  <data name="Validated ADS current-duty snapshot for territory/CFC {0}/{1}." xml:space="preserve">
+    <value>territory/CFC {0}/{1} için ADS mevcut görev anlık görüntüsü doğrulandı.</value>
+  </data>
+  <data name="Waiting for party window" xml:space="preserve">
+    <value>Grup penceresi bekleniyor</value>
+  </data>
+  <data name="addon hidden" xml:space="preserve">
+    <value>addon gizli</value>
+  </data>
+  <data name="addon not found" xml:space="preserve">
+    <value>addon bulunamadı</value>
+  </data>
+  <data name="already mounted" xml:space="preserve">
+    <value>zaten binekte</value>
+  </data>
+  <data name="already mounting" xml:space="preserve">
+    <value>zaten bineğe biniyor</value>
+  </data>
+  <data name="automation preempted" xml:space="preserve">
+    <value>otomasyon kesildi</value>
+  </data>
+  <data name="between areas" xml:space="preserve">
+    <value>alanlar arasında</value>
+  </data>
+  <data name="casting" xml:space="preserve">
+    <value>büyü yapıyor</value>
+  </data>
+  <data name="casting or occupied" xml:space="preserve">
+    <value>büyü yapıyor veya meşgul</value>
+  </data>
+  <data name="duty confirm popup" xml:space="preserve">
+    <value>görev onay penceresi</value>
+  </data>
+  <data name="event null" xml:space="preserve">
+    <value>olay null</value>
+  </data>
+  <data name="exception: {0}" xml:space="preserve">
+    <value>istisna: {0}</value>
+  </data>
+  <data name="far chase active" xml:space="preserve">
+    <value>uzak kovalamaca etkin</value>
+  </data>
+  <data name="flying stuck escape (dX={0:F1} dY={1:F1} dZ={2:F1}, all &lt;{3}y in {4}s)" xml:space="preserve">
+    <value>uçuşta sıkışmadan kaçış (dX={0:F1} dY={1:F1} dZ={2:F1}, tümü {4} s içinde &lt;{3}y)</value>
+  </data>
+  <data name="fren flying" xml:space="preserve">
+    <value>fren uçuyor</value>
+  </data>
+  <data name="fren unavailable" xml:space="preserve">
+    <value>fren kullanılamıyor</value>
+  </data>
+  <data name="in combat" xml:space="preserve">
+    <value>savaşta</value>
+  </data>
+  <data name="in duty" xml:space="preserve">
+    <value>görevde</value>
+  </data>
+  <data name="local player unavailable" xml:space="preserve">
+    <value>yerel oyuncu kullanılamıyor</value>
+  </data>
+  <data name="mount action check failed: {0}" xml:space="preserve">
+    <value>binek eylemi kontrolü başarısız: {0}</value>
+  </data>
+  <data name="mount action unavailable (status={0})" xml:space="preserve">
+    <value>binek eylemi kullanılamıyor (durum={0})</value>
+  </data>
+  <data name="mounted or riding pillion" xml:space="preserve">
+    <value>binekte veya artçı</value>
+  </data>
+  <data name="near fren on foot" xml:space="preserve">
+    <value>yaya fren yakında</value>
+  </data>
+  <data name="near mounted fren with Fly You Fools disabled" xml:space="preserve">
+    <value>Fly You Fools kapalıyken binekteki fren yakında</value>
+  </data>
+  <data name="near mounted fren with Fly You Fools enabled" xml:space="preserve">
+    <value>Fly You Fools açıkken binekteki fren yakında</value>
+  </data>
+  <data name="node index out of range" xml:space="preserve">
+    <value>düğüm dizini aralık dışında</value>
+  </data>
+  <data name="node null" xml:space="preserve">
+    <value>düğüm null</value>
+  </data>
+  <data name="not mounted or riding" xml:space="preserve">
+    <value>binekte veya artçı değil</value>
+  </data>
+  <data name="occupied or in cutscene" xml:space="preserve">
+    <value>meşgul veya ara sahnede</value>
+  </data>
+  <data name="outside sanctuary" xml:space="preserve">
+    <value>güvenli alan dışında</value>
+  </data>
+  <data name="player busy" xml:space="preserve">
+    <value>oyuncu meşgul</value>
+  </data>
+  <data name="player dead" xml:space="preserve">
+    <value>oyuncu ölü</value>
+  </data>
+  <data name="riding pillion" xml:space="preserve">
+    <value>artçı</value>
+  </data>
+  <data name="safe and in cling range" xml:space="preserve">
+    <value>güvenli ve yakın durma menzilinde</value>
+  </data>
+  <data name="stuck repath (dX={0:F1} dY={1:F1} dZ={2:F1}, all &lt;{3}y in {4}s)" xml:space="preserve">
+    <value>sıkışınca yeniden yol bulma (dX={0:F1} dY={1:F1} dZ={2:F1}, tümü {4} s içinde &lt;{3}y)</value>
+  </data>
+  <data name="stuck repath (moved {0:F1}y &lt; {1:F1}y in {2:F0}s)" xml:space="preserve">
+    <value>sıkışınca yeniden yol bulma ({2:F0} s içinde {0:F1}y hareket &lt; {1:F1}y)</value>
+  </data>
+  <data name="teleport or dialog" xml:space="preserve">
+    <value>ışınlanma veya diyalog</value>
+  </data>
+  <data name="unit manager not found" xml:space="preserve">
+    <value>birim yöneticisi bulunamadı</value>
+  </data>
+  <data name="unsupported arg type" xml:space="preserve">
+    <value>desteklenmeyen argüman türü</value>
+  </data>
+  <data name="{0:F1}y XZ from fren, handoff {1:F1}y" xml:space="preserve">
+    <value>fren'den {0:F1}y XZ, devir {1:F1}y</value>
+  </data>
+  <data name="Overworld" xml:space="preserve">
+    <value>Açık dünya</value>
+  </data>
+  <data name="Town" xml:space="preserve">
+    <value>Şehir</value>
+  </data>
+  <data name="Duty" xml:space="preserve">
+    <value>Görev</value>
+  </data>
+  <data name="DeepDungeon" xml:space="preserve">
+    <value>DeepDungeon</value>
+  </data>
+  <data name="Foray" xml:space="preserve">
+    <value>Foray</value>
+  </data>
+  <data name="Typed" xml:space="preserve">
+    <value>Türlenmiş</value>
+  </data>
+  <data name="JsonFallback" xml:space="preserve">
+    <value>JSON yedeği</value>
+  </data>
+  <data name="StaleHold" xml:space="preserve">
+    <value>Eski durumu tut</value>
+  </data>
+  <data name="Unloaded" xml:space="preserve">
+    <value>Yüklenmemiş</value>
+  </data>
+  <data name="Unreadable" xml:space="preserve">
+    <value>Okunamıyor</value>
+  </data>
+  <data name="Following local aetheryte network to {0}{1}" xml:space="preserve">
+    <value>Yerel aetheryte ağıyla {0}{1} yönüne takip</value>
+  </data>
+  <data name="Found {0} aetherytes for {1}" xml:space="preserve">
+    <value>{1} için {0} aetheryte bulundu</value>
+  </data>
+  <data name="Matched {0}" xml:space="preserve">
+    <value>{0} eşleşti</value>
+  </data>
+  <data name="Sent {0}; matched {1}; found {2} aetherytes{3}" xml:space="preserve">
+    <value>{0} gönderildi; {1} eşleşti; {2} aetheryte bulundu{3}</value>
+  </data>
+  <data name="{0}{1}; retry in {2}s" xml:space="preserve">
+    <value>{0}{1}; {2} s sonra yeniden dene</value>
+  </data>
+  <data name="ADS loaded; ready." xml:space="preserve">
+    <value>ADS yüklü; hazır.</value>
+  </data>
+  <data name="ADS loaded; {0}." xml:space="preserve">
+    <value>ADS yüklü; {0}.</value>
+  </data>
+  <data name="{0} {1}: M{2}/T{3}, {4}." xml:space="preserve">
+    <value>{0} {1}: M{2}/T{3}, {4}.</value>
+  </data>
+  <data name="ADS is not loaded" xml:space="preserve">
+    <value>ADS yüklü değil</value>
+  </data>
+  <data name="{0}; FrenRider local duty logic stays active" xml:space="preserve">
+    <value>{0}; FrenRider yerel görev mantığı etkin kalır</value>
+  </data>
+  <data name="ADS current-duty identity does not match live GameMain territory/CFC {0}/{1}; FrenRider local duty logic stays active" xml:space="preserve">
+    <value>ADS mevcut görev kimliği canlı GameMain territory/CFC {0}/{1} ile eşleşmiyor; FrenRider yerel görev mantığı etkin kalır</value>
+  </data>
+  <data name="{0} handoff is off; FrenRider local duty logic stays active" xml:space="preserve">
+    <value>{0} devri kapalı; FrenRider yerel görev mantığı etkin kalır</value>
+  </data>
+  <data name="{0} has ADS clearance {1} (M{2}), below threshold {3}; FrenRider local duty logic stays active" xml:space="preserve">
+    <value>{0} ADS tamamlama durumu {1} (M{2}), {3} eşiğinin altında; FrenRider yerel görev mantığı etkin kalır</value>
+  </data>
+  <data name="ADS current-duty identity {0}/{1} does not match live GameMain identity {2}/{3}." xml:space="preserve">
+    <value>ADS mevcut görev kimliği {0}/{1}, canlı GameMain kimliği {2}/{3} ile eşleşmiyor.</value>
+  </data>
+  <data name="Live duty identity changed from territory/CFC {0}/{1} to {2}/{3}." xml:space="preserve">
+    <value>Canlı görev kimliği territory/CFC {0}/{1} değerinden {2}/{3} değerine değişti.</value>
+  </data>
+  <data name="No validated ADS current-duty snapshot." xml:space="preserve">
+    <value>Doğrulanmış ADS mevcut görev anlık görüntüsü yok.</value>
+  </data>
+  <data name="Live client is outside an instanced duty." xml:space="preserve">
+    <value>Canlı istemci örnekli görev dışında.</value>
+  </data>
+  <data name="GameMain did not provide a live duty territory identity." xml:space="preserve">
+    <value>GameMain canlı görev bölge kimliğini sağlamadı.</value>
+  </data>
+  <data name="ADS unloaded." xml:space="preserve">
+    <value>ADS kaldırıldı.</value>
+  </data>
+  <data name="ADS.GetStatusJson returned an empty payload" xml:space="preserve">
+    <value>ADS.GetStatusJson boş içerik döndürdü</value>
+  </data>
+  <data name="ADS status does not identify an active instanced duty" xml:space="preserve">
+    <value>ADS durumu etkin örnekli görev tanımlamıyor</value>
+  </data>
+  <data name="ADS current duty has no catalog metadata" xml:space="preserve">
+    <value>ADS mevcut görevinde katalog metaverisi yok</value>
+  </data>
+  <data name="ADS current-duty catalog row has no duty name" xml:space="preserve">
+    <value>ADS mevcut görev katalog satırında görev adı yok</value>
+  </data>
+  <data name="ADS current-duty catalog row has no territory identity" xml:space="preserve">
+    <value>ADS mevcut görev katalog satırında bölge kimliği yok</value>
+  </data>
+  <data name="ADS current-duty catalog row has no CFC identity" xml:space="preserve">
+    <value>ADS mevcut görev katalog satırında CFC kimliği yok</value>
+  </data>
+  <data name="ADS current-duty catalog row has unsupported category '{0}'" xml:space="preserve">
+    <value>ADS mevcut görev katalog satırında desteklenmeyen '{0}' kategorisi var</value>
+  </data>
+  <data name="ADS current-duty catalog row has unsupported support level '{0}'" xml:space="preserve">
+    <value>ADS mevcut görev katalog satırında desteklenmeyen '{0}' destek düzeyi var</value>
+  </data>
+  <data name="ADS current-duty catalog row has unsupported clearance status '{0}'" xml:space="preserve">
+    <value>ADS mevcut görev katalog satırında desteklenmeyen '{0}' tamamlama durumu var</value>
+  </data>
+  <data name="ADS.GetStatusJson was invalid JSON: {0}" xml:space="preserve">
+    <value>ADS.GetStatusJson geçersiz JSON içeriyordu: {0}</value>
+  </data>
+  <data name="ADS.GetStatusJson unavailable: {0}" xml:space="preserve">
+    <value>ADS.GetStatusJson kullanılamıyor: {0}</value>
+  </data>
+  <data name="ADS.GetStatusJson unavailable; retaining the validated current-duty snapshot for the same live identity: {0}" xml:space="preserve">
+    <value>ADS.GetStatusJson kullanılamıyor; aynı canlı kimliğin doğrulanmış mevcut görev anlık görüntüsü korunuyor: {0}</value>
+  </data>
+  <data name="waiting for login" xml:space="preserve">
+    <value>oturum açma bekleniyor</value>
+  </data>
+  <data name="waiting for local player" xml:space="preserve">
+    <value>yerel oyuncu bekleniyor</value>
+  </data>
+  <data name="waiting for unconscious state to clear" xml:space="preserve">
+    <value>bilinçsiz durumun geçmesi bekleniyor</value>
+  </data>
+  <data name="waiting for local player to be alive" xml:space="preserve">
+    <value>yerel oyuncunun canlı olması bekleniyor</value>
+  </data>
+  <data name="waiting for area transition to finish" xml:space="preserve">
+    <value>alan geçişinin bitmesi bekleniyor</value>
+  </data>
+  <data name="waiting for cutscene to finish" xml:space="preserve">
+    <value>ara sahnenin bitmesi bekleniyor</value>
+  </data>
+  <data name="waiting for cutscene event to finish" xml:space="preserve">
+    <value>ara sahne olayının bitmesi bekleniyor</value>
+  </data>
+  <data name="NPC no-inn/no-teleport" xml:space="preserve">
+    <value>NPC han yok/ışınlanma yok</value>
+  </data>
+  <data name="applied" xml:space="preserve">
+    <value>uygulandı</value>
+  </data>
+  <data name="already set" xml:space="preserve">
+    <value>zaten ayarlı</value>
+  </data>
+  <data name="not loaded" xml:space="preserve">
+    <value>yüklü değil</value>
+  </data>
+  <data name="unavailable" xml:space="preserve">
+    <value>kullanılamıyor</value>
+  </data>
+  <data name="failed" xml:space="preserve">
+    <value>başarısız</value>
+  </data>
+  <data name="RSR {0}{1}" xml:space="preserve">
+    <value>RSR {0}{1}</value>
+  </data>
+  <data name="{0} active{1}" xml:space="preserve">
+    <value>{0} etkin{1}</value>
+  </data>
+  <data name="{0} auto{1}" xml:space="preserve">
+    <value>{0} otomatik{1}</value>
+  </data>
+  <data name="{0} unavailable{1}" xml:space="preserve">
+    <value>{0} kullanılamıyor{1}</value>
+  </data>
+  <data name="{0} captured" xml:space="preserve">
+    <value>{0} kaydedildi</value>
+  </data>
+  <data name="{0} unavailable" xml:space="preserve">
+    <value>{0} kullanılamıyor</value>
+  </data>
+  <data name="{0} unavailable: {1}" xml:space="preserve">
+    <value>{0} kullanılamıyor: {1}</value>
+  </data>
+  <data name="Partial restore ({0})." xml:space="preserve">
+    <value>Kısmi geri yükleme ({0}).</value>
+  </data>
+  <data name="Far chase" xml:space="preserve">
+    <value>Uzak kovalamaca</value>
+  </data>
+  <data name="Fly You Fools" xml:space="preserve">
+    <value>Fly You Fools</value>
+  </data>
+  <data name="outside effective cling range" xml:space="preserve">
+    <value>etkin yakın durma menzili dışında</value>
+  </data>
+  <data name="Failed to send {0}" xml:space="preserve">
+    <value>{0} gönderilemedi</value>
+  </data>
+  <data name="; Party window left open" xml:space="preserve">
+    <value>; Grup penceresi açık bırakıldı</value>
+  </data>
+  <data name="No unlocked Lifestream aetherytes matched {0} (candidate count=0; {1})" xml:space="preserve">
+    <value>{0} ile eşleşen açık Lifestream aetheryte'ı yok (aday sayısı=0; {1})</value>
+  </data>
+  <data name="ADS.StartDutyFromInside accepted" xml:space="preserve">
+    <value>ADS.StartDutyFromInside kabul edildi</value>
+  </data>
+  <data name="ADS.StartDutyFromInside rejected; command fallback suppressed" xml:space="preserve">
+    <value>ADS.StartDutyFromInside reddedildi; yedek komut engellendi</value>
+  </data>
+  <data name="typed endpoint unavailable; sent /ads inside fallback" xml:space="preserve">
+    <value>türlenmiş uç nokta yok; yedek /ads inside gönderildi</value>
+  </data>
+  <data name="typed endpoint unavailable and /ads inside fallback failed" xml:space="preserve">
+    <value>türlenmiş uç nokta yok ve yedek /ads inside başarısız</value>
+  </data>
+  <data name="DeathReturn" xml:space="preserve">
+    <value>Ölümde Return</value>
+  </data>
+  <data name="Raise" xml:space="preserve">
+    <value>Raise</value>
+  </data>
+  <data name="Teleport" xml:space="preserve">
+    <value>Işınlanma</value>
+  </data>
+  <data name="Duty completed, {0}leaving in {1:F0}s..." xml:space="preserve">
+    <value>Görev tamamlandı, {0}{1:F0} s sonra ayrılıyor...</value>
+  </data>
+  <data name="ADS authority active" xml:space="preserve">
+    <value>ADS denetimi etkin</value>
+  </data>
+  <data name="local aethernet travel active" xml:space="preserve">
+    <value>yerel aethernet seyahati etkin</value>
+  </data>
+  <data name="settings changed" xml:space="preserve">
+    <value>ayarlar değişti</value>
+  </data>
+  <data name="typed IPC unavailable" xml:space="preserve">
+    <value>türlenmiş IPC kullanılamıyor</value>
+  </data>
+  <data name="live AutoFollow read unavailable" xml:space="preserve">
+    <value>canlı AutoFollow okuması kullanılamıyor</value>
+  </data>
+  <data name="BossMod.Service not found" xml:space="preserve">
+    <value>BossMod.Service bulunamadı</value>
+  </data>
+  <data name="BossMod.Service.Config unavailable" xml:space="preserve">
+    <value>BossMod.Service.Config kullanılamıyor</value>
+  </data>
+  <data name="BossMod.AI.AIConfig not found" xml:space="preserve">
+    <value>BossMod.AI.AIConfig bulunamadı</value>
+  </data>
+  <data name="live instance discovery failed: {0}" xml:space="preserve">
+    <value>canlı örnek keşfi başarısız: {0}</value>
+  </data>
+  <data name="Dalamud LocalPlugin wrapper was not reachable from IExposedPlugin" xml:space="preserve">
+    <value>Dalamud LocalPlugin sarmalayıcısına IExposedPlugin üzerinden ulaşılamadı</value>
+  </data>
+  <data name="Dalamud LocalPlugin had no live instance" xml:space="preserve">
+    <value>Dalamud LocalPlugin'in canlı örneği yoktu</value>
+  </data>
+  <data name="Dalamud LocalPlugin had no live assembly" xml:space="preserve">
+    <value>Dalamud LocalPlugin'in canlı assembly'si yoktu</value>
+  </data>
+  <data name="Dalamud LocalPlugin instance and assembly did not match" xml:space="preserve">
+    <value>Dalamud LocalPlugin örneği ve assembly'si eşleşmedi</value>
+  </data>
+  <data name="ADS unavailable/pending: {0}." xml:space="preserve">
+    <value>ADS kullanılamıyor/bekliyor: {0}.</value>
+  </data>
+  <data name="range" xml:space="preserve">
+    <value>menzil</value>
+  </data>
+  <data name="range reset" xml:space="preserve">
+    <value>menzil sıfırlama</value>
+  </data>
+  <data name="hunts" xml:space="preserve">
+    <value>avlar</value>
+  </data>
+  <data name="hunts reset" xml:space="preserve">
+    <value>avları sıfırlama</value>
+  </data>
+  <data name="queen" xml:space="preserve">
+    <value>queen</value>
+  </data>
+  <data name="queen reset" xml:space="preserve">
+    <value>queen sıfırlama</value>
+  </data>
+  <data name="Misc" xml:space="preserve">
+    <value>Çeşitli</value>
+  </data>
+  <data name="ADS returned false" xml:space="preserve">
+    <value>ADS false döndürdü</value>
+  </data>
+  <data name="ADS unavailable; reflection hacks pending." xml:space="preserve">
+    <value>ADS kullanılamıyor; yansıtma değişiklikleri bekliyor.</value>
+  </data>
+  <data name="No ADS utility status." xml:space="preserve">
+    <value>ADS yardımcı işlem durumu yok.</value>
+  </data>
+  <data name="ADS repair running" xml:space="preserve">
+    <value>ADS onarımı çalışıyor</value>
+  </data>
+  <data name="ADS did not accept the utility request." xml:space="preserve">
+    <value>ADS yardımcı işlem isteğini kabul etmedi.</value>
+  </data>
+  <data name="ADS status was not readable." xml:space="preserve">
+    <value>ADS durumu okunamadı.</value>
+  </data>
+  <data name="Members" xml:space="preserve">
+    <value>Üyeler</value>
+  </data>
+  <data name="Jobs" xml:space="preserve">
+    <value>Meslekler</value>
+  </data>
+  <data name="{0} total, {1} visible, {2} mounted" xml:space="preserve">
+    <value>toplam {0}, görünür {1}, binekte {2}</value>
+  </data>
+  <data name="Tank" xml:space="preserve">
+    <value>Tank</value>
+  </data>
+  <data name="Healer" xml:space="preserve">
+    <value>Şifacı</value>
+  </data>
+  <data name="Melee" xml:space="preserve">
+    <value>Yakın dövüş</value>
+  </data>
+  <data name="Ranged" xml:space="preserve">
+    <value>Uzak dövüş</value>
+  </data>
+  <data name="Caster" xml:space="preserve">
+    <value>Büyücü</value>
+  </data>
+  <data name="Select {0}..." xml:space="preserve">
+    <value>{0} seç...</value>
+  </data>
+  <data name="Window appearance" xml:space="preserve"><value>Pencere görünümü</value></data>
+  <data name="Compact visible on main window" xml:space="preserve"><value>Ana pencerede kompakt modu göster</value></data>
+  <data name="Language visible on main window" xml:space="preserve"><value>Ana pencerede dil seçimini göster</value></data>
+  <data name="Transparency" xml:space="preserve"><value>Saydamlık</value></data>
+  <data name="Opacity (%)" xml:space="preserve"><value>Opaklık (%)</value></data>
+  <data name="Auto-fade when unfocused" xml:space="preserve"><value>Odak yokken otomatik soldur</value></data>
+  <data name="Unfocused opacity (%)" xml:space="preserve"><value>Odak yokken opaklık (%)</value></data>
+  <data name="Unfocused delay (seconds)" xml:space="preserve"><value>Odak kaybı gecikmesi (saniye)</value></data>
+</root>

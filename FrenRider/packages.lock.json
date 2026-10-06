@@ -19,6 +19,15 @@
         "requested": "[3.2.0.17, )",
         "resolved": "3.2.0.17",
         "contentHash": "B6l4Sb6anZh4ttLsEklx4LTE5DDxbEicZgqYNz5sgDb9y2wR5sVebYEWSrPgwSVPanx+UxQcocTtBrqBQfmN8g=="
+      },
+      "aethertekui": {
+        "type": "Project"
+      },
+      "aethertekui.dalamud": {
+        "type": "Project",
+        "dependencies": {
+          "AethertekUI": "[0.3.0, )"
+        }
       }
     }
   }

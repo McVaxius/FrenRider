@@ -4,9 +4,9 @@
 
   <PropertyGroup>
 
-    <Version>1.4.0.1</Version>
-    <FileVersion>1.4.0.1</FileVersion>
-    <AssemblyVersion>1.4.0.1</AssemblyVersion>
+    <Version>2.0.0.0</Version>
+    <FileVersion>2.0.0.0</FileVersion>
+    <AssemblyVersion>2.0.0.0</AssemblyVersion>
 
     <PackageProjectUrl>https://github.com/McVaxius/FrenRider</PackageProjectUrl>
 
@@ -15,6 +15,11 @@
     <IsPackable>false</IsPackable>
 
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\aethertekUI\src\AethertekUI\AethertekUI.csproj" />
+    <ProjectReference Include="..\..\aethertekUI\src\AethertekUI.Dalamud\AethertekUI.Dalamud.csproj" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="ECommons" Version="3.2.0.17" />
@@ -47,6 +52,8 @@
     <ItemGroup>
 
       <PluginFiles Include="$(TargetPath)" />
+      <PluginFiles Include="$(OutputPath)AethertekUI.dll" />
+      <PluginFiles Include="$(OutputPath)AethertekUI.Dalamud.dll" />
 
       <PluginFiles Include="$(ProjectDir)$(AssemblyName).json" />
 

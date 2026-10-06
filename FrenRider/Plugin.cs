@@ -15,6 +15,10 @@ using ECommons;
 using FrenRider.IPC;
 using FrenRider.Services;
 using FrenRider.Windows;
+using AethertekUI;
+using Dalamud.Interface.Utility;
+using Dalamud.Bindings.ImGui;
+using System.Numerics;
 
 namespace FrenRider;
 
@@ -33,6 +37,7 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static IGameGui GameGui { get; private set; } = null!;
     [PluginService] internal static IDtrBar DtrBar { get; private set; } = null!;
     [PluginService] internal static IDataManager DataManager { get; private set; } = null!;
+    [PluginService] internal static ITextureProvider TextureProvider { get; private set; } = null!;
     [PluginService] internal static ISigScanner SigScanner { get; private set; } = null!;
     [PluginService] internal static IGameInteropProvider GameInteropProvider { get; private set; } = null!;
     [PluginService] internal static ITargetManager TargetManager { get; private set; } = null!;
@@ -76,6 +81,7 @@ public sealed class Plugin : IDalamudPlugin
     public DadIPC DadIPC { get; init; }
     public AutoYesService AutoYesService { get; init; }
     public RespawnService RespawnService { get; init; }
+    internal PhoenixDownRecoveryService PhoenixDownRecoveryService { get; init; }
     public AutoDutyDetectionService AutoDutyDetectionService { get; init; }
     public bool ECommonsAvailable { get; private set; }
     public string[] MountNames { get; private set; } = Array.Empty<string>();
@@ -93,10 +99,25 @@ public sealed class Plugin : IDalamudPlugin
     private DateTime nextFrameworkHitchLogUtc = DateTime.MinValue;
     private double lastSlowUpdateMs;
     private string lastSlowUpdateSource = "none";
+    private FrenRiderFonts uiFonts = null!;
+    private UiText uiText = null!;
+    private AethertekUI.Dalamud.MaterialTextHost? shapedText;
+    private MaterialTheme uiTheme = null!;
+    private MaterialOptions<string> languageOptions = null!;
+    private string appliedLanguage = "";
+    private uint appliedAccent;
+    private Vector3 accentDraft;
+    private int checkedFontGeneration = -1;
+    private bool fontIssueLogged;
+    private readonly MaterialWindowFold fontStatusFold = new();
+    private readonly MaterialWindowDecorations fontStatusDecorations = new();
+    private readonly MaterialWindowOpacity fontStatusOpacity = new();
+    private readonly Action<ImGuiWindowPtr> prepareFontStatusDecorations;
 //	private readonly ICommandManager commandManager;
 
     public Plugin()
     {
+        prepareFontStatusDecorations = fontStatusDecorations.Prepare;
         try
         {
             ECommonsMain.Init(PluginInterface, this);
@@ -158,6 +179,7 @@ public sealed class Plugin : IDalamudPlugin
         CombatOnlyIPC = new CombatOnlyIPC(PluginInterface, ConfigManager, Log);
         AutoYesService = new AutoYesService(this, Condition, Log);
         RespawnService = new RespawnService(this);
+        PhoenixDownRecoveryService = new PhoenixDownRecoveryService(new NativePhoenixRecoveryRuntime(this));
 		
         // Initialize AutoDuty warning system
         AutoDutyWarningWindow = new AutoDutyWarningWindow(this, ChatGui, Log);
@@ -195,7 +217,8 @@ public sealed class Plugin : IDalamudPlugin
             HelpMessage = "Fren Rider: /fr [on|off|settings|s|mini|m|debug], or /fr to open the main window."
         });
 
-        PluginInterface.UiBuilder.Draw += WindowSystem.Draw;
+        ApplyAppearance();
+        PluginInterface.UiBuilder.Draw += DrawUi;
         PluginInterface.UiBuilder.OpenConfigUi += ToggleConfigUi;
         PluginInterface.UiBuilder.OpenMainUi += ToggleMainUi;
 
@@ -224,6 +247,7 @@ public sealed class Plugin : IDalamudPlugin
 
     public void Dispose()
     {
+        PhoenixDownRecoveryService.Dispose();
         ToastGui.ErrorToast -= BossModActionTweaksService.OnErrorToast;
         BossModActionTweaksService.ResetRecovery();
         FollowService.Dispose();
@@ -231,7 +255,7 @@ public sealed class Plugin : IDalamudPlugin
         Framework.Update -= OnFrameworkUpdate;
         ClientState.Login -= OnLoginEvent;
 
-        PluginInterface.UiBuilder.Draw -= WindowSystem.Draw;
+        PluginInterface.UiBuilder.Draw -= DrawUi;
         PluginInterface.UiBuilder.OpenConfigUi -= ToggleConfigUi;
         PluginInterface.UiBuilder.OpenMainUi -= ToggleMainUi;
 
@@ -240,6 +264,9 @@ public sealed class Plugin : IDalamudPlugin
         ConfigWindow.Dispose();
         MainWindow.Dispose();
         MagiaMiniWindow.Dispose();
+        uiFonts.Dispose();
+        uiText.Dispose();
+        shapedText?.Dispose();
 
         AutorotIpcService.Dispose();
         QuestionableIpcService.Dispose();
@@ -276,6 +303,136 @@ public sealed class Plugin : IDalamudPlugin
 
             ECommonsAvailable = false;
         }
+    }
+
+    private void DrawUi()
+    {
+        ApplyAppearance();
+        if (!MainWindow.IsOpen && !ConfigWindow.IsOpen && !MagiaMiniWindow.IsOpen && !AutoDutyWarningWindow.IsOpen)
+            return;
+        using var text = uiText.Enter();
+        shapedText ??= new(TextureProvider);
+        using var shaped = shapedText.Push();
+        if (!uiFonts.Ready)
+        {
+            if (!fontIssueLogged && uiFonts.LoadException is { } error)
+            {
+                Log.Error(error, "[FrenRider] Required UI fonts failed to load.");
+                fontIssueLogged = true;
+            }
+            DrawFontStatus(uiFonts.LoadException is null);
+            return;
+        }
+        if (checkedFontGeneration != uiFonts.Generation)
+        {
+            try
+            {
+                var generation = uiFonts.Generation;
+                foreach (var height in FrenRiderPresentation.FontSizes)
+                    shapedText.Renderer.CheckGlyphs(uiText.RequiredText, height * ImGuiHelpers.GlobalScale);
+                uiFonts.CheckGlyphs(uiText.RequiredText);
+                checkedFontGeneration = generation;
+            }
+            catch (Exception ex)
+            {
+                if (!fontIssueLogged) { Log.Error(ex, "[FrenRider] Required UI glyph coverage failed."); fontIssueLogged = true; }
+                DrawFontStatus(false);
+                return;
+            }
+        }
+        using var theme = MaterialTheme.Push(uiTheme, ImGuiHelpers.GlobalScale, MaterialStyleMode.ColorsOnly);
+        using var geometry = new MaterialStyleScope();
+        var compact = Configuration.UiCompact;
+        var scale = ImGuiHelpers.GlobalScale;
+        geometry.Style(ImGuiStyleVar.WindowPadding, new Vector2(compact ? 12 : 16) * scale);
+        geometry.Style(ImGuiStyleVar.ItemSpacing, new Vector2(compact ? 8 : 12, compact ? 6 : 10) * scale);
+        geometry.Style(ImGuiStyleVar.FramePadding, new Vector2(compact ? 8 : 12, compact ? 4 : 7) * scale);
+        geometry.Style(ImGuiStyleVar.CellPadding, new Vector2(compact ? 8 : 12, compact ? 5 : 8) * scale);
+        geometry.Style(ImGuiStyleVar.FrameRounding, 4 * scale);
+        geometry.Style(ImGuiStyleVar.ChildRounding, 4 * scale);
+        using var body = uiFonts.Push(UiFontRole.Body);
+        using var chrome = MaterialWindowChrome.Push();
+        WindowSystem.Draw();
+    }
+
+    private void DrawFontStatus(bool loading)
+    {
+        using var theme = MaterialTheme.Push(uiTheme, ImGuiHelpers.GlobalScale, MaterialStyleMode.ColorsOnly);
+        using var chrome = MaterialWindowChrome.Push();
+        ImGui.SetNextWindowSize(new Vector2(460 * ImGuiHelpers.GlobalScale, 0));
+        fontStatusFold.PreDraw("Fren Rider##FontStatus", null, null, false, prepareFontStatusDecorations);
+        var visible = ImGui.Begin("Fren Rider##FontStatus", ImGuiWindowFlags.AlwaysAutoResize);
+        try
+        {
+            if (visible)
+            {
+                fontStatusDecorations.Paint();
+                MaterialText.TextWrapped(UiText.T(loading ? "Loading UI fonts..." : "UI fonts failed to load. See the plugin log."));
+            }
+        }
+        finally
+        {
+            ImGui.End();
+            fontStatusDecorations.Paint();
+            fontStatusFold.PostDraw();
+            ApplyWindowOpacity(fontStatusOpacity, "Fren Rider##FontStatus");
+        }
+    }
+
+    private void ApplyAppearance()
+    {
+        var language = UiText.Languages.Any(l => l.Code == Configuration.UiLanguage) ? Configuration.UiLanguage : "en";
+        if (language != appliedLanguage)
+        {
+            uiFonts?.Dispose();
+            uiText?.Dispose();
+            uiText = new(language, role => uiFonts!.Push(role));
+            uiFonts = new(PluginInterface.UiBuilder.FontAtlas, uiText.GlyphRanges(), language);
+            languageOptions = new(UiText.Languages.Select(l => new MaterialOption<string>(l.Code, l.Code, l.Name)).ToArray());
+            appliedLanguage = language;
+            checkedFontGeneration = -1;
+            fontIssueLogged = false;
+        }
+        if (uiTheme is null || (Configuration.UiAccentRgb & 0xFFFFFF) != appliedAccent)
+        {
+            appliedAccent = Configuration.UiAccentRgb & 0xFFFFFF;
+            uiTheme = FrenRiderPresentation.Theme(appliedAccent);
+            var color = FrenRiderPresentation.Rgb(appliedAccent);
+            accentDraft = new(color.X, color.Y, color.Z);
+        }
+    }
+
+    internal void DrawAppearanceSelector()
+    {
+        DrawAccentSelector();
+        ImGui.SameLine();
+        DrawLanguageSelector();
+    }
+
+    internal void DrawAccentSelector()
+    {
+        using var controls = MaterialControls.Push(FrenRiderPresentation.Controls(Configuration.UiCompact ? 28 : 32, 18));
+        if (!MaterialAppearanceSelector.DrawAccent("appearance", ref accentDraft,
+            new(UiText.T("Color"), UiText.T("Language"), UiText.T("Teal"), UiText.T("Blue"), UiText.T("Pink"), UiText.T("Custom RGB")))) return;
+        Configuration.UiAccentRgb = ((uint)Math.Clamp((int)MathF.Round(accentDraft.X * 255), 0, 255) << 16)
+            | ((uint)Math.Clamp((int)MathF.Round(accentDraft.Y * 255), 0, 255) << 8) | (uint)Math.Clamp((int)MathF.Round(accentDraft.Z * 255), 0, 255);
+        Configuration.Save();
+    }
+
+    internal void DrawLanguageSelector()
+    {
+        var language = appliedLanguage;
+        using var controls = MaterialControls.Push(FrenRiderPresentation.Controls(Configuration.UiCompact ? 28 : 32, 18));
+        if (!MaterialAppearanceSelector.DrawLanguage("appearance", ref language, languageOptions, languageWidth: 140)) return;
+        Configuration.UiLanguage = language;
+        Configuration.Save();
+    }
+
+    internal void DrawCompactSelector()
+    {
+        var compact = Configuration.UiCompact;
+        if (ImGui.Checkbox("C", ref compact)) { Configuration.UiCompact = compact; Configuration.Save(); }
+        if (ImGui.IsItemHovered()) MaterialText.SetTooltip(UiText.T("Compact mode"));
     }
 
     private void OnFrenRiderEnabledChanged(bool enabled)
@@ -333,6 +490,7 @@ public sealed class Plugin : IDalamudPlugin
             FollowService.PreemptFarChase("disabled");
             MountService.PreemptFarChase("disabled");
             RespawnService.ResetForDisable();
+            PhoenixDownRecoveryService.Reset();
             AutoDutyDetectionService.HandleFrenRiderDisabled();
             ExternalAutomationCleanupService.Cleanup(
                 ConfigManager.GetActiveConfig(),
@@ -475,6 +633,7 @@ public sealed class Plugin : IDalamudPlugin
             else
             {
                 ConfigManager.ClearActiveCharacter();
+                PhoenixDownRecoveryService.Reset();
                 Log.Warning($"OnLogin: Missing data - charName={charName}, worldName={worldName}");
             }
         }
@@ -524,6 +683,7 @@ public sealed class Plugin : IDalamudPlugin
             }
             else if (!ClientState.IsLoggedIn && wasLoggedIn)
             {
+                PhoenixDownRecoveryService.Reset();
                 wasLoggedIn = false;
                 loginDetectionDelay = 0;
                 ConfigManager.ClearActiveCharacter();
@@ -531,6 +691,7 @@ public sealed class Plugin : IDalamudPlugin
 
             if (IsAreaTransitionActive())
             {
+                PhoenixDownRecoveryService.Reset();
                 BeastCaptureService.Suspend();
                 BossModActionTweaksService.ResetRecovery();
                 FrenTeleportService.ResetForAreaTransition();
@@ -622,13 +783,20 @@ public sealed class Plugin : IDalamudPlugin
             Measure("ads-integration", AdsIntegrationService.Update);
             Measure("ads-reflection", () => AdsReflectionIpcService.Update());
             Measure("utility-gate", AutomationService.UpdateUtilityGate);
-            Measure("combat", CombatService.Update);
-            Measure("beast-capture", BeastCaptureService.Update);
-            Measure("casting-recovery", BossModActionTweaksService.UpdateRecovery);
+            Measure("phoenix-down-recovery", PhoenixDownRecoveryService.Update);
+            if (!PhoenixDownRecoveryService.HoldActions)
+                Measure("combat", CombatService.Update);
+            if (!PhoenixDownRecoveryService.HoldMovement)
+            {
+                Measure("beast-capture", BeastCaptureService.Update);
+                Measure("casting-recovery", BossModActionTweaksService.UpdateRecovery);
+            }
 
             Measure("fren-teleport", FrenTeleportService.Update);
             Measure("auto-yes", AutoYesService.Update);
             Measure("respawn", RespawnService.Update);
+            if (PhoenixDownRecoveryService.HoldMovement)
+                return;
             Measure("fate-sync", FateSyncService.Update);
             Measure("follow", FollowService.Update);
             Measure("mount", MountService.Update);
@@ -678,7 +846,7 @@ public sealed class Plugin : IDalamudPlugin
         {
             dtrEntry = DtrBar.Get("Fren Rider");
             dtrEntry.Shown = Configuration.DtrBarEnabled;
-            dtrEntry.Text = new SeString(new TextPayload("FR: Off"));
+            dtrEntry.Text = new SeString(new TextPayload(uiText.Language == "hi" ? "FR: Off" : uiText.Label("FR: Off")));
             dtrEntry.OnClick = (_) =>
             {
                 var cfg = ConfigManager.GetActiveConfig();
@@ -714,15 +882,27 @@ public sealed class Plugin : IDalamudPlugin
                 dtrEntry.Text = new SeString(new TextPayload(glyph));
                 break;
             default: // text-only
-                var statusText = config.Enabled ? "FR: On" : "FR: Off";
+                var statusKey = config.Enabled ? "FR: On" : "FR: Off";
+                var statusText = uiText.Language == "hi" ? statusKey : uiText.Label(statusKey);
                 dtrEntry.Text = new SeString(new TextPayload(statusText));
                 break;
         }
 
-        dtrEntry.Tooltip = new SeString(new TextPayload(
-            config.Enabled
-                ? $"Fren Rider active - Following {config.FrenName}. Coppelia: {CoppeliaPowerlevelLeaseService.StatusText}. Cleanup: {ExternalAutomationCleanupService.StatusText}"
+        using var text = uiText.Enter();
+        var fren = Configuration.KrangleEnabled ? KrangleService.KrangleName(config.FrenName) : config.FrenName;
+        // Game-rendered DTR text cannot use the ImGui shaping route.
+        if (uiText.Language == "hi")
+        {
+            dtrEntry.Tooltip = new SeString(new TextPayload(config.Enabled
+                ? $"Fren Rider active - Following {fren}. Coppelia: {CoppeliaPowerlevelLeaseService.StatusText}. Cleanup: {ExternalAutomationCleanupService.StatusText}"
                 : $"Fren Rider disabled - Click to toggle. Coppelia: {CoppeliaPowerlevelLeaseService.StatusText}. Cleanup: {ExternalAutomationCleanupService.StatusText}"));
+            return;
+        }
+        dtrEntry.Tooltip = new SeString(new TextPayload(config.Enabled
+            ? UiText.F("Fren Rider active - Following {0}. Coppelia: {1}. Cleanup: {2}", fren,
+                UiText.T(CoppeliaPowerlevelLeaseService.StatusText), UiText.T(ExternalAutomationCleanupService.StatusText))
+            : UiText.F("Fren Rider disabled - Click to toggle. Coppelia: {0}. Cleanup: {1}",
+                UiText.T(CoppeliaPowerlevelLeaseService.StatusText), UiText.T(ExternalAutomationCleanupService.StatusText))));
     }
 
     private void LoadMountNames()
@@ -776,4 +956,62 @@ public sealed class Plugin : IDalamudPlugin
 
     public void ToggleConfigUi() => ConfigWindow.Toggle();
     public void ToggleMainUi() => MainWindow.Toggle();
+    internal void ApplyWindowOpacity(MaterialWindowOpacity opacity, string name)
+    {
+        opacity.Apply(name, Math.Clamp(Configuration.UiWindowOpacityPercent, 10, 100) / 100f, Configuration.UiTransparencyEnabled,
+            Configuration.UiAutoFade, Math.Clamp(Configuration.UiFadedOpacityPercent, 10, 100) / 100f,
+            float.IsFinite(Configuration.UiUnfocusedDelaySeconds) ? Math.Max(0, Configuration.UiUnfocusedDelaySeconds) : 10);
+    }
+
+    internal void DrawWindowAppearance()
+    {
+        UiGui.TextUnformatted("Window appearance");
+        DrawAppearanceSelector();
+        DrawCompactSelector();
+        var config = Configuration;
+        var changed = false;
+        var compactVisibleOnMainWindow = config.UiCompactVisibleOnMainWindow;
+        if (UiGui.Checkbox("Compact visible on main window" + "###UiCompactVisibleOnMainWindowSettings", ref compactVisibleOnMainWindow))
+        { config.UiCompactVisibleOnMainWindow = compactVisibleOnMainWindow; changed = true; }
+        var languageVisibleOnMainWindow = config.UiLanguageVisibleOnMainWindow;
+        if (UiGui.Checkbox("Language visible on main window" + "###UiLanguageVisibleOnMainWindowSettings", ref languageVisibleOnMainWindow))
+        { config.UiLanguageVisibleOnMainWindow = languageVisibleOnMainWindow; changed = true; }
+        var transparencyEnabled = config.UiTransparencyEnabled;
+        if (UiGui.Checkbox("Transparency" + "###UiTransparencyEnabledSettings", ref transparencyEnabled))
+        { config.UiTransparencyEnabled = transparencyEnabled; changed = true; }
+        var autoFade = config.UiAutoFade;
+        if (UiGui.Checkbox("Auto-fade when unfocused" + "###UiAutoFadeSettings", ref autoFade))
+        { config.UiAutoFade = autoFade; changed = true; }
+        ImGui.BeginDisabled(!transparencyEnabled);
+        try
+        {
+        var opacity = Math.Clamp(config.UiWindowOpacityPercent, 10, 100);
+        ImGui.SetNextItemWidth(180 * MaterialTheme.Metrics.Scale);
+        if (UiGui.AppearanceSliderInt("Opacity (%)" + "###UiWindowOpacityPercentSettings", ref opacity, 10, 100, "%d%%", ImGuiSliderFlags.AlwaysClamp))
+        { config.UiWindowOpacityPercent = opacity; changed = true; }
+        var fadedOpacity = Math.Clamp(config.UiFadedOpacityPercent, 10, 100);
+        ImGui.SetNextItemWidth(180 * MaterialTheme.Metrics.Scale);
+        if (UiGui.AppearanceSliderInt("Unfocused opacity (%)" + "###UiFadedOpacityPercentSettings", ref fadedOpacity, 10, 100, "%d%%", ImGuiSliderFlags.AlwaysClamp))
+        { config.UiFadedOpacityPercent = fadedOpacity; changed = true; }
+        ImGui.BeginDisabled(!autoFade);
+        try
+        {
+        var delay = float.IsFinite(config.UiUnfocusedDelaySeconds) ? Math.Max(0, config.UiUnfocusedDelaySeconds) : 10;
+        ImGui.SetNextItemWidth(180 * MaterialTheme.Metrics.Scale);
+        if (UiGui.AppearanceInputFloat("Unfocused delay (seconds)" + "###UiUnfocusedDelaySecondsSettings", ref delay))
+        { delay = float.IsFinite(delay) ? Math.Max(0, delay) : 10; config.UiUnfocusedDelaySeconds = delay; changed = true; }
+        }
+        finally { ImGui.EndDisabled(); }
+        }
+        finally { ImGui.EndDisabled(); }
+        if (changed) config.Save();
+    }
+
+    internal void DrawTransparency()
+    {
+        var enabled = Configuration.UiTransparencyEnabled;
+        if (UiGui.Checkbox("Transparency" + "###UiTransparencyHeader", ref enabled))
+        { Configuration.UiTransparencyEnabled = enabled; Configuration.Save(); }
+    }
+
 }

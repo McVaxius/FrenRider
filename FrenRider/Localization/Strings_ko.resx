@@ -1,0 +1,2706 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="Blue" xml:space="preserve">
+    <value>파랑</value>
+  </data>
+  <data name="Character" xml:space="preserve">
+    <value>캐릭터</value>
+  </data>
+  <data name="Color" xml:space="preserve">
+    <value>색상</value>
+  </data>
+  <data name="Custom RGB" xml:space="preserve">
+    <value>사용자 지정 RGB</value>
+  </data>
+  <data name="Enabled" xml:space="preserve">
+    <value>활성화</value>
+  </data>
+  <data name="Forced / On" xml:space="preserve">
+    <value>강제/켜짐</value>
+  </data>
+  <data name="Icon only" xml:space="preserve">
+    <value>아이콘만</value>
+  </data>
+  <data name="Interactive" xml:space="preserve">
+    <value>상호작용</value>
+  </data>
+  <data name="Job" xml:space="preserve">
+    <value>직업</value>
+  </data>
+  <data name="Ko-fi" xml:space="preserve">
+    <value>Ko-fi</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>언어</value>
+  </data>
+  <data name="Loading UI fonts..." xml:space="preserve">
+    <value>UI 글꼴 로드 중...</value>
+  </data>
+  <data name="N" xml:space="preserve">
+    <value>아니요</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>아니요</value>
+  </data>
+  <data name="Off" xml:space="preserve">
+    <value>꺼짐</value>
+  </data>
+  <data name="On" xml:space="preserve">
+    <value>켜짐</value>
+  </data>
+  <data name="Override Off" xml:space="preserve">
+    <value>강제 꺼짐</value>
+  </data>
+  <data name="Passive" xml:space="preserve">
+    <value>수동적</value>
+  </data>
+  <data name="Pink" xml:space="preserve">
+    <value>분홍</value>
+  </data>
+  <data name="Profile" xml:space="preserve">
+    <value>프로필</value>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>검색</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>설정</value>
+  </data>
+  <data name="Teal" xml:space="preserve">
+    <value>청록</value>
+  </data>
+  <data name="Text only" xml:space="preserve">
+    <value>텍스트만</value>
+  </data>
+  <data name="UI fonts failed to load. See the plugin log." xml:space="preserve">
+    <value>UI 글꼴 로드 실패. 플러그인 로그 확인.</value>
+  </data>
+  <data name="Unknown" xml:space="preserve">
+    <value>알 수 없음</value>
+  </data>
+  <data name="Y" xml:space="preserve">
+    <value>예</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>예</value>
+  </data>
+  <data name="Compact mode" xml:space="preserve">
+    <value>간소화 모드</value>
+  </data>
+  <data name="Run" xml:space="preserve">
+    <value>실행</value>
+  </data>
+  <data name="Operator" xml:space="preserve">
+    <value>운영 정보</value>
+  </data>
+  <data name="Party" xml:space="preserve">
+    <value>파티</value>
+  </data>
+  <data name="Automation" xml:space="preserve">
+    <value>자동화</value>
+  </data>
+  <data name="Account" xml:space="preserve">
+    <value>계정</value>
+  </data>
+  <data name="Fren" xml:space="preserve">
+    <value>친구</value>
+  </data>
+  <data name="Tracking" xml:space="preserve">
+    <value>추적</value>
+  </data>
+  <data name="Position" xml:space="preserve">
+    <value>위치</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>이름</value>
+  </data>
+  <data name="Distance" xml:space="preserve">
+    <value>거리</value>
+  </data>
+  <data name="Follow" xml:space="preserve">
+    <value>따라가기</value>
+  </data>
+  <data name="Mount" xml:space="preserve">
+    <value>탈것</value>
+  </data>
+  <data name="Combat" xml:space="preserve">
+    <value>전투</value>
+  </data>
+  <data name="Cleanup" xml:space="preserve">
+    <value>복원</value>
+  </data>
+  <data name="Idle" xml:space="preserve">
+    <value>대기</value>
+  </data>
+  <data name="Fren teleport" xml:space="preserve">
+    <value>친구에게 텔레포</value>
+  </data>
+  <data name="Phoenix Down" xml:space="preserve">
+    <value>불사조의 깃털</value>
+  </data>
+  <data name="Respawn" xml:space="preserve">
+    <value>부활</value>
+  </data>
+  <data name="Food" xml:space="preserve">
+    <value>음식</value>
+  </data>
+  <data name="Repair" xml:space="preserve">
+    <value>수리</value>
+  </data>
+  <data name="Desynth" xml:space="preserve">
+    <value>분해</value>
+  </data>
+  <data name="Companion" xml:space="preserve">
+    <value>버디</value>
+  </data>
+  <data name="Formation" xml:space="preserve">
+    <value>대형</value>
+  </data>
+  <data name="Duty / ADS / Exit" xml:space="preserve">
+    <value>임무 / ADS / 퇴장</value>
+  </data>
+  <data name="Zone" xml:space="preserve">
+    <value>지역</value>
+  </data>
+  <data name="Exit method" xml:space="preserve">
+    <value>퇴장 방식</value>
+  </data>
+  <data name="Exit" xml:space="preserve">
+    <value>퇴장</value>
+  </data>
+  <data name="Duty interact" xml:space="preserve">
+    <value>임무 상호작용</value>
+  </data>
+  <data name="ADS authority" xml:space="preserve">
+    <value>ADS 제어 권한</value>
+  </data>
+  <data name="Compact debug" xml:space="preserve">
+    <value>디버그 세부 정보</value>
+  </data>
+  <data name="Config" xml:space="preserve">
+    <value>설정</value>
+  </data>
+  <data name="Distances" xml:space="preserve">
+    <value>거리 설정</value>
+  </data>
+  <data name="ADS flags" xml:space="preserve">
+    <value>ADS 상태 플래그</value>
+  </data>
+  <data name="Not logged in" xml:space="preserve">
+    <value>로그인하지 않음</value>
+  </data>
+  <data name="Logged in, local player unavailable" xml:space="preserve">
+    <value>로그인됨, 로컬 플레이어를 찾을 수 없음</value>
+  </data>
+  <data name="No account loaded" xml:space="preserve">
+    <value>불러온 계정 없음</value>
+  </data>
+  <data name="No account loaded." xml:space="preserve">
+    <value>불러온 계정이 없습니다.</value>
+  </data>
+  <data name="No fren configured" xml:space="preserve">
+    <value>설정한 친구 없음</value>
+  </data>
+  <data name="Inactive" xml:space="preserve">
+    <value>비활성</value>
+  </data>
+  <data name="In party but not visible" xml:space="preserve">
+    <value>파티에 있지만 보이지 않음</value>
+  </data>
+  <data name="Fren not found" xml:space="preserve">
+    <value>친구를 찾을 수 없음</value>
+  </data>
+  <data name="in party" xml:space="preserve">
+    <value>파티 참여 중</value>
+  </data>
+  <data name="not in party" xml:space="preserve">
+    <value>파티에 없음</value>
+  </data>
+  <data name="Not in a party" xml:space="preserve">
+    <value>파티에 참여하지 않음</value>
+  </data>
+  <data name="Mounted" xml:space="preserve">
+    <value>탑승 중</value>
+  </data>
+  <data name="On foot" xml:space="preserve">
+    <value>도보</value>
+  </data>
+  <data name="Not visible" xml:space="preserve">
+    <value>보이지 않음</value>
+  </data>
+  <data name="Active checks running" xml:space="preserve">
+    <value>활성 검사 진행 중</value>
+  </data>
+  <data name="Idle; last {0}" xml:space="preserve">
+    <value>대기, 마지막: {0}</value>
+  </data>
+  <data name="Slot {0}" xml:space="preserve">
+    <value>슬롯 {0}</value>
+  </data>
+  <data name="All FR on" xml:space="preserve">
+    <value>모든 FR 켜기</value>
+  </data>
+  <data name="All FR off" xml:space="preserve">
+    <value>모든 FR 끄기</value>
+  </data>
+  <data name="Fren Rider Mini" xml:space="preserve">
+    <value>Fren Rider 미니</value>
+  </data>
+  <data name="Attack" xml:space="preserve">
+    <value>공격</value>
+  </data>
+  <data name="Defense" xml:space="preserve">
+    <value>방어</value>
+  </data>
+  <data name="&lt;none&gt;" xml:space="preserve">
+    <value>&lt;없음&gt;</value>
+  </data>
+  <data name="UI / About" xml:space="preserve">
+    <value>UI / 정보</value>
+  </data>
+  <data name="DEFAULT CONFIG" xml:space="preserve">
+    <value>기본 설정</value>
+  </data>
+  <data name="REMOTE PROFILES (DAD)" xml:space="preserve">
+    <value>원격 프로필 (DAD)</value>
+  </data>
+  <data name="REMOTE DAD PROFILE" xml:space="preserve">
+    <value>DAD 원격 프로필</value>
+  </data>
+  <data name="REMOTE: {0}" xml:space="preserve">
+    <value>원격: {0}</value>
+  </data>
+  <data name="Fren Rider Settings - {0}" xml:space="preserve">
+    <value>Fren Rider 설정 - {0}</value>
+  </data>
+  <data name="DELETE" xml:space="preserve">
+    <value>삭제</value>
+  </data>
+  <data name="DELETE REMOTE" xml:space="preserve">
+    <value>원격 삭제</value>
+  </data>
+  <data name="Everything Sync" xml:space="preserve">
+    <value>전체 동기화</value>
+  </data>
+  <data name="Full Tab Sync" xml:space="preserve">
+    <value>탭 전체 동기화</value>
+  </data>
+  <data name="Reset All" xml:space="preserve">
+    <value>모두 초기화</value>
+  </data>
+  <data name="Reset This" xml:space="preserve">
+    <value>현재 탭 초기화</value>
+  </data>
+  <data name="Sync all" xml:space="preserve">
+    <value>모두에게 동기화</value>
+  </data>
+  <data name="Fren Name" xml:space="preserve">
+    <value>친구 이름</value>
+  </data>
+  <data name="DAD Profile Acceptance" xml:space="preserve">
+    <value>DAD 프로필 수락</value>
+  </data>
+  <data name="Temporary" xml:space="preserve">
+    <value>임시</value>
+  </data>
+  <data name="Permanent" xml:space="preserve">
+    <value>영구</value>
+  </data>
+  <data name="Fren Rider enabled by default" xml:space="preserve">
+    <value>Fren Rider 기본 활성화</value>
+  </data>
+  <data name="Enabled when transferred" xml:space="preserve">
+    <value>전송 시 활성화</value>
+  </data>
+  <data name="Display label" xml:space="preserve">
+    <value>표시 이름</value>
+  </data>
+  <data name="Show Fren Rider status in the server info bar." xml:space="preserve">
+    <value>서버 정보 표시줄에 Fren Rider 상태를 표시합니다.</value>
+  </data>
+  <data name="Obfuscate character names in FrenRider UI." xml:space="preserve">
+    <value>FrenRider에서 캐릭터 이름을 익명화합니다.</value>
+  </data>
+  <data name="Not logged in. FrenRider waits until a character is loaded." xml:space="preserve">
+    <value>로그인하지 않았습니다. 캐릭터를 불러올 때까지 기다립니다.</value>
+  </data>
+  <data name="AutoDuty detected while FrenRider is enabled." xml:space="preserve">
+    <value>FrenRider 활성화 중 AutoDuty가 감지되었습니다.</value>
+  </data>
+  <data name="Set DEFAULT CONFIG and every local character in the current account, including the active temporary profile." xml:space="preserve">
+    <value>기본 설정과 현재 계정의 모든 로컬 캐릭터를 변경합니다. 활성 임시 프로필도 포함됩니다.</value>
+  </data>
+  <data name="Fly You Fools (fly alongside instead of pillion)" xml:space="preserve">
+    <value>동승 대신 나란히 비행</value>
+  </data>
+  <data name="Try Teleport to Fren When Out of Zone" xml:space="preserve">
+    <value>다른 지역의 친구에게 텔레포</value>
+  </data>
+  <data name="Follow local aetheryte networks" xml:space="preserve">
+    <value>지역 에테라이트망 따라가기</value>
+  </data>
+  <data name="Teleport Delay (seconds)" xml:space="preserve">
+    <value>텔레포 지연(초)</value>
+  </data>
+  <data name="Nudge in duty when fren not nearby/in-zone" xml:space="preserve">
+    <value>임무에서 친구가 없을 때 전진</value>
+  </data>
+  <data name="Use Phoenix Downs for recovery" xml:space="preserve">
+    <value>불사조의 깃털로 부활</value>
+  </data>
+  <data name="Revive anyone within range outdoors" xml:space="preserve">
+    <value>야외에서 범위 내 누구나 부활</value>
+  </data>
+  <data name="Allow Phoenix Down use during combat" xml:space="preserve">
+    <value>전투 중 불사조의 깃털 허용</value>
+  </data>
+  <data name="Respawn after death outside duties after" xml:space="preserve">
+    <value>임무 밖 사망 후 부활 대기</value>
+  </data>
+  <data name="Respawn after death inside duties after" xml:space="preserve">
+    <value>임무 내 사망 후 부활 대기</value>
+  </data>
+  <data name="seconds" xml:space="preserve">
+    <value>초</value>
+  </data>
+  <data name="Mount-up to chase fren if &gt;" xml:space="preserve">
+    <value>이 거리 이상이면 탑승하여 추적 &gt;</value>
+  </data>
+  <data name="y from fren" xml:space="preserve">
+    <value>y(친구까지)</value>
+  </data>
+  <data name="after" xml:space="preserve">
+    <value>이후</value>
+  </data>
+  <data name="Mount Name (if flying solo)" xml:space="preserve">
+    <value>혼자 비행할 때 탈것 이름</value>
+  </data>
+  <data name="(none)" xml:space="preserve">
+    <value>(없음)</value>
+  </data>
+  <data name="Mount Roulette" xml:space="preserve">
+    <value>무작위 탈것</value>
+  </data>
+  <data name="Summon Chocobo" xml:space="preserve">
+    <value>초코보 소환</value>
+  </data>
+  <data name="Gysahl Greens: {0}" xml:space="preserve">
+    <value>기살의 야채: {0}</value>
+  </data>
+  <data name="Companion Stance" xml:space="preserve">
+    <value>버디 태세</value>
+  </data>
+  <data name="Free Stance" xml:space="preserve">
+    <value>자유 태세</value>
+  </data>
+  <data name="Defender Stance" xml:space="preserve">
+    <value>방어 태세</value>
+  </data>
+  <data name="Attacker Stance" xml:space="preserve">
+    <value>공격 태세</value>
+  </data>
+  <data name="Healer Stance" xml:space="preserve">
+    <value>치유 태세</value>
+  </data>
+  <data name="Auto Discard (/ays discard)" xml:space="preserve">
+    <value>자동 버리기 (/ays discard)</value>
+  </data>
+  <data name="Update Interval (seconds)" xml:space="preserve">
+    <value>갱신 간격(초)</value>
+  </data>
+  <data name="WARNING: Very low update interval may impact game performance!" xml:space="preserve">
+    <value>경고: 갱신 간격이 너무 짧으면 게임 성능이 저하될 수 있습니다!</value>
+  </data>
+  <data name="Cling Distance" xml:space="preserve">
+    <value>따라가기 거리</value>
+  </data>
+  <data name="Cling Type" xml:space="preserve">
+    <value>따라가기 방식</value>
+  </data>
+  <data name="Cling Type (Duty)" xml:space="preserve">
+    <value>임무 내 따라가기 방식</value>
+  </data>
+  <data name="BossMod Follow" xml:space="preserve">
+    <value>BossMod 따라가기</value>
+  </data>
+  <data name="Vanilla Follow" xml:space="preserve">
+    <value>게임 기본 따라가기</value>
+  </data>
+  <data name="Social Distancing" xml:space="preserve">
+    <value>간격 유지</value>
+  </data>
+  <data name="Social Distance (yalms)" xml:space="preserve">
+    <value>유지할 간격(y)</value>
+  </data>
+  <data name="Social Distance Indoors" xml:space="preserve">
+    <value>실내 간격 유지</value>
+  </data>
+  <data name="X Wiggle (+/- yalms)" xml:space="preserve">
+    <value>X축 편차(±y)</value>
+  </data>
+  <data name="Z Wiggle (+/- yalms)" xml:space="preserve">
+    <value>Z축 편차(±y)</value>
+  </data>
+  <data name="Max Distances" xml:space="preserve">
+    <value>최대 거리</value>
+  </data>
+  <data name="Max Follow Distance" xml:space="preserve">
+    <value>최대 따라가기 거리</value>
+  </data>
+  <data name="Max Follow Distance (Foray)" xml:space="preserve">
+    <value>탐험 콘텐츠 최대 따라가기 거리</value>
+  </data>
+  <data name="Deep Dungeon Extra Cling" xml:space="preserve">
+    <value>딥 던전 추가 거리</value>
+  </data>
+  <data name="FATE Extra Cling" xml:space="preserve">
+    <value>돌발 임무 추가 거리</value>
+  </data>
+  <data name="Auto Sync FATE" xml:space="preserve">
+    <value>돌발 임무 자동 레벨 조율</value>
+  </data>
+  <data name="Formation Following" xml:space="preserve">
+    <value>대형 따라가기</value>
+  </data>
+  <data name="Follow in Combat" xml:space="preserve">
+    <value>전투 중 따라가기</value>
+  </data>
+  <data name="Harmonized Cling Reset Ticks" xml:space="preserve">
+    <value>따라가기 거리 초기화 주기</value>
+  </data>
+  <data name="Rotation Plugin" xml:space="preserve">
+    <value>스킬 자동화 플러그인</value>
+  </data>
+  <data name="Rotation Plugin (Foray)" xml:space="preserve">
+    <value>탐험 콘텐츠 스킬 자동화</value>
+  </data>
+  <data name="Daedalus Party Mode" xml:space="preserve">
+    <value>Daedalus 파티 모드</value>
+  </data>
+  <data name="None" xml:space="preserve">
+    <value>없음</value>
+  </data>
+  <data name="Focus" xml:space="preserve">
+    <value>집중</value>
+  </data>
+  <data name="Split" xml:space="preserve">
+    <value>분산</value>
+  </data>
+  <data name="Kill Adds" xml:space="preserve">
+    <value>추가 적 처치</value>
+  </data>
+  <data name="Autorot Presets" xml:space="preserve">
+    <value>스킬 자동화 프리셋</value>
+  </data>
+  <data name="Configure rotation preset manually" xml:space="preserve">
+    <value>스킬 자동화 프리셋 수동 설정</value>
+  </data>
+  <data name="BM Rotation Preset" xml:space="preserve">
+    <value>BM 스킬 자동화 프리셋</value>
+  </data>
+  <data name="BM Rotation Preset (DD)" xml:space="preserve">
+    <value>BM 프리셋(딥 던전)</value>
+  </data>
+  <data name="BM Rotation Preset (FATE)" xml:space="preserve">
+    <value>BM 프리셋(돌발 임무)</value>
+  </data>
+  <data name="Force BossMod preset regardless of rotation" xml:space="preserve">
+    <value>스킬 자동화와 무관하게 BossMod 프리셋 적용</value>
+  </data>
+  <data name="Push Presets Now" xml:space="preserve">
+    <value>지금 프리셋 전송</value>
+  </data>
+  <data name="Cleanup Mode" xml:space="preserve">
+    <value>복원 모드</value>
+  </data>
+  <data name="Restore snapshot" xml:space="preserve">
+    <value>저장 상태 복원</value>
+  </data>
+  <data name="Turn everything off" xml:space="preserve">
+    <value>모두 끄기</value>
+  </data>
+  <data name="RSR Operating Mode" xml:space="preserve">
+    <value>RSR 작동 모드</value>
+  </data>
+  <data name="RSR Aggro Type" xml:space="preserve">
+    <value>RSR 대상 선택</value>
+  </data>
+  <data name="All Attackable Targets" xml:space="preserve">
+    <value>공격 가능한 모든 대상</value>
+  </data>
+  <data name="Previously Engaged Targets" xml:space="preserve">
+    <value>교전한 대상</value>
+  </data>
+  <data name="All Targets When Solo in Duty" xml:space="preserve">
+    <value>임무에서 혼자일 때 모든 대상</value>
+  </data>
+  <data name="All Targets When Solo" xml:space="preserve">
+    <value>혼자일 때 모든 대상</value>
+  </data>
+  <data name="Solo Deep Dungeon Smart" xml:space="preserve">
+    <value>솔로 딥 던전 지능형 선택</value>
+  </data>
+  <data name="Manual" xml:space="preserve">
+    <value>수동</value>
+  </data>
+  <data name="Support" xml:space="preserve">
+    <value>지원</value>
+  </data>
+  <data name="Don't move while casting" xml:space="preserve">
+    <value>시전 중 이동 금지</value>
+  </data>
+  <data name="Positional" xml:space="preserve">
+    <value>위치 지정</value>
+  </data>
+  <data name="Front" xml:space="preserve">
+    <value>정면</value>
+  </data>
+  <data name="Rear" xml:space="preserve">
+    <value>후면</value>
+  </data>
+  <data name="Any" xml:space="preserve">
+    <value>무관</value>
+  </data>
+  <data name="Combat Max Distance" xml:space="preserve">
+    <value>최대 전투 거리</value>
+  </data>
+  <data name="Limit Break HP %" xml:space="preserve">
+    <value>리미트 브레이크 HP %</value>
+  </data>
+  <data name="Beastmaster Capture" xml:space="preserve">
+    <value>마수 조련사 포획</value>
+  </data>
+  <data name="Try to catch beasts" xml:space="preserve">
+    <value>마수 포획 시도</value>
+  </data>
+  <data name="Capture HP: within 5 levels below you or equal" xml:space="preserve">
+    <value>포획 HP: 동레벨 또는 5레벨 이내</value>
+  </data>
+  <data name="Capture HP: more than 5 levels below you" xml:space="preserve">
+    <value>포획 HP: 5레벨보다 낮음</value>
+  </data>
+  <data name="Saved beasts" xml:space="preserve">
+    <value>저장한 마수</value>
+  </data>
+  <data name="Select a local character to browse their saved beasts." xml:space="preserve">
+    <value>로컬 캐릭터를 선택하여 저장한 마수를 확인하세요.</value>
+  </data>
+  <data name="Obstacle maps on" xml:space="preserve">
+    <value>장애물 지도 켜기</value>
+  </data>
+  <data name="BMR reduce activation range for outdoor areas" xml:space="preserve">
+    <value>야외 BMR 활성 범위 축소</value>
+  </data>
+  <data name="BMR Disable Hunt Modules" xml:space="preserve">
+    <value>BMR 마물 사냥 모듈 끄기</value>
+  </data>
+  <data name="BMR Disable Queen Lunatender" xml:space="preserve">
+    <value>BMR Queen Lunatender 끄기</value>
+  </data>
+  <data name="ADS Duty Handoff" xml:space="preserve">
+    <value>ADS 임무 인계</value>
+  </data>
+  <data name="Duty Families" xml:space="preserve">
+    <value>임무 분류</value>
+  </data>
+  <data name="sec ready" xml:space="preserve">
+    <value>초 준비 상태</value>
+  </data>
+  <data name="Seed family rows from legacy values" xml:space="preserve">
+    <value>기존 값으로 분류 초기화</value>
+  </data>
+  <data name="Temporarily controlled by DAD" xml:space="preserve">
+    <value>DAD가 임시 제어 중</value>
+  </data>
+  <data name="Equip job stone for current class" xml:space="preserve">
+    <value>현재 클래스 소울 크리스탈 장착</value>
+  </data>
+  <data name="Loot" xml:space="preserve">
+    <value>전리품</value>
+  </data>
+  <data name="Loot Type" xml:space="preserve">
+    <value>전리품 선택</value>
+  </data>
+  <data name="unchanged" xml:space="preserve">
+    <value>변경 없음</value>
+  </data>
+  <data name="need" xml:space="preserve">
+    <value>필요</value>
+  </data>
+  <data name="greed" xml:space="preserve">
+    <value>탐욕</value>
+  </data>
+  <data name="pass" xml:space="preserve">
+    <value>포기</value>
+  </data>
+  <data name="OPEN ADS LOOT OPTIONS" xml:space="preserve">
+    <value>ADS 전리품 설정 열기</value>
+  </data>
+  <data name="Use HQ food" xml:space="preserve">
+    <value>HQ 음식 사용</value>
+  </data>
+  <data name="Search for Food if Depleted" xml:space="preserve">
+    <value>음식이 떨어지면 다른 음식 검색</value>
+  </data>
+  <data name="Clear Food" xml:space="preserve">
+    <value>음식 해제</value>
+  </data>
+  <data name="No food selected. Food is optional." xml:space="preserve">
+    <value>음식을 선택하지 않았습니다. 음식은 선택 사항입니다.</value>
+  </data>
+  <data name="Type at least 2 characters to search..." xml:space="preserve">
+    <value>검색하려면 2자 이상 입력하세요...</value>
+  </data>
+  <data name="No results. Try a different search term." xml:space="preserve">
+    <value>결과가 없습니다. 다른 검색어를 입력하세요.</value>
+  </data>
+  <data name="Repair Mode" xml:space="preserve">
+    <value>수리 모드</value>
+  </data>
+  <data name="Self" xml:space="preserve">
+    <value>직접 수리</value>
+  </data>
+  <data name="NPC no-inn" xml:space="preserve">
+    <value>NPC 수리(여관 없음)</value>
+  </data>
+  <data name="NPC No Inn + No TP" xml:space="preserve">
+    <value>NPC 수리(여관·텔레포 없음)</value>
+  </data>
+  <data name="NPC repair + inn room" xml:space="preserve">
+    <value>NPC 수리와 여관 방</value>
+  </data>
+  <data name="Repair At % Durability" xml:space="preserve">
+    <value>수리할 내구도 %</value>
+  </data>
+  <data name="Test ADS NPC No-Inn Repair" xml:space="preserve">
+    <value>ADS NPC 수리(여관 없음) 실행</value>
+  </data>
+  <data name="Desynthesis" xml:space="preserve">
+    <value>분해</value>
+  </data>
+  <data name="Enable Auto Desynth" xml:space="preserve">
+    <value>자동 분해 켜기</value>
+  </data>
+  <data name="OPEN DESYNTH CONFIG" xml:space="preserve">
+    <value>분해 설정 열기</value>
+  </data>
+  <data name="Idle Behavior" xml:space="preserve">
+    <value>대기 중 동작</value>
+  </data>
+  <data name="Idle Mode" xml:space="preserve">
+    <value>대기 모드</value>
+  </data>
+  <data name="Specific Action" xml:space="preserve">
+    <value>지정 동작</value>
+  </data>
+  <data name="Action From List" xml:space="preserve">
+    <value>목록에서 선택</value>
+  </data>
+  <data name="Idle Command" xml:space="preserve">
+    <value>대기 명령</value>
+  </data>
+  <data name="List Source" xml:space="preserve">
+    <value>목록 유형</value>
+  </data>
+  <data name="Default List" xml:space="preserve">
+    <value>기본 목록</value>
+  </data>
+  <data name="Custom List" xml:space="preserve">
+    <value>사용자 목록</value>
+  </data>
+  <data name="Idle Ticks Before Action" xml:space="preserve">
+    <value>동작 전 대기 주기</value>
+  </data>
+  <data name="Echo Messages" xml:space="preserve">
+    <value>채팅 메시지</value>
+  </data>
+  <data name="Invite Whitelist" xml:space="preserve">
+    <value>초대 허용 목록</value>
+  </data>
+  <data name="Trusted inviters" xml:space="preserve">
+    <value>신뢰할 초대자</value>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>추가</value>
+  </data>
+  <data name="Auto-Yes Dialogs" xml:space="preserve">
+    <value>대화 자동 승인</value>
+  </data>
+  <data name="Teleport offers" xml:space="preserve">
+    <value>텔레포 제안</value>
+  </data>
+  <data name="Party invites (backup)" xml:space="preserve">
+    <value>파티 초대(보조)</value>
+  </data>
+  <data name="Raise offers are accepted automatically while FrenRider is enabled." xml:space="preserve">
+    <value>FrenRider가 활성화되면 부활 제안을 자동 수락합니다.</value>
+  </data>
+  <data name="Exit Behaviour" xml:space="preserve">
+    <value>퇴장 동작</value>
+  </data>
+  <data name="Duty-end delay" xml:space="preserve">
+    <value>임무 종료 후 지연</value>
+  </data>
+  <data name="seconds after duty ends" xml:space="preserve">
+    <value>초(임무 종료 후)</value>
+  </data>
+  <data name="UI Settings" xml:space="preserve">
+    <value>UI 설정</value>
+  </data>
+  <data name="Video Notifications" xml:space="preserve">
+    <value>동영상 알림</value>
+  </data>
+  <data name="Movable Config Window" xml:space="preserve">
+    <value>설정 창 이동 허용</value>
+  </data>
+  <data name="DTR Bar Enabled" xml:space="preserve">
+    <value>DTR 표시줄 켜기</value>
+  </data>
+  <data name="DTR Bar Mode" xml:space="preserve">
+    <value>DTR 표시 방식</value>
+  </data>
+  <data name="Icon+Text" xml:space="preserve">
+    <value>아이콘과 텍스트</value>
+  </data>
+  <data name="DTR Icons (max 3 characters)" xml:space="preserve">
+    <value>DTR 아이콘(최대 3자)</value>
+  </data>
+  <data name="Copy Icon Guide Link" xml:space="preserve">
+    <value>아이콘 가이드 링크 복사</value>
+  </data>
+  <data name="VLC not found" xml:space="preserve">
+    <value>VLC를 찾을 수 없음</value>
+  </data>
+  <data name="Download VLC" xml:space="preserve">
+    <value>VLC 다운로드</value>
+  </data>
+  <data name="Advanced" xml:space="preserve">
+    <value>고급</value>
+  </data>
+  <data name="Debug / Logging" xml:space="preserve">
+    <value>디버그 / 로그</value>
+  </data>
+  <data name="Presets" xml:space="preserve">
+    <value>프리셋</value>
+  </data>
+  <data name="Behavior" xml:space="preserve">
+    <value>동작</value>
+  </data>
+  <data name="Hacks" xml:space="preserve">
+    <value>특수 기능</value>
+  </data>
+  <data name="DISABLE PANDORA's BOX" xml:space="preserve">
+    <value>PANDORA's BOX 끄기</value>
+  </data>
+  <data name="Commands:" xml:space="preserve">
+    <value>명령어:</value>
+  </data>
+  <data name="Required Dependencies:" xml:space="preserve">
+    <value>필수 의존성:</value>
+  </data>
+  <data name="Optional Plugins:" xml:space="preserve">
+    <value>선택 플러그인:</value>
+  </data>
+  <data name="Multiplayer Guide:" xml:space="preserve">
+    <value>멀티플레이 가이드:</value>
+  </data>
+  <data name="Made by McVaxius" xml:space="preserve">
+    <value>제작: McVaxius</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>닫기</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>상태</value>
+  </data>
+  <data name="Beast" xml:space="preserve">
+    <value>마수</value>
+  </data>
+  <data name="Saved ownership" xml:space="preserve">
+    <value>저장된 보유 정보</value>
+  </data>
+  <data name="DD Extra Distance" xml:space="preserve">
+    <value>딥 던전 추가 거리</value>
+  </data>
+  <data name="FATE Extra Distance" xml:space="preserve">
+    <value>돌발 임무 추가 거리</value>
+  </data>
+  <data name="Max AI Distance" xml:space="preserve">
+    <value>AI 최대 거리</value>
+  </data>
+  <data name="LB Threshold %" xml:space="preserve">
+    <value>LB 발동 HP %</value>
+  </data>
+  <data name="ADS Exit Method" xml:space="preserve">
+    <value>ADS 퇴장 방식</value>
+  </data>
+  <data name="FrenRider Exit method" xml:space="preserve">
+    <value>FrenRider 퇴장 방식</value>
+  </data>
+  <data name="Exit after N seconds" xml:space="preserve">
+    <value>N초 후 퇴장</value>
+  </data>
+  <data name="Leave when all others left" xml:space="preserve">
+    <value>다른 사람이 모두 나가면 퇴장</value>
+  </data>
+  <data name="No automatic exit" xml:space="preserve">
+    <value>자동 퇴장 없음</value>
+  </data>
+  <data name="Food Item Name" xml:space="preserve">
+    <value>음식 아이템 이름</value>
+  </data>
+  <data name="Add command" xml:space="preserve">
+    <value>명령 추가</value>
+  </data>
+  <data name="Remove command" xml:space="preserve">
+    <value>명령 삭제</value>
+  </data>
+  <data name="Click to copy Daedalus repository URL" xml:space="preserve">
+    <value>클릭하여 Daedalus 저장소 URL 복사</value>
+  </data>
+  <data name="Click to copy URL to clipboard" xml:space="preserve">
+    <value>클릭하여 URL 복사</value>
+  </data>
+  <data name="Click to download VLC media player" xml:space="preserve">
+    <value>클릭하여 VLC 다운로드</value>
+  </data>
+  <data name="Copies the Lodestone blog link with suggested glyphs" xml:space="preserve">
+    <value>추천 문자 Lodestone 블로그 링크 복사</value>
+  </data>
+  <data name="Disable Krangle to edit fren name." xml:space="preserve">
+    <value>친구 이름을 편집하려면 Krangle을 끄세요.</value>
+  </data>
+  <data name="Disable Krangle to edit the account alias." xml:space="preserve">
+    <value>계정 별칭을 편집하려면 Krangle을 끄세요.</value>
+  </data>
+  <data name="Select from current party members" xml:space="preserve">
+    <value>현재 파티원에서 선택</value>
+  </data>
+  <data name="Hold CTRL and click to delete this remote profile." xml:space="preserve">
+    <value>CTRL을 누른 채 클릭하여 원격 프로필을 삭제합니다.</value>
+  </data>
+  <data name="The currently active character profile cannot be deleted while logged in." xml:space="preserve">
+    <value>로그인 중 현재 캐릭터 프로필을 삭제할 수 없습니다.</value>
+  </data>
+  <data name="Hold CTRL and click to delete this character's config.&#10;This cannot be undone." xml:space="preserve">
+    <value>CTRL을 누른 채 클릭하여 설정을 삭제합니다.
+되돌릴 수 없습니다.</value>
+  </data>
+  <data name="Log in to a character to create one." xml:space="preserve">
+    <value>캐릭터로 로그인하여 계정을 생성하세요.</value>
+  </data>
+  <data name="Separate profiles for exact remote identities. They never become local character rows." xml:space="preserve">
+    <value>정확한 원격 ID의 별도 프로필입니다. 로컬 캐릭터가 되지 않습니다.</value>
+  </data>
+  <data name="This row is separate from local characters and can never become the active-character profile." xml:space="preserve">
+    <value>이 행은 로컬 캐릭터와 별개이며 활성 캐릭터 프로필이 될 수 없습니다.</value>
+  </data>
+  <data name="Incoming DAD profiles will replace this character's saved profile." xml:space="preserve">
+    <value>수신한 DAD 프로필이 이 캐릭터의 저장된 프로필을 교체합니다.</value>
+  </data>
+  <data name="FrenRider installs BossMod presets whenever it is enabled." xml:space="preserve">
+    <value>FrenRider를 켤 때마다 BossMod 프리셋을 설치합니다.</value>
+  </data>
+  <data name="Managed presets: BMR/VBM use FRENRIDER role presets; RSR/WRATH/DAEDALUS use passive role presets." xml:space="preserve">
+    <value>BMR/VBM은 FRENRIDER 역할, RSR/WRATH/DAEDALUS는 수동 역할 프리셋을 사용합니다.</value>
+  </data>
+  <data name="Copy DEFAULT CONFIG character-profile settings to every character profile in this account." xml:space="preserve">
+    <value>기본 캐릭터 설정을 이 계정의 모든 프로필에 복사합니다.</value>
+  </data>
+  <data name="Copy this DEFAULT CONFIG tab to every character profile in this account." xml:space="preserve">
+    <value>기본 설정의 이 탭을 모든 캐릭터 프로필에 복사합니다.</value>
+  </data>
+  <data name="UI / About uses global settings and is not copied to character profiles." xml:space="preserve">
+    <value>UI / 정보는 전역 설정이므로 캐릭터 프로필에 복사하지 않습니다.</value>
+  </data>
+  <data name="Set DEFAULT CONFIG and every local character in this account, including the active temporary profile." xml:space="preserve">
+    <value>기본 설정과 모든 로컬 캐릭터를 변경합니다. 활성 임시 프로필도 포함됩니다.</value>
+  </data>
+  <data name="Copy '{0}' from DEFAULT CONFIG to every character profile in this account." xml:space="preserve">
+    <value>기본 설정의 '{0}'을 모든 캐릭터 프로필에 복사합니다.</value>
+  </data>
+  <data name="AutoDuty Detected - Action Required" xml:space="preserve">
+    <value>AutoDuty 감지 - 조치 필요</value>
+  </data>
+  <data name="AutoDuty is enabled and may cause issues:" xml:space="preserve">
+    <value>AutoDuty가 활성화되어 다음 문제가 발생할 수 있습니다:</value>
+  </data>
+  <data name="FrenRider requires AutoDuty to be disabled for proper operation." xml:space="preserve">
+    <value>FrenRider가 정상 작동하려면 AutoDuty를 꺼야 합니다.</value>
+  </data>
+  <data name="Disable AutoDuty" xml:space="preserve">
+    <value>AutoDuty 끄기</value>
+  </data>
+  <data name="This window will close automatically after disabling AutoDuty." xml:space="preserve">
+    <value>AutoDuty를 끄면 이 창은 자동으로 닫힙니다.</value>
+  </data>
+  <data name="0 = disabled.&#10;1 = ADS self repair.&#10;2 = ADS NPC repair without inn fallback.&#10;3 = ADS NPC repair only when a mender is within 120y.&#10;4 = ADS NPC repair near an inn, then enter the inn room." xml:space="preserve">
+    <value>0: 끄기, 1: ADS 직접 수리, 2: 여관 없이 NPC 수리, 3: 수리 NPC가 120y 이내일 때만, 4: 여관 근처 NPC 수리 후 방 입장.</value>
+  </data>
+  <data name="Additionally revive non-party players within 15 yalms outdoors. Party members and healers have priority. Never approach strangers." xml:space="preserve">
+    <value>야외에서 15y 내 파티원 외 플레이어도 부활시킵니다. 파티원과 치유사가 우선이며 낯선 사람에게 접근하지 않습니다.</value>
+  </data>
+  <data name="After DutyCompleted and duty exit, ask ADS to run configured desynthesis. FrenRider pauses automatic actions until completion or the 180s timeout." xml:space="preserve">
+    <value>DutyCompleted 및 퇴장 후 설정된 ADS 분해를 실행합니다. 완료 또는 180초 제한까지 FrenRider 동작을 멈춥니다.</value>
+  </data>
+  <data name="After remaining continuously unconscious inside duties for this delay, open the Return prompt and accept it. Duty scope is selected only by BoundByDuty. Minimum: 1 second. Default: 60." xml:space="preserve">
+    <value>임무 내 지속 사망 상태 후 데존 창을 열고 수락합니다. 임무 판정은 BoundByDuty만 사용합니다. 최소 1초, 기본 60초.</value>
+  </data>
+  <data name="After remaining continuously unconscious outside duties for this delay, open the Return prompt and accept it. Minimum: 1 second. Default: 60." xml:space="preserve">
+    <value>임무 밖 지속 사망 상태 후 데존 창을 열고 수락합니다. 최소 1초, 기본 60초.</value>
+  </data>
+  <data name="Applies in dungeons and outdoors. Off waits for the rescuer to leave combat before approaching or using an item; current combat may finish, but new pulls stay blocked. On still respects native item availability and every other recovery gate." xml:space="preserve">
+    <value>던전과 야외에 적용됩니다. 끄면 구조자의 전투 종료까지 접근·아이템 사용을 기다립니다. 진행 중 전투는 끝낼 수 있지만 새 교전은 막습니다. 켜도 아이템 사용 가능 여부와 다른 조건을 지킵니다.</value>
+  </data>
+  <data name="Auto-summon chocobo companion using Gysahl Greens when timer is low.&#10;Will not summon in sanctuaries or duties." xml:space="preserve">
+    <value>남은 시간이 짧으면 기살의 야채로 초코보를 소환합니다. 휴식 지역과 임무에서는 소환하지 않습니다.</value>
+  </data>
+  <data name="Automatically accept teleport offers (e.g., Return, Teleport to).&#10;Note: Party invites are handled by the whitelist system below." xml:space="preserve">
+    <value>데존 등 텔레포 제안을 자동 수락합니다. 파티 초대는 아래 허용 목록으로 처리합니다.</value>
+  </data>
+  <data name="Automatically accept teleport offers." xml:space="preserve">
+    <value>텔레포 제안을 자동 수락합니다.</value>
+  </data>
+  <data name="Automatically click Yes on specific dialog types when FrenRider is enabled.&#10;Works alongside YesAlready - FrenRider pauses YesAlready and handles these dialogs itself." xml:space="preserve">
+    <value>FrenRider 활성화 중 지정된 대화를 자동 승인합니다. YesAlready를 일시 중지하고 FrenRider가 처리합니다.</value>
+  </data>
+  <data name="Automatically leave the duty N seconds after it completes." xml:space="preserve">
+    <value>임무 완료 N초 후 자동 퇴장합니다.</value>
+  </data>
+  <data name="Backup auto-accept for party invites.&#10;Primary invite handling uses the whitelist system above." xml:space="preserve">
+    <value>파티 초대 자동 수락 보조 기능입니다. 위 허용 목록이 기본 방식입니다.</value>
+  </data>
+  <data name="Backup auto-accept for party invites. Primary invite handling uses the whitelist." xml:space="preserve">
+    <value>파티 초대 자동 수락 보조 기능입니다. 허용 목록이 기본 방식입니다.</value>
+  </data>
+  <data name="Both HP thresholds accept 1–100%. Exactly five levels below uses this second threshold.&#10;100% permits Capture on a full-health beast and may initiate combat." xml:space="preserve">
+    <value>두 HP 기준은 1–100%입니다. 정확히 5레벨 낮으면 두 번째 기준을 씁니다. 100%는 최대 HP에서도 포획하여 전투를 시작할 수 있습니다.</value>
+  </data>
+  <data name="Chocobo companion battle stance.&#10;Controls how your companion behaves in combat." xml:space="preserve">
+    <value>초코보 전투 태세와 전투 중 동작을 설정합니다.</value>
+  </data>
+  <data name="Combat positional preference.&#10;Front: Stay in front of target&#10;Rear: Stay behind target&#10;Any: No preference&#10;Auto: Let plugin decide based on job" xml:space="preserve">
+    <value>정면: 대상 앞, 후면: 대상 뒤, 무관: 선호 없음, 자동: 직업에 따라 선택.</value>
+  </data>
+  <data name="Controls BossMod Reborn only. Default: off. Applies when FrenRider is enabled, regardless of combat provider." xml:space="preserve">
+    <value>BossMod Reborn만 제어합니다. 기본은 끄기이며 전투 플러그인과 무관하게 FrenRider가 켜지면 적용됩니다.</value>
+  </data>
+  <data name="Customize the glyphs used for enabled/disabled icon modes." xml:space="preserve">
+    <value>켜짐·꺼짐 상태의 아이콘 문자를 설정합니다.</value>
+  </data>
+  <data name="DTR bar display mode:&#10;Text Only: 'FR: On/Off'&#10;Icon+Text: '⚫ FR'&#10;Icon Only: '⚫'" xml:space="preserve">
+    <value>DTR 표시: 텍스트 'FR: 켜짐/꺼짐', 아이콘과 텍스트 '● FR', 아이콘만 '●'.</value>
+  </data>
+  <data name="Default List: Built-in emote list&#10;Custom List: Your own list of commands" xml:space="preserve">
+    <value>기본 목록은 내장 감정 표현, 사용자 목록은 자신의 명령입니다.</value>
+  </data>
+  <data name="Default List: built-in emotes&#10;Custom List: your own command list" xml:space="preserve">
+    <value>기본 목록은 내장 감정 표현, 사용자 목록은 자신의 명령입니다.</value>
+  </data>
+  <data name="Delay before opening the party window and teleporting. Allowed range: 5-300 seconds. Default: 30." xml:space="preserve">
+    <value>파티 창을 열고 텔레포하기 전 지연입니다. 5–300초, 기본 30초.</value>
+  </data>
+  <data name="Distance threshold (yalms) to start following fren.&#10;When you are farther than this from fren, navigation begins." xml:space="preserve">
+    <value>친구와 이 거리(y)보다 멀어지면 따라가기를 시작합니다.</value>
+  </data>
+  <data name="Each family has its own enable toggle, maturity threshold, and continuous-ready handoff delay.&#10;0 = not cleared, 1 = unsync cleared, 2 = duty support cleared, 3 = proven sync clear.&#10;Handoff delay range: 2-300 seconds." xml:space="preserve">
+    <value>분류마다 켜기, 성숙도 기준, 연속 준비 지연이 있습니다. 0: 미완료, 1: 제한 해제 완료, 2: 임무 지원, 3: 조율 완료 검증. 지연 2–300초.</value>
+  </data>
+  <data name="Enable social distancing indoors too.&#10;Off by default. Turn on if you want spacing in dungeons." xml:space="preserve">
+    <value>실내에서도 간격을 유지합니다. 기본은 끄기이며 던전에서 간격을 유지하려면 켜세요.</value>
+  </data>
+  <data name="Extra distance added to cling in Deep Dungeons.&#10;Prevents constant chasing in PotD/HoH." xml:space="preserve">
+    <value>딥 던전 따라가기 거리를 늘려 PotD/HoH의 지속 추적을 방지합니다.</value>
+  </data>
+  <data name="Follow in a formation pattern (8-person grid).&#10;Positions based on party slot number.&#10;Disabled during mounting." xml:space="preserve">
+    <value>파티 슬롯에 따른 8인 격자 대형입니다. 탑승 중에는 사용하지 않습니다.</value>
+  </data>
+  <data name="Garble all identifying text (character names, fren names, servers)&#10;with military/exercise words. Useful for taking screenshots&#10;to report issues without revealing personal info." xml:space="preserve">
+    <value>캐릭터·친구·서버 이름을 훈련 용어로 바꿔 개인정보 없이 문제 화면을 공유합니다.</value>
+  </data>
+  <data name="Global setting. On plugin load and whenever it changes, applies casting movement lock to currently loaded BMR, VBM, and RSR plugins." xml:space="preserve">
+    <value>전역 설정입니다. 로드와 변경 시 활성 BMR/VBM/RSR에 시전 중 이동 금지를 적용합니다.</value>
+  </data>
+  <data name="Hostile target selection sent to RotationSolver Reborn through its typed settings IPC." xml:space="preserve">
+    <value>적 대상 선택을 RotationSolver Reborn의 형식 지정 설정 IPC로 전송합니다.</value>
+  </data>
+  <data name="How loot is handled if LazyLoot is installed.&#10;'unchanged' = Don't modify loot settings." xml:space="preserve">
+    <value>LazyLoot 전리품 처리입니다. '변경 없음'은 설정을 유지합니다.</value>
+  </data>
+  <data name="How often the plugin runs its main logic loop.&#10;Lower values = more responsive but higher CPU usage.&#10;Default: 0.3s. WARNING: Values below 0.1 may impact performance." xml:space="preserve">
+    <value>주 처리 갱신 간격입니다. 짧을수록 반응과 CPU 사용이 늘어납니다. 기본 0.3초, 0.1초 미만은 성능을 저하시킬 수 있습니다.</value>
+  </data>
+  <data name="Human-readable alias for this account group. Linked to account ID internally." xml:space="preserve">
+    <value>계정 그룹의 표시 별칭이며 내부 계정 ID와 연결됩니다.</value>
+  </data>
+  <data name="If configured food runs out, search inventory for any food starting from lowest item ID." xml:space="preserve">
+    <value>설정한 음식이 떨어지면 가장 낮은 아이템 ID부터 소지품에서 다른 음식을 찾습니다.</value>
+  </data>
+  <data name="If enabled, you will summon your own mount instead of pillion riding.&#10;Useful for flying zones.&#10;&#10;⚠️ IMPORTANT: This feature requires you to be grouped with your fren.&#10;It will not work properly if ungrouped (won't jump into air to follow)." xml:space="preserve">
+    <value>동승 대신 자신의 탈것을 소환하여 비행합니다. 친구와 같은 파티에 있어야 하며 파티가 아니면 비행 추적을 위해 이륙하지 못합니다.</value>
+  </data>
+  <data name="If your configured food runs out, search inventory for any food starting from lowest item ID." xml:space="preserve">
+    <value>설정한 음식이 떨어지면 가장 낮은 아이템 ID부터 소지품에서 다른 음식을 찾습니다.</value>
+  </data>
+  <data name="Immediately follow a fren's aethernet jump through Lifestream when you are at the same origin. Supports connected city, residential, and custom networks, including Bozja and Eureka." xml:space="preserve">
+    <value>같은 출발점에서 Lifestream으로 친구의 에테라이트 이동을 즉시 따라갑니다. 도시·주거·특수망 및 Bozja/Eureka를 지원합니다.</value>
+  </data>
+  <data name="Leave the duty if no other party members are visible in the zone." xml:space="preserve">
+    <value>지역에 다른 파티원이 보이지 않으면 퇴장합니다.</value>
+  </data>
+  <data name="Max distance to targets for combat AI.&#10;424242 = Auto (plugin decides based on job: melee 2.6, caster 10)." xml:space="preserve">
+    <value>전투 AI 최대 대상 거리입니다. 424242는 직업별 자동(근접 2.6, 마법 10)입니다.</value>
+  </data>
+  <data name="Max follow distance in forays (Eureka/Bozja).&#10;Lower value to avoid mini-aetheryte transition issues." xml:space="preserve">
+    <value>Eureka/Bozja 최대 따라가기 거리입니다. 줄이면 작은 에테라이트 전환 문제를 방지합니다.</value>
+  </data>
+  <data name="Maximum distance (yalms) to chase fren.&#10;Beyond this, stop following to avoid zone-hopping." xml:space="preserve">
+    <value>최대 추적 거리(y)입니다. 초과하면 지역 이동을 반복하지 않도록 따라가기를 멈춥니다.</value>
+  </data>
+  <data name="Minimum distance to maintain from fren in outdoor/foray zones.&#10;Prevents characters from stacking on top of each other (less bot-like).&#10;Set to 0 to disable." xml:space="preserve">
+    <value>야외·탐험 지역에서 친구와 최소 간격을 유지하여 겹치지 않게 합니다. 0은 끄기입니다.</value>
+  </data>
+  <data name="Name of food to auto-consume.&#10;Full item search from game data planned for a future update." xml:space="preserve">
+    <value>자동 섭취 음식 이름입니다. 전체 게임 아이템 검색은 추후 업데이트 예정입니다.</value>
+  </data>
+  <data name="Name of the auto-rotation preset for general content.&#10;Must match a preset name in your rotation plugin.&#10;Use 'none' to not change the preset." xml:space="preserve">
+    <value>일반 콘텐츠 프리셋 이름으로 플러그인에 존재해야 합니다. 'none'은 현재 프리셋을 유지합니다.</value>
+  </data>
+  <data name="Name of the party member to follow. Can be partial if unique.&#10;The @Server part is cosmetic for display; targeting uses the name before @.&#10;Names are auto-capitalized. Select from party or type manually." xml:space="preserve">
+    <value>따라갈 파티원 이름입니다. 유일하면 일부도 가능합니다. @Server는 표시용이고 대상은 @ 앞 이름으로 찾습니다. 자동 대문자화하며 파티 선택 또는 입력합니다.</value>
+  </data>
+  <data name="Navigation method to reach fren.&#10;NavMesh: VNavmesh plugin pathfinding (recommended)&#10;Visland: Alternative navigation&#10;BossMod Follow: Uses BossMod's follow leader&#10;Vanilla Follow: Game's built-in /follow" xml:space="preserve">
+    <value>NavMesh: VNavmesh 경로 탐색(권장), Visland: 대체 이동, BossMod Follow: BossMod 선두 따라가기, Vanilla Follow: 게임 /follow.</value>
+  </data>
+  <data name="Navigation method to use inside duties.&#10;May need a different method than overworld." xml:space="preserve">
+    <value>임무 내 이동 방식으로 야외와 다를 수 있습니다.</value>
+  </data>
+  <data name="New character profiles inherit this setting. Existing characters change only when you use a sync action." xml:space="preserve">
+    <value>새 캐릭터 프로필은 이 설정을 상속하며 기존 프로필은 동기화할 때만 변경됩니다.</value>
+  </data>
+  <data name="Number of ticks before harmonized cling resets to 0.&#10;Handles special logic like DD/FATE force cling." xml:space="preserve">
+    <value>조정된 따라가기 거리를 0으로 초기화할 주기 수이며 DD/FATE 특수 처리에 쓰입니다.</value>
+  </data>
+  <data name="Number of update ticks before idle action triggers." xml:space="preserve">
+    <value>대기 동작 전 갱신 주기 수입니다.</value>
+  </data>
+  <data name="Off: FrenRider chooses the BossMod preset from current job and selected rotation plugin.&#10;On: use the preset name fields below." xml:space="preserve">
+    <value>끄기: 직업·스킬 자동화에 따라 BossMod 프리셋 선택, 켜기: 아래 이름 사용.</value>
+  </data>
+  <data name="On: enable the selected BossMod AI implementation for combat.&#10;Off: send BMR and VBM AI off commands while preserving the rest of FrenRider's combat setup." xml:space="preserve">
+    <value>켜기: 선택한 BossMod 전투 AI, 끄기: BMR/VBM AI off 명령을 보내고 나머지 전투 설정 유지.</value>
+  </data>
+  <data name="Outside duties, summon your configured own mount and fly toward a visible fren after horizontal XZ distance exceeds this threshold continuously for the configured delay. Existing zone-specific Max Follow Distance still applies. Distance minimum: 1y. Delay range: 0-300 seconds; 0 means immediate. Defaults: 100y and 30 seconds." xml:space="preserve">
+    <value>임무 밖에서 XZ 수평 거리가 지연 시간 동안 계속 기준을 넘으면 자신의 탈것으로 보이는 친구를 추적합니다. 지역 최대 거리는 유지합니다. 최소 1y, 지연 0–300초(0은 즉시), 기본 100y/30초.</value>
+  </data>
+  <data name="Party engage mode sent through Daedalus LAN coordination.&#10;Focus requires a living enemy hard target.&#10;None, Split, and Kill Adds preserve Daedalus's current focus and off-tank assignments." xml:space="preserve">
+    <value>Daedalus LAN 파티 전투 모드입니다. 집중은 살아 있는 적 선택이 필요합니다. 없음·분산·추가 적 처치는 현재 집중 및 부탱커 배정을 유지합니다.</value>
+  </data>
+  <data name="Per-duty-family ADS handoff.&#10;Duty name, category, support, and clearance come only from ADS CurrentDuty. FrenRider accepts that snapshot only when ADS catalog metadata is complete and its territory/CFC matches live GameMain; otherwise local duty logic stays active.&#10;The handoff delay counts only while the character remains continuously ready: logged in, present, alive, conscious, out of area transitions, and out of cutscenes.&#10;Runtime ADS ownership is authoritative even after manual Start Inside. FrenRider pauses local duty systems while handoff is pending or ADS owns the run; configured exit takeover remains available after duty completion." xml:space="preserve">
+    <value>분류별 ADS 인계입니다. 이름·분류·지원·완료는 ADS CurrentDuty에서만 읽고 완전한 카탈로그와 GameMain 지역/CFC 일치가 필요합니다. 아니면 로컬 처리합니다. 로그인·존재·생존·의식·지역 전환 없음·컷신 없음이 지속될 때만 지연을 셉니다. 수동 Start Inside 후에도 실제 ADS 권한이 우선입니다. 인계·ADS 진행 중 로컬 처리를 멈추며 완료 후 설정된 퇴장 인계는 가능합니다.</value>
+  </data>
+  <data name="Play videos when Fren Rider is enabled or disabled.&#10;Requires VLC media player." xml:space="preserve">
+    <value>Fren Rider 켜기·끄기 시 동영상을 재생합니다. VLC가 필요합니다.</value>
+  </data>
+  <data name="Play videos when Fren Rider is enabled/disabled.&#10;Requires VLC media player to be installed.&#10;Videos are embedded with the plugin distribution." xml:space="preserve">
+    <value>켜기·끄기 시 동영상 재생. VLC 설치가 필요하며 동영상은 플러그인에 포함됩니다.</value>
+  </data>
+  <data name="Players in this list will have party invites automatically accepted when you are not in a group.&#10;Names should omit the @Server part." xml:space="preserve">
+    <value>파티가 없으면 목록 플레이어의 초대를 자동 수락합니다. @Server 없이 이름을 입력하세요.</value>
+  </data>
+  <data name="Players in this list will have their party invites automatically accepted when you're not in a group.&#10;When you join a party via whitelist invite, the inviter will automatically be set as your Fren.&#10;Enter names without the @Server part." xml:space="preserve">
+    <value>파티가 없을 때 목록 초대를 자동 수락하고 초대자를 친구로 설정합니다. @Server 없이 입력하세요.</value>
+  </data>
+  <data name="Preset name for Deep Dungeon content.&#10;Use 'none' to not change the preset." xml:space="preserve">
+    <value>딥 던전 프리셋 이름입니다. 'none'은 변경하지 않습니다.</value>
+  </data>
+  <data name="Preset name for FATE content.&#10;Use 'none' to not change the preset." xml:space="preserve">
+    <value>돌발 임무 프리셋 이름입니다. 'none'은 변경하지 않습니다.</value>
+  </data>
+  <data name="Print status messages to game chat.&#10;Useful for debugging but fills chat quickly." xml:space="preserve">
+    <value>게임 채팅에 상태를 출력합니다. 디버깅에 유용하지만 채팅이 빨리 찹니다.</value>
+  </data>
+  <data name="RSR operating mode when RSR is the selected rotation plugin.&#10;Auto: Full auto.&#10;Manual: Manual targeting mode.&#10;None: Don't let FrenRider change the current rotation state.&#10;Support: Uses RSR's plugin-managed support mode." xml:space="preserve">
+    <value>RSR 모드: Auto 전체 자동, Manual 수동 대상, None 현재 상태 유지, Support RSR 지원 모드.</value>
+  </data>
+  <data name="Random variance on X axis during social distancing.&#10;Adds natural-looking movement variance." xml:space="preserve">
+    <value>간격 유지 시 X축 무작위 편차를 주어 자연스럽게 움직입니다.</value>
+  </data>
+  <data name="Random variance on Z axis during social distancing." xml:space="preserve">
+    <value>간격 유지 시 Z축 무작위 편차입니다.</value>
+  </data>
+  <data name="Recover party members in regular four-player dungeons and outdoors. A living healer within 20 yalms of the corpse blocks item use. Party recovery pauses progression and defers Return while a living party rescuer remains." xml:space="preserve">
+    <value>일반 4인 던전과 야외에서 파티원을 부활시킵니다. 시체 20y 내 살아 있는 치유사가 있으면 아이템을 쓰지 않습니다. 살아 있는 파티 구조자가 있으면 진행과 데존을 보류합니다.</value>
+  </data>
+  <data name="Reserved for future autosync FATE behavior.&#10;Current follow distance does not change on FATE join or leave." xml:space="preserve">
+    <value>향후 돌발 임무 자동 조율용입니다. 현재 참여·이탈 시 거리를 변경하지 않습니다.</value>
+  </data>
+  <data name="Reset ALL tabs for this character to default values.&#10;If editing DEFAULT CONFIG, resets to plugin defaults." xml:space="preserve">
+    <value>캐릭터의 모든 탭을 초기화합니다. 기본 설정을 편집 중이면 플러그인 기본값을 사용합니다.</value>
+  </data>
+  <data name="Reset only the current tab for this character to default values." xml:space="preserve">
+    <value>캐릭터의 현재 탭만 초기화합니다.</value>
+  </data>
+  <data name="Restore snapshot: put captured BMR/VBM AI on/off, follow, movement, CBT fields, and Daedalus enabled state back on /fr off.&#10;Turn everything off: disable BMR/VBM AI, CBT AutoFollow, RotationSolverReborn, Daedalus, and Wrath auto if FrenRider started it." xml:space="preserve">
+    <value>복원: /fr off에서 저장된 BMR/VBM AI, 따라가기, 이동, CBT 항목과 Daedalus 상태를 복원합니다. 모두 끄기: BMR/VBM AI, CBT AutoFollow, RotationSolverReborn, Daedalus 및 FrenRider가 시작한 Wrath 자동을 끕니다.</value>
+  </data>
+  <data name="Rotation plugin for foray content (Eureka/Bozja).&#10;WRATH recommended for phantom job support." xml:space="preserve">
+    <value>Eureka/Bozja 스킬 자동화입니다. 팬텀 직업은 WRATH를 권장합니다.</value>
+  </data>
+  <data name="Runs /ays discard every 10s only while mounted and in a safe idle window.&#10;FrenRider defers discard during combat, cutscenes, and area transitions.&#10;Requires AutoRetainer plugin." xml:space="preserve">
+    <value>탑승 중 안전한 대기에만 10초마다 /ays discard를 실행합니다. 전투·컷신·지역 전환 시 미룹니다. AutoRetainer가 필요합니다.</value>
+  </data>
+  <data name="Runs /ays discard while mounted and in a safe idle window.&#10;Requires AutoRetainer plugin." xml:space="preserve">
+    <value>탑승 중 안전한 대기에만 /ays discard를 실행합니다. AutoRetainer가 필요합니다.</value>
+  </data>
+  <data name="Runs /levelsync on after joining a FATE.&#10;Defers while mounted or riding pillion." xml:space="preserve">
+    <value>돌발 임무 참여 시 /levelsync on을 실행합니다. 탑승·동승 중에는 미룹니다.</value>
+  </data>
+  <data name="Select the mount to use when flying solo.&#10;'Mount Roulette' picks a random mount.&#10;Type to search the list." xml:space="preserve">
+    <value>혼자 비행할 탈것을 선택합니다. Mount Roulette은 무작위이며 입력하여 검색합니다.</value>
+  </data>
+  <data name="Send /ads leave after the configured duty-end delay. FrenRider does not also run its own Leave Duty flow." xml:space="preserve">
+    <value>임무 종료 지연 후 /ads leave를 보냅니다. FrenRider 자체 퇴장을 함께 실행하지 않습니다.</value>
+  </data>
+  <data name="Show or hide the DTR bar entry." xml:space="preserve">
+    <value>DTR 표시줄 항목을 표시하거나 숨깁니다.</value>
+  </data>
+  <data name="Show/hide the DTR bar entry (server info bar)." xml:space="preserve">
+    <value>서버 정보 표시줄 DTR 항목을 표시하거나 숨깁니다.</value>
+  </data>
+  <data name="Slash command to execute when idle.&#10;Examples: /tomescroll, /dance, /snd run scriptname" xml:space="preserve">
+    <value>대기 시 실행할 명령입니다. 예: /tomescroll, /dance, /snd run scriptname.</value>
+  </data>
+  <data name="Target HP percentage to use Limit Break.&#10;-1 = Disabled.&#10;Automatically uses LB3 if available, otherwise LB2." xml:space="preserve">
+    <value>LB 사용 대상 HP %입니다. -1은 끄기이며 가능하면 LB3, 아니면 LB2를 씁니다.</value>
+  </data>
+  <data name="Temporary uses an in-memory profile only for the exact DAD proposal. Off opts this local character out. Permanent replaces this local character's profile while keeping this choice." xml:space="preserve">
+    <value>임시: 정확한 DAD 제안에만 메모리 프로필 사용. 끄기: 이 캐릭터 거부. 영구: 저장 프로필을 교체하고 수락 선택은 유지.</value>
+  </data>
+  <data name="Trigger repair when gear durability falls below this percentage." xml:space="preserve">
+    <value>장비 내구도가 이 비율보다 낮으면 수리합니다.</value>
+  </data>
+  <data name="Use FrenRider's local Leave Duty flow after the configured duty-end condition." xml:space="preserve">
+    <value>설정된 종료 조건 후 FrenRider 자체 퇴장을 사용합니다.</value>
+  </data>
+  <data name="VLC media player is required for video notifications.&#10;Click to download and install VLC." xml:space="preserve">
+    <value>동영상 알림에는 VLC가 필요합니다. 클릭하여 다운로드하고 설치하세요.</value>
+  </data>
+  <data name="What to do when idle.&#10;Specific Action: Execute a single command&#10;Action From List: Pick randomly from a list" xml:space="preserve">
+    <value>대기 동작: 지정 명령 하나 또는 목록에서 무작위 선택.</value>
+  </data>
+  <data name="What to do when idle.&#10;Specific Action: execute one command&#10;Action From List: rotate through a list" xml:space="preserve">
+    <value>대기 동작: 지정 명령 하나 또는 목록 동작 순환.</value>
+  </data>
+  <data name="When RSR, WRATH, or DAEDALUS is selected, also force BMR to the configured zone preset." xml:space="preserve">
+    <value>RSR/WRATH/DAEDALUS 선택 시 BMR에도 설정된 지역 프리셋을 적용합니다.</value>
+  </data>
+  <data name="When enabled, FrenRider asks ADS to disable BMR hunt modules." xml:space="preserve">
+    <value>ADS에 BMR 마물 사냥 모듈 해제를 요청합니다.</value>
+  </data>
+  <data name="When enabled, FrenRider asks ADS to disable the BMR Queen Lunatender module." xml:space="preserve">
+    <value>ADS에 BMR Queen Lunatender 모듈 해제를 요청합니다.</value>
+  </data>
+  <data name="When enabled, FrenRider may issue the fallback forward nudge inside duties even if the configured fren is not visible in your party/object table. Leave disabled for safer duty movement." xml:space="preserve">
+    <value>파티·객체 테이블에 친구가 없어도 임무 내 전진을 허용합니다. 안전한 이동을 위해 꺼두세요.</value>
+  </data>
+  <data name="When enabled, FrenRider waits after your configured fren is still in party but no longer visible, then asks Lifestream to teleport to a random unlocked aetheryte in that zone." xml:space="preserve">
+    <value>친구가 파티에 있지만 보이지 않으면 기다린 뒤 Lifestream으로 그 지역의 해금 에테라이트에 무작위 텔레포합니다.</value>
+  </data>
+  <data name="Whether to follow fren during combat.&#10;Auto: Let the plugin decide based on your job/role." xml:space="preserve">
+    <value>전투 중 친구 따라가기입니다. 자동은 직업·역할에 따라 결정합니다.</value>
+  </data>
+  <data name="Which rotation automation plugin to use.&#10;BMR: BossModReborn&#10;VBM: VanillaBossMod&#10;RSR: RotationSolver Reborn&#10;WRATH: Wrath&#10;DAEDALUS: Daedalus" xml:space="preserve">
+    <value>스킬 자동화: BMR=BossModReborn, VBM=VanillaBossMod, RSR=RotationSolver Reborn, WRATH=Wrath, DAEDALUS=Daedalus.</value>
+  </data>
+  <data name="While Fren Rider is enabled, equip the first matching armoury-chest soul crystal when the current character is on a level 30+ base class and equipment can be changed safely. The current gearset is updated after the equip is confirmed." xml:space="preserve">
+    <value>Fren Rider 활성화 중 30레벨 이상 기본 클래스에서 안전하게 장비를 바꿀 수 있으면 장비함의 첫 해당 소울 크리스탈을 장착합니다. 확인 후 현재 장비 세트를 갱신합니다.</value>
+  </data>
+  <data name="While FrenRider is enabled on Beastmaster, try Capture on eligible living beasts closer than 10 yalms, including passive beasts outside combat.&#10;Prefers an eligible current target; otherwise automatically targets the nearest eligible beast when Capture is ready.&#10;Skips owned beasts and enemies above your effective level, and respects both HP thresholds.&#10;Retries on later cooldowns, including already marked beasts." xml:space="preserve">
+    <value>마수 조련사 활성화 중 10y 미만의 포획 가능한 살아 있는 마수를 대상으로 하며 전투 밖 비적대도 포함합니다. 적합한 현재 대상을 우선하고 없으면 포획 준비 시 가장 가까운 대상으로 변경합니다. 소유·실효 레벨 초과는 제외하며 두 HP 기준을 지킵니다. 표시된 대상도 다음 재사용 대기 후 재시도합니다.</value>
+  </data>
+  <data name="Disabled" xml:space="preserve">
+    <value>비활성화</value>
+  </data>
+  <data name="Auto" xml:space="preserve">
+    <value>자동</value>
+  </data>
+  <data name="BossMod AI" xml:space="preserve">
+    <value>BossMod AI</value>
+  </data>
+  <data name="Owned" xml:space="preserve">
+    <value>보유</value>
+  </data>
+  <data name="Missing" xml:space="preserve">
+    <value>미보유</value>
+  </data>
+  <data name="At least one command required" xml:space="preserve">
+    <value>명령이 하나 이상 필요합니다</value>
+  </data>
+  <data name="0 - Not Cleared" xml:space="preserve">
+    <value>0 - 미완료</value>
+  </data>
+  <data name="1 - 1P Unsync Cleared" xml:space="preserve">
+    <value>1 - 솔로 제한 해제 완료</value>
+  </data>
+  <data name="2 - 1P Duty Support" xml:space="preserve">
+    <value>2 - 솔로 임무 지원</value>
+  </data>
+  <data name="3 - 4P Sync Cleared" xml:space="preserve">
+    <value>3 - 4인 조율 완료</value>
+  </data>
+  <data name="A Dalamud plugin for FFXIV multiplayer follow/combat automation." xml:space="preserve">
+    <value>FFXIV 멀티플레이 따라가기·전투 자동화 Dalamud 플러그인.</value>
+  </data>
+  <data name="/frenrider - Open main window" xml:space="preserve">
+    <value>/frenrider - 메인 창 열기</value>
+  </data>
+  <data name="/fr - Open main window (alias)" xml:space="preserve">
+    <value>/fr - 메인 창 열기(별칭)</value>
+  </data>
+  <data name="/fr on - Enable Fren Rider" xml:space="preserve">
+    <value>/fr on - Fren Rider 켜기</value>
+  </data>
+  <data name="/fr off - Disable Fren Rider" xml:space="preserve">
+    <value>/fr off - Fren Rider 끄기</value>
+  </data>
+  <data name="/fr settings or /fr s - Toggle settings" xml:space="preserve">
+    <value>/fr settings 또는 /fr s - 설정 전환</value>
+  </data>
+  <data name="/fr mini or /fr m - Toggle MAGIA mini window" xml:space="preserve">
+    <value>/fr mini 또는 /fr m - MAGIA 미니 전환</value>
+  </data>
+  <data name="/fr debug - Toggle debug controls" xml:space="preserve">
+    <value>/fr debug - 디버그 제어 전환</value>
+  </data>
+  <data name="vnavmesh - Navigation and pathfinding" xml:space="preserve">
+    <value>vnavmesh - 이동과 경로 탐색</value>
+  </data>
+  <data name="Visland - Alternative navigation (if vnavmesh unavailable)" xml:space="preserve">
+    <value>Visland - 대체 이동(vnavmesh 없음)</value>
+  </data>
+  <data name="BossMod / BossModReborn - Combat AI and following" xml:space="preserve">
+    <value>BossMod / BossModReborn - 전투 AI와 따라가기</value>
+  </data>
+  <data name="Rotation Solver Reborn - Combat rotation automation" xml:space="preserve">
+    <value>Rotation Solver Reborn - 스킬 자동화</value>
+  </data>
+  <data name="WRATH - Combat rotation automation" xml:space="preserve">
+    <value>WRATH - 스킬 자동화</value>
+  </data>
+  <data name="Daedalus - Combat rotation automation" xml:space="preserve">
+    <value>Daedalus - 스킬 자동화</value>
+  </data>
+  <data name="Questionable - Quest automation integration" xml:space="preserve">
+    <value>Questionable - 퀘스트 자동화 연동</value>
+  </data>
+  <data name="Automaton (CBT) by Croizat - Enhanced duty start/end, auto-leave" xml:space="preserve">
+    <value>Croizat의 Automaton (CBT) - 시작·종료 및 자동 퇴장</value>
+  </data>
+  <data name="Owner: {0}" xml:space="preserve">
+    <value>소유자: {0}</value>
+  </data>
+  <data name="Island: {0}" xml:space="preserve">
+    <value>섬: {0}</value>
+  </data>
+  <data name="Opaque character: {0}" xml:space="preserve">
+    <value>불투명 캐릭터 ID: {0}</value>
+  </data>
+  <data name="Row ID: {0}" xml:space="preserve">
+    <value>행 ID: {0}</value>
+  </data>
+  <data name="{0} Icon" xml:space="preserve">
+    <value>{0} 아이콘</value>
+  </data>
+  <data name="{0} Icon Code" xml:space="preserve">
+    <value>{0} 아이콘 코드</value>
+  </data>
+  <data name="Shown when Fren Rider is {0}" xml:space="preserve">
+    <value>Fren Rider가 {0}일 때 표시</value>
+  </data>
+  <data name="ADS reflection: {0}" xml:space="preserve">
+    <value>ADS 반영: {0}</value>
+  </data>
+  <data name="ADS Status: {0}" xml:space="preserve">
+    <value>ADS 상태: {0}</value>
+  </data>
+  <data name="When enabled, FrenRider asks ADS to set BMR MaxLoadDistance to {0:0}." xml:space="preserve">
+    <value>ADS에 BMR MaxLoadDistance를 {0:0}으로 설정하도록 요청합니다.</value>
+  </data>
+  <data name="Solo" xml:space="preserve">
+    <value>솔로</value>
+  </data>
+  <data name="4-Man" xml:space="preserve">
+    <value>4인</value>
+  </data>
+  <data name="8-Man" xml:space="preserve">
+    <value>8인</value>
+  </data>
+  <data name="Alliance" xml:space="preserve">
+    <value>연합</value>
+  </data>
+  <data name="Guild Hest" xml:space="preserve">
+    <value>길드 작전</value>
+  </data>
+  <data name="Deep Dungeon" xml:space="preserve">
+    <value>딥 던전</value>
+  </data>
+  <data name="Treasure Dungeon" xml:space="preserve">
+    <value>보물 던전</value>
+  </data>
+  <data name="Other" xml:space="preserve">
+    <value>기타</value>
+  </data>
+  <data name="ADS Handoff" xml:space="preserve">
+    <value>ADS 인계</value>
+  </data>
+  <data name="Exit Behavior" xml:space="preserve">
+    <value>퇴장 동작</value>
+  </data>
+  <data name="Equipment" xml:space="preserve">
+    <value>장비</value>
+  </data>
+  <data name="Maintenance" xml:space="preserve">
+    <value>유지보수</value>
+  </data>
+  <data name="Debug" xml:space="preserve">
+    <value>디버그</value>
+  </data>
+  <data name="Following" xml:space="preserve">
+    <value>따라가는 중</value>
+  </data>
+  <data name="InRange" xml:space="preserve">
+    <value>범위 내</value>
+  </data>
+  <data name="TooFar" xml:space="preserve">
+    <value>너무 멂</value>
+  </data>
+  <data name="InCombat" xml:space="preserve">
+    <value>전투 중</value>
+  </data>
+  <data name="WaitingToMount" xml:space="preserve">
+    <value>탑승 대기</value>
+  </data>
+  <data name="Mounting" xml:space="preserve">
+    <value>탑승하는 중</value>
+  </data>
+  <data name="Dismounting" xml:space="preserve">
+    <value>내리는 중</value>
+  </data>
+  <data name="OutOfCombat" xml:space="preserve">
+    <value>비전투</value>
+  </data>
+  <data name="EnteringCombat" xml:space="preserve">
+    <value>전투 시작</value>
+  </data>
+  <data name="LeavingCombat" xml:space="preserve">
+    <value>전투 종료</value>
+  </data>
+  <data name="Unconscious" xml:space="preserve">
+    <value>전투 불능</value>
+  </data>
+  <data name="Area transition" xml:space="preserve">
+    <value>지역 전환</value>
+  </data>
+  <data name="Zone transition" xml:space="preserve">
+    <value>지역 전환</value>
+  </data>
+  <data name="No fren found" xml:space="preserve">
+    <value>친구를 찾을 수 없음</value>
+  </data>
+  <data name="Fren not visible" xml:space="preserve">
+    <value>친구가 보이지 않음</value>
+  </data>
+  <data name="No fren" xml:space="preserve">
+    <value>친구 없음</value>
+  </data>
+  <data name="ADS utility active" xml:space="preserve">
+    <value>ADS 유틸리티 진행 중</value>
+  </data>
+  <data name="Teleport active" xml:space="preserve">
+    <value>텔레포 중</value>
+  </data>
+  <data name="Teleport or dialog active" xml:space="preserve">
+    <value>텔레포 또는 대화 진행 중</value>
+  </data>
+  <data name="Paused (in combat)" xml:space="preserve">
+    <value>일시 중지(전투)</value>
+  </data>
+  <data name="Phoenix Down recovery" xml:space="preserve">
+    <value>불사조의 깃털 부활 진행</value>
+  </data>
+  <data name="Waiting for party revival; Return deferred" xml:space="preserve">
+    <value>파티 부활 대기, 데존 보류</value>
+  </data>
+  <data name="No living party rescuer" xml:space="preserve">
+    <value>살아 있는 파티 구조자 없음</value>
+  </data>
+  <data name="Casting Phoenix Down" xml:space="preserve">
+    <value>불사조의 깃털 시전 중</value>
+  </data>
+  <data name="Cast ended; checking revival" xml:space="preserve">
+    <value>시전 종료, 부활 확인 중</value>
+  </data>
+  <data name="Attempt did not start; rechecking readiness" xml:space="preserve">
+    <value>시작하지 않음, 준비 상태 재확인</value>
+  </data>
+  <data name="Waiting for healer, Raise cast or pending revival" xml:space="preserve">
+    <value>치유사·부활 시전·부활 대기</value>
+  </data>
+  <data name="Dismounting for recovery" xml:space="preserve">
+    <value>부활을 위해 내리는 중</value>
+  </data>
+  <data name="Approaching party corpse" xml:space="preserve">
+    <value>파티원 시체에 접근 중</value>
+  </data>
+  <data name="Waiting for recovery attempt slot" xml:space="preserve">
+    <value>부활 시도 순서 대기</value>
+  </data>
+  <data name="Phoenix Down requested; waiting for actual cast" xml:space="preserve">
+    <value>불사조의 깃털 요청, 실제 시전 대기</value>
+  </data>
+  <data name="Item attempt rejected; rechecking in one second" xml:space="preserve">
+    <value>아이템 거부, 1초 후 재확인</value>
+  </data>
+  <data name="Ready" xml:space="preserve">
+    <value>준비 완료</value>
+  </data>
+  <data name="Blocked: {0}" xml:space="preserve">
+    <value>차단: {0}</value>
+  </data>
+  <data name="Waiting: {0}" xml:space="preserve">
+    <value>대기: {0}</value>
+  </data>
+  <data name="Running: {0}" xml:space="preserve">
+    <value>진행 중: {0}</value>
+  </data>
+  <data name="Completed: {0}" xml:space="preserve">
+    <value>완료: {0}</value>
+  </data>
+  <data name="Failed: {0}" xml:space="preserve">
+    <value>실패: {0}</value>
+  </data>
+  <data name="Cooldown: retry in {0}s" xml:space="preserve">
+    <value>재사용 대기, {0}초 후 재시도</value>
+  </data>
+  <data name="Fren out of zone; teleport in {0}s" xml:space="preserve">
+    <value>친구가 다른 지역, {0}초 후 텔레포</value>
+  </data>
+  <data name="FrenRider disabled" xml:space="preserve">
+    <value>FrenRider 비활성</value>
+  </data>
+  <data name="Zone changed" xml:space="preserve">
+    <value>지역 변경</value>
+  </data>
+  <data name="Fren not in party" xml:space="preserve">
+    <value>친구가 파티에 없음</value>
+  </data>
+  <data name="Fren visible" xml:space="preserve">
+    <value>친구가 보임</value>
+  </data>
+  <data name="Reading party window" xml:space="preserve">
+    <value>파티 창 읽는 중</value>
+  </data>
+  <data name="Following local aetheryte network" xml:space="preserve">
+    <value>지역 에테라이트망 추적</value>
+  </data>
+  <data name="Duty scope changed" xml:space="preserve">
+    <value>임무 범위 변경</value>
+  </data>
+  <data name="Setting changed" xml:space="preserve">
+    <value>설정 변경</value>
+  </data>
+  <data name="Unconscious; return in {0}s" xml:space="preserve">
+    <value>전투 불능, {0}초 후 데존</value>
+  </data>
+  <data name="Handling revive/Return notification" xml:space="preserve">
+    <value>부활·데존 알림 처리 중</value>
+  </data>
+  <data name="Opening Return prompt" xml:space="preserve">
+    <value>데존 확인 열기</value>
+  </data>
+  <data name="Revive/Return confirmed; waiting for transition" xml:space="preserve">
+    <value>부활·데존 확인, 전환 대기</value>
+  </data>
+  <data name="Waiting for readable Return confirmation" xml:space="preserve">
+    <value>읽을 수 있는 데존 확인 대기</value>
+  </data>
+  <data name="Return agent unavailable" xml:space="preserve">
+    <value>데존 에이전트 사용 불가</value>
+  </data>
+  <data name="Opened Return prompt" xml:space="preserve">
+    <value>데존 확인 열림</value>
+  </data>
+  <data name="Waiting for Return confirmation" xml:space="preserve">
+    <value>데존 확인 대기</value>
+  </data>
+  <data name="Return prompt failed" xml:space="preserve">
+    <value>데존 확인 실패</value>
+  </data>
+  <data name="ADS Hyper Focus ended outside duty" xml:space="preserve">
+    <value>임무 밖에서 ADS Hyper Focus 종료</value>
+  </data>
+  <data name="ADS Hyper Focus ended without ADS duty ownership" xml:space="preserve">
+    <value>ADS 제어 없이 Hyper Focus 종료</value>
+  </data>
+  <data name="ADS Hyper Focus ended; combat bootstrap pending" xml:space="preserve">
+    <value>ADS Hyper Focus 종료, 전투 초기화 대기</value>
+  </data>
+  <data name="ADS Hyper Focus lease active; RSR Manual" xml:space="preserve">
+    <value>ADS Hyper Focus 제어 중, RSR 수동</value>
+  </data>
+  <data name="ADS active" xml:space="preserve">
+    <value>ADS 활성</value>
+  </data>
+  <data name="ADS active; FrenRider combat authoritative" xml:space="preserve">
+    <value>ADS 활성, FrenRider 전투 제어</value>
+  </data>
+  <data name="ADS did not accept {0} repair: {1}" xml:space="preserve">
+    <value>ADS가 {0} 수리를 거부: {1}</value>
+  </data>
+  <data name="ADS duty ownership active; FrenRider rotation disabled" xml:space="preserve">
+    <value>ADS 임무 제어, FrenRider 스킬 자동화 비활성</value>
+  </data>
+  <data name="ADS duty progression paused; configured FrenRider exit takeover active ({0})." xml:space="preserve">
+    <value>ADS 진행 중지, FrenRider 퇴장 인계 활성({0}).</value>
+  </data>
+  <data name="ADS handoff off; FrenRider local duty logic active." xml:space="preserve">
+    <value>ADS 인계 비활성, FrenRider 로컬 처리 활성.</value>
+  </data>
+  <data name="ADS handoff pending" xml:space="preserve">
+    <value>ADS 인계 대기</value>
+  </data>
+  <data name="ADS handoff pending; FrenRider combat authoritative" xml:space="preserve">
+    <value>ADS 인계 대기, FrenRider 전투 제어</value>
+  </data>
+  <data name="ADS loaded; waiting for duty. FrenRider local logic active." xml:space="preserve">
+    <value>ADS 로드됨, 임무 대기. FrenRider 로컬 처리 활성.</value>
+  </data>
+  <data name="ADS not loaded." xml:space="preserve">
+    <value>ADS가 로드되지 않음.</value>
+  </data>
+  <data name="ADS not loaded. FrenRider local logic active." xml:space="preserve">
+    <value>ADS 미로드. FrenRider 로컬 처리 활성.</value>
+  </data>
+  <data name="ADS reflection applied; no reassert pending." xml:space="preserve">
+    <value>ADS 반영 적용, 재적용 대기 없음.</value>
+  </data>
+  <data name="ADS reflection applied; waiting for desired-state change or ADS reload." xml:space="preserve">
+    <value>ADS 반영 적용, 목표 상태 변경 또는 ADS 재로드 대기.</value>
+  </data>
+  <data name="ADS reflection hacks reset." xml:space="preserve">
+    <value>ADS 특수 설정 초기화.</value>
+  </data>
+  <data name="ADS reflection idle." xml:space="preserve">
+    <value>ADS 반영 대기.</value>
+  </data>
+  <data name="ADS released duty ownership via {0}; FrenRider local duty logic active." xml:space="preserve">
+    <value>{0}에서 ADS 제어 해제, FrenRider 로컬 처리.</value>
+  </data>
+  <data name="ADS released duty progression; configured FrenRider exit takeover active via {0}." xml:space="preserve">
+    <value>{0}에서 ADS 진행 해제, FrenRider 퇴장 인계.</value>
+  </data>
+  <data name="ADS runtime ownership active via {0}; FrenRider duty systems paused." xml:space="preserve">
+    <value>{0}로 ADS 제어, FrenRider 임무 처리 중지.</value>
+  </data>
+  <data name="ADS runtime ownership active via {0}; FrenRider exit takeover active." xml:space="preserve">
+    <value>{0}로 ADS 제어, FrenRider 퇴장 인계 활성.</value>
+  </data>
+  <data name="ADS runtime ownership confirmed via {0}; solo combat delay complete." xml:space="preserve">
+    <value>{0}로 ADS 제어 확인, 솔로 전투 지연 완료.</value>
+  </data>
+  <data name="ADS solo combat held; waiting for readable ownership confirmation." xml:space="preserve">
+    <value>ADS 솔로 전투 보류, 읽을 수 있는 제어 확인 대기.</value>
+  </data>
+  <data name="ADS solo combat held; {0}." xml:space="preserve">
+    <value>ADS 솔로 전투 보류, {0}.</value>
+  </data>
+  <data name="ADS utility dialog active" xml:space="preserve">
+    <value>ADS 유틸리티 대화 활성</value>
+  </data>
+  <data name="Approaching exit '{0}' ({1:F1}y)" xml:space="preserve">
+    <value>출구 '{0}' 접근({1:F1}y)</value>
+  </data>
+  <data name="Ate {0} [{1}] ({2} left)" xml:space="preserve">
+    <value>{0} [{1}] 섭취(남은 수 {2})</value>
+  </data>
+  <data name="Blocked: Phoenix Down readiness changed" xml:space="preserve">
+    <value>차단: 불사조의 깃털 준비 상태 변경</value>
+  </data>
+  <data name="Blocked: navigation unavailable or corpse unreachable" xml:space="preserve">
+    <value>차단: 이동 불가 또는 시체 접근 불가</value>
+  </data>
+  <data name="Blocked: recovery state unavailable" xml:space="preserve">
+    <value>차단: 부활 상태 사용 불가</value>
+  </data>
+  <data name="Blocked: waiting for a visible, confirmed party corpse" xml:space="preserve">
+    <value>차단: 확인된 가시 파티원 시체 대기</value>
+  </data>
+  <data name="Can't pillion: fren not found" xml:space="preserve">
+    <value>동승 불가: 친구 없음</value>
+  </data>
+  <data name="Can't pillion: fren not in ObjectTable" xml:space="preserve">
+    <value>동승 불가: 객체 테이블에 친구 없음</value>
+  </data>
+  <data name="Can't summon (mounted/duty)" xml:space="preserve">
+    <value>소환 불가(탑승·임무)</value>
+  </data>
+  <data name="Captured automation snapshot ({0})." xml:space="preserve">
+    <value>자동화 상태 저장({0}).</value>
+  </data>
+  <data name="Cleanup failed: no captured automation state was available to restore." xml:space="preserve">
+    <value>복원 실패: 저장된 상태 없음.</value>
+  </data>
+  <data name="Cleanup failed: {0}/{1} commands failed." xml:space="preserve">
+    <value>복원 실패: {0}/{1} 명령 실패.</value>
+  </data>
+  <data name="Clicking Commence on duty popup" xml:space="preserve">
+    <value>임무 창에서 시작 누르기</value>
+  </data>
+  <data name="Combat held: {0}" xml:space="preserve">
+    <value>전투 보류: {0}</value>
+  </data>
+  <data name="Companion: {0}m{1:D2}s" xml:space="preserve">
+    <value>버디: {0}분{1:D2}초</value>
+  </data>
+  <data name="Coppelia PowerlevelBot lease active" xml:space="preserve">
+    <value>Coppelia PowerlevelBot 제어 중</value>
+  </data>
+  <data name="Dismounting..." xml:space="preserve">
+    <value>내리는 중...</value>
+  </data>
+  <data name="Duty completed; automatic ADS handoff stopped." xml:space="preserve">
+    <value>임무 완료, ADS 자동 인계 중지.</value>
+  </data>
+  <data name="Duty completed; configured FrenRider exit takeover active." xml:space="preserve">
+    <value>임무 완료, FrenRider 퇴장 인계 활성.</value>
+  </data>
+  <data name="Duty exit requested; waiting to leave duty." xml:space="preserve">
+    <value>퇴장 요청, 임무 퇴장 대기.</value>
+  </data>
+  <data name="Failed to eat {0} [{1}]" xml:space="preserve">
+    <value>{0} [{1}] 섭취 실패</value>
+  </data>
+  <data name="Failed to summon chocobo" xml:space="preserve">
+    <value>초코보 소환 실패</value>
+  </data>
+  <data name="Failed: timed out after {0}s." xml:space="preserve">
+    <value>실패: {0}초 시간 초과.</value>
+  </data>
+  <data name="Far chase ({0:F1}y XZ, max {1:F0}y)" xml:space="preserve">
+    <value>원거리 추적(XZ {0:F1}y, 최대 {1:F0}y)</value>
+  </data>
+  <data name="Far chase blocked: {0}" xml:space="preserve">
+    <value>원거리 추적 차단: {0}</value>
+  </data>
+  <data name="Far chase mount cooldown ({0:F1}s)" xml:space="preserve">
+    <value>장거리 추격 탈것 재사용 대기({0:F1}s)</value>
+  </data>
+  <data name="Far chase pillion cooldown ({0:F1}s)" xml:space="preserve">
+    <value>장거리 추격 동승 재사용 대기({0:F1}s)</value>
+  </data>
+  <data name="Far chase preempted: {0}" xml:space="preserve">
+    <value>장거리 추격 중단: {0}</value>
+  </data>
+  <data name="Far chase settings changed" xml:space="preserve">
+    <value>장거리 추격 설정 변경</value>
+  </data>
+  <data name="Far chase: flying" xml:space="preserve">
+    <value>장거리 추격: 비행 중</value>
+  </data>
+  <data name="Far chase: leaving pillion" xml:space="preserve">
+    <value>장거리 추격: 동승 해제</value>
+  </data>
+  <data name="Far chase: mounted; taking off" xml:space="preserve">
+    <value>장거리 추격: 탑승, 이륙 중</value>
+  </data>
+  <data name="Far chase: mounting ({0:F1}y XZ)" xml:space="preserve">
+    <value>장거리 추격: 탑승 중({0:F1}y XZ)</value>
+  </data>
+  <data name="Far chase: mounting own mount" xml:space="preserve">
+    <value>장거리 추격: 자신의 탈것 탑승</value>
+  </data>
+  <data name="Far chase: requesting mount ({0:F1}y XZ)" xml:space="preserve">
+    <value>장거리 추격: 탈것 요청({0:F1}y XZ)</value>
+  </data>
+  <data name="Flying alongside fren" xml:space="preserve">
+    <value>친구 옆에서 비행</value>
+  </data>
+  <data name="Flying stuck escape: ascend ({0}s)" xml:space="preserve">
+    <value>비행 끼임 탈출: 상승({0}s)</value>
+  </data>
+  <data name="Flying stuck escape: automove ({0}s)" xml:space="preserve">
+    <value>비행 끼임 탈출: 자동 이동({0}s)</value>
+  </data>
+  <data name="Following ({0:F1}y, cling {1:F1}y)" xml:space="preserve">
+    <value>따르는 중({0:F1}y, 간격 {1:F1}y)</value>
+  </data>
+  <data name="Formation slot {0} ({1:F1}y)" xml:space="preserve">
+    <value>대형 위치 {0}({1:F1}y)</value>
+  </data>
+  <data name="Found: {0} ({1:F1}y)" xml:space="preserve">
+    <value>발견: {0}({1:F1}y)</value>
+  </data>
+  <data name="Fren mounted (FlyYouFools), mounting..." xml:space="preserve">
+    <value>친구 탑승(FlyYouFools), 탑승 중...</value>
+  </data>
+  <data name="Fren mounted, riding pillion..." xml:space="preserve">
+    <value>친구 탑승, 동승 중...</value>
+  </data>
+  <data name="FrenRider disabled." xml:space="preserve">
+    <value>FrenRider 비활성.</value>
+  </data>
+  <data name="FrenRider duty authority; rotation disabled" xml:space="preserve">
+    <value>FrenRider 임무 제어, 스킬 자동화 비활성</value>
+  </data>
+  <data name="Grace period ({0:F0}s)..." xml:space="preserve">
+    <value>유예 기간({0:F0}s)...</value>
+  </data>
+  <data name="In duty (out of combat) - rotation active" xml:space="preserve">
+    <value>임무 중(비전투) - 스킬 자동화 활성</value>
+  </data>
+  <data name="In range ({0:F1}y)" xml:space="preserve">
+    <value>범위 내({0:F1}y)</value>
+  </data>
+  <data name="In sanctuary" xml:space="preserve">
+    <value>안전지대 내</value>
+  </data>
+  <data name="Interacting with exit '{0}' ({1:F1}y)" xml:space="preserve">
+    <value>출구 '{0}' 상호작용({1:F1}y)</value>
+  </data>
+  <data name="Landing..." xml:space="preserve">
+    <value>착륙 중...</value>
+  </data>
+  <data name="Leaving duty (attempt #{0}) - {1}" xml:space="preserve">
+    <value>임무 퇴장(시도 #{0}) - {1}</value>
+  </data>
+  <data name="Mount cooldown ({0:F1}s)" xml:space="preserve">
+    <value>탈것 재사용 대기({0:F1}s)</value>
+  </data>
+  <data name="Mount correction cooldown ({0:F1}s)" xml:space="preserve">
+    <value>탈것 보정 재사용 대기({0:F1}s)</value>
+  </data>
+  <data name="Mount state preserved: {0}" xml:space="preserve">
+    <value>탈것 상태 유지: {0}</value>
+  </data>
+  <data name="Mounted - rotations suppressed" xml:space="preserve">
+    <value>탑승 중 - 스킬 자동화 억제</value>
+  </data>
+  <data name="Mounted alongside fren" xml:space="preserve">
+    <value>친구 옆에서 탑승</value>
+  </data>
+  <data name="Mounting for: {0} ({1:F1}y)" xml:space="preserve">
+    <value>탑승 목적: {0}({1:F1}y)</value>
+  </data>
+  <data name="Mounting..." xml:space="preserve">
+    <value>탑승 중...</value>
+  </data>
+  <data name="Moving to: {0}" xml:space="preserve">
+    <value>이동 대상: {0}</value>
+  </data>
+  <data name="NPC repair + inn room failed: {0}" xml:space="preserve">
+    <value>NPC 수리 및 여관 실패: {0}</value>
+  </data>
+  <data name="Navigating to exit '{0}' ({1:F1}y)" xml:space="preserve">
+    <value>출구 '{0}'로 이동({1:F1}y)</value>
+  </data>
+  <data name="Near fren on foot; dismounting" xml:space="preserve">
+    <value>도보 친구 근처, 내리는 중</value>
+  </data>
+  <data name="Near fren on foot; landing to dismount" xml:space="preserve">
+    <value>도보 친구 근처, 내리기 위해 착륙</value>
+  </data>
+  <data name="Near mounted fren; dismounting to ride pillion" xml:space="preserve">
+    <value>탑승 친구 근처, 동승 위해 내리는 중</value>
+  </data>
+  <data name="Near mounted fren; landing to ride pillion" xml:space="preserve">
+    <value>탑승 친구 근처, 동승 위해 착륙</value>
+  </data>
+  <data name="Need companion (cooldown {0:F1}s)" xml:space="preserve">
+    <value>버디 필요(재사용 대기 {0:F1}s)</value>
+  </data>
+  <data name="Need food (cooldown {0:F1}s)" xml:space="preserve">
+    <value>음식 필요(재사용 대기 {0:F1}s)</value>
+  </data>
+  <data name="Need food but in duty+combat" xml:space="preserve">
+    <value>음식 필요, 임무 및 전투 중</value>
+  </data>
+  <data name="No ADS reflection hacks enabled." xml:space="preserve">
+    <value>ADS 특수 반영 설정 없음.</value>
+  </data>
+  <data name="No Gysahl Greens" xml:space="preserve">
+    <value>Gysahl Greens 없음</value>
+  </data>
+  <data name="No equipped gear below {0}%." xml:space="preserve">
+    <value>착용 장비 중 {0}% 미만 없음.</value>
+  </data>
+  <data name="No food in inventory" xml:space="preserve">
+    <value>소지품에 음식 없음</value>
+  </data>
+  <data name="No food item resolved" xml:space="preserve">
+    <value>음식 아이템 확인 안 됨</value>
+  </data>
+  <data name="No interactables found, nudging forward..." xml:space="preserve">
+    <value>상호작용 대상 없음, 조금 전진...</value>
+  </data>
+  <data name="Out of {0} [{1}]" xml:space="preserve">
+    <value>{0} [{1}] 소진</value>
+  </data>
+  <data name="Own mount retained: {0}" xml:space="preserve">
+    <value>자신의 탈것 유지: {0}</value>
+  </data>
+  <data name="Partial cleanup: {0}/{1} commands failed." xml:space="preserve">
+    <value>부분 정리: {0}/{1} 명령 실패.</value>
+  </data>
+  <data name="Paused for ADS utility" xml:space="preserve">
+    <value>ADS 유틸리티로 일시 중지</value>
+  </data>
+  <data name="Pending duty exit after completed territory {0}." xml:space="preserve">
+    <value>완료 지역 {0} 이후 퇴장 대기.</value>
+  </data>
+  <data name="Pending duty exit." xml:space="preserve">
+    <value>임무 퇴장 대기.</value>
+  </data>
+  <data name="QuestionableSolo authority; FrenRider combat suppressed" xml:space="preserve">
+    <value>QuestionableSolo 제어, FrenRider 전투 억제</value>
+  </data>
+  <data name="Repair complete; no equipped gear below {0}%." xml:space="preserve">
+    <value>수리 완료, {0}% 미만 장비 없음.</value>
+  </data>
+  <data name="Repair timed out after {0}s; ADS: {1}" xml:space="preserve">
+    <value>수리 {0}s 시간 초과, ADS: {1}</value>
+  </data>
+  <data name="Restore failed: no automation snapshot captured for this account/character." xml:space="preserve">
+    <value>복원 실패: 이 계정/캐릭터의 자동화 상태 기록 없음.</value>
+  </data>
+  <data name="Retry wait after ADS failure: {0}" xml:space="preserve">
+    <value>ADS 실패 후 재시도 대기: {0}</value>
+  </data>
+  <data name="Retry wait after rejected start: {0}" xml:space="preserve">
+    <value>시작 거부 후 재시도 대기: {0}</value>
+  </data>
+  <data name="Retry wait: ADS not loaded." xml:space="preserve">
+    <value>재시도 대기: ADS 미로드.</value>
+  </data>
+  <data name="Retry wait: ADS utility active ({0})." xml:space="preserve">
+    <value>재시도 대기: ADS 유틸리티 활성({0}).</value>
+  </data>
+  <data name="Retry wait: {0}s." xml:space="preserve">
+    <value>재시도까지 {0}s.</value>
+  </data>
+  <data name="Revive/Return accept attempted; waiting for dialog to close" xml:space="preserve">
+    <value>부활/Return 수락 시도, 대화 종료 대기</value>
+  </data>
+  <data name="Revive/Return accept callback failed; waiting to retry" xml:space="preserve">
+    <value>부활/Return 콜백 실패, 재시도 대기</value>
+  </data>
+  <data name="Riding pillion on fren's mount" xml:space="preserve">
+    <value>친구 탈것에 동승 중</value>
+  </data>
+  <data name="Scanning for interactables..." xml:space="preserve">
+    <value>상호작용 대상 검색...</value>
+  </data>
+  <data name="Summoning chocobo ({0} greens left)" xml:space="preserve">
+    <value>초코보 소환(Greens {0}개 남음)</value>
+  </data>
+  <data name="Suppressed by Coppelia PowerlevelBot" xml:space="preserve">
+    <value>Coppelia PowerlevelBot에 의해 억제</value>
+  </data>
+  <data name="Surfacing revive/Return prompt" xml:space="preserve">
+    <value>부활/Return 대화 표시</value>
+  </data>
+  <data name="Surfacing teleport prompt" xml:space="preserve">
+    <value>텔레포 대화 표시</value>
+  </data>
+  <data name="Switched to {0} [{1}]" xml:space="preserve">
+    <value>{0} [{1}]로 변경</value>
+  </data>
+  <data name="Teleport decline attempted; waiting for dialog to close" xml:space="preserve">
+    <value>텔레포 거절 시도, 대화 종료 대기</value>
+  </data>
+  <data name="Teleport decline callback failed; waiting to retry" xml:space="preserve">
+    <value>텔레포 콜백 실패, 재시도 대기</value>
+  </data>
+  <data name="Too far ({0:F1}y &gt; {1:F0}y max)" xml:space="preserve">
+    <value>너무 멂({0:F1}y &gt; 최대 {1:F0}y)</value>
+  </data>
+  <data name="Waiting for ADS desynthesis to start." xml:space="preserve">
+    <value>ADS 분해 시작 대기.</value>
+  </data>
+  <data name="Waiting for revive/Return notification" xml:space="preserve">
+    <value>부활/Return 알림 대기</value>
+  </data>
+  <data name="Waiting for revive/Return prompt" xml:space="preserve">
+    <value>부활/Return 대화 대기</value>
+  </data>
+  <data name="Waiting for teleport prompt" xml:space="preserve">
+    <value>텔레포 대화 대기</value>
+  </data>
+  <data name="Waiting for {0} SelectYesno dialog" xml:space="preserve">
+    <value>{0} SelectYesno 대화 대기</value>
+  </data>
+  <data name="Waiting start: configured desynthesis requested (attempt {0})." xml:space="preserve">
+    <value>시작 대기: 설정된 분해 요청(시도 {0}).</value>
+  </data>
+  <data name="Waiting to mount..." xml:space="preserve">
+    <value>탑승 대기...</value>
+  </data>
+  <data name="Waiting: ADS not loaded." xml:space="preserve">
+    <value>대기: ADS 미로드.</value>
+  </data>
+  <data name="Waiting: ADS utility active ({0})." xml:space="preserve">
+    <value>대기: ADS 유틸리티 활성({0}).</value>
+  </data>
+  <data name="Waiting: {0}." xml:space="preserve">
+    <value>대기: {0}.</value>
+  </data>
+  <data name="⚠️ WARNING: AutoDuty Plugin Detected" xml:space="preserve">
+    <value>경고: AutoDuty 플러그인 감지</value>
+  </data>
+  <data name="• Force respawn at entrance" xml:space="preserve">
+    <value>• 입구에서 강제 부활</value>
+  </data>
+  <data name="• Leave instances at random times" xml:space="preserve">
+    <value>• 임의 시점에 임무 퇴장</value>
+  </data>
+  <data name="• Interfere with FrenRider automation" xml:space="preserve">
+    <value>• FrenRider 자동화 방해</value>
+  </data>
+  <data name="⚠ VLC Not Found" xml:space="preserve">
+    <value>VLC를 찾을 수 없음</value>
+  </data>
+  <data name="Well Fed: {0:F0}s ({1} [{2}])" xml:space="preserve">
+    <value>음식 효과: {0:F0}s({1} [{2}])</value>
+  </data>
+  <data name="Zone transition (rotation disabled)" xml:space="preserve">
+    <value>지역 이동(스킬 자동화 비활성)</value>
+  </data>
+  <data name="handoff in {0:F1}s of continuous readiness" xml:space="preserve">
+    <value>연속 준비 {0:F1}s 후 인계</value>
+  </data>
+  <data name="handoff retry backoff until {0:HH:mm:ss}" xml:space="preserve">
+    <value>인계 재시도 {0:HH:mm:ss}까지 대기</value>
+  </data>
+  <data name="waiting for duty start seam" xml:space="preserve">
+    <value>임무 시작 지점 대기</value>
+  </data>
+  <data name="waiting {0:F1}s for ADS ownership confirmation" xml:space="preserve">
+    <value>ADS 제어 확인 {0:F1}s 대기</value>
+  </data>
+  <data name="{0} active" xml:space="preserve">
+    <value>{0} 활성</value>
+  </data>
+  <data name="{0} auto" xml:space="preserve">
+    <value>{0} 자동</value>
+  </data>
+  <data name="{0} repair enabled; threshold is 0%." xml:space="preserve">
+    <value>{0} 수리 활성, 기준 0%.</value>
+  </data>
+  <data name="{0} repair needed below {1}%; dismounting first." xml:space="preserve">
+    <value>{1}% 미만으로 {0} 수리 필요, 먼저 하차.</value>
+  </data>
+  <data name="{0} repair needed below {1}%; waiting for mount transition." xml:space="preserve">
+    <value>{1}% 미만으로 {0} 수리 필요, 탑승 상태 전환 대기.</value>
+  </data>
+  <data name="{0} repair needed below {1}%; waiting to dismount." xml:space="preserve">
+    <value>{1}% 미만으로 {0} 수리 필요, 하차 대기.</value>
+  </data>
+  <data name="{0} repair needed below {1}%; waiting while {2}." xml:space="preserve">
+    <value>{1}% 미만으로 {0} 수리 필요, {2} 중 대기.</value>
+  </data>
+  <data name="{0} repair requested below {1}%; FrenRider paused." xml:space="preserve">
+    <value>{1}% 미만으로 {0} 수리 요청, FrenRider 중지.</value>
+  </data>
+  <data name="{0} repair requested; waiting for ADS status." xml:space="preserve">
+    <value>{0} 수리 요청, ADS 상태 대기.</value>
+  </data>
+  <data name="{0} repair requested; waiting for ADS to start." xml:space="preserve">
+    <value>{0} 수리 요청, ADS 시작 대기.</value>
+  </data>
+  <data name="{0} repair running; FrenRider paused. ADS: {1}" xml:space="preserve">
+    <value>{0} 수리 중, FrenRider 중지. ADS: {1}</value>
+  </data>
+  <data name="{0} repair still needed below {1}%; automatic dismount timed out." xml:space="preserve">
+    <value>{1}% 미만으로 {0} 수리 필요, 자동 하차 시간 초과.</value>
+  </data>
+  <data name="{0} repair still needed below {1}%; retry in {2}s. ADS: {3}" xml:space="preserve">
+    <value>{1}% 미만으로 {0} 수리 필요, {2}s 후 재시도. ADS: {3}</value>
+  </data>
+  <data name="{0} repair still needed below {1}%; waiting while {2}. ADS: {3}" xml:space="preserve">
+    <value>{1}% 미만으로 {0} 수리 필요, {2} 중 대기. ADS: {3}</value>
+  </data>
+  <data name="{0}: mounting {1}" xml:space="preserve">
+    <value>{0}: {1} 탑승</value>
+  </data>
+  <data name="{0}; restarting readiness delay with 5s retry backoff" xml:space="preserve">
+    <value>{0}, 5s 재시도 대기로 준비 지연 재시작</value>
+  </data>
+  <data name="{0}; waiting for authoritative ownership" xml:space="preserve">
+    <value>{0}, 확정된 제어권 대기</value>
+  </data>
+  <data name="True" xml:space="preserve">
+    <value>예</value>
+  </data>
+  <data name="False" xml:space="preserve">
+    <value>아니요</value>
+  </data>
+  <data name="ADS recovery hold IPC unavailable; update ADS" xml:space="preserve">
+    <value>ADS 복구 보류 IPC 없음, ADS 업데이트 필요</value>
+  </data>
+  <data name="Waiting for ADS recovery hold acknowledgement" xml:space="preserve">
+    <value>ADS 복구 보류 승인 대기</value>
+  </data>
+  <data name="Waiting to leave combat before approaching or using Phoenix Down" xml:space="preserve">
+    <value>접근 또는 불사조의 깃털 사용 전 전투 종료 대기</value>
+  </data>
+  <data name="Waiting to land" xml:space="preserve">
+    <value>착륙 대기</value>
+  </data>
+  <data name="No Phoenix Downs; waiting for party recovery" xml:space="preserve">
+    <value>불사조의 깃털 없음, 파티 복구 대기</value>
+  </data>
+  <data name="Medicine cooldown; waiting for recovery" xml:space="preserve">
+    <value>약품 재사용 대기, 복구 대기</value>
+  </data>
+  <data name="Waiting for current cast" xml:space="preserve">
+    <value>현재 시전 대기</value>
+  </data>
+  <data name="FR: On" xml:space="preserve">
+    <value>FR: 켜짐</value>
+  </data>
+  <data name="FR: Off" xml:space="preserve">
+    <value>FR: 꺼짐</value>
+  </data>
+  <data name="Fren Rider active - Following {0}. Coppelia: {1}. Cleanup: {2}" xml:space="preserve">
+    <value>Fren Rider 활성 - {0} 따르는 중. Coppelia: {1}. 정리: {2}</value>
+  </data>
+  <data name="Fren Rider disabled - Click to toggle. Coppelia: {0}. Cleanup: {1}" xml:space="preserve">
+    <value>Fren Rider 비활성 - 클릭하여 전환. Coppelia: {0}. 정리: {1}</value>
+  </data>
+  <data name="No compatible BossMod preset IPC responded" xml:space="preserve">
+    <value>호환 BossMod 프리셋 IPC 응답 없음</value>
+  </data>
+  <data name="No packaged presets found" xml:space="preserve">
+    <value>포함된 프리셋 없음</value>
+  </data>
+  <data name="Preset push partially succeeded ({0}/{1})" xml:space="preserve">
+    <value>프리셋 적용 일부 성공({0}/{1})</value>
+  </data>
+  <data name="Six BossMod presets pushed" xml:space="preserve">
+    <value>BossMod 프리셋 6개 적용</value>
+  </data>
+  <data name=", FATE {0}" xml:space="preserve">
+    <value>, FATE {0}</value>
+  </data>
+  <data name=", indoors" xml:space="preserve">
+    <value>, 실내</value>
+  </data>
+  <data name="{0} (territory {1}{2})" xml:space="preserve">
+    <value>{0}(지역 {1}{2})</value>
+  </data>
+  <data name="ADS Exit Method ({0}s)" xml:space="preserve">
+    <value>ADS 퇴장 방식({0}s)</value>
+  </data>
+  <data name="FrenRider: leave after {0}s" xml:space="preserve">
+    <value>FrenRider: {0}s 후 퇴장</value>
+  </data>
+  <data name="FrenRider: leave when party leaves" xml:space="preserve">
+    <value>FrenRider: 파티가 떠나면 퇴장</value>
+  </data>
+  <data name="Timer: {0}" xml:space="preserve">
+    <value>남은 시간: {0}</value>
+  </data>
+  <data name="Next retry/reassert in {0}s." xml:space="preserve">
+    <value>재시도/재적용까지 {0}s.</value>
+  </data>
+  <data name="Legacy seed active: {0} at threshold {1}." xml:space="preserve">
+    <value>이전 설정 활성: {0}, 기준 {1}.</value>
+  </data>
+  <data name="global handoff on" xml:space="preserve">
+    <value>전체 인계 켜짐</value>
+  </data>
+  <data name="global handoff off" xml:space="preserve">
+    <value>전체 인계 꺼짐</value>
+  </data>
+  <data name="Authority source: {0}; readable={1}; exit takeover={2}" xml:space="preserve">
+    <value>제어 출처: {0}, 읽기 가능={1}, 퇴장 인계={2}</value>
+  </data>
+  <data name="Selected: {0} {1} (ID: {2})" xml:space="preserve">
+    <value>선택: {0} {1}(ID: {2})</value>
+  </data>
+  <data name="{0} in party but not visible" xml:space="preserve">
+    <value>{0} 파티에 있으나 보이지 않음</value>
+  </data>
+  <data name="Active, {0}m {1:D2}s remaining" xml:space="preserve">
+    <value>활성, {0}m {1:D2}s 남음</value>
+  </data>
+  <data name="Inactive, {0} Gysahl Greens" xml:space="preserve">
+    <value>비활성, Gysahl Greens {0}개</value>
+  </data>
+  <data name="Run={0}, FlyYouFools={1}, FarChase={2}, FollowMode={3}/{4}" xml:space="preserve">
+    <value>실행={0}, FlyYouFools={1}, 장거리추격={2}, 추종방식={3}/{4}</value>
+  </data>
+  <data name="Cling={0:F1}, Max={1:F0}, ForayMax={2:F0}" xml:space="preserve">
+    <value>간격={0:F1}, 최대={1:F0}, 특수최대={2:F0}</value>
+  </data>
+  <data name="Loaded={0}, Pending={1}, RuntimeOwned={2}, Readable={3}, Source={4}, ExitTakeover={5}" xml:space="preserve">
+    <value>로드={0}, 대기={1}, 제어중={2}, 읽기가능={3}, 출처={4}, 퇴장인계={5}</value>
+  </data>
+  <data name="Source={0}, Readable={1}, ExitTakeover={2}" xml:space="preserve">
+    <value>출처={0}, 읽기가능={1}, 퇴장인계={2}</value>
+  </data>
+  <data name="Saved fren is outside the current party." xml:space="preserve">
+    <value>저장된 친구가 현재 파티에 없음.</value>
+  </data>
+  <data name="ADS Hyper Focus heartbeat received." xml:space="preserve">
+    <value>ADS Hyper Focus 생존 신호 수신.</value>
+  </data>
+  <data name="ADS Hyper Focus lease active." xml:space="preserve">
+    <value>ADS Hyper Focus 제어 활성.</value>
+  </data>
+  <data name="ActionManager unavailable" xml:space="preserve">
+    <value>ActionManager 사용 불가</value>
+  </data>
+  <data name="Aetheryte sheet unavailable for {0} (candidate count=0)" xml:space="preserve">
+    <value>{0} 에테라이트 데이터 없음(후보=0)</value>
+  </data>
+  <data name="Coppelia Powerlevel heartbeat received." xml:space="preserve">
+    <value>Coppelia Powerlevel 생존 신호 수신.</value>
+  </data>
+  <data name="Coppelia Powerlevel lease active." xml:space="preserve">
+    <value>Coppelia Powerlevel 제어 활성.</value>
+  </data>
+  <data name="Exit after duty ends - {0:F0}s elapsed (configured: {1}s)" xml:space="preserve">
+    <value>임무 종료 후 퇴장 - {0:F0}s 경과(설정: {1}s)</value>
+  </data>
+  <data name="Failed to open /partycmd" xml:space="preserve">
+    <value>/partycmd 열기 실패</value>
+  </data>
+  <data name="Leave when all party members left" xml:space="preserve">
+    <value>모든 파티원 퇴장 후 떠나기</value>
+  </data>
+  <data name="Matched {0} ({1})" xml:space="preserve">
+    <value>{0} 일치({1})</value>
+  </data>
+  <data name="No interactables found; fren not visible in duty" xml:space="preserve">
+    <value>상호작용 대상 없음, 임무에서 친구 안 보임</value>
+  </data>
+  <data name="No interactables found; not bound by duty" xml:space="preserve">
+    <value>상호작용 대상 없음, 임무에 묶이지 않음</value>
+  </data>
+  <data name="No party row found for {0} ({1})" xml:space="preserve">
+    <value>{0} 파티 행 없음({1})</value>
+  </data>
+  <data name="No unlocked Lifestream aetherytes matched {0} " xml:space="preserve">
+    <value>{0} 일치하는 개방 Lifestream 에테라이트 없음 </value>
+  </data>
+  <data name="Opening party window" xml:space="preserve">
+    <value>파티 창 여는 중</value>
+  </data>
+  <data name="Party row found for {0}, but no zone name matched ({1})" xml:space="preserve">
+    <value>{0} 파티 행 발견, 지역명 불일치({1})</value>
+  </data>
+  <data name="Party window did not open (addon visible=false, opened by FrenRider=true)" xml:space="preserve">
+    <value>파티 창 열리지 않음(애드온 표시=아니요, FrenRider가 열음=예)</value>
+  </data>
+  <data name="Party window had no readable rows ({0})" xml:space="preserve">
+    <value>파티 창에 읽을 수 있는 행 없음({0})</value>
+  </data>
+  <data name="Party window not visible" xml:space="preserve">
+    <value>파티 창 안 보임</value>
+  </data>
+  <data name="Party window read failed: {0}" xml:space="preserve">
+    <value>파티 창 읽기 실패: {0}</value>
+  </data>
+  <data name="Reading party window ({0})" xml:space="preserve">
+    <value>파티 창 읽는 중({0})</value>
+  </data>
+  <data name="SelectYesno dialog" xml:space="preserve">
+    <value>SelectYesno 대화</value>
+  </data>
+  <data name="Telepo unavailable for {0} (candidate count=0)" xml:space="preserve">
+    <value>{0} Telepo 사용 불가(후보=0)</value>
+  </data>
+  <data name="Teleport list read failed for {0}: {1} (candidate count=0)" xml:space="preserve">
+    <value>{0} 텔레포 목록 읽기 실패: {1}(후보=0)</value>
+  </data>
+  <data name="Transient IPC failure; preserving owned state. Typed: {0}; JSON: {1}" xml:space="preserve">
+    <value>일시 IPC 실패, 제어 상태 유지. 형식화: {0}, JSON: {1}</value>
+  </data>
+  <data name="UI manager unavailable" xml:space="preserve">
+    <value>UI 관리자 사용 불가</value>
+  </data>
+  <data name="Validated ADS current-duty snapshot for territory/CFC {0}/{1}." xml:space="preserve">
+    <value>지역/CFC {0}/{1} ADS 상태 검증됨.</value>
+  </data>
+  <data name="Waiting for party window" xml:space="preserve">
+    <value>파티 창 대기</value>
+  </data>
+  <data name="addon hidden" xml:space="preserve">
+    <value>애드온 숨김</value>
+  </data>
+  <data name="addon not found" xml:space="preserve">
+    <value>애드온 없음</value>
+  </data>
+  <data name="already mounted" xml:space="preserve">
+    <value>이미 탑승 중</value>
+  </data>
+  <data name="already mounting" xml:space="preserve">
+    <value>이미 탑승 동작 중</value>
+  </data>
+  <data name="automation preempted" xml:space="preserve">
+    <value>자동화 중단</value>
+  </data>
+  <data name="between areas" xml:space="preserve">
+    <value>지역 이동 중</value>
+  </data>
+  <data name="casting" xml:space="preserve">
+    <value>시전 중</value>
+  </data>
+  <data name="casting or occupied" xml:space="preserve">
+    <value>시전 또는 사용 중</value>
+  </data>
+  <data name="duty confirm popup" xml:space="preserve">
+    <value>임무 확인 팝업</value>
+  </data>
+  <data name="event null" xml:space="preserve">
+    <value>이벤트 null</value>
+  </data>
+  <data name="exception: {0}" xml:space="preserve">
+    <value>예외: {0}</value>
+  </data>
+  <data name="far chase active" xml:space="preserve">
+    <value>장거리 추격 활성</value>
+  </data>
+  <data name="flying stuck escape (dX={0:F1} dY={1:F1} dZ={2:F1}, all &lt;{3}y in {4}s)" xml:space="preserve">
+    <value>비행 끼임 탈출(dX={0:F1} dY={1:F1} dZ={2:F1}, {4}s 동안 모두 &lt;{3}y)</value>
+  </data>
+  <data name="fren flying" xml:space="preserve">
+    <value>친구 비행 중</value>
+  </data>
+  <data name="fren unavailable" xml:space="preserve">
+    <value>친구 없음</value>
+  </data>
+  <data name="in combat" xml:space="preserve">
+    <value>전투 중</value>
+  </data>
+  <data name="in duty" xml:space="preserve">
+    <value>임무 중</value>
+  </data>
+  <data name="local player unavailable" xml:space="preserve">
+    <value>로컬 플레이어 없음</value>
+  </data>
+  <data name="mount action check failed: {0}" xml:space="preserve">
+    <value>탈것 행동 확인 실패: {0}</value>
+  </data>
+  <data name="mount action unavailable (status={0})" xml:space="preserve">
+    <value>탈것 행동 사용 불가(상태={0})</value>
+  </data>
+  <data name="mounted or riding pillion" xml:space="preserve">
+    <value>탑승 또는 동승 중</value>
+  </data>
+  <data name="near fren on foot" xml:space="preserve">
+    <value>도보 친구 근처</value>
+  </data>
+  <data name="near mounted fren with Fly You Fools disabled" xml:space="preserve">
+    <value>탑승 친구 근처, Fly You Fools 꺼짐</value>
+  </data>
+  <data name="near mounted fren with Fly You Fools enabled" xml:space="preserve">
+    <value>탑승 친구 근처, Fly You Fools 켜짐</value>
+  </data>
+  <data name="node index out of range" xml:space="preserve">
+    <value>노드 인덱스 범위 밖</value>
+  </data>
+  <data name="node null" xml:space="preserve">
+    <value>노드 null</value>
+  </data>
+  <data name="not mounted or riding" xml:space="preserve">
+    <value>탑승 및 동승 아님</value>
+  </data>
+  <data name="occupied or in cutscene" xml:space="preserve">
+    <value>사용 중 또는 컷신</value>
+  </data>
+  <data name="outside sanctuary" xml:space="preserve">
+    <value>안전지대 밖</value>
+  </data>
+  <data name="player busy" xml:space="preserve">
+    <value>플레이어 사용 중</value>
+  </data>
+  <data name="player dead" xml:space="preserve">
+    <value>플레이어 사망</value>
+  </data>
+  <data name="riding pillion" xml:space="preserve">
+    <value>동승 중</value>
+  </data>
+  <data name="safe and in cling range" xml:space="preserve">
+    <value>안전하며 추종 범위 내</value>
+  </data>
+  <data name="stuck repath (dX={0:F1} dY={1:F1} dZ={2:F1}, all &lt;{3}y in {4}s)" xml:space="preserve">
+    <value>끼임 경로 재설정(dX={0:F1} dY={1:F1} dZ={2:F1}, {4}s 동안 모두 &lt;{3}y)</value>
+  </data>
+  <data name="stuck repath (moved {0:F1}y &lt; {1:F1}y in {2:F0}s)" xml:space="preserve">
+    <value>끼임 경로 재설정({2:F0}s 동안 이동 {0:F1}y &lt; {1:F1}y)</value>
+  </data>
+  <data name="teleport or dialog" xml:space="preserve">
+    <value>텔레포 또는 대화</value>
+  </data>
+  <data name="unit manager not found" xml:space="preserve">
+    <value>유닛 관리자 없음</value>
+  </data>
+  <data name="unsupported arg type" xml:space="preserve">
+    <value>지원하지 않는 인수 형식</value>
+  </data>
+  <data name="{0:F1}y XZ from fren, handoff {1:F1}y" xml:space="preserve">
+    <value>친구로부터 XZ {0:F1}y, 인계 {1:F1}y</value>
+  </data>
+  <data name="Overworld" xml:space="preserve">
+    <value>필드</value>
+  </data>
+  <data name="Town" xml:space="preserve">
+    <value>도시</value>
+  </data>
+  <data name="Duty" xml:space="preserve">
+    <value>임무</value>
+  </data>
+  <data name="DeepDungeon" xml:space="preserve">
+    <value>딥 던전</value>
+  </data>
+  <data name="Foray" xml:space="preserve">
+    <value>특수 필드</value>
+  </data>
+  <data name="Typed" xml:space="preserve">
+    <value>형식화</value>
+  </data>
+  <data name="JsonFallback" xml:space="preserve">
+    <value>JSON 대체</value>
+  </data>
+  <data name="StaleHold" xml:space="preserve">
+    <value>오래된 보류</value>
+  </data>
+  <data name="Unloaded" xml:space="preserve">
+    <value>미로드</value>
+  </data>
+  <data name="Unreadable" xml:space="preserve">
+    <value>읽기 불가</value>
+  </data>
+  <data name="Following local aetheryte network to {0}{1}" xml:space="preserve">
+    <value>지역 에테라이트 네트워크로 {0}{1} 추종</value>
+  </data>
+  <data name="Found {0} aetherytes for {1}" xml:space="preserve">
+    <value>{1} 에테라이트 {0}개 발견</value>
+  </data>
+  <data name="Matched {0}" xml:space="preserve">
+    <value>{0} 일치</value>
+  </data>
+  <data name="Sent {0}; matched {1}; found {2} aetherytes{3}" xml:space="preserve">
+    <value>{0} 전송, {1} 일치, 에테라이트 {2}개 발견{3}</value>
+  </data>
+  <data name="{0}{1}; retry in {2}s" xml:space="preserve">
+    <value>{0}{1}, {2}s 후 재시도</value>
+  </data>
+  <data name="ADS loaded; ready." xml:space="preserve">
+    <value>ADS 로드됨; 준비 완료.</value>
+  </data>
+  <data name="ADS loaded; {0}." xml:space="preserve">
+    <value>ADS 로드됨; {0}.</value>
+  </data>
+  <data name="{0} {1}: M{2}/T{3}, {4}." xml:space="preserve">
+    <value>{0} {1}: M{2}/T{3}, {4}.</value>
+  </data>
+  <data name="ADS is not loaded" xml:space="preserve">
+    <value>ADS가 로드되지 않음</value>
+  </data>
+  <data name="{0}; FrenRider local duty logic stays active" xml:space="preserve">
+    <value>{0}; FrenRider의 로컬 콘텐츠 처리는 계속 활성 상태</value>
+  </data>
+  <data name="ADS current-duty identity does not match live GameMain territory/CFC {0}/{1}; FrenRider local duty logic stays active" xml:space="preserve">
+    <value>ADS의 현재 콘텐츠 식별자가 실제 GameMain 지역/CFC {0}/{1}과 일치하지 않음; FrenRider의 로컬 콘텐츠 처리는 계속 활성 상태</value>
+  </data>
+  <data name="{0} handoff is off; FrenRider local duty logic stays active" xml:space="preserve">
+    <value>{0} 제어권 전달이 꺼져 있음; FrenRider의 로컬 콘텐츠 처리는 계속 활성 상태</value>
+  </data>
+  <data name="{0} has ADS clearance {1} (M{2}), below threshold {3}; FrenRider local duty logic stays active" xml:space="preserve">
+    <value>{0}의 ADS 인증 {1} (M{2})이 기준 {3} 미만임; FrenRider의 로컬 콘텐츠 처리는 계속 활성 상태</value>
+  </data>
+  <data name="ADS current-duty identity {0}/{1} does not match live GameMain identity {2}/{3}." xml:space="preserve">
+    <value>ADS의 현재 콘텐츠 식별자 {0}/{1}이 실제 GameMain 식별자 {2}/{3}과 일치하지 않음.</value>
+  </data>
+  <data name="Live duty identity changed from territory/CFC {0}/{1} to {2}/{3}." xml:space="preserve">
+    <value>실제 콘텐츠 식별자가 지역/CFC {0}/{1}에서 {2}/{3}으로 변경됨.</value>
+  </data>
+  <data name="No validated ADS current-duty snapshot." xml:space="preserve">
+    <value>검증된 ADS 현재 콘텐츠 스냅샷이 없음.</value>
+  </data>
+  <data name="Live client is outside an instanced duty." xml:space="preserve">
+    <value>현재 클라이언트가 인스턴스 콘텐츠 밖에 있음.</value>
+  </data>
+  <data name="GameMain did not provide a live duty territory identity." xml:space="preserve">
+    <value>GameMain이 실제 콘텐츠 지역 식별자를 제공하지 않음.</value>
+  </data>
+  <data name="ADS unloaded." xml:space="preserve">
+    <value>ADS 로드 해제됨.</value>
+  </data>
+  <data name="ADS.GetStatusJson returned an empty payload" xml:space="preserve">
+    <value>ADS.GetStatusJson이 빈 데이터를 반환함</value>
+  </data>
+  <data name="ADS status does not identify an active instanced duty" xml:space="preserve">
+    <value>ADS 상태에서 활성 인스턴스 콘텐츠를 확인할 수 없음</value>
+  </data>
+  <data name="ADS current duty has no catalog metadata" xml:space="preserve">
+    <value>ADS의 현재 콘텐츠에 카탈로그 메타데이터가 없음</value>
+  </data>
+  <data name="ADS current-duty catalog row has no duty name" xml:space="preserve">
+    <value>ADS의 현재 콘텐츠 카탈로그 행에 콘텐츠 이름이 없음</value>
+  </data>
+  <data name="ADS current-duty catalog row has no territory identity" xml:space="preserve">
+    <value>ADS의 현재 콘텐츠 카탈로그 행에 지역 식별자가 없음</value>
+  </data>
+  <data name="ADS current-duty catalog row has no CFC identity" xml:space="preserve">
+    <value>ADS의 현재 콘텐츠 카탈로그 행에 CFC 식별자가 없음</value>
+  </data>
+  <data name="ADS current-duty catalog row has unsupported category '{0}'" xml:space="preserve">
+    <value>ADS의 현재 콘텐츠 카탈로그 행에 지원되지 않는 분류 '{0}'이 있음</value>
+  </data>
+  <data name="ADS current-duty catalog row has unsupported support level '{0}'" xml:space="preserve">
+    <value>ADS의 현재 콘텐츠 카탈로그 행에 지원되지 않는 지원 수준 '{0}'이 있음</value>
+  </data>
+  <data name="ADS current-duty catalog row has unsupported clearance status '{0}'" xml:space="preserve">
+    <value>ADS의 현재 콘텐츠 카탈로그 행에 지원되지 않는 인증 상태 '{0}'이 있음</value>
+  </data>
+  <data name="ADS.GetStatusJson was invalid JSON: {0}" xml:space="preserve">
+    <value>ADS.GetStatusJson의 JSON이 유효하지 않음: {0}</value>
+  </data>
+  <data name="ADS.GetStatusJson unavailable: {0}" xml:space="preserve">
+    <value>ADS.GetStatusJson을 사용할 수 없음: {0}</value>
+  </data>
+  <data name="ADS.GetStatusJson unavailable; retaining the validated current-duty snapshot for the same live identity: {0}" xml:space="preserve">
+    <value>ADS.GetStatusJson을 사용할 수 없음; 동일한 실제 식별자의 검증된 현재 콘텐츠 스냅샷을 유지함: {0}</value>
+  </data>
+  <data name="waiting for login" xml:space="preserve">
+    <value>로그인 대기 중</value>
+  </data>
+  <data name="waiting for local player" xml:space="preserve">
+    <value>로컬 플레이어 대기 중</value>
+  </data>
+  <data name="waiting for unconscious state to clear" xml:space="preserve">
+    <value>전투 불능 상태 해제 대기 중</value>
+  </data>
+  <data name="waiting for local player to be alive" xml:space="preserve">
+    <value>로컬 플레이어 생존 대기 중</value>
+  </data>
+  <data name="waiting for area transition to finish" xml:space="preserve">
+    <value>지역 이동 완료 대기 중</value>
+  </data>
+  <data name="waiting for cutscene to finish" xml:space="preserve">
+    <value>컷신 종료 대기 중</value>
+  </data>
+  <data name="waiting for cutscene event to finish" xml:space="preserve">
+    <value>컷신 이벤트 종료 대기 중</value>
+  </data>
+  <data name="NPC no-inn/no-teleport" xml:space="preserve">
+    <value>NPC 여관 이동 없음/텔레포 없음</value>
+  </data>
+  <data name="applied" xml:space="preserve">
+    <value>적용됨</value>
+  </data>
+  <data name="already set" xml:space="preserve">
+    <value>이미 설정됨</value>
+  </data>
+  <data name="not loaded" xml:space="preserve">
+    <value>로드되지 않음</value>
+  </data>
+  <data name="unavailable" xml:space="preserve">
+    <value>사용할 수 없음</value>
+  </data>
+  <data name="failed" xml:space="preserve">
+    <value>실패함</value>
+  </data>
+  <data name="RSR {0}{1}" xml:space="preserve">
+    <value>RSR {0}{1}</value>
+  </data>
+  <data name="{0} active{1}" xml:space="preserve">
+    <value>{0} 활성{1}</value>
+  </data>
+  <data name="{0} auto{1}" xml:space="preserve">
+    <value>{0} 자동{1}</value>
+  </data>
+  <data name="{0} unavailable{1}" xml:space="preserve">
+    <value>{0} 사용할 수 없음{1}</value>
+  </data>
+  <data name="{0} captured" xml:space="preserve">
+    <value>{0} 캡처됨</value>
+  </data>
+  <data name="{0} unavailable" xml:space="preserve">
+    <value>{0} 사용할 수 없음</value>
+  </data>
+  <data name="{0} unavailable: {1}" xml:space="preserve">
+    <value>{0} 사용할 수 없음: {1}</value>
+  </data>
+  <data name="Partial restore ({0})." xml:space="preserve">
+    <value>일부 복원 ({0}).</value>
+  </data>
+  <data name="Far chase" xml:space="preserve">
+    <value>장거리 추격</value>
+  </data>
+  <data name="Fly You Fools" xml:space="preserve">
+    <value>나란히 비행</value>
+  </data>
+  <data name="outside effective cling range" xml:space="preserve">
+    <value>유효 밀착 범위 밖</value>
+  </data>
+  <data name="Failed to send {0}" xml:space="preserve">
+    <value>{0} 전송 실패</value>
+  </data>
+  <data name="; Party window left open" xml:space="preserve">
+    <value>; 파티 창을 열어 둠</value>
+  </data>
+  <data name="No unlocked Lifestream aetherytes matched {0} (candidate count=0; {1})" xml:space="preserve">
+    <value>{0}과 일치하는 개방된 Lifestream 에테라이트가 없음 (후보 수=0; {1})</value>
+  </data>
+  <data name="ADS.StartDutyFromInside accepted" xml:space="preserve">
+    <value>ADS.StartDutyFromInside가 수락됨</value>
+  </data>
+  <data name="ADS.StartDutyFromInside rejected; command fallback suppressed" xml:space="preserve">
+    <value>ADS.StartDutyFromInside가 거부됨; 대체 명령 억제됨</value>
+  </data>
+  <data name="typed endpoint unavailable; sent /ads inside fallback" xml:space="preserve">
+    <value>형식 지정 엔드포인트를 사용할 수 없음; 대체 /ads inside 명령 전송됨</value>
+  </data>
+  <data name="typed endpoint unavailable and /ads inside fallback failed" xml:space="preserve">
+    <value>형식 지정 엔드포인트를 사용할 수 없고 대체 /ads inside 명령도 실패함</value>
+  </data>
+  <data name="DeathReturn" xml:space="preserve">
+    <value>전투 불능 귀환</value>
+  </data>
+  <data name="Raise" xml:space="preserve">
+    <value>부활</value>
+  </data>
+  <data name="Teleport" xml:space="preserve">
+    <value>텔레포</value>
+  </data>
+  <data name="Duty completed, {0}leaving in {1:F0}s..." xml:space="preserve">
+    <value>콘텐츠 완료, {0}{1:F0}초 후 퇴장...</value>
+  </data>
+  <data name="ADS authority active" xml:space="preserve">
+    <value>ADS 제어 활성</value>
+  </data>
+  <data name="local aethernet travel active" xml:space="preserve">
+    <value>로컬 도시 내 에테라이트 이동 활성</value>
+  </data>
+  <data name="settings changed" xml:space="preserve">
+    <value>설정 변경됨</value>
+  </data>
+  <data name="typed IPC unavailable" xml:space="preserve">
+    <value>형식 지정 IPC를 사용할 수 없음</value>
+  </data>
+  <data name="live AutoFollow read unavailable" xml:space="preserve">
+    <value>현재 AutoFollow 설정을 읽을 수 없음</value>
+  </data>
+  <data name="BossMod.Service not found" xml:space="preserve">
+    <value>BossMod.Service를 찾을 수 없음</value>
+  </data>
+  <data name="BossMod.Service.Config unavailable" xml:space="preserve">
+    <value>BossMod.Service.Config를 사용할 수 없음</value>
+  </data>
+  <data name="BossMod.AI.AIConfig not found" xml:space="preserve">
+    <value>BossMod.AI.AIConfig를 찾을 수 없음</value>
+  </data>
+  <data name="live instance discovery failed: {0}" xml:space="preserve">
+    <value>현재 인스턴스 탐색 실패: {0}</value>
+  </data>
+  <data name="Dalamud LocalPlugin wrapper was not reachable from IExposedPlugin" xml:space="preserve">
+    <value>IExposedPlugin에서 Dalamud LocalPlugin 래퍼에 접근할 수 없었음</value>
+  </data>
+  <data name="Dalamud LocalPlugin had no live instance" xml:space="preserve">
+    <value>Dalamud LocalPlugin에 현재 인스턴스가 없었음</value>
+  </data>
+  <data name="Dalamud LocalPlugin had no live assembly" xml:space="preserve">
+    <value>Dalamud LocalPlugin에 현재 어셈블리가 없었음</value>
+  </data>
+  <data name="Dalamud LocalPlugin instance and assembly did not match" xml:space="preserve">
+    <value>Dalamud LocalPlugin의 인스턴스와 어셈블리가 일치하지 않았음</value>
+  </data>
+  <data name="ADS unavailable/pending: {0}." xml:space="preserve">
+    <value>ADS 사용 불가/대기 중: {0}.</value>
+  </data>
+  <data name="range" xml:space="preserve">
+    <value>범위</value>
+  </data>
+  <data name="range reset" xml:space="preserve">
+    <value>범위 초기화</value>
+  </data>
+  <data name="hunts" xml:space="preserve">
+    <value>마물 사냥</value>
+  </data>
+  <data name="hunts reset" xml:space="preserve">
+    <value>마물 사냥 초기화</value>
+  </data>
+  <data name="queen" xml:space="preserve">
+    <value>여왕</value>
+  </data>
+  <data name="queen reset" xml:space="preserve">
+    <value>여왕 초기화</value>
+  </data>
+  <data name="Misc" xml:space="preserve">
+    <value>기타</value>
+  </data>
+  <data name="ADS returned false" xml:space="preserve">
+    <value>ADS가 false를 반환함</value>
+  </data>
+  <data name="ADS unavailable; reflection hacks pending." xml:space="preserve">
+    <value>ADS를 사용할 수 없음; 리플렉션 우회 처리 대기 중.</value>
+  </data>
+  <data name="No ADS utility status." xml:space="preserve">
+    <value>ADS 유틸리티 상태 없음.</value>
+  </data>
+  <data name="ADS repair running" xml:space="preserve">
+    <value>ADS 수리 진행 중</value>
+  </data>
+  <data name="ADS did not accept the utility request." xml:space="preserve">
+    <value>ADS가 유틸리티 요청을 수락하지 않음.</value>
+  </data>
+  <data name="ADS status was not readable." xml:space="preserve">
+    <value>ADS 상태를 읽을 수 없음.</value>
+  </data>
+  <data name="Members" xml:space="preserve">
+    <value>멤버</value>
+  </data>
+  <data name="Jobs" xml:space="preserve">
+    <value>직업</value>
+  </data>
+  <data name="{0} total, {1} visible, {2} mounted" xml:space="preserve">
+    <value>총 {0}명, 표시 {1}명, 탈것 탑승 {2}명</value>
+  </data>
+  <data name="Tank" xml:space="preserve">
+    <value>방어</value>
+  </data>
+  <data name="Healer" xml:space="preserve">
+    <value>치유</value>
+  </data>
+  <data name="Melee" xml:space="preserve">
+    <value>근접</value>
+  </data>
+  <data name="Ranged" xml:space="preserve">
+    <value>원거리</value>
+  </data>
+  <data name="Caster" xml:space="preserve">
+    <value>마법</value>
+  </data>
+  <data name="Select {0}..." xml:space="preserve">
+    <value>{0} 선택...</value>
+  </data>
+  <data name="Window appearance" xml:space="preserve"><value>창 모양</value></data>
+  <data name="Compact visible on main window" xml:space="preserve"><value>메인 창에 간결 모드 전환 표시</value></data>
+  <data name="Language visible on main window" xml:space="preserve"><value>메인 창에 언어 선택 표시</value></data>
+  <data name="Transparency" xml:space="preserve"><value>투명도</value></data>
+  <data name="Opacity (%)" xml:space="preserve"><value>불투명도 (%)</value></data>
+  <data name="Auto-fade when unfocused" xml:space="preserve"><value>포커스를 잃으면 자동으로 흐리게 표시</value></data>
+  <data name="Unfocused opacity (%)" xml:space="preserve"><value>포커스가 없을 때 불투명도 (%)</value></data>
+  <data name="Unfocused delay (seconds)" xml:space="preserve"><value>포커스를 잃은 후 대기 시간 (초)</value></data>
+</root>

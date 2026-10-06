@@ -81,6 +81,8 @@ public sealed class FrenTeleportService
 
     public void Update()
     {
+        if (plugin.PhoenixDownRecoveryService.HoldMovement)
+            return;
         var config = plugin.ConfigManager.GetActiveConfig();
         var now = Environment.TickCount64;
 
