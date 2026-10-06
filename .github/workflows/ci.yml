@@ -6,34 +6,58 @@ on:
       - main
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   build:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    defaults:
+      run:
+        working-directory: FrenRider
     runs-on: windows-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          path: FrenRider
+          persist-credentials: false
+
+      - name: Checkout AethertekUI
+        uses: actions/checkout@v4
+        with:
+          repository: McVaxius/aethertekUI
+          ref: 6c193cf06ac67f954c549cafc2033ac0efdd630a
+          path: aethertekUI
+          ssh-key: ${{ secrets.AETHERTEKUI_DEPLOY_KEY }}
+          persist-credentials: false
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '10.0.x'
-          dotnet-quality: 'preview'
+          dotnet-version: '10.0.201'
 
-      - name: Install Dalamud runtime
-        uses: Blooym/setup-dalamud@v1
-        with:
-          branch: release
+      - name: Download Dalamud
+        run: |
+          Invoke-WebRequest -Uri https://goatcorp.github.io/dalamud-distrib/latest.zip -OutFile latest.zip
+          Expand-Archive -Force latest.zip "$env:AppData\XIVLauncher\addon\Hooks\dev\"
 
       - name: Restore
-        run: dotnet restore .\FrenRider\FrenRider.csproj
+        run: |
+          $dalamudLibPath = "$env:AppData/XIVLauncher/addon/Hooks/dev"
+          dotnet restore .\FrenRider\FrenRider.csproj -p:Configuration=Release -p:Platform=x64 -p:DalamudLibPath="$dalamudLibPath"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Build (Release)
-        run: dotnet build .\FrenRider\FrenRider.csproj -c Release --no-restore -p:Platform=x64
+        run: |
+          $dalamudLibPath = "$env:AppData/XIVLauncher/addon/Hooks/dev"
+          dotnet build .\FrenRider\FrenRider.csproj -c Release --no-restore -p:Platform=x64 -p:DalamudLibPath="$dalamudLibPath"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Upload packaged plugin zip
         uses: actions/upload-artifact@v4
         with:
           name: FrenRider-latest
-          path: .\FrenRider\bin\x64\Release\FrenRider\latest.zip
+          path: FrenRider\FrenRider\bin\x64\Release\FrenRider\latest.zip
           if-no-files-found: error
