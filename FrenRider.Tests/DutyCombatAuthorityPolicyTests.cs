@@ -158,6 +158,42 @@ public sealed class DutyCombatAuthorityPolicyTests
     }
 
     [Fact]
+    public void AdsInteractionPauseLeavesVbmBootstrapPendingUntilRelease()
+    {
+        var now = new DateTime(2026, 10, 7, 12, 0, 0, DateTimeKind.Utc);
+        var paused = true;
+        var ipc = new AdsDutyIpcService(() => true, () => true,
+            () => $$"""{"inInstancedDuty":true,"ownershipMode":"OwnedStartInside","hasCatalogMetadata":true,"duty":"Sastasha","territoryTypeId":1036,"contentFinderConditionId":4,"dutyCategory":"FourMan","supportLevel":"PassiveOnly","clearanceStatus":"FourPlayerSyncCleared","interactionVbmPauseActive":{{(paused ? "true" : "false")}}}""",
+            () => true, () => now);
+        var policy = new DutyCombatAuthorityPolicy();
+
+        ipc.Refresh(true, 1036, 4, force: true);
+        var blocked = policy.Update(Input(adsDutyHandoffActive: true,
+            frenRiderBootstrapAllowed: !ipc.IsInteractionVbmPauseActive));
+
+        Assert.False(blocked.ShouldBootstrapFrenRider);
+        Assert.False(policy.FrenRiderBootstrapComplete);
+        Assert.Empty(CombatService.BuildBossModAiCommands(0, "VBM", ipc.IsInteractionVbmPauseActive));
+        Assert.Contains("/bmrai on", CombatService.BuildBossModAiCommands(0, "BMR", ipc.IsInteractionVbmPauseActive));
+        Assert.Equal(new[] { "/bmrai off", "/vbmai off" },
+            CombatService.BuildBossModAiCommands(1, "VBM", ipc.IsInteractionVbmPauseActive));
+        Assert.False(CombatService.ShouldActivateConfiguredRotation(2));
+
+        paused = false;
+        now = now.AddMilliseconds(100);
+        ipc.Refresh(true, 1036, 4, force: true);
+        var released = policy.Update(Input(adsDutyHandoffActive: true,
+            frenRiderBootstrapAllowed: !ipc.IsInteractionVbmPauseActive));
+        var repeated = policy.Update(Input(adsDutyHandoffActive: true));
+
+        Assert.True(released.ShouldBootstrapFrenRider);
+        Assert.True(policy.FrenRiderBootstrapComplete);
+        Assert.False(repeated.ShouldBootstrapFrenRider);
+        Assert.Equal(new[] { "/vbmai on" },
+            CombatService.BuildBossModAiCommands(0, "VBM", ipc.IsInteractionVbmPauseActive));
+    }
+
+    [Fact]
     public void AdsOwnedFourManDutyStillBootstrapsExactlyOnceWithoutQuestionableShutdown()
     {
         Assert.True(AdsIntegrationPolicy.ShouldPauseDutySystems(

@@ -2749,4 +2749,6 @@ Activé : utilisez les préréglages BossMod ci-dessous avec tout fournisseur de
   <data name="BossMod preset catalog unavailable or empty; saved selections are retained." xml:space="preserve">
     <value>Catalogue des préréglages BossMod indisponible ou vide ; les choix enregistrés sont conservés.</value>
   </data>
+  <data name="ADS interaction active; VBM setup deferred" xml:space="preserve"><value>Interaction ADS active ; configuration de VBM différée</value></data>
+  <data name="ADS interaction active; VBM settings pending" xml:space="preserve"><value>Interaction ADS active ; paramètres VBM en attente</value></data>
 </root>

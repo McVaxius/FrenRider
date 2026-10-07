@@ -79,8 +79,11 @@ internal static class UiGui
     internal static bool Button(string label, Vector2 size, MaterialIcon? icon = null, Vector4? gradientBottom = null)
     {
         var translated = UiText.T(label.Split("##", 2)[0]);
+        using var controls = ImGui.GetStyle().FramePadding.Y == 0 || MaterialControls.Context == MaterialControlContext.Dense
+            ? default(MaterialControls.ControlScope) : MaterialControls.Push(MaterialControlContext.Toolbar);
+        var paddingY = ImGui.GetStyle().FramePadding.Y;
         using var height = MaterialText.PushLineHeight(translated);
-        if (MaterialText.RequiresShaping(translated)) size.Y = Math.Max(size.Y, MaterialText.Measure(translated).Y + 2 * ImGui.GetStyle().FramePadding.Y);
+        size.Y = Math.Max(size.Y, Math.Max(ImGui.GetTextLineHeight(), MaterialText.Measure(translated).Y) + 2 * paddingY);
         var foreground = ImGui.GetStyle().Colors[(int)ImGuiCol.Text];
         var iconSize = ImGui.GetTextLineHeight();
         var iconWidth = icon.HasValue ? iconSize + 8 * MaterialTheme.Metrics.Scale : 0;
@@ -174,6 +177,8 @@ internal static class UiGui
     internal static bool Button(string label,string? display=null,MaterialIcon? icon=null)
     {
         var translated=display ?? UiText.T(label.Split("##",2)[0]);
+        using var controls = ImGui.GetStyle().FramePadding.Y == 0 || MaterialControls.Context == MaterialControlContext.Dense
+            ? default(MaterialControls.ControlScope) : MaterialControls.Push(MaterialControlContext.Toolbar);
         using var height = MaterialText.PushLineHeight(translated);
         var iconSize=ImGui.GetTextLineHeight();
         var iconWidth=icon.HasValue?iconSize+8*MaterialTheme.Metrics.Scale:0;

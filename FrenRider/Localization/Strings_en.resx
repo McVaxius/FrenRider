@@ -2848,4 +2848,6 @@ On: use the BossMod presets below with any rotation provider. A custom preset ma
   <data name="BossMod preset catalog unavailable or empty; saved selections are retained." xml:space="preserve">
     <value>BossMod preset catalog unavailable or empty; saved selections are retained.</value>
   </data>
+  <data name="ADS interaction active; VBM setup deferred" xml:space="preserve"><value>ADS interaction active; VBM setup deferred</value></data>
+  <data name="ADS interaction active; VBM settings pending" xml:space="preserve"><value>ADS interaction active; VBM settings pending</value></data>
 </root>

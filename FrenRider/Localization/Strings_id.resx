@@ -2854,4 +2854,6 @@ Aktif: gunakan preset BossMod di bawah dengan penyedia rotasi apa pun. Preset kh
   <data name="BossMod preset catalog unavailable or empty; saved selections are retained." xml:space="preserve">
     <value>Katalog preset BossMod tidak tersedia atau kosong; pilihan tersimpan tetap dipertahankan.</value>
   </data>
+  <data name="ADS interaction active; VBM setup deferred" xml:space="preserve"><value>Interaksi ADS aktif; penyiapan VBM ditunda</value></data>
+  <data name="ADS interaction active; VBM settings pending" xml:space="preserve"><value>Interaksi ADS aktif; pengaturan VBM menunggu</value></data>
 </root>

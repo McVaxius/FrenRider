@@ -2749,4 +2749,6 @@
   <data name="BossMod preset catalog unavailable or empty; saved selections are retained." xml:space="preserve">
     <value>BossMod のプリセット一覧が取得できないか空です。保存された選択を保持します。</value>
   </data>
+  <data name="ADS interaction active; VBM setup deferred" xml:space="preserve"><value>ADS の操作中です。VBM の設定を延期しています</value></data>
+  <data name="ADS interaction active; VBM settings pending" xml:space="preserve"><value>ADS の操作中です。VBM の設定は適用待ちです</value></data>
 </root>

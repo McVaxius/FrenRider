@@ -14,6 +14,8 @@ public sealed record AdsCurrentDutySnapshot(
     int ClearanceLevel,
     DateTime CapturedAtUtc)
 {
+    public bool InteractionVbmPauseActive { get; init; }
+
     public bool MatchesIdentity(uint territoryTypeId, uint contentFinderConditionId)
         => TerritoryTypeId == territoryTypeId
            && ContentFinderConditionId == contentFinderConditionId;
@@ -90,6 +92,7 @@ public sealed record AdsCurrentDutySnapshot(
                 return false;
             }
 
+            TryReadBoolean(root, "interactionVbmPauseActive", out var interactionVbmPauseActive);
             snapshot = new AdsCurrentDutySnapshot(
                 dutyName,
                 territoryTypeId,
@@ -98,7 +101,10 @@ public sealed record AdsCurrentDutySnapshot(
                 supportLevel,
                 clearanceStatus,
                 clearanceLevel,
-                capturedAtUtc);
+                capturedAtUtc)
+            {
+                InteractionVbmPauseActive = interactionVbmPauseActive,
+            };
             return true;
         }
         catch (JsonException ex)

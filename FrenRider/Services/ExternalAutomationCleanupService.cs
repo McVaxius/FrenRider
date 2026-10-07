@@ -513,7 +513,7 @@ public sealed class BossModExternalAutomationSnapshotProvider : IExternalAutomat
             if (configRoot == null)
                 return BossModAutomationSnapshot.Unavailable("BossMod.Service.Config unavailable");
 
-            var configNode = FindConfigNode(configRoot);
+            var configNode = FindConfigNode(configRoot, liveAssembly);
             if (configNode == null)
                 return BossModAutomationSnapshot.Unavailable($"{AiConfigType} not found");
 
@@ -702,19 +702,16 @@ public sealed class BossModExternalAutomationSnapshotProvider : IExternalAutomat
         return false;
     }
 
-    private static object? FindConfigNode(object configRoot)
+    private static object? FindConfigNode(object configRoot, Assembly assembly)
     {
-        if (GetInstanceMember(configRoot, "Nodes") is not IEnumerable nodes)
+        var aiConfigType = assembly.GetType(AiConfigType);
+        if (aiConfigType is null || configRoot.GetType().Assembly != assembly)
             return null;
-
-        foreach (var node in nodes)
-        {
-            var typeName = node?.GetType().FullName;
-            if (string.Equals(typeName, AiConfigType, StringComparison.Ordinal))
-                return node;
-        }
-
-        return null;
+        var getter = configRoot.GetType().GetMethods(BindingFlags.Instance | BindingFlags.Public)
+            .SingleOrDefault(method => method.Name == "Get" && method.IsGenericMethodDefinition
+                && method.GetGenericArguments().Length == 1 && method.GetParameters().Length == 0);
+        var node = getter?.MakeGenericMethod(aiConfigType).Invoke(configRoot, null);
+        return node?.GetType() == aiConfigType ? node : null;
     }
 
     private static bool? TryGetBool(object root, string name)

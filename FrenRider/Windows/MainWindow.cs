@@ -310,7 +310,7 @@ public class MainWindow : Window, IDisposable
         var sameRow = minimum * 2 + ImGui.GetStyle().ItemSpacing.X <= available;
         var buttonSize = new Vector2(
             sameRow ? (available - ImGui.GetStyle().ItemSpacing.X) / 2f : available,
-            UiHelpers.Scale(plugin.Configuration.UiCompact ? 40f : 44f));
+            MaterialControlMetrics.Measure(MaterialTheme.Metrics, ImGui.GetTextLineHeight(), MaterialControlContext.Toolbar).Height);
 
         ImGui.BeginDisabled(plugin.ConfigManager.GetCurrentAccount() == null);
         DrawAllFrenRiderButton(false, buttonSize);

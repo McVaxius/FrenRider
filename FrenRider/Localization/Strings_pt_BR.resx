@@ -2854,4 +2854,6 @@ Ativado: use as predefinições do BossMod abaixo com qualquer provedor de rota�
   <data name="BossMod preset catalog unavailable or empty; saved selections are retained." xml:space="preserve">
     <value>O catálogo de predefinições do BossMod está indisponível ou vazio; as seleções salvas são mantidas.</value>
   </data>
+  <data name="ADS interaction active; VBM setup deferred" xml:space="preserve"><value>Interação de ADS ativa; configuração de VBM adiada</value></data>
+  <data name="ADS interaction active; VBM settings pending" xml:space="preserve"><value>Interação de ADS ativa; ajustes de VBM pendentes</value></data>
 </root>

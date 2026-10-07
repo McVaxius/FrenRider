@@ -182,7 +182,6 @@ public sealed class ExternalAutomationCleanupServiceTests
     [Theory]
     [InlineData("")]
     [InlineData("Missing")]
-    [InlineData(null)]
     public void UnsupportedOriginalBmrSelectorsPreventPresetWrites(string? originalSelector)
     {
         var native = new NativeBossModProvider("BMR", "Original") { Selector = originalSelector };
@@ -193,6 +192,71 @@ public sealed class ExternalAutomationCleanupServiceTests
         Assert.Equal(originalSelector, native.Selector);
         Assert.Empty(native.Writes);
         Assert.Contains("restoration path", service.LastStatus);
+    }
+
+    [Theory]
+    [InlineData("", false)]
+    [InlineData("Original", false)]
+    [InlineData("", true)]
+    [InlineData("Original", true)]
+    public void UnsetBmrSelectorStartsAndRestoresTheOriginalSelection(string originalRuntime, bool callbackThrows)
+    {
+        var native = new NativeBossModProvider("BMR", originalRuntime) { Selector = null };
+        if (callbackThrows)
+            native.SelectorWriteCallback = () => throw new InvalidOperationException("selection changed before callback failure");
+        using var service = native.CreateService();
+        Assert.True(service.PrepareOwnedBossModSettings("BMR", "account", "character", new CharacterConfig()));
+        Assert.True(service.ApplyOwnedBossModPreset("null"));
+        Assert.True(service.ApplyOwnedPreferredDistance(native.SendCommand, 1.5));
+
+        service.ReleaseOwnedBossModSettings(turnEverythingOff: false);
+
+        Assert.Null(native.Selector);
+        Assert.Equal(originalRuntime.Length == 0 ? Array.Empty<string>() : new[] { originalRuntime }, native.Active);
+        Assert.Equal(7.5, native.Distance);
+        Assert.False(native.ForceDisabled);
+        Assert.Contains("BossMod.AI.SetPreset ", native.Writes);
+        Assert.Empty(native.Warnings);
+    }
+
+    [Theory]
+    [InlineData("BMR")]
+    [InlineData("VBM")]
+    public void RuntimeCleanupConfirmsAWriteThatMutatesBeforeThrowing(string provider)
+    {
+        var native = new NativeBossModProvider(provider, "Original");
+        using var service = native.CreateService();
+        Assert.True(service.PrepareOwnedBossModSettings(provider, "account", "character", new CharacterConfig()));
+        Assert.True(service.ApplyOwnedBossModPreset("null"));
+        native.RuntimeWriteCallback = () => throw new InvalidOperationException("runtime changed before callback failure");
+
+        service.ReleaseOwnedBossModSettings(turnEverythingOff: false);
+
+        Assert.Equal(new[] { "Original" }, native.Active);
+        Assert.Equal("Original", native.Selector);
+        Assert.Empty(native.Warnings);
+    }
+
+    [Theory]
+    [InlineData("BMR")]
+    [InlineData("VBM")]
+    public void ReadbackLossBetweenCleanupPhasesRetainsTheOriginalForExplicitRecovery(string provider)
+    {
+        var native = new NativeBossModProvider(provider, "Original");
+        using var service = native.CreateService();
+        var profile = new CharacterConfig();
+        Assert.True(service.PrepareOwnedBossModSettings(provider, "account", "character", profile));
+        Assert.True(service.ApplyOwnedBossModPreset("null"));
+        Assert.True(service.BeginOwnedBossModCleanup("account", "character"));
+        native.UnavailableChannel = provider == "BMR" ? "BossMod.Presets.GetActive" : "BossMod.Presets.GetActiveList";
+
+        Assert.False(service.EndOwnedBossModCleanup(turnEverythingOff: false));
+        native.UnavailableChannel = null;
+        Assert.False(service.PrepareOwnedBossModSettings(provider, "account", "character", profile));
+        Assert.False(service.ApplyOwnedBossModPreset("Next"));
+        Assert.True(service.BeginOwnedBossModCleanup("account", "character"));
+        Assert.True(service.EndOwnedBossModCleanup(turnEverythingOff: false));
+        Assert.Equal(new[] { "Original" }, native.Active);
     }
 
     [Fact]
@@ -208,6 +272,145 @@ public sealed class ExternalAutomationCleanupServiceTests
         service.ReleaseOwnedBossModSettings(turnEverythingOff: false);
         Assert.Equal("Original", native.Selector);
         Assert.Equal(new[] { "Original" }, native.Active);
+    }
+
+    [Theory]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    [InlineData(true, true)]
+    public void SelectorMutationThenCallbackExceptionUsesConfirmedReadback(bool duringActivation, bool duringCleanup)
+    {
+        var native = new NativeBossModProvider("BMR", "Original");
+        native.SelectorWriteCallback = () =>
+        {
+            if (native.Selector == "null" && duringActivation || native.Selector == "Original" && duringCleanup)
+                throw new InvalidOperationException("selector callback failed after mutation");
+        };
+        using var service = native.CreateService();
+        Assert.True(service.PrepareOwnedBossModSettings("BMR", "account", "character", new CharacterConfig()));
+
+        Assert.True(service.ApplyOwnedBossModPreset("null"));
+        Assert.Equal("null", native.Selector);
+        Assert.Equal(new[] { "null" }, native.Active);
+
+        service.ReleaseOwnedBossModSettings(turnEverythingOff: false);
+
+        Assert.Equal("Original", native.Selector);
+        Assert.Equal(new[] { "Original" }, native.Active);
+        Assert.Empty(native.Warnings);
+    }
+
+    [Fact]
+    public void SelectorExceptionBeforeMutationDoesNotClaimOrChangeRuntime()
+    {
+        var native = new NativeBossModProvider("BMR", "Original") { UnavailableChannel = "BossMod.AI.SetPreset" };
+        using var service = native.CreateService();
+        Assert.True(service.PrepareOwnedBossModSettings("BMR", "account", "character", new CharacterConfig()));
+
+        Assert.False(service.ApplyOwnedBossModPreset("null"));
+
+        Assert.Equal("Original", native.Selector);
+        Assert.Equal(new[] { "Original" }, native.Active);
+        Assert.Empty(native.Writes);
+    }
+
+    [Fact]
+    public void SelectorCallbackExternalMutationIsPreservedWithoutClaimingTheRequestedWrite()
+    {
+        var native = new NativeBossModProvider("BMR", "Original");
+        native.SelectorWriteCallback = () =>
+        {
+            native.Selector = "External";
+            throw new InvalidOperationException("selector callback changed the selection");
+        };
+        using var service = native.CreateService();
+        Assert.True(service.PrepareOwnedBossModSettings("BMR", "account", "character", new CharacterConfig()));
+
+        Assert.False(service.ApplyOwnedBossModPreset("null"));
+        native.SelectorWriteCallback = null;
+        native.Writes.Clear();
+        service.ReleaseOwnedBossModSettings(turnEverythingOff: false);
+
+        Assert.Equal("External", native.Selector);
+        Assert.Equal(new[] { "Original" }, native.Active);
+        Assert.Empty(native.Writes);
+    }
+
+    [Fact]
+    public void SelectorRestoreCallbackKeepsNewerIndependentRuntimeAndDistance()
+    {
+        var native = new NativeBossModProvider("BMR", "Original");
+        using var service = native.CreateService();
+        Assert.True(service.PrepareOwnedBossModSettings("BMR", "account", "character", new CharacterConfig()));
+        Assert.True(service.ApplyOwnedBossModPreset("null"));
+        Assert.True(service.ApplyOwnedPreferredDistance(native.SendCommand, 1.5));
+        native.SelectorWriteCallback = () =>
+        {
+            native.Active = ["External"];
+            native.Distance = 9.5;
+            throw new InvalidOperationException("selector restored before an external distance change");
+        };
+        native.Writes.Clear();
+
+        Assert.True(service.BeginOwnedBossModCleanup("account", "character"));
+        Assert.True(service.SendBossModAiCommand("/bmrai off", native.SendCommand));
+        Assert.Empty(native.Active);
+        Assert.True(service.EndOwnedBossModCleanup(turnEverythingOff: false));
+
+        Assert.Equal("Original", native.Selector);
+        Assert.Equal(new[] { "External" }, native.Active);
+        Assert.Equal(9.5, native.Distance);
+        Assert.DoesNotContain(native.Writes, write => write.StartsWith("Configuration ", StringComparison.Ordinal));
+        Assert.Empty(native.Warnings);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void SelectorActivationCallbackKeepsNewerIndependentRuntime(bool callbackThrows)
+    {
+        var native = new NativeBossModProvider("BMR", "Original");
+        native.SelectorWriteCallback = () =>
+        {
+            native.Active = ["External"];
+            if (callbackThrows)
+                throw new InvalidOperationException("selection changed before callback failure");
+        };
+        using var service = native.CreateService();
+        Assert.True(service.PrepareOwnedBossModSettings("BMR", "account", "character", new CharacterConfig()));
+
+        Assert.False(service.ApplyOwnedBossModPreset("null"));
+        Assert.Equal(new[] { "External" }, native.Active);
+        Assert.Equal("null", native.Selector);
+        native.SelectorWriteCallback = null;
+
+        service.ReleaseOwnedBossModSettings(turnEverythingOff: false);
+
+        Assert.Equal(new[] { "External" }, native.Active);
+        Assert.Equal("Original", native.Selector);
+        Assert.DoesNotContain(native.Writes, write => write.StartsWith("BossMod.Presets.Set", StringComparison.Ordinal));
+        Assert.Empty(native.Warnings);
+    }
+
+    [Fact]
+    public void SelectorCallbackProviderReplacementCannotConfirmOwnershipIntoTheReplacement()
+    {
+        var native = new NativeBossModProvider("BMR", "Original");
+        native.SelectorWriteCallback = native.Reload;
+        using var service = native.CreateService();
+        var profile = new CharacterConfig();
+        Assert.True(service.PrepareOwnedBossModSettings("BMR", "account", "character", profile));
+
+        Assert.False(service.ApplyOwnedBossModPreset("null"));
+        Assert.Equal(new[] { "Original" }, native.Active);
+        Assert.Equal(new[] { "BossMod.AI.SetPreset null" }, native.Writes);
+
+        native.SelectorWriteCallback = null;
+        native.Writes.Clear();
+        service.ReleaseOwnedBossModSettings(turnEverythingOff: false);
+        Assert.True(service.PrepareOwnedBossModSettings("BMR", "account", "character", profile));
+        Assert.Empty(native.Writes);
+        Assert.Equal("null", native.Selector);
     }
 
     [Theory]
@@ -293,25 +496,102 @@ public sealed class ExternalAutomationCleanupServiceTests
         Assert.False(native.AiEnabled);
     }
 
-    [Fact]
-    public void ProviderReloadReportsTheDepartedSessionAndCapturesOnlyTheReplacementBaseline()
+    [Theory]
+    [InlineData("BMR")]
+    [InlineData("VBM")]
+    public void ProviderReloadReportsIncompleteOldCleanupAndCapturesOnlyTheReplacementBaseline(string provider)
     {
-        var native = new NativeBossModProvider("BMR", "Original");
+        var native = new NativeBossModProvider(provider, "Original");
         using var service = native.CreateService();
         var profile = new CharacterConfig();
-        Assert.True(service.PrepareOwnedBossModSettings("BMR", "account", "character", profile));
+        Assert.True(service.PrepareOwnedBossModSettings(provider, "account", "character", profile));
         Assert.True(service.ApplyOwnedBossModPreset("null"));
         native.Reload();
         native.Active = ["Reloaded"];
         native.Selector = "Reloaded";
         native.Writes.Clear();
-        Assert.True(service.PrepareOwnedBossModSettings("BMR", "account", "character", profile));
+        Assert.False(service.BeginOwnedBossModCleanup("account", "character"));
+        Assert.False(service.SendBossModAiCommand(provider == "BMR" ? "/bmrai off" : "/vbmai off", native.SendCommand));
+        Assert.False(service.EndOwnedBossModCleanup(turnEverythingOff: false));
+        Assert.True(service.PrepareOwnedBossModSettings(provider, "account", "character", profile));
         Assert.Contains(native.Warnings, warning => warning.Contains("reloaded"));
         Assert.Empty(native.Writes);
-        Assert.True(service.ApplyOwnedBossModPreset("Next"));
         service.ReleaseOwnedBossModSettings(turnEverythingOff: false);
         Assert.Equal(new[] { "Reloaded" }, native.Active);
         Assert.Equal("Reloaded", native.Selector);
+        Assert.Empty(native.Writes);
+    }
+
+    [Theory]
+    [InlineData("BMR", "Original")]
+    [InlineData("VBM", "Original|Other")]
+    public void IncompleteCleanupRetainsTheFirstBaselineUntilExplicitMatchingCleanup(string provider, string original)
+    {
+        var native = new NativeBossModProvider(provider, original);
+        using var service = native.CreateService();
+        var profile = new CharacterConfig();
+        Assert.True(service.PrepareOwnedBossModSettings(provider, "account", "character", profile));
+        Assert.True(service.ApplyOwnedBossModPreset("null"));
+        native.RejectRuntimeWrite = true;
+        service.ReleaseOwnedBossModSettings(turnEverythingOff: false);
+        Assert.Equal(new[] { "null" }, native.Active);
+
+        native.RejectRuntimeWrite = false;
+        native.Writes.Clear();
+        for (var frame = 0; frame < 3; frame++)
+        {
+            service.ObserveOwnedBossModIdentity(provider, "other account", "other character", new CharacterConfig());
+            Assert.False(service.PrepareOwnedBossModSettings(provider, "account", "character", profile));
+            Assert.False(service.PrepareOwnedBossModSettings(provider, "other account", "other character", new CharacterConfig()));
+        }
+        Assert.False(service.ApplyOwnedBossModPreset("Next"));
+        Assert.False(service.ApplyOwnedPreferredDistance(native.SendCommand, 2.5));
+        Assert.False(service.DisableOwnedBossModRuntime());
+        Assert.False(service.SendBossModAiCommand(provider == "BMR" ? "/bmrai on" : "/vbmai on", native.SendCommand));
+        Assert.False(service.BeginOwnedBossModCleanup("other account", "other character"));
+        Assert.False(service.EndOwnedBossModCleanup(turnEverythingOff: false));
+        Assert.Empty(native.Writes);
+
+        Assert.True(service.BeginOwnedBossModCleanup("account", "character"));
+        Assert.True(service.EndOwnedBossModCleanup(turnEverythingOff: false));
+        Assert.Equal(original.Split('|'), native.Active);
+        Assert.Equal("Original", native.Selector);
+        Assert.True(service.PrepareOwnedBossModSettings(provider, "account", "character", profile));
+    }
+
+    [Theory]
+    [InlineData("BMR")]
+    [InlineData("VBM")]
+    public void ExplicitCleanupAfterAnIncompleteAttemptPreservesNewerExternalState(string provider)
+    {
+        var native = new NativeBossModProvider(provider, "Original");
+        using var service = native.CreateService();
+        var profile = new CharacterConfig();
+        Assert.True(service.PrepareOwnedBossModSettings(provider, "account", "character", profile));
+        Assert.True(service.ApplyOwnedBossModPreset("null"));
+        if (provider == "BMR")
+            Assert.True(service.ApplyOwnedPreferredDistance(native.SendCommand, 1.5));
+        native.RejectRuntimeWrite = true;
+        service.ReleaseOwnedBossModSettings(turnEverythingOff: false);
+
+        native.RejectRuntimeWrite = false;
+        native.Active = ["External"];
+        native.Selector = "External";
+        native.Distance = 9.5;
+        native.Writes.Clear();
+        Assert.False(service.PrepareOwnedBossModSettings(provider, "account", "character", profile));
+
+        service.ReleaseOwnedBossModSettings(turnEverythingOff: false);
+
+        Assert.Equal(new[] { "External" }, native.Active);
+        Assert.Equal("External", native.Selector);
+        Assert.Equal(9.5, native.Distance);
+        Assert.Empty(native.Writes);
+        Assert.True(service.PrepareOwnedBossModSettings(provider, "account", "character", profile));
+        Assert.True(service.ApplyOwnedBossModPreset("Next"));
+        service.ReleaseOwnedBossModSettings(turnEverythingOff: false);
+        Assert.Equal(new[] { "External" }, native.Active);
+        Assert.Equal("External", native.Selector);
     }
 
     [Fact]
@@ -354,7 +634,6 @@ public sealed class ExternalAutomationCleanupServiceTests
     private sealed record NativePreset(string Name, bool HiddenByDefault = false);
     private sealed record NativePresetDatabase(NativePreset[] AllPresets, NativePreset[] DefaultPresets, NativePreset[] UserPresets);
     private sealed record NativeRotationDatabase(NativePresetDatabase Presets);
-    private sealed record NativeConfigRoot(object[] Nodes);
     private sealed record NativeHost(IServiceProvider Services);
     private sealed class NativeTickServices(object tick) : IServiceProvider
     {
@@ -374,6 +653,8 @@ public sealed class ExternalAutomationCleanupServiceTests
         internal List<string> Active;
         internal bool ForceDisabled;
         internal bool RejectRuntimeWrite;
+        internal Action? SelectorWriteCallback;
+        internal Action? RuntimeWriteCallback;
         internal string? UnavailableChannel;
         internal double Distance = 7.5;
         private readonly object node;
@@ -382,6 +663,7 @@ public sealed class ExternalAutomationCleanupServiceTests
         private readonly Type pluginType;
         private readonly object database;
         private readonly object? host;
+        internal readonly object ConfigRoot;
 
         internal string? Selector
         {
@@ -404,15 +686,66 @@ public sealed class ExternalAutomationCleanupServiceTests
             ForceDisabled = disabled;
             var module = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("FrenRiderNativeBossMod" + Guid.NewGuid().ToString("N")),
                 AssemblyBuilderAccess.Run).DefineDynamicModule("NativeProvider");
-            var nodeBuilder = module.DefineType("BossMod.AI.AIConfig", TypeAttributes.Public);
+            var configNodeType = module.DefineType("BossMod.ConfigNode", TypeAttributes.Public | TypeAttributes.Abstract).CreateType()!;
+            var nodeBuilder = module.DefineType("BossMod.AI.AIConfig", TypeAttributes.Public, configNodeType);
             nodeBuilder.DefineField("Enabled", typeof(bool), FieldAttributes.Public);
             nodeBuilder.DefineField("AIAutorotPresetName", typeof(string), FieldAttributes.Public);
-            node = Activator.CreateInstance(nodeBuilder.CreateType()!)!;
+            var nodeType = nodeBuilder.CreateType()!;
+            node = Activator.CreateInstance(nodeType)!;
             Selector = "Original";
+            var dictionaryType = typeof(Dictionary<,>).MakeGenericType(typeof(Type), configNodeType);
+            var configBuilder = module.DefineType("BossMod.ConfigRoot", TypeAttributes.Public);
+            var nodesField = configBuilder.DefineField("_nodes", dictionaryType, FieldAttributes.Private);
+            MethodBuilder? typedAccessor = null;
+            if (provider == "VBM")
+            {
+                var nodesGetter = configBuilder.DefineMethod("get_Nodes",
+                    MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig,
+                    typeof(IEnumerable<Type>), Type.EmptyTypes);
+                var nodesIl = nodesGetter.GetILGenerator();
+                nodesIl.Emit(OpCodes.Ldarg_0);
+                nodesIl.Emit(OpCodes.Ldfld, nodesField);
+                nodesIl.Emit(OpCodes.Callvirt, dictionaryType.GetProperty("Keys")!.GetMethod!);
+                nodesIl.Emit(OpCodes.Ret);
+                configBuilder.DefineProperty("Nodes", PropertyAttributes.None, typeof(IEnumerable<Type>), Type.EmptyTypes)
+                    .SetGetMethod(nodesGetter);
+                typedAccessor = configBuilder.DefineMethod("Get", MethodAttributes.Public);
+                var typedArgument = typedAccessor.DefineGenericParameters("T")[0];
+                typedArgument.SetBaseTypeConstraint(configNodeType);
+                typedAccessor.SetReturnType(typedArgument);
+                typedAccessor.SetParameters(typeof(Type));
+                var typedIl = typedAccessor.GetILGenerator();
+                typedIl.Emit(OpCodes.Ldarg_0);
+                typedIl.Emit(OpCodes.Ldfld, nodesField);
+                typedIl.Emit(OpCodes.Ldarg_1);
+                typedIl.Emit(OpCodes.Callvirt, dictionaryType.GetProperty("Item")!.GetMethod!);
+                typedIl.Emit(OpCodes.Unbox_Any, typedArgument);
+                typedIl.Emit(OpCodes.Ret);
+            }
+            var accessor = configBuilder.DefineMethod("Get", MethodAttributes.Public);
+            var configArgument = accessor.DefineGenericParameters("T")[0];
+            configArgument.SetBaseTypeConstraint(configNodeType);
+            accessor.SetReturnType(configArgument);
+            var configIl = accessor.GetILGenerator();
+            configIl.Emit(OpCodes.Ldarg_0);
+            if (typedAccessor is null)
+                configIl.Emit(OpCodes.Ldfld, nodesField);
+            configIl.Emit(OpCodes.Ldtoken, configArgument);
+            configIl.Emit(OpCodes.Call, typeof(Type).GetMethod(nameof(Type.GetTypeFromHandle))!);
+            configIl.Emit(typedAccessor is null ? OpCodes.Callvirt : OpCodes.Call,
+                typedAccessor is null ? dictionaryType.GetProperty("Item")!.GetMethod! : typedAccessor.MakeGenericMethod(configArgument));
+            if (typedAccessor is null)
+                configIl.Emit(OpCodes.Unbox_Any, configArgument);
+            configIl.Emit(OpCodes.Ret);
+            var configType = configBuilder.CreateType()!;
+            ConfigRoot = Activator.CreateInstance(configType)!;
+            var nodes = (System.Collections.IDictionary)Activator.CreateInstance(dictionaryType)!;
+            nodes.Add(nodeType, node);
+            configType.GetField("_nodes", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(ConfigRoot, nodes);
             var serviceBuilder = module.DefineType("BossMod.Service", TypeAttributes.Public);
-            serviceBuilder.DefineField("Config", typeof(object), FieldAttributes.Public | FieldAttributes.Static);
+            serviceBuilder.DefineField("Config", configType, FieldAttributes.Public | FieldAttributes.Static);
             var serviceType = serviceBuilder.CreateType()!;
-            serviceType.GetField("Config")!.SetValue(null, new NativeConfigRoot([node]));
+            serviceType.GetField("Config")!.SetValue(null, ConfigRoot);
             if (provider == "BMR")
             {
                 var managerBuilder = module.DefineType("BossMod.AI.AIManager", TypeAttributes.Public);
@@ -530,7 +863,9 @@ public sealed class ExternalAutomationCleanupServiceTests
             if (channel == "BossMod.AI.SetPreset")
             {
                 Assert.Equal("InvokeAction", call.Name);
-                Selector = (string)values![0]!;
+                Selector = ((NativeRotationDatabase)database).Presets.AllPresets.FirstOrDefault(preset =>
+                    string.Equals(preset.Name.Trim(), ((string)values![0]!).Trim(), StringComparison.OrdinalIgnoreCase))?.Name;
+                SelectorWriteCallback?.Invoke();
                 return null;
             }
             if (RejectRuntimeWrite) return false;
@@ -539,6 +874,7 @@ public sealed class ExternalAutomationCleanupServiceTests
             else if (channel == "BossMod.Presets.ClearActive") { Active.Clear(); ForceDisabled = false; }
             else if (channel == "BossMod.Presets.SetForceDisabled") { Active.Clear(); ForceDisabled = true; }
             else throw new InvalidOperationException("unexpected native endpoint " + channel);
+            RuntimeWriteCallback?.Invoke();
             return true;
         }
 

@@ -1,3 +1,8 @@
+2026-10-07 - Button sizing (I491)
+
+- Use font-aware Toolbar sizing for ordinary buttons and reduce the local-account All FR on/off action heights. Preserve complete labels and icons, native IDs/actions, full-width slots and small/dense controls.
+- Current Debug/x64 compilation passes. Final actual-product native checks pass 9714 assertions across 32 focused scenes and 112 pointer activations, with integer exit 0 in all 2 routes. Coverage uses English/Hindi captions, original exercised font roles, both densities, 100/150 percent scale and enlarged text; game/GPU acceptance remains separate.
+
 2026-10-07 - CJK atlas construction
 
 - Request a 4096 x 4096 managed atlas and merge one bundled Noto CJK face per font role for the selected language, including Simplified and Traditional Chinese aliases. Preserve existing font sizes, glyph ranges, Windows and symbol fonts, and font lifecycle.
@@ -17,6 +22,8 @@
 - Populate general, deep-dungeon and FATE manual selectors from the selected live provider's complete preset catalog, retaining exact names, None and dormant profile fields. Replace a deleted active choice only after a readable catalog confirms it is missing, and preserve selections when no valid catalog is available.
 - Honor manual BossMod choices with every rotation provider while preserving the saved force field. Remove unsupported RSR preset-setting forwards and use literal BossMod preset IPC with exact readback.
 - Capture the original provider, character/profile, runtime presets, BMR saved AI selector and supported preferred distance before owned writes. Restore matching fields at session cleanup, preserving later external values and distinguishing none, force-disabled and ordered VBM selections; report unavailable or unconfirmed restoration.
+- Read the native AI config through the provider's zero-argument generic config accessor. Support an originally unset BMR selector with a catalog-checked clear argument and confirmed null restoration. Confirm selector/runtime effects even when dispatch throws, preserve independent runtime or distance changes, and retain failed cleanup against the same provider until explicit recovery. Never send the departed provider's cleanup command to its replacement.
+- Current focused ownership, interaction, combat-authority and duty lifecycle checks pass 359/359 with no failures or skips. The unchanged FrenRider launcher builds Debug/x64 with zero warnings/errors. Installed-provider and game acceptance remain user-controlled.
 - Continue debounced combat-setting application while ADS owns navigation. Apply preset, AI, aggro, positional and target-mode edits independently, preserving combat suppression and saved profiles.
 - Preserve startup holds and reapply eligible configured combat after an actual suppression ends. Read VBM automatic AI from its live Enabled setting and report departed-provider restoration failures without writing into a replacement instance.
 

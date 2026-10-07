@@ -2854,4 +2854,6 @@ Włączone: używaj poniższych presetów BossMod z dowolnym dostawcą rotacji. 
   <data name="BossMod preset catalog unavailable or empty; saved selections are retained." xml:space="preserve">
     <value>Katalog presetów BossMod jest niedostępny lub pusty; zapisane wybory zostają zachowane.</value>
   </data>
+  <data name="ADS interaction active; VBM setup deferred" xml:space="preserve"><value>Interakcja ADS aktywna; konfiguracja VBM odroczona</value></data>
+  <data name="ADS interaction active; VBM settings pending" xml:space="preserve"><value>Interakcja ADS aktywna; ustawienia VBM oczekują</value></data>
 </root>

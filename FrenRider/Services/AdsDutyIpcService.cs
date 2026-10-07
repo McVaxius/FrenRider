@@ -101,6 +101,10 @@ public sealed class AdsDutyIpcService : IDisposable
     public AdsDutyOwnershipSnapshot Current { get; private set; } = AdsDutyOwnershipSnapshot.Empty;
     public AdsCurrentDutySnapshot? CurrentDuty { get; private set; }
     public string CurrentDutyDetail { get; private set; } = "No validated ADS current-duty snapshot.";
+    public bool IsInteractionVbmPauseActive
+        => Current.IsOwned && trackedInInstancedDuty
+           && CurrentDuty is { InteractionVbmPauseActive: true } duty
+           && duty.MatchesIdentity(trackedTerritoryTypeId, trackedContentFinderConditionId);
 
     public void Dispose()
     {

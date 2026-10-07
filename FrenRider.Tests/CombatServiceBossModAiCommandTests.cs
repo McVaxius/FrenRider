@@ -55,6 +55,23 @@ public sealed class CombatServiceBossModAiCommandTests
     }
 
     [Theory]
+    [InlineData("VBM", new string[] { })]
+    [InlineData("BMR", new[] { "/bmrai forbidactions off", "/bmrai on" })]
+    [InlineData("RSR", new[] { "/bmrai forbidactions off", "/bmrai on" })]
+    [InlineData("WRATH", new[] { "/bmrai forbidactions off", "/bmrai on" })]
+    [InlineData("DAEDALUS", new[] { "/bmrai forbidactions off", "/bmrai on" })]
+    public void AdsInteractionPauseDefersOnlyVbmOn(string provider, string[] expected)
+        => Assert.Equal(expected, CombatService.BuildBossModAiCommands(0, provider,
+            interactionVbmPauseActive: true));
+
+    [Theory]
+    [InlineData("VBM")]
+    [InlineData("BMR")]
+    public void AdsInteractionPausePreservesExplicitAiOff(string provider)
+        => Assert.Equal(new[] { "/bmrai off", "/vbmai off" },
+            CombatService.BuildBossModAiCommands(1, provider, interactionVbmPauseActive: true));
+
+    [Theory]
     [InlineData("BMR", "FRENRIDER - TANK", "/bmrai setpresetname FRENRIDER - TANK")]
     [InlineData("RSR", "passive - ranged", "/bmrai setpresetname passive - ranged")]
     [InlineData("WRATH", "passive - melee", "/bmrai setpresetname passive - melee")]

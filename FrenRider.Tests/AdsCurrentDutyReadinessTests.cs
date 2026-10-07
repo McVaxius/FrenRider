@@ -32,6 +32,186 @@ public sealed class AdsCurrentDutyReadinessTests
     }
 
     [Theory]
+    [InlineData("true", true)]
+    [InlineData("false", false)]
+    [InlineData("\"true\"", false)]
+    [InlineData("1", false)]
+    [InlineData("null", false)]
+    [InlineData("{}", false)]
+    public void InteractionPauseAcceptsOnlyAnOptionalJsonBoolean(string flagJson, bool expected)
+    {
+        var snapshot = Parse(InteractionPauseStatusJson(flagJson));
+
+        Assert.Equal(expected, snapshot.InteractionVbmPauseActive);
+        Assert.True(AdsIntegrationService.IsSnapshotReady(EnabledAtThreshold(3), snapshot));
+    }
+
+    [Fact]
+    public void OlderAdsStatusWithoutInteractionPauseKeepsExistingReadiness()
+    {
+        var snapshot = Parse(StatusJson());
+
+        Assert.False(snapshot.InteractionVbmPauseActive);
+        Assert.True(AdsIntegrationService.IsSnapshotReady(EnabledAtThreshold(3), snapshot));
+    }
+
+    [Theory]
+    [InlineData(true, true, "OwnedStartInside", true)]
+    [InlineData(false, true, "Observing", false)]
+    [InlineData(true, true, "Observing", true)]
+    [InlineData(false, true, "OwnedStartInside", false)]
+    [InlineData(true, false, "OwnedStartInside", true)]
+    [InlineData(false, false, "Observing", false)]
+    public void InteractionPauseUsesTheExistingTypedOrFallbackOwnership(
+        bool owned, bool typedAvailable, string mode, bool expected)
+    {
+        var service = CreateService(
+            () => true,
+            () => typedAvailable ? owned : throw new InvalidOperationException("typed unavailable"),
+            () => InteractionPauseStatusJson(mode: mode),
+            () => CapturedAtUtc);
+
+        service.Refresh(true, 1036, 4, force: true);
+
+        Assert.Equal(expected, service.IsInteractionVbmPauseActive);
+        Assert.Equal(typedAvailable ? AdsDutyOwnershipSource.Typed : AdsDutyOwnershipSource.JsonFallback,
+            service.Current.Source);
+    }
+
+    [Theory]
+    [InlineData(false, true, 1036u, 4u, true)]
+    [InlineData(true, false, 1036u, 4u, true)]
+    [InlineData(true, true, 9999u, 4u, true)]
+    [InlineData(true, true, 1036u, 5u, true)]
+    [InlineData(true, true, 1036u, 4u, false)]
+    public void InteractionPauseRejectsUnloadedOutsideMismatchedOrUncataloguedDuty(
+        bool loaded, bool inDuty, uint territory, uint cfc, bool metadata)
+    {
+        var service = CreateService(
+            () => loaded,
+            () => true,
+            () => InteractionPauseStatusJson(metadata: metadata),
+            () => CapturedAtUtc);
+
+        service.Refresh(inDuty, territory, cfc, force: true);
+
+        Assert.False(service.IsInteractionVbmPauseActive);
+    }
+
+    [Theory]
+    [InlineData(false, 1036u, 4u)]
+    [InlineData(true, 9999u, 4u)]
+    [InlineData(true, 1036u, 5u)]
+    public void InteractionPauseClearsCachedHoldBeforeTheNextOwnershipPoll(
+        bool inDuty, uint territory, uint cfc)
+    {
+        var now = CapturedAtUtc;
+        var jsonCalls = 0;
+        var service = CreateService(() => true, () => true,
+            () =>
+            {
+                jsonCalls++;
+                return InteractionPauseStatusJson();
+            }, () => now);
+
+        service.Refresh(true, 1036, 4, force: true);
+        Assert.True(service.IsInteractionVbmPauseActive);
+
+        now = now.AddMilliseconds(100);
+        service.Refresh(inDuty, territory, cfc);
+
+        Assert.False(service.IsInteractionVbmPauseActive);
+        Assert.Null(service.CurrentDuty);
+        Assert.Equal(1, jsonCalls);
+    }
+
+    [Fact]
+    public void ForcedRefreshObservesPauseStartAndReleaseWithinTheNormalPollingInterval()
+    {
+        var now = CapturedAtUtc;
+        var paused = false;
+        var jsonCalls = 0;
+        var service = CreateService(
+            () => true,
+            () => true,
+            () =>
+            {
+                jsonCalls++;
+                return InteractionPauseStatusJson(paused ? "true" : "false");
+            },
+            () => now);
+
+        service.Refresh(true, 1036, 4, force: true);
+        Assert.False(service.IsInteractionVbmPauseActive);
+
+        paused = true;
+        now = now.AddMilliseconds(100);
+        service.Refresh(true, 1036, 4);
+        Assert.False(service.IsInteractionVbmPauseActive);
+        Assert.Equal(1, jsonCalls);
+
+        service.Refresh(true, 1036, 4, force: true);
+        Assert.True(service.IsInteractionVbmPauseActive);
+        Assert.Equal(2, jsonCalls);
+
+        paused = false;
+        now = now.AddMilliseconds(100);
+        service.Refresh(true, 1036, 4, force: true);
+        Assert.False(service.IsInteractionVbmPauseActive);
+        Assert.Equal(3, jsonCalls);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ConfirmedOwnershipRetainsKnownPauseDuringAJsonFailure(bool typedFails)
+    {
+        var now = CapturedAtUtc;
+        var failJson = false;
+        var service = CreateService(
+            () => true,
+            () => failJson && typedFails ? throw new InvalidOperationException("typed failed") : true,
+            () => failJson ? throw new InvalidOperationException("json failed") : InteractionPauseStatusJson(),
+            () => now);
+
+        service.Refresh(true, 1036, 4, force: true);
+        var captured = service.CurrentDuty;
+        Assert.True(service.IsInteractionVbmPauseActive);
+
+        failJson = true;
+        now = now.AddSeconds(4);
+        service.Refresh(true, 1036, 4, force: true);
+        Assert.True(service.IsInteractionVbmPauseActive);
+
+        now = now.AddSeconds(2);
+        service.Refresh(true, 1036, 4, force: true);
+        Assert.Equal(!typedFails, service.IsInteractionVbmPauseActive);
+        Assert.Same(captured, service.CurrentDuty);
+    }
+
+    [Fact]
+    public void ExplicitOwnershipReleaseClearsKnownPauseDuringAJsonFailure()
+    {
+        var now = CapturedAtUtc;
+        var owned = true;
+        var failJson = false;
+        var service = CreateService(
+            () => true,
+            () => owned,
+            () => failJson ? throw new InvalidOperationException("json failed") : InteractionPauseStatusJson(),
+            () => now);
+
+        service.Refresh(true, 1036, 4, force: true);
+        Assert.True(service.IsInteractionVbmPauseActive);
+
+        owned = false;
+        failJson = true;
+        now = now.AddMilliseconds(100);
+        service.Refresh(true, 1036, 4, force: true);
+        Assert.False(service.IsInteractionVbmPauseActive);
+    }
+
+    [Theory]
     [InlineData("NotCleared", 0)]
     [InlineData("OnePlayerUnsyncCleared", 1)]
     [InlineData("OnePlayerDutySupport", 2)]
@@ -255,6 +435,11 @@ public sealed class AdsCurrentDutyReadinessTests
         Func<string> json,
         Func<DateTime> now)
         => new(loaded, typed, json, () => true, now);
+
+    private static string InteractionPauseStatusJson(string flagJson = "true",
+        string mode = "OwnedStartInside", bool metadata = true)
+        => "{\"interactionVbmPauseActive\":" + flagJson + ","
+           + StatusJson(hasCatalogMetadata: metadata).Replace("\"Observing\"", "\"" + mode + "\"")[1..];
 
     private static string StatusJson(
         string duty = "Sastasha",

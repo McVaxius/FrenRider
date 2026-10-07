@@ -2854,4 +2854,6 @@ Açık: aşağıdaki BossMod ön ayarlarını herhangi bir rotasyon sağlayıcı
   <data name="BossMod preset catalog unavailable or empty; saved selections are retained." xml:space="preserve">
     <value>BossMod ön ayar kataloğu kullanılamıyor veya boş; kaydedilen seçimler korunur.</value>
   </data>
+  <data name="ADS interaction active; VBM setup deferred" xml:space="preserve"><value>ADS etkileşimi sürüyor; VBM kurulumu ertelendi</value></data>
+  <data name="ADS interaction active; VBM settings pending" xml:space="preserve"><value>ADS etkileşimi sürüyor; VBM ayarları bekliyor</value></data>
 </root>

@@ -2854,4 +2854,6 @@ Bật: dùng các preset BossMod bên dưới với mọi nhà cung cấp rotati
   <data name="BossMod preset catalog unavailable or empty; saved selections are retained." xml:space="preserve">
     <value>Danh mục preset BossMod không có sẵn hoặc trống; các lựa chọn đã lưu được giữ nguyên.</value>
   </data>
+  <data name="ADS interaction active; VBM setup deferred" xml:space="preserve"><value>ADS đang tương tác; hoãn thiết lập VBM</value></data>
+  <data name="ADS interaction active; VBM settings pending" xml:space="preserve"><value>ADS đang tương tác; cài đặt VBM đang chờ</value></data>
 </root>

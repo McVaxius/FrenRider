@@ -2749,4 +2749,6 @@
   <data name="BossMod preset catalog unavailable or empty; saved selections are retained." xml:space="preserve">
     <value>BossMod 预设目录不可用或为空；保留已保存的选择。</value>
   </data>
+  <data name="ADS interaction active; VBM setup deferred" xml:space="preserve"><value>ADS 交互正在进行；已推迟 VBM 配置</value></data>
+  <data name="ADS interaction active; VBM settings pending" xml:space="preserve"><value>ADS 交互正在进行；VBM 设置等待应用</value></data>
 </root>
