@@ -92,6 +92,7 @@ public class CharacterConfig
     public int IdleTicksBeforeAction { get; set; } = 10;
 
     // --- Distance / Following ---
+    public List<uint> ClingExcludedTerritoryIds { get; set; } = CreateDefaultClingExcludedTerritoryIds();
     public float Cling { get; set; } = 2.6f;
     public int ClingType { get; set; } = 0; // 0=NavMesh, 1=Visland, 2=BossMod, 3=Vanilla
     public int ClingTypeDuty { get; set; } = 0;
@@ -105,6 +106,8 @@ public class CharacterConfig
     public int FollowInCombat { get; set; } = 0; // 0=No, 1=Yes, 2=Auto
     public float FDistance { get; set; } = 0f; // Reserved for future autosync FATE; not applied to follow distance.
     public bool AutoSyncFate { get; set; } = true;
+    public bool PauseClingForFate { get; set; } = false;
+    public bool IgnoreFates { get; set; } = false;
     public bool Formation { get; set; } = false;
     public int HClingReset { get; set; } = 10;
 
@@ -267,6 +270,7 @@ public class CharacterConfig
             IdleListMode = IdleListMode,
             CustomIdleList = CloneCustomIdleList(CustomIdleList),
             IdleTicksBeforeAction = IdleTicksBeforeAction,
+            ClingExcludedTerritoryIds = new List<uint>(ClingExcludedTerritoryIds),
             Cling = Cling,
             ClingType = ClingType,
             ClingTypeDuty = ClingTypeDuty,
@@ -280,6 +284,8 @@ public class CharacterConfig
             FollowInCombat = FollowInCombat,
             FDistance = FDistance,
             AutoSyncFate = AutoSyncFate,
+            PauseClingForFate = PauseClingForFate,
+            IgnoreFates = IgnoreFates,
             Formation = Formation,
             HClingReset = HClingReset,
             TryToCatchBeasts = TryToCatchBeasts,
@@ -357,6 +363,24 @@ public class CharacterConfig
             Enabled = Enabled,
         };
     }
+
+    public static List<uint> CreateDefaultClingExcludedTerritoryIds() => new()
+    {
+        128, 129, // Limsa Lominsa
+        130, 131, // Ul'dah
+        132, 133, // Gridania
+        418, 419, // Ishgard
+        478,      // Idyllshire
+        628,      // Kugane
+        635,      // Rhalgr's Reach
+        759,      // The Doman Enclave
+        819, 820, // The Crystarium and Eulmore
+        962, 963, // Old Sharlayan and Radz-at-Han
+        1185, 1186, // Tuliyollal and Solution Nine
+    };
+
+    internal bool IsClingExcluded(uint territoryId)
+        => territoryId != 0 && ClingExcludedTerritoryIds.Contains(territoryId);
 
     internal bool MigrateLegacyRsrOperatingMode()
     {

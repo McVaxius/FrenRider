@@ -2802,4 +2802,50 @@ Retries on later cooldowns, including already marked beasts.</value>
   <data name="Auto-fade when unfocused" xml:space="preserve"><value>Auto-fade when unfocused</value></data>
   <data name="Unfocused opacity (%)" xml:space="preserve"><value>Unfocused opacity (%)</value></data>
   <data name="Unfocused delay (seconds)" xml:space="preserve"><value>Unfocused delay (seconds)</value></data>
+  <data name="Cling exclusions" xml:space="preserve">
+    <value>Cling exclusions</value>
+  </data>
+  <data name="Pause cling in these areas. Seek and teleport travel remain available." xml:space="preserve">
+    <value>Pause cling in these areas. Seek and teleport travel remain available.</value>
+  </data>
+  <data name="Area" xml:space="preserve">
+    <value>Area</value>
+  </data>
+  <data name="Choose an area" xml:space="preserve">
+    <value>Choose an area</value>
+  </data>
+  <data name="No cling exclusions." xml:space="preserve">
+    <value>No cling exclusions.</value>
+  </data>
+  <data name="Area {0}" xml:space="preserve">
+    <value>Area {0}</value>
+  </data>
+  <data name="Cling excluded in this area" xml:space="preserve">
+    <value>Cling excluded in this area</value>
+  </data>
+  <data name="Pause cling for FATE" xml:space="preserve">
+    <value>Pause cling for FATE</value>
+  </data>
+  <data name="While driving your own mount with Fly You Fools, safely land and dismount, then pause cling until the FATE and combat end. Pillion passengers are never dismounted." xml:space="preserve">
+    <value>While driving your own mount with Fly You Fools, safely land and dismount, then pause cling until the FATE and combat end. Pillion passengers are never dismounted.</value>
+  </data>
+  <data name="Ignore FATEs" xml:space="preserve">
+    <value>Ignore FATEs</value>
+  </data>
+  <data name="Skip automatic FATE sync and FATE preset overrides, and ignore Pause cling for FATE. Ordinary travel and self-defence continue." xml:space="preserve">
+    <value>Skip automatic FATE sync and FATE preset overrides, and ignore Pause cling for FATE. Ordinary travel and self-defence continue.</value>
+  </data>
+  <data name="Cling paused for FATE" xml:space="preserve">
+    <value>Cling paused for FATE</value>
+  </data>
+  <data name="Off: FrenRider chooses BossMod presets from your job and rotation provider.&#xA;On: use the BossMod presets below with any rotation provider. A custom preset may run actions alongside RSR, WRATH or DAEDALUS." xml:space="preserve">
+    <value>Off: FrenRider chooses BossMod presets from your job and rotation provider.
+On: use the BossMod presets below with any rotation provider. A custom preset may run actions alongside RSR, WRATH or DAEDALUS.</value>
+  </data>
+  <data name="Choose a preset from the selected BossMod provider's complete catalog. None leaves its current preset unchanged." xml:space="preserve">
+    <value>Choose a preset from the selected BossMod provider's complete catalog. None leaves its current preset unchanged.</value>
+  </data>
+  <data name="BossMod preset catalog unavailable or empty; saved selections are retained." xml:space="preserve">
+    <value>BossMod preset catalog unavailable or empty; saved selections are retained.</value>
+  </data>
 </root>

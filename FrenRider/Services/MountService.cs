@@ -31,10 +31,14 @@ public class MountService
     private bool wasFarChaseRequested;
     private long farChaseMountPendingUntilMs;
     private string lastDesiredMountStateLogKey = "";
+    private ushort fateClingHoldId;
+    private CharacterConfig? fateClingHoldConfig;
+    private (string Account, string Character, string ConfiguredFren, string TrackedFren, string World, uint Territory) fateClingHoldOwner;
 
     public MountState State { get; private set; } = MountState.Idle;
     public string StateDetail { get; private set; } = "";
     public bool IsFarChaseMountOwned => farChaseMountOwned;
+    public bool IsFateClingHeld => fateClingHoldId != 0;
 
     public MountService(Plugin plugin, FrenTracker tracker, ZoneService zoneService)
     {
@@ -52,10 +56,66 @@ public class MountService
         lastDesiredMountStateLogKey = "";
     }
 
+    public void ResetFateClingHold()
+    {
+        fateClingHoldId = 0;
+        fateClingHoldConfig = null;
+        fateClingHoldOwner = default;
+    }
+
+    public void RefreshFateClingHold()
+    {
+        var config = plugin.ConfigManager.GetActiveConfig();
+        var fren = tracker.Fren;
+        var trackedFren = fren?.IsFound == true ? fren.Name : fateClingHoldOwner.TrackedFren ?? "";
+        var trackedWorld = fren?.IsFound == true ? fren.WorldName : fateClingHoldOwner.World ?? "";
+        var owner = (plugin.ConfigManager.CurrentAccountId, plugin.ConfigManager.ActiveCharacterKey,
+            config.FrenName, trackedFren, trackedWorld, zoneService.TerritoryId);
+        var ridingPillion = Plugin.Condition[ConditionFlag.RidingPillion];
+        var ownerAndSettingsValid = Plugin.ClientState.IsLoggedIn
+            && config.Enabled && config.PauseClingForFate && !config.IgnoreFates && config.FlyYouFools
+            && !zoneService.ZoneChanged
+            && !Plugin.Condition[ConditionFlag.BetweenAreas]
+            && !Plugin.Condition[ConditionFlag.BetweenAreas51]
+            && !Plugin.Condition[ConditionFlag.Unconscious]
+            && (fateClingHoldId == 0
+                || (ReferenceEquals(config, fateClingHoldConfig) && owner == fateClingHoldOwner));
+        if (!ownerAndSettingsValid || ridingPillion)
+        {
+            ResetFateClingHold();
+            return;
+        }
+
+        var nextFateId = FrenRiderMountPolicy.ResolveFateClingHold(
+            fateClingHoldId,
+            ownerAndSettingsValid,
+            zoneService.InFate ? zoneService.CurrentFateId : (ushort)0,
+            Plugin.Condition[ConditionFlag.InCombat],
+            selfOnOwnMount: fateClingHoldId == 0 && ResolveOwnMountState(ridingPillion),
+            ridingPillion,
+            canBegin: fateClingHoldId == 0 && CanSafelyChangeOwnMount(out _)
+                && !plugin.PhoenixDownRecoveryService.HoldMovement
+                && !plugin.CoppeliaPowerlevelLeaseService.IsLeaseActive
+                && !plugin.AdsHyperFocusLeaseService.IsLeaseActive);
+        if (nextFateId == 0)
+        {
+            ResetFateClingHold();
+            return;
+        }
+
+        if (fateClingHoldId == 0)
+        {
+            fateClingHoldConfig = config;
+            fateClingHoldOwner = owner;
+        }
+        fateClingHoldId = nextFateId;
+    }
+
     public void Update()
     {
         var config = plugin.ConfigManager.GetActiveConfig();
         var now = Environment.TickCount64;
+        RefreshFateClingHold();
         var selfRidingPillion = Plugin.Condition[ConditionFlag.RidingPillion];
         var selfOnOwnMount = ResolveOwnMountState(selfRidingPillion);
         UpdateFarChaseMountOwnership(selfOnOwnMount, now);
@@ -103,6 +163,37 @@ public class MountService
             PreemptFarChase("local aethernet travel active");
             State = MountState.Idle;
             StateDetail = "Teleport active";
+            return;
+        }
+
+        if (IsFateClingHeld)
+        {
+            ClearFarChaseMountPending();
+            State = MountState.Idle;
+            StateDetail = "Cling paused for FATE";
+            if (now < mountCooldownMs
+                || !CanSafelyChangeOwnMount(out _)
+                || plugin.PhoenixDownRecoveryService.HoldMovement
+                || plugin.CoppeliaPowerlevelLeaseService.IsLeaseActive
+                || plugin.AdsHyperFocusLeaseService.IsLeaseActive)
+                return;
+
+            // Read the passenger/own-mount state again at the action boundary.
+            // Retiring a hold for pillion never sends a mount or movement command.
+            var ridingPillionNow = Plugin.Condition[ConditionFlag.RidingPillion];
+            if (ridingPillionNow)
+            {
+                ResetFateClingHold();
+                return;
+            }
+            var action = FrenRiderMountPolicy.GetCorrectionAction(
+                ResolveOwnMountState(ridingPillionNow), FrenMountPolicy.OnFoot,
+                correctionAllowed: true,
+                Plugin.Condition[ConditionFlag.InFlight] || Plugin.Condition[ConditionFlag.Diving]);
+            if (action == FrenMountCorrectionAction.Land)
+                LandSelf();
+            else if (action == FrenMountCorrectionAction.Dismount)
+                DismountSelf();
             return;
         }
 
@@ -595,6 +686,24 @@ public class MountService
             return false;
         }
 
+        if (config.Formation)
+        {
+            reason = "automation preempted";
+            return false;
+        }
+
+        return CanSafelyChangeOwnMount(out reason);
+    }
+
+    private bool CanSafelyChangeOwnMount(out string reason)
+    {
+        var localPlayer = Plugin.ObjectTable.LocalPlayer;
+        if (localPlayer == null)
+        {
+            reason = "local player unavailable";
+            return false;
+        }
+
         if (Plugin.Condition[ConditionFlag.InCombat])
         {
             reason = "in combat";
@@ -632,8 +741,7 @@ public class MountService
             return false;
         }
 
-        if (config.Formation
-            || plugin.AdsIntegrationService.ShouldPauseDutySystems
+        if (plugin.AdsIntegrationService.ShouldPauseDutySystems
             || plugin.AdsIntegrationService.IsHandoffPending
             || plugin.AutomationService.IsUtilityGateActive
             || HasTeleportOrDialogActivity())
@@ -642,7 +750,7 @@ public class MountService
             return false;
         }
 
-        reason = "safe and in cling range";
+        reason = "safe mount action";
         return true;
     }
 

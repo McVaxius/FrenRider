@@ -1,7 +1,9 @@
 using System;
+using System.Linq;
 using System.Numerics;
 using AethertekUI;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface.Windowing;
 
 namespace FrenRider.Windows;
 
@@ -21,12 +23,12 @@ internal static class UiGui
     internal static void BulletText(string text) => MaterialText.BulletText(UiText.T(text));
     internal static void TextColored(Vector4 color, string text) => MaterialText.TextColored(color, UiText.T(text));
     internal static void SetTooltip(string text) => MaterialText.SetTooltip(UiText.T(text));
-    internal static bool BeginCombo(string label, string preview, ImGuiComboFlags flags = ImGuiComboFlags.None)
+    internal static bool BeginCombo(string label, string preview, ImGuiComboFlags flags = ImGuiComboFlags.None, bool literalPreview = false)
     {
         BeginField(label);
         try
         {
-            var open = MaterialText.BeginCombo("", UiText.T(preview), flags);
+            var open = MaterialText.BeginCombo("", literalPreview ? preview : UiText.T(preview), flags);
             if (!open) ImGui.PopID();
             return open;
         }
@@ -333,33 +335,67 @@ internal static class UiGui
     }
 
     internal static void Title(string original,string translated,bool people=false,float brandSize=0,bool compactBrand=false)
+        => TitleWithButtons(original, translated, null, people, brandSize, compactBrand);
+
+    internal static float TitleMinimumWidth(Window owner, string translated, bool people = false, float brandSize = 0, bool compactBrand = false)
     {
-        var s=ImGui.GetStyle(); var size=ImGui.GetFontSize();var height=ImGui.GetFrameHeight();
-        var flags=ImGuiP.GetCurrentWindow().Flags;
+        var style = ImGui.GetStyle();
+        var nativeSize = ImGui.GetFontSize();
+        var count = owner.TitleBarButtons.Count(button => !owner.IsClickthrough || button.AvailableClickthrough);
+        if (owner.AllowPinning || owner.AllowClickthrough || owner.AllowBackgroundBlur) count++;
+        var left = brandSize > 0 ? (compactBrand ? 40 : 42) * MaterialTheme.Metrics.Scale
+            : style.FramePadding.X + ((owner.Flags & ImGuiWindowFlags.NoCollapse) == 0 && style.WindowMenuButtonPosition == ImGuiDir.Left
+                ? nativeSize + style.ItemInnerSpacing.X : 0);
+        var right = nativeSize + style.FramePadding.X * 2 + count * (nativeSize + style.ItemInnerSpacing.X);
+        if ((owner.Flags & ImGuiWindowFlags.NoCollapse) == 0 && style.WindowMenuButtonPosition == ImGuiDir.Right)
+            right += nativeSize + style.ItemInnerSpacing.X;
+        using var font = UiText.Font(people ? compactBrand ? UiFontRole.BodyStrong : UiFontRole.PluginName : UiFontRole.Body);
+        var renderSize = people ? ImGui.GetFontSize() : nativeSize;
+        var iconWidth = people ? (brandSize > 0 ? brandSize * MaterialTheme.Metrics.Scale + 10 * MaterialTheme.Metrics.Scale
+            : nativeSize + style.ItemInnerSpacing.X) : 0;
+        return left + ScaledTextSize(translated, renderSize / ImGui.GetFontSize()).X + iconWidth + right + style.ItemInnerSpacing.X;
+    }
+
+    internal static unsafe void TitleWithButtons(string original,string translated,Window? owner,bool people=false,float brandSize=0,bool compactBrand=false)
+    {
+        var window = owner is null ? ImGuiP.GetCurrentWindow() : ImGuiP.FindWindowByName(owner.WindowName);
+        if (window.Handle == null || (window.Flags & ImGuiWindowFlags.NoTitleBar) != 0) return;
+        var nativeFont = ImGui.GetFont();
+        var s=ImGui.GetStyle(); var size=nativeFont.FontSize*nativeFont.Scale*ImGui.GetIO().FontGlobalScale*window.FontWindowScale;
+        var height=ImGuiP.TitleBarHeight(window);
+        var flags=window.Flags;
         var collapseOnLeft=(flags & (ImGuiWindowFlags.NoCollapse|ImGuiWindowFlags.Modal))==0 && s.WindowMenuButtonPosition==ImGuiDir.Left;
-        var position=ImGui.GetWindowPos()+new Vector2(s.FramePadding.X+(collapseOnLeft?size+s.ItemInnerSpacing.X:0),s.FramePadding.Y);
+        var position=window.Pos+new Vector2(s.FramePadding.X+(collapseOnLeft?size+s.ItemInnerSpacing.X:0),s.FramePadding.Y);
         var erasePosition=position;
         var originalWidth=MaterialText.Measure(original).X;
         using var font=UiText.Font(people?compactBrand?UiFontRole.BodyStrong:UiFontRole.PluginName:UiFontRole.Body);
         var renderSize=people?ImGui.GetFontSize():size;
         var iconSize=brandSize>0?brandSize*MaterialTheme.Metrics.Scale:size;
         var iconWidth=people?iconSize+(brandSize>0?10*MaterialTheme.Metrics.Scale:s.ItemInnerSpacing.X):0;
-        if(brandSize>0)position=ImGui.GetWindowPos()+new Vector2((compactBrand?40:42)*MaterialTheme.Metrics.Scale,(height-Math.Max(renderSize,iconSize))*.5f);
+        if(brandSize>0)position=window.Pos+new Vector2((compactBrand?40:42)*MaterialTheme.Metrics.Scale,(height-Math.Max(renderSize,iconSize))*.5f);
         var translatedSize=ScaledTextSize(translated,renderSize/ImGui.GetFontSize());
         var translatedWidth=translatedSize.X+iconWidth;
-        var dl=ImGui.GetWindowDrawList();
+        var dl=window.DrawList;
         var rightButtons = size + s.FramePadding.X * 2;
+        if (owner is not null)
+        {
+            var count = owner.TitleBarButtons.Count(button => !owner.IsClickthrough || button.AvailableClickthrough);
+            if (owner.AllowPinning || owner.AllowClickthrough || owner.AllowBackgroundBlur) count++;
+            rightButtons += count * (size + s.ItemInnerSpacing.X);
+        }
         if ((flags & ImGuiWindowFlags.NoCollapse) == 0 && s.WindowMenuButtonPosition == ImGuiDir.Right)
             rightButtons += size + s.ItemInnerSpacing.X;
-        dl.PushClipRect(new Vector2(Math.Min(position.X,erasePosition.X),ImGui.GetWindowPos().Y),ImGui.GetWindowPos()+new Vector2(Math.Max(0, ImGui.GetWindowSize().X-rightButtons),height),false);
+        dl.PushClipRect(new Vector2(Math.Min(position.X,erasePosition.X),window.Pos.Y),window.Pos+new Vector2(Math.Max(0, window.Size.X-rightButtons),height),false);
         try
         {
-        var bg=s.Colors[(int)(ImGui.IsWindowFocused(ImGuiFocusedFlags.RootAndChildWindows)?ImGuiCol.TitleBgActive:ImGuiCol.TitleBg)];
-        dl.AddRectFilled(new Vector2(Math.Min(position.X,erasePosition.X),ImGui.GetWindowPos().Y),
-            new Vector2(Math.Max(erasePosition.X+originalWidth,position.X+translatedWidth),ImGui.GetWindowPos().Y+height),ImGui.ColorConvertFloat4ToU32(bg));
+        var nav = ImGui.GetCurrentContext().NavWindow;
+        var focused = nav.Handle != null && nav.RootWindow.ID == window.RootWindow.ID;
+        var bg=s.Colors[(int)(focused?ImGuiCol.TitleBgActive:ImGuiCol.TitleBg)];
+        dl.AddRectFilled(new Vector2(Math.Min(position.X,erasePosition.X),window.Pos.Y),
+            new Vector2(Math.Max(erasePosition.X+originalWidth,position.X+translatedWidth),window.Pos.Y+height),ImGui.ColorConvertFloat4ToU32(bg));
         if(people) FrenRiderPresentation.People(position,iconSize,MaterialTheme.Current.Colors.Primary);
         var textPosition=position+new Vector2(iconWidth,0);
-        if(brandSize>0)textPosition.Y=ImGui.GetWindowPos().Y+(height-translatedSize.Y)*.5f;
+        if(brandSize>0)textPosition.Y=window.Pos.Y+(height-translatedSize.Y)*.5f;
         MaterialText.AddText(dl,ImGui.GetFont(),renderSize,textPosition,ImGui.ColorConvertFloat4ToU32(s.Colors[(int)ImGuiCol.Text]),translated);
         }
         finally { dl.PopClipRect(); }

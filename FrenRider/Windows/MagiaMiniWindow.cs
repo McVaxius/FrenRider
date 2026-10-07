@@ -3,6 +3,7 @@ using System;
 using System.Numerics;
 using AethertekUI;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface;
 using Dalamud.Interface.Windowing;
 using FrenRider.Models;
 using FrenRider.Services;
@@ -23,6 +24,30 @@ public sealed class MagiaMiniWindow : Window, IDisposable
         Flags = ImGuiWindowFlags.AlwaysAutoResize
                 | ImGuiWindowFlags.NoScrollbar
                 | ImGuiWindowFlags.NoScrollWithMouse;
+        TitleBarButtons.Add(new()
+        {
+            Icon = FontAwesomeIcon.Home, Priority = 0, IconOffset = new(2, 1),
+            Click = button => { if (button == ImGuiMouseButton.Left) plugin.ToggleMainUi(); },
+            ShowTooltip = () => UiGui.SetTooltip("Fren Rider"),
+        });
+        TitleBarButtons.Add(new()
+        {
+            Icon = FontAwesomeIcon.Cog, Priority = -10, IconOffset = new(2, 1),
+            Click = button => { if (button == ImGuiMouseButton.Left) plugin.ToggleConfigUi(); },
+            ShowTooltip = () => UiGui.SetTooltip("Settings"),
+        });
+        TitleBarButtons.Add(new()
+        {
+            Icon = FontAwesomeIcon.PowerOff, Priority = -20, IconOffset = new(2, 1),
+            Click = button =>
+            {
+                if (button == ImGuiMouseButton.Left && Plugin.ClientState.IsLoggedIn && plugin.ConfigManager.TryGetActiveConfig(out var active) && active != null)
+                    plugin.ConfigManager.SetFrenRiderEnabled(!active.Enabled);
+            },
+            ShowTooltip = () => MaterialText.SetTooltip(Plugin.ClientState.IsLoggedIn && plugin.ConfigManager.TryGetActiveConfig(out var active) && active != null
+                ? UiText.T("Run") + ": " + UiText.T(active.Enabled ? "Enabled" : "Disabled")
+                : UiText.T("Not logged in. FrenRider waits until a character is loaded.")),
+        });
     }
 
     public void Dispose()
@@ -46,16 +71,19 @@ public sealed class MagiaMiniWindow : Window, IDisposable
             var rowWidth = MathF.Ceiling(labelWidth + style.FramePadding.X * 2) * 3 + UiHelpers.Scale(24);
             width = Math.Max(width, rowWidth + UiHelpers.Scale(42));
         }
-        ImGui.SetNextWindowSize(new Vector2(MathF.Ceiling(width), 0));
         contentFramePadding = ImGui.GetStyle().FramePadding;
         ImGui.PushStyleVar(ImGuiStyleVar.FramePadding,
             new Vector2(UiHelpers.Scale(compact ? 7 : 9), (UiHelpers.Scale(FrenRiderPresentation.MiniTitleHeight(compact)) - ImGui.GetFontSize()) * .5f));
+        width = Math.Max(width, UiGui.TitleMinimumWidth(this, UiText.T("Fren Rider Mini"), people: true, brandSize: 32, compactBrand: compact));
+        ImGui.SetNextWindowSize(new Vector2(MathF.Ceiling(width), 0));
         motion.Prepare(this, reducedMotion: false, roundedCorners: true);
     }
 
     public override void PostDraw()
     {
         motion.Restore(this);
+        UiGui.TitleWithButtons("Fren Rider Mini", UiText.T("Fren Rider Mini"), this,
+            people: true, brandSize: 32, compactBrand: plugin.Configuration.UiCompact);
         plugin.ApplyWindowOpacity(windowOpacity, WindowName);
         ImGui.PopStyleVar();
     }
@@ -64,7 +92,6 @@ public sealed class MagiaMiniWindow : Window, IDisposable
     {
         motion.DrawChrome();
         var compact = plugin.Configuration.UiCompact;
-        UiGui.Title("Fren Rider Mini", UiText.T("Fren Rider Mini"), people: true, brandSize: 32, compactBrand: compact);
         using var fields = new MaterialStyleScope();
         fields.Style(ImGuiStyleVar.FramePadding, contentFramePadding);
         fields.Style(ImGuiStyleVar.FrameBorderSize, 1);

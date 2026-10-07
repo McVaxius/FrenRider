@@ -6,6 +6,7 @@ using System.Numerics;
 using System.Collections.Generic;
 using AethertekUI;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface;
 using Dalamud.Interface.Windowing;
 using FrenRider.Models;
 using FrenRider.Services;
@@ -31,6 +32,44 @@ public class MainWindow : Window, IDisposable
         };
 
         this.plugin = plugin;
+        TitleBarButtons.Add(new()
+        {
+            Icon = FontAwesomeIcon.Cog, Priority = 0, IconOffset = new(2, 1),
+            Click = button => { if (button == ImGuiMouseButton.Left) plugin.ToggleConfigUi(); },
+            ShowTooltip = () => UiGui.SetTooltip("Settings"),
+        });
+        TitleBarButtons.Add(new()
+        {
+            Icon = FontAwesomeIcon.Compress, Priority = -10, IconOffset = new(2, 1),
+            Click = button => { if (button == ImGuiMouseButton.Left) plugin.ToggleMiniUi(); },
+            ShowTooltip = () => UiGui.SetTooltip("Fren Rider Mini"),
+        });
+        TitleBarButtons.Add(new()
+        {
+            Icon = FontAwesomeIcon.PowerOff, Priority = -20, IconOffset = new(2, 1),
+            Click = button =>
+            {
+                if (button == ImGuiMouseButton.Left && Plugin.ClientState.IsLoggedIn && plugin.ConfigManager.TryGetActiveConfig(out var active) && active != null)
+                    plugin.ConfigManager.SetFrenRiderEnabled(!active.Enabled);
+            },
+            ShowTooltip = () => MaterialText.SetTooltip(Plugin.ClientState.IsLoggedIn && plugin.ConfigManager.TryGetActiveConfig(out var active) && active != null
+                ? UiText.T("Run") + ": " + UiText.T(active.Enabled ? "Enabled" : "Disabled")
+                : UiText.T("Not logged in. FrenRider waits until a character is loaded.")),
+        });
+        TitleBarButtons.Add(new()
+        {
+            Icon = FontAwesomeIcon.ToggleOn, Priority = -30, IconOffset = new(2, 1),
+            Click = button => { if (button == ImGuiMouseButton.Left && plugin.ConfigManager.GetCurrentAccount() != null) plugin.ConfigManager.SetAllFrenRiderEnabled(true); },
+            ShowTooltip = () => MaterialText.SetTooltip(UiText.T("All FR on") + "\n" + UiText.T(plugin.ConfigManager.GetCurrentAccount() == null
+                ? "No account loaded." : "Set DEFAULT CONFIG and every local character in the current account, including the active temporary profile.")),
+        });
+        TitleBarButtons.Add(new()
+        {
+            Icon = FontAwesomeIcon.ToggleOff, Priority = -40, IconOffset = new(2, 1),
+            Click = button => { if (button == ImGuiMouseButton.Left && plugin.ConfigManager.GetCurrentAccount() != null) plugin.ConfigManager.SetAllFrenRiderEnabled(false); },
+            ShowTooltip = () => MaterialText.SetTooltip(UiText.T("All FR off") + "\n" + UiText.T(plugin.ConfigManager.GetCurrentAccount() == null
+                ? "No account loaded." : "Set DEFAULT CONFIG and every local character in the current account, including the active temporary profile.")),
+        });
     }
 
     public void Dispose() { }
@@ -39,12 +78,19 @@ public class MainWindow : Window, IDisposable
     {
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding,
             UiHelpers.Scale(new Vector2(12, plugin.Configuration.UiCompact ? 7 : 12)));
+        var minimumWidth = UiGui.TitleMinimumWidth(this, "Fren Rider v" + CurrentVersion) / Math.Max(.01f, MaterialTheme.Metrics.Scale);
+        SizeConstraints = new WindowSizeConstraints
+        {
+            MinimumSize = new Vector2(Math.Max(460, minimumWidth), 360),
+            MaximumSize = new Vector2(float.MaxValue, float.MaxValue),
+        };
         motion.Prepare(this, reducedMotion: false, roundedCorners: true);
     }
 
     public override void PostDraw()
     {
         motion.Restore(this);
+        UiGui.TitleWithButtons("Fren Rider", "Fren Rider v" + CurrentVersion, this);
         plugin.ApplyWindowOpacity(windowOpacity, WindowName);
         ImGui.PopStyleVar();
     }
@@ -52,7 +98,6 @@ public class MainWindow : Window, IDisposable
     public override void Draw()
     {
         motion.DrawChrome();
-        UiGui.Title("Fren Rider", "Fren Rider v" + CurrentVersion);
         using var fields = new MaterialStyleScope();
         fields.Style(ImGuiStyleVar.FrameBorderSize, 1);
         fields.Color(ImGuiCol.FrameBg, MaterialTheme.Current.Colors.SurfaceContainer);

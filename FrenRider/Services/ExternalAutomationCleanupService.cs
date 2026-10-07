@@ -161,6 +161,7 @@ public sealed class ExternalAutomationCleanupService
     private readonly Action<string>? warningLog;
     private readonly IRsrCleanupController rsrCleanupController;
     private readonly IDaedalusAutomationController? daedalusAutomationController;
+    private readonly AutorotIpcService? autorotIpcService;
     private readonly Dictionary<string, ExternalAutomationSnapshot> snapshots = new(StringComparer.OrdinalIgnoreCase);
     private readonly HashSet<string> wrathStartedKeys = new(StringComparer.OrdinalIgnoreCase);
 
@@ -170,7 +171,8 @@ public sealed class ExternalAutomationCleanupService
         Action<string>? infoLog = null,
         Action<string>? warningLog = null,
         IRsrCleanupController? rsrCleanupController = null,
-        IDaedalusAutomationController? daedalusAutomationController = null)
+        IDaedalusAutomationController? daedalusAutomationController = null,
+        AutorotIpcService? autorotIpcService = null)
     {
         this.commandSender = commandSender;
         this.snapshotProvider = snapshotProvider;
@@ -178,6 +180,7 @@ public sealed class ExternalAutomationCleanupService
         this.warningLog = warningLog;
         this.rsrCleanupController = rsrCleanupController ?? new FallbackOnlyRsrCleanupController(commandSender);
         this.daedalusAutomationController = daedalusAutomationController;
+        this.autorotIpcService = autorotIpcService;
     }
 
     public ExternalAutomationCleanupState State { get; private set; } = ExternalAutomationCleanupState.Idle;
@@ -219,9 +222,18 @@ public sealed class ExternalAutomationCleanupService
         string characterKey,
         string reason)
     {
-        return config.CleanupMode == FrenRiderCleanupMode.TurnEverythingOff
+        var settingsSucceeded = autorotIpcService?.BeginOwnedBossModCleanup(accountId, characterKey) ?? true;
+        var forceOff = config.CleanupMode == FrenRiderCleanupMode.TurnEverythingOff;
+        var result = forceOff
             ? TurnEverythingOff(accountId, characterKey, reason)
             : RestoreSnapshot(accountId, characterKey, reason);
+        settingsSucceeded &= autorotIpcService?.EndOwnedBossModCleanup(forceOff) ?? true;
+        if (settingsSucceeded)
+            return result;
+        State = result.State == ExternalAutomationCleanupState.Failed ? result.State : ExternalAutomationCleanupState.Partial;
+        StatusText = $"{result.StatusText} BossMod settings cleanup is incomplete: {autorotIpcService!.LastStatus}";
+        warningLog?.Invoke($"[ExternalCleanup] {StatusText} reason={reason}");
+        return result with { State = State, StatusText = StatusText };
     }
 
     private ExternalAutomationCleanupResult RestoreSnapshot(string accountId, string characterKey, string reason)
@@ -410,7 +422,8 @@ public sealed class ExternalAutomationCleanupService
     }
 
     private CommandAttempt Send(string command)
-        => new(command, commandSender.TrySendCommand(command));
+        => new(command, autorotIpcService?.SendBossModAiCommand(command, commandSender.TrySendCommand)
+            ?? commandSender.TrySendCommand(command));
 
     private static string FormatSnapshotSummary(ExternalAutomationSnapshot snapshot)
     {
@@ -506,7 +519,7 @@ public sealed class BossModExternalAutomationSnapshotProvider : IExternalAutomat
 
             return new BossModAutomationSnapshot(
                 true,
-                TryGetAiActive(liveAssembly),
+                target.InternalName == "BossMod" ? TryGetBool(configNode, "Enabled") : TryGetAiActive(liveAssembly),
                 TryGetBool(configNode, "ForbidMovement"),
                 TryGetBool(configNode, "FollowOutOfCombat"),
                 TryGetBool(configNode, "FollowDuringCombat"),
@@ -588,7 +601,7 @@ public sealed class BossModExternalAutomationSnapshotProvider : IExternalAutomat
         return null;
     }
 
-    private static bool? TryGetAiActive(Assembly liveAssembly)
+    internal static bool? TryGetAiActive(Assembly liveAssembly)
     {
         var aiManagerType = liveAssembly.GetType("BossMod.AI.AIManager");
         if (aiManagerType == null)
@@ -663,10 +676,10 @@ public sealed class BossModExternalAutomationSnapshotProvider : IExternalAutomat
         return type.GetField(name, StaticMembers)?.GetValue(null);
     }
 
-    private static object? GetInstanceMember(object root, string name)
+    internal static object? GetInstanceMember(object root, string name)
         => TryGetInstanceMember(root, name, out var value) ? value : null;
 
-    private static bool TryGetInstanceMember(object root, string name, out object? value)
+    internal static bool TryGetInstanceMember(object root, string name, out object? value)
     {
         for (var type = root.GetType(); type != null; type = type.BaseType)
         {

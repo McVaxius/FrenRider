@@ -2703,4 +2703,50 @@
   <data name="Auto-fade when unfocused" xml:space="preserve"><value>失去焦点后自动淡化</value></data>
   <data name="Unfocused opacity (%)" xml:space="preserve"><value>未聚焦时的不透明度 (%)</value></data>
   <data name="Unfocused delay (seconds)" xml:space="preserve"><value>失去焦点后的等待时间 (秒)</value></data>
+  <data name="Cling exclusions" xml:space="preserve">
+    <value>跟随排除区域</value>
+  </data>
+  <data name="Pause cling in these areas. Seek and teleport travel remain available." xml:space="preserve">
+    <value>在这些区域暂停跟随。寻找目标和传送移动仍然可用。</value>
+  </data>
+  <data name="Area" xml:space="preserve">
+    <value>区域</value>
+  </data>
+  <data name="Choose an area" xml:space="preserve">
+    <value>选择区域</value>
+  </data>
+  <data name="No cling exclusions." xml:space="preserve">
+    <value>没有跟随排除区域。</value>
+  </data>
+  <data name="Area {0}" xml:space="preserve">
+    <value>区域 {0}</value>
+  </data>
+  <data name="Cling excluded in this area" xml:space="preserve">
+    <value>此区域已排除跟随</value>
+  </data>
+  <data name="Pause cling for FATE" xml:space="preserve">
+    <value>在FATE中暂停跟随</value>
+  </data>
+  <data name="While driving your own mount with Fly You Fools, safely land and dismount, then pause cling until the FATE and combat end. Pillion passengers are never dismounted." xml:space="preserve">
+    <value>启用Fly You Fools并驾驶自己的坐骑时，安全降落并下坐骑，然后暂停跟随，直到FATE和战斗结束。绝不会让共乘乘客下坐骑。</value>
+  </data>
+  <data name="Ignore FATEs" xml:space="preserve">
+    <value>忽略FATE</value>
+  </data>
+  <data name="Skip automatic FATE sync and FATE preset overrides, and ignore Pause cling for FATE. Ordinary travel and self-defence continue." xml:space="preserve">
+    <value>跳过自动FATE同步和FATE预设覆盖，并忽略FATE跟随暂停。普通移动和自卫继续进行。</value>
+  </data>
+  <data name="Cling paused for FATE" xml:space="preserve">
+    <value>已为FATE暂停跟随</value>
+  </data>
+  <data name="Off: FrenRider chooses BossMod presets from your job and rotation provider.&#xA;On: use the BossMod presets below with any rotation provider. A custom preset may run actions alongside RSR, WRATH or DAEDALUS." xml:space="preserve">
+    <value>关闭：FrenRider 根据职业和循环提供程序选择 BossMod 预设。
+开启：将下方的 BossMod 预设用于任何循环提供程序。自定义预设可能与 RSR、WRATH 或 DAEDALUS 同时执行技能。</value>
+  </data>
+  <data name="Choose a preset from the selected BossMod provider's complete catalog. None leaves its current preset unchanged." xml:space="preserve">
+    <value>从所选 BossMod 提供程序的完整目录中选择预设。无会保留其当前预设。</value>
+  </data>
+  <data name="BossMod preset catalog unavailable or empty; saved selections are retained." xml:space="preserve">
+    <value>BossMod 预设目录不可用或为空；保留已保存的选择。</value>
+  </data>
 </root>

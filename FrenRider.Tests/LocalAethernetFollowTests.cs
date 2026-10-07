@@ -1,10 +1,30 @@
 using System.Numerics;
+using FrenRider.Models;
 using FrenRider.Services;
 
 namespace FrenRider.Tests;
 
 public sealed class LocalAethernetFollowTests
 {
+    [Fact]
+    public void LocalAethernetJumpRemainsEligibleInAnExcludedCity()
+    {
+        var config = new CharacterConfig { FollowLocalAetheryteNetworks = true };
+        Assert.True(config.IsClingExcluded(129));
+        var position = new Vector3(100, 0, 100);
+        var origin = new LocalAethernetNode(1, 129, new(100, 100), "Origin");
+        var destination = new LocalAethernetNode(2, 129, new(160, 100), "Destination");
+        var network = new LocalAethernetNetwork(origin, [origin, destination], 15f);
+        var detector = new LocalAethernetFollowDetector();
+        var before = new LocalAethernetSample("Fren@World", 129, position, 1000);
+
+        Assert.False(detector.Observe(before, network, position, position, 1000, out _));
+        Assert.True(detector.Observe(before with { Position = new(160, 0, 100), Timestamp = 1200 },
+            network, position, position, 1200, out var chosen));
+        Assert.Equal(destination, chosen);
+        Assert.True(config.FollowLocalAetheryteNetworks);
+    }
+
     [Fact]
     public void LocalJumpRequiresFreshUniqueConnectedDestinationAndIsConsumedOnce()
     {

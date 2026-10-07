@@ -2703,4 +2703,50 @@ No se puede deshacer.</value>
   <data name="Auto-fade when unfocused" xml:space="preserve"><value>Atenuar automáticamente sin foco</value></data>
   <data name="Unfocused opacity (%)" xml:space="preserve"><value>Opacidad sin foco (%)</value></data>
   <data name="Unfocused delay (seconds)" xml:space="preserve"><value>Espera sin foco (segundos)</value></data>
+  <data name="Cling exclusions" xml:space="preserve">
+    <value>Zonas excluidas del seguimiento</value>
+  </data>
+  <data name="Pause cling in these areas. Seek and teleport travel remain available." xml:space="preserve">
+    <value>El seguimiento se pausa en estas zonas. La búsqueda y los viajes por teletransporte siguen disponibles.</value>
+  </data>
+  <data name="Area" xml:space="preserve">
+    <value>Zona</value>
+  </data>
+  <data name="Choose an area" xml:space="preserve">
+    <value>Elegir una zona</value>
+  </data>
+  <data name="No cling exclusions." xml:space="preserve">
+    <value>No hay zonas excluidas del seguimiento.</value>
+  </data>
+  <data name="Area {0}" xml:space="preserve">
+    <value>Zona {0}</value>
+  </data>
+  <data name="Cling excluded in this area" xml:space="preserve">
+    <value>Seguimiento excluido en esta zona</value>
+  </data>
+  <data name="Pause cling for FATE" xml:space="preserve">
+    <value>Pausar seguimiento para FATE</value>
+  </data>
+  <data name="While driving your own mount with Fly You Fools, safely land and dismount, then pause cling until the FATE and combat end. Pillion passengers are never dismounted." xml:space="preserve">
+    <value>Al conducir tu propia montura con Fly You Fools, aterriza y desmonta de forma segura; después pausa el seguimiento hasta que terminen el FATE y el combate. Nunca se desmonta a los pasajeros.</value>
+  </data>
+  <data name="Ignore FATEs" xml:space="preserve">
+    <value>Ignorar FATE</value>
+  </data>
+  <data name="Skip automatic FATE sync and FATE preset overrides, and ignore Pause cling for FATE. Ordinary travel and self-defence continue." xml:space="preserve">
+    <value>Omite la sincronización automática y los ajustes de FATE, e ignora la pausa de seguimiento para FATE. Los viajes normales y la defensa propia continúan.</value>
+  </data>
+  <data name="Cling paused for FATE" xml:space="preserve">
+    <value>Seguimiento pausado para FATE</value>
+  </data>
+  <data name="Off: FrenRider chooses BossMod presets from your job and rotation provider.&#xA;On: use the BossMod presets below with any rotation provider. A custom preset may run actions alongside RSR, WRATH or DAEDALUS." xml:space="preserve">
+    <value>Desactivado: FrenRider elige ajustes de BossMod según tu oficio y proveedor de rotación.
+Activado: usa los ajustes de BossMod de abajo con cualquier proveedor de rotación. Un ajuste personalizado puede ejecutar acciones junto con RSR, WRATH o DAEDALUS.</value>
+  </data>
+  <data name="Choose a preset from the selected BossMod provider's complete catalog. None leaves its current preset unchanged." xml:space="preserve">
+    <value>Elige un ajuste del catálogo completo del proveedor de BossMod seleccionado. Ninguno conserva su ajuste actual.</value>
+  </data>
+  <data name="BossMod preset catalog unavailable or empty; saved selections are retained." xml:space="preserve">
+    <value>El catálogo de ajustes de BossMod no está disponible o está vacío; se conservan las selecciones guardadas.</value>
+  </data>
 </root>

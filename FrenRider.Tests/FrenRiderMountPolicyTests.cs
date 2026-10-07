@@ -6,6 +6,47 @@ namespace FrenRider.Tests;
 public sealed class FrenRiderMountPolicyTests
 {
     [Theory]
+    [InlineData(0, true, 12, false, true, false, true, 12)]
+    [InlineData(0, true, 12, false, false, false, true, 0)]
+    [InlineData(0, true, 12, false, true, true, true, 0)]
+    [InlineData(0, true, 12, false, true, false, false, 0)]
+    [InlineData(0, true, 0, false, true, false, true, 0)]
+    [InlineData(12, true, 12, false, false, false, false, 12)]
+    [InlineData(12, true, 0, true, false, false, false, 12)]
+    [InlineData(12, true, 0, false, false, false, false, 0)]
+    [InlineData(12, true, 13, false, false, false, false, 0)]
+    [InlineData(12, true, 13, true, false, false, false, 12)]
+    [InlineData(12, false, 12, true, true, false, true, 0)]
+    [InlineData(12, true, 12, true, true, true, true, 0)]
+    public void FateHoldRequiresOwnMountAndRetainsOnlyItsFateOrRemainingCombat(
+        ushort heldFateId, bool ownerAndSettingsValid, ushort currentFateId, bool inCombat,
+        bool selfOnOwnMount, bool ridingPillion, bool canBegin, ushort expected)
+    {
+        Assert.Equal(expected, FrenRiderMountPolicy.ResolveFateClingHold(
+            heldFateId, ownerAndSettingsValid, currentFateId, inCombat,
+            selfOnOwnMount, ridingPillion, canBegin));
+    }
+
+    [Theory]
+    [InlineData(false, true, true, FrenMountCorrectionAction.Land)]
+    [InlineData(false, true, false, FrenMountCorrectionAction.Dismount)]
+    [InlineData(false, false, true, FrenMountCorrectionAction.None)]
+    [InlineData(true, true, true, FrenMountCorrectionAction.None)]
+    [InlineData(true, true, false, FrenMountCorrectionAction.None)]
+    public void FateCorrectionRechecksPillionEvenWithBothMountedFlagsTrue(
+        bool ridingPillion, bool safetyAllowed, bool airborne, FrenMountCorrectionAction expected)
+    {
+        var ownMount = FrenRiderMountPolicy.ResolveOwnMountState(
+            nativeAccessAvailable: true, nativeMounted: true, ridingPillion, conditionMounted: true);
+        var hold = FrenRiderMountPolicy.ResolveFateClingHold(
+            heldFateId: 12, ownerAndSettingsValid: true, currentFateId: 12,
+            inCombat: false, ownMount, ridingPillion, canBegin: true);
+
+        Assert.Equal(expected, FrenRiderMountPolicy.GetCorrectionAction(
+            ownMount, FrenMountPolicy.OnFoot, safetyAllowed && hold != 0, airborne));
+    }
+
+    [Theory]
     [InlineData(true, true, false, false, true)]
     [InlineData(true, false, false, true, true)]
     [InlineData(true, true, true, true, false)]

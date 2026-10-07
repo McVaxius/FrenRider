@@ -6,6 +6,80 @@ namespace FrenRider.Tests;
 
 public sealed class ConfigManagerDefaultSyncTests
 {
+    [Theory]
+    [InlineData("Pause cling for FATE", true, false)]
+    [InlineData("Ignore FATEs", false, true)]
+    [InlineData("Follow", true, true)]
+    public void FatePreferencesSyncOnlyTheSelectedRowOrFollowTab(string scope, bool pause, bool ignore)
+    {
+        var account = CreateAccount();
+        account.DefaultConfig.PauseClingForFate = true;
+        account.DefaultConfig.IgnoreFates = true;
+        account.DefaultConfig.AutoSyncFate = false;
+        var count = scope == "Follow"
+            ? ConfigManager.ApplyDefaultTabToAllCharacters(account, scope)
+            : ConfigManager.ApplyDefaultSettingToAllCharacters(account, scope);
+
+        Assert.Equal(account.Characters.Count, count);
+        Assert.All(account.Characters.Values, target =>
+        {
+            Assert.Equal(pause, target.PauseClingForFate);
+            Assert.Equal(ignore, target.IgnoreFates);
+            Assert.Equal(scope != "Follow", target.AutoSyncFate);
+        });
+    }
+
+    [Theory]
+    [InlineData("row", false)]
+    [InlineData("row", true)]
+    [InlineData("Follow", false)]
+    [InlineData("Follow", true)]
+    [InlineData("full", false)]
+    [InlineData("full", true)]
+    public void ClingExclusionSyncCopiesIndependentListsToLocalCharactersOnly(string scope, bool empty)
+    {
+        var account = CreateAccount();
+        account.DefaultConfig.ClingExcludedTerritoryIds = empty ? [] : [156, 9999];
+        account.DefaultConfig.Enabled = true;
+        account.DefaultConfig.FrenName = "Default Fren";
+        account.DefaultConfig.Cling = 9f;
+        var remote = new RemoteProfileRow
+        {
+            Config = new CharacterConfig { ClingExcludedTerritoryIds = [128] },
+        };
+        account.RemoteProfiles.Add(remote);
+        var before = account.Characters.ToDictionary(pair => pair.Key, pair => pair.Value.Clone());
+
+        var count = scope switch
+        {
+            "row" => ConfigManager.ApplyDefaultSettingToAllCharacters(account, "Cling exclusions"),
+            "Follow" => ConfigManager.ApplyDefaultTabToAllCharacters(account, "Follow"),
+            _ => ConfigManager.ApplyDefaultToAllCharacters(account),
+        };
+
+        Assert.Equal(account.Characters.Count, count);
+        var targets = account.Characters.Values.ToArray();
+        Assert.NotSame(targets[0].ClingExcludedTerritoryIds, targets[1].ClingExcludedTerritoryIds);
+        foreach (var pair in account.Characters)
+        {
+            var target = pair.Value;
+            Assert.Equal(account.DefaultConfig.ClingExcludedTerritoryIds, target.ClingExcludedTerritoryIds);
+            Assert.NotSame(account.DefaultConfig.ClingExcludedTerritoryIds, target.ClingExcludedTerritoryIds);
+            if (scope != "full")
+            {
+                Assert.Equal(before[pair.Key].Enabled, target.Enabled);
+                Assert.Equal(before[pair.Key].FrenName, target.FrenName);
+            }
+            if (scope == "row")
+                Assert.Equal(before[pair.Key].Cling, target.Cling);
+        }
+
+        targets[0].ClingExcludedTerritoryIds.Add(130);
+        Assert.DoesNotContain((uint)130, targets[1].ClingExcludedTerritoryIds);
+        Assert.DoesNotContain((uint)130, account.DefaultConfig.ClingExcludedTerritoryIds);
+        Assert.Equal(new uint[] { 128 }, remote.Config.ClingExcludedTerritoryIds);
+    }
+
     [Fact]
     public void FullSyncCopiesMappedCharacterSettingsToCurrentAccountCharacters()
     {
@@ -393,6 +467,7 @@ public sealed class ConfigManagerDefaultSyncTests
                 var type when type == typeof(string) => $"value-{offset}-{property.Name}",
                 var type when type == typeof(string[]) => new[] { $"value-{offset}-{property.Name}" },
                 var type when type == typeof(List<string>) => new List<string> { $"value-{offset}-{property.Name}" },
+                var type when type == typeof(List<uint>) => new List<uint> { (uint)(offset + index + 1) },
                 var type when type.IsEnum => Enum.GetValues(type).GetValue(enumIndex % Enum.GetValues(type).Length)!,
                 _ => throw new InvalidOperationException($"Add a persisted-value test fixture for {property.Name} ({property.PropertyType})."),
             };
@@ -412,6 +487,11 @@ public sealed class ConfigManagerDefaultSyncTests
             Assert.True(expectedArray.SequenceEqual(actualArray), $"{property.Name} array values differ.");
         else if (expected is List<string> expectedList && actual is List<string> actualList)
             Assert.True(expectedList.SequenceEqual(actualList), $"{property.Name} list values differ.");
+        else if (expected is List<uint> expectedIds && actual is List<uint> actualIds)
+        {
+            Assert.True(expectedIds.SequenceEqual(actualIds), $"{property.Name} list values differ.");
+            Assert.NotSame(expectedIds, actualIds);
+        }
         else
             Assert.True(Equals(expected, actual), $"{property.Name}: expected {expected}, actual {actual}.");
     }
@@ -427,6 +507,8 @@ public sealed class ConfigManagerDefaultSyncTests
             Assert.False(expectedArray.SequenceEqual(actualArray), $"{property.Name} must begin with distinct array values.");
         else if (expected is List<string> expectedList && actual is List<string> actualList)
             Assert.False(expectedList.SequenceEqual(actualList), $"{property.Name} must begin with distinct list values.");
+        else if (expected is List<uint> expectedIds && actual is List<uint> actualIds)
+            Assert.False(expectedIds.SequenceEqual(actualIds), $"{property.Name} must begin with distinct list values.");
         else
             Assert.NotEqual(expected, actual);
     }

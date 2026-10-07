@@ -14,29 +14,40 @@ public sealed class DadIPC : IDisposable
     public const string ConfigureAndEnableEndpoint = "FrenRider.Dad.ConfigureAndEnable";
     public const string ApplyQuestionableDutySettingsEndpoint = "FrenRider.Dad.ApplyQuestionableDutySettings";
     public const string ReleaseQuestionableDutySettingsEndpoint = "FrenRider.Dad.ReleaseQuestionableDutySettings";
+    public const string AcquireDungeonRsrAggroEndpoint = "FrenRider.Dad.AcquireDungeonRsrAggro";
+    public const string ReleaseDungeonRsrAggroEndpoint = "FrenRider.Dad.ReleaseDungeonRsrAggro";
 
     private readonly DadIpcEndpoint endpoint;
     private readonly DadProfileTransferService profileTransferService;
     private readonly DadProfileIpcEndpoint profileEndpoint;
     private readonly IDalamudPluginInterface pluginInterface;
     private readonly ConfigManager configManager;
+    private readonly CombatService combatService;
     private readonly Dalamud.Plugin.Ipc.ICallGateProvider<string, string, bool> applyQuestionableProvider;
     private readonly Dalamud.Plugin.Ipc.ICallGateProvider<string, bool> releaseQuestionableProvider;
+    private readonly Dalamud.Plugin.Ipc.ICallGateProvider<string, uint, bool> acquireDungeonRsrProvider;
+    private readonly Dalamud.Plugin.Ipc.ICallGateProvider<string, bool> releaseDungeonRsrProvider;
     private bool disposed;
 
     public DadIPC(
         IDalamudPluginInterface pluginInterface,
         ConfigManager configManager,
         FrenTracker frenTracker,
+        CombatService combatService,
         IPluginLog log)
     {
         this.pluginInterface = pluginInterface;
         this.configManager = configManager;
+        this.combatService = combatService;
         applyQuestionableProvider = pluginInterface.GetIpcProvider<string, string, bool>(ApplyQuestionableDutySettingsEndpoint);
         releaseQuestionableProvider = pluginInterface.GetIpcProvider<string, bool>(ReleaseQuestionableDutySettingsEndpoint);
         applyQuestionableProvider.RegisterFunc((runId, json) =>
             configManager.QuestionableDutySettings.Apply(runId, json, configManager.QuestionableCharacterIdentity));
         releaseQuestionableProvider.RegisterFunc(configManager.QuestionableDutySettings.Release);
+        acquireDungeonRsrProvider = pluginInterface.GetIpcProvider<string, uint, bool>(AcquireDungeonRsrAggroEndpoint);
+        releaseDungeonRsrProvider = pluginInterface.GetIpcProvider<string, bool>(ReleaseDungeonRsrAggroEndpoint);
+        acquireDungeonRsrProvider.RegisterFunc(combatService.AcquireDungeonRsrAggro);
+        releaseDungeonRsrProvider.RegisterFunc(combatService.ReleaseDungeonRsrAggro);
         pluginInterface.ActivePluginsChanged += OnActivePluginsChanged;
         var provider = pluginInterface.GetIpcProvider<string, bool>(ConfigureAndEnableEndpoint);
         endpoint = new DadIpcEndpoint(
@@ -71,6 +82,9 @@ public sealed class DadIPC : IDisposable
         pluginInterface.ActivePluginsChanged -= OnActivePluginsChanged;
         applyQuestionableProvider.UnregisterFunc();
         releaseQuestionableProvider.UnregisterFunc();
+        acquireDungeonRsrProvider.UnregisterFunc();
+        releaseDungeonRsrProvider.UnregisterFunc();
+        combatService.ReleaseDungeonRsrAggroForDeparture("FrenRider DAD IPC disposal");
         configManager.QuestionableDutySettings.Clear();
         profileEndpoint.Dispose();
         profileTransferService.Dispose();
@@ -83,7 +97,10 @@ public sealed class DadIPC : IDisposable
     private void OnActivePluginsChanged(IActivePluginsChangedEventArgs args)
     {
         if (args.AffectedInternalNames.Contains("dad", StringComparer.OrdinalIgnoreCase))
+        {
             configManager.QuestionableDutySettings.Clear();
+            combatService.ReleaseDungeonRsrAggroForDeparture("DAD provider departure");
+        }
     }
 }
 

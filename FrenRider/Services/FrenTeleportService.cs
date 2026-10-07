@@ -254,6 +254,7 @@ public sealed class FrenTeleportService
 
             // AethernetTeleport is a single immediate request; rejected/busy requests
             // consume the observation without scheduling a local retry.
+            plugin.FollowService.SuspendForTravel();
             if (!ipc.GetIpcSubscriber<string, bool>("Lifestream.AethernetTeleport").InvokeFunc(destination.Name))
                 return false;
 
@@ -354,6 +355,7 @@ public sealed class FrenTeleportService
         SetStatus(FrenTeleportState.ReadingParty, $"Found {candidateCount} aetherytes for {location.DisplayName}", log: true);
 
         var command = $"/li {candidate.Name}";
+        plugin.FollowService.SuspendForTravel();
         if (!GameHelpers.SendChatCommand(command, "FrenTeleport"))
         {
             StartCooldown(now, $"Failed to send {command}");

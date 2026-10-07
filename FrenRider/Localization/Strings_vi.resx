@@ -2808,4 +2808,50 @@ Thử lại ở lần hồi chiêu sau, kể cả thú đã đánh dấu.</value
   <data name="Auto-fade when unfocused" xml:space="preserve"><value>Tự giảm độ đục khi mất tiêu điểm</value></data>
   <data name="Unfocused opacity (%)" xml:space="preserve"><value>Độ đục khi mất tiêu điểm (%)</value></data>
   <data name="Unfocused delay (seconds)" xml:space="preserve"><value>Độ trễ khi mất tiêu điểm (giây)</value></data>
+  <data name="Cling exclusions" xml:space="preserve">
+    <value>Khu vực loại trừ bám theo</value>
+  </data>
+  <data name="Pause cling in these areas. Seek and teleport travel remain available." xml:space="preserve">
+    <value>Tạm dừng bám theo trong các khu vực này. Tìm kiếm và di chuyển bằng dịch chuyển vẫn khả dụng.</value>
+  </data>
+  <data name="Area" xml:space="preserve">
+    <value>Khu vực</value>
+  </data>
+  <data name="Choose an area" xml:space="preserve">
+    <value>Chọn khu vực</value>
+  </data>
+  <data name="No cling exclusions." xml:space="preserve">
+    <value>Không có khu vực loại trừ bám theo.</value>
+  </data>
+  <data name="Area {0}" xml:space="preserve">
+    <value>Khu vực {0}</value>
+  </data>
+  <data name="Cling excluded in this area" xml:space="preserve">
+    <value>Loại trừ bám theo trong khu vực này</value>
+  </data>
+  <data name="Pause cling for FATE" xml:space="preserve">
+    <value>Tạm dừng bám theo trong FATE</value>
+  </data>
+  <data name="While driving your own mount with Fly You Fools, safely land and dismount, then pause cling until the FATE and combat end. Pillion passengers are never dismounted." xml:space="preserve">
+    <value>Khi điều khiển thú cưỡi riêng với Fly You Fools, hãy hạ cánh và xuống thú cưỡi an toàn, rồi tạm dừng bám theo đến khi FATE và chiến đấu kết thúc. Không bao giờ buộc hành khách xuống thú cưỡi.</value>
+  </data>
+  <data name="Ignore FATEs" xml:space="preserve">
+    <value>Bỏ qua FATE</value>
+  </data>
+  <data name="Skip automatic FATE sync and FATE preset overrides, and ignore Pause cling for FATE. Ordinary travel and self-defence continue." xml:space="preserve">
+    <value>Bỏ qua tự động đồng bộ, ghi đè thiết lập FATE và tạm dừng bám theo trong FATE. Di chuyển thông thường và tự vệ vẫn tiếp tục.</value>
+  </data>
+  <data name="Cling paused for FATE" xml:space="preserve">
+    <value>Đã tạm dừng bám theo trong FATE</value>
+  </data>
+  <data name="Off: FrenRider chooses BossMod presets from your job and rotation provider.&#xA;On: use the BossMod presets below with any rotation provider. A custom preset may run actions alongside RSR, WRATH or DAEDALUS." xml:space="preserve">
+    <value>Tắt: FrenRider chọn preset BossMod theo job và nhà cung cấp rotation của bạn.
+Bật: dùng các preset BossMod bên dưới với mọi nhà cung cấp rotation. Preset tùy chỉnh có thể thực hiện hành động cùng RSR, WRATH hoặc DAEDALUS.</value>
+  </data>
+  <data name="Choose a preset from the selected BossMod provider's complete catalog. None leaves its current preset unchanged." xml:space="preserve">
+    <value>Chọn preset từ toàn bộ danh mục của nhà cung cấp BossMod đã chọn. Không có sẽ giữ nguyên preset hiện tại.</value>
+  </data>
+  <data name="BossMod preset catalog unavailable or empty; saved selections are retained." xml:space="preserve">
+    <value>Danh mục preset BossMod không có sẵn hoặc trống; các lựa chọn đã lưu được giữ nguyên.</value>
+  </data>
 </root>

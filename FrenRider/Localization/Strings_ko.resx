@@ -2703,4 +2703,50 @@
   <data name="Auto-fade when unfocused" xml:space="preserve"><value>포커스를 잃으면 자동으로 흐리게 표시</value></data>
   <data name="Unfocused opacity (%)" xml:space="preserve"><value>포커스가 없을 때 불투명도 (%)</value></data>
   <data name="Unfocused delay (seconds)" xml:space="preserve"><value>포커스를 잃은 후 대기 시간 (초)</value></data>
+  <data name="Cling exclusions" xml:space="preserve">
+    <value>추종 제외 지역</value>
+  </data>
+  <data name="Pause cling in these areas. Seek and teleport travel remain available." xml:space="preserve">
+    <value>이 지역에서는 추종을 일시 중지합니다. 탐색과 텔레포트 이동은 계속 사용할 수 있습니다.</value>
+  </data>
+  <data name="Area" xml:space="preserve">
+    <value>지역</value>
+  </data>
+  <data name="Choose an area" xml:space="preserve">
+    <value>지역 선택</value>
+  </data>
+  <data name="No cling exclusions." xml:space="preserve">
+    <value>추종 제외 지역이 없습니다.</value>
+  </data>
+  <data name="Area {0}" xml:space="preserve">
+    <value>지역 {0}</value>
+  </data>
+  <data name="Cling excluded in this area" xml:space="preserve">
+    <value>이 지역에서 추종 제외</value>
+  </data>
+  <data name="Pause cling for FATE" xml:space="preserve">
+    <value>FATE에서 추종 일시 중지</value>
+  </data>
+  <data name="While driving your own mount with Fly You Fools, safely land and dismount, then pause cling until the FATE and combat end. Pillion passengers are never dismounted." xml:space="preserve">
+    <value>Fly You Fools로 자신의 탈것을 조종할 때 안전하게 착륙하고 내린 후 FATE와 전투가 끝날 때까지 추종을 일시 중지합니다. 동승자를 내리게 하지는 않습니다.</value>
+  </data>
+  <data name="Ignore FATEs" xml:space="preserve">
+    <value>FATE 무시</value>
+  </data>
+  <data name="Skip automatic FATE sync and FATE preset overrides, and ignore Pause cling for FATE. Ordinary travel and self-defence continue." xml:space="preserve">
+    <value>FATE 자동 동기화와 FATE 프리셋 전환을 건너뛰고 FATE 추종 일시 중지도 무시합니다. 일반 이동과 자기 방어는 계속합니다.</value>
+  </data>
+  <data name="Cling paused for FATE" xml:space="preserve">
+    <value>FATE에서 추종 일시 중지됨</value>
+  </data>
+  <data name="Off: FrenRider chooses BossMod presets from your job and rotation provider.&#xA;On: use the BossMod presets below with any rotation provider. A custom preset may run actions alongside RSR, WRATH or DAEDALUS." xml:space="preserve">
+    <value>끔: FrenRider가 직업과 로테이션 제공자에 따라 BossMod 프리셋을 선택합니다.
+켬: 아래 BossMod 프리셋을 모든 로테이션 제공자와 사용합니다. 사용자 프리셋은 RSR, WRATH 또는 DAEDALUS와 함께 동작을 실행할 수 있습니다.</value>
+  </data>
+  <data name="Choose a preset from the selected BossMod provider's complete catalog. None leaves its current preset unchanged." xml:space="preserve">
+    <value>선택한 BossMod 제공자의 전체 목록에서 프리셋을 선택하세요. 없음은 현재 프리셋을 유지합니다.</value>
+  </data>
+  <data name="BossMod preset catalog unavailable or empty; saved selections are retained." xml:space="preserve">
+    <value>BossMod 프리셋 목록을 읽을 수 없거나 비어 있습니다. 저장된 선택을 유지합니다.</value>
+  </data>
 </root>

@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using FrenRider.IPC;
 using FrenRider.Models;
 using FrenRider.Services;
@@ -31,6 +32,10 @@ public sealed class DadProfileTransferTests
         Assert.Equal("Remote Label", created.DisplayLabel);
         Assert.Equal("Default Fren", created.Config.FrenName);
         Assert.NotSame(account.DefaultConfig, created.Config);
+        Assert.Equal(account.DefaultConfig.ClingExcludedTerritoryIds, created.Config.ClingExcludedTerritoryIds);
+        Assert.NotSame(account.DefaultConfig.ClingExcludedTerritoryIds, created.Config.ClingExcludedTerritoryIds);
+        created.Config.ClingExcludedTerritoryIds.Clear();
+        Assert.True(account.DefaultConfig.IsClingExcluded(129));
         Assert.Equal(localCount, account.Characters.Count);
         Assert.DoesNotContain(created.RowId, account.Characters.Keys);
 
@@ -104,6 +109,156 @@ public sealed class DadProfileTransferTests
         Assert.True(DadProfileTransferService.TryDeserializeProfile(json, out var roundTrip, out code));
         Assert.Equal("  o'Brien TIA@ExactWorld  ", roundTrip!.FrenName);
         Assert.True(roundTrip.Enabled);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void CurrentProfileRoundTripPreservesIndependentCustomOrEmptyClingExclusions(bool empty)
+    {
+        var original = new CharacterConfig
+        {
+            ClingExcludedTerritoryIds = empty ? [] : [156, 9999, 156],
+            PauseClingForFate = true,
+            IgnoreFates = true,
+            AutoSyncFate = false,
+        };
+        var json = Export(original);
+
+        Assert.True(DadProfileTransferService.TryDeserializeProfile(json, out var first, out var code));
+        Assert.Equal("ok", code);
+        Assert.True(DadProfileTransferService.TryDeserializeProfile(json, out var second, out code));
+        Assert.Equal(original.ClingExcludedTerritoryIds, first!.ClingExcludedTerritoryIds);
+        Assert.Equal(original.ClingExcludedTerritoryIds, second!.ClingExcludedTerritoryIds);
+        Assert.True(first.PauseClingForFate);
+        Assert.True(first.IgnoreFates);
+        Assert.False(first.AutoSyncFate);
+        Assert.NotSame(original.ClingExcludedTerritoryIds, first.ClingExcludedTerritoryIds);
+        Assert.NotSame(first.ClingExcludedTerritoryIds, second.ClingExcludedTerritoryIds);
+        first.ClingExcludedTerritoryIds.Add(129);
+        Assert.DoesNotContain((uint)129, original.ClingExcludedTerritoryIds);
+        Assert.DoesNotContain((uint)129, second.ClingExcludedTerritoryIds);
+    }
+
+    [Fact]
+    public void LegacyProfileMissingNewClingAndFatePreferencesReceivesIndependentDefaults()
+    {
+        var profile = JsonNode.Parse(Export(new CharacterConfig { FrenName = "Legacy Fren", Enabled = true }))!;
+        Assert.True(profile["config"]!.AsObject().Remove("clingExcludedTerritoryIds"));
+        Assert.True(profile["config"]!.AsObject().Remove("pauseClingForFate"));
+        Assert.True(profile["config"]!.AsObject().Remove("ignoreFates"));
+        var json = profile.ToJsonString();
+
+        Assert.True(DadProfileTransferService.TryDeserializeProfile(json, out var first, out var code));
+        Assert.Equal("ok", code);
+        Assert.True(DadProfileTransferService.TryDeserializeProfile(json, out var second, out code));
+        Assert.Equal("Legacy Fren", first!.FrenName);
+        Assert.True(first.Enabled);
+        Assert.Equal(CharacterConfig.CreateDefaultClingExcludedTerritoryIds(), first.ClingExcludedTerritoryIds);
+        Assert.False(first.PauseClingForFate);
+        Assert.False(first.IgnoreFates);
+        Assert.NotSame(first.ClingExcludedTerritoryIds, second!.ClingExcludedTerritoryIds);
+        first.ClingExcludedTerritoryIds.Clear();
+        Assert.True(second.IsClingExcluded(129));
+    }
+
+    [Theory]
+    [InlineData("clingExcludedTerritoryIds")]
+    [InlineData("pauseClingForFate")]
+    [InlineData("ignoreFates")]
+    public void MissingOneNewPreferencePreservesEveryPresentPreference(string missing)
+    {
+        var profile = JsonNode.Parse(Export(new CharacterConfig
+        {
+            ClingExcludedTerritoryIds = [],
+            PauseClingForFate = true,
+            IgnoreFates = true,
+            AutoSyncFate = false,
+        }))!;
+        profile["config"]!.AsObject().Remove(missing);
+
+        Assert.True(DadProfileTransferService.TryDeserializeProfile(profile.ToJsonString(), out var config, out var code));
+        Assert.Equal("ok", code);
+        Assert.Equal(missing != "pauseClingForFate", config!.PauseClingForFate);
+        Assert.Equal(missing != "ignoreFates", config.IgnoreFates);
+        Assert.False(config.AutoSyncFate);
+        if (missing == "clingExcludedTerritoryIds")
+            Assert.Equal(CharacterConfig.CreateDefaultClingExcludedTerritoryIds(), config.ClingExcludedTerritoryIds);
+        else
+            Assert.Empty(config.ClingExcludedTerritoryIds);
+    }
+
+    [Fact]
+    public void MissingRequiredUnknownDuplicateAndNullProfileFieldsRemainRejectedWithoutMutation()
+    {
+        var account = CreateAccount();
+        var original = account.Characters[ActiveCharacterKey];
+        var manager = new TestProfileStore(account, ActiveCharacterKey);
+        using var service = new DadProfileTransferService(manager);
+        var valid = Export(new CharacterConfig());
+        var profile = JsonNode.Parse(valid)!;
+        var config = profile["config"]!.AsObject();
+
+        foreach (var property in config.Select(pair => pair.Key)
+                     .Where(key => key is not ("clingExcludedTerritoryIds" or "pauseClingForFate" or "ignoreFates")))
+        {
+            var incomplete = profile.DeepClone();
+            incomplete["config"]!.AsObject().Remove(property);
+            Assert.Equal("incompatible-profile", ReadResult(service.ApplyProfile(ApplyRequest(incomplete.ToJsonString()))).Code);
+        }
+
+        var unknown = profile.DeepClone();
+        unknown["config"]!["unexpectedSetting"] = true;
+        Assert.Equal("incompatible-profile", ReadResult(service.ApplyProfile(ApplyRequest(unknown.ToJsonString()))).Code);
+        var nullList = profile.DeepClone();
+        nullList["config"]!["clingExcludedTerritoryIds"] = null;
+        Assert.Equal("incompatible-profile", ReadResult(service.ApplyProfile(ApplyRequest(nullList.ToJsonString()))).Code);
+
+        var configJson = config.ToJsonString();
+        foreach (var property in new[] { "enabled", "clingExcludedTerritoryIds" })
+        {
+            var duplicate = "{\"version\":1,\"config\":" + configJson[..^1]
+                            + ",\"" + property + "\":" + config[property]!.ToJsonString() + "}}";
+            Assert.Equal("incompatible-profile", ReadResult(service.ApplyProfile(ApplyRequest(duplicate))).Code);
+        }
+        Assert.False(manager.HasTemporaryProfile);
+        Assert.Same(original, account.Characters[ActiveCharacterKey]);
+    }
+
+    [Theory]
+    [InlineData(FrenRiderProfileAcceptancePolicy.Temporary, false)]
+    [InlineData(FrenRiderProfileAcceptancePolicy.Temporary, true)]
+    [InlineData(FrenRiderProfileAcceptancePolicy.Permanent, false)]
+    [InlineData(FrenRiderProfileAcceptancePolicy.Permanent, true)]
+    public void ProfileApplyPreservesCustomOrEmptyClingExclusionsAndLocalPolicy(
+        FrenRiderProfileAcceptancePolicy policy, bool empty)
+    {
+        var account = CreateAccount(policy);
+        var original = account.Characters[ActiveCharacterKey];
+        var manager = new TestProfileStore(account, ActiveCharacterKey);
+        using var service = new DadProfileTransferService(manager);
+        var incoming = new CharacterConfig { ClingExcludedTerritoryIds = empty ? [] : [156, 9999] };
+
+        var applied = ReadResult(service.ApplyProfile(ApplyRequest(Export(incoming))));
+
+        Assert.Equal("ok", applied.Code);
+        var active = manager.GetActiveConfig();
+        Assert.Equal(incoming.ClingExcludedTerritoryIds, active.ClingExcludedTerritoryIds);
+        Assert.NotSame(original.ClingExcludedTerritoryIds, active.ClingExcludedTerritoryIds);
+        Assert.Equal(policy, active.ProfileAcceptancePolicy);
+        active.ClingExcludedTerritoryIds.Add(130);
+        Assert.DoesNotContain((uint)130, incoming.ClingExcludedTerritoryIds);
+        if (policy == FrenRiderProfileAcceptancePolicy.Temporary)
+        {
+            Assert.Equal("temporary-applied", applied.Outcome);
+            Assert.Same(original, account.Characters[ActiveCharacterKey]);
+            Assert.Equal(CharacterConfig.CreateDefaultClingExcludedTerritoryIds(), original.ClingExcludedTerritoryIds);
+        }
+        else
+        {
+            Assert.Equal("permanent-applied", applied.Outcome);
+            Assert.Same(active, account.Characters[ActiveCharacterKey]);
+        }
     }
 
     [Fact]

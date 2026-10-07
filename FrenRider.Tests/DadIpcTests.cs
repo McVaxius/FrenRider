@@ -12,6 +12,35 @@ public sealed class DadIpcTests
 {
     private const string QuestionableSettingsJson = """{"AdsSoloEnabled":true,"AdsSoloMaturityThreshold":0,"AdsSoloHandoffDelaySeconds":10,"AdsFourManEnabled":true,"AdsFourManMaturityThreshold":0,"AdsFourManHandoffDelaySeconds":2,"UseAdsLeaveAfterAdsDuty":true,"ExitAfterDutyEnds":false,"LeaveWhenAllLeft":false,"ExitAfterDutySeconds":20}""";
 
+    [Theory]
+    [InlineData(2U, 4, 1, true)]
+    [InlineData(2U, 1, 1, false)]
+    [InlineData(2U, 8, 1, false)]
+    [InlineData(2U, 4, 3, false)]
+    [InlineData(3U, 4, 1, false)]
+    [InlineData(4U, 4, 1, false)]
+    [InlineData(5U, 8, 3, false)]
+    [InlineData(0U, 4, 1, false)]
+    public void DungeonTargetingScopeExcludesOtherDutyFamilies(uint contentType, int members, int parties, bool accepted)
+        => Assert.Equal(accepted, CombatService.IsFourPlayerDungeon(contentType, members, parties));
+
+    [Fact]
+    public void DungeonEffectiveSelectionPreservesProfilesAndRetainsNewerIntentionalSelections()
+    {
+        var profile = new CharacterConfig { RsrAggroType = 3, RotationType = 1, RotationPlugin = 2 };
+        var saved = JsonSerializer.Serialize(profile);
+        var live = new DungeonRsrLiveOwnership(new RsrLiveTargetingSnapshot(new object(), new object(), "Basic", 30, 2, null, 2));
+        var ownership = new DadDungeonRsrAggroOwnership("run", "character", profile, 1, 2, profile.RsrAggroType, live);
+        Assert.Equal(0, ownership.ResolveSelection("character", profile));
+        Assert.Equal(saved, JsonSerializer.Serialize(profile));
+        Assert.Equal(3, ownership.ResolveSelection("other-character", profile));
+        Assert.Equal(3, ownership.ResolveSelection("character", profile.Clone()));
+        profile.RsrAggroType = 1;
+        Assert.Equal(1, ownership.ResolveSelection("character", profile));
+        Assert.Equal(1, profile.RotationType);
+        Assert.Equal(2, profile.RotationPlugin);
+    }
+
     [Fact]
     public void QuestionableIpcUsesOnlyActiveProfileAndClearsOnBothPluginUnloadsAndLogout()
     {
@@ -58,7 +87,10 @@ public sealed class DadIpcTests
             var active = manager.GetActiveConfig();
             var other = account.Characters["Other Character@Excalibur"];
             var saved = JsonSerializer.Serialize(account);
-            using var ipc = new DadIPC(pi, manager, new FrenTracker(null!), log);
+            var combat = new CombatService(null!, null!, null!, null!);
+            using var ipc = new DadIPC(pi, manager, new FrenTracker(null!), combat, log);
+            Assert.IsType<Func<string, uint, bool>>(providers[DadIPC.AcquireDungeonRsrAggroEndpoint]);
+            Assert.IsType<Func<string, bool>>(providers[DadIPC.ReleaseDungeonRsrAggroEndpoint]);
             bool Apply(string owner) => ((Func<string, string, bool>)providers[DadIPC.ApplyQuestionableDutySettingsEndpoint])(owner, QuestionableSettingsJson);
             var release = (Func<string, bool>)providers[DadIPC.ReleaseQuestionableDutySettingsEndpoint];
             Assert.True(Apply("run"));
@@ -86,7 +118,7 @@ public sealed class DadIpcTests
             ipc.Dispose();
             Assert.False(manager.IsQuestionableDutyFamilyControlled(active, AdsDutyCategory.Solo));
             Assert.Empty(providers);
-            using var reloaded = new DadIPC(pi, manager, new FrenTracker(null!), log);
+            using var reloaded = new DadIPC(pi, manager, new FrenTracker(null!), combat, log);
             Assert.True(Apply("new-run"));
             ipc.Dispose(); // Old instance cannot unregister or clear the new instance.
             Assert.True(manager.IsQuestionableDutyFamilyControlled(active, AdsDutyCategory.Solo));

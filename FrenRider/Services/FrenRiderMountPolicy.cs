@@ -31,6 +31,24 @@ public static class FrenRiderMountPolicy
         return !ridingPillion && (hasNativeMountedState || conditionMounted);
     }
 
+    internal static ushort ResolveFateClingHold(
+        ushort heldFateId,
+        bool ownerAndSettingsValid,
+        ushort currentFateId,
+        bool inCombat,
+        bool selfOnOwnMount,
+        bool ridingPillion,
+        bool canBegin)
+    {
+        if (!ownerAndSettingsValid || ridingPillion)
+            return 0;
+
+        if (heldFateId != 0)
+            return currentFateId == heldFateId || inCombat ? heldFateId : (ushort)0;
+
+        return currentFateId != 0 && selfOnOwnMount && canBegin ? currentFateId : (ushort)0;
+    }
+
     public static bool ShouldRequestFarChase(
         bool currentlyRequested,
         bool eligible,

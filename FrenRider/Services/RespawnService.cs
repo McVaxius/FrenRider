@@ -1,7 +1,10 @@
 using System;
 using Dalamud.Game.ClientState.Conditions;
+using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FrenRider.Models;
+using Lumina.Excel.Sheets;
 
 namespace FrenRider.Services;
 
@@ -21,11 +24,16 @@ public sealed class RespawnService
     private readonly Plugin plugin;
     private readonly RespawnNotificationRecoveryPolicy notificationRecovery = new();
     private long unconsciousStartedMs;
+    private long soloUnconsciousStartedMs;
+    private (ulong Character, uint Territory, uint Duty) soloDutyIdentity;
     private long lastActionMs;
     private bool settingsInitialized;
     private bool lastEnabled;
     private int lastDelaySeconds;
     private bool lastInDuty;
+    private CharacterConfig? lastConfig;
+    private string lastAccount = string.Empty;
+    private string lastCharacter = string.Empty;
 
     public RespawnState State { get; private set; } = RespawnState.Off;
     public string StatusText { get; private set; } = "Off";
@@ -62,7 +70,7 @@ public sealed class RespawnService
                 ? config.RespawnInsideDutiesDelaySeconds
                 : config.RespawnOutsideDutiesDelaySeconds);
 
-        if (SettingsChanged(respawnEnabled, delaySeconds, inDuty))
+        if (SettingsChanged(config, respawnEnabled, delaySeconds, inDuty))
         {
             ResetTimer();
             SetState(respawnEnabled ? RespawnState.Idle : RespawnState.Off, inDuty ? "Duty scope changed" : "Setting changed");
@@ -114,10 +122,15 @@ public sealed class RespawnService
             SetState(RespawnState.Waiting, $"Unconscious; return in {delaySeconds}s");
         }
 
+        var soloIdentity = ReadSoloDutyIdentity(config);
+        UpdateSoloDelay(soloIdentity, now);
+        var delayStartedMs = soloUnconsciousStartedMs != 0 ? soloUnconsciousStartedMs : unconsciousStartedMs;
+        if (soloUnconsciousStartedMs != 0)
+            delaySeconds = 5;
         var delayMs = delaySeconds * 1000L;
-        if (!HasRespawnDelayElapsed(unconsciousStartedMs, now, delayMs))
+        if (!HasRespawnDelayElapsed(delayStartedMs, now, delayMs))
         {
-            var remainingSeconds = Math.Max(1, (int)Math.Ceiling((delayMs - (now - unconsciousStartedMs)) / 1000.0));
+            var remainingSeconds = Math.Max(1, (int)Math.Ceiling((delayMs - (now - delayStartedMs)) / 1000.0));
             SetState(RespawnState.Waiting, $"Unconscious; return in {remainingSeconds}s");
             return;
         }
@@ -152,7 +165,7 @@ public sealed class RespawnService
     internal static bool HasRespawnDelayElapsed(long unconsciousStartedMs, long nowMs, long delayMs)
         => nowMs - unconsciousStartedMs >= delayMs;
 
-    private bool SettingsChanged(bool enabled, int delaySeconds, bool inDuty)
+    private bool SettingsChanged(CharacterConfig config, bool enabled, int delaySeconds, bool inDuty)
     {
         if (!settingsInitialized)
         {
@@ -160,20 +173,147 @@ public sealed class RespawnService
             lastEnabled = enabled;
             lastDelaySeconds = delaySeconds;
             lastInDuty = inDuty;
+            lastConfig = config;
+            lastAccount = plugin.ConfigManager.CurrentAccountId;
+            lastCharacter = plugin.ConfigManager.ActiveCharacterKey;
             return false;
         }
 
-        if (lastEnabled == enabled && lastDelaySeconds == delaySeconds && lastInDuty == inDuty)
+        if (lastEnabled == enabled && lastDelaySeconds == delaySeconds && lastInDuty == inDuty
+            && ReferenceEquals(lastConfig, config)
+            && lastAccount == plugin.ConfigManager.CurrentAccountId
+            && lastCharacter == plugin.ConfigManager.ActiveCharacterKey)
             return false;
 
         lastEnabled = enabled;
         lastDelaySeconds = delaySeconds;
         lastInDuty = inDuty;
+        lastConfig = config;
+        lastAccount = plugin.ConfigManager.CurrentAccountId;
+        lastCharacter = plugin.ConfigManager.ActiveCharacterKey;
         return true;
     }
 
     private static bool IsInDuty()
-        => Plugin.Condition[ConditionFlag.BoundByDuty];
+        => Plugin.Condition[ConditionFlag.BoundByDuty]
+            || Plugin.Condition[ConditionFlag.BoundByDuty56]
+            || Plugin.Condition[ConditionFlag.BoundByDuty95]
+            || TryReadConfirmedDutyIdentity(out _, out _);
+
+    private static unsafe bool TryReadConfirmedDutyIdentity(out uint territory, out uint duty)
+    {
+        territory = 0;
+        duty = 0;
+        try
+        {
+            var gameMain = GameMain.Instance();
+            if (gameMain == null || gameMain->CurrentContentFinderConditionId == 0
+                || gameMain->CurrentTerritoryTypeId == 0
+                || gameMain->CurrentTerritoryTypeId != Plugin.ClientState.TerritoryType)
+                return false;
+            var row = Plugin.DataManager.GetExcelSheet<ContentFinderCondition>()?
+                .GetRowOrDefault(gameMain->CurrentContentFinderConditionId);
+            if (row?.TerritoryType.RowId != gameMain->CurrentTerritoryTypeId)
+                return false;
+            territory = gameMain->CurrentTerritoryTypeId;
+            duty = gameMain->CurrentContentFinderConditionId;
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private unsafe (ulong Character, uint Territory, uint Duty) ReadSoloDutyIdentity(CharacterConfig config)
+    {
+        if (!config.Enabled || !config.RespawnInsideDuties || !Plugin.ClientState.IsLoggedIn
+            || IsAreaTransitionActive() || !TryReadConfirmedDutyIdentity(out var territory, out var duty)
+            || !plugin.ConfigManager.TryGetLocalActiveConfig(out _))
+            return default;
+        try
+        {
+            var local = Plugin.ObjectTable.LocalPlayer;
+            var characterId = Plugin.PlayerState.ContentId;
+            if (local == null || local.Address == 0 || characterId == 0
+                || ((Character*)local.Address)->ContentId != characterId)
+                return default;
+
+            // Native membership precedes enumeration: the Dalamud enumerator
+            // skips unreadable entries, which must never make a group look solo.
+            var nativeCount = Plugin.PartyList.Length;
+            var partyId = Plugin.PartyList.PartyId;
+            var alliance = Plugin.PartyList.IsAlliance;
+            if (nativeCount is < 0 or > 1 || alliance || nativeCount == 0 && partyId != 0)
+                return default;
+            var readCount = 0;
+            var rosterMemberIsLocal = false;
+            foreach (var member in Plugin.PartyList)
+            {
+                readCount++;
+                rosterMemberIsLocal = member.ContentId == characterId && member.EntityId == local.EntityId;
+            }
+
+            // The HUD roster also includes duty NPC companions. An absent,
+            // inconsistent or larger companion roster retains the saved delay.
+            var hud = AgentHUD.Instance();
+            if (hud == null)
+                return default;
+            var hudCount = hud->PartyMemberCount;
+            var hudMemberIsLocal = hudCount == 1
+                && hud->PartyMembers[0].ContentId == characterId
+                && hud->PartyMembers[0].EntityId == local.EntityId;
+            if (!RespawnNotificationRecoveryPolicy.IsPositivelySoloRoster(
+                    nativeCount, partyId, alliance, readCount, rosterMemberIsLocal,
+                    hudCount, hudMemberIsLocal, hud->RaidGroupSize)
+                || Plugin.PartyList.Length != nativeCount || Plugin.PartyList.PartyId != partyId
+                || Plugin.PartyList.IsAlliance != alliance
+                || !TryReadConfirmedDutyIdentity(out var currentTerritory, out var currentDuty)
+                || currentTerritory != territory || currentDuty != duty)
+                return default;
+            return (characterId, territory, duty);
+        }
+        catch
+        {
+            return default;
+        }
+    }
+
+    private void UpdateSoloDelay((ulong Character, uint Territory, uint Duty) identity, long now)
+    {
+        soloUnconsciousStartedMs = ResolveSoloDelayStart(soloUnconsciousStartedMs, soloDutyIdentity, identity, now);
+        soloDutyIdentity = identity;
+    }
+
+    internal static long ResolveSoloDelayStart(long startedMs,
+        (ulong Character, uint Territory, uint Duty) previous,
+        (ulong Character, uint Territory, uint Duty) current, long now)
+        => current == default ? 0 : startedMs == 0 || current != previous ? now : startedMs;
+
+    private bool CanActAfterRecheck(long now)
+    {
+        var config = plugin.ConfigManager.GetActiveConfig();
+        var inDuty = IsInDuty();
+        var enabled = inDuty ? config.RespawnInsideDuties : config.RespawnOutsideDuties;
+        var delay = Math.Max(1, inDuty ? config.RespawnInsideDutiesDelaySeconds : config.RespawnOutsideDutiesDelaySeconds);
+        if (SettingsChanged(config, enabled, delay, inDuty))
+        {
+            ResetTimer();
+            return false;
+        }
+        if (!Plugin.ClientState.IsLoggedIn || !config.Enabled || !enabled
+            || IsAreaTransitionActive() || !Plugin.Condition[ConditionFlag.Unconscious]
+            || plugin.AutoYesService.RaiseOfferActive || plugin.PhoenixDownRecoveryService.DeferReturn
+            || plugin.AutomationService.IsUtilityGateActive)
+            return false;
+        var previousSolo = soloDutyIdentity;
+        UpdateSoloDelay(ReadSoloDutyIdentity(config), now);
+        if (previousSolo != soloDutyIdentity)
+            return false;
+        return HasRespawnDelayElapsed(
+            soloUnconsciousStartedMs != 0 ? soloUnconsciousStartedMs : unconsciousStartedMs,
+            now, soloUnconsciousStartedMs != 0 ? 5000 : delay * 1000L);
+    }
 
     private static bool IsAreaTransitionActive()
         => Plugin.Condition[ConditionFlag.BetweenAreas]
@@ -306,6 +446,8 @@ public sealed class RespawnService
 
     private unsafe void TryReturn(long now)
     {
+        if (!CanActAfterRecheck(now))
+            return;
         if (GameHelpers.TryReadSelectYesnoPrompt(out var promptText))
         {
             var promptKind = SelectYesnoPromptClassifier.Classify(promptText);
@@ -372,6 +514,8 @@ public sealed class RespawnService
         string promptText,
         long now)
     {
+        if (responseYes && promptKind == SelectYesnoPromptKind.DeathReturn && !CanActAfterRecheck(now))
+            return;
         var callbackDispatched = responseYes
             ? GameHelpers.ClickYesIfVisible(logClick: false)
             : GameHelpers.ClickNoIfVisible(logClick: false);
@@ -442,6 +586,8 @@ public sealed class RespawnService
     private void ResetTimer()
     {
         unconsciousStartedMs = 0;
+        soloUnconsciousStartedMs = 0;
+        soloDutyIdentity = default;
         lastActionMs = 0;
         ClearNotificationRecovery();
     }

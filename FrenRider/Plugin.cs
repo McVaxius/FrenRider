@@ -13,6 +13,7 @@ using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
 using ECommons;
 using FrenRider.IPC;
+using FrenRider.Models;
 using FrenRider.Services;
 using FrenRider.Windows;
 using AethertekUI;
@@ -94,6 +95,7 @@ public sealed class Plugin : IDalamudPlugin
 
     private IDtrBarEntry? dtrEntry;
     private bool wasLoggedIn;
+    private bool loggingOutCleanupDone;
     private int loginDetectionDelay;
     private bool wasPluginEnabled = false;
     private DateTime nextFrameworkHitchLogUtc = DateTime.MinValue;
@@ -159,7 +161,8 @@ public sealed class Plugin : IDalamudPlugin
             message => Log.Information(message),
             message => Log.Warning(message),
             new AutorotRsrCleanupController(AutorotIpcService, externalAutomationCommandSender),
-            daedalusAutomationController);
+            daedalusAutomationController,
+            AutorotIpcService);
         CoppeliaPowerlevelLeaseService = new CoppeliaPowerlevelLeaseService(this);
         FollowService = new FollowService(this, FrenTracker, ZoneService);
         MountService = new MountService(this, FrenTracker, ZoneService);
@@ -186,8 +189,9 @@ public sealed class Plugin : IDalamudPlugin
         AutoDutyDetectionService = new AutoDutyDetectionService(this, ChatGui, Framework, Log, AutoDutyWarningWindow);
 
         // Hook into FrenRider enabled state changes
+        ConfigManager.OnEffectiveProfileChanging += EndCombatSettingsSession;
         ConfigManager.OnFrenRiderEnabledChanged += OnFrenRiderEnabledChanged;
-        DadIPC = new DadIPC(PluginInterface, ConfigManager, FrenTracker, Log);
+        DadIPC = new DadIPC(PluginInterface, ConfigManager, FrenTracker, CombatService, Log);
 
         // Check for AutoDuty on plugin load if FrenRider is already enabled
         if (ConfigManager.GetActiveConfig().Enabled)
@@ -232,6 +236,7 @@ public sealed class Plugin : IDalamudPlugin
         ClientState.Login += OnLoginEvent;
         ToastGui.ErrorToast += BossModActionTweaksService.OnErrorToast;
         Framework.Update += OnFrameworkUpdate;
+        DutyState.DutyCompleted += OnDutyCompleted;
 
         // If already logged in at plugin load, defer detection to framework update
         if (ClientState.IsLoggedIn)
@@ -247,12 +252,16 @@ public sealed class Plugin : IDalamudPlugin
 
     public void Dispose()
     {
+        EndCombatSettingsSession();
+        ConfigManager.OnEffectiveProfileChanging -= EndCombatSettingsSession;
         PhoenixDownRecoveryService.Dispose();
         ToastGui.ErrorToast -= BossModActionTweaksService.OnErrorToast;
         BossModActionTweaksService.ResetRecovery();
         FollowService.Dispose();
+        MountService.ResetFateClingHold();
 
         Framework.Update -= OnFrameworkUpdate;
+        DutyState.DutyCompleted -= OnDutyCompleted;
         ClientState.Login -= OnLoginEvent;
 
         PluginInterface.UiBuilder.Draw -= DrawUi;
@@ -445,10 +454,12 @@ public sealed class Plugin : IDalamudPlugin
         {
             AdsIntegrationService.Update(forceOwnershipRefresh: true);
             var allowCombatSetup = CombatService.PrepareForEnableCombatSetup();
-            if (!AdsIntegrationService.IsSoloCombatHeld)
+            if (allowCombatSetup)
             {
+                CaptureExternalAutomationSnapshot("FrenRider enable preset preparation");
                 Log.Information("[FrenRider] Refreshing packaged BossMod presets on enable");
-                AutorotIpcService.CreatePresets(force: true);
+                AutorotIpcService.CreatePresets(force: true,
+                    rotationProvider: CombatService.GetConfiguredRotationProvider(ConfigManager.GetActiveConfig()));
             }
 
            // Trigger AutoDuty check when FrenRider is enabled
@@ -489,9 +500,11 @@ public sealed class Plugin : IDalamudPlugin
             FollowService.CancelFlyingStuckRecovery("disabled");
             FollowService.PreemptFarChase("disabled");
             MountService.PreemptFarChase("disabled");
+            MountService.ResetFateClingHold();
             RespawnService.ResetForDisable();
             PhoenixDownRecoveryService.Reset();
             AutoDutyDetectionService.HandleFrenRiderDisabled();
+            CombatService.ReleaseDungeonRsrAggroForDeparture("FrenRider disabled");
             ExternalAutomationCleanupService.Cleanup(
                 ConfigManager.GetActiveConfig(),
                 GetCleanupAccountId(),
@@ -503,8 +516,26 @@ public sealed class Plugin : IDalamudPlugin
 
     internal void CaptureExternalAutomationSnapshot(string reason)
     {
+        var config = ConfigManager.GetActiveConfig();
+        if (config.Enabled)
+            AutorotIpcService.PrepareOwnedBossModSettings(CombatService.GetConfiguredRotationProvider(config),
+                GetCleanupAccountId(), GetCleanupCharacterKey(), config);
         ExternalAutomationCleanupService.CaptureIfMissing(GetCleanupAccountId(), GetCleanupCharacterKey(), reason);
     }
+
+    private void EndCombatSettingsSession()
+    {
+        var config = ConfigManager.GetActiveConfig();
+        CombatService.ReleaseDungeonRsrAggroForDeparture("combat settings session departure");
+        if (ExternalAutomationCleanupService.TryGetSnapshot(GetCleanupAccountId(), GetCleanupCharacterKey(), out _))
+            ExternalAutomationCleanupService.Cleanup(config, GetCleanupAccountId(), GetCleanupCharacterKey(), "combat settings session departure");
+        else
+            AutorotIpcService.ReleaseOwnedBossModSettings(config.CleanupMode == FrenRiderCleanupMode.TurnEverythingOff);
+        CombatService.ClearExternalAutomationRuntimeState("combat settings session departure");
+    }
+
+    private void OnDutyCompleted(Dalamud.Game.DutyState.IDutyStateEventArgs args)
+        => CombatService.ReleaseDungeonRsrAggroForDeparture("native duty completion");
 
     internal void MarkWrathAutoStartedByFrenRider(string reason)
     {
@@ -683,11 +714,24 @@ public sealed class Plugin : IDalamudPlugin
             }
             else if (!ClientState.IsLoggedIn && wasLoggedIn)
             {
+                EndCombatSettingsSession();
                 PhoenixDownRecoveryService.Reset();
+                MountService.ResetFateClingHold();
                 wasLoggedIn = false;
                 loginDetectionDelay = 0;
                 ConfigManager.ClearActiveCharacter();
             }
+
+            if (ClientState.IsLoggedIn && Condition[ConditionFlag.LoggingOut])
+            {
+                if (!loggingOutCleanupDone)
+                {
+                    EndCombatSettingsSession();
+                    loggingOutCleanupDone = true;
+                }
+                return;
+            }
+            loggingOutCleanupDone = false;
 
             if (IsAreaTransitionActive())
             {
@@ -697,6 +741,7 @@ public sealed class Plugin : IDalamudPlugin
                 FrenTeleportService.ResetForAreaTransition();
                 FollowService.ResetForAreaTransition();
                 MountService.PreemptFarChase("area transition");
+                MountService.ResetFateClingHold();
                 RespawnService.ResetForAreaTransition();
                 return;
             }
@@ -784,6 +829,7 @@ public sealed class Plugin : IDalamudPlugin
             Measure("ads-reflection", () => AdsReflectionIpcService.Update());
             Measure("utility-gate", AutomationService.UpdateUtilityGate);
             Measure("phoenix-down-recovery", PhoenixDownRecoveryService.Update);
+            Measure("fate-cling-hold", MountService.RefreshFateClingHold);
             if (!PhoenixDownRecoveryService.HoldActions)
                 Measure("combat", CombatService.Update);
             if (!PhoenixDownRecoveryService.HoldMovement)
@@ -956,6 +1002,7 @@ public sealed class Plugin : IDalamudPlugin
 
     public void ToggleConfigUi() => ConfigWindow.Toggle();
     public void ToggleMainUi() => MainWindow.Toggle();
+    public void ToggleMiniUi() => MagiaMiniWindow.Toggle();
     internal void ApplyWindowOpacity(MaterialWindowOpacity opacity, string name)
     {
         opacity.Apply(name, Math.Clamp(Configuration.UiWindowOpacityPercent, 10, 100) / 100f, Configuration.UiTransparencyEnabled,

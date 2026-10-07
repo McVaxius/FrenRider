@@ -1,3 +1,40 @@
+2026-10-07 - CJK atlas construction
+
+- Request a 4096 x 4096 managed atlas and merge one bundled Noto CJK face per font role for the selected language, including Simplified and Traditional Chinese aliases. Preserve existing font sizes, glyph ranges, Windows and symbol fonts, and font lifecycle.
+
+2026-10-07 - Native Main and Mini shortcuts (I489)
+
+- Add fixed Settings, Mini, active-profile Run and local-account All FR on/off titlebar actions to Main, plus Main, Settings and active-profile Run on Mini. Recheck the effective profile/account when clicked and retain all body controls, the Fren selector and Eureka Magia actions.
+- Reserve actual native-button and measured title widths before motion preparation; keep title painting clear of controls and available while collapsed without changing saved window identities.
+
+2026-10-07 - DAD dungeon RSR targeting ownership (I465)
+
+- Add matching-run acquire/release IPC for confirmed four-player dungeons. Keep All Attackable Targets effective through eligible FrenRider RSR activation and refresh without editing saved or temporary profiles or changing operating mode during acquisition.
+- Capture the loaded provider, configuration and exact job's native targeting before a write. Require configured/effective readback before normal RSR activation, preserve active external overrides and newer intentional changes, and report unsupported or unconfirmed conditional restoration.
+
+2026-10-07 - Manual BossMod selection and owned live settings (I470/I485)
+
+- Populate general, deep-dungeon and FATE manual selectors from the selected live provider's complete preset catalog, retaining exact names, None and dormant profile fields. Replace a deleted active choice only after a readable catalog confirms it is missing, and preserve selections when no valid catalog is available.
+- Honor manual BossMod choices with every rotation provider while preserving the saved force field. Remove unsupported RSR preset-setting forwards and use literal BossMod preset IPC with exact readback.
+- Capture the original provider, character/profile, runtime presets, BMR saved AI selector and supported preferred distance before owned writes. Restore matching fields at session cleanup, preserving later external values and distinguishing none, force-disabled and ordered VBM selections; report unavailable or unconfirmed restoration.
+- Continue debounced combat-setting application while ADS owns navigation. Apply preset, AI, aggro, positional and target-mode edits independently, preserving combat suppression and saved profiles.
+- Preserve startup holds and reapply eligible configured combat after an actual suppression ends. Read VBM automatic AI from its live Enabled setting and report departed-provider restoration failures without writing into a replacement instance.
+
+2026-10-06 - Solo duty Return recovery (I483)
+
+- Reuse the inside-duty Return opt-in with a five-second continuous delay only for a confirmed solo duty and complete native/HUD roster evidence. Grouped and outside-duty cases retain their saved delays.
+- Recheck scope, identity and roster before Return, preserving Raise, Phoenix Down, utility and transition holds.
+
+2026-10-06 - Own-mount FATE pause and Ignore FATEs (I469)
+
+- Add optional FATE cling pause and Ignore FATEs settings, both off by default. Pause only begins from a verified own mount with Fly You Fools, safely lands/dismounts and holds normal follow/mount correction through the FATE and remaining combat; pillion always retires the hold without a passenger dismount.
+- Ignore FATEs preserves ordinary travel and self-defence while skipping automatic sync and FATE preset overrides. Preserve saved sync, distance and preset choices, default/profile compatibility, and clear transient FATE ownership on character/profile/fren changes, disable, death, logout and transitions.
+
+2026-10-06 - City and hub cling exclusions (I467)
+
+- Add an editable territory exclusion list to Follow settings, seeded with current cities and secondary hubs. Preserve custom and empty lists through character/default saves, independent cloning, default synchronization and profile transfer; legacy profiles missing this field receive the seeded defaults.
+- Pause owned cling, formation and same-territory chase in excluded areas without changing saved enablement, combat or mount policy. Keep Revenant's Toll and housing allowed by default, and keep seek, teleport and local aethernet travel available by releasing owned cling before travel starts.
+
 2026-10-06 - Default-branch CI
 
 - Run the existing artifact-only CI on master as well as the retained main branch, matching this repository's default branch. Preserve the fork-PR guard, build steps, dependency pin and version; Build and Release remains the sole publisher.

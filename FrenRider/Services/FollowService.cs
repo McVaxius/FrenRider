@@ -140,6 +140,15 @@ public class FollowService
         StateDetail = "Phoenix Down recovery";
     }
 
+    public void SuspendForTravel()
+    {
+        ResetFarChaseDelay();
+        SetFarChaseRequested(false, "fren travel");
+        StopAllFollowing(plugin.ConfigManager.GetActiveConfig(), "fren travel");
+        State = FollowState.Idle;
+        StateDetail = "Teleport or dialog active";
+    }
+
     public void CancelFlyingStuckRecovery(string reason)
     {
         if (flyingStuckRecoveryPhase == FlyingStuckRecoveryPhase.None
@@ -203,6 +212,16 @@ public class FollowService
             return;
         }
 
+        if (config.IsClingExcluded(zoneService.TerritoryId))
+        {
+            ResetFarChaseDelay();
+            SetFarChaseRequested(false, "cling exclusion");
+            StopAllFollowing(config, "cling exclusion");
+            State = FollowState.Idle;
+            StateDetail = "Cling excluded in this area";
+            return;
+        }
+
         if (plugin.AdsIntegrationService.ShouldPauseDutySystems
             || plugin.AdsIntegrationService.IsHandoffPending)
         {
@@ -247,6 +266,16 @@ public class FollowService
             State = FollowState.Idle;
             StateDetail = "Teleport or dialog active";
             LogFateFollowDecisionIfChanged(config, tracker.Fren, "teleport or dialog active");
+            return;
+        }
+
+        plugin.MountService.RefreshFateClingHold();
+        if (plugin.MountService.IsFateClingHeld)
+        {
+            SetFarChaseRequested(false, "FATE cling hold");
+            StopAllFollowing(config, "FATE cling hold");
+            State = FollowState.Idle;
+            StateDetail = "Cling paused for FATE";
             return;
         }
 

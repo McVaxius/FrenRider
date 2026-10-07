@@ -238,9 +238,10 @@ internal sealed class DadProfileTransferService : IDisposable
             var actualProperties = configElement.EnumerateObject()
                 .Select(property => property.Name)
                 .ToArray();
-            if (actualProperties.Length != ExpectedProfileProperties.Count
-                || actualProperties.Distinct(StringComparer.Ordinal).Count() != actualProperties.Length
-                || !ExpectedProfileProperties.SetEquals(actualProperties))
+            if (actualProperties.Distinct(StringComparer.Ordinal).Count() != actualProperties.Length
+                || actualProperties.Any(property => !ExpectedProfileProperties.Contains(property))
+                || ExpectedProfileProperties.Except(actualProperties, StringComparer.Ordinal)
+                    .Any(property => property is not ("clingExcludedTerritoryIds" or "pauseClingForFate" or "ignoreFates")))
             {
                 code = "incompatible-profile";
                 return false;
@@ -338,6 +339,7 @@ internal sealed class DadProfileTransferService : IDisposable
             || config.CompanionStrat == null
             || config.IdleAction == null
             || config.CustomIdleList == null
+            || config.ClingExcludedTerritoryIds == null
             || config.AutoRotationType == null
             || config.AutoRotationTypeDD == null
             || config.AutoRotationTypeFATE == null

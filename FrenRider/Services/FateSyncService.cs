@@ -24,7 +24,7 @@ public sealed class FateSyncService
     public void Update()
     {
         var config = plugin.ConfigManager.GetActiveConfig();
-        if (!config.AutoSyncFate)
+        if (!config.AutoSyncFate || config.IgnoreFates)
             return;
 
         if (plugin.AutomationService.IsUtilityGateActive)

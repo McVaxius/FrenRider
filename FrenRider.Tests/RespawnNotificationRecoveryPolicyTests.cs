@@ -4,6 +4,50 @@ namespace FrenRider.Tests;
 
 public sealed class RespawnNotificationRecoveryPolicyTests
 {
+    [Theory]
+    [InlineData(0, 0, false, 0, false, 0, false, 0, true)]
+    [InlineData(0, 0, false, 0, false, 1, true, 0, true)]
+    [InlineData(1, 42, false, 1, true, 1, true, 0, true)]
+    [InlineData(0, 42, false, 0, false, 0, false, 0, false)]
+    [InlineData(0, 0, true, 0, false, 0, false, 0, false)]
+    [InlineData(2, 42, false, 1, true, 1, true, 0, false)]
+    [InlineData(4, 42, false, 1, true, 1, true, 0, false)]
+    [InlineData(1, 42, false, 0, false, 1, true, 0, false)]
+    [InlineData(1, 42, false, 1, false, 1, true, 0, false)]
+    [InlineData(1, 42, false, 1, true, 0, false, 0, false)]
+    [InlineData(1, 42, false, 1, true, 1, false, 0, false)]
+    [InlineData(0, 0, false, 0, false, 4, false, 0, false)]
+    [InlineData(0, 0, false, 0, false, 1, false, 0, false)]
+    [InlineData(0, 0, false, 0, false, -1, false, 0, false)]
+    [InlineData(0, 0, false, 0, false, 0, false, 1, false)]
+    public void SoloEvidenceUsesCompleteMembershipAndRejectsNpcOrUncertainRosters(
+        int nativeCount, long partyId, bool alliance, int readCount, bool rosterSelf,
+        int hudCount, bool hudSelf, int hudRaidCount, bool expected)
+    {
+        Assert.Equal(expected, RespawnNotificationRecoveryPolicy.IsPositivelySoloRoster(
+            nativeCount, partyId, alliance, readCount, rosterSelf, hudCount, hudSelf, hudRaidCount));
+    }
+
+    [Fact]
+    public void SoloFiveSecondWaitRequiresContinuousSameDutyAndCharacterEvidence()
+    {
+        var solo = (Character: 1UL, Territory: 100U, Duty: 2U);
+        var started = RespawnService.ResolveSoloDelayStart(0, default, solo, 1000);
+        Assert.False(RespawnService.HasRespawnDelayElapsed(started, 5999, 5000));
+        Assert.True(RespawnService.HasRespawnDelayElapsed(started, 6000, 5000));
+        Assert.Equal(started, RespawnService.ResolveSoloDelayStart(started, solo, solo, 6000));
+
+        // A group, transition, outside-duty frame or unreadable identity all
+        // remove eligibility; later solo truth must earn a fresh five seconds.
+        Assert.Equal(0, RespawnService.ResolveSoloDelayStart(started, solo, default, 6000));
+        var regained = RespawnService.ResolveSoloDelayStart(0, default, solo, 7000);
+        Assert.False(RespawnService.HasRespawnDelayElapsed(regained, 11999, 5000));
+        Assert.True(RespawnService.HasRespawnDelayElapsed(regained, 12000, 5000));
+        Assert.Equal(8000, RespawnService.ResolveSoloDelayStart(regained, solo, (2, 100, 2), 8000));
+        Assert.Equal(8000, RespawnService.ResolveSoloDelayStart(regained, solo, (1, 101, 2), 8000));
+        Assert.Equal(8000, RespawnService.ResolveSoloDelayStart(regained, solo, (1, 100, 3), 8000));
+    }
+
     [Fact]
     public void RetryTimingsKeepNotificationDelayAndUseOneSecondDialogRetry()
     {

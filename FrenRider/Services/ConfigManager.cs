@@ -25,6 +25,7 @@ public class ConfigManager : IDadProfileStore
 
     // Event to notify when FrenRider enabled state changes
     public event Action<bool>? OnFrenRiderEnabledChanged;
+    internal event Action? OnEffectiveProfileChanging;
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -67,6 +68,7 @@ public class ConfigManager : IDadProfileStore
             new[] { "Follow", "Distance" },
             new[]
             {
+                Setting("Cling exclusions", (source, target) => target.ClingExcludedTerritoryIds = new List<uint>(source.ClingExcludedTerritoryIds)),
                 Setting("Cling Distance", (source, target) => target.Cling = source.Cling),
                 Setting("Cling Type", (source, target) => target.ClingType = source.ClingType),
                 Setting("Cling Type (Duty)", (source, target) => target.ClingTypeDuty = source.ClingTypeDuty),
@@ -79,6 +81,8 @@ public class ConfigManager : IDadProfileStore
                 Setting("DD Extra Distance", (source, target) => target.DDDistance = source.DDDistance),
                 Setting("FATE Extra Distance", (source, target) => target.FDistance = source.FDistance),
                 Setting("Auto Sync FATE", (source, target) => target.AutoSyncFate = source.AutoSyncFate),
+                Setting("Pause cling for FATE", (source, target) => target.PauseClingForFate = source.PauseClingForFate),
+                Setting("Ignore FATEs", (source, target) => target.IgnoreFates = source.IgnoreFates),
                 Setting("Formation Following", (source, target) => target.Formation = source.Formation),
                 Setting("Follow in Combat", (source, target) => target.FollowInCombat = source.FollowInCombat),
                 Setting("Harmonized Cling Reset Ticks", (source, target) => target.HClingReset = source.HClingReset),
@@ -460,7 +464,7 @@ public class ConfigManager : IDadProfileStore
             AutorotPushOnEnable = false,
         };
 
-    private bool TryGetActiveConfig(out CharacterConfig? activeConfig)
+    internal bool TryGetActiveConfig(out CharacterConfig? activeConfig)
     {
         activeConfig = GetActiveConfig();
         return TryResolveActiveConfig(GetCurrentAccount(), CurrentAccountId, ActiveCharacterKey, out _);
@@ -496,6 +500,7 @@ public class ConfigManager : IDadProfileStore
         string? currentCharacterKey,
         string? aliasHint = null)
     {
+        NotifyEffectiveProfileChanging();
         ReleaseTemporaryProfileForCharacterTransition();
         ActiveCharacterKey = "";
 
@@ -764,6 +769,8 @@ public class ConfigManager : IDadProfileStore
             return;
 
         var charKey = $"{characterName}@{worldName}";
+        if (!string.Equals(charKey, ActiveCharacterKey, StringComparison.Ordinal))
+            NotifyEffectiveProfileChanging();
         if (string.IsNullOrEmpty(CurrentAccountId))
         {
             ActiveCharacterKey = "";
@@ -825,6 +832,7 @@ public class ConfigManager : IDadProfileStore
         if (string.IsNullOrEmpty(ActiveCharacterKey))
             return;
 
+        NotifyEffectiveProfileChanging();
         ReleaseTemporaryProfileForCharacterTransition();
         log.Information($"Cleared active character profile: {ActiveCharacterKey}");
         ActiveCharacterKey = "";
@@ -834,9 +842,12 @@ public class ConfigManager : IDadProfileStore
     {
         if (!TryGetLocalActiveConfig(out var localConfig) || localConfig == null)
             return false;
+        if (temporaryProfileOverlay.IsInstalled && temporaryProfileOverlay.Identity != identity)
+            return false;
 
         config.ProfileAcceptancePolicy = localConfig.ProfileAcceptancePolicy;
         var previousEnabled = GetActiveConfig().Enabled;
+        NotifyEffectiveProfileChanging();
         if (!temporaryProfileOverlay.TryInstall(identity, CurrentAccountId, ActiveCharacterKey, config))
             return false;
 
@@ -846,7 +857,10 @@ public class ConfigManager : IDadProfileStore
 
     internal bool TryReleaseTemporaryProfile(DadProfileIdentity identity)
     {
+        if (!temporaryProfileOverlay.IsInstalled || temporaryProfileOverlay.Identity != identity)
+            return false;
         var previousEnabled = GetActiveConfig().Enabled;
+        NotifyEffectiveProfileChanging();
         if (!temporaryProfileOverlay.TryRelease(identity, out _))
             return false;
 
@@ -881,7 +895,10 @@ public class ConfigManager : IDadProfileStore
     {
         var identity = temporaryProfileOverlay.Identity;
         if (identity != null)
+        {
+            NotifyEffectiveProfileChanging();
             temporaryProfileOverlay.TryRelease(identity, out _);
+        }
     }
 
     internal bool TryReplaceActiveProfilePermanently(CharacterConfig incoming)
@@ -894,7 +911,8 @@ public class ConfigManager : IDadProfileStore
                 incoming,
                 () => SaveAccount(CurrentAccountId),
                 out var previousEnabled,
-                out var currentEnabled))
+                out var currentEnabled,
+                NotifyEffectiveProfileChanging))
             return false;
 
         NotifyEffectiveEnabledChanged(previousEnabled, currentEnabled, "permanent DAD profile applied");
@@ -907,7 +925,8 @@ public class ConfigManager : IDadProfileStore
         CharacterConfig incoming,
         Func<bool> persist,
         out bool previousEnabled,
-        out bool currentEnabled)
+        out bool currentEnabled,
+        Action? beforeReplace = null)
     {
         previousEnabled = false;
         currentEnabled = false;
@@ -923,6 +942,7 @@ public class ConfigManager : IDadProfileStore
         replacement.ProfileAcceptancePolicy = localConfig.ProfileAcceptancePolicy;
         previousEnabled = localConfig.Enabled;
         currentEnabled = replacement.Enabled;
+        beforeReplace?.Invoke();
         account.Characters[activeCharacterKey] = replacement;
 
         var saved = false;
@@ -957,6 +977,12 @@ public class ConfigManager : IDadProfileStore
         {
             log.Error(ex, $"[ConfigManager] FrenRider lifecycle callback failed after {reason}.");
         }
+    }
+
+    private void NotifyEffectiveProfileChanging()
+    {
+        try { OnEffectiveProfileChanging?.Invoke(); }
+        catch (Exception ex) { log.Error(ex, "[ConfigManager] Combat settings cleanup failed before effective profile replacement."); }
     }
 
     public string CreateNewAccount(string alias)
@@ -1174,6 +1200,8 @@ public class ConfigManager : IDadProfileStore
         else if (account.Characters.ContainsKey(charKey))
         {
             // Reset character to current default
+            if (ReferenceEquals(GetActiveConfig(), account.Characters[charKey]))
+                NotifyEffectiveProfileChanging();
             account.Characters[charKey] = account.DefaultConfig.Clone();
         }
 

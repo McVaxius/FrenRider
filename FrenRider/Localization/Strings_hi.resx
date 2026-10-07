@@ -2714,4 +2714,50 @@
   <data name="Unfocused delay (seconds)" xml:space="preserve">
     <value>फ़ोकस हटने पर विलंब (सेकंड)</value>
   </data>
+  <data name="Cling exclusions" xml:space="preserve">
+    <value>पीछा करने से बाहर रखे गए क्षेत्र</value>
+  </data>
+  <data name="Pause cling in these areas. Seek and teleport travel remain available." xml:space="preserve">
+    <value>इन क्षेत्रों में पीछा करना रुक जाता है। खोज और टेलीपोर्ट यात्रा उपलब्ध रहती हैं।</value>
+  </data>
+  <data name="Area" xml:space="preserve">
+    <value>क्षेत्र</value>
+  </data>
+  <data name="Choose an area" xml:space="preserve">
+    <value>क्षेत्र चुनें</value>
+  </data>
+  <data name="No cling exclusions." xml:space="preserve">
+    <value>पीछा करने से बाहर रखा गया कोई क्षेत्र नहीं है।</value>
+  </data>
+  <data name="Area {0}" xml:space="preserve">
+    <value>क्षेत्र {0}</value>
+  </data>
+  <data name="Cling excluded in this area" xml:space="preserve">
+    <value>इस क्षेत्र में पीछा करना बंद है</value>
+  </data>
+  <data name="Pause cling for FATE" xml:space="preserve">
+    <value>FATE के लिए पीछा रोकें</value>
+  </data>
+  <data name="While driving your own mount with Fly You Fools, safely land and dismount, then pause cling until the FATE and combat end. Pillion passengers are never dismounted." xml:space="preserve">
+    <value>Fly You Fools के साथ अपनी सवारी चलाते समय सुरक्षित रूप से उतरें और सवारी छोड़ें, फिर FATE और युद्ध समाप्त होने तक पीछा रोकें। पीछे बैठे यात्रियों को कभी नहीं उतारा जाता।</value>
+  </data>
+  <data name="Ignore FATEs" xml:space="preserve">
+    <value>FATE को अनदेखा करें</value>
+  </data>
+  <data name="Skip automatic FATE sync and FATE preset overrides, and ignore Pause cling for FATE. Ordinary travel and self-defence continue." xml:space="preserve">
+    <value>स्वचालित FATE सिंक, FATE प्रीसेट और FATE के लिए पीछा रोकने की सेटिंग को अनदेखा करें। सामान्य यात्रा और आत्मरक्षा जारी रहती हैं।</value>
+  </data>
+  <data name="Cling paused for FATE" xml:space="preserve">
+    <value>FATE के लिए पीछा रुका है</value>
+  </data>
+  <data name="Off: FrenRider chooses BossMod presets from your job and rotation provider.&#xA;On: use the BossMod presets below with any rotation provider. A custom preset may run actions alongside RSR, WRATH or DAEDALUS." xml:space="preserve">
+    <value>बंद: FrenRider आपके जॉब और रोटेशन प्रदाता के अनुसार BossMod प्रीसेट चुनता है।
+चालू: नीचे दिए BossMod प्रीसेट किसी भी रोटेशन प्रदाता के साथ इस्तेमाल करें। कस्टम प्रीसेट RSR, WRATH या DAEDALUS के साथ क्रियाएँ चला सकता है।</value>
+  </data>
+  <data name="Choose a preset from the selected BossMod provider's complete catalog. None leaves its current preset unchanged." xml:space="preserve">
+    <value>चुने गए BossMod प्रदाता की पूरी सूची से प्रीसेट चुनें। कोई नहीं चुनने पर उसका मौजूदा प्रीसेट नहीं बदलेगा।</value>
+  </data>
+  <data name="BossMod preset catalog unavailable or empty; saved selections are retained." xml:space="preserve">
+    <value>BossMod प्रीसेट सूची उपलब्ध नहीं है या खाली है; सहेजे गए चयन बनाए रखे जाते हैं।</value>
+  </data>
 </root>

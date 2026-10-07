@@ -35,6 +35,8 @@ public class ConfigWindow : Window, IDisposable
     private string foodSearch = "";
     private bool isDraggingSplitter = false;
     private string whitelistInput = "";
+    private string clingExclusionSearch = "";
+    private uint clingExclusionAreaToAdd;
     private readonly List<(uint Id, string Name)> foodItems = new();
     private bool foodItemsLoaded = false;
 
@@ -930,6 +932,8 @@ public class ConfigWindow : Window, IDisposable
         HelpMarker("Navigation method to use inside duties.\nMay need a different method than overworld.");
         DrawDefaultSettingSyncButton("Cling Type (Duty)");
 
+        DrawClingExclusions(config);
+
         ImGui.Spacing();
         ImGui.Separator();
         UiGui.Text("Social Distancing");
@@ -1043,6 +1047,26 @@ public class ConfigWindow : Window, IDisposable
         HelpMarker("Runs /levelsync on after joining a FATE.\nDefers while mounted or riding pillion.");
         DrawDefaultSettingSyncButton("Auto Sync FATE");
 
+        var pauseClingForFate = config.PauseClingForFate;
+        if (UiGui.Checkbox("Pause cling for FATE", ref pauseClingForFate))
+        {
+            config.PauseClingForFate = pauseClingForFate;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("While driving your own mount with Fly You Fools, safely land and dismount, then pause cling until the FATE and combat end. Pillion passengers are never dismounted.");
+        DrawDefaultSettingSyncButton("Pause cling for FATE");
+
+        var ignoreFates = config.IgnoreFates;
+        if (UiGui.Checkbox("Ignore FATEs", ref ignoreFates))
+        {
+            config.IgnoreFates = ignoreFates;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Skip automatic FATE sync and FATE preset overrides, and ignore Pause cling for FATE. Ordinary travel and self-defence continue.");
+        DrawDefaultSettingSyncButton("Ignore FATEs");
+
         ImGui.Spacing();
         ImGui.Separator();
         ImGui.Spacing();
@@ -1078,6 +1102,128 @@ public class ConfigWindow : Window, IDisposable
         ImGui.SameLine();
         HelpMarker("Number of ticks before harmonized cling resets to 0.\nHandles special logic like DD/FATE force cling.");
         DrawDefaultSettingSyncButton("Harmonized Cling Reset Ticks");
+    }
+
+    private void DrawClingExclusions(CharacterConfig config)
+    {
+        ImGui.Spacing();
+        ImGui.Separator();
+        UiGui.Text("Cling exclusions");
+        UiGui.TextWrapped("Pause cling in these areas. Seek and teleport travel remain available.");
+        DrawDefaultSettingSyncButton("Cling exclusions");
+
+        var territories = Plugin.DataManager.GetExcelSheet<TerritoryType>();
+        string AreaLabel(uint id)
+        {
+            var name = territories?.GetRowOrDefault(id)?.PlaceName.ValueNullable?.Name.ToString();
+            return string.IsNullOrWhiteSpace(name) ? UiText.F("Area {0}", id) : $"{name} ({id})";
+        }
+
+        ImGui.PushID("ClingExclusions");
+        try
+        {
+            if (config.ClingExcludedTerritoryIds.Count == 0)
+                UiGui.TextDisabled("No cling exclusions.");
+
+            for (var index = 0; index < config.ClingExcludedTerritoryIds.Count; index++)
+            {
+                var id = config.ClingExcludedTerritoryIds[index];
+                ImGui.PushID(index);
+                try
+                {
+                    MaterialText.Text(AreaLabel(id));
+                    ImGui.SameLine();
+                    if (UiGui.SmallButton("X##RemoveClingExclusion"))
+                    {
+                        config.ClingExcludedTerritoryIds.RemoveAt(index);
+                        configManager.SaveCurrentAccount();
+                        break;
+                    }
+                }
+                finally { ImGui.PopID(); }
+            }
+
+            ImGui.SetNextItemWidth(200);
+            UiGui.InputText("Search##ClingExclusionSearch", ref clingExclusionSearch, 128);
+            ImGui.SetNextItemWidth(200);
+            if (UiGui.BeginCombo("Area", clingExclusionAreaToAdd == 0
+                    ? "Choose an area" : AreaLabel(clingExclusionAreaToAdd)))
+            {
+                try
+                {
+                    if (territories != null)
+                    {
+                        foreach (var territory in territories)
+                        {
+                            var name = territory.PlaceName.ValueNullable?.Name.ToString();
+                            if (territory.RowId == 0 || string.IsNullOrWhiteSpace(name))
+                                continue;
+                            var label = AreaLabel(territory.RowId);
+                            if (!label.Contains(clingExclusionSearch, StringComparison.OrdinalIgnoreCase))
+                                continue;
+                            ImGui.PushID((int)territory.RowId);
+                            try
+                            {
+                                if (UiGui.Selectable("##ClingArea", territory.RowId == clingExclusionAreaToAdd, label))
+                                    clingExclusionAreaToAdd = territory.RowId;
+                            }
+                            finally { ImGui.PopID(); }
+                        }
+                    }
+                }
+                finally { UiGui.EndCombo(); }
+            }
+
+            ImGui.BeginDisabled(clingExclusionAreaToAdd == 0
+                || config.ClingExcludedTerritoryIds.Contains(clingExclusionAreaToAdd));
+            if (UiGui.SmallButton("Add##ClingExclusion"))
+            {
+                config.ClingExcludedTerritoryIds.Add(clingExclusionAreaToAdd);
+                configManager.SaveCurrentAccount();
+            }
+            ImGui.EndDisabled();
+        }
+        finally { ImGui.PopID(); }
+    }
+
+    private void DrawBossModPresetSelector(string label, CharacterConfig config, int selector, BossModPresetCatalog catalog)
+    {
+        var saved = CombatService.ReadManualPresetSelector(config, selector);
+        if (plugin.CombatService.IsCurrentManualPresetSelector(config, selector))
+        {
+            var resolved = AutorotIpcService.ResolvePresetSelection(saved, catalog);
+            if (!string.Equals(saved, resolved, StringComparison.Ordinal))
+            {
+                CombatService.WriteManualPresetSelector(config, selector, resolved);
+                configManager.SaveCurrentAccount();
+                saved = resolved;
+            }
+        }
+        ImGui.SetNextItemWidth(200);
+        if (UiGui.BeginCombo(label, AutorotIpcService.IsNoPreset(saved) ? UiText.T("(none)") : saved, literalPreview: true))
+        {
+            try
+            {
+                if (UiGui.Selectable("##NoBossModPreset", AutorotIpcService.IsNoPreset(saved), UiText.T("(none)")))
+                {
+                    CombatService.WriteManualPresetSelector(config, selector, "none");
+                    configManager.SaveCurrentAccount();
+                }
+                for (var index = 0; index < catalog.DisplayedNames.Count; index++)
+                {
+                    var name = catalog.DisplayedNames[index];
+                    if (UiGui.Selectable($"##BossModPreset{index}", string.Equals(saved, name, StringComparison.Ordinal), name))
+                    {
+                        CombatService.WriteManualPresetSelector(config, selector, name);
+                        configManager.SaveCurrentAccount();
+                    }
+                }
+            }
+            finally { UiGui.EndCombo(); }
+        }
+        ImGui.SameLine();
+        HelpMarker("Choose a preset from the selected BossMod provider's complete catalog. None leaves its current preset unchanged.");
+        DrawDefaultSettingSyncButton(label);
     }
 
     private void DrawCombatTab(CharacterConfig config)
@@ -1146,53 +1292,17 @@ public class ConfigWindow : Window, IDisposable
             configManager.SaveCurrentAccount();
         }
         ImGui.SameLine();
-        HelpMarker("Off: FrenRider chooses the BossMod preset from current job and selected rotation plugin.\nOn: use the preset name fields below.");
+        HelpMarker("Off: FrenRider chooses BossMod presets from your job and rotation provider.\nOn: use the BossMod presets below with any rotation provider. A custom preset may run actions alongside RSR, WRATH or DAEDALUS.");
         DrawDefaultSettingSyncButton("Configure rotation preset manually");
 
         if (config.ConfigureRotationPresetManually)
         {
-            var autoRot = config.AutoRotationType;
-            ImGui.SetNextItemWidth(200);
-            if (UiGui.InputText("BM Rotation Preset", ref autoRot, 32))
-            {
-                config.AutoRotationType = autoRot;
-                configManager.SaveCurrentAccount();
-            }
-            ImGui.SameLine();
-            HelpMarker("Name of the auto-rotation preset for general content.\nMust match a preset name in your rotation plugin.\nUse 'none' to not change the preset.");
-            DrawDefaultSettingSyncButton("BM Rotation Preset");
-
-            var autoRotDD = config.AutoRotationTypeDD;
-            ImGui.SetNextItemWidth(200);
-            if (UiGui.InputText("BM Rotation Preset (DD)", ref autoRotDD, 32))
-            {
-                config.AutoRotationTypeDD = autoRotDD;
-                configManager.SaveCurrentAccount();
-            }
-            ImGui.SameLine();
-            HelpMarker("Preset name for Deep Dungeon content.\nUse 'none' to not change the preset.");
-            DrawDefaultSettingSyncButton("BM Rotation Preset (DD)");
-
-            var autoRotFATE = config.AutoRotationTypeFATE;
-            ImGui.SetNextItemWidth(200);
-            if (UiGui.InputText("BM Rotation Preset (FATE)", ref autoRotFATE, 32))
-            {
-                config.AutoRotationTypeFATE = autoRotFATE;
-                configManager.SaveCurrentAccount();
-            }
-            ImGui.SameLine();
-            HelpMarker("Preset name for FATE content.\nUse 'none' to not change the preset.");
-            DrawDefaultSettingSyncButton("BM Rotation Preset (FATE)");
-
-            var forceBossModPreset = config.ForceBossModPresetRegardlessOfRotation;
-            if (UiGui.Checkbox("Force BossMod preset regardless of rotation", ref forceBossModPreset))
-            {
-                config.ForceBossModPresetRegardlessOfRotation = forceBossModPreset;
-                configManager.SaveCurrentAccount();
-            }
-            ImGui.SameLine();
-            HelpMarker("When RSR, WRATH, or DAEDALUS is selected, also force BMR to the configured zone preset.");
-            DrawDefaultSettingSyncButton("Force BossMod preset regardless of rotation");
+            var catalog = plugin.AutorotIpcService.ReadPresetCatalog(plugin.CombatService.GetConfiguredRotationProvider(config));
+            DrawBossModPresetSelector("BM Rotation Preset", config, 0, catalog);
+            DrawBossModPresetSelector("BM Rotation Preset (DD)", config, 1, catalog);
+            DrawBossModPresetSelector("BM Rotation Preset (FATE)", config, 2, catalog);
+            if (!catalog.Readable || catalog.DisplayedNames.Count == 0)
+                UiGui.TextDisabled("BossMod preset catalog unavailable or empty; saved selections are retained.");
         }
         else
         {

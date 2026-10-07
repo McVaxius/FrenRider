@@ -45,6 +45,18 @@ public sealed class RespawnNotificationRecoveryPolicy
     public int FailedCyclesInBurst => failedCyclesInBurst;
     public bool HasPendingPromptAttempt => pendingPromptAttempt.HasValue;
 
+    internal static bool IsPositivelySoloRoster(int nativeMemberCount, long partyId, bool alliance,
+        int enumeratedMemberCount, bool rosterMemberIsLocal,
+        int hudMemberCount, bool hudMemberIsLocal, int hudRaidGroupSize)
+    {
+        if (nativeMemberCount is < 0 or > 1 || alliance || hudRaidGroupSize != 0
+            || enumeratedMemberCount != nativeMemberCount || hudMemberCount is < 0 or > 1)
+            return false;
+        return nativeMemberCount == 0
+            ? partyId == 0 && (hudMemberCount == 0 || hudMemberIsLocal)
+            : rosterMemberIsLocal && hudMemberCount == 1 && hudMemberIsLocal;
+    }
+
     public static bool IsRespawnEnabledForDutyState(
         bool respawnOutsideDuties,
         bool respawnInsideDuties,
