@@ -16,7 +16,8 @@ Before you can use Fren Rider, you need:
 **Download XIVLauncher:** https://github.com/goatcorp/FFXIVQuickLauncher/releases
 
 ### 2. .NET Runtime
-- .NET Core 8 Runtime (usually installed with XIVLauncher/Dalamud)
+- Use an up-to-date Dalamud installation; v2.0.0.1 targets .NET 10.
+- Building from source requires the .NET 10 SDK (the release workflow uses 10.0.201).
 
 ### 3. Recommended Plugins
 For full functionality, install these plugins from the Dalamud Plugin Installer:
@@ -39,11 +40,17 @@ For full functionality, install these plugins from the Dalamud Plugin Installer:
 
 ## Installation Methods
 
-### Method 1: Install from Dev Plugin (During Development)
+### Method 1: Install from Dev Plugin (For Source Development)
+
+For normal installation, use the Aethertek custom repository in Method 2.
 
 1. **Build the Plugin:**
-   - Open `FrenRider.sln` in Visual Studio 2022
-   - Build the solution (Build → Build Solution or Ctrl+Shift+B)
+   - Place a checkout of `McVaxius/aethertekUI` in a sibling `aethertekUI` directory so the project's shared UI references resolve
+   - From the FrenRider repository root, build with the .NET 10 SDK:
+     ```powershell
+     dotnet build FrenRider/FrenRider.csproj --configuration Debug -p:Platform=x64 -p:DalamudLibPath="$env:APPDATA/XIVLauncher/addon/Hooks/dev"
+     ```
+   - `DalamudLibPath` must point to your current Dalamud assemblies; the path above is the one used by the release workflow
    - The plugin DLL will be in: `FrenRider/bin/x64/Debug/FrenRider.dll`
 
 2. **Add to Dalamud Dev Plugins:**
@@ -52,7 +59,7 @@ For full functionality, install these plugins from the Dalamud Plugin Installer:
    - Go to the **Experimental** tab
    - Under "Dev Plugin Locations", click the **+** button
    - Paste the full path to `FrenRider.dll`
-     - Example: `D:\temp\FrenRider\bin\x64\Debug\FrenRider.dll`
+     - Example: `D:\temp\FrenRider\FrenRider\bin\x64\Debug\FrenRider.dll`
    - Click **Save and Close**
 
 3. **Enable the Plugin:**
@@ -62,19 +69,20 @@ For full functionality, install these plugins from the Dalamud Plugin Installer:
    - Click the checkbox to enable it
 
 4. **Verify Installation:**
-   - Type `/frenrider` in chat
-   - The Fren Rider configuration window should open
+   - Type `/frenrider` or `/fr` in chat
+   - The Fren Rider main window should open
+   - Use `/fr settings` or `/fr s` to open settings
 
 ---
 
-### Method 2: Install from Custom Repository (Future)
+### Method 2: Install from Custom Repository (Recommended)
 
-> **Note:** This method will be available once the plugin is published to a custom repository.
+Fren Rider is published through the Aethertek custom repository. [v2.0.0.1](https://github.com/McVaxius/FrenRider/releases/tag/v2.0.0.1) was released on October 7, 2026.
 
 1. **Add Custom Repository:**
    - Type `/xlsettings` in-game
    - Go to **Experimental** tab
-   - Under "Custom Plugin Repositories", add the repository URL
+   - Under "Custom Plugin Repositories", add `https://aethertek.io/x.json`
    - Click **Save and Close**
 
 2. **Install from Plugin Installer:**
@@ -85,20 +93,22 @@ For full functionality, install these plugins from the Dalamud Plugin Installer:
 3. **Enable the Plugin:**
    - The plugin should auto-enable after installation
    - If not, check the box next to "Fren Rider" in the plugin list
+   - Use `/fr` to verify the main window opens; configure settings before starting automation with `/fr on`
 
 ---
 
 ## First-Time Setup
 
 ### 1. Open Configuration
-- Type `/frenrider` in chat
-- The configuration window will open
+- Type `/fr settings` or `/fr s` in chat
+- The settings window will open; `/frenrider` and `/fr` open the main window
 
 ### 2. Configure Basic Settings
 
 **Party/Friend Settings:**
 - **Fren Name:** Enter the first and last name of the person you want to follow
-  - Example: `John Smith` (do NOT include @Server)
+  - Example: `John Smith` or `John Smith@World`; the `@World` part is cosmetic for targeting
+  - You can also select the fren from the party dropdown
   - Can be partial as long as it's unique (e.g., `John` if only one John in party)
   
 **Following Settings:**
@@ -108,8 +118,7 @@ For full functionality, install these plugins from the Dalamud Plugin Installer:
   - 0 = VNavmesh (recommended)
   - 1 = Visland
   - 2 = BossMod Follow Leader
-  - 3 = CBT Autofollow
-  - 4 = Vanilla Game Follow
+  - 3 = Vanilla Game Follow
 
 **Mount Settings:**
 - **Fly You Fools:** If enabled, flies on own mount instead of riding fren's mount
@@ -136,11 +145,14 @@ For full functionality, install these plugins from the Dalamud Plugin Installer:
 
 **Repair:**
 - 0 = No auto-repair
-- 1 = Self-repair always
-- 2 = Repair at inn NPC
+- 1 = ADS self-repair
+- 2 = ADS NPC repair without inn fallback
+- 3 = ADS NPC repair without teleport or inn fallback
+- 4 = ADS NPC repair followed by entering an inn room
+- Requires ADS; repair triggers below the configured durability threshold
 
 ### 5. Save Configuration
-- Click **Save** or close the window (auto-saves)
+- Settings save when changed; finish editing a text field so its value is committed
 
 ---
 
@@ -153,8 +165,9 @@ For full functionality, install these plugins from the Dalamud Plugin Installer:
    - Make sure the fren name is configured correctly
 
 2. **Start Following:**
-   - The plugin automatically follows when distance exceeds cling threshold
-   - No manual command needed once configured
+   - Run `/fr on` to enable Fren Rider for the active character (new profiles are disabled by default)
+   - While enabled, the plugin follows according to the configured movement mode and distance settings
+   - Run `/fr off` to stop Fren Rider for the active character
 
 3. **Mounting:**
    - When fren mounts, you'll automatically:
@@ -167,13 +180,23 @@ For full functionality, install these plugins from the Dalamud Plugin Installer:
 
 ### Slash Commands
 
-- `/frenrider` - Open configuration window
-- `/frenrider toggle` - Enable/disable following (if implemented)
-- `/frenrider reload` - Reload configuration (if implemented)
+| Command | Behavior |
+| --- | --- |
+| `/frenrider` or `/fr` | Toggle the main window |
+| `/fr on` | Enable Fren Rider for the active character |
+| `/fr off` | Disable Fren Rider for the active character |
+| `/fr settings` or `/fr s` | Toggle the settings window |
+| `/fr mini` or `/fr m` | Toggle the MAGIA mini window |
+| `/fr debug` | Toggle and save debug controls for the active character config |
+
+`/frenrider` always toggles the main window, regardless of arguments. It has no `toggle` or `reload` subcommands. Use `/fr` for the commands above.
+
+Opening the mini window does not enable automation. Its MAGIA Attack, Defense, and Off buttons appear only in Eureka and send `/magiaauto attack`, `/magiaauto defense`, and `/magiaauto off`.
 
 ### Monitoring
 
 **Check Plugin Status:**
+- Open `/fr` to check run state, party status, follow/mount state, and ADS status
 - Look for echo messages in chat (if spam_printer enabled)
 - Check Dalamud plugin list (`/xlplugins`)
 
@@ -183,6 +206,7 @@ For full functionality, install these plugins from the Dalamud Plugin Installer:
   - Fren name is correct
   - Distance > cling threshold
   - Plugin is enabled
+  - Fren Rider is running for the active character (`/fr on`)
   - Required plugins (VNavmesh) are installed
 
 ---
@@ -244,7 +268,7 @@ For full functionality, install these plugins from the Dalamud Plugin Installer:
 
 ### Dev Plugin Updates
 1. Pull latest code from repository
-2. Rebuild solution in Visual Studio
+2. Rebuild with the .NET 10 SDK using the source-build instructions above
 3. Restart FFXIV or reload plugin
    - `/xlplugins` → Disable → Enable
 
@@ -276,14 +300,15 @@ For full functionality, install these plugins from the Dalamud Plugin Installer:
 ## Troubleshooting
 
 ### Plugin Won't Load
-- **Check:** .NET Core 8 SDK installed
+- **Check:** Dalamud supports the release's API 15 / .NET 10 target
 - **Check:** Dalamud is up to date
-- **Check:** Plugin DLL path is correct
-- **Check:** No compile errors in Visual Studio
+- **For source builds:** Check the .NET 10 SDK, shared UI checkout, Dalamud assembly path, and build errors
+- **For dev plugins:** Check the plugin DLL path is correct
 
 ### Not Following Fren
 - **Check:** Fren is in party
-- **Check:** Fren name matches configuration (case-sensitive)
+- **Check:** Fren name matches configuration (matching is case-insensitive; avoid ambiguous partial names)
+- **Check:** Fren Rider is running for the active character (`/fr on`)
 - **Check:** Distance > cling threshold
 - **Check:** VNavmesh plugin installed and enabled
 - **Check:** Not in a zone that restricts movement
@@ -306,7 +331,7 @@ For full functionality, install these plugins from the Dalamud Plugin Installer:
 
 ### Configuration Not Saving
 - **Check:** File permissions on config directory
-- **Try:** Manually save in UI
+- **Try:** Finish editing the field; settings save when changed
 - **Check:** No errors in Dalamud log (`/xllog`)
 
 ---
@@ -336,7 +361,7 @@ For full functionality, install these plugins from the Dalamud Plugin Installer:
 
 ### Getting Help
 - Check this guide first
-- Review PROJECT_PLAN.md for feature status
+- Review README.MD for current features and commands
 - Check CHANGELOG.md for recent changes
 
 ### Reporting Issues
@@ -347,7 +372,7 @@ For full functionality, install these plugins from the Dalamud Plugin Installer:
 
 ### Feature Requests
 - Check PROJECT_PLAN.md for planned features
-- Suggest new features via GitHub issues (when available)
+- Suggest new features via GitHub issues
 
 ---
 
@@ -375,10 +400,10 @@ A: Yes, through the rotation plugin (BMR/VBM/RSR/Wrath/Daedalus) settings.
 A: Most zones, with special handling for dungeons, forays, deep dungeons, etc.
 
 **Q: Can I turn it off temporarily?**  
-A: Yes, disable the plugin in `/xlplugins` or use toggle command (if implemented).
+A: Yes, use `/fr off` to stop Fren Rider for the active character and `/fr on` to resume. You can also disable the plugin in `/xlplugins`.
 
 **Q: How do I update my settings?**  
-A: `/frenrider` to open config, make changes, save.
+A: Use `/fr settings` or `/fr s`, then make changes; settings save when changed.
 
 **Q: What if my fren changes?**  
 A: Update the "Fren Name" in configuration.
@@ -393,4 +418,4 @@ A: Update the "Fren Name" in configuration.
 
 ---
 
-*Last Updated: Phase 0 - Initial Documentation*
+*Last Updated: October 7, 2026 — verified against README.MD and v2.0.0.1 source at a7ddfe6d3788fa9d5eef8af4c417929a6505cc05.*
