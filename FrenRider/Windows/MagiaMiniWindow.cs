@@ -167,7 +167,10 @@ public sealed class MagiaMiniWindow : Window, IDisposable
         }
 
         if (!eureka)
+        {
+            DrawCompanionPurchases(config, left);
             return;
+        }
 
         ImGui.SetCursorScreenPos(position + new Vector2(21, compact ? 182 : 186) * scale);
         ImGui.Separator();
@@ -198,6 +201,14 @@ public sealed class MagiaMiniWindow : Window, IDisposable
         ContinueButton("Off", size.X);
         if (UiGui.Button("Off", size))
             GameHelpers.SendChatCommand("/magiaauto off", "Fren Rider mini");
+        DrawCompanionPurchases(config, left);
+    }
+
+    private void DrawCompanionPurchases(CharacterConfig config, float left)
+    {
+        ImGui.SetCursorScreenPos(new Vector2(left, ImGui.GetCursorScreenPos().Y + UiHelpers.Scale(6)));
+        ImGui.Separator();
+        UiGui.DrawCompanionPurchases(plugin, config, mini: true);
     }
 
     private static void ContinueButton(string label, float minimumWidth)

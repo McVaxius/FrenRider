@@ -2802,4 +2802,66 @@
   <data name="Waiting for observed skill learning." xml:space="preserve"><value>スキル習得の確認を待っています。</value></data>
   <data name="Skill learning request was rejected; no retry." xml:space="preserve"><value>スキル習得の要求が拒否されました。再試行はしません。</value></data>
   <data name="Skill allocation stopped." xml:space="preserve"><value>スキルの割り振りを停止しました。</value></data>
+  <data name="Waiting for Companion readiness." xml:space="preserve"><value>チョコボの準備が整うのを待っています。</value></data>
+  <data name="Skill allocation stopped: Companion readiness was not observed; no retry." xml:space="preserve"><value>スキル割り振りを停止しました：チョコボの準備完了を確認できませんでした。再試行しません。</value></data>
+  <data name="Chocobo food" xml:space="preserve"><value>チョコボの餌</value></data>
+  <data name="Automatically feed Chocobo" xml:space="preserve"><value>チョコボに自動で餌を与える</value></data>
+  <data name="Companion food" xml:space="preserve"><value>バディの餌</value></data>
+  <data name="Curiel Root" xml:space="preserve"><value>クリーエの野菜</value></data>
+  <data name="Sylkis Bud" xml:space="preserve"><value>シルキスの野菜</value></data>
+  <data name="Mimett Gourd" xml:space="preserve"><value>ミメットの野菜</value></data>
+  <data name="Tantalplant" xml:space="preserve"><value>タンタルの野菜</value></data>
+  <data name="Pahsana Fruit" xml:space="preserve"><value>パサーナの野菜</value></data>
+  <data name="Unsupported companion food" xml:space="preserve"><value>未対応のバディの餌</value></data>
+  <data name="These settings belong to the profile being edited. Feed and Stop use the active character&apos;s runtime profile." xml:space="preserve"><value>これらの設定は編集中のプロフィールに保存されます。「餌を与える」と「停止」は、アクティブなキャラクターの実行中のプロフィールを使用します。</value></data>
+  <data name="Feed companion now" xml:space="preserve"><value>バディに今すぐ餌を与える</value></data>
+  <data name="Stop companion feeding" xml:space="preserve"><value>バディへの給餌を停止</value></data>
+  <data name="Feeding status (active character)" xml:space="preserve"><value>給餌の状態（アクティブなキャラクター）</value></data>
+  <data name="No companion feeding is pending." xml:space="preserve"><value>保留中のバディへの給餌はありません。</value></data>
+  <data name="Companion feeding is unavailable in the current context." xml:space="preserve"><value>現在の状況ではバディに餌を与えられません。</value></data>
+  <data name="Select a supported companion food." xml:space="preserve"><value>対応するバディの餌を選択してください。</value></data>
+  <data name="Summon the companion before feeding." xml:space="preserve"><value>餌を与える前にバディを呼び出してください。</value></data>
+  <data name="No selected companion food in inventory." xml:space="preserve"><value>選択したバディの餌が所持品にありません。</value></data>
+  <data name="Selected companion food effect is already active." xml:space="preserve"><value>選択したバディの餌の効果はすでに有効です。</value></data>
+  <data name="Waiting for observed companion feeding." xml:space="preserve"><value>バディへの給餌の確認を待っています。</value></data>
+  <data name="Companion feeding completed; food and effect were observed." xml:space="preserve"><value>バディへの給餌が完了しました。餌の消費と効果を確認しました。</value></data>
+  <data name="Companion feeding stopped: unexpected inventory change." xml:space="preserve"><value>バディへの給餌を停止しました：所持品に予期しない変化がありました。</value></data>
+  <data name="Companion feeding stopped: consumption and effect were not observed; no retry." xml:space="preserve"><value>バディへの給餌を停止しました：消費と効果を確認できませんでした。再試行はしません。</value></data>
+  <data name="Companion feeding request was rejected; no retry." xml:space="preserve"><value>バディへの給餌リクエストが拒否されました。再試行はしません。</value></data>
+  <data name="Companion feeding cancelled: context or profile changed." xml:space="preserve"><value>バディへの給餌をキャンセルしました：状況またはプロフィールが変わりました。</value></data>
+  <data name="Companion feeding stopped." xml:space="preserve"><value>バディへの給餌を停止しました。</value></data>
+  <data name="Companion feeding failed." xml:space="preserve"><value>バディへの給餌に失敗しました。</value></data>
+  <data name="Companion purchasing" xml:space="preserve"><value>バディ用品の購入</value></data>
+  <data name="Gysahl Greens stock target" xml:space="preserve"><value>ギサールの野菜の目標在庫</value></data>
+  <data name="Companion food stock target" xml:space="preserve"><value>バディの餌の目標在庫</value></data>
+  <data name="Purchase actions use the active character&apos;s profile. Select that character to purchase." xml:space="preserve"><value>購入には現在のキャラクターの設定を使用します。購入するにはそのキャラクターを選択してください。</value></data>
+  <data name="Stop companion purchasing" xml:space="preserve"><value>バディ用品の購入を停止</value></data>
+  <data name="Purchasing status (active character)" xml:space="preserve"><value>購入状況（現在のキャラクター）</value></data>
+  <data name="No companion purchase is pending." xml:space="preserve"><value>保留中のバディ用品購入はありません。</value></data>
+  <data name="Select a supported companion purchase item." xml:space="preserve"><value>購入可能なバディ用品を選択してください。</value></data>
+  <data name="Companion purchasing is unavailable in the current context." xml:space="preserve"><value>現在の状況ではバディ用品を購入できません。</value></data>
+  <data name="Companion purchase stopped: unresolved request in this shop session; no retry." xml:space="preserve"><value>バディ用品の購入を停止：このショップセッションに未確定の要求があります。再試行しません。</value></data>
+  <data name="Companion purchase stopped: the shop offer or price is not verified." xml:space="preserve"><value>バディ用品の購入を停止：ショップの商品または価格を検証できません。</value></data>
+  <data name="The companion purchase stock target is already met." xml:space="preserve"><value>バディ用品の目標在庫は既に満たされています。</value></data>
+  <data name="Companion purchase has no affordable quantity or inventory room." xml:space="preserve"><value>バディ用品を購入できる数量、または所持品の空きがありません。</value></data>
+  <data name="Companion purchase cancelled: context, profile, or shop session changed." xml:space="preserve"><value>バディ用品の購入をキャンセル：状況、設定、またはショップセッションが変わりました。</value></data>
+  <data name="Waiting for observed companion purchase." xml:space="preserve"><value>バディ用品の購入結果を確認中です。</value></data>
+  <data name="Companion purchase failed; no retry." xml:space="preserve"><value>バディ用品の購入に失敗しました。再試行しません。</value></data>
+  <data name="Companion purchase stopped: unexpected inventory or gil change." xml:space="preserve"><value>バディ用品の購入を停止：所持品またはギルに想定外の変化がありました。</value></data>
+  <data name="Companion purchase completed; exact items and gil were observed." xml:space="preserve"><value>バディ用品の購入が完了しました。正確な商品数量とギルの支出を確認しました。</value></data>
+  <data name="Companion purchase stopped: items, gil debit, and settled transaction were not observed; no retry." xml:space="preserve"><value>バディ用品の購入を停止：商品、ギルの支出、取引の完了を確認できませんでした。再試行しません。</value></data>
+  <data name="Companion purchase stopped: confirmation did not match the owned request; no retry." xml:space="preserve"><value>バディ用品の購入を停止：確認が自分の購入要求と一致しませんでした。再試行しません。</value></data>
+  <data name="Companion purchase stopped: additional confirmation; no retry." xml:space="preserve"><value>バディ用品の購入を停止：追加の確認が表示されました。再試行しません。</value></data>
+  <data name="Companion purchase stopped." xml:space="preserve"><value>バディ用品の購入を停止しました。</value></data>
+  <data name="BUY GREENS" xml:space="preserve"><value>野菜を購入</value></data>
+  <data name="BUY FOOD" xml:space="preserve"><value>餌を購入</value></data>
+  <data name="ADS owns companion vendor travel and purchases." xml:space="preserve"><value>バディ用品の販売店への移動と購入はADSが担当します。</value></data>
+  <data name="Selected food: {0} | NQ stock: {1} | Target: {2}" xml:space="preserve"><value>選択した餌：{0} | NQ所持数：{1} | 目標：{2}</value></data>
+  <data name="Waiting for ADS companion purchase." xml:space="preserve"><value>ADSによるバディ用品の購入を待っています。</value></data>
+  <data name="ADS did not accept the companion purchase." xml:space="preserve"><value>ADSがバディ用品の購入を受け付けませんでした。</value></data>
+  <data name="ADS companion purchase outcome is unknown; no retry." xml:space="preserve"><value>ADSによるバディ用品の購入結果が不明です。再試行しません。</value></data>
+  <data name="Set a positive stock target." xml:space="preserve"><value>目標在庫を1以上に設定してください。</value></data>
+  <data name="Buy travels to the vendor and fills the stock target once. Purchasing starts only when you press Buy. Zero targets disable purchasing." xml:space="preserve"><value>購入ボタンで販売NPCまで移動し、目標在庫まで一度補充します。購入はボタンを押したときだけ開始します。目標が0なら購入しません。</value></data>
+  <data name="Buying companion food from Vath requires beast tribe progression through The Naming of Vath. Purchase is unavailable until the vendor is unlocked." xml:space="preserve"><value>ヴァスからバディの餌を購入するには、友好部族クエストをThe Naming of Vathの完了まで進める必要があります。販売NPCを解放するまで購入できません。</value></data>
+  <data name="Companion purchase cancelled: context, profile, or settings changed." xml:space="preserve"><value>バディ用品の購入を中止しました：状況、プロフィール、または設定が変更されました。</value></data>
 </root>

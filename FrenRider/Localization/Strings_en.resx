@@ -2901,4 +2901,66 @@ On: use the BossMod presets below with any rotation provider. A custom preset ma
   <data name="Waiting for observed skill learning." xml:space="preserve"><value>Waiting for observed skill learning.</value></data>
   <data name="Skill learning request was rejected; no retry." xml:space="preserve"><value>Skill learning request was rejected; no retry.</value></data>
   <data name="Skill allocation stopped." xml:space="preserve"><value>Skill allocation stopped.</value></data>
+  <data name="Waiting for Companion readiness." xml:space="preserve"><value>Waiting for Companion readiness.</value></data>
+  <data name="Skill allocation stopped: Companion readiness was not observed; no retry." xml:space="preserve"><value>Skill allocation stopped: Companion readiness was not observed; no retry.</value></data>
+  <data name="Chocobo food" xml:space="preserve"><value>Chocobo food</value></data>
+  <data name="Automatically feed Chocobo" xml:space="preserve"><value>Automatically feed Chocobo</value></data>
+  <data name="Companion food" xml:space="preserve"><value>Companion food</value></data>
+  <data name="Curiel Root" xml:space="preserve"><value>Curiel Root</value></data>
+  <data name="Sylkis Bud" xml:space="preserve"><value>Sylkis Bud</value></data>
+  <data name="Mimett Gourd" xml:space="preserve"><value>Mimett Gourd</value></data>
+  <data name="Tantalplant" xml:space="preserve"><value>Tantalplant</value></data>
+  <data name="Pahsana Fruit" xml:space="preserve"><value>Pahsana Fruit</value></data>
+  <data name="Unsupported companion food" xml:space="preserve"><value>Unsupported companion food</value></data>
+  <data name="These settings belong to the profile being edited. Feed and Stop use the active character&apos;s runtime profile." xml:space="preserve"><value>These settings belong to the profile being edited. Feed and Stop use the active character&apos;s runtime profile.</value></data>
+  <data name="Feed companion now" xml:space="preserve"><value>Feed companion now</value></data>
+  <data name="Stop companion feeding" xml:space="preserve"><value>Stop companion feeding</value></data>
+  <data name="Feeding status (active character)" xml:space="preserve"><value>Feeding status (active character)</value></data>
+  <data name="No companion feeding is pending." xml:space="preserve"><value>No companion feeding is pending.</value></data>
+  <data name="Companion feeding is unavailable in the current context." xml:space="preserve"><value>Companion feeding is unavailable in the current context.</value></data>
+  <data name="Select a supported companion food." xml:space="preserve"><value>Select a supported companion food.</value></data>
+  <data name="Summon the companion before feeding." xml:space="preserve"><value>Summon the companion before feeding.</value></data>
+  <data name="No selected companion food in inventory." xml:space="preserve"><value>No selected companion food in inventory.</value></data>
+  <data name="Selected companion food effect is already active." xml:space="preserve"><value>Selected companion food effect is already active.</value></data>
+  <data name="Waiting for observed companion feeding." xml:space="preserve"><value>Waiting for observed companion feeding.</value></data>
+  <data name="Companion feeding completed; food and effect were observed." xml:space="preserve"><value>Companion feeding completed; food and effect were observed.</value></data>
+  <data name="Companion feeding stopped: unexpected inventory change." xml:space="preserve"><value>Companion feeding stopped: unexpected inventory change.</value></data>
+  <data name="Companion feeding stopped: consumption and effect were not observed; no retry." xml:space="preserve"><value>Companion feeding stopped: consumption and effect were not observed; no retry.</value></data>
+  <data name="Companion feeding request was rejected; no retry." xml:space="preserve"><value>Companion feeding request was rejected; no retry.</value></data>
+  <data name="Companion feeding cancelled: context or profile changed." xml:space="preserve"><value>Companion feeding cancelled: context or profile changed.</value></data>
+  <data name="Companion feeding stopped." xml:space="preserve"><value>Companion feeding stopped.</value></data>
+  <data name="Companion feeding failed." xml:space="preserve"><value>Companion feeding failed.</value></data>
+  <data name="Companion purchasing" xml:space="preserve"><value>Companion purchasing</value></data>
+  <data name="Gysahl Greens stock target" xml:space="preserve"><value>Gysahl Greens stock target</value></data>
+  <data name="Companion food stock target" xml:space="preserve"><value>Companion food stock target</value></data>
+  <data name="Purchase actions use the active character&apos;s profile. Select that character to purchase." xml:space="preserve"><value>Purchase actions use the active character&apos;s profile. Select that character to purchase.</value></data>
+  <data name="Stop companion purchasing" xml:space="preserve"><value>Stop companion purchasing</value></data>
+  <data name="Purchasing status (active character)" xml:space="preserve"><value>Purchasing status (active character)</value></data>
+  <data name="No companion purchase is pending." xml:space="preserve"><value>No companion purchase is pending.</value></data>
+  <data name="Select a supported companion purchase item." xml:space="preserve"><value>Select a supported companion purchase item.</value></data>
+  <data name="Companion purchasing is unavailable in the current context." xml:space="preserve"><value>Companion purchasing is unavailable in the current context.</value></data>
+  <data name="Companion purchase stopped: unresolved request in this shop session; no retry." xml:space="preserve"><value>Companion purchase stopped: unresolved request in this shop session; no retry.</value></data>
+  <data name="Companion purchase stopped: the shop offer or price is not verified." xml:space="preserve"><value>Companion purchase stopped: the shop offer or price is not verified.</value></data>
+  <data name="The companion purchase stock target is already met." xml:space="preserve"><value>The companion purchase stock target is already met.</value></data>
+  <data name="Companion purchase has no affordable quantity or inventory room." xml:space="preserve"><value>Companion purchase has no affordable quantity or inventory room.</value></data>
+  <data name="Companion purchase cancelled: context, profile, or shop session changed." xml:space="preserve"><value>Companion purchase cancelled: context, profile, or shop session changed.</value></data>
+  <data name="Waiting for observed companion purchase." xml:space="preserve"><value>Waiting for observed companion purchase.</value></data>
+  <data name="Companion purchase failed; no retry." xml:space="preserve"><value>Companion purchase failed; no retry.</value></data>
+  <data name="Companion purchase stopped: unexpected inventory or gil change." xml:space="preserve"><value>Companion purchase stopped: unexpected inventory or gil change.</value></data>
+  <data name="Companion purchase completed; exact items and gil were observed." xml:space="preserve"><value>Companion purchase completed; exact items and gil were observed.</value></data>
+  <data name="Companion purchase stopped: items, gil debit, and settled transaction were not observed; no retry." xml:space="preserve"><value>Companion purchase stopped: items, gil debit, and settled transaction were not observed; no retry.</value></data>
+  <data name="Companion purchase stopped: confirmation did not match the owned request; no retry." xml:space="preserve"><value>Companion purchase stopped: confirmation did not match the owned request; no retry.</value></data>
+  <data name="Companion purchase stopped: additional confirmation; no retry." xml:space="preserve"><value>Companion purchase stopped: additional confirmation; no retry.</value></data>
+  <data name="Companion purchase stopped." xml:space="preserve"><value>Companion purchase stopped.</value></data>
+  <data name="BUY GREENS" xml:space="preserve"><value>BUY GREENS</value></data>
+  <data name="BUY FOOD" xml:space="preserve"><value>BUY FOOD</value></data>
+  <data name="ADS owns companion vendor travel and purchases." xml:space="preserve"><value>ADS owns companion vendor travel and purchases.</value></data>
+  <data name="Selected food: {0} | NQ stock: {1} | Target: {2}" xml:space="preserve"><value>Selected food: {0} | NQ stock: {1} | Target: {2}</value></data>
+  <data name="Waiting for ADS companion purchase." xml:space="preserve"><value>Waiting for ADS companion purchase.</value></data>
+  <data name="ADS did not accept the companion purchase." xml:space="preserve"><value>ADS did not accept the companion purchase.</value></data>
+  <data name="ADS companion purchase outcome is unknown; no retry." xml:space="preserve"><value>ADS companion purchase outcome is unknown; no retry.</value></data>
+  <data name="Set a positive stock target." xml:space="preserve"><value>Set a positive stock target.</value></data>
+  <data name="Buy travels to the vendor and fills the stock target once. Purchasing starts only when you press Buy. Zero targets disable purchasing." xml:space="preserve"><value>Buy travels to the vendor and fills the stock target once. Purchasing starts only when you press Buy. Zero targets disable purchasing.</value></data>
+  <data name="Buying companion food from Vath requires beast tribe progression through The Naming of Vath. Purchase is unavailable until the vendor is unlocked." xml:space="preserve"><value>Buying companion food from Vath requires beast tribe progression through The Naming of Vath. Purchase is unavailable until the vendor is unlocked.</value></data>
+  <data name="Companion purchase cancelled: context, profile, or settings changed." xml:space="preserve"><value>Companion purchase cancelled: context, profile, or settings changed.</value></data>
 </root>

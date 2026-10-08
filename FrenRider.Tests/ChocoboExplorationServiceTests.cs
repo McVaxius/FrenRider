@@ -6,6 +6,43 @@ namespace FrenRider.Tests;
 public sealed class ChocoboExplorationServiceTests
 {
     [Fact]
+    public void SkillsPreparationWaitsForItsChildHoldsTheWindowAndRestoresOnlyOnRelease()
+    {
+        var probe = new Probe(Snapshot(2)) { ChildReady = false };
+        Assert.True(probe.Service.PrepareSkills());
+        probe.Tick();
+        probe.Tick(299);
+        Assert.False(probe.Service.SkillsReady);
+        probe.Tick(1);
+        Assert.False(probe.Service.SkillsReady);
+        probe.ChildReady = true;
+        probe.Tick();
+        Assert.True(probe.Service.SkillsReady);
+        probe.Tick(30_000);
+        Assert.True(probe.Service.IsSkillPreparation);
+        Assert.Equal(new[] { 1 }, probe.SelectedTabs);
+        Assert.Equal(0, probe.CaptureCalls);
+        Assert.Equal(0, probe.OpenCalls);
+        probe.Service.Stop("allocation complete");
+        Assert.False(probe.Service.SkillsReady);
+        Assert.Equal(new[] { 1, 2 }, probe.SelectedTabs);
+        Assert.Equal(2, probe.Window!.Value.Tab);
+    }
+
+    [Fact]
+    public void MissingSkillsChildTimesOutWithoutRepeatingTabSelection()
+    {
+        var probe = new Probe(Snapshot(2)) { ChildReady = false };
+        Assert.True(probe.Service.PrepareSkills());
+        probe.Tick();
+        probe.Tick(300);
+        probe.Tick(15_000);
+        Assert.False(probe.Service.IsActive);
+        Assert.Equal(new[] { 1, 2 }, probe.SelectedTabs);
+        Assert.Contains("timeout", probe.Logs);
+    }
+
+    [Fact]
     public void ProbeOpensOnceObservesAllThreeTabsAndClosesItsWindow()
     {
         var probe = new Probe();
@@ -873,6 +910,37 @@ public sealed class ChocoboExplorationServiceTests
 
     private static WindowSnapshot Snapshot(int tab) => new((nint)123, 7, tab, true, tab);
 
+    [Theory]
+    [InlineData("context")]
+    [InlineData("identity")]
+    [InlineData("address")]
+    [InlineData("id")]
+    [InlineData("tab")]
+    [InlineData("selected-tab")]
+    [InlineData("closed")]
+    [InlineData("not-ready")]
+    [InlineData("child")]
+    [InlineData("stopped")]
+    public void SkillsPromptCleanupRequiresFreshSafeCharacterAndWindowOwnership(string change)
+    {
+        var probe = new Probe(Snapshot(2));
+        Assert.True(probe.Service.PrepareSkills());
+        probe.Tick();
+        probe.Tick(300);
+        Assert.True(probe.Service.OwnsReadySkillsWindow);
+        switch (change)
+        {
+            case "context": probe.CanRun = false; break;
+            case "identity": probe.Identity++; break;
+            case "child": probe.ChildReady = false; break;
+            case "tab": probe.Window = probe.Window!.Value with { Tab = 2 }; break;
+            case "selected-tab": probe.Window = probe.Window!.Value with { SelectedTab = 2 }; break;
+            case "stopped": probe.Service.Stop("area transition", restore: false); break;
+            default: probe.Window = ChangedWindow(probe.Window!.Value, change); break;
+        }
+        Assert.False(probe.Service.OwnsReadySkillsWindow);
+    }
+
     private static WindowSnapshot? ChangedWindow(WindowSnapshot window, string change) => change switch
     {
         "tab" => window with { Tab = window.Tab == 0 ? 2 : 1, SelectedTab = window.Tab == 0 ? 2 : 1 },
@@ -890,6 +958,7 @@ public sealed class ChocoboExplorationServiceTests
     {
         public bool CanRun = true;
         public bool Registered = true;
+        public bool ChildReady = true;
         public ulong Identity = 1;
         public WindowSnapshot? Window;
         public bool AutoOpen = true;
@@ -951,7 +1020,7 @@ public sealed class ChocoboExplorationServiceTests
                     CloseCalls++;
                     if (CloseFailure != null) throw CloseFailure;
                     Window = null;
-                }, Logs.Add, () => now);
+                }, Logs.Add, () => now, () => ChildReady);
         }
 
         public void Tick(long elapsed = 0)

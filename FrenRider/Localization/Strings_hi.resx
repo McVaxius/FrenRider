@@ -2813,4 +2813,66 @@
   <data name="Waiting for observed skill learning." xml:space="preserve"><value>कौशल सीखने की पुष्टि के लिए प्रतीक्षा कर रहे हैं।</value></data>
   <data name="Skill learning request was rejected; no retry." xml:space="preserve"><value>कौशल सीखने का अनुरोध अस्वीकार हुआ; दोबारा प्रयास नहीं होगा।</value></data>
   <data name="Skill allocation stopped." xml:space="preserve"><value>कौशल आवंटन रुका।</value></data>
+  <data name="Waiting for Companion readiness." xml:space="preserve"><value>चोकोबो के तैयार होने की प्रतीक्षा है।</value></data>
+  <data name="Skill allocation stopped: Companion readiness was not observed; no retry." xml:space="preserve"><value>कौशल आवंटन रोका गया: चोकोबो के तैयार होने की पुष्टि नहीं हुई; दोबारा प्रयास नहीं होगा।</value></data>
+  <data name="Chocobo food" xml:space="preserve"><value>चोकोबो का भोजन</value></data>
+  <data name="Automatically feed Chocobo" xml:space="preserve"><value>चोकोबो को अपने आप खिलाएँ</value></data>
+  <data name="Companion food" xml:space="preserve"><value>साथी का भोजन</value></data>
+  <data name="Curiel Root" xml:space="preserve"><value>क्यूरियल जड़</value></data>
+  <data name="Sylkis Bud" xml:space="preserve"><value>सिल्किस कली</value></data>
+  <data name="Mimett Gourd" xml:space="preserve"><value>मिमेट लौकी</value></data>
+  <data name="Tantalplant" xml:space="preserve"><value>टैंटल पौधा</value></data>
+  <data name="Pahsana Fruit" xml:space="preserve"><value>पहसाना फल</value></data>
+  <data name="Unsupported companion food" xml:space="preserve"><value>असमर्थित साथी भोजन</value></data>
+  <data name="These settings belong to the profile being edited. Feed and Stop use the active character&apos;s runtime profile." xml:space="preserve"><value>ये सेटिंग संपादित किए जा रहे प्रोफ़ाइल की हैं। खिलाएँ और रोकें सक्रिय पात्र के रनटाइम प्रोफ़ाइल का उपयोग करते हैं।</value></data>
+  <data name="Feed companion now" xml:space="preserve"><value>साथी को अभी खिलाएँ</value></data>
+  <data name="Stop companion feeding" xml:space="preserve"><value>साथी को खिलाना रोकें</value></data>
+  <data name="Feeding status (active character)" xml:space="preserve"><value>खिलाने की स्थिति (सक्रिय पात्र)</value></data>
+  <data name="No companion feeding is pending." xml:space="preserve"><value>साथी को खिलाने का कोई काम लंबित नहीं है।</value></data>
+  <data name="Companion feeding is unavailable in the current context." xml:space="preserve"><value>मौजूदा संदर्भ में साथी को खिलाना उपलब्ध नहीं है।</value></data>
+  <data name="Select a supported companion food." xml:space="preserve"><value>कोई समर्थित साथी भोजन चुनें।</value></data>
+  <data name="Summon the companion before feeding." xml:space="preserve"><value>खिलाने से पहले साथी को बुलाएँ।</value></data>
+  <data name="No selected companion food in inventory." xml:space="preserve"><value>इन्वेंटरी में चुना गया साथी भोजन नहीं है।</value></data>
+  <data name="Selected companion food effect is already active." xml:space="preserve"><value>चुने गए साथी भोजन का प्रभाव पहले से सक्रिय है।</value></data>
+  <data name="Waiting for observed companion feeding." xml:space="preserve"><value>साथी को खिलाने की पुष्टि की प्रतीक्षा है।</value></data>
+  <data name="Companion feeding completed; food and effect were observed." xml:space="preserve"><value>साथी को खिलाना पूरा हुआ; भोजन की खपत और प्रभाव देखे गए।</value></data>
+  <data name="Companion feeding stopped: unexpected inventory change." xml:space="preserve"><value>साथी को खिलाना रोका गया: इन्वेंटरी में अप्रत्याशित बदलाव।</value></data>
+  <data name="Companion feeding stopped: consumption and effect were not observed; no retry." xml:space="preserve"><value>साथी को खिलाना रोका गया: खपत और प्रभाव नहीं देखे गए; दोबारा प्रयास नहीं होगा।</value></data>
+  <data name="Companion feeding request was rejected; no retry." xml:space="preserve"><value>साथी को खिलाने का अनुरोध अस्वीकार हुआ; दोबारा प्रयास नहीं होगा।</value></data>
+  <data name="Companion feeding cancelled: context or profile changed." xml:space="preserve"><value>साथी को खिलाना रद्द हुआ: संदर्भ या प्रोफ़ाइल बदल गया।</value></data>
+  <data name="Companion feeding stopped." xml:space="preserve"><value>साथी को खिलाना रोक दिया गया।</value></data>
+  <data name="Companion feeding failed." xml:space="preserve"><value>साथी को खिलाना विफल हुआ।</value></data>
+  <data name="Companion purchasing" xml:space="preserve"><value>साथी के लिए खरीदारी</value></data>
+  <data name="Gysahl Greens stock target" xml:space="preserve"><value>Gysahl Greens भंडार लक्ष्य</value></data>
+  <data name="Companion food stock target" xml:space="preserve"><value>साथी के भोजन का भंडार लक्ष्य</value></data>
+  <data name="Purchase actions use the active character&apos;s profile. Select that character to purchase." xml:space="preserve"><value>खरीदारी में सक्रिय पात्र की प्रोफ़ाइल इस्तेमाल होती है। खरीदने के लिए उस पात्र को चुनें।</value></data>
+  <data name="Stop companion purchasing" xml:space="preserve"><value>साथी की खरीदारी रोकें</value></data>
+  <data name="Purchasing status (active character)" xml:space="preserve"><value>खरीदारी की स्थिति (सक्रिय पात्र)</value></data>
+  <data name="No companion purchase is pending." xml:space="preserve"><value>साथी की कोई खरीदारी लंबित नहीं है।</value></data>
+  <data name="Select a supported companion purchase item." xml:space="preserve"><value>साथी की खरीदारी के लिए समर्थित वस्तु चुनें।</value></data>
+  <data name="Companion purchasing is unavailable in the current context." xml:space="preserve"><value>मौजूदा स्थिति में साथी की खरीदारी उपलब्ध नहीं है।</value></data>
+  <data name="Companion purchase stopped: unresolved request in this shop session; no retry." xml:space="preserve"><value>साथी की खरीदारी रुकी: इस दुकान सत्र में अनुरोध अनिश्चित है; दोबारा प्रयास नहीं होगा।</value></data>
+  <data name="Companion purchase stopped: the shop offer or price is not verified." xml:space="preserve"><value>साथी की खरीदारी रुकी: दुकान की पेशकश या कीमत सत्यापित नहीं है।</value></data>
+  <data name="The companion purchase stock target is already met." xml:space="preserve"><value>साथी की खरीदारी का भंडार लक्ष्य पहले ही पूरा है।</value></data>
+  <data name="Companion purchase has no affordable quantity or inventory room." xml:space="preserve"><value>साथी की खरीदारी के लिए बजट में आने वाली मात्रा या इन्वेंटरी में जगह नहीं है।</value></data>
+  <data name="Companion purchase cancelled: context, profile, or shop session changed." xml:space="preserve"><value>साथी की खरीदारी रद्द: स्थिति, प्रोफ़ाइल या दुकान सत्र बदल गया।</value></data>
+  <data name="Waiting for observed companion purchase." xml:space="preserve"><value>साथी की खरीदारी की पुष्टि का इंतज़ार है।</value></data>
+  <data name="Companion purchase failed; no retry." xml:space="preserve"><value>साथी की खरीदारी विफल; दोबारा प्रयास नहीं होगा।</value></data>
+  <data name="Companion purchase stopped: unexpected inventory or gil change." xml:space="preserve"><value>साथी की खरीदारी रुकी: इन्वेंटरी या गिल में अप्रत्याशित बदलाव।</value></data>
+  <data name="Companion purchase completed; exact items and gil were observed." xml:space="preserve"><value>साथी की खरीदारी पूरी; वस्तुओं की सही मात्रा और गिल की कटौती देखी गई।</value></data>
+  <data name="Companion purchase stopped: items, gil debit, and settled transaction were not observed; no retry." xml:space="preserve"><value>साथी की खरीदारी रुकी: वस्तुएँ, गिल की कटौती और लेनदेन का पूरा होना नहीं देखा गया; दोबारा प्रयास नहीं होगा।</value></data>
+  <data name="Companion purchase stopped: confirmation did not match the owned request; no retry." xml:space="preserve"><value>साथी की खरीदारी रुकी: पुष्टि अपने अनुरोध से मेल नहीं खाई; दोबारा प्रयास नहीं होगा।</value></data>
+  <data name="Companion purchase stopped: additional confirmation; no retry." xml:space="preserve"><value>साथी की खरीदारी रुकी: अतिरिक्त पुष्टि; दोबारा प्रयास नहीं होगा।</value></data>
+  <data name="Companion purchase stopped." xml:space="preserve"><value>साथी की खरीदारी रुकी।</value></data>
+  <data name="BUY GREENS" xml:space="preserve"><value>सब्ज़ियाँ खरीदें</value></data>
+  <data name="BUY FOOD" xml:space="preserve"><value>भोजन खरीदें</value></data>
+  <data name="ADS owns companion vendor travel and purchases." xml:space="preserve"><value>साथी के विक्रेता की यात्रा और खरीद ADS संभालता है।</value></data>
+  <data name="Selected food: {0} | NQ stock: {1} | Target: {2}" xml:space="preserve"><value>चुना हुआ भोजन: {0} | NQ स्टॉक: {1} | लक्ष्य: {2}</value></data>
+  <data name="Waiting for ADS companion purchase." xml:space="preserve"><value>ADS से साथी की खरीद की प्रतीक्षा है।</value></data>
+  <data name="ADS did not accept the companion purchase." xml:space="preserve"><value>ADS ने साथी की खरीद स्वीकार नहीं की।</value></data>
+  <data name="ADS companion purchase outcome is unknown; no retry." xml:space="preserve"><value>ADS से साथी की खरीद का परिणाम अज्ञात है; दोबारा प्रयास नहीं होगा।</value></data>
+  <data name="Set a positive stock target." xml:space="preserve"><value>भंडार लक्ष्य शून्य से अधिक तय करें।</value></data>
+  <data name="Buy travels to the vendor and fills the stock target once. Purchasing starts only when you press Buy. Zero targets disable purchasing." xml:space="preserve"><value>खरीदें विक्रेता तक जाता है और लक्ष्य भंडार एक बार पूरा करता है। खरीद केवल खरीदें दबाने पर शुरू होती है। शून्य लक्ष्य खरीद बंद करता है।</value></data>
+  <data name="Buying companion food from Vath requires beast tribe progression through The Naming of Vath. Purchase is unavailable until the vendor is unlocked." xml:space="preserve"><value>Vath से साथी का भोजन खरीदने के लिए जनजातीय प्रगति में The Naming of Vath पूरा करना आवश्यक है। विक्रेता अनलॉक होने तक खरीद उपलब्ध नहीं है।</value></data>
+  <data name="Companion purchase cancelled: context, profile, or settings changed." xml:space="preserve"><value>साथी की खरीद रद्द: संदर्भ, प्रोफ़ाइल या सेटिंग बदल गई है।</value></data>
 </root>

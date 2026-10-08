@@ -4,6 +4,8 @@ using System.Numerics;
 using AethertekUI;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Windowing;
+using FrenRider.Models;
+using FrenRider.Services;
 
 namespace FrenRider.Windows;
 
@@ -11,6 +13,50 @@ namespace FrenRider.Windows;
 // This also preserves English-derived helper IDs and existing saved window identities.
 internal static class UiGui
 {
+    internal static void DrawCompanionPurchases(Plugin plugin, CharacterConfig config, bool mini)
+    {
+        using var font = UiText.Font(UiFontRole.Action);
+        using var controls = MaterialControls.Push(MaterialControlContext.Toolbar);
+        var available = Plugin.ClientState.IsLoggedIn
+            && plugin.ConfigManager.TryGetActiveConfig(out var active) && ReferenceEquals(active, config);
+        var greens = available ? GameHelpers.GetCompanionSupplyStock((int)GameHelpers.GysahlGreensItemId) : -1;
+        var food = available ? GameHelpers.GetCompanionSupplyStock(config.ChocoboFoodItemId) : -1;
+        var greensCount = greens < 0 ? "-" : greens.ToString();
+        var foodCount = food < 0 ? "-" : food.ToString();
+        var greensLabel = mini ? greensCount : UiText.T("BUY GREENS") + " · " + greensCount;
+        var foodLabel = mini ? foodCount : UiText.T("BUY FOOD") + " · " + foodCount;
+        var stopLabel = UiText.T("Stop companion purchasing");
+
+        ImGui.BeginDisabled(!available);
+        try
+        {
+            if (Button("BUY GREENS", display: greensLabel, icon: MaterialIcon.Cart)) plugin.PurchaseChocoboGreensNow();
+            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                MaterialText.SetTooltip(UiText.T("BUY GREENS") + "\n" + UiText.F("Gysahl Greens: {0}", greensCount)
+                    + "\n" + UiText.T("Gysahl Greens stock target") + ": " + config.ChocoboGreensStockTarget);
+            ContinuePurchaseAction(foodLabel, icon: true);
+            if (Button("BUY FOOD", display: foodLabel, icon: MaterialIcon.Utensils)) plugin.PurchaseChocoboFoodNow();
+            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                MaterialText.SetTooltip(UiText.T("BUY FOOD") + "\n" + UiText.F("Selected food: {0} | NQ stock: {1} | Target: {2}",
+                    UiText.T(ConfigWindow.ChocoboFoodName(config.ChocoboFoodItemId)), foodCount, config.ChocoboFoodStockTarget)
+                    + "\n" + UiText.T("Buying companion food from Vath requires beast tribe progression through The Naming of Vath. Purchase is unavailable until the vendor is unlocked."));
+        }
+        finally { ImGui.EndDisabled(); }
+        ContinuePurchaseAction(mini ? "" : stopLabel, icon: true);
+        if (mini ? IconButton("Stop companion purchasing", MaterialIcon.Stop)
+            : Button("Stop companion purchasing", icon: MaterialIcon.Stop)) plugin.StopChocoboPurchasing();
+        if (ImGui.IsItemHovered()) MaterialText.SetTooltip(stopLabel + "\n" + UiText.T(plugin.ChocoboPurchaseStatus));
+    }
+
+    private static void ContinuePurchaseAction(string display, bool icon)
+    {
+        var width = display.Length == 0 ? Math.Max(ImGui.GetFrameHeight(), MaterialControls.Metrics.Height)
+            : MaterialText.Measure(display).X + (icon ? ImGui.GetTextLineHeight() + UiHelpers.Scale(8) : 0)
+                + ImGui.GetStyle().FramePadding.X * 2;
+        var right = ImGui.GetWindowPos().X + ImGui.GetWindowContentRegionMax().X;
+        if (ImGui.GetItemRectMax().X + ImGui.GetStyle().ItemSpacing.X + width <= right) ImGui.SameLine();
+    }
+
     internal static void TextUnformatted(string text) => MaterialText.Text(UiText.T(text));
     internal static void TextWrapped(string text) => MaterialText.TextWrapped(UiText.T(text));
     internal static void TextDisabled(string text)

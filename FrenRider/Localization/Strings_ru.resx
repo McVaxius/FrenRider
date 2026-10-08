@@ -2802,4 +2802,66 @@
   <data name="Waiting for observed skill learning." xml:space="preserve"><value>Ожидание обнаружения изученного умения.</value></data>
   <data name="Skill learning request was rejected; no retry." xml:space="preserve"><value>Запрос на изучение умения отклонён; повторной попытки не будет.</value></data>
   <data name="Skill allocation stopped." xml:space="preserve"><value>Распределение умений остановлено.</value></data>
+  <data name="Waiting for Companion readiness." xml:space="preserve"><value>Ожидание готовности чокобо.</value></data>
+  <data name="Skill allocation stopped: Companion readiness was not observed; no retry." xml:space="preserve"><value>Распределение умений остановлено: готовность чокобо не подтверждена; повторной попытки не будет.</value></data>
+  <data name="Chocobo food" xml:space="preserve"><value>Корм чокобо</value></data>
+  <data name="Automatically feed Chocobo" xml:space="preserve"><value>Автоматически кормить чокобо</value></data>
+  <data name="Companion food" xml:space="preserve"><value>Корм спутника</value></data>
+  <data name="Curiel Root" xml:space="preserve"><value>Корень Кюриэля</value></data>
+  <data name="Sylkis Bud" xml:space="preserve"><value>Бутон Силькиса</value></data>
+  <data name="Mimett Gourd" xml:space="preserve"><value>Тыква Миметта</value></data>
+  <data name="Tantalplant" xml:space="preserve"><value>Растение Тантал</value></data>
+  <data name="Pahsana Fruit" xml:space="preserve"><value>Плод Пахсаны</value></data>
+  <data name="Unsupported companion food" xml:space="preserve"><value>Неподдерживаемый корм спутника</value></data>
+  <data name="These settings belong to the profile being edited. Feed and Stop use the active character&apos;s runtime profile." xml:space="preserve"><value>Эти настройки принадлежат редактируемому профилю. Кормление и остановка используют текущий рабочий профиль активного персонажа.</value></data>
+  <data name="Feed companion now" xml:space="preserve"><value>Покормить спутника сейчас</value></data>
+  <data name="Stop companion feeding" xml:space="preserve"><value>Остановить кормление спутника</value></data>
+  <data name="Feeding status (active character)" xml:space="preserve"><value>Состояние кормления (активный персонаж)</value></data>
+  <data name="No companion feeding is pending." xml:space="preserve"><value>Нет ожидающего кормления спутника.</value></data>
+  <data name="Companion feeding is unavailable in the current context." xml:space="preserve"><value>Кормление спутника недоступно в текущем контексте.</value></data>
+  <data name="Select a supported companion food." xml:space="preserve"><value>Выберите поддерживаемый корм спутника.</value></data>
+  <data name="Summon the companion before feeding." xml:space="preserve"><value>Призовите спутника перед кормлением.</value></data>
+  <data name="No selected companion food in inventory." xml:space="preserve"><value>Выбранного корма спутника нет в инвентаре.</value></data>
+  <data name="Selected companion food effect is already active." xml:space="preserve"><value>Эффект выбранного корма спутника уже активен.</value></data>
+  <data name="Waiting for observed companion feeding." xml:space="preserve"><value>Ожидание подтверждения кормления спутника.</value></data>
+  <data name="Companion feeding completed; food and effect were observed." xml:space="preserve"><value>Кормление спутника завершено; расход корма и эффект подтверждены.</value></data>
+  <data name="Companion feeding stopped: unexpected inventory change." xml:space="preserve"><value>Кормление спутника остановлено: неожиданное изменение инвентаря.</value></data>
+  <data name="Companion feeding stopped: consumption and effect were not observed; no retry." xml:space="preserve"><value>Кормление спутника остановлено: расход и эффект не подтверждены; повторной попытки не будет.</value></data>
+  <data name="Companion feeding request was rejected; no retry." xml:space="preserve"><value>Запрос кормления спутника отклонён; повторной попытки не будет.</value></data>
+  <data name="Companion feeding cancelled: context or profile changed." xml:space="preserve"><value>Кормление спутника отменено: контекст или профиль изменился.</value></data>
+  <data name="Companion feeding stopped." xml:space="preserve"><value>Кормление спутника остановлено.</value></data>
+  <data name="Companion feeding failed." xml:space="preserve"><value>Не удалось покормить спутника.</value></data>
+  <data name="Companion purchasing" xml:space="preserve"><value>Покупки для спутника</value></data>
+  <data name="Gysahl Greens stock target" xml:space="preserve"><value>Целевой запас зелени гизал</value></data>
+  <data name="Companion food stock target" xml:space="preserve"><value>Целевой запас корма спутника</value></data>
+  <data name="Purchase actions use the active character&apos;s profile. Select that character to purchase." xml:space="preserve"><value>Покупки используют профиль активного персонажа. Выберите этого персонажа для покупки.</value></data>
+  <data name="Stop companion purchasing" xml:space="preserve"><value>Остановить покупки для спутника</value></data>
+  <data name="Purchasing status (active character)" xml:space="preserve"><value>Состояние покупок (активный персонаж)</value></data>
+  <data name="No companion purchase is pending." xml:space="preserve"><value>Нет ожидающей покупки для спутника.</value></data>
+  <data name="Select a supported companion purchase item." xml:space="preserve"><value>Выберите поддерживаемый предмет для покупки спутнику.</value></data>
+  <data name="Companion purchasing is unavailable in the current context." xml:space="preserve"><value>Покупки для спутника недоступны в текущих условиях.</value></data>
+  <data name="Companion purchase stopped: unresolved request in this shop session; no retry." xml:space="preserve"><value>Покупка для спутника остановлена: неразрешённый запрос в этом сеансе магазина; без повтора.</value></data>
+  <data name="Companion purchase stopped: the shop offer or price is not verified." xml:space="preserve"><value>Покупка для спутника остановлена: предложение магазина или цена не проверены.</value></data>
+  <data name="The companion purchase stock target is already met." xml:space="preserve"><value>Целевой запас для покупки спутнику уже достигнут.</value></data>
+  <data name="Companion purchase has no affordable quantity or inventory room." xml:space="preserve"><value>Для покупки спутнику нет доступного по бюджету количества или места в инвентаре.</value></data>
+  <data name="Companion purchase cancelled: context, profile, or shop session changed." xml:space="preserve"><value>Покупка для спутника отменена: изменились условия, профиль или сеанс магазина.</value></data>
+  <data name="Waiting for observed companion purchase." xml:space="preserve"><value>Ожидание подтверждения покупки для спутника.</value></data>
+  <data name="Companion purchase failed; no retry." xml:space="preserve"><value>Покупка для спутника не удалась; без повтора.</value></data>
+  <data name="Companion purchase stopped: unexpected inventory or gil change." xml:space="preserve"><value>Покупка для спутника остановлена: неожиданное изменение инвентаря или гил.</value></data>
+  <data name="Companion purchase completed; exact items and gil were observed." xml:space="preserve"><value>Покупка для спутника завершена; подтверждены точные предметы и списание гил.</value></data>
+  <data name="Companion purchase stopped: items, gil debit, and settled transaction were not observed; no retry." xml:space="preserve"><value>Покупка для спутника остановлена: предметы, списание гил и завершение сделки не подтверждены; без повтора.</value></data>
+  <data name="Companion purchase stopped: confirmation did not match the owned request; no retry." xml:space="preserve"><value>Покупка для спутника остановлена: подтверждение не соответствует собственному запросу; без повтора.</value></data>
+  <data name="Companion purchase stopped: additional confirmation; no retry." xml:space="preserve"><value>Покупка для спутника остановлена: дополнительное подтверждение; без повтора.</value></data>
+  <data name="Companion purchase stopped." xml:space="preserve"><value>Покупка для спутника остановлена.</value></data>
+  <data name="BUY GREENS" xml:space="preserve"><value>КУПИТЬ ОВОЩИ</value></data>
+  <data name="BUY FOOD" xml:space="preserve"><value>КУПИТЬ КОРМ</value></data>
+  <data name="ADS owns companion vendor travel and purchases." xml:space="preserve"><value>ADS управляет поездками к продавцам и покупками для компаньона.</value></data>
+  <data name="Selected food: {0} | NQ stock: {1} | Target: {2}" xml:space="preserve"><value>Выбранный корм: {0} | Запас NQ: {1} | Цель: {2}</value></data>
+  <data name="Waiting for ADS companion purchase." xml:space="preserve"><value>Ожидание покупки для компаньона через ADS.</value></data>
+  <data name="ADS did not accept the companion purchase." xml:space="preserve"><value>ADS не принял запрос на покупку для компаньона.</value></data>
+  <data name="ADS companion purchase outcome is unknown; no retry." xml:space="preserve"><value>Результат покупки для компаньона через ADS неизвестен; повтора не будет.</value></data>
+  <data name="Set a positive stock target." xml:space="preserve"><value>Задайте целевой запас больше нуля.</value></data>
+  <data name="Buy travels to the vendor and fills the stock target once. Purchasing starts only when you press Buy. Zero targets disable purchasing." xml:space="preserve"><value>Кнопка покупки перемещает к торговцу и однократно пополняет целевой запас. Покупка начинается только по нажатию кнопки. Нулевой запас отключает покупки.</value></data>
+  <data name="Buying companion food from Vath requires beast tribe progression through The Naming of Vath. Purchase is unavailable until the vendor is unlocked." xml:space="preserve"><value>Для покупки еды для спутника у Vath нужно пройти племенные задания вплоть до The Naming of Vath. Покупка недоступна, пока торговец не разблокирован.</value></data>
+  <data name="Companion purchase cancelled: context, profile, or settings changed." xml:space="preserve"><value>Покупка для спутника отменена: изменились условия, профиль или настройки.</value></data>
 </root>

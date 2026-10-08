@@ -26,6 +26,25 @@ internal readonly record struct CompanionSnapshot(byte Rank, byte Stars, uint Cu
 /// </summary>
 public static class GameHelpers
 {
+    internal static unsafe long GetInventoryGil()
+    {
+        var inventory = InventoryManager.Instance();
+        return inventory == null ? -1 : inventory->GetGil();
+    }
+
+    internal static unsafe int GetCompanionSupplyStock(int itemId)
+    {
+        if (!ChocoboPurchaseService.IsSupportedItem(itemId)) return -1;
+        var inventory = InventoryManager.Instance();
+        if (inventory == null) return -1;
+        foreach (var type in new[] { InventoryType.Inventory1, InventoryType.Inventory2,
+            InventoryType.Inventory3, InventoryType.Inventory4 })
+        {
+            var container = inventory->GetInventoryContainer(type);
+            if (container == null || !container->IsLoaded || container->Size != 35) return -1;
+        }
+        return inventory->GetInventoryItemCount((uint)itemId, false);
+    }
     private const float AetheryteSanctuaryFallbackDistance = 50.0f;
     private const float AetheryteSanctuaryFallbackDistanceSquared = AetheryteSanctuaryFallbackDistance * AetheryteSanctuaryFallbackDistance;
 
@@ -376,9 +395,156 @@ public static class GameHelpers
             || actual.Rank is < 1 or > 20
             || !ChocoboSkillPlan.TryGetNext(actual, new[] { step.Tree }, out var next) || next != step)
             return false;
-        // SDK-owned command; OmenTools BuddyCommand documents the same level-major payload.
-        // This return records dispatch only. ChocoboSkillService observes both learned level and point debit.
-        return GameMain.ExecuteCommand(1702, step.Payload);
+        var manager = RaptureAtkUnitManager.Instance();
+        var dialog = manager == null ? null : manager->GetAddonByName("SelectYesno");
+        if (dialog != null && dialog->IsVisible) return false;
+        if (!TryGetCompanionSkillPrompt(step, out _)) return false;
+        var skills = ChocoboExplorationService.GetReadySkillsChild();
+        if (skills == null) return false;
+        var treeNodeId = step.Tree switch
+        {
+            ChocoboSkillTree.Defender => 6u,
+            ChocoboSkillTree.Attacker => 8u,
+            ChocoboSkillTree.Healer => 7u,
+            _ => 0u,
+        };
+        var column = skills->GetComponentByNodeId(treeNodeId);
+        if (column == null || column->UldManager.NodeList == null) return false;
+        AtkResNode* candidate = null;
+        for (var i = 0; i < Math.Min((int)column->UldManager.NodeListCount, 64); i++)
+        {
+            var node = column->UldManager.NodeList[i];
+            if (node == null || !node->IsVisible() || (node->NodeFlags & NodeFlags.Enabled) == 0) continue;
+            var component = node->GetAsAtkComponentNode();
+            if (component == null || component->Component == null
+                || component->Component->GetComponentType() != ComponentType.Button) continue;
+            var button = (AtkComponentButton*)component->Component;
+            if (!button->IsEnabled) continue;
+            var costNode = button->UldManager.SearchNodeById(5);
+            var text = costNode == null ? null : costNode->GetAsAtkTextNode();
+            if (text == null || !costNode->IsVisible() || !text->NodeText.StringPtr.HasValue
+                || text->NodeText.BufUsed is < 1 or > 64 || text->NodeText.BufSize < text->NodeText.BufUsed) continue;
+            var cost = Dalamud.Game.Text.SeStringHandling.SeString.Parse(text->NodeText.AsSpan()).TextValue;
+            if (cost != step.Cost.ToString(System.Globalization.CultureInfo.InvariantCulture)) continue;
+            if (candidate != null) return false; // Ambiguous controls must never choose a skill.
+            candidate = node;
+        }
+        if (candidate == null) return false;
+        var evt = candidate->AtkEventManager.Event;
+        for (var i = 0; evt != null && i < 8; i++, evt = evt->NextEvent)
+        {
+            if (evt->State.EventType != AtkEventType.ButtonClick || evt->Listener == null
+                || evt->Target != (AtkEventTarget*)candidate
+                || (evt->State.StateFlags & AtkEventStateFlags.IsGlobalEvent) != 0) continue;
+            AtkEventData input = default;
+            evt->Listener->ReceiveEvent(evt->State.EventType, checked((int)evt->Param), evt, &input);
+            return true; // Dispatch only; exact confirmation and progression are checked by the service.
+        }
+        return false;
+    }
+
+    internal static unsafe bool TryReadCompanionFood(uint itemId, out CompanionFoodSnapshot snapshot)
+    {
+        snapshot = default;
+        var normal = itemId switch
+        {
+            7894 => 536u,
+            7895 => 538u,
+            7897 => 540u,
+            7898 => 542u,
+            7900 => 544u,
+            _ => 0u,
+        };
+        if (normal == 0) return false;
+        var local = Plugin.ObjectTable.LocalPlayer;
+        var state = UIState.Instance();
+        var characters = FFXIVClientStructs.FFXIV.Client.Game.Character.CharacterManager.Instance();
+        if (local == null || state == null || characters == null) return false;
+        var stock = GetInventoryItemCount(itemId, highQuality: false);
+        var buddy = characters->LookupBuddyByOwnerObject(
+            (FFXIVClientStructs.FFXIV.Client.Game.Character.BattleChara*)local.Address);
+        var member = state->Buddy.CompanionInfo.Companion;
+        if (buddy == null || member == null || buddy->EntityId is 0 or 0xE0000000
+            || buddy->EntityId != member->EntityId || state->Buddy.CompanionInfo.TimeLeft <= 0
+            || state->Buddy.CompanionInfo.Mounted)
+        { snapshot = new(0, stock, 0); return true; }
+        byte holders = 0;
+        var playerStatuses = ((FFXIVClientStructs.FFXIV.Client.Game.Character.BattleChara*)local.Address)->GetStatusManager();
+        var buddyStatuses = buddy->GetStatusManager();
+        if (playerStatuses != null && (playerStatuses->HasStatus(normal) || playerStatuses->HasStatus(normal + 1))) holders |= 1;
+        if (buddyStatuses != null && (buddyStatuses->HasStatus(normal) || buddyStatuses->HasStatus(normal + 1))) holders |= 2;
+        if (member->StatusManager.HasStatus(normal) || member->StatusManager.HasStatus(normal + 1)) holders |= 4;
+        snapshot = new(buddy->EntityId, stock, holders);
+        return true;
+    }
+
+    internal static unsafe bool TryFeedCompanion(uint itemId, CompanionFoodSnapshot expected)
+    {
+        var manager = RaptureAtkUnitManager.Instance();
+        var dialog = manager == null ? null : manager->GetAddonByName("SelectYesno");
+        if (manager == null || (dialog != null && dialog->IsVisible)) return false;
+        var player = Plugin.ObjectTable.LocalPlayer;
+        return player != null && expected.BuddyEntityId != 0 && expected.Stock > 0 && expected.EffectHolders == 0
+            && TryReadCompanionFood(itemId, out var current) && current == expected
+            && UseItem(itemId, highQuality: false, player.GameObjectId);
+    }
+
+    internal static bool TryGetCompanionSkillPrompt(ChocoboSkillStep step, out string prompt)
+    {
+        prompt = "";
+        var language = Plugin.ClientState.ClientLanguage;
+        var skill = Plugin.DataManager.GetExcelSheet<Lumina.Excel.Sheets.BuddySkill>(language)?.GetRowOrDefault((uint)step.Level);
+        if (!skill.HasValue || skill.Value.BuddyLevel != step.Level) return false;
+        var reference = step.Tree switch
+        {
+            ChocoboSkillTree.Defender => skill.Value.Defender.RowId,
+            ChocoboSkillTree.Attacker => skill.Value.Attacker.RowId,
+            ChocoboSkillTree.Healer => skill.Value.Healer.RowId,
+            _ => 0u,
+        };
+        if (reference == 0) return false;
+        Lumina.Text.ReadOnly.ReadOnlySeString name;
+        if (skill.Value.IsActive)
+        {
+            var action = Plugin.DataManager.GetExcelSheet<Lumina.Excel.Sheets.Action>(language)?.GetRowOrDefault(reference);
+            if (!action.HasValue) return false;
+            name = action.Value.Name;
+        }
+        else
+        {
+            var trait = Plugin.DataManager.GetExcelSheet<Lumina.Excel.Sheets.Trait>(language)?.GetRowOrDefault(reference);
+            if (!trait.HasValue) return false;
+            name = trait.Value.Name;
+        }
+        if (string.IsNullOrWhiteSpace(name.ExtractText())) return false;
+        var evaluator = ECommons.DalamudServices.Svc.SeStringEvaluator;
+        if (evaluator == null) return false;
+        // Native Addon4974 binds lstr1 to the skill name and lnum2 to its point cost.
+        var parameters = new Dalamud.Game.Text.Evaluator.SeStringParameter[] { name, (uint)step.Cost };
+        prompt = evaluator.EvaluateFromAddon(4974u, parameters, language).ExtractText();
+        return !string.IsNullOrWhiteSpace(prompt);
+    }
+
+    internal static unsafe ChocoboSkillConfirmationResult RespondCompanionSkillConfirmation(
+        CompanionSnapshot before, ChocoboSkillStep step, bool accept = true)
+    {
+        var manager = RaptureAtkUnitManager.Instance();
+        var dialog = manager == null ? null : (AddonSelectYesno*)manager->GetAddonByName("SelectYesno");
+        if (dialog == null || !dialog->IsVisible || !dialog->IsReady)
+            return ChocoboSkillConfirmationResult.Waiting;
+        var id = dialog->Id;
+        if (!TryGetCompanionSkillPrompt(step, out var expected)
+            || !TryReadSelectYesnoPrompt(out var actual) || !string.Equals(actual, expected, StringComparison.Ordinal))
+            return ChocoboSkillConfirmationResult.Rejected;
+        if (!TryReadCompanion(out var state) || state != before)
+            return ChocoboSkillConfirmationResult.Rejected;
+        if (manager->GetAddonByName("SelectYesno") != (AtkUnitBase*)dialog || dialog->Id != id)
+            return ChocoboSkillConfirmationResult.Rejected;
+        var button = accept ? dialog->YesButton : dialog->NoButton;
+        if (button == null || !button->IsEnabled) return ChocoboSkillConfirmationResult.Waiting;
+        var value = new AtkValue { Type = AtkValueType.Int, Int = accept ? 0 : 1 };
+        dialog->FireCallback(1, &value, true);
+        return ChocoboSkillConfirmationResult.Accepted;
     }
 
     internal static unsafe bool TryOpenCompanionWindow()

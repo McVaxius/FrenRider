@@ -106,6 +106,10 @@ public sealed class Plugin : IDalamudPlugin
     private int chocoboRequestGeneration;
     private readonly ChocoboSkillService chocoboSkills;
     private int chocoboSkillRequestGeneration;
+    private readonly ChocoboFoodService chocoboFood;
+    private int chocoboFoodRequestGeneration;
+    private readonly ChocoboPurchaseService chocoboPurchase;
+    private int chocoboPurchaseRequestGeneration;
     private DateTime nextFrameworkHitchLogUtc = DateTime.MinValue;
     private double lastSlowUpdateMs;
     private string lastSlowUpdateSource = "none";
@@ -182,12 +186,71 @@ public sealed class Plugin : IDalamudPlugin
         BeastCaptureService = new BeastCaptureService(this);
         AdsHyperFocusLeaseService = new AdsHyperFocusLeaseService(this);
         AutomationService = new AutomationService(this, FrenTracker, ZoneService);
+        CompanionSnapshot? ownedSkillBefore = null;
+        ChocoboSkillStep? ownedSkillStep = null;
         chocoboSkills = new ChocoboSkillService(CanAllocateChocoboSkills,
             () => PlayerState.ContentId,
             () => ConfigManager.TryGetActiveConfig(out var active) ? active : null,
             () => GameHelpers.TryReadCompanion(out var info) ? info : null,
-            GameHelpers.TryLearnCompanionSkill,
+            (before, step) =>
+            {
+                var dispatched = GameHelpers.TryLearnCompanionSkill(before, step);
+                if (dispatched) { ownedSkillBefore = before; ownedSkillStep = step; }
+                return dispatched;
+            },
             message => Log.Information($"[FrenRider][ChocoboSkills] {message}"),
+            () => Environment.TickCount64,
+            prepare: () =>
+            {
+                ownedSkillBefore = null;
+                ownedSkillStep = null;
+                return chocoboExploration.PrepareSkills();
+            },
+            prepared: () => chocoboExploration.SkillsReady,
+            release: () =>
+            {
+                try
+                {
+                    if (ownedSkillBefore.HasValue && ownedSkillStep.HasValue
+                        && chocoboExploration.OwnsReadySkillsWindow && CanAllocateChocoboSkills())
+                        GameHelpers.RespondCompanionSkillConfirmation(ownedSkillBefore.Value, ownedSkillStep.Value, accept: false);
+                }
+                finally
+                {
+                    ownedSkillBefore = null;
+                    ownedSkillStep = null;
+                    chocoboExploration.Stop("skill allocation released its Skills window");
+                }
+            },
+            confirm: (before, step) => GameHelpers.RespondCompanionSkillConfirmation(before, step));
+        chocoboFood = new ChocoboFoodService(CanFeedChocobo,
+            () => PlayerState.ContentId,
+            () => ConfigManager.TryGetActiveConfig(out var active) ? active : null,
+            item => GameHelpers.TryReadCompanionFood(item, out var state) ? state : null,
+            GameHelpers.TryFeedCompanion,
+            message => Log.Information($"[FrenRider][ChocoboFood] {message}"),
+            () => Environment.TickCount64);
+        chocoboPurchase = new ChocoboPurchaseService(CanPurchaseChocobo,
+            () => PlayerState.ContentId,
+            () => ConfigManager.TryGetActiveConfig(out var active) ? active : null,
+            GameHelpers.GetCompanionSupplyStock, GameHelpers.GetInventoryGil,
+            request =>
+            {
+                // Capability inspection is input-free. Missing/older ADS rejects before any local hold cleanup.
+                try
+                {
+                    if (!ChocoboPurchaseService.SupportsTravelPolicy(PluginInterface
+                        .GetIpcSubscriber<string>("ADS.GetCapabilitiesJson").InvokeFunc())) return false;
+                }
+                catch { return false; }
+                FollowService.SuspendForTravel();
+                MountService.PreemptFarChase("ADS companion purchase");
+                return PluginInterface.GetIpcSubscriber<string, bool>("ADS.StartCurrencyShopPurchase")
+                    .InvokeFunc(request.ToJson());
+            },
+            () => CompanionAdsPurchaseStatus.Parse(PluginInterface.GetIpcSubscriber<string>("ADS.GetShopPurchaseStatusJson").InvokeFunc()),
+            operationId => PluginInterface.GetIpcSubscriber<string, bool>("ADS.CancelShopPurchase").InvokeFunc(operationId),
+            message => Log.Information($"[FrenRider][ChocoboPurchase] {message}"),
             () => Environment.TickCount64);
         FormationService = new FormationService(this, FrenTracker);
         PartyService = new PartyService(this, Log, GameGui);
@@ -209,6 +272,8 @@ public sealed class Plugin : IDalamudPlugin
         // Hook into FrenRider enabled state changes
         ConfigManager.OnEffectiveProfileChanging += EndCombatSettingsSession;
         ConfigManager.OnEffectiveProfileChanging += CancelChocoboSkillSession;
+        ConfigManager.OnEffectiveProfileChanging += CancelChocoboFoodSession;
+        ConfigManager.OnEffectiveProfileChanging += CancelChocoboPurchaseSession;
         ConfigManager.OnFrenRiderEnabledChanged += OnFrenRiderEnabledChanged;
         DadIPC = new DadIPC(PluginInterface, ConfigManager, FrenTracker, CombatService, Log);
 
@@ -268,6 +333,7 @@ public sealed class Plugin : IDalamudPlugin
         Log.Information($"[FrenRider] Loaded version {loadedVersion} from {PluginInterface.AssemblyLocation.FullName}");
         Log.Information("===Fren Rider loaded!===");
         Log.Information($"[FrenRider][ChocoboProbe] available build={ChocoboExplorationService.BuildMarker}; command=/fr testchocobo");
+        Log.Information("[FrenRider][ChocoboPurchase] available build=I496-food-03; manual=true; main-mini-stock-controls=true; gil-cap-setting=false; travel-checkbox=false");
     }
 
     public void Dispose()
@@ -275,9 +341,13 @@ public sealed class Plugin : IDalamudPlugin
         System.Threading.Interlocked.Increment(ref chocoboRequestGeneration);
         chocoboExploration.Dispose();
         CancelChocoboSkillSession();
+        CancelChocoboFoodSession();
+        CancelChocoboPurchaseSession();
         EndCombatSettingsSession();
         ConfigManager.OnEffectiveProfileChanging -= EndCombatSettingsSession;
         ConfigManager.OnEffectiveProfileChanging -= CancelChocoboSkillSession;
+        ConfigManager.OnEffectiveProfileChanging -= CancelChocoboFoodSession;
+        ConfigManager.OnEffectiveProfileChanging -= CancelChocoboPurchaseSession;
         PhoenixDownRecoveryService.Dispose();
         ToastGui.ErrorToast -= BossModActionTweaksService.OnErrorToast;
         BossModActionTweaksService.ResetRecovery();
@@ -595,7 +665,8 @@ public sealed class Plugin : IDalamudPlugin
         MainWindow.Toggle();
     }
 
-    internal string ChocoboProbeStatus => chocoboExploration.IsActive ? "Companion discovery is running"
+    internal string ChocoboProbeStatus => chocoboExploration.IsSkillPreparation ? chocoboSkills.Status
+        : chocoboExploration.IsActive ? "Companion discovery is running"
         : chocoboExploration.PendingReload ? "Waiting for character readiness" : "No Companion discovery is pending";
 
     internal string ChocoboSkillStatus => chocoboSkills.Status;
@@ -620,6 +691,81 @@ public sealed class Plugin : IDalamudPlugin
 
     internal void CheckAutomaticChocoboSkills() => chocoboSkills.CheckAutomatic();
 
+    internal string ChocoboFoodStatus => chocoboFood.Status;
+
+    internal void FeedChocoboNow()
+    {
+        var generation = System.Threading.Volatile.Read(ref chocoboFoodRequestGeneration);
+        _ = Framework.RunOnFrameworkThread(() =>
+        {
+            if (generation == System.Threading.Volatile.Read(ref chocoboFoodRequestGeneration))
+                chocoboFood.Start();
+        });
+    }
+
+    internal void StopChocoboFeeding()
+    {
+        System.Threading.Interlocked.Increment(ref chocoboFoodRequestGeneration);
+        _ = Framework.RunOnFrameworkThread(() => chocoboFood.Stop());
+    }
+
+    internal void CheckAutomaticChocoboFood() => chocoboFood.CheckAutomatic();
+
+    internal string ChocoboPurchaseStatus => chocoboPurchase.Status;
+
+    internal void PurchaseChocoboGreensNow() => PurchaseChocoboStock(food: false);
+    internal void PurchaseChocoboFoodNow() => PurchaseChocoboStock(food: true);
+
+    private void PurchaseChocoboStock(bool food)
+    {
+        var generation = System.Threading.Volatile.Read(ref chocoboPurchaseRequestGeneration);
+        _ = Framework.RunOnFrameworkThread(() =>
+        {
+            if (generation != System.Threading.Volatile.Read(ref chocoboPurchaseRequestGeneration)
+                || !ConfigManager.TryGetActiveConfig(out var active) || active == null) return;
+            chocoboPurchase.Start(food ? active.ChocoboFoodItemId : (int)GameHelpers.GysahlGreensItemId,
+                food ? active.ChocoboFoodStockTarget : active.ChocoboGreensStockTarget);
+        });
+    }
+
+    internal void StopChocoboPurchasing()
+    {
+        System.Threading.Interlocked.Increment(ref chocoboPurchaseRequestGeneration);
+        _ = Framework.RunOnFrameworkThread(() => chocoboPurchase.Stop());
+    }
+
+    private void CancelChocoboPurchaseSession()
+    {
+        System.Threading.Interlocked.Increment(ref chocoboPurchaseRequestGeneration);
+        chocoboPurchase.Stop("Companion purchase cancelled: context, profile, or shop session changed.");
+    }
+
+    private bool CanPurchaseChocobo()
+        => (chocoboPurchase.HasOwnedFlow ? CanContinueOwnedChocoboPurchase() : CanUseCompanionActions(allowOwnedShop: true))
+            && !Condition[ConditionFlag.RidingPillion]
+            && !chocoboExploration.IsActive && !chocoboExploration.PendingReload
+            && !chocoboSkills.IsActive && !chocoboFood.IsActive;
+
+    private bool CanContinueOwnedChocoboPurchase()
+        => ClientState.IsLoggedIn && PlayerState.ContentId != 0
+            && !Condition[ConditionFlag.InCombat] && !Condition[ConditionFlag.LoggingOut]
+            && !Condition[ConditionFlag.BoundByDuty] && !Condition[ConditionFlag.BoundByDuty56]
+            && (chocoboPurchase.AllowsOwnedTravel
+                || !Condition[ConditionFlag.Mounted] && !Condition[ConditionFlag.Mounting71])
+            && !Condition[ConditionFlag.OccupiedInCutSceneEvent]
+            && (chocoboPurchase.AllowsOwnedTravel && IsAreaTransitionActive()
+                || ObjectTable.LocalPlayer is { CurrentHp: > 0 } player
+                    && (!player.IsCasting || chocoboPurchase.AllowsOwnedTravel))
+            && !AdsIntegrationService.ShouldPauseDutySystems && !AutomationService.IsRepairFlowActive
+            && !CoppeliaPowerlevelLeaseService.ShouldSuppressCompanionAutoSummon
+            && !PhoenixDownRecoveryService.HoldActions && !PhoenixDownRecoveryService.HoldMovement;
+
+    private void CancelChocoboFoodSession()
+    {
+        System.Threading.Interlocked.Increment(ref chocoboFoodRequestGeneration);
+        chocoboFood.Stop("Companion feeding cancelled: context or profile changed.");
+    }
+
     private void CancelChocoboSkillSession()
     {
         System.Threading.Interlocked.Increment(ref chocoboSkillRequestGeneration);
@@ -627,14 +773,26 @@ public sealed class Plugin : IDalamudPlugin
     }
 
     private bool CanAllocateChocoboSkills()
+        => CanUseCompanionActions()
+            && (!chocoboExploration.IsActive || chocoboExploration.IsSkillPreparation)
+            && !chocoboExploration.PendingReload
+            && (!chocoboSkills.IsActive || chocoboExploration.IsSkillPreparation)
+            && !chocoboFood.IsActive && !chocoboPurchase.HasOwnedFlow;
+
+    private bool CanFeedChocobo()
+        => CanUseCompanionActions() && !Condition[ConditionFlag.RidingPillion]
+            && !chocoboExploration.IsActive && !chocoboExploration.PendingReload && !chocoboSkills.IsActive
+            && !chocoboPurchase.HasOwnedFlow;
+
+    private bool CanUseCompanionActions(bool allowOwnedShop = false)
         => ClientState.IsLoggedIn && ObjectTable.LocalPlayer is { IsCasting: false, CurrentHp: > 0 }
             && !Condition[ConditionFlag.InCombat] && !Condition[ConditionFlag.LoggingOut]
             && !Condition[ConditionFlag.BetweenAreas] && !Condition[ConditionFlag.BetweenAreas51]
             && !Condition[ConditionFlag.BoundByDuty] && !Condition[ConditionFlag.BoundByDuty56]
             && !Condition[ConditionFlag.Mounted] && !Condition[ConditionFlag.Mounting71]
-            && !Condition[ConditionFlag.OccupiedInQuestEvent] && !Condition[ConditionFlag.OccupiedInCutSceneEvent]
-            && !Condition[ConditionFlag.Occupied33] && !Condition[ConditionFlag.Occupied39]
-            && !chocoboExploration.IsActive && !chocoboExploration.PendingReload
+            && !Condition[ConditionFlag.OccupiedInCutSceneEvent]
+            && (allowOwnedShop || (!Condition[ConditionFlag.OccupiedInQuestEvent]
+                && !Condition[ConditionFlag.Occupied33] && !Condition[ConditionFlag.Occupied39]))
             && !AdsIntegrationService.ShouldPauseDutySystems && !AutomationService.IsUtilityGateActive
             && !CoppeliaPowerlevelLeaseService.ShouldSuppressCompanionAutoSummon
             && !PhoenixDownRecoveryService.HoldActions && !PhoenixDownRecoveryService.HoldMovement;
@@ -653,7 +811,8 @@ public sealed class Plugin : IDalamudPlugin
         var generation = System.Threading.Volatile.Read(ref chocoboRequestGeneration);
         _ = Framework.RunOnFrameworkThread(() =>
         {
-            if (generation == System.Threading.Volatile.Read(ref chocoboRequestGeneration))
+            if (generation == System.Threading.Volatile.Read(ref chocoboRequestGeneration)
+                && !chocoboSkills.IsActive && !chocoboFood.IsActive && !chocoboPurchase.HasOwnedFlow)
                 chocoboExploration.Start();
         });
     }
@@ -844,6 +1003,8 @@ public sealed class Plugin : IDalamudPlugin
             {
                 chocoboExploration.Stop("logout", restore: false);
                 CancelChocoboSkillSession();
+                CancelChocoboFoodSession();
+                CancelChocoboPurchaseSession();
                 EndCombatSettingsSession();
                 PhoenixDownRecoveryService.Reset();
                 MountService.ResetFateClingHold();
@@ -856,6 +1017,8 @@ public sealed class Plugin : IDalamudPlugin
             {
                 chocoboExploration.Stop("logging out", restore: false);
                 CancelChocoboSkillSession();
+                CancelChocoboFoodSession();
+                CancelChocoboPurchaseSession();
                 if (!loggingOutCleanupDone)
                 {
                     EndCombatSettingsSession();
@@ -869,6 +1032,9 @@ public sealed class Plugin : IDalamudPlugin
             {
                 chocoboExploration.Stop("area transition", restore: false);
                 CancelChocoboSkillSession();
+                CancelChocoboFoodSession();
+                if (chocoboPurchase.AllowsOwnedTravel) chocoboPurchase.Tick();
+                else CancelChocoboPurchaseSession();
                 PhoenixDownRecoveryService.Reset();
                 BeastCaptureService.Suspend();
                 BossModActionTweaksService.ResetRecovery();
@@ -891,7 +1057,7 @@ public sealed class Plugin : IDalamudPlugin
             {
                 if (chocoboExploration.PendingReload)
                 {
-                    try { chocoboExploration.TickReload(ConfigManager.TryGetLocalActiveConfig(out _)); }
+                    try { chocoboExploration.TickReload(!chocoboPurchase.HasOwnedFlow && ConfigManager.TryGetLocalActiveConfig(out _)); }
                     catch (Exception ex)
                     {
                         chocoboExploration.Stop($"reload registration failed: {ex.GetType().Name}", restore: false);
@@ -977,6 +1143,8 @@ public sealed class Plugin : IDalamudPlugin
             Measure("utility-gate", AutomationService.UpdateUtilityGate);
             Measure("phoenix-down-recovery", PhoenixDownRecoveryService.Update);
             Measure("chocobo-skills", chocoboSkills.Tick);
+            Measure("chocobo-food", chocoboFood.Tick);
+            Measure("chocobo-purchase", chocoboPurchase.Tick);
             Measure("fate-cling-hold", MountService.RefreshFateClingHold);
             if (!PhoenixDownRecoveryService.HoldActions)
                 Measure("combat", CombatService.Update);
@@ -986,6 +1154,8 @@ public sealed class Plugin : IDalamudPlugin
                 Measure("casting-recovery", BossModActionTweaksService.UpdateRecovery);
             }
 
+            if (chocoboPurchase.HoldsMovement)
+                return; // Hold local teleport, dialogs and movement for the owned restock operation.
             Measure("fren-teleport", FrenTeleportService.Update);
             Measure("auto-yes", AutoYesService.Update);
             Measure("respawn", RespawnService.Update);
@@ -995,6 +1165,7 @@ public sealed class Plugin : IDalamudPlugin
             Measure("follow", FollowService.Update);
             Measure("mount", MountService.Update);
             Measure("automation", AutomationService.Update);
+            if (chocoboPurchase.HoldsMovement) return;
             Measure("formation", FormationService.Update);
             Measure("party", PartyService.Update);
             Measure("duty-interact", DutyInteractService.Update);

@@ -2802,4 +2802,66 @@ An: Die BossMod-Voreinstellungen unten mit jedem Rotationsanbieter verwenden. Ei
   <data name="Waiting for observed skill learning." xml:space="preserve"><value>Warte auf festgestellten Fertigkeitserwerb.</value></data>
   <data name="Skill learning request was rejected; no retry." xml:space="preserve"><value>Anfrage zum Fertigkeitserwerb abgelehnt; kein erneuter Versuch.</value></data>
   <data name="Skill allocation stopped." xml:space="preserve"><value>Fertigkeitszuweisung gestoppt.</value></data>
+  <data name="Waiting for Companion readiness." xml:space="preserve"><value>Warte, bis der Chocobo bereit ist.</value></data>
+  <data name="Skill allocation stopped: Companion readiness was not observed; no retry." xml:space="preserve"><value>Fertigkeitsverteilung beendet: Die Bereitschaft des Chocobos wurde nicht bestätigt; kein erneuter Versuch.</value></data>
+  <data name="Chocobo food" xml:space="preserve"><value>Chocobo-Futter</value></data>
+  <data name="Automatically feed Chocobo" xml:space="preserve"><value>Chocobo automatisch füttern</value></data>
+  <data name="Companion food" xml:space="preserve"><value>Begleiterfutter</value></data>
+  <data name="Curiel Root" xml:space="preserve"><value>Curielgemüse</value></data>
+  <data name="Sylkis Bud" xml:space="preserve"><value>Sylkisgemüse</value></data>
+  <data name="Mimett Gourd" xml:space="preserve"><value>Mimettgemüse</value></data>
+  <data name="Tantalplant" xml:space="preserve"><value>Tantalgemüse</value></data>
+  <data name="Pahsana Fruit" xml:space="preserve"><value>Pahsanagemüse</value></data>
+  <data name="Unsupported companion food" xml:space="preserve"><value>Nicht unterstütztes Begleiterfutter</value></data>
+  <data name="These settings belong to the profile being edited. Feed and Stop use the active character&apos;s runtime profile." xml:space="preserve"><value>Diese Einstellungen gehören zum bearbeiteten Profil. Füttern und Stoppen verwenden das aktive Laufzeitprofil des Charakters.</value></data>
+  <data name="Feed companion now" xml:space="preserve"><value>Begleiter jetzt füttern</value></data>
+  <data name="Stop companion feeding" xml:space="preserve"><value>Begleiterfütterung stoppen</value></data>
+  <data name="Feeding status (active character)" xml:space="preserve"><value>Fütterungsstatus (aktiver Charakter)</value></data>
+  <data name="No companion feeding is pending." xml:space="preserve"><value>Keine Begleiterfütterung ausstehend.</value></data>
+  <data name="Companion feeding is unavailable in the current context." xml:space="preserve"><value>Begleiterfütterung ist im aktuellen Kontext nicht verfügbar.</value></data>
+  <data name="Select a supported companion food." xml:space="preserve"><value>Wähle ein unterstütztes Begleiterfutter.</value></data>
+  <data name="Summon the companion before feeding." xml:space="preserve"><value>Rufe den Begleiter vor dem Füttern.</value></data>
+  <data name="No selected companion food in inventory." xml:space="preserve"><value>Kein ausgewähltes Begleiterfutter im Inventar.</value></data>
+  <data name="Selected companion food effect is already active." xml:space="preserve"><value>Der Effekt des ausgewählten Begleiterfutters ist bereits aktiv.</value></data>
+  <data name="Waiting for observed companion feeding." xml:space="preserve"><value>Warte auf die Bestätigung der Begleiterfütterung.</value></data>
+  <data name="Companion feeding completed; food and effect were observed." xml:space="preserve"><value>Begleiterfütterung abgeschlossen; Futterverbrauch und Effekt wurden beobachtet.</value></data>
+  <data name="Companion feeding stopped: unexpected inventory change." xml:space="preserve"><value>Begleiterfütterung gestoppt: unerwartete Inventaränderung.</value></data>
+  <data name="Companion feeding stopped: consumption and effect were not observed; no retry." xml:space="preserve"><value>Begleiterfütterung gestoppt: Verbrauch und Effekt wurden nicht beobachtet; kein erneuter Versuch.</value></data>
+  <data name="Companion feeding request was rejected; no retry." xml:space="preserve"><value>Anfrage zur Begleiterfütterung abgelehnt; kein erneuter Versuch.</value></data>
+  <data name="Companion feeding cancelled: context or profile changed." xml:space="preserve"><value>Begleiterfütterung abgebrochen: Kontext oder Profil geändert.</value></data>
+  <data name="Companion feeding stopped." xml:space="preserve"><value>Begleiterfütterung gestoppt.</value></data>
+  <data name="Companion feeding failed." xml:space="preserve"><value>Begleiterfütterung fehlgeschlagen.</value></data>
+  <data name="Companion purchasing" xml:space="preserve"><value>Begleiterkäufe</value></data>
+  <data name="Gysahl Greens stock target" xml:space="preserve"><value>Vorratsziel für Gizar-Kraut</value></data>
+  <data name="Companion food stock target" xml:space="preserve"><value>Vorratsziel für Begleiterfutter</value></data>
+  <data name="Purchase actions use the active character&apos;s profile. Select that character to purchase." xml:space="preserve"><value>Käufe verwenden das Profil des aktiven Charakters. Wähle diesen Charakter zum Kaufen aus.</value></data>
+  <data name="Stop companion purchasing" xml:space="preserve"><value>Begleiterkäufe stoppen</value></data>
+  <data name="Purchasing status (active character)" xml:space="preserve"><value>Kaufstatus (aktiver Charakter)</value></data>
+  <data name="No companion purchase is pending." xml:space="preserve"><value>Kein Begleiterkauf steht aus.</value></data>
+  <data name="Select a supported companion purchase item." xml:space="preserve"><value>Wähle einen unterstützten Artikel für den Begleiterkauf.</value></data>
+  <data name="Companion purchasing is unavailable in the current context." xml:space="preserve"><value>Begleiterkäufe sind im aktuellen Kontext nicht verfügbar.</value></data>
+  <data name="Companion purchase stopped: unresolved request in this shop session; no retry." xml:space="preserve"><value>Begleiterkauf gestoppt: ungeklärte Anfrage in dieser Shop-Sitzung; kein erneuter Versuch.</value></data>
+  <data name="Companion purchase stopped: the shop offer or price is not verified." xml:space="preserve"><value>Begleiterkauf gestoppt: Shopangebot oder Preis nicht bestätigt.</value></data>
+  <data name="The companion purchase stock target is already met." xml:space="preserve"><value>Das Vorratsziel für den Begleiterkauf ist bereits erreicht.</value></data>
+  <data name="Companion purchase has no affordable quantity or inventory room." xml:space="preserve"><value>Für den Begleiterkauf reichen Budget oder Inventarplatz nicht aus.</value></data>
+  <data name="Companion purchase cancelled: context, profile, or shop session changed." xml:space="preserve"><value>Begleiterkauf abgebrochen: Kontext, Profil oder Shop-Sitzung geändert.</value></data>
+  <data name="Waiting for observed companion purchase." xml:space="preserve"><value>Warte auf die Bestätigung des Begleiterkaufs.</value></data>
+  <data name="Companion purchase failed; no retry." xml:space="preserve"><value>Begleiterkauf fehlgeschlagen; kein erneuter Versuch.</value></data>
+  <data name="Companion purchase stopped: unexpected inventory or gil change." xml:space="preserve"><value>Begleiterkauf gestoppt: unerwartete Änderung von Inventar oder Gil.</value></data>
+  <data name="Companion purchase completed; exact items and gil were observed." xml:space="preserve"><value>Begleiterkauf abgeschlossen; genaue Artikelmenge und Gil-Abbuchung wurden festgestellt.</value></data>
+  <data name="Companion purchase stopped: items, gil debit, and settled transaction were not observed; no retry." xml:space="preserve"><value>Begleiterkauf gestoppt: Artikel, Gil-Abbuchung und Transaktionsabschluss wurden nicht festgestellt; kein erneuter Versuch.</value></data>
+  <data name="Companion purchase stopped: confirmation did not match the owned request; no retry." xml:space="preserve"><value>Begleiterkauf gestoppt: Bestätigung passte nicht zur zugehörigen Anfrage; kein erneuter Versuch.</value></data>
+  <data name="Companion purchase stopped: additional confirmation; no retry." xml:space="preserve"><value>Begleiterkauf gestoppt: zusätzliche Bestätigung; kein erneuter Versuch.</value></data>
+  <data name="Companion purchase stopped." xml:space="preserve"><value>Begleiterkauf gestoppt.</value></data>
+  <data name="BUY GREENS" xml:space="preserve"><value>GEMÜSE KAUFEN</value></data>
+  <data name="BUY FOOD" xml:space="preserve"><value>FUTTER KAUFEN</value></data>
+  <data name="ADS owns companion vendor travel and purchases." xml:space="preserve"><value>ADS übernimmt Reisen zu Begleiterhändlern und Käufe.</value></data>
+  <data name="Selected food: {0} | NQ stock: {1} | Target: {2}" xml:space="preserve"><value>Gewähltes Futter: {0} | NQ-Bestand: {1} | Ziel: {2}</value></data>
+  <data name="Waiting for ADS companion purchase." xml:space="preserve"><value>Warten auf den ADS-Begleiterkauf.</value></data>
+  <data name="ADS did not accept the companion purchase." xml:space="preserve"><value>ADS hat den Begleiterkauf nicht angenommen.</value></data>
+  <data name="ADS companion purchase outcome is unknown; no retry." xml:space="preserve"><value>Das Ergebnis des ADS-Begleiterkaufs ist unbekannt; kein erneuter Versuch.</value></data>
+  <data name="Set a positive stock target." xml:space="preserve"><value>Lege ein positives Vorratsziel fest.</value></data>
+  <data name="Buy travels to the vendor and fills the stock target once. Purchasing starts only when you press Buy. Zero targets disable purchasing." xml:space="preserve"><value>Kaufen reist zum Händler und füllt den Zielvorrat einmal auf. Ein Kauf beginnt nur nach einem Klick auf Kaufen. Zielwerte von null deaktivieren Käufe.</value></data>
+  <data name="Buying companion food from Vath requires beast tribe progression through The Naming of Vath. Purchase is unavailable until the vendor is unlocked." xml:space="preserve"><value>Begleiterfutter von Vath erfordert Fortschritt beim Stammesvolk bis einschließlich The Naming of Vath. Ohne freigeschalteten Händler ist der Kauf nicht verfügbar.</value></data>
+  <data name="Companion purchase cancelled: context, profile, or settings changed." xml:space="preserve"><value>Begleiterkauf abgebrochen: Kontext, Profil oder Einstellungen geändert.</value></data>
 </root>

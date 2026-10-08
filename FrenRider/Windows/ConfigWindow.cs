@@ -43,6 +43,17 @@ public class ConfigWindow : Window, IDisposable
     private bool selectChocoboTab;
 
     private static readonly string[] CompanionStances = { "Free Stance", "Defender Stance", "Attacker Stance", "Healer Stance", "Follow" };
+    private static readonly (int ItemId, string Name)[] ChocoboFoods =
+    {
+        (0, "None"),
+        (7894, "Curiel Root"),
+        (7895, "Sylkis Bud"),
+        (7897, "Mimett Gourd"),
+        (7898, "Tantalplant"),
+        (7900, "Pahsana Fruit"),
+    };
+    internal static string ChocoboFoodName(int itemId)
+        => ChocoboFoods.FirstOrDefault(food => food.ItemId == itemId).Name ?? "Unsupported companion food";
     private static readonly string[] ChocoboSkillTrees = { "Defender", "Attacker", "Healer" };
     private static readonly string[] ChocoboSkillPriorityLabels = { "First skill tree", "Second skill tree (optional)", "Third skill tree (optional)" };
     private static readonly string[] ClingTypes = { "NavMesh", "Visland", "BossMod Follow", "Vanilla Follow" };
@@ -872,6 +883,61 @@ public class ConfigWindow : Window, IDisposable
     private void DrawChocoboTab(CharacterConfig config)
     {
         ImGui.Spacing();
+        UiGui.Text("Companion purchasing");
+        var foodPreview = ChocoboFoodName(config.ChocoboFoodItemId);
+        if (UiGui.BeginCombo("Companion food", foodPreview))
+        {
+            try
+            {
+                foreach (var food in ChocoboFoods)
+                {
+                    var selected = config.ChocoboFoodItemId == food.ItemId;
+                    if (UiGui.Selectable($"##ChocoboFood{food.ItemId}", selected, UiText.T(food.Name)))
+                    {
+                        config.ChocoboFoodItemId = food.ItemId;
+                        configManager.SaveCurrentAccount();
+                    }
+                    if (selected) ImGui.SetItemDefaultFocus();
+                }
+            }
+            finally { UiGui.EndCombo(); }
+        }
+        DrawDefaultSettingSyncButton("Companion food");
+        var greensStockTarget = config.ChocoboGreensStockTarget;
+        if (UiGui.InputInt("Gysahl Greens stock target", ref greensStockTarget))
+        {
+            config.ChocoboGreensStockTarget = Math.Max(0, greensStockTarget);
+            configManager.SaveCurrentAccount();
+        }
+        DrawDefaultSettingSyncButton("Gysahl Greens stock target");
+        var foodStockTarget = config.ChocoboFoodStockTarget;
+        if (UiGui.InputInt("Companion food stock target", ref foodStockTarget))
+        {
+            config.ChocoboFoodStockTarget = Math.Max(0, foodStockTarget);
+            configManager.SaveCurrentAccount();
+        }
+        DrawDefaultSettingSyncButton("Companion food stock target");
+        UiGui.TextWrapped("Buy travels to the vendor and fills the stock target once. Purchasing starts only when you press Buy. Zero targets disable purchasing.");
+        UiGui.TextWrapped("Purchase actions use the active character's profile. Select that character to purchase.");
+        var canPurchase = Plugin.ClientState.IsLoggedIn
+            && configManager.TryGetLocalActiveConfig(out var activePurchaseConfig)
+            && ReferenceEquals(config, activePurchaseConfig);
+        var foodCount = canPurchase ? GameHelpers.GetCompanionSupplyStock(config.ChocoboFoodItemId) : -1;
+        var selectedFoodStock = foodCount < 0 ? "-" : foodCount.ToString();
+        UiGui.Text(UiText.F("Selected food: {0} | NQ stock: {1} | Target: {2}",
+            UiText.T(foodPreview), selectedFoodStock, config.ChocoboFoodStockTarget));
+        ImGui.BeginDisabled(!canPurchase);
+        if (UiGui.Button("BUY GREENS")) plugin.PurchaseChocoboGreensNow();
+        ImGui.SameLine();
+        if (UiGui.Button("BUY FOOD")) plugin.PurchaseChocoboFoodNow();
+        ImGui.EndDisabled();
+        ImGui.SameLine();
+        if (UiGui.Button("Stop companion purchasing")) plugin.StopChocoboPurchasing();
+        UiGui.TextWrapped("Buying companion food from Vath requires beast tribe progression through The Naming of Vath. Purchase is unavailable until the vendor is unlocked.");
+        UiGui.Text("Purchasing status (active character)");
+        UiGui.TextDisabled(plugin.ChocoboPurchaseStatus);
+
+        ImGui.Separator();
         UiGui.Text("Chocobo reload testing");
         var probeAfterReload = configuration.ChocoboProbeAfterReload;
         if (UiGui.Checkbox("Run Companion discovery after reload", ref probeAfterReload))
@@ -922,6 +988,24 @@ public class ConfigWindow : Window, IDisposable
         HelpMarker("Chocobo companion battle stance.\nControls how your companion behaves in combat.");
 
         DrawDefaultSettingSyncButton("Companion Stance");
+
+        ImGui.Separator();
+        UiGui.Text("Chocobo food");
+        var autoFeed = config.ChocoboAutoFeed;
+        if (UiGui.Checkbox("Automatically feed Chocobo", ref autoFeed))
+        {
+            config.ChocoboAutoFeed = autoFeed;
+            configManager.SaveCurrentAccount();
+        }
+        DrawDefaultSettingSyncButton("Automatically feed Chocobo");
+        UiGui.TextWrapped("These settings belong to the profile being edited. Feed and Stop use the active character's runtime profile.");
+        ImGui.BeginDisabled(!Plugin.ClientState.IsLoggedIn || !configManager.TryGetLocalActiveConfig(out _));
+        if (UiGui.Button("Feed companion now")) plugin.FeedChocoboNow();
+        ImGui.EndDisabled();
+        ImGui.SameLine();
+        if (UiGui.Button("Stop companion feeding")) plugin.StopChocoboFeeding();
+        UiGui.Text("Feeding status (active character)");
+        UiGui.TextDisabled(plugin.ChocoboFoodStatus);
 
         ImGui.Separator();
         UiGui.Text("Chocobo skills");

@@ -2907,4 +2907,66 @@ Bật: dùng các preset BossMod bên dưới với mọi nhà cung cấp rotati
   <data name="Waiting for observed skill learning." xml:space="preserve"><value>Đang chờ quan sát việc học kỹ năng.</value></data>
   <data name="Skill learning request was rejected; no retry." xml:space="preserve"><value>Yêu cầu học kỹ năng bị từ chối; không thử lại.</value></data>
   <data name="Skill allocation stopped." xml:space="preserve"><value>Đã dừng phân bổ kỹ năng.</value></data>
+  <data name="Waiting for Companion readiness." xml:space="preserve"><value>Đang chờ chocobo sẵn sàng.</value></data>
+  <data name="Skill allocation stopped: Companion readiness was not observed; no retry." xml:space="preserve"><value>Đã dừng phân bổ kỹ năng: chưa xác nhận chocobo sẵn sàng; không thử lại.</value></data>
+  <data name="Chocobo food" xml:space="preserve"><value>Thức ăn cho chocobo</value></data>
+  <data name="Automatically feed Chocobo" xml:space="preserve"><value>Tự động cho chocobo ăn</value></data>
+  <data name="Companion food" xml:space="preserve"><value>Thức ăn cho bạn đồng hành</value></data>
+  <data name="Curiel Root" xml:space="preserve"><value>Rễ Curiel</value></data>
+  <data name="Sylkis Bud" xml:space="preserve"><value>Chồi Sylkis</value></data>
+  <data name="Mimett Gourd" xml:space="preserve"><value>Bí Mimett</value></data>
+  <data name="Tantalplant" xml:space="preserve"><value>Cây Tantal</value></data>
+  <data name="Pahsana Fruit" xml:space="preserve"><value>Quả Pahsana</value></data>
+  <data name="Unsupported companion food" xml:space="preserve"><value>Thức ăn cho bạn đồng hành không được hỗ trợ</value></data>
+  <data name="These settings belong to the profile being edited. Feed and Stop use the active character&apos;s runtime profile." xml:space="preserve"><value>Các thiết lập này thuộc về hồ sơ đang chỉnh sửa. Cho ăn và Dừng dùng hồ sơ đang chạy của nhân vật hiện tại.</value></data>
+  <data name="Feed companion now" xml:space="preserve"><value>Cho bạn đồng hành ăn ngay</value></data>
+  <data name="Stop companion feeding" xml:space="preserve"><value>Dừng cho bạn đồng hành ăn</value></data>
+  <data name="Feeding status (active character)" xml:space="preserve"><value>Trạng thái cho ăn (nhân vật hiện tại)</value></data>
+  <data name="No companion feeding is pending." xml:space="preserve"><value>Không có thao tác cho bạn đồng hành ăn đang chờ.</value></data>
+  <data name="Companion feeding is unavailable in the current context." xml:space="preserve"><value>Không thể cho bạn đồng hành ăn trong ngữ cảnh hiện tại.</value></data>
+  <data name="Select a supported companion food." xml:space="preserve"><value>Chọn thức ăn cho bạn đồng hành được hỗ trợ.</value></data>
+  <data name="Summon the companion before feeding." xml:space="preserve"><value>Triệu hồi bạn đồng hành trước khi cho ăn.</value></data>
+  <data name="No selected companion food in inventory." xml:space="preserve"><value>Không có thức ăn đã chọn cho bạn đồng hành trong túi đồ.</value></data>
+  <data name="Selected companion food effect is already active." xml:space="preserve"><value>Hiệu ứng của thức ăn đã chọn cho bạn đồng hành đang hoạt động.</value></data>
+  <data name="Waiting for observed companion feeding." xml:space="preserve"><value>Đang chờ xác nhận việc cho bạn đồng hành ăn.</value></data>
+  <data name="Companion feeding completed; food and effect were observed." xml:space="preserve"><value>Đã cho bạn đồng hành ăn xong; đã quan sát thấy thức ăn được tiêu thụ và hiệu ứng.</value></data>
+  <data name="Companion feeding stopped: unexpected inventory change." xml:space="preserve"><value>Đã dừng cho bạn đồng hành ăn: túi đồ thay đổi ngoài dự kiến.</value></data>
+  <data name="Companion feeding stopped: consumption and effect were not observed; no retry." xml:space="preserve"><value>Đã dừng cho bạn đồng hành ăn: không quan sát thấy tiêu thụ và hiệu ứng; không thử lại.</value></data>
+  <data name="Companion feeding request was rejected; no retry." xml:space="preserve"><value>Yêu cầu cho bạn đồng hành ăn bị từ chối; không thử lại.</value></data>
+  <data name="Companion feeding cancelled: context or profile changed." xml:space="preserve"><value>Đã hủy cho bạn đồng hành ăn: ngữ cảnh hoặc hồ sơ đã thay đổi.</value></data>
+  <data name="Companion feeding stopped." xml:space="preserve"><value>Đã dừng cho bạn đồng hành ăn.</value></data>
+  <data name="Companion feeding failed." xml:space="preserve"><value>Cho bạn đồng hành ăn thất bại.</value></data>
+  <data name="Companion purchasing" xml:space="preserve"><value>Mua vật phẩm cho bạn đồng hành</value></data>
+  <data name="Gysahl Greens stock target" xml:space="preserve"><value>Mục tiêu tồn kho Gysahl Greens</value></data>
+  <data name="Companion food stock target" xml:space="preserve"><value>Mục tiêu tồn kho thức ăn cho bạn đồng hành</value></data>
+  <data name="Purchase actions use the active character&apos;s profile. Select that character to purchase." xml:space="preserve"><value>Việc mua dùng hồ sơ của nhân vật đang hoạt động. Chọn nhân vật đó để mua.</value></data>
+  <data name="Stop companion purchasing" xml:space="preserve"><value>Dừng mua vật phẩm cho bạn đồng hành</value></data>
+  <data name="Purchasing status (active character)" xml:space="preserve"><value>Trạng thái mua (nhân vật đang hoạt động)</value></data>
+  <data name="No companion purchase is pending." xml:space="preserve"><value>Không có giao dịch mua cho bạn đồng hành đang chờ.</value></data>
+  <data name="Select a supported companion purchase item." xml:space="preserve"><value>Chọn vật phẩm được hỗ trợ để mua cho bạn đồng hành.</value></data>
+  <data name="Companion purchasing is unavailable in the current context." xml:space="preserve"><value>Không thể mua vật phẩm cho bạn đồng hành trong tình huống hiện tại.</value></data>
+  <data name="Companion purchase stopped: unresolved request in this shop session; no retry." xml:space="preserve"><value>Đã dừng mua cho bạn đồng hành: yêu cầu chưa xác định kết quả trong phiên cửa hàng này; không thử lại.</value></data>
+  <data name="Companion purchase stopped: the shop offer or price is not verified." xml:space="preserve"><value>Đã dừng mua cho bạn đồng hành: mặt hàng hoặc giá của cửa hàng chưa được xác minh.</value></data>
+  <data name="The companion purchase stock target is already met." xml:space="preserve"><value>Đã đạt mục tiêu tồn kho cho giao dịch mua của bạn đồng hành.</value></data>
+  <data name="Companion purchase has no affordable quantity or inventory room." xml:space="preserve"><value>Không có số lượng phù hợp với ngân sách hoặc chỗ trống trong túi đồ để mua cho bạn đồng hành.</value></data>
+  <data name="Companion purchase cancelled: context, profile, or shop session changed." xml:space="preserve"><value>Đã hủy mua cho bạn đồng hành: tình huống, hồ sơ hoặc phiên cửa hàng đã thay đổi.</value></data>
+  <data name="Waiting for observed companion purchase." xml:space="preserve"><value>Đang chờ xác minh giao dịch mua cho bạn đồng hành.</value></data>
+  <data name="Companion purchase failed; no retry." xml:space="preserve"><value>Mua cho bạn đồng hành thất bại; không thử lại.</value></data>
+  <data name="Companion purchase stopped: unexpected inventory or gil change." xml:space="preserve"><value>Đã dừng mua cho bạn đồng hành: túi đồ hoặc gil thay đổi ngoài dự kiến.</value></data>
+  <data name="Companion purchase completed; exact items and gil were observed." xml:space="preserve"><value>Đã mua xong cho bạn đồng hành; xác nhận đúng vật phẩm và số gil đã trừ.</value></data>
+  <data name="Companion purchase stopped: items, gil debit, and settled transaction were not observed; no retry." xml:space="preserve"><value>Đã dừng mua cho bạn đồng hành: chưa xác nhận vật phẩm, số gil đã trừ và giao dịch hoàn tất; không thử lại.</value></data>
+  <data name="Companion purchase stopped: confirmation did not match the owned request; no retry." xml:space="preserve"><value>Đã dừng mua cho bạn đồng hành: xác nhận không khớp với yêu cầu của mình; không thử lại.</value></data>
+  <data name="Companion purchase stopped: additional confirmation; no retry." xml:space="preserve"><value>Đã dừng mua cho bạn đồng hành: có xác nhận bổ sung; không thử lại.</value></data>
+  <data name="Companion purchase stopped." xml:space="preserve"><value>Đã dừng mua cho bạn đồng hành.</value></data>
+  <data name="BUY GREENS" xml:space="preserve"><value>MUA RAU</value></data>
+  <data name="BUY FOOD" xml:space="preserve"><value>MUA THỨC ĂN</value></data>
+  <data name="ADS owns companion vendor travel and purchases." xml:space="preserve"><value>ADS phụ trách di chuyển đến người bán và mua vật tư cho bạn đồng hành.</value></data>
+  <data name="Selected food: {0} | NQ stock: {1} | Target: {2}" xml:space="preserve"><value>Thức ăn đã chọn: {0} | Tồn kho NQ: {1} | Mục tiêu: {2}</value></data>
+  <data name="Waiting for ADS companion purchase." xml:space="preserve"><value>Đang chờ ADS mua vật tư cho bạn đồng hành.</value></data>
+  <data name="ADS did not accept the companion purchase." xml:space="preserve"><value>ADS không chấp nhận việc mua vật tư cho bạn đồng hành.</value></data>
+  <data name="ADS companion purchase outcome is unknown; no retry." xml:space="preserve"><value>Không rõ kết quả ADS mua vật tư cho bạn đồng hành; không thử lại.</value></data>
+  <data name="Set a positive stock target." xml:space="preserve"><value>Đặt mục tiêu tồn kho lớn hơn 0.</value></data>
+  <data name="Buy travels to the vendor and fills the stock target once. Purchasing starts only when you press Buy. Zero targets disable purchasing." xml:space="preserve"><value>Nút Mua đến người bán và bổ sung tới mục tiêu tồn kho một lần. Chỉ bắt đầu mua khi bạn nhấn Mua. Mục tiêu bằng 0 tắt mua hàng.</value></data>
+  <data name="Buying companion food from Vath requires beast tribe progression through The Naming of Vath. Purchase is unavailable until the vendor is unlocked." xml:space="preserve"><value>Mua thức ăn bạn đồng hành từ Vath yêu cầu tiến triển nhiệm vụ bộ tộc đến khi hoàn thành The Naming of Vath. Không thể mua cho đến khi mở khóa người bán.</value></data>
+  <data name="Companion purchase cancelled: context, profile, or settings changed." xml:space="preserve"><value>Đã hủy mua vật phẩm bạn đồng hành: ngữ cảnh, hồ sơ hoặc thiết lập thay đổi.</value></data>
 </root>

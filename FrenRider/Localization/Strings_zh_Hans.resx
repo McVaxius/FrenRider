@@ -2802,4 +2802,66 @@
   <data name="Waiting for observed skill learning." xml:space="preserve"><value>正在等待观察技能习得。</value></data>
   <data name="Skill learning request was rejected; no retry." xml:space="preserve"><value>技能习得请求被拒绝；不会重试。</value></data>
   <data name="Skill allocation stopped." xml:space="preserve"><value>技能分配已停止。</value></data>
+  <data name="Waiting for Companion readiness." xml:space="preserve"><value>正在等待陆行鸟准备就绪。</value></data>
+  <data name="Skill allocation stopped: Companion readiness was not observed; no retry." xml:space="preserve"><value>已停止分配技能：未确认陆行鸟准备就绪；不会重试。</value></data>
+  <data name="Chocobo food" xml:space="preserve"><value>陆行鸟食物</value></data>
+  <data name="Automatically feed Chocobo" xml:space="preserve"><value>自动喂食陆行鸟</value></data>
+  <data name="Companion food" xml:space="preserve"><value>搭档食物</value></data>
+  <data name="Curiel Root" xml:space="preserve"><value>库里尔萝卜</value></data>
+  <data name="Sylkis Bud" xml:space="preserve"><value>希尔奇斯菜蓟</value></data>
+  <data name="Mimett Gourd" xml:space="preserve"><value>密梅特葫芦</value></data>
+  <data name="Tantalplant" xml:space="preserve"><value>坦塔尔矮茄</value></data>
+  <data name="Pahsana Fruit" xml:space="preserve"><value>帕萨纳番茄</value></data>
+  <data name="Unsupported companion food" xml:space="preserve"><value>不支持的搭档食物</value></data>
+  <data name="These settings belong to the profile being edited. Feed and Stop use the active character&apos;s runtime profile." xml:space="preserve"><value>这些设置属于正在编辑的配置。喂食和停止使用当前角色运行中的配置。</value></data>
+  <data name="Feed companion now" xml:space="preserve"><value>立即喂食搭档</value></data>
+  <data name="Stop companion feeding" xml:space="preserve"><value>停止喂食搭档</value></data>
+  <data name="Feeding status (active character)" xml:space="preserve"><value>喂食状态（当前角色）</value></data>
+  <data name="No companion feeding is pending." xml:space="preserve"><value>没有待处理的搭档喂食。</value></data>
+  <data name="Companion feeding is unavailable in the current context." xml:space="preserve"><value>当前状态下无法喂食搭档。</value></data>
+  <data name="Select a supported companion food." xml:space="preserve"><value>请选择受支持的搭档食物。</value></data>
+  <data name="Summon the companion before feeding." xml:space="preserve"><value>请先召唤搭档再喂食。</value></data>
+  <data name="No selected companion food in inventory." xml:space="preserve"><value>背包中没有所选的搭档食物。</value></data>
+  <data name="Selected companion food effect is already active." xml:space="preserve"><value>所选搭档食物的效果已生效。</value></data>
+  <data name="Waiting for observed companion feeding." xml:space="preserve"><value>正在等待确认搭档喂食。</value></data>
+  <data name="Companion feeding completed; food and effect were observed." xml:space="preserve"><value>搭档喂食完成；已观察到食物消耗和效果。</value></data>
+  <data name="Companion feeding stopped: unexpected inventory change." xml:space="preserve"><value>搭档喂食已停止：背包发生意外变化。</value></data>
+  <data name="Companion feeding stopped: consumption and effect were not observed; no retry." xml:space="preserve"><value>搭档喂食已停止：未观察到消耗和效果；不会重试。</value></data>
+  <data name="Companion feeding request was rejected; no retry." xml:space="preserve"><value>搭档喂食请求被拒绝；不会重试。</value></data>
+  <data name="Companion feeding cancelled: context or profile changed." xml:space="preserve"><value>搭档喂食已取消：状态或配置发生变化。</value></data>
+  <data name="Companion feeding stopped." xml:space="preserve"><value>搭档喂食已停止。</value></data>
+  <data name="Companion feeding failed." xml:space="preserve"><value>搭档喂食失败。</value></data>
+  <data name="Companion purchasing" xml:space="preserve"><value>搭档用品购买</value></data>
+  <data name="Gysahl Greens stock target" xml:space="preserve"><value>基萨尔野菜目标库存</value></data>
+  <data name="Companion food stock target" xml:space="preserve"><value>搭档食物目标库存</value></data>
+  <data name="Purchase actions use the active character&apos;s profile. Select that character to purchase." xml:space="preserve"><value>购买操作使用当前角色的配置。请选择该角色进行购买。</value></data>
+  <data name="Stop companion purchasing" xml:space="preserve"><value>停止购买搭档用品</value></data>
+  <data name="Purchasing status (active character)" xml:space="preserve"><value>购买状态（当前角色）</value></data>
+  <data name="No companion purchase is pending." xml:space="preserve"><value>没有待处理的搭档用品购买。</value></data>
+  <data name="Select a supported companion purchase item." xml:space="preserve"><value>请选择受支持的搭档购买物品。</value></data>
+  <data name="Companion purchasing is unavailable in the current context." xml:space="preserve"><value>当前状态无法购买搭档用品。</value></data>
+  <data name="Companion purchase stopped: unresolved request in this shop session; no retry." xml:space="preserve"><value>搭档用品购买已停止：本次商店会话存在结果未确定的请求；不会重试。</value></data>
+  <data name="Companion purchase stopped: the shop offer or price is not verified." xml:space="preserve"><value>搭档用品购买已停止：商店商品或价格尚未验证。</value></data>
+  <data name="The companion purchase stock target is already met." xml:space="preserve"><value>搭档用品购买的目标库存已满足。</value></data>
+  <data name="Companion purchase has no affordable quantity or inventory room." xml:space="preserve"><value>搭档用品购买没有预算内可购买的数量或背包空间。</value></data>
+  <data name="Companion purchase cancelled: context, profile, or shop session changed." xml:space="preserve"><value>搭档用品购买已取消：状态、配置或商店会话已改变。</value></data>
+  <data name="Waiting for observed companion purchase." xml:space="preserve"><value>正在等待确认搭档用品购买结果。</value></data>
+  <data name="Companion purchase failed; no retry." xml:space="preserve"><value>搭档用品购买失败；不会重试。</value></data>
+  <data name="Companion purchase stopped: unexpected inventory or gil change." xml:space="preserve"><value>搭档用品购买已停止：背包或金币出现意外变化。</value></data>
+  <data name="Companion purchase completed; exact items and gil were observed." xml:space="preserve"><value>搭档用品购买已完成；已确认准确的物品数量和金币扣款。</value></data>
+  <data name="Companion purchase stopped: items, gil debit, and settled transaction were not observed; no retry." xml:space="preserve"><value>搭档用品购买已停止：未确认物品、金币扣款及交易完成；不会重试。</value></data>
+  <data name="Companion purchase stopped: confirmation did not match the owned request; no retry." xml:space="preserve"><value>搭档用品购买已停止：确认与自己的请求不符；不会重试。</value></data>
+  <data name="Companion purchase stopped: additional confirmation; no retry." xml:space="preserve"><value>搭档用品购买已停止：出现额外确认；不会重试。</value></data>
+  <data name="Companion purchase stopped." xml:space="preserve"><value>搭档用品购买已停止。</value></data>
+  <data name="BUY GREENS" xml:space="preserve"><value>购买蔬菜</value></data>
+  <data name="BUY FOOD" xml:space="preserve"><value>购买饲料</value></data>
+  <data name="ADS owns companion vendor travel and purchases." xml:space="preserve"><value>ADS负责陆行鸟用品商人的移动和购买。</value></data>
+  <data name="Selected food: {0} | NQ stock: {1} | Target: {2}" xml:space="preserve"><value>所选饲料：{0} | NQ库存：{1} | 目标：{2}</value></data>
+  <data name="Waiting for ADS companion purchase." xml:space="preserve"><value>正在等待ADS购买陆行鸟用品。</value></data>
+  <data name="ADS did not accept the companion purchase." xml:space="preserve"><value>ADS未接受陆行鸟用品购买请求。</value></data>
+  <data name="ADS companion purchase outcome is unknown; no retry." xml:space="preserve"><value>ADS购买陆行鸟用品的结果未知；不会重试。</value></data>
+  <data name="Set a positive stock target." xml:space="preserve"><value>请将目标库存设为正数。</value></data>
+  <data name="Buy travels to the vendor and fills the stock target once. Purchasing starts only when you press Buy. Zero targets disable purchasing." xml:space="preserve"><value>购买按钮会前往商人处并补足目标库存一次。只有点击购买按钮才会开始。目标为0会禁用购买。</value></data>
+  <data name="Buying companion food from Vath requires beast tribe progression through The Naming of Vath. Purchase is unavailable until the vendor is unlocked." xml:space="preserve"><value>向瓦斯族购买搭档饲料需要推进友好部族任务并完成The Naming of Vath。解锁商人之前无法购买。</value></data>
+  <data name="Companion purchase cancelled: context, profile, or settings changed." xml:space="preserve"><value>搭档用品购买已取消：当前状况、配置或设置发生变化。</value></data>
 </root>

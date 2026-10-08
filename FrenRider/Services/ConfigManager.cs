@@ -68,6 +68,10 @@ public class ConfigManager : IDadProfileStore
             {
                 Setting("Summon Chocobo", (source, target) => target.ForceGysahl = source.ForceGysahl),
                 Setting("Companion Stance", (source, target) => target.CompanionStrat = source.CompanionStrat),
+                Setting("Automatically feed Chocobo", (source, target) => target.ChocoboAutoFeed = source.ChocoboAutoFeed),
+                Setting("Companion food", (source, target) => target.ChocoboFoodItemId = source.ChocoboFoodItemId),
+                Setting("Gysahl Greens stock target", (source, target) => target.ChocoboGreensStockTarget = source.ChocoboGreensStockTarget),
+                Setting("Companion food stock target", (source, target) => target.ChocoboFoodStockTarget = source.ChocoboFoodStockTarget),
                 Setting("Automatically allocate Chocobo skills", (source, target) => target.ChocoboAutoAllocateSkills = source.ChocoboAutoAllocateSkills),
                 Setting("Skill priority", (source, target) => target.ChocoboSkillPriority = source.ChocoboSkillPriority == null ? null : new List<int>(source.ChocoboSkillPriority)),
             }),

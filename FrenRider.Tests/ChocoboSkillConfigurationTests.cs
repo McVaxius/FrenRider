@@ -8,7 +8,7 @@ namespace FrenRider.Tests;
 public sealed class ChocoboSkillConfigurationTests
 {
     [Fact]
-    public void NewAndLegacyProfilesKeepSkillAutomationOffAndHealerAsTheOnlyPriority()
+    public void NewAndLegacyProfilesKeepSkillAutomationOffAndHealerAttackerDefenderPriority()
     {
         var fresh = new CharacterConfig();
         var legacy = JsonSerializer.Deserialize<CharacterConfig>(
@@ -16,8 +16,8 @@ public sealed class ChocoboSkillConfigurationTests
 
         Assert.False(fresh.ChocoboAutoAllocateSkills);
         Assert.False(legacy.ChocoboAutoAllocateSkills);
-        Assert.Equal(new[] { 2 }, fresh.ChocoboSkillPriority);
-        Assert.Equal(new[] { 2 }, legacy.ChocoboSkillPriority);
+        Assert.Equal(new[] { 2, 1, 0 }, fresh.ChocoboSkillPriority);
+        Assert.Equal(new[] { 2, 1, 0 }, legacy.ChocoboSkillPriority);
         Assert.NotSame(fresh.ChocoboSkillPriority, legacy.ChocoboSkillPriority);
         Assert.True(legacy.ForceGysahl);
         Assert.Equal("Attacker Stance", legacy.CompanionStrat);
@@ -124,7 +124,7 @@ public sealed class ChocoboSkillConfigurationTests
         Assert.All(account.Characters.Values, target =>
         {
             Assert.True(target.ChocoboAutoAllocateSkills);
-            Assert.Equal(new[] { 2 }, target.ChocoboSkillPriority);
+            Assert.Equal(new[] { 2, 1, 0 }, target.ChocoboSkillPriority);
             Assert.False(target.ForceGysahl);
             Assert.Equal("Free Stance", target.CompanionStrat);
         });

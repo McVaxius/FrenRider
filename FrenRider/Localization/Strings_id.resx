@@ -2907,4 +2907,66 @@ Aktif: gunakan preset BossMod di bawah dengan penyedia rotasi apa pun. Preset kh
   <data name="Waiting for observed skill learning." xml:space="preserve"><value>Menunggu pembelajaran keahlian teramati.</value></data>
   <data name="Skill learning request was rejected; no retry." xml:space="preserve"><value>Permintaan pembelajaran keahlian ditolak; tidak dicoba ulang.</value></data>
   <data name="Skill allocation stopped." xml:space="preserve"><value>Alokasi keahlian dihentikan.</value></data>
+  <data name="Waiting for Companion readiness." xml:space="preserve"><value>Menunggu chocobo siap.</value></data>
+  <data name="Skill allocation stopped: Companion readiness was not observed; no retry." xml:space="preserve"><value>Alokasi keterampilan dihentikan: kesiapan chocobo belum terkonfirmasi; tidak mencoba lagi.</value></data>
+  <data name="Chocobo food" xml:space="preserve"><value>Makanan Chocobo</value></data>
+  <data name="Automatically feed Chocobo" xml:space="preserve"><value>Beri makan Chocobo secara otomatis</value></data>
+  <data name="Companion food" xml:space="preserve"><value>Makanan pendamping</value></data>
+  <data name="Curiel Root" xml:space="preserve"><value>Akar Curiel</value></data>
+  <data name="Sylkis Bud" xml:space="preserve"><value>Kuncup Sylkis</value></data>
+  <data name="Mimett Gourd" xml:space="preserve"><value>Labu Mimett</value></data>
+  <data name="Tantalplant" xml:space="preserve"><value>Tanaman Tantal</value></data>
+  <data name="Pahsana Fruit" xml:space="preserve"><value>Buah Pahsana</value></data>
+  <data name="Unsupported companion food" xml:space="preserve"><value>Makanan pendamping tidak didukung</value></data>
+  <data name="These settings belong to the profile being edited. Feed and Stop use the active character&apos;s runtime profile." xml:space="preserve"><value>Pengaturan ini milik profil yang sedang diedit. Beri Makan dan Hentikan menggunakan profil runtime karakter aktif.</value></data>
+  <data name="Feed companion now" xml:space="preserve"><value>Beri makan pendamping sekarang</value></data>
+  <data name="Stop companion feeding" xml:space="preserve"><value>Hentikan pemberian makan pendamping</value></data>
+  <data name="Feeding status (active character)" xml:space="preserve"><value>Status pemberian makan (karakter aktif)</value></data>
+  <data name="No companion feeding is pending." xml:space="preserve"><value>Tidak ada pemberian makan pendamping yang tertunda.</value></data>
+  <data name="Companion feeding is unavailable in the current context." xml:space="preserve"><value>Pemberian makan pendamping tidak tersedia dalam konteks saat ini.</value></data>
+  <data name="Select a supported companion food." xml:space="preserve"><value>Pilih makanan pendamping yang didukung.</value></data>
+  <data name="Summon the companion before feeding." xml:space="preserve"><value>Panggil pendamping sebelum memberi makan.</value></data>
+  <data name="No selected companion food in inventory." xml:space="preserve"><value>Tidak ada makanan pendamping yang dipilih di inventaris.</value></data>
+  <data name="Selected companion food effect is already active." xml:space="preserve"><value>Efek makanan pendamping yang dipilih sudah aktif.</value></data>
+  <data name="Waiting for observed companion feeding." xml:space="preserve"><value>Menunggu pemberian makan pendamping teramati.</value></data>
+  <data name="Companion feeding completed; food and effect were observed." xml:space="preserve"><value>Pemberian makan pendamping selesai; konsumsi makanan dan efek teramati.</value></data>
+  <data name="Companion feeding stopped: unexpected inventory change." xml:space="preserve"><value>Pemberian makan pendamping dihentikan: perubahan inventaris tak terduga.</value></data>
+  <data name="Companion feeding stopped: consumption and effect were not observed; no retry." xml:space="preserve"><value>Pemberian makan pendamping dihentikan: konsumsi dan efek tidak teramati; tidak ada percobaan ulang.</value></data>
+  <data name="Companion feeding request was rejected; no retry." xml:space="preserve"><value>Permintaan pemberian makan pendamping ditolak; tidak ada percobaan ulang.</value></data>
+  <data name="Companion feeding cancelled: context or profile changed." xml:space="preserve"><value>Pemberian makan pendamping dibatalkan: konteks atau profil berubah.</value></data>
+  <data name="Companion feeding stopped." xml:space="preserve"><value>Pemberian makan pendamping dihentikan.</value></data>
+  <data name="Companion feeding failed." xml:space="preserve"><value>Pemberian makan pendamping gagal.</value></data>
+  <data name="Companion purchasing" xml:space="preserve"><value>Pembelian untuk pendamping</value></data>
+  <data name="Gysahl Greens stock target" xml:space="preserve"><value>Target stok Gysahl Greens</value></data>
+  <data name="Companion food stock target" xml:space="preserve"><value>Target stok makanan pendamping</value></data>
+  <data name="Purchase actions use the active character&apos;s profile. Select that character to purchase." xml:space="preserve"><value>Pembelian memakai profil karakter aktif. Pilih karakter itu untuk membeli.</value></data>
+  <data name="Stop companion purchasing" xml:space="preserve"><value>Hentikan pembelian pendamping</value></data>
+  <data name="Purchasing status (active character)" xml:space="preserve"><value>Status pembelian (karakter aktif)</value></data>
+  <data name="No companion purchase is pending." xml:space="preserve"><value>Tidak ada pembelian pendamping yang tertunda.</value></data>
+  <data name="Select a supported companion purchase item." xml:space="preserve"><value>Pilih item pembelian pendamping yang didukung.</value></data>
+  <data name="Companion purchasing is unavailable in the current context." xml:space="preserve"><value>Pembelian pendamping tidak tersedia dalam kondisi saat ini.</value></data>
+  <data name="Companion purchase stopped: unresolved request in this shop session; no retry." xml:space="preserve"><value>Pembelian pendamping dihentikan: permintaan belum terselesaikan pada sesi toko ini; tidak dicoba ulang.</value></data>
+  <data name="Companion purchase stopped: the shop offer or price is not verified." xml:space="preserve"><value>Pembelian pendamping dihentikan: penawaran toko atau harga belum terverifikasi.</value></data>
+  <data name="The companion purchase stock target is already met." xml:space="preserve"><value>Target stok pembelian pendamping sudah tercapai.</value></data>
+  <data name="Companion purchase has no affordable quantity or inventory room." xml:space="preserve"><value>Tidak ada jumlah yang terjangkau atau ruang inventaris untuk pembelian pendamping.</value></data>
+  <data name="Companion purchase cancelled: context, profile, or shop session changed." xml:space="preserve"><value>Pembelian pendamping dibatalkan: kondisi, profil, atau sesi toko berubah.</value></data>
+  <data name="Waiting for observed companion purchase." xml:space="preserve"><value>Menunggu verifikasi pembelian pendamping.</value></data>
+  <data name="Companion purchase failed; no retry." xml:space="preserve"><value>Pembelian pendamping gagal; tidak dicoba ulang.</value></data>
+  <data name="Companion purchase stopped: unexpected inventory or gil change." xml:space="preserve"><value>Pembelian pendamping dihentikan: perubahan inventaris atau gil yang tidak diharapkan.</value></data>
+  <data name="Companion purchase completed; exact items and gil were observed." xml:space="preserve"><value>Pembelian pendamping selesai; item dan pengurangan gil yang tepat telah teramati.</value></data>
+  <data name="Companion purchase stopped: items, gil debit, and settled transaction were not observed; no retry." xml:space="preserve"><value>Pembelian pendamping dihentikan: item, pengurangan gil, dan selesainya transaksi belum teramati; tidak dicoba ulang.</value></data>
+  <data name="Companion purchase stopped: confirmation did not match the owned request; no retry." xml:space="preserve"><value>Pembelian pendamping dihentikan: konfirmasi tidak sesuai dengan permintaan sendiri; tidak dicoba ulang.</value></data>
+  <data name="Companion purchase stopped: additional confirmation; no retry." xml:space="preserve"><value>Pembelian pendamping dihentikan: konfirmasi tambahan; tidak dicoba ulang.</value></data>
+  <data name="Companion purchase stopped." xml:space="preserve"><value>Pembelian pendamping dihentikan.</value></data>
+  <data name="BUY GREENS" xml:space="preserve"><value>BELI SAYURAN</value></data>
+  <data name="BUY FOOD" xml:space="preserve"><value>BELI MAKANAN</value></data>
+  <data name="ADS owns companion vendor travel and purchases." xml:space="preserve"><value>ADS menangani perjalanan ke pedagang dan pembelian pendamping.</value></data>
+  <data name="Selected food: {0} | NQ stock: {1} | Target: {2}" xml:space="preserve"><value>Makanan pilihan: {0} | Stok NQ: {1} | Target: {2}</value></data>
+  <data name="Waiting for ADS companion purchase." xml:space="preserve"><value>Menunggu pembelian pendamping oleh ADS.</value></data>
+  <data name="ADS did not accept the companion purchase." xml:space="preserve"><value>ADS tidak menerima pembelian pendamping.</value></data>
+  <data name="ADS companion purchase outcome is unknown; no retry." xml:space="preserve"><value>Hasil pembelian pendamping oleh ADS tidak diketahui; tidak mencoba lagi.</value></data>
+  <data name="Set a positive stock target." xml:space="preserve"><value>Tetapkan target stok positif.</value></data>
+  <data name="Buy travels to the vendor and fills the stock target once. Purchasing starts only when you press Buy. Zero targets disable purchasing." xml:space="preserve"><value>Beli menuju pedagang dan mengisi target stok sekali. Pembelian hanya dimulai saat Anda menekan Beli. Target nol menonaktifkan pembelian.</value></data>
+  <data name="Buying companion food from Vath requires beast tribe progression through The Naming of Vath. Purchase is unavailable until the vendor is unlocked." xml:space="preserve"><value>Membeli makanan pendamping dari Vath memerlukan progres misi suku hingga menyelesaikan The Naming of Vath. Pembelian tidak tersedia sampai pedagang terbuka.</value></data>
+  <data name="Companion purchase cancelled: context, profile, or settings changed." xml:space="preserve"><value>Pembelian pendamping dibatalkan: konteks, profil, atau pengaturan berubah.</value></data>
 </root>

@@ -8,10 +8,10 @@ using FFXIVClientStructs.FFXIV.Component.GUI;
 
 namespace FrenRider.Services;
 
-/// <summary>One command-owned, read-only Companion exploration on the framework thread.</summary>
+/// <summary>Own Companion discovery or a held Skills window on the framework thread.</summary>
 internal sealed class ChocoboExplorationService
 {
-    internal const string BuildMarker = "chocobo-discovery-011";
+    internal const string BuildMarker = "chocobo-discovery-025";
     private const long TimeoutMs = 15_000;
     private const long SettleMs = 300;
     internal readonly record struct WindowSnapshot(nint Address, uint Id, int Tab, bool Ready, int SelectedTab,
@@ -26,6 +26,7 @@ internal sealed class ChocoboExplorationService
     private readonly Action close;
     private readonly Action<string> log;
     private readonly Func<long> clock;
+    private readonly Func<bool> skillsChildReady;
     private ulong owner;
     private WindowSnapshot? original;
     private WindowSnapshot? ownedWindow;
@@ -39,9 +40,24 @@ internal sealed class ChocoboExplorationService
     private bool reloadInitialized;
     private bool pendingReload;
     private ulong reloadOwner;
+    private bool preparingSkills;
+    private bool skillsReady;
 
     internal bool IsActive => active;
     internal bool PendingReload => pendingReload;
+    internal bool IsSkillPreparation => active && preparingSkills;
+    internal bool SkillsReady => IsSkillPreparation && skillsReady;
+    internal bool OwnsReadySkillsWindow
+    {
+        get
+        {
+            if (!SkillsReady || !ownedWindow.HasValue || !canRun() || identity() != owner) return false;
+            var current = readWindow();
+            return current.HasValue && current.Value.Ready && SameWindow(current.Value, ownedWindow.Value)
+                && current.Value.Tab == 1 && current.Value.SelectedTab == 1 && skillsChildReady();
+        }
+    }
+    internal bool PrepareSkills() => Start(forSkills: true);
 
     public ChocoboExplorationService() : this(
         () => Plugin.ClientState.IsLoggedIn && Plugin.ObjectTable.LocalPlayer != null
@@ -57,7 +73,7 @@ internal sealed class ChocoboExplorationService
 
     internal ChocoboExplorationService(Func<bool> canRun, Func<ulong> identity,
         Func<WindowSnapshot?> readWindow, Func<bool> open, Action<int> selectTab,
-        Action capture, Action close, Action<string> log, Func<long> clock)
+        Action capture, Action close, Action<string> log, Func<long> clock, Func<bool>? skillsChildReady = null)
     {
         this.canRun = canRun;
         this.identity = identity;
@@ -68,6 +84,7 @@ internal sealed class ChocoboExplorationService
         this.close = close;
         this.log = log;
         this.clock = clock;
+        this.skillsChildReady = skillsChildReady ?? HasReadySkillsChild;
     }
 
     internal void InitializeReload(bool selectedAtLoad, ulong ownerAtLoad)
@@ -110,7 +127,7 @@ internal sealed class ChocoboExplorationService
         }
     }
 
-    internal bool Start()
+    internal bool Start(bool forSkills = false)
     {
         if (disposed) return false;
         pendingReload = false; // An explicit manual attempt supersedes pending reload discovery.
@@ -128,6 +145,8 @@ internal sealed class ChocoboExplorationService
             owner = identity();
             ownedWindow = null;
             nextTab = 0;
+            preparingSkills = forSkills;
+            skillsReady = false;
             awaitingWindow = true;
             deadline = clock() + TimeoutMs;
             active = true; // Consume the attempt before native dispatch; Tick never reopens it.
@@ -148,7 +167,7 @@ internal sealed class ChocoboExplorationService
         try
         {
             if (!canRun() || identity() != owner) { Stop("context/character departed", restore: false); return; }
-            if (clock() >= deadline) { Stop("timeout"); return; }
+            if (!skillsReady && clock() >= deadline) { Stop("timeout"); return; }
             var current = readWindow();
             if (awaitingWindow)
             {
@@ -163,8 +182,11 @@ internal sealed class ChocoboExplorationService
                 expectedTab = current.Value.Tab;
                 awaitingWindow = false;
                 log($"accepted: Companion visible and ready; initial-tab={expectedTab}");
-                if (current.Value.SelectedTab == current.Value.Tab) capture();
-                else log("initial native/radio mismatch: capture deferred until the first selected tab is accepted");
+                if (!preparingSkills)
+                {
+                    if (current.Value.SelectedTab == current.Value.Tab) capture();
+                    else log("initial native/radio mismatch: capture deferred until the first selected tab is accepted");
+                }
                 if (active) DispatchNextTab();
                 return;
             }
@@ -178,6 +200,13 @@ internal sealed class ChocoboExplorationService
                 Stop("native tab changed externally or dispatch was rejected", restore: false);
                 return;
             }
+            if (preparingSkills)
+            {
+                if (!skillsChildReady()) return;
+                if (!skillsReady) log("Skills window prepared: native/radio tab1 and linked BuddySkill ready");
+                skillsReady = true;
+                return; // The allocator owns spending and releases this window when it stops.
+            }
             log($"progress: inspecting tab={expectedTab}");
             capture();
             if (active) DispatchNextTab();
@@ -188,6 +217,14 @@ internal sealed class ChocoboExplorationService
     private void DispatchNextTab()
     {
         if (!canRun() || identity() != owner) { Stop("context/character departed", restore: false); return; }
+        if (preparingSkills)
+        {
+            expectedTab = 1;
+            settleUntil = clock() + SettleMs;
+            log("dispatch: select Skills tab=1");
+            selectTab(1);
+            return;
+        }
         if (nextTab == 3) { Stop("completed: all three tab selections observed; content captured for review"); return; }
         expectedTab = nextTab++;
         settleUntil = clock() + SettleMs;
@@ -197,6 +234,8 @@ internal sealed class ChocoboExplorationService
 
     internal void Stop(string reason, bool restore = true)
     {
+        preparingSkills = false;
+        skillsReady = false;
         if (pendingReload)
         {
             pendingReload = false;
@@ -296,6 +335,29 @@ internal sealed class ChocoboExplorationService
             throw new InvalidOperationException();
     }
 
+    private static unsafe bool HasReadySkillsChild() => GetReadySkillsChild() != null;
+
+    internal static unsafe AtkUnitBase* GetReadySkillsChild()
+    {
+        var buddy = GetWindow();
+        if (buddy == null || !buddy->IsVisible || !buddy->IsReady
+            || buddy->TabIndex != 1 || ReadSelectedTab(buddy) != 1) return null;
+        ref var control = ref buddy->AddonControl;
+        if (control.ParentAddon != (AtkUnitBase*)buddy || control.ChildAddons.WithOps.Head == null) return null;
+        var head = control.ChildAddons.WithOps.Head;
+        var entry = head->Next;
+        for (var i = 0; entry != null && entry != head && i < 8; i++, entry = entry->Next)
+        {
+            var info = entry->Value.Value;
+            var child = info == null ? null : info->AtkUnitBase;
+            if (child == null || !child->IsVisible || !child->IsReady || child->ParentId != buddy->Id) continue;
+            var bytes = child->Name;
+            var end = bytes.IndexOf((byte)0);
+            if (System.Text.Encoding.UTF8.GetString(end < 0 ? bytes : bytes[..end]) == "BuddySkill") return child;
+        }
+        return null;
+    }
+
     private static unsafe void Capture()
     {
         var addon = GetWindow();
@@ -327,6 +389,12 @@ internal sealed class ChocoboExplorationService
         var rankRow = Plugin.DataManager.GetExcelSheet<Lumina.Excel.Sheets.BuddyRank>()?.GetRowOrDefault(rank);
         if (rankRow.HasValue)
             Write($"rank-catalog rank={rank}; xp-required={rankRow.Value.ExpRequired}; raw-xp={state->Buddy.CompanionInfo.CurrentXP}; attained-cap not inferred from stars");
+        var vathVendorPresent = false;
+        foreach (var obj in Plugin.ObjectTable)
+            if (obj.ObjectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.EventNpc
+                && obj.BaseId == 1016804 && obj.IsTargetable) { vathVendorPresent = true; break; }
+        var game = FFXIVClientStructs.FFXIV.Client.Game.GameMain.Instance();
+        Write($"vath-vendor quest-complete={FFXIVClientStructs.FFXIV.Client.Game.QuestManager.IsQuestComplete(67791u)}; in-territory={Plugin.ClientState.TerritoryType == 398}; native-territory-agrees={game != null && game->CurrentTerritoryTypeId == Plugin.ClientState.TerritoryType}; loaded-targetable-vendor={vathVendorPresent}; read-only=True");
         var names = new List<string>();
         names.Add(state->Buddy.CompanionInfo.NameString);
         var playerName = Plugin.ObjectTable.LocalPlayer?.Name.ToString() ?? "";
@@ -334,6 +402,14 @@ internal sealed class ChocoboExplorationService
         names.Add(playerName);
         names.AddRange(playerName.Split(' ', StringSplitOptions.RemoveEmptyEntries));
         var redactions = names.ToArray();
+        var confirmationTemplate = Plugin.DataManager.GetExcelSheet<Lumina.Excel.Sheets.Addon>(Plugin.ClientState.ClientLanguage)?.GetRowOrDefault(4974);
+        if (confirmationTemplate.HasValue)
+            Write($"skill-confirmation-template macro={Sanitize(confirmationTemplate.Value.Text.ToMacroString(), redactions)}");
+        if (GameHelpers.TryGetCompanionSkillPrompt(new(ChocoboSkillTree.Healer, 9, 9, 26), out var renderedPrompt))
+            Write($"skill-confirmation-rendered={Sanitize(renderedPrompt, redactions)}");
+        Write(GameHelpers.TryReadSelectYesnoPrompt(out var prompt)
+            ? $"pending-confirmation visible=True; prompt={Sanitize(prompt, redactions)}"
+            : "pending-confirmation visible=False");
         var skills = Plugin.DataManager.GetExcelSheet<Lumina.Excel.Sheets.BuddySkill>();
         if (skills != null)
         {
@@ -355,6 +431,17 @@ internal sealed class ChocoboExplorationService
                 var label = item.HasValue ? Sanitize(item.Value.Name.ToString(), redactions) : "";
                 Write($"food-catalog row={food.RowId}; item={food.Item.RowId}; name={label}; raw-status={food.Status}; use-field={food.UseField}; use-training={food.UseTraining}; raw-unknown0={food.Unknown0}");
             }
+        }
+        var player = Plugin.ObjectTable.LocalPlayer;
+        var actions = FFXIVClientStructs.FFXIV.Client.Game.ActionManager.Instance();
+        foreach (var itemId in new uint[] { 4868, 7894, 7895, 7897, 7898, 7900, 8166 })
+        {
+            var stock = GameHelpers.GetInventoryItemCount(itemId, highQuality: false);
+            var actionStatus = player == null || actions == null ? uint.MaxValue
+                : actions->GetActionStatus(FFXIVClientStructs.FFXIV.Client.Game.ActionType.Item, itemId, player.GameObjectId);
+            Write($"field-item item={itemId}; nq-stock={stock}; self-action-status={actionStatus}; read-only=True");
+            if (GameHelpers.TryReadCompanionFood(itemId, out var field))
+                Write($"field-food item={itemId}; owned-summoned={field.BuddyEntityId != 0}; nq-stock={field.Stock}; effect-holders={field.EffectHolders}; read-only=True");
         }
         for (var i = 0; i < addon->RadioButtons.Length; i++)
         {

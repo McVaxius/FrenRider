@@ -4,9 +4,17 @@ using FrenRider.Models;
 
 namespace FrenRider.Services;
 
+internal enum ChocoboSkillConfirmationResult
+{
+    Waiting,
+    Accepted,
+    Rejected,
+}
+
 /// <summary>Allocate an ordered skill tree without respec or replaying unacknowledged commands.</summary>
 internal sealed class ChocoboSkillService
 {
+    private const long PreparationMs = 15_000;
     private const long AcknowledgementMs = 3_000;
     private readonly Func<bool> canRun;
     private readonly Func<ulong> identity;
@@ -15,6 +23,10 @@ internal sealed class ChocoboSkillService
     private readonly Func<CompanionSnapshot, ChocoboSkillStep, bool> dispatch;
     private readonly Action<string> log;
     private readonly Func<long> clock;
+    private readonly Func<bool>? prepare;
+    private readonly Func<bool>? prepared;
+    private readonly Action? release;
+    private readonly Func<CompanionSnapshot, ChocoboSkillStep, ChocoboSkillConfirmationResult>? confirm;
     private CharacterConfig? profile;
     private ulong owner;
     private ChocoboSkillTree[] priority = Array.Empty<ChocoboSkillTree>();
@@ -22,6 +34,9 @@ internal sealed class ChocoboSkillService
     private ChocoboSkillStep? pending;
     private long deadline;
     private bool automatic;
+    private bool awaitingPreparation;
+    private bool preparationOwned;
+    private bool confirmationAccepted;
     private int learned;
     private CompanionSnapshot? lastAutomaticState;
     private CharacterConfig? lastAutomaticProfile;
@@ -33,7 +48,9 @@ internal sealed class ChocoboSkillService
 
     internal ChocoboSkillService(Func<bool> canRun, Func<ulong> identity,
         Func<CharacterConfig?> currentProfile, Func<CompanionSnapshot?> read,
-        Func<CompanionSnapshot, ChocoboSkillStep, bool> dispatch, Action<string> log, Func<long> clock)
+        Func<CompanionSnapshot, ChocoboSkillStep, bool> dispatch, Action<string> log, Func<long> clock,
+        Func<bool>? prepare = null, Func<bool>? prepared = null, Action? release = null,
+        Func<CompanionSnapshot, ChocoboSkillStep, ChocoboSkillConfirmationResult>? confirm = null)
     {
         this.canRun = canRun;
         this.identity = identity;
@@ -42,6 +59,10 @@ internal sealed class ChocoboSkillService
         this.dispatch = dispatch;
         this.log = log;
         this.clock = clock;
+        this.prepare = prepare;
+        this.prepared = prepared;
+        this.release = release;
+        this.confirm = confirm;
     }
 
     internal bool Start(bool automatically = false)
@@ -57,7 +78,7 @@ internal sealed class ChocoboSkillService
             var selected = active.ChocoboSkillPriority;
             priority = selected?.Select(value => (ChocoboSkillTree)value).ToArray()
                 ?? Array.Empty<ChocoboSkillTree>();
-            if (!ChocoboSkillPlan.TryGetNext(snapshot.Value, priority, out _))
+            if (!ChocoboSkillPlan.TryGetNext(snapshot.Value, priority, out var step))
             { Status = "No affordable next skill in the configured priority."; return false; }
             profile = active;
             owner = identity();
@@ -71,7 +92,17 @@ internal sealed class ChocoboSkillService
                 lastAutomaticPriority = selected?.ToArray();
             }
             IsActive = true;
-            RequestNext(snapshot.Value);
+            if (prepare != null)
+            {
+                before = snapshot.Value;
+                pending = step;
+                awaitingPreparation = true;
+                preparationOwned = true; // Own cleanup before preparation can reject or throw.
+                deadline = clock() + PreparationMs;
+                Status = "Waiting for Companion readiness.";
+                if (!prepare()) Stop("Skill allocation is unavailable in the current context.");
+            }
+            else RequestNext(snapshot.Value);
             return IsActive;
         }
         catch (Exception ex) { Stop("Skill allocation failed."); log($"allocation failed: {ex.GetType().Name}"); return false; }
@@ -120,6 +151,25 @@ internal sealed class ChocoboSkillService
             if (!snapshot.HasValue || !pending.HasValue)
             { Stop("Skill allocation cancelled: companion data unavailable."); return; }
             var step = pending.Value;
+            if (awaitingPreparation)
+            {
+                if (snapshot.Value != before)
+                { Stop("Skill allocation stopped: unexpected progression change."); return; }
+                if (clock() >= deadline)
+                { Stop("Skill allocation stopped: Companion readiness was not observed; no retry."); return; }
+                if (prepared?.Invoke() == false) return;
+                if (!IsActive) return;
+                snapshot = read();
+                if (!snapshot.HasValue || snapshot.Value != before
+                    || !ChocoboSkillPlan.TryGetNext(snapshot.Value, priority, out var readyStep) || readyStep != step)
+                { Stop("Skill allocation stopped: unexpected progression change."); return; }
+                awaitingPreparation = false; // Consume readiness before native dispatch.
+                RequestNext(snapshot.Value);
+                return;
+            }
+            if (prepared?.Invoke() == false)
+            { Stop("Skill allocation cancelled: companion data unavailable."); return; }
+            if (!IsActive) return;
             if (IsAcknowledged(before, snapshot.Value, step))
             {
                 learned++;
@@ -132,6 +182,23 @@ internal sealed class ChocoboSkillService
                 Stop("Skill allocation stopped: unexpected progression change.");
             else if (clock() >= deadline)
                 Stop("Skill allocation stopped: learning was not observed; no retry.");
+            else if (confirm != null && !confirmationAccepted)
+            {
+                var result = confirm(before, step);
+                if (!IsActive) return;
+                switch (result)
+                {
+                    case ChocoboSkillConfirmationResult.Waiting:
+                        break;
+                    case ChocoboSkillConfirmationResult.Accepted:
+                        confirmationAccepted = true;
+                        deadline = clock() + AcknowledgementMs;
+                        break;
+                    default:
+                        Stop("Skill learning request was rejected; no retry.");
+                        break;
+                }
+            }
         }
         catch (Exception ex) { Stop("Skill allocation failed."); log($"allocation failed: {ex.GetType().Name}"); }
     }
@@ -142,9 +209,10 @@ internal sealed class ChocoboSkillService
         { Stop("Skill allocation completed; progression was observed."); return; }
         before = snapshot;
         pending = step;
+        confirmationAccepted = false;
         deadline = clock() + AcknowledgementMs;
         Status = "Waiting for observed skill learning.";
-        log($"dispatch learning: tree={(int)step.Tree}; level={step.Level}; cost={step.Cost}; payload={step.Payload}");
+        log($"dispatch learning: tree={(int)step.Tree}; level={step.Level}; cost={step.Cost}");
         if (!dispatch(snapshot, step)) Stop("Skill learning request was rejected; no retry.");
     }
 
@@ -154,8 +222,17 @@ internal sealed class ChocoboSkillService
         if (pending.HasValue) automaticSuspended = true;
         IsActive = false;
         pending = null;
+        awaitingPreparation = false;
+        confirmationAccepted = false;
         profile = null;
         Status = reason;
+        var releasePreparation = preparationOwned;
+        preparationOwned = false; // Cleanup is consumed before callbacks and cannot repeat.
+        if (releasePreparation)
+        {
+            try { release?.Invoke(); }
+            catch (Exception ex) { log($"allocation cleanup failed: {ex.GetType().Name}"); }
+        }
         if (wasActive) log(reason);
     }
 

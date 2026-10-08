@@ -2907,4 +2907,66 @@ Włączone: używaj poniższych presetów BossMod z dowolnym dostawcą rotacji. 
   <data name="Waiting for observed skill learning." xml:space="preserve"><value>Oczekiwanie na zaobserwowanie nauki umiejętności.</value></data>
   <data name="Skill learning request was rejected; no retry." xml:space="preserve"><value>Żądanie nauki umiejętności odrzucone; bez ponownej próby.</value></data>
   <data name="Skill allocation stopped." xml:space="preserve"><value>Przydzielanie umiejętności zatrzymane.</value></data>
+  <data name="Waiting for Companion readiness." xml:space="preserve"><value>Oczekiwanie na gotowość chocobo.</value></data>
+  <data name="Skill allocation stopped: Companion readiness was not observed; no retry." xml:space="preserve"><value>Przydzielanie umiejętności zatrzymane: nie potwierdzono gotowości chocobo; bez ponownej próby.</value></data>
+  <data name="Chocobo food" xml:space="preserve"><value>Pokarm chocobo</value></data>
+  <data name="Automatically feed Chocobo" xml:space="preserve"><value>Automatycznie karm chocobo</value></data>
+  <data name="Companion food" xml:space="preserve"><value>Pokarm towarzysza</value></data>
+  <data name="Curiel Root" xml:space="preserve"><value>Korzeń Curiel</value></data>
+  <data name="Sylkis Bud" xml:space="preserve"><value>Pąk Sylkis</value></data>
+  <data name="Mimett Gourd" xml:space="preserve"><value>Tykwa Mimett</value></data>
+  <data name="Tantalplant" xml:space="preserve"><value>Roślina Tantal</value></data>
+  <data name="Pahsana Fruit" xml:space="preserve"><value>Owoc Pahsana</value></data>
+  <data name="Unsupported companion food" xml:space="preserve"><value>Nieobsługiwany pokarm towarzysza</value></data>
+  <data name="These settings belong to the profile being edited. Feed and Stop use the active character&apos;s runtime profile." xml:space="preserve"><value>Te ustawienia należą do edytowanego profilu. Karmienie i zatrzymanie używają profilu aktualnie działającego dla aktywnej postaci.</value></data>
+  <data name="Feed companion now" xml:space="preserve"><value>Nakarm towarzysza teraz</value></data>
+  <data name="Stop companion feeding" xml:space="preserve"><value>Zatrzymaj karmienie towarzysza</value></data>
+  <data name="Feeding status (active character)" xml:space="preserve"><value>Stan karmienia (aktywna postać)</value></data>
+  <data name="No companion feeding is pending." xml:space="preserve"><value>Brak oczekującego karmienia towarzysza.</value></data>
+  <data name="Companion feeding is unavailable in the current context." xml:space="preserve"><value>Karmienie towarzysza jest niedostępne w bieżącym kontekście.</value></data>
+  <data name="Select a supported companion food." xml:space="preserve"><value>Wybierz obsługiwany pokarm towarzysza.</value></data>
+  <data name="Summon the companion before feeding." xml:space="preserve"><value>Przywołaj towarzysza przed karmieniem.</value></data>
+  <data name="No selected companion food in inventory." xml:space="preserve"><value>Brak wybranego pokarmu towarzysza w ekwipunku.</value></data>
+  <data name="Selected companion food effect is already active." xml:space="preserve"><value>Efekt wybranego pokarmu towarzysza jest już aktywny.</value></data>
+  <data name="Waiting for observed companion feeding." xml:space="preserve"><value>Oczekiwanie na zaobserwowanie karmienia towarzysza.</value></data>
+  <data name="Companion feeding completed; food and effect were observed." xml:space="preserve"><value>Karmienie towarzysza zakończone; zaobserwowano zużycie pokarmu i efekt.</value></data>
+  <data name="Companion feeding stopped: unexpected inventory change." xml:space="preserve"><value>Karmienie towarzysza zatrzymane: nieoczekiwana zmiana ekwipunku.</value></data>
+  <data name="Companion feeding stopped: consumption and effect were not observed; no retry." xml:space="preserve"><value>Karmienie towarzysza zatrzymane: nie zaobserwowano zużycia ani efektu; bez ponownej próby.</value></data>
+  <data name="Companion feeding request was rejected; no retry." xml:space="preserve"><value>Żądanie karmienia towarzysza zostało odrzucone; bez ponownej próby.</value></data>
+  <data name="Companion feeding cancelled: context or profile changed." xml:space="preserve"><value>Karmienie towarzysza anulowane: zmieniono kontekst lub profil.</value></data>
+  <data name="Companion feeding stopped." xml:space="preserve"><value>Karmienie towarzysza zatrzymane.</value></data>
+  <data name="Companion feeding failed." xml:space="preserve"><value>Karmienie towarzysza nie powiodło się.</value></data>
+  <data name="Companion purchasing" xml:space="preserve"><value>Zakupy dla towarzysza</value></data>
+  <data name="Gysahl Greens stock target" xml:space="preserve"><value>Docelowy zapas Gysahl Greens</value></data>
+  <data name="Companion food stock target" xml:space="preserve"><value>Docelowy zapas pokarmu towarzysza</value></data>
+  <data name="Purchase actions use the active character&apos;s profile. Select that character to purchase." xml:space="preserve"><value>Zakupy korzystają z profilu aktywnej postaci. Wybierz tę postać, aby kupować.</value></data>
+  <data name="Stop companion purchasing" xml:space="preserve"><value>Zatrzymaj zakupy dla towarzysza</value></data>
+  <data name="Purchasing status (active character)" xml:space="preserve"><value>Stan zakupów (aktywna postać)</value></data>
+  <data name="No companion purchase is pending." xml:space="preserve"><value>Żaden zakup dla towarzysza nie oczekuje.</value></data>
+  <data name="Select a supported companion purchase item." xml:space="preserve"><value>Wybierz obsługiwany przedmiot do zakupu dla towarzysza.</value></data>
+  <data name="Companion purchasing is unavailable in the current context." xml:space="preserve"><value>Zakupy dla towarzysza są niedostępne w obecnym kontekście.</value></data>
+  <data name="Companion purchase stopped: unresolved request in this shop session; no retry." xml:space="preserve"><value>Zakup dla towarzysza zatrzymany: nierozstrzygnięte żądanie w tej sesji sklepu; bez ponowienia.</value></data>
+  <data name="Companion purchase stopped: the shop offer or price is not verified." xml:space="preserve"><value>Zakup dla towarzysza zatrzymany: oferta sklepu lub cena nie jest zweryfikowana.</value></data>
+  <data name="The companion purchase stock target is already met." xml:space="preserve"><value>Docelowy zapas zakupu dla towarzysza jest już osiągnięty.</value></data>
+  <data name="Companion purchase has no affordable quantity or inventory room." xml:space="preserve"><value>Brak ilości mieszczącej się w budżecie lub miejsca w ekwipunku na zakup dla towarzysza.</value></data>
+  <data name="Companion purchase cancelled: context, profile, or shop session changed." xml:space="preserve"><value>Zakup dla towarzysza anulowany: zmienił się kontekst, profil lub sesja sklepu.</value></data>
+  <data name="Waiting for observed companion purchase." xml:space="preserve"><value>Oczekiwanie na weryfikację zakupu dla towarzysza.</value></data>
+  <data name="Companion purchase failed; no retry." xml:space="preserve"><value>Zakup dla towarzysza nie powiódł się; bez ponowienia.</value></data>
+  <data name="Companion purchase stopped: unexpected inventory or gil change." xml:space="preserve"><value>Zakup dla towarzysza zatrzymany: nieoczekiwana zmiana ekwipunku lub gil.</value></data>
+  <data name="Companion purchase completed; exact items and gil were observed." xml:space="preserve"><value>Zakup dla towarzysza zakończony; potwierdzono dokładne przedmioty i ubytek gil.</value></data>
+  <data name="Companion purchase stopped: items, gil debit, and settled transaction were not observed; no retry." xml:space="preserve"><value>Zakup dla towarzysza zatrzymany: nie potwierdzono przedmiotów, ubytku gil i zakończenia transakcji; bez ponowienia.</value></data>
+  <data name="Companion purchase stopped: confirmation did not match the owned request; no retry." xml:space="preserve"><value>Zakup dla towarzysza zatrzymany: potwierdzenie nie pasowało do własnego żądania; bez ponowienia.</value></data>
+  <data name="Companion purchase stopped: additional confirmation; no retry." xml:space="preserve"><value>Zakup dla towarzysza zatrzymany: dodatkowe potwierdzenie; bez ponowienia.</value></data>
+  <data name="Companion purchase stopped." xml:space="preserve"><value>Zakup dla towarzysza zatrzymany.</value></data>
+  <data name="BUY GREENS" xml:space="preserve"><value>KUP WARZYWA</value></data>
+  <data name="BUY FOOD" xml:space="preserve"><value>KUP KARMĘ</value></data>
+  <data name="ADS owns companion vendor travel and purchases." xml:space="preserve"><value>ADS odpowiada za podróże do sprzedawców i zakupy dla towarzysza.</value></data>
+  <data name="Selected food: {0} | NQ stock: {1} | Target: {2}" xml:space="preserve"><value>Wybrana karma: {0} | Zapas NQ: {1} | Cel: {2}</value></data>
+  <data name="Waiting for ADS companion purchase." xml:space="preserve"><value>Oczekiwanie na zakup dla towarzysza przez ADS.</value></data>
+  <data name="ADS did not accept the companion purchase." xml:space="preserve"><value>ADS nie przyjął zakupu dla towarzysza.</value></data>
+  <data name="ADS companion purchase outcome is unknown; no retry." xml:space="preserve"><value>Wynik zakupu dla towarzysza przez ADS jest nieznany; bez ponawiania.</value></data>
+  <data name="Set a positive stock target." xml:space="preserve"><value>Ustaw docelowy zapas większy od zera.</value></data>
+  <data name="Buy travels to the vendor and fills the stock target once. Purchasing starts only when you press Buy. Zero targets disable purchasing." xml:space="preserve"><value>Kup dociera do sprzedawcy i jednorazowo uzupełnia docelowy zapas. Zakup zaczyna się tylko po naciśnięciu Kup. Cel równy zero wyłącza zakupy.</value></data>
+  <data name="Buying companion food from Vath requires beast tribe progression through The Naming of Vath. Purchase is unavailable until the vendor is unlocked." xml:space="preserve"><value>Zakup karmy dla towarzysza u Vath wymaga postępów w zadaniach plemiennych aż do ukończenia The Naming of Vath. Zakup jest niedostępny do odblokowania sprzedawcy.</value></data>
+  <data name="Companion purchase cancelled: context, profile, or settings changed." xml:space="preserve"><value>Zakup dla towarzysza anulowany: zmienił się kontekst, profil lub ustawienia.</value></data>
 </root>

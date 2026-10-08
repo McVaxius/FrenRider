@@ -1,9 +1,39 @@
+2026-10-08 - Manual purchase controls on Main and Mini (I496)
+
+- Show Buy Greens, Buy Food and Stop purchasing on Main, with cart/food/stop icons on Mini inside and outside Eureka. Both windows show current NQ stock beside the corresponding action; tooltips identify the selected food, saved targets, Vath unlock requirement and current purchase status. Unknown stock displays a dash.
+- Share the existing manual actions without automatic purchase triggers or additional settings. Preserve profile targets, window identities and localized captions. Native Account 1 retesting remains pending.
+
+2026-10-08 - Manual companion purchasing without a gil-cap setting (I496)
+
+- Remove the saved gil cap, travel checkbox and automatic restocking. Only BUY FOOD and BUY GREENS start one vendor trip and purchase the affordable deficit to the active profile's stock target; legacy zero caps no longer block a manual purchase. Authorize the exact expected cost through the existing ADS request while retaining price, stock, capacity, cancellation and uncertain-outcome checks.
+- Move BUY FOOD, BUY GREENS and Stop purchasing to the top of Chocobo settings. Warn beside the food controls that the Vath vendor requires beast tribe progression through The Naming of Vath. Translate the warning and manual-purchase guidance in all fifteen existing catalogs. Native Account 1 purchasing remains pending verification.
+
+2026-10-08 - ADS-owned Chocobo purchasing and travel (I496)
+
+- Add separate per-profile automatic-restock and purchase-travel switches, both off by default, with existing clone/sync/reset controls. Allow zero stock targets and a zero gil cap to disable their purchase intent. Share one gil cap across greens and selected food in a captured restock cycle.
+- Expose BUY FOOD and BUY GREENS in Chocobo settings and display the selected food's current NQ stock and target. Delegate vendor travel, shop opening, purchasing and cancellation to ADS IPC; FrenRider retains the profile policy and displayed purchase status.
+- Require ADS's advertised purchase-travel capability and match the request identity, quantity, verified offer and exact stock before accepting completion. Keep local movement and companion-action holds after unreadable cancellation until the matching ADS operation is terminal with navigation released, without replaying the request.
+- Use only verified city merchants or the unlocked Vath gil shop, with travel off unless explicitly enabled. Translate the reached controls and delegation statuses in the existing fifteen catalogs. ADS purchasing and travel still require runtime acceptance; no live purchase or deployment is claimed.
+
+2026-10-08 - Bounded Chocobo gil-shop purchasing (I496)
+
+- Add manual greens/selected-food stock purchasing from an already open supported city or unlocked Vath shop, with per-profile stock targets and a gil cap that default unset. Retain profile clone/sync/reset ownership and translate the new settings and statuses in the existing fifteen catalogs.
+- Bind the loaded shop lifecycle to the active character/profile, territory, merchant and typed handler. Recheck the exact NQ offer, price, capacity and budget before dispatch; consume the request and its matching localized confirmation before native input. Accept only exact item/gil readback and a settled owned transaction. Cancel changed context and block an unresolved request in the same shop session without retry; the guard is instance-local.
+- No automatic purchase, vendor opening/travel, food test trigger, onion use or client-file mutation is added. Local isolated compilation, 1,252 tests and the unchanged Debug/x64 batch pass without warnings/errors; live purchasing remains untested.
+
+2026-10-08 - Guarded Chocobo field feeding (I496)
+
+- Add a per-profile field-food selector and optional automatic feeding to the existing fifteen-second companion cadence. Feeding defaults off; Mimett Gourd is the selected default, preserving explicit saved choices. Retain manual Feed/Stop, current runtime-profile ownership, cloning and default-sync behavior; translate the new controls and displayed statuses in all fifteen existing languages.
+- Require the summoned battle buddy to match the active character's native companion, with no current selected-food effect. Recheck exact NQ stock and ownership before self-targeted item use; accept feeding only after one item is deducted and its normal or favorite effect is observed on the owned native state. Cancel on context/profile/companion changes and stop uncertain or rejected attempts without automatic replay in the current plugin load.
+- Preserve the separate read-only discovery selector and block simultaneous skill allocation/feeding. Field feeding is locally verified and has not been live-tested; onions, verified purchasing and optional travel remain unfinished.
+
 2026-10-08 - Guarded Chocobo skill allocation (I496)
 
-- Add manual skill allocation and optional automatic allocation in the existing fifteen-second companion check. Automatic allocation defaults off; priority defaults to Healer only, with explicit optional subsequent trees. Wait for the first unfinished tree when its next skill is unaffordable and never respec learned skills.
-- Use the current runtime profile, native progression and the SDK learning command. Observe the selected learned level and exact skill-point deduction before advancing. Cancel on unsafe context/profile changes; stop on rejection, partial results or missing acknowledgement without automatic replay until an explicit new selection or manual attempt.
+- Add manual skill allocation and optional automatic allocation in the existing fifteen-second companion check. Automatic allocation defaults off; priority defaults to Healer, Attacker, Defender, preserving saved custom choices. Wait for the first unfinished tree when its next skill is unaffordable and never respec learned skills.
+- Use the current runtime profile and own a settled native Skills window. Invoke the enabled skill button's registered click listener and match the exact native-language skill/cost confirmation. Observe the selected learned level and exact skill-point deduction before advancing. Restore the original window/tab on release; cancel on unsafe context/profile changes and stop on rejection, partial results or missing acknowledgement without automatic replay until an explicit new selection or manual attempt.
 - Preserve nullable/malformed priorities so they block spending instead of silently choosing another tree. Deep-copy the choices in profile cloning, default sync and reset. Add Chocobo settings access to Main and Main/Mini titlebars while retaining existing controls.
-- Keep the saved reload-discovery selector read-only. Feeding, onion use and purchasing remain unfinished; live learning acceptance is separate from source and local test verification.
+- Keep the saved reload-discovery selector read-only. One controlled FTP5 Healer9 acquisition is verified with the exact nine-point debit; generalized allocation and other native clients retain separate runtime acceptance. Feeding, onion use and purchasing remain unfinished.
+- Reject an owned skill prompt during cleanup only while fresh character, safe context, progression and Skills-window ownership still match; logout, transitions and replaced windows receive no cleanup input.
 
 2026-10-08 - GitHub Actions shared-library repair
 
@@ -20,6 +50,7 @@
 - For an existing ready Companion window with valid but differing tab/radio indexes, defer capture until the probe's first tab dispatch is accepted and restore its original native tab. Keep identity/window binding, invalid-selection and newly opened-window guards unchanged.
 - Include visible, ready child addons owned by the Buddy addon control in bounded read-only discovery. Distinguish confirmed tab selection from complete content verification and leave unidentified number-array values labelled as raw slots.
 - Bound child-name decoding to the native fixed field and capture control enabled flags plus field/training food metadata without dispatching skill, item or purchase actions.
+- Include bounded read-only NQ stock and native self-target item availability for companion greens, field foods and onions. Availability is observational; it does not dispatch or prove consumption.
 
 2026-10-07 - Chocobo inspection preparation (I496)
 

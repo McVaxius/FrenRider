@@ -120,6 +120,9 @@ public class MainWindow : Window, IDisposable
         ImGui.SetCursorScreenPos(new Vector2(headerStart.X, actionsY));
         DrawAccountControls();
         ImGui.SetCursorScreenPos(new Vector2(headerStart.X,
+            ImGui.GetItemRectMax().Y + ImGui.GetStyle().ItemSpacing.Y));
+        UiGui.DrawCompanionPurchases(plugin, config, mini: false);
+        ImGui.SetCursorScreenPos(new Vector2(headerStart.X,
             ImGui.GetItemRectMax().Y + UiHelpers.Scale(plugin.Configuration.UiCompact ? 13 : 14)));
         if (ImGui.BeginChild("##FrenRiderOperatorScroll",
                 new Vector2(Math.Max(1, ImGui.GetContentRegionAvail().X - UiHelpers.Scale(2)), 0), false))
