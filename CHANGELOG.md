@@ -1,3 +1,7 @@
+2026-10-08 - GitHub Actions shared-library repair
+
+- Build against published AethertekUI main so current shared APIs are available. Retain repository-specific read-only SSH deploy keys, which do not expire, and disabled credential persistence. Publish library APIs before consumer changes.
+
 2026-10-07 - Packaged image branding and operator guidance (I500/I497/I499)
 
 - Use the existing packaged icon in Main and MAGIA Mini branding/titlebars with aspect-ratio fitting and a stable reserved box. Preserve native titlebar controls, saved geometry, motion and complete-window opacity. Copy the original icon beside direct and packaged DLLs as icon.png while retaining the nested images copy.

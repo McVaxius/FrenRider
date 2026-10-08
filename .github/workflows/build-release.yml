@@ -33,8 +33,10 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: McVaxius/aethertekUI
-          ref: 6c193cf06ac67f954c549cafc2033ac0efdd630a
+          # Publish compatible library APIs before consumer changes.
+          ref: main
           path: aethertekUI
+          # Repository-specific read-only SSH deploy key; no expiration.
           ssh-key: ${{ secrets.AETHERTEKUI_DEPLOY_KEY }}
           persist-credentials: false
 
