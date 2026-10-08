@@ -1,6 +1,31 @@
+2026-10-08 - Guarded Chocobo skill allocation (I496)
+
+- Add manual skill allocation and optional automatic allocation in the existing fifteen-second companion check. Automatic allocation defaults off; priority defaults to Healer only, with explicit optional subsequent trees. Wait for the first unfinished tree when its next skill is unaffordable and never respec learned skills.
+- Use the current runtime profile, native progression and the SDK learning command. Observe the selected learned level and exact skill-point deduction before advancing. Cancel on unsafe context/profile changes; stop on rejection, partial results or missing acknowledgement without automatic replay until an explicit new selection or manual attempt.
+- Preserve nullable/malformed priorities so they block spending instead of silently choosing another tree. Deep-copy the choices in profile cloning, default sync and reset. Add Chocobo settings access to Main and Main/Mini titlebars while retaining existing controls.
+- Keep the saved reload-discovery selector read-only. Feeding, onion use and purchasing remain unfinished; live learning acceptance is separate from source and local test verification.
+
 2026-10-08 - GitHub Actions shared-library repair
 
 - Build against published AethertekUI main so current shared APIs are available. Retain repository-specific read-only SSH deploy keys, which do not expire, and disabled credential persistence. Publish library APIs before consumer changes.
+
+2026-10-08 - Automatic Companion discovery (I496)
+
+- /fr testchocobo now opens the existing Chocobo tab with saved opt-in reload-test controls. Run one selected probe per plugin load after character registration; turning it off, Stop or unloading cancels without replay. Manual Run/Stop remain available, and the new global preference is independent of character/DAD profiles.
+- Pair native Buddy agent Show/Hide for probe-owned windows and log bounded agent/window lifecycle state to diagnose missing-window requests without claiming unobserved acceptance.
+- Add /fr testchocobo: one bounded automatic exploration of the native Companion window and all three tabs, logging progression, redacted text and structural control/event metadata through the existing plugin log. /fr testchocobo stop cancels the attempt.
+- Preserve an existing window/tab when still owned, cancel on unsafe context or native-window changes, and never replay an open request. Discovery does not spend points, use food/onions or purchase items.
+- The first live probe exposed unchanged tab selection despite changing TabIndex. Activate the native radio button with SetActive and require its observed selection to agree with the native tab before recording a tab or completing discovery.
+- A later probe showed radio activation alone changes the highlight without changing the native tab. Pair the typed radio and Buddy SetTab calls, retaining rejected-dispatch cancellation and bounded content capture; native acceptance remains an observed result.
+- For an existing ready Companion window with valid but differing tab/radio indexes, defer capture until the probe's first tab dispatch is accepted and restore its original native tab. Keep identity/window binding, invalid-selection and newly opened-window guards unchanged.
+- Include visible, ready child addons owned by the Buddy addon control in bounded read-only discovery. Distinguish confirmed tab selection from complete content verification and leave unidentified number-array values labelled as raw slots.
+- Bound child-name decoding to the native fixed field and capture control enabled flags plus field/training food metadata without dispatching skill, item or purchase actions.
+
+2026-10-07 - Chocobo inspection preparation (I496)
+
+- Move the existing summon and stance controls into Settings → Chocobo, retaining saved fields and actions with matching tab sync/reset ownership.
+- Show read-only native companion rank, stars, experience, unused skill points and Defender/Attacker/Healer levels for the active character. Add an explicit manual Companion-window request through the current Buddy agent API; request dispatch is separate from in-game acceptance.
+- Skill spending, feeding, onion use and vendor purchases remain pending native-window verification. No new automatic action or purchasing travel is enabled.
 
 2026-10-07 - Packaged image branding and operator guidance (I500/I497/I499)
 

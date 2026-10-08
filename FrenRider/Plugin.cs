@@ -102,6 +102,10 @@ public sealed class Plugin : IDalamudPlugin
     private bool loggingOutCleanupDone;
     private int loginDetectionDelay;
     private bool wasPluginEnabled = false;
+    private readonly ChocoboExplorationService chocoboExploration = new();
+    private int chocoboRequestGeneration;
+    private readonly ChocoboSkillService chocoboSkills;
+    private int chocoboSkillRequestGeneration;
     private DateTime nextFrameworkHitchLogUtc = DateTime.MinValue;
     private double lastSlowUpdateMs;
     private string lastSlowUpdateSource = "none";
@@ -145,6 +149,8 @@ public sealed class Plugin : IDalamudPlugin
         }
 
         ConfigManager = new ConfigManager(PluginInterface, Log);
+        chocoboExploration.InitializeReload(Configuration.ChocoboProbeAfterReload,
+            ClientState.IsLoggedIn ? PlayerState.ContentId : 0);
 
         FrenTracker = new FrenTracker(this);
         ZoneService = new ZoneService();
@@ -176,6 +182,13 @@ public sealed class Plugin : IDalamudPlugin
         BeastCaptureService = new BeastCaptureService(this);
         AdsHyperFocusLeaseService = new AdsHyperFocusLeaseService(this);
         AutomationService = new AutomationService(this, FrenTracker, ZoneService);
+        chocoboSkills = new ChocoboSkillService(CanAllocateChocoboSkills,
+            () => PlayerState.ContentId,
+            () => ConfigManager.TryGetActiveConfig(out var active) ? active : null,
+            () => GameHelpers.TryReadCompanion(out var info) ? info : null,
+            GameHelpers.TryLearnCompanionSkill,
+            message => Log.Information($"[FrenRider][ChocoboSkills] {message}"),
+            () => Environment.TickCount64);
         FormationService = new FormationService(this, FrenTracker);
         PartyService = new PartyService(this, Log, GameGui);
         PartyService.Initialize();
@@ -195,6 +208,7 @@ public sealed class Plugin : IDalamudPlugin
 
         // Hook into FrenRider enabled state changes
         ConfigManager.OnEffectiveProfileChanging += EndCombatSettingsSession;
+        ConfigManager.OnEffectiveProfileChanging += CancelChocoboSkillSession;
         ConfigManager.OnFrenRiderEnabledChanged += OnFrenRiderEnabledChanged;
         DadIPC = new DadIPC(PluginInterface, ConfigManager, FrenTracker, CombatService, Log);
 
@@ -223,7 +237,7 @@ public sealed class Plugin : IDalamudPlugin
 
         CommandManager.AddHandler(AliasCommandName, new CommandInfo(OnAliasCommand)
         {
-            HelpMessage = "Fren Rider: /fr [on|off|settings|s|mini|m|debug], or /fr to open the main window."
+            HelpMessage = "Fren Rider: /fr [on|off|settings|s|mini|m|debug|testchocobo]; testchocobo opens reload-test controls; testchocobo on/off selects reload testing; testchocobo run/stop runs or stops discovery."
         });
 
         ApplyAppearance();
@@ -253,12 +267,17 @@ public sealed class Plugin : IDalamudPlugin
         var loadedVersion = typeof(Plugin).Assembly.GetName().Version?.ToString() ?? "unknown";
         Log.Information($"[FrenRider] Loaded version {loadedVersion} from {PluginInterface.AssemblyLocation.FullName}");
         Log.Information("===Fren Rider loaded!===");
+        Log.Information($"[FrenRider][ChocoboProbe] available build={ChocoboExplorationService.BuildMarker}; command=/fr testchocobo");
     }
 
     public void Dispose()
     {
+        System.Threading.Interlocked.Increment(ref chocoboRequestGeneration);
+        chocoboExploration.Dispose();
+        CancelChocoboSkillSession();
         EndCombatSettingsSession();
         ConfigManager.OnEffectiveProfileChanging -= EndCombatSettingsSession;
+        ConfigManager.OnEffectiveProfileChanging -= CancelChocoboSkillSession;
         PhoenixDownRecoveryService.Dispose();
         ToastGui.ErrorToast -= BossModActionTweaksService.OnErrorToast;
         BossModActionTweaksService.ResetRecovery();
@@ -576,10 +595,96 @@ public sealed class Plugin : IDalamudPlugin
         MainWindow.Toggle();
     }
 
+    internal string ChocoboProbeStatus => chocoboExploration.IsActive ? "Companion discovery is running"
+        : chocoboExploration.PendingReload ? "Waiting for character readiness" : "No Companion discovery is pending";
+
+    internal string ChocoboSkillStatus => chocoboSkills.Status;
+    internal bool IsChocoboSkillAllocationActive => chocoboSkills.IsActive;
+    internal void OpenChocoboSettings() => ConfigWindow.OpenChocoboTesting();
+
+    internal void AllocateChocoboSkills()
+    {
+        var generation = System.Threading.Volatile.Read(ref chocoboSkillRequestGeneration);
+        _ = Framework.RunOnFrameworkThread(() =>
+        {
+            if (generation == System.Threading.Volatile.Read(ref chocoboSkillRequestGeneration))
+                chocoboSkills.Start();
+        });
+    }
+
+    internal void StopChocoboSkills()
+    {
+        System.Threading.Interlocked.Increment(ref chocoboSkillRequestGeneration);
+        _ = Framework.RunOnFrameworkThread(() => chocoboSkills.Stop());
+    }
+
+    internal void CheckAutomaticChocoboSkills() => chocoboSkills.CheckAutomatic();
+
+    private void CancelChocoboSkillSession()
+    {
+        System.Threading.Interlocked.Increment(ref chocoboSkillRequestGeneration);
+        chocoboSkills.Stop("Skill allocation cancelled: context or profile changed.");
+    }
+
+    private bool CanAllocateChocoboSkills()
+        => ClientState.IsLoggedIn && ObjectTable.LocalPlayer is { IsCasting: false, CurrentHp: > 0 }
+            && !Condition[ConditionFlag.InCombat] && !Condition[ConditionFlag.LoggingOut]
+            && !Condition[ConditionFlag.BetweenAreas] && !Condition[ConditionFlag.BetweenAreas51]
+            && !Condition[ConditionFlag.BoundByDuty] && !Condition[ConditionFlag.BoundByDuty56]
+            && !Condition[ConditionFlag.Mounted] && !Condition[ConditionFlag.Mounting71]
+            && !Condition[ConditionFlag.OccupiedInQuestEvent] && !Condition[ConditionFlag.OccupiedInCutSceneEvent]
+            && !Condition[ConditionFlag.Occupied33] && !Condition[ConditionFlag.Occupied39]
+            && !chocoboExploration.IsActive && !chocoboExploration.PendingReload
+            && !AdsIntegrationService.ShouldPauseDutySystems && !AutomationService.IsUtilityGateActive
+            && !CoppeliaPowerlevelLeaseService.ShouldSuppressCompanionAutoSummon
+            && !PhoenixDownRecoveryService.HoldActions && !PhoenixDownRecoveryService.HoldMovement;
+
+    internal void SetChocoboProbeAfterReload(bool selected)
+    {
+        if (Configuration.ChocoboProbeAfterReload == selected) return;
+        Configuration.ChocoboProbeAfterReload = selected;
+        Configuration.Save();
+        if (!selected) System.Threading.Interlocked.Increment(ref chocoboRequestGeneration);
+        _ = Framework.RunOnFrameworkThread(() => chocoboExploration.SelectionChanged(selected));
+    }
+
+    internal void RunChocoboProbe()
+    {
+        var generation = System.Threading.Volatile.Read(ref chocoboRequestGeneration);
+        _ = Framework.RunOnFrameworkThread(() =>
+        {
+            if (generation == System.Threading.Volatile.Read(ref chocoboRequestGeneration))
+                chocoboExploration.Start();
+        });
+    }
+
+    internal void StopChocoboProbe()
+    {
+        System.Threading.Interlocked.Increment(ref chocoboRequestGeneration);
+        _ = Framework.RunOnFrameworkThread(() => chocoboExploration.Stop("explicit stop"));
+    }
+
     private void OnAliasCommand(string command, string args)
     {
         var arg = args.Trim().ToLowerInvariant();
-        if (arg == "on" || arg == "off")
+        if (arg == "testchocobo")
+        {
+            ConfigWindow.OpenChocoboTesting();
+        }
+        else if (arg == "testchocobo on" || arg == "testchocobo off")
+        {
+            SetChocoboProbeAfterReload(arg == "testchocobo on");
+            ConfigWindow.OpenChocoboTesting();
+        }
+        else if (arg == "testchocobo run")
+        {
+            RunChocoboProbe();
+        }
+        else if (arg == "testchocobo stop")
+        {
+            StopChocoboProbe();
+        }
+        else if (arg == "on" || arg == "off")
         {
             ConfigManager.SetFrenRiderEnabled(arg == "on");
             Log.Information($"Fren Rider {(arg == "on" ? "enabled" : "disabled")} via /fr {arg}");
@@ -737,6 +842,8 @@ public sealed class Plugin : IDalamudPlugin
             }
             else if (!ClientState.IsLoggedIn && wasLoggedIn)
             {
+                chocoboExploration.Stop("logout", restore: false);
+                CancelChocoboSkillSession();
                 EndCombatSettingsSession();
                 PhoenixDownRecoveryService.Reset();
                 MountService.ResetFateClingHold();
@@ -747,6 +854,8 @@ public sealed class Plugin : IDalamudPlugin
 
             if (ClientState.IsLoggedIn && Condition[ConditionFlag.LoggingOut])
             {
+                chocoboExploration.Stop("logging out", restore: false);
+                CancelChocoboSkillSession();
                 if (!loggingOutCleanupDone)
                 {
                     EndCombatSettingsSession();
@@ -758,6 +867,8 @@ public sealed class Plugin : IDalamudPlugin
 
             if (IsAreaTransitionActive())
             {
+                chocoboExploration.Stop("area transition", restore: false);
+                CancelChocoboSkillSession();
                 PhoenixDownRecoveryService.Reset();
                 BeastCaptureService.Suspend();
                 BossModActionTweaksService.ResetRecovery();
@@ -775,6 +886,19 @@ public sealed class Plugin : IDalamudPlugin
                 if (loginDetectionDelay == 0)
                     Measure("login", OnLogin);
             }
+
+            Measure("chocobo-discovery", () =>
+            {
+                if (chocoboExploration.PendingReload)
+                {
+                    try { chocoboExploration.TickReload(ConfigManager.TryGetLocalActiveConfig(out _)); }
+                    catch (Exception ex)
+                    {
+                        chocoboExploration.Stop($"reload registration failed: {ex.GetType().Name}", restore: false);
+                    }
+                }
+                chocoboExploration.Tick();
+            });
 
             // Update fren tracking
             Measure("fren-tracker", FrenTracker.Update);
@@ -852,6 +976,7 @@ public sealed class Plugin : IDalamudPlugin
             Measure("ads-reflection", () => AdsReflectionIpcService.Update());
             Measure("utility-gate", AutomationService.UpdateUtilityGate);
             Measure("phoenix-down-recovery", PhoenixDownRecoveryService.Update);
+            Measure("chocobo-skills", chocoboSkills.Tick);
             Measure("fate-cling-hold", MountService.RefreshFateClingHold);
             if (!PhoenixDownRecoveryService.HoldActions)
                 Measure("combat", CombatService.Update);

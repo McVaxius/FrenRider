@@ -48,6 +48,12 @@ public sealed class MagiaMiniWindow : Window, IDisposable
                 ? UiText.T("Run") + ": " + UiText.T(active.Enabled ? "Enabled" : "Disabled")
                 : UiText.T("Not logged in. FrenRider waits until a character is loaded.")),
         });
+        TitleBarButtons.Add(new()
+        {
+            Icon = FontAwesomeIcon.FeatherAlt, Priority = -30, IconOffset = new(2, 1),
+            Click = button => { if (button == ImGuiMouseButton.Left) plugin.OpenChocoboSettings(); },
+            ShowTooltip = () => UiGui.SetTooltip("Chocobo settings"),
+        });
     }
 
     public void Dispose()

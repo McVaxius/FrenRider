@@ -70,6 +70,12 @@ public class MainWindow : Window, IDisposable
             ShowTooltip = () => MaterialText.SetTooltip(UiText.T("All FR off") + "\n" + UiText.T(plugin.ConfigManager.GetCurrentAccount() == null
                 ? "No account loaded." : "Set DEFAULT CONFIG and every local character in the current account, including the active temporary profile.")),
         });
+        TitleBarButtons.Add(new()
+        {
+            Icon = FontAwesomeIcon.FeatherAlt, Priority = -50, IconOffset = new(2, 1),
+            Click = button => { if (button == ImGuiMouseButton.Left) plugin.OpenChocoboSettings(); },
+            ShowTooltip = () => UiGui.SetTooltip("Chocobo settings"),
+        });
     }
 
     public void Dispose() { }
@@ -276,6 +282,10 @@ public class MainWindow : Window, IDisposable
                 UseShellExecute = true
             });
         }
+
+        NextButton("Chocobo");
+        if (UiGui.Button("Chocobo", icon: MaterialIcon.Egg))
+            plugin.OpenChocoboSettings();
 
         if (plugin.Configuration.UiLanguageVisibleOnMainWindow)
         {

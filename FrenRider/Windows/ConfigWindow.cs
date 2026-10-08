@@ -39,8 +39,12 @@ public class ConfigWindow : Window, IDisposable
     private uint clingExclusionAreaToAdd;
     private readonly List<(uint Id, string Name)> foodItems = new();
     private bool foodItemsLoaded = false;
+    private string companionWindowStatus = "";
+    private bool selectChocoboTab;
 
     private static readonly string[] CompanionStances = { "Free Stance", "Defender Stance", "Attacker Stance", "Healer Stance", "Follow" };
+    private static readonly string[] ChocoboSkillTrees = { "Defender", "Attacker", "Healer" };
+    private static readonly string[] ChocoboSkillPriorityLabels = { "First skill tree", "Second skill tree (optional)", "Third skill tree (optional)" };
     private static readonly string[] ClingTypes = { "NavMesh", "Visland", "BossMod Follow", "Vanilla Follow" };
     private static readonly string[] RotationPlugins = { "BMR", "DAEDALUS", "RSR", "VBM", "WRATH" };
     // Keep saved plugin IDs stable while displaying names alphabetically.
@@ -86,6 +90,12 @@ public class ConfigWindow : Window, IDisposable
     }
 
     public void Dispose() { }
+
+    internal void OpenChocoboTesting()
+    {
+        selectChocoboTab = true;
+        IsOpen = true;
+    }
 
     private void EnsureFoodItemsLoaded()
     {
@@ -418,7 +428,7 @@ public class ConfigWindow : Window, IDisposable
 
         bool tabsOpen;
         using (MaterialText.PushLineHeight(UiText.T("Profile"), UiText.T("Follow"), UiText.T("Combat"),
-            UiText.T("Duty / ADS / Exit"), UiText.T("Automation"), UiText.T("UI / About")))
+            UiText.T("Duty / ADS / Exit"), UiText.T("Automation"), UiText.T("Chocobo"), UiText.T("UI / About")))
             tabsOpen = ImGui.BeginTabBar("FrenRiderTabs", ImGuiTabBarFlags.FittingPolicyScroll);
         if (tabsOpen)
         {
@@ -450,6 +460,13 @@ public class ConfigWindow : Window, IDisposable
             {
                 currentTab = "Automation";
                 DrawAutomationTab(config);
+                ImGui.EndTabItem();
+            }
+            if (UiGui.BeginTabItem("Chocobo", selectChocoboTab ? ImGuiTabItemFlags.SetSelected : ImGuiTabItemFlags.None))
+            {
+                selectChocoboTab = false;
+                currentTab = "Chocobo";
+                DrawChocoboTab(config);
                 ImGui.EndTabItem();
             }
             if (UiGui.BeginTabItem("UI / About"))
@@ -820,6 +837,50 @@ public class ConfigWindow : Window, IDisposable
             UiGui.EndCombo();
         }
 
+        // Auto Discard
+        var autoDiscard = config.EnableAutoDiscard;
+        if (UiGui.Checkbox("Auto Discard (/ays discard)", ref autoDiscard))
+        {
+            config.EnableAutoDiscard = autoDiscard;
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("Runs /ays discard every 10s only while mounted and in a safe idle window.\nFrenRider defers discard during combat, cutscenes, and area transitions.\nRequires AutoRetainer plugin.");
+        DrawDefaultSettingSyncButton("Auto Discard");
+
+        ImGui.Spacing();
+        ImGui.Separator();
+        ImGui.Spacing();
+
+        // Update Interval
+        var updateInterval = config.UpdateInterval;
+        ImGui.SetNextItemWidth(200);
+        if (UiGui.InputFloat("Update Interval (seconds)", ref updateInterval, 0.01f, 0.1f, "%.3f"))
+        {
+            config.UpdateInterval = Math.Max(0.05f, updateInterval);
+            configManager.SaveCurrentAccount();
+        }
+        ImGui.SameLine();
+        HelpMarker("How often the plugin runs its main logic loop.\nLower values = more responsive but higher CPU usage.\nDefault: 0.3s. WARNING: Values below 0.1 may impact performance.");
+        DrawDefaultSettingSyncButton("Update Interval");
+        if (updateInterval < 0.1f)
+        {
+            UiGui.TextColored(new Vector4(1, 0.4f, 0.4f, 1), "WARNING: Very low update interval may impact game performance!");
+        }
+    }
+
+    private void DrawChocoboTab(CharacterConfig config)
+    {
+        ImGui.Spacing();
+        UiGui.Text("Chocobo reload testing");
+        var probeAfterReload = configuration.ChocoboProbeAfterReload;
+        if (UiGui.Checkbox("Run Companion discovery after reload", ref probeAfterReload))
+            plugin.SetChocoboProbeAfterReload(probeAfterReload);
+        UiGui.TextWrapped("Runs one read-only Companion probe per plugin load. Changing this switch takes effect on the next reload.");
+        if (UiGui.Button("Run Companion discovery now")) plugin.RunChocoboProbe();
+        if (UiGui.Button("Stop Companion discovery")) plugin.StopChocoboProbe();
+        UiGui.TextDisabled(plugin.ChocoboProbeStatus);
+        ImGui.Separator();
         // Summon Chocobo
         var forceGysahl = config.ForceGysahl;
         if (UiGui.Checkbox("Summon Chocobo", ref forceGysahl))
@@ -862,36 +923,94 @@ public class ConfigWindow : Window, IDisposable
 
         DrawDefaultSettingSyncButton("Companion Stance");
 
-        // Auto Discard
-        var autoDiscard = config.EnableAutoDiscard;
-        if (UiGui.Checkbox("Auto Discard (/ays discard)", ref autoDiscard))
-        {
-            config.EnableAutoDiscard = autoDiscard;
-            configManager.SaveCurrentAccount();
-        }
-        ImGui.SameLine();
-        HelpMarker("Runs /ays discard every 10s only while mounted and in a safe idle window.\nFrenRider defers discard during combat, cutscenes, and area transitions.\nRequires AutoRetainer plugin.");
-        DrawDefaultSettingSyncButton("Auto Discard");
-
-        ImGui.Spacing();
         ImGui.Separator();
-        ImGui.Spacing();
-
-        // Update Interval
-        var updateInterval = config.UpdateInterval;
-        ImGui.SetNextItemWidth(200);
-        if (UiGui.InputFloat("Update Interval (seconds)", ref updateInterval, 0.01f, 0.1f, "%.3f"))
+        UiGui.Text("Chocobo skills");
+        var autoAllocateSkills = config.ChocoboAutoAllocateSkills;
+        if (UiGui.Checkbox("Automatically allocate Chocobo skills", ref autoAllocateSkills))
         {
-            config.UpdateInterval = Math.Max(0.05f, updateInterval);
+            config.ChocoboAutoAllocateSkills = autoAllocateSkills;
             configManager.SaveCurrentAccount();
         }
         ImGui.SameLine();
-        HelpMarker("How often the plugin runs its main logic loop.\nLower values = more responsive but higher CPU usage.\nDefault: 0.3s. WARNING: Values below 0.1 may impact performance.");
-        DrawDefaultSettingSyncButton("Update Interval");
-        if (updateInterval < 0.1f)
+        HelpMarker("Completes the first chosen tree before the next. Waits when the next skill costs more points than are available.");
+        DrawDefaultSettingSyncButton("Automatically allocate Chocobo skills");
+        DrawChocoboSkillPriority(config);
+        UiGui.TextWrapped("These settings belong to the profile being edited. Allocate and Stop use the active character's runtime profile.");
+        ImGui.BeginDisabled(!Plugin.ClientState.IsLoggedIn || !configManager.TryGetLocalActiveConfig(out _));
+        if (UiGui.Button("Allocate skills now")) plugin.AllocateChocoboSkills();
+        ImGui.EndDisabled();
+        ImGui.SameLine();
+        if (UiGui.Button("Stop skill allocation")) plugin.StopChocoboSkills();
+        UiGui.TextDisabled(plugin.ChocoboSkillStatus);
+
+        ImGui.Separator();
+        UiGui.Text("Current companion (active character)");
+        UiGui.TextWrapped("These values describe the active character, regardless of the profile being edited.");
+        if (GameHelpers.TryReadCompanion(out var companion))
         {
-            UiGui.TextColored(new Vector4(1, 0.4f, 0.4f, 1), "WARNING: Very low update interval may impact game performance!");
+            UiGui.Text(UiText.F("Rank: {0} | Stars: {1}", companion.Rank, companion.Stars));
+            UiGui.Text(UiText.F("Experience: {0}", companion.CurrentXp));
+            UiGui.Text(UiText.F("Unused skill points: {0}", companion.SkillPoints));
+            UiGui.Text(UiText.F("Defender level: {0}", companion.DefenderLevel));
+            UiGui.Text(UiText.F("Attacker level: {0}", companion.AttackerLevel));
+            UiGui.Text(UiText.F("Healer level: {0}", companion.HealerLevel));
         }
+        else
+            UiGui.TextDisabled("No companion data available. Log in to inspect it.");
+        ImGui.Spacing();
+        ImGui.BeginDisabled(Plugin.ObjectTable.LocalPlayer is null);
+        if (UiGui.Button("Open game Companion window"))
+            companionWindowStatus = GameHelpers.TryOpenCompanionWindow()
+                ? "Companion window requested." : "Companion window is unavailable.";
+        ImGui.EndDisabled();
+        if (companionWindowStatus.Length > 0) UiGui.TextWrapped(companionWindowStatus);
+    }
+
+    private void DrawChocoboSkillPriority(CharacterConfig config)
+    {
+        var saved = config.ChocoboSkillPriority;
+        var valid = saved is { Count: >= 1 and <= 3 } &&
+                    saved.All(tree => tree is >= 0 and <= 2) && saved.Distinct().Count() == saved.Count;
+        var order = new[] { -1, -1, -1 };
+        if (valid)
+            saved!.CopyTo(order);
+        else
+            UiGui.TextDisabled("Invalid skill priority in this profile. Choose a first skill tree.");
+
+        for (var index = 0; index < order.Length; index++)
+        {
+            var choices = new List<int>();
+            var labels = new List<string>();
+            if (index > 0 || order[index] < 0)
+            {
+                choices.Add(-1);
+                labels.Add(index == 0 ? "Choose a skill tree" : "None");
+            }
+            for (var tree = 0; tree < ChocoboSkillTrees.Length; tree++)
+            {
+                if (order[index] < 0 && order.Contains(tree)) continue;
+                choices.Add(tree);
+                labels.Add(ChocoboSkillTrees[tree]);
+            }
+            var choice = choices.IndexOf(order[index]);
+            ImGui.BeginDisabled(index > 0 && order[index - 1] < 0);
+            if (UiGui.Combo(ChocoboSkillPriorityLabels[index], ref choice, labels.ToArray(), labels.Count))
+            {
+                var selected = choices[choice];
+                if (selected >= 0)
+                {
+                    var previousIndex = Array.IndexOf(order, selected);
+                    if (previousIndex >= 0) order[previousIndex] = order[index];
+                }
+                order[index] = selected;
+                config.ChocoboSkillPriority = order.Where(tree => tree >= 0).ToList();
+                Array.Fill(order, -1);
+                config.ChocoboSkillPriority.CopyTo(order);
+                configManager.SaveCurrentAccount();
+            }
+            ImGui.EndDisabled();
+        }
+        DrawDefaultSettingSyncButton("Skill priority");
     }
 
     private void DrawDistanceTab(CharacterConfig config)

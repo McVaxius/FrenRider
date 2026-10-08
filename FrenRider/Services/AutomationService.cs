@@ -236,6 +236,7 @@ public class AutomationService : IDisposable
         {
             lastCompanionCheckMs = now;
             CheckCompanion(config);
+            plugin.CheckAutomaticChocoboSkills();
         }
 
         // Deferred companion stance setting (after summoning, wait for spawn)

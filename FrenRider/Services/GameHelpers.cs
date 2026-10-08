@@ -18,6 +18,9 @@ using GameObject = FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject;
 
 namespace FrenRider.Services;
 
+internal readonly record struct CompanionSnapshot(byte Rank, byte Stars, uint CurrentXp,
+    byte SkillPoints, byte DefenderLevel, byte AttackerLevel, byte HealerLevel);
+
 /// <summary>
 /// Static unsafe helpers for game state queries: inventory, status effects, item usage, companion.
 /// </summary>
@@ -347,6 +350,94 @@ public static class GameHelpers
             if (!quiet)
                 Plugin.Log.Error($"TryUseActionLocation({actionType}, {actionId}) failed: {ex.Message}");
             return false;
+        }
+    }
+
+    /// <summary>
+    /// Read non-identifying companion progression for the current character.
+    /// </summary>
+    internal static unsafe bool TryReadCompanion(out CompanionSnapshot snapshot)
+    {
+        snapshot = default;
+        if (Plugin.ObjectTable.LocalPlayer is null) return false;
+        var state = UIState.Instance();
+        if (state == null) return false;
+        ref var companion = ref state->Buddy.CompanionInfo;
+        // Native order is Defender, Attacker, Healer. Do not infer learned skills
+        // or spending eligibility from points/levels alone.
+        snapshot = new(companion.Rank, companion.Stars, companion.CurrentXP, companion.SkillPoints,
+            companion.Levels[0], companion.Levels[1], companion.Levels[2]);
+        return true;
+    }
+
+    internal static unsafe bool TryLearnCompanionSkill(CompanionSnapshot expected, ChocoboSkillStep step)
+    {
+        if (!TryReadCompanion(out var actual) || actual != expected
+            || actual.Rank is < 1 or > 20
+            || !ChocoboSkillPlan.TryGetNext(actual, new[] { step.Tree }, out var next) || next != step)
+            return false;
+        // SDK-owned command; OmenTools BuddyCommand documents the same level-major payload.
+        // This return records dispatch only. ChocoboSkillService observes both learned level and point debit.
+        return GameMain.ExecuteCommand(1702, step.Payload);
+    }
+
+    internal static unsafe bool TryOpenCompanionWindow()
+    {
+        if (Plugin.ObjectTable.LocalPlayer is null) return false;
+        LogCompanionWindowLifecycle("before-show");
+        var agent = GetCompanionAgent();
+        if (agent == null) return false;
+        try
+        {
+            agent->Show();
+            return true; // Dispatch only; native window acceptance is observed in-game.
+        }
+        finally { LogCompanionWindowLifecycle("after-show"); }
+    }
+
+    internal static unsafe AgentInterface* GetCompanionAgent()
+    {
+        var module = AgentModule.Instance();
+        return module == null ? null : module->GetAgentByInternalId(AgentId.Buddy);
+    }
+
+    internal static unsafe bool TryHideCompanionWindow(uint expectedAddonId)
+    {
+        LogCompanionWindowLifecycle("before-hide");
+        if (Plugin.ObjectTable.LocalPlayer is null) return false;
+        var agent = GetCompanionAgent();
+        var manager = RaptureAtkUnitManager.Instance();
+        var addon = manager == null ? null : manager->GetAddonByName("Buddy");
+        if (expectedAddonId == 0 || agent == null || addon == null
+            || !addon->IsVisible || !addon->IsReady || addon->Id != expectedAddonId
+            || !agent->IsAgentActive() || agent->GetAddonId() != expectedAddonId)
+            return false;
+        try
+        {
+            agent->Hide();
+            return true; // Dispatch only; immediate readback may still be transitioning.
+        }
+        finally { LogCompanionWindowLifecycle("after-hide"); }
+    }
+
+    private static unsafe void LogCompanionWindowLifecycle(string phase)
+    {
+        try
+        {
+            var agent = GetCompanionAgent();
+            var manager = RaptureAtkUnitManager.Instance();
+            var addon = manager == null ? null : manager->GetAddonByName("Buddy");
+            var agentActive = agent != null && agent->IsAgentActive();
+            var agentAddonId = agent == null ? 0u : agent->GetAddonId();
+            var agentReady = agent != null && agent->IsAddonReady();
+            var visible = addon != null && addon->IsVisible;
+            Plugin.Log.Information($"[FrenRider][ChocoboProbe] lifecycle phase={phase}; agent-present={agent != null}; agent-active={agentActive}; agent-addon-id={agentAddonId}; agent-ready={agentReady}; buddy-present={addon != null}; buddy-id={(addon == null ? 0u : addon->Id)}; buddy-visible={visible}; buddy-ready={addon != null && addon->IsReady}; hidden-active={agentActive && !visible}");
+            if (phase == "before-show" && agentActive && !visible)
+                Plugin.Log.Information("[FrenRider][ChocoboProbe] existing Buddy agent is active while its window is not visible; Show request only, no reset requested");
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log.Information($"[FrenRider][ChocoboProbe] lifecycle phase={phase}; diagnostic-unavailable={ex.GetType().Name}");
         }
     }
 

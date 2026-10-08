@@ -30,6 +30,9 @@ public class Configuration : IPluginConfiguration
     public float LeftPanelWidth { get; set; } = 240f;
     public bool DontMoveWhileCasting { get; set; } = ConfigurationMigration.DefaultDontMoveWhileCasting;
 
+    // Opt-in development probe; independent of character and temporary DAD profiles.
+    public bool ChocoboProbeAfterReload { get; set; } = false;
+
     // --- Video Notifications ---
     public bool VideoNotificationsEnabled { get; set; } = false;
     public int VideoWindowX { get; set; } = 100;

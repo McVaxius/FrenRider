@@ -2753,4 +2753,53 @@
   <data name="ADS interaction active; VBM settings pending" xml:space="preserve"><value>Взаимодействие ADS активно; настройки VBM ожидают применения</value></data>
   <data name="Questing idle; VBM paused" xml:space="preserve"><value>Ожидание заданий; VBM приостановлен</value></data>
   <data name="Questing idle; VBM pause unconfirmed" xml:space="preserve"><value>Ожидание заданий; пауза VBM не подтверждена</value></data>
+  <data name="Chocobo" xml:space="preserve"><value>Чокобо</value></data>
+  <data name="Current companion (active character)" xml:space="preserve"><value>Текущий спутник (активный персонаж)</value></data>
+  <data name="These values describe the active character, regardless of the profile being edited." xml:space="preserve"><value>Эти значения относятся к активному персонажу независимо от редактируемого профиля.</value></data>
+  <data name="Rank: {0} | Stars: {1}" xml:space="preserve"><value>Ранг: {0} | Звёзды: {1}</value></data>
+  <data name="Experience: {0}" xml:space="preserve"><value>Опыт: {0}</value></data>
+  <data name="Unused skill points: {0}" xml:space="preserve"><value>Неиспользованные очки навыков: {0}</value></data>
+  <data name="Defender level: {0}" xml:space="preserve"><value>Уровень защитника: {0}</value></data>
+  <data name="Attacker level: {0}" xml:space="preserve"><value>Уровень атакующего: {0}</value></data>
+  <data name="Healer level: {0}" xml:space="preserve"><value>Уровень целителя: {0}</value></data>
+  <data name="No companion data available. Log in to inspect it." xml:space="preserve"><value>Данные спутника недоступны. Войдите в игру, чтобы их просмотреть.</value></data>
+  <data name="Skill spending, feeding and purchases await native window verification." xml:space="preserve"><value>Распределение очков навыков, кормление и покупки ожидают проверки игрового окна.</value></data>
+  <data name="Open game Companion window" xml:space="preserve"><value>Открыть игровое окно спутника</value></data>
+  <data name="Companion window requested." xml:space="preserve"><value>Запрошено открытие окна спутника.</value></data>
+  <data name="Companion window is unavailable." xml:space="preserve"><value>Окно спутника недоступно.</value></data>
+  <data name="Chocobo reload testing" xml:space="preserve"><value>Тест чокобо при перезагрузке</value></data>
+  <data name="Run Companion discovery after reload" xml:space="preserve"><value>Проверять окно спутника после перезагрузки</value></data>
+  <data name="Runs one read-only Companion probe per plugin load. Changing this switch takes effect on the next reload." xml:space="preserve"><value>При каждой загрузке плагина выполняется одна проверка окна спутника в режиме только чтения. Изменение этого переключателя вступает в силу при следующей перезагрузке.</value></data>
+  <data name="Run Companion discovery now" xml:space="preserve"><value>Проверить окно спутника сейчас</value></data>
+  <data name="Stop Companion discovery" xml:space="preserve"><value>Остановить проверку окна спутника</value></data>
+  <data name="Waiting for character readiness" xml:space="preserve"><value>Ожидание готовности персонажа</value></data>
+  <data name="Companion discovery is running" xml:space="preserve"><value>Выполняется проверка окна спутника</value></data>
+  <data name="No Companion discovery is pending" xml:space="preserve"><value>Нет ожидающей проверки окна спутника</value></data>
+  <data name="Chocobo settings" xml:space="preserve"><value>Настройки чокобо</value></data>
+  <data name="Chocobo skills" xml:space="preserve"><value>Умения чокобо</value></data>
+  <data name="Automatically allocate Chocobo skills" xml:space="preserve"><value>Автоматически распределять умения чокобо</value></data>
+  <data name="Completes the first chosen tree before the next. Waits when the next skill costs more points than are available." xml:space="preserve"><value>Завершает первое выбранное дерево перед переходом к следующему. Ожидает, если следующее умение стоит больше очков, чем доступно.</value></data>
+  <data name="These settings belong to the profile being edited. Allocate and Stop use the active character&apos;s runtime profile." xml:space="preserve"><value>Эти настройки принадлежат редактируемому профилю. Распределение и остановка используют рабочий профиль активного персонажа.</value></data>
+  <data name="Allocate skills now" xml:space="preserve"><value>Распределить умения сейчас</value></data>
+  <data name="Stop skill allocation" xml:space="preserve"><value>Остановить распределение умений</value></data>
+  <data name="First skill tree" xml:space="preserve"><value>Первое дерево умений</value></data>
+  <data name="Second skill tree (optional)" xml:space="preserve"><value>Второе дерево умений (необязательно)</value></data>
+  <data name="Third skill tree (optional)" xml:space="preserve"><value>Третье дерево умений (необязательно)</value></data>
+  <data name="Defender" xml:space="preserve"><value>Защитник</value></data>
+  <data name="Attacker" xml:space="preserve"><value>Атакующий</value></data>
+  <data name="Skill priority" xml:space="preserve"><value>Приоритет умений</value></data>
+  <data name="Invalid skill priority in this profile. Choose a first skill tree." xml:space="preserve"><value>Недопустимый приоритет умений в этом профиле. Выберите первое дерево умений.</value></data>
+  <data name="Choose a skill tree" xml:space="preserve"><value>Выбрать дерево умений</value></data>
+  <data name="No skill allocation is pending." xml:space="preserve"><value>Нет ожидающего распределения умений.</value></data>
+  <data name="Skill allocation is unavailable in the current context." xml:space="preserve"><value>Распределение умений недоступно в текущих условиях.</value></data>
+  <data name="No affordable next skill in the configured priority." xml:space="preserve"><value>В заданном порядке нет следующего умения, на которое хватает очков.</value></data>
+  <data name="Skill allocation failed." xml:space="preserve"><value>Не удалось распределить умения.</value></data>
+  <data name="Skill allocation cancelled: context or profile changed." xml:space="preserve"><value>Распределение умений отменено: изменились условия или профиль.</value></data>
+  <data name="Skill allocation cancelled: companion data unavailable." xml:space="preserve"><value>Распределение умений отменено: данные спутника недоступны.</value></data>
+  <data name="Skill allocation stopped: unexpected progression change." xml:space="preserve"><value>Распределение умений остановлено: неожиданное изменение прогресса.</value></data>
+  <data name="Skill allocation stopped: learning was not observed; no retry." xml:space="preserve"><value>Распределение умений остановлено: изучение не обнаружено; повторной попытки не будет.</value></data>
+  <data name="Skill allocation completed; progression was observed." xml:space="preserve"><value>Распределение умений завершено; прогресс обнаружен.</value></data>
+  <data name="Waiting for observed skill learning." xml:space="preserve"><value>Ожидание обнаружения изученного умения.</value></data>
+  <data name="Skill learning request was rejected; no retry." xml:space="preserve"><value>Запрос на изучение умения отклонён; повторной попытки не будет.</value></data>
+  <data name="Skill allocation stopped." xml:space="preserve"><value>Распределение умений остановлено.</value></data>
 </root>

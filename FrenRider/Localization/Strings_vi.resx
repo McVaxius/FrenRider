@@ -2858,4 +2858,53 @@ Bật: dùng các preset BossMod bên dưới với mọi nhà cung cấp rotati
   <data name="ADS interaction active; VBM settings pending" xml:space="preserve"><value>ADS đang tương tác; cài đặt VBM đang chờ</value></data>
   <data name="Questing idle; VBM paused" xml:space="preserve"><value>Đang chờ nhiệm vụ; VBM đã tạm dừng</value></data>
   <data name="Questing idle; VBM pause unconfirmed" xml:space="preserve"><value>Đang chờ nhiệm vụ; chưa xác nhận tạm dừng VBM</value></data>
+  <data name="Chocobo" xml:space="preserve"><value>Chocobo</value></data>
+  <data name="Current companion (active character)" xml:space="preserve"><value>Bạn đồng hành hiện tại (nhân vật đang hoạt động)</value></data>
+  <data name="These values describe the active character, regardless of the profile being edited." xml:space="preserve"><value>Các giá trị này mô tả nhân vật đang hoạt động, bất kể hồ sơ đang được chỉnh sửa.</value></data>
+  <data name="Rank: {0} | Stars: {1}" xml:space="preserve"><value>Cấp bậc: {0} | Sao: {1}</value></data>
+  <data name="Experience: {0}" xml:space="preserve"><value>Kinh nghiệm: {0}</value></data>
+  <data name="Unused skill points: {0}" xml:space="preserve"><value>Điểm kỹ năng chưa dùng: {0}</value></data>
+  <data name="Defender level: {0}" xml:space="preserve"><value>Cấp phòng thủ: {0}</value></data>
+  <data name="Attacker level: {0}" xml:space="preserve"><value>Cấp tấn công: {0}</value></data>
+  <data name="Healer level: {0}" xml:space="preserve"><value>Cấp chữa trị: {0}</value></data>
+  <data name="No companion data available. Log in to inspect it." xml:space="preserve"><value>Không có dữ liệu bạn đồng hành. Hãy đăng nhập để xem.</value></data>
+  <data name="Skill spending, feeding and purchases await native window verification." xml:space="preserve"><value>Việc phân bổ điểm kỹ năng, cho ăn và mua sắm đang chờ xác minh cửa sổ trong trò chơi.</value></data>
+  <data name="Open game Companion window" xml:space="preserve"><value>Mở cửa sổ Bạn đồng hành trong trò chơi</value></data>
+  <data name="Companion window requested." xml:space="preserve"><value>Đã yêu cầu mở cửa sổ Bạn đồng hành.</value></data>
+  <data name="Companion window is unavailable." xml:space="preserve"><value>Cửa sổ Bạn đồng hành không khả dụng.</value></data>
+  <data name="Chocobo reload testing" xml:space="preserve"><value>Kiểm thử Chocobo khi tải lại</value></data>
+  <data name="Run Companion discovery after reload" xml:space="preserve"><value>Kiểm tra cửa sổ Bạn đồng hành sau khi tải lại</value></data>
+  <data name="Runs one read-only Companion probe per plugin load. Changing this switch takes effect on the next reload." xml:space="preserve"><value>Chạy một lần kiểm tra chỉ đọc cửa sổ Bạn đồng hành mỗi khi plugin được tải. Thay đổi công tắc này có hiệu lực ở lần tải lại tiếp theo.</value></data>
+  <data name="Run Companion discovery now" xml:space="preserve"><value>Kiểm tra cửa sổ Bạn đồng hành ngay</value></data>
+  <data name="Stop Companion discovery" xml:space="preserve"><value>Dừng kiểm tra cửa sổ Bạn đồng hành</value></data>
+  <data name="Waiting for character readiness" xml:space="preserve"><value>Đang chờ nhân vật sẵn sàng</value></data>
+  <data name="Companion discovery is running" xml:space="preserve"><value>Đang kiểm tra cửa sổ Bạn đồng hành</value></data>
+  <data name="No Companion discovery is pending" xml:space="preserve"><value>Không có lượt kiểm tra cửa sổ Bạn đồng hành nào đang chờ</value></data>
+  <data name="Chocobo settings" xml:space="preserve"><value>Cài đặt Chocobo</value></data>
+  <data name="Chocobo skills" xml:space="preserve"><value>Kỹ năng Chocobo</value></data>
+  <data name="Automatically allocate Chocobo skills" xml:space="preserve"><value>Tự động phân bổ kỹ năng Chocobo</value></data>
+  <data name="Completes the first chosen tree before the next. Waits when the next skill costs more points than are available." xml:space="preserve"><value>Hoàn thành cây kỹ năng được chọn đầu tiên trước khi chuyển sang cây tiếp theo. Chờ khi kỹ năng tiếp theo cần nhiều điểm hơn số điểm hiện có.</value></data>
+  <data name="These settings belong to the profile being edited. Allocate and Stop use the active character&apos;s runtime profile." xml:space="preserve"><value>Các cài đặt này thuộc về hồ sơ đang chỉnh sửa. Phân bổ và Dừng sử dụng hồ sơ đang dùng của nhân vật hiện tại.</value></data>
+  <data name="Allocate skills now" xml:space="preserve"><value>Phân bổ kỹ năng ngay</value></data>
+  <data name="Stop skill allocation" xml:space="preserve"><value>Dừng phân bổ kỹ năng</value></data>
+  <data name="First skill tree" xml:space="preserve"><value>Cây kỹ năng thứ nhất</value></data>
+  <data name="Second skill tree (optional)" xml:space="preserve"><value>Cây kỹ năng thứ hai (tùy chọn)</value></data>
+  <data name="Third skill tree (optional)" xml:space="preserve"><value>Cây kỹ năng thứ ba (tùy chọn)</value></data>
+  <data name="Defender" xml:space="preserve"><value>Phòng thủ</value></data>
+  <data name="Attacker" xml:space="preserve"><value>Tấn công</value></data>
+  <data name="Skill priority" xml:space="preserve"><value>Thứ tự ưu tiên kỹ năng</value></data>
+  <data name="Invalid skill priority in this profile. Choose a first skill tree." xml:space="preserve"><value>Thứ tự ưu tiên kỹ năng trong hồ sơ này không hợp lệ. Hãy chọn cây kỹ năng đầu tiên.</value></data>
+  <data name="Choose a skill tree" xml:space="preserve"><value>Chọn một cây kỹ năng</value></data>
+  <data name="No skill allocation is pending." xml:space="preserve"><value>Không có phân bổ kỹ năng nào đang chờ.</value></data>
+  <data name="Skill allocation is unavailable in the current context." xml:space="preserve"><value>Không thể phân bổ kỹ năng trong tình huống hiện tại.</value></data>
+  <data name="No affordable next skill in the configured priority." xml:space="preserve"><value>Không đủ điểm cho kỹ năng tiếp theo trong thứ tự ưu tiên đã đặt.</value></data>
+  <data name="Skill allocation failed." xml:space="preserve"><value>Phân bổ kỹ năng thất bại.</value></data>
+  <data name="Skill allocation cancelled: context or profile changed." xml:space="preserve"><value>Đã hủy phân bổ kỹ năng: tình huống hoặc hồ sơ đã thay đổi.</value></data>
+  <data name="Skill allocation cancelled: companion data unavailable." xml:space="preserve"><value>Đã hủy phân bổ kỹ năng: không có dữ liệu bạn đồng hành.</value></data>
+  <data name="Skill allocation stopped: unexpected progression change." xml:space="preserve"><value>Đã dừng phân bổ kỹ năng: tiến trình thay đổi ngoài dự kiến.</value></data>
+  <data name="Skill allocation stopped: learning was not observed; no retry." xml:space="preserve"><value>Đã dừng phân bổ kỹ năng: chưa quan sát thấy việc học kỹ năng; không thử lại.</value></data>
+  <data name="Skill allocation completed; progression was observed." xml:space="preserve"><value>Phân bổ kỹ năng hoàn tất; đã quan sát thấy tiến trình.</value></data>
+  <data name="Waiting for observed skill learning." xml:space="preserve"><value>Đang chờ quan sát việc học kỹ năng.</value></data>
+  <data name="Skill learning request was rejected; no retry." xml:space="preserve"><value>Yêu cầu học kỹ năng bị từ chối; không thử lại.</value></data>
+  <data name="Skill allocation stopped." xml:space="preserve"><value>Đã dừng phân bổ kỹ năng.</value></data>
 </root>

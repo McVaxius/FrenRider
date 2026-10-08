@@ -6,6 +6,39 @@ namespace FrenRider.Tests;
 
 public sealed class ConfigManagerDefaultSyncTests
 {
+    [Fact]
+    public void ChocoboTabSyncRetainsOtherSettingsAndRemoteProfiles()
+    {
+        var account = CreateAccount();
+        account.DefaultConfig.ForceGysahl = true;
+        account.DefaultConfig.CompanionStrat = "Healer Stance";
+        account.DefaultConfig.Enabled = true;
+        account.DefaultConfig.FrenName = "Changed Default";
+        var before = account.Characters.ToDictionary(pair => pair.Key, pair => pair.Value.Clone());
+        var remote = new RemoteProfileRow { Config = new CharacterConfig() };
+        account.RemoteProfiles.Add(remote);
+
+        Assert.Equal(account.Characters.Count, ConfigManager.ApplyDefaultTabToAllCharacters(account, "Chocobo"));
+        foreach (var pair in account.Characters)
+        {
+            Assert.True(pair.Value.ForceGysahl);
+            Assert.Equal("Healer Stance", pair.Value.CompanionStrat);
+            Assert.Equal(before[pair.Key].Enabled, pair.Value.Enabled);
+            Assert.Equal(before[pair.Key].FrenName, pair.Value.FrenName);
+        }
+        Assert.False(remote.Config.ForceGysahl);
+        Assert.Equal("Free Stance", remote.Config.CompanionStrat);
+
+        account.DefaultConfig.ForceGysahl = false;
+        account.DefaultConfig.CompanionStrat = "Attacker Stance";
+        ConfigManager.ApplyDefaultTabToAllCharacters(account, "Profile");
+        Assert.All(account.Characters.Values, profile =>
+        {
+            Assert.True(profile.ForceGysahl);
+            Assert.Equal("Healer Stance", profile.CompanionStrat);
+        });
+    }
+
     [Theory]
     [InlineData("Pause cling for FATE", true, false)]
     [InlineData("Ignore FATEs", false, true)]
@@ -468,6 +501,7 @@ public sealed class ConfigManagerDefaultSyncTests
                 var type when type == typeof(string[]) => new[] { $"value-{offset}-{property.Name}" },
                 var type when type == typeof(List<string>) => new List<string> { $"value-{offset}-{property.Name}" },
                 var type when type == typeof(List<uint>) => new List<uint> { (uint)(offset + index + 1) },
+                var type when type == typeof(List<int>) => new List<int> { offset == 0 ? 2 : 0 },
                 var type when type.IsEnum => Enum.GetValues(type).GetValue(enumIndex % Enum.GetValues(type).Length)!,
                 _ => throw new InvalidOperationException($"Add a persisted-value test fixture for {property.Name} ({property.PropertyType})."),
             };
@@ -492,6 +526,11 @@ public sealed class ConfigManagerDefaultSyncTests
             Assert.True(expectedIds.SequenceEqual(actualIds), $"{property.Name} list values differ.");
             Assert.NotSame(expectedIds, actualIds);
         }
+        else if (expected is List<int> expectedPriority && actual is List<int> actualPriority)
+        {
+            Assert.True(expectedPriority.SequenceEqual(actualPriority), $"{property.Name} list values differ.");
+            Assert.NotSame(expectedPriority, actualPriority);
+        }
         else
             Assert.True(Equals(expected, actual), $"{property.Name}: expected {expected}, actual {actual}.");
     }
@@ -509,6 +548,8 @@ public sealed class ConfigManagerDefaultSyncTests
             Assert.False(expectedList.SequenceEqual(actualList), $"{property.Name} must begin with distinct list values.");
         else if (expected is List<uint> expectedIds && actual is List<uint> actualIds)
             Assert.False(expectedIds.SequenceEqual(actualIds), $"{property.Name} must begin with distinct list values.");
+        else if (expected is List<int> expectedPriority && actual is List<int> actualPriority)
+            Assert.False(expectedPriority.SequenceEqual(actualPriority), $"{property.Name} must begin with distinct list values.");
         else
             Assert.NotEqual(expected, actual);
     }

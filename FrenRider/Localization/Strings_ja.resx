@@ -2753,4 +2753,53 @@
   <data name="ADS interaction active; VBM settings pending" xml:space="preserve"><value>ADS の操作中です。VBM の設定は適用待ちです</value></data>
   <data name="Questing idle; VBM paused" xml:space="preserve"><value>クエスト待機中：VBM停止中</value></data>
   <data name="Questing idle; VBM pause unconfirmed" xml:space="preserve"><value>クエスト待機中：VBM停止を確認できません</value></data>
+  <data name="Chocobo" xml:space="preserve"><value>チョコボ</value></data>
+  <data name="Current companion (active character)" xml:space="preserve"><value>現在のバディ（操作中のキャラクター）</value></data>
+  <data name="These values describe the active character, regardless of the profile being edited." xml:space="preserve"><value>これらの値は、編集中のプロフィールに関係なく、操作中のキャラクターのものです。</value></data>
+  <data name="Rank: {0} | Stars: {1}" xml:space="preserve"><value>ランク: {0} | 星: {1}</value></data>
+  <data name="Experience: {0}" xml:space="preserve"><value>経験値: {0}</value></data>
+  <data name="Unused skill points: {0}" xml:space="preserve"><value>未使用のスキルポイント: {0}</value></data>
+  <data name="Defender level: {0}" xml:space="preserve"><value>ディフェンダーレベル: {0}</value></data>
+  <data name="Attacker level: {0}" xml:space="preserve"><value>アタッカーレベル: {0}</value></data>
+  <data name="Healer level: {0}" xml:space="preserve"><value>ヒーラーレベル: {0}</value></data>
+  <data name="No companion data available. Log in to inspect it." xml:space="preserve"><value>バディのデータがありません。ログインして確認してください。</value></data>
+  <data name="Skill spending, feeding and purchases await native window verification." xml:space="preserve"><value>スキルポイントの割り振り、餌やり、購入はゲーム内ウィンドウの検証待ちです。</value></data>
+  <data name="Open game Companion window" xml:space="preserve"><value>ゲーム内のバディウィンドウを開く</value></data>
+  <data name="Companion window requested." xml:space="preserve"><value>バディウィンドウを開くように要求しました。</value></data>
+  <data name="Companion window is unavailable." xml:space="preserve"><value>バディウィンドウを利用できません。</value></data>
+  <data name="Chocobo reload testing" xml:space="preserve"><value>チョコボの再読み込みテスト</value></data>
+  <data name="Run Companion discovery after reload" xml:space="preserve"><value>再読み込み後にバディウィンドウを調査する</value></data>
+  <data name="Runs one read-only Companion probe per plugin load. Changing this switch takes effect on the next reload." xml:space="preserve"><value>プラグインを読み込むたびに、バディウィンドウの読み取り専用の調査を1回だけ実行します。このスイッチの変更は次回の再読み込み時に反映されます。</value></data>
+  <data name="Run Companion discovery now" xml:space="preserve"><value>今すぐバディウィンドウを調査する</value></data>
+  <data name="Stop Companion discovery" xml:space="preserve"><value>バディウィンドウの調査を停止する</value></data>
+  <data name="Waiting for character readiness" xml:space="preserve"><value>キャラクターの準備が整うまで待機中</value></data>
+  <data name="Companion discovery is running" xml:space="preserve"><value>バディウィンドウを調査中</value></data>
+  <data name="No Companion discovery is pending" xml:space="preserve"><value>待機中のバディウィンドウ調査はありません</value></data>
+  <data name="Chocobo settings" xml:space="preserve"><value>チョコボ設定</value></data>
+  <data name="Chocobo skills" xml:space="preserve"><value>チョコボスキル</value></data>
+  <data name="Automatically allocate Chocobo skills" xml:space="preserve"><value>チョコボスキルを自動で割り振る</value></data>
+  <data name="Completes the first chosen tree before the next. Waits when the next skill costs more points than are available." xml:space="preserve"><value>最初に選んだスキルツリーを完成させてから次に進みます。次のスキルに必要なポイントが不足している場合は待機します。</value></data>
+  <data name="These settings belong to the profile being edited. Allocate and Stop use the active character&apos;s runtime profile." xml:space="preserve"><value>この設定は編集中のプロフィールに適用されます。割り振りと停止には、操作中のキャラクターが現在使用しているプロフィールを使います。</value></data>
+  <data name="Allocate skills now" xml:space="preserve"><value>今すぐスキルを割り振る</value></data>
+  <data name="Stop skill allocation" xml:space="preserve"><value>スキルの割り振りを停止</value></data>
+  <data name="First skill tree" xml:space="preserve"><value>1番目のスキルツリー</value></data>
+  <data name="Second skill tree (optional)" xml:space="preserve"><value>2番目のスキルツリー（任意）</value></data>
+  <data name="Third skill tree (optional)" xml:space="preserve"><value>3番目のスキルツリー（任意）</value></data>
+  <data name="Defender" xml:space="preserve"><value>ディフェンダー</value></data>
+  <data name="Attacker" xml:space="preserve"><value>アタッカー</value></data>
+  <data name="Skill priority" xml:space="preserve"><value>スキルの優先順</value></data>
+  <data name="Invalid skill priority in this profile. Choose a first skill tree." xml:space="preserve"><value>このプロフィールのスキル優先順が無効です。1番目のスキルツリーを選んでください。</value></data>
+  <data name="Choose a skill tree" xml:space="preserve"><value>スキルツリーを選択</value></data>
+  <data name="No skill allocation is pending." xml:space="preserve"><value>実行待ちのスキル割り振りはありません。</value></data>
+  <data name="Skill allocation is unavailable in the current context." xml:space="preserve"><value>現在の状況ではスキルを割り振れません。</value></data>
+  <data name="No affordable next skill in the configured priority." xml:space="preserve"><value>設定した優先順の次のスキルに必要なポイントが不足しています。</value></data>
+  <data name="Skill allocation failed." xml:space="preserve"><value>スキルの割り振りに失敗しました。</value></data>
+  <data name="Skill allocation cancelled: context or profile changed." xml:space="preserve"><value>スキルの割り振りをキャンセルしました：状況またはプロフィールが変更されました。</value></data>
+  <data name="Skill allocation cancelled: companion data unavailable." xml:space="preserve"><value>スキルの割り振りをキャンセルしました：バディのデータを取得できません。</value></data>
+  <data name="Skill allocation stopped: unexpected progression change." xml:space="preserve"><value>スキルの割り振りを停止しました：予期しない進行状況の変化がありました。</value></data>
+  <data name="Skill allocation stopped: learning was not observed; no retry." xml:space="preserve"><value>スキルの割り振りを停止しました：スキル習得を確認できませんでした。再試行はしません。</value></data>
+  <data name="Skill allocation completed; progression was observed." xml:space="preserve"><value>スキルの割り振りが完了し、進行状況の変化を確認しました。</value></data>
+  <data name="Waiting for observed skill learning." xml:space="preserve"><value>スキル習得の確認を待っています。</value></data>
+  <data name="Skill learning request was rejected; no retry." xml:space="preserve"><value>スキル習得の要求が拒否されました。再試行はしません。</value></data>
+  <data name="Skill allocation stopped." xml:space="preserve"><value>スキルの割り振りを停止しました。</value></data>
 </root>

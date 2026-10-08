@@ -58,10 +58,18 @@ public class ConfigManager : IDadProfileStore
                 Setting("Allow Phoenix Down use during combat", (source, target) => target.AllowPhoenixDownInCombat = source.AllowPhoenixDownInCombat),
                 Setting("Mount-up to chase fren", CopyMountUpToChaseFren),
                 Setting("Mount Name", (source, target) => target.FoolFlier = source.FoolFlier),
-                Setting("Summon Chocobo", (source, target) => target.ForceGysahl = source.ForceGysahl),
-                Setting("Companion Stance", (source, target) => target.CompanionStrat = source.CompanionStrat),
                 Setting("Update Interval", (source, target) => target.UpdateInterval = source.UpdateInterval),
                 Setting("Auto Discard", (source, target) => target.EnableAutoDiscard = source.EnableAutoDiscard),
+            }),
+        new(
+            "Chocobo",
+            new[] { "Chocobo" },
+            new[]
+            {
+                Setting("Summon Chocobo", (source, target) => target.ForceGysahl = source.ForceGysahl),
+                Setting("Companion Stance", (source, target) => target.CompanionStrat = source.CompanionStrat),
+                Setting("Automatically allocate Chocobo skills", (source, target) => target.ChocoboAutoAllocateSkills = source.ChocoboAutoAllocateSkills),
+                Setting("Skill priority", (source, target) => target.ChocoboSkillPriority = source.ChocoboSkillPriority == null ? null : new List<int>(source.ChocoboSkillPriority)),
             }),
         new(
             "Follow",

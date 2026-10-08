@@ -2858,4 +2858,53 @@ Aktif: gunakan preset BossMod di bawah dengan penyedia rotasi apa pun. Preset kh
   <data name="ADS interaction active; VBM settings pending" xml:space="preserve"><value>Interaksi ADS aktif; pengaturan VBM menunggu</value></data>
   <data name="Questing idle; VBM paused" xml:space="preserve"><value>Menunggu quest; VBM dijeda</value></data>
   <data name="Questing idle; VBM pause unconfirmed" xml:space="preserve"><value>Menunggu quest; jeda VBM belum dikonfirmasi</value></data>
+  <data name="Chocobo" xml:space="preserve"><value>Chocobo</value></data>
+  <data name="Current companion (active character)" xml:space="preserve"><value>Pendamping saat ini (karakter aktif)</value></data>
+  <data name="These values describe the active character, regardless of the profile being edited." xml:space="preserve"><value>Nilai ini menjelaskan karakter aktif, terlepas dari profil yang sedang diedit.</value></data>
+  <data name="Rank: {0} | Stars: {1}" xml:space="preserve"><value>Peringkat: {0} | Bintang: {1}</value></data>
+  <data name="Experience: {0}" xml:space="preserve"><value>Pengalaman: {0}</value></data>
+  <data name="Unused skill points: {0}" xml:space="preserve"><value>Poin keterampilan yang belum digunakan: {0}</value></data>
+  <data name="Defender level: {0}" xml:space="preserve"><value>Level pembela: {0}</value></data>
+  <data name="Attacker level: {0}" xml:space="preserve"><value>Level penyerang: {0}</value></data>
+  <data name="Healer level: {0}" xml:space="preserve"><value>Level penyembuh: {0}</value></data>
+  <data name="No companion data available. Log in to inspect it." xml:space="preserve"><value>Data pendamping tidak tersedia. Masuk untuk memeriksanya.</value></data>
+  <data name="Skill spending, feeding and purchases await native window verification." xml:space="preserve"><value>Penggunaan poin keterampilan, pemberian makan, dan pembelian menunggu verifikasi jendela dalam game.</value></data>
+  <data name="Open game Companion window" xml:space="preserve"><value>Buka jendela Pendamping dalam game</value></data>
+  <data name="Companion window requested." xml:space="preserve"><value>Pembukaan jendela Pendamping telah diminta.</value></data>
+  <data name="Companion window is unavailable." xml:space="preserve"><value>Jendela Pendamping tidak tersedia.</value></data>
+  <data name="Chocobo reload testing" xml:space="preserve"><value>Pengujian Chocobo saat muat ulang</value></data>
+  <data name="Run Companion discovery after reload" xml:space="preserve"><value>Periksa jendela Pendamping setelah muat ulang</value></data>
+  <data name="Runs one read-only Companion probe per plugin load. Changing this switch takes effect on the next reload." xml:space="preserve"><value>Menjalankan satu pemeriksaan hanya baca pada jendela Pendamping setiap kali plugin dimuat. Perubahan sakelar ini berlaku pada muat ulang berikutnya.</value></data>
+  <data name="Run Companion discovery now" xml:space="preserve"><value>Periksa jendela Pendamping sekarang</value></data>
+  <data name="Stop Companion discovery" xml:space="preserve"><value>Hentikan pemeriksaan jendela Pendamping</value></data>
+  <data name="Waiting for character readiness" xml:space="preserve"><value>Menunggu karakter siap</value></data>
+  <data name="Companion discovery is running" xml:space="preserve"><value>Pemeriksaan jendela Pendamping sedang berjalan</value></data>
+  <data name="No Companion discovery is pending" xml:space="preserve"><value>Tidak ada pemeriksaan jendela Pendamping yang tertunda</value></data>
+  <data name="Chocobo settings" xml:space="preserve"><value>Pengaturan Chocobo</value></data>
+  <data name="Chocobo skills" xml:space="preserve"><value>Keahlian Chocobo</value></data>
+  <data name="Automatically allocate Chocobo skills" xml:space="preserve"><value>Alokasikan keahlian Chocobo secara otomatis</value></data>
+  <data name="Completes the first chosen tree before the next. Waits when the next skill costs more points than are available." xml:space="preserve"><value>Menyelesaikan pohon pertama yang dipilih sebelum melanjutkan ke pohon berikutnya. Menunggu jika keahlian berikutnya membutuhkan lebih banyak poin daripada yang tersedia.</value></data>
+  <data name="These settings belong to the profile being edited. Allocate and Stop use the active character&apos;s runtime profile." xml:space="preserve"><value>Pengaturan ini milik profil yang sedang diedit. Alokasi dan Berhenti menggunakan profil yang sedang dijalankan oleh karakter aktif.</value></data>
+  <data name="Allocate skills now" xml:space="preserve"><value>Alokasikan keahlian sekarang</value></data>
+  <data name="Stop skill allocation" xml:space="preserve"><value>Hentikan alokasi keahlian</value></data>
+  <data name="First skill tree" xml:space="preserve"><value>Pohon keahlian pertama</value></data>
+  <data name="Second skill tree (optional)" xml:space="preserve"><value>Pohon keahlian kedua (opsional)</value></data>
+  <data name="Third skill tree (optional)" xml:space="preserve"><value>Pohon keahlian ketiga (opsional)</value></data>
+  <data name="Defender" xml:space="preserve"><value>Pembela</value></data>
+  <data name="Attacker" xml:space="preserve"><value>Penyerang</value></data>
+  <data name="Skill priority" xml:space="preserve"><value>Prioritas keahlian</value></data>
+  <data name="Invalid skill priority in this profile. Choose a first skill tree." xml:space="preserve"><value>Prioritas keahlian dalam profil ini tidak valid. Pilih pohon keahlian pertama.</value></data>
+  <data name="Choose a skill tree" xml:space="preserve"><value>Pilih pohon keahlian</value></data>
+  <data name="No skill allocation is pending." xml:space="preserve"><value>Tidak ada alokasi keahlian yang tertunda.</value></data>
+  <data name="Skill allocation is unavailable in the current context." xml:space="preserve"><value>Alokasi keahlian tidak tersedia dalam kondisi saat ini.</value></data>
+  <data name="No affordable next skill in the configured priority." xml:space="preserve"><value>Tidak ada keahlian berikutnya yang terjangkau dalam prioritas yang ditetapkan.</value></data>
+  <data name="Skill allocation failed." xml:space="preserve"><value>Alokasi keahlian gagal.</value></data>
+  <data name="Skill allocation cancelled: context or profile changed." xml:space="preserve"><value>Alokasi keahlian dibatalkan: kondisi atau profil berubah.</value></data>
+  <data name="Skill allocation cancelled: companion data unavailable." xml:space="preserve"><value>Alokasi keahlian dibatalkan: data pendamping tidak tersedia.</value></data>
+  <data name="Skill allocation stopped: unexpected progression change." xml:space="preserve"><value>Alokasi keahlian dihentikan: perubahan perkembangan yang tidak terduga.</value></data>
+  <data name="Skill allocation stopped: learning was not observed; no retry." xml:space="preserve"><value>Alokasi keahlian dihentikan: pembelajaran tidak teramati; tidak dicoba ulang.</value></data>
+  <data name="Skill allocation completed; progression was observed." xml:space="preserve"><value>Alokasi keahlian selesai; perkembangan telah teramati.</value></data>
+  <data name="Waiting for observed skill learning." xml:space="preserve"><value>Menunggu pembelajaran keahlian teramati.</value></data>
+  <data name="Skill learning request was rejected; no retry." xml:space="preserve"><value>Permintaan pembelajaran keahlian ditolak; tidak dicoba ulang.</value></data>
+  <data name="Skill allocation stopped." xml:space="preserve"><value>Alokasi keahlian dihentikan.</value></data>
 </root>

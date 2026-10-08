@@ -84,6 +84,8 @@ public class CharacterConfig
     public string FulfType { get; set; } = "unchanged";
     public bool ForceGysahl { get; set; } = false;
     public string CompanionStrat { get; set; } = "Free Stance";
+    public bool ChocoboAutoAllocateSkills { get; set; } = false;
+    public List<int>? ChocoboSkillPriority { get; set; } = [2]; // 0=Defender, 1=Attacker, 2=Healer
     public float UpdateInterval { get; set; } = 0.3f;
     public string IdleAction { get; set; } = "/tomescroll";
     public int IdleActionMode { get; set; } = 0; // 0 = specific action, 1 = action from list
@@ -264,6 +266,8 @@ public class CharacterConfig
             FulfType = FulfType,
             ForceGysahl = ForceGysahl,
             CompanionStrat = CompanionStrat,
+            ChocoboAutoAllocateSkills = ChocoboAutoAllocateSkills,
+            ChocoboSkillPriority = ChocoboSkillPriority == null ? null : new List<int>(ChocoboSkillPriority),
             UpdateInterval = UpdateInterval,
             IdleAction = IdleAction,
             IdleActionMode = IdleActionMode,

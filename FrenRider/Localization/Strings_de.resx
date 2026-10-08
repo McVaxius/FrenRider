@@ -2753,4 +2753,53 @@ An: Die BossMod-Voreinstellungen unten mit jedem Rotationsanbieter verwenden. Ei
   <data name="ADS interaction active; VBM settings pending" xml:space="preserve"><value>ADS-Interaktion aktiv; VBM-Einstellungen ausstehend</value></data>
   <data name="Questing idle; VBM paused" xml:space="preserve"><value>Quest-Automatisierung wartet; VBM pausiert</value></data>
   <data name="Questing idle; VBM pause unconfirmed" xml:space="preserve"><value>Quest-Automatisierung wartet; VBM-Pause nicht bestätigt</value></data>
+  <data name="Chocobo" xml:space="preserve"><value>Chocobo</value></data>
+  <data name="Current companion (active character)" xml:space="preserve"><value>Aktueller Begleiter (aktiver Charakter)</value></data>
+  <data name="These values describe the active character, regardless of the profile being edited." xml:space="preserve"><value>Diese Werte beziehen sich auf den aktiven Charakter, unabhängig vom bearbeiteten Profil.</value></data>
+  <data name="Rank: {0} | Stars: {1}" xml:space="preserve"><value>Rang: {0} | Sterne: {1}</value></data>
+  <data name="Experience: {0}" xml:space="preserve"><value>Erfahrung: {0}</value></data>
+  <data name="Unused skill points: {0}" xml:space="preserve"><value>Nicht vergebene Fertigkeitspunkte: {0}</value></data>
+  <data name="Defender level: {0}" xml:space="preserve"><value>Verteidigerstufe: {0}</value></data>
+  <data name="Attacker level: {0}" xml:space="preserve"><value>Angreiferstufe: {0}</value></data>
+  <data name="Healer level: {0}" xml:space="preserve"><value>Heilerstufe: {0}</value></data>
+  <data name="No companion data available. Log in to inspect it." xml:space="preserve"><value>Keine Begleiterdaten verfügbar. Melde dich an, um sie anzusehen.</value></data>
+  <data name="Skill spending, feeding and purchases await native window verification." xml:space="preserve"><value>Fertigkeitspunktevergabe, Füttern und Einkäufe stehen bis zur Überprüfung des spielinternen Fensters aus.</value></data>
+  <data name="Open game Companion window" xml:space="preserve"><value>Begleiterfenster im Spiel öffnen</value></data>
+  <data name="Companion window requested." xml:space="preserve"><value>Öffnen des Begleiterfensters angefordert.</value></data>
+  <data name="Companion window is unavailable." xml:space="preserve"><value>Das Begleiterfenster ist nicht verfügbar.</value></data>
+  <data name="Chocobo reload testing" xml:space="preserve"><value>Chocobo-Test beim Neuladen</value></data>
+  <data name="Run Companion discovery after reload" xml:space="preserve"><value>Begleiterfenster nach dem Neuladen untersuchen</value></data>
+  <data name="Runs one read-only Companion probe per plugin load. Changing this switch takes effect on the next reload." xml:space="preserve"><value>Führt pro Plugin-Ladevorgang eine ausschließlich lesende Untersuchung des Begleiterfensters aus. Änderungen an diesem Schalter werden beim nächsten Neuladen wirksam.</value></data>
+  <data name="Run Companion discovery now" xml:space="preserve"><value>Begleiterfenster jetzt untersuchen</value></data>
+  <data name="Stop Companion discovery" xml:space="preserve"><value>Untersuchung des Begleiterfensters stoppen</value></data>
+  <data name="Waiting for character readiness" xml:space="preserve"><value>Warten, bis der Charakter bereit ist</value></data>
+  <data name="Companion discovery is running" xml:space="preserve"><value>Begleiterfenster wird untersucht</value></data>
+  <data name="No Companion discovery is pending" xml:space="preserve"><value>Keine Untersuchung des Begleiterfensters ausstehend</value></data>
+  <data name="Chocobo settings" xml:space="preserve"><value>Chocobo-Einstellungen</value></data>
+  <data name="Chocobo skills" xml:space="preserve"><value>Chocobo-Fertigkeiten</value></data>
+  <data name="Automatically allocate Chocobo skills" xml:space="preserve"><value>Chocobo-Fertigkeiten automatisch zuweisen</value></data>
+  <data name="Completes the first chosen tree before the next. Waits when the next skill costs more points than are available." xml:space="preserve"><value>Schließt den ersten gewählten Fertigkeitsbaum vor dem nächsten ab. Wartet, wenn die nächste Fertigkeit mehr Punkte kostet, als verfügbar sind.</value></data>
+  <data name="These settings belong to the profile being edited. Allocate and Stop use the active character&apos;s runtime profile." xml:space="preserve"><value>Diese Einstellungen gehören zum bearbeiteten Profil. Zuweisen und Stoppen verwenden das Laufzeitprofil des aktiven Charakters.</value></data>
+  <data name="Allocate skills now" xml:space="preserve"><value>Fertigkeiten jetzt zuweisen</value></data>
+  <data name="Stop skill allocation" xml:space="preserve"><value>Fertigkeitszuweisung stoppen</value></data>
+  <data name="First skill tree" xml:space="preserve"><value>Erster Fertigkeitsbaum</value></data>
+  <data name="Second skill tree (optional)" xml:space="preserve"><value>Zweiter Fertigkeitsbaum (optional)</value></data>
+  <data name="Third skill tree (optional)" xml:space="preserve"><value>Dritter Fertigkeitsbaum (optional)</value></data>
+  <data name="Defender" xml:space="preserve"><value>Verteidiger</value></data>
+  <data name="Attacker" xml:space="preserve"><value>Angreifer</value></data>
+  <data name="Skill priority" xml:space="preserve"><value>Fertigkeitspriorität</value></data>
+  <data name="Invalid skill priority in this profile. Choose a first skill tree." xml:space="preserve"><value>Ungültige Fertigkeitspriorität in diesem Profil. Wähle einen ersten Fertigkeitsbaum.</value></data>
+  <data name="Choose a skill tree" xml:space="preserve"><value>Fertigkeitsbaum wählen</value></data>
+  <data name="No skill allocation is pending." xml:space="preserve"><value>Keine Fertigkeitszuweisung steht aus.</value></data>
+  <data name="Skill allocation is unavailable in the current context." xml:space="preserve"><value>Die Fertigkeitszuweisung ist im aktuellen Kontext nicht verfügbar.</value></data>
+  <data name="No affordable next skill in the configured priority." xml:space="preserve"><value>Keine bezahlbare nächste Fertigkeit in der festgelegten Priorität.</value></data>
+  <data name="Skill allocation failed." xml:space="preserve"><value>Fertigkeitszuweisung fehlgeschlagen.</value></data>
+  <data name="Skill allocation cancelled: context or profile changed." xml:space="preserve"><value>Fertigkeitszuweisung abgebrochen: Kontext oder Profil geändert.</value></data>
+  <data name="Skill allocation cancelled: companion data unavailable." xml:space="preserve"><value>Fertigkeitszuweisung abgebrochen: Begleiterdaten nicht verfügbar.</value></data>
+  <data name="Skill allocation stopped: unexpected progression change." xml:space="preserve"><value>Fertigkeitszuweisung gestoppt: unerwartete Fortschrittsänderung.</value></data>
+  <data name="Skill allocation stopped: learning was not observed; no retry." xml:space="preserve"><value>Fertigkeitszuweisung gestoppt: Fertigkeitserwerb nicht festgestellt; kein erneuter Versuch.</value></data>
+  <data name="Skill allocation completed; progression was observed." xml:space="preserve"><value>Fertigkeitszuweisung abgeschlossen; Fortschritt wurde festgestellt.</value></data>
+  <data name="Waiting for observed skill learning." xml:space="preserve"><value>Warte auf festgestellten Fertigkeitserwerb.</value></data>
+  <data name="Skill learning request was rejected; no retry." xml:space="preserve"><value>Anfrage zum Fertigkeitserwerb abgelehnt; kein erneuter Versuch.</value></data>
+  <data name="Skill allocation stopped." xml:space="preserve"><value>Fertigkeitszuweisung gestoppt.</value></data>
 </root>

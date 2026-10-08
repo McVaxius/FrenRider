@@ -40,7 +40,7 @@ internal static class UiGui
         var items = options.Split('\0', StringSplitOptions.RemoveEmptyEntries);
         return Combo(label, ref value, items, items.Length);
     }
-    internal static bool BeginTabItem(string label)
+    internal static bool BeginTabItem(string label, ImGuiTabItemFlags flags = ImGuiTabItemFlags.None)
     {
         var display = UiText.T(label);
         using var height = MaterialText.PushLineHeight(display);
@@ -48,7 +48,7 @@ internal static class UiGui
         var foreground = ImGui.GetStyle().Colors[(int)ImGuiCol.Text];
         ImGui.SetNextItemWidth(MathF.Ceiling(Math.Max(MaterialText.Measure(display).X, MaterialText.Measure(label).X) + pad.X * 2));
         ImGui.PushStyleColor(ImGuiCol.Text, Vector4.Zero);
-        var open = ImGui.BeginTabItem(label);
+        var open = ImGui.BeginTabItem(label, flags);
         ImGui.PopStyleColor();
         foreground.W *= ImGui.GetStyle().Alpha;
         var min = ImGui.GetItemRectMin(); var max = ImGui.GetItemRectMax();

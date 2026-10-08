@@ -2753,4 +2753,53 @@
   <data name="ADS interaction active; VBM settings pending" xml:space="preserve"><value>ADS 상호작용 중; VBM 설정 적용 대기 중</value></data>
   <data name="Questing idle; VBM paused" xml:space="preserve"><value>퀘스트 대기 중; VBM 일시 중지</value></data>
   <data name="Questing idle; VBM pause unconfirmed" xml:space="preserve"><value>퀘스트 대기 중; VBM 일시 중지 확인 안 됨</value></data>
+  <data name="Chocobo" xml:space="preserve"><value>초코보</value></data>
+  <data name="Current companion (active character)" xml:space="preserve"><value>현재 버디 (현재 접속한 캐릭터)</value></data>
+  <data name="These values describe the active character, regardless of the profile being edited." xml:space="preserve"><value>이 값은 편집 중인 프로필과 관계없이 현재 접속한 캐릭터의 정보입니다.</value></data>
+  <data name="Rank: {0} | Stars: {1}" xml:space="preserve"><value>랭크: {0} | 별: {1}</value></data>
+  <data name="Experience: {0}" xml:space="preserve"><value>경험치: {0}</value></data>
+  <data name="Unused skill points: {0}" xml:space="preserve"><value>미사용 기술 포인트: {0}</value></data>
+  <data name="Defender level: {0}" xml:space="preserve"><value>방어 레벨: {0}</value></data>
+  <data name="Attacker level: {0}" xml:space="preserve"><value>공격 레벨: {0}</value></data>
+  <data name="Healer level: {0}" xml:space="preserve"><value>치유 레벨: {0}</value></data>
+  <data name="No companion data available. Log in to inspect it." xml:space="preserve"><value>버디 정보가 없습니다. 확인하려면 로그인하세요.</value></data>
+  <data name="Skill spending, feeding and purchases await native window verification." xml:space="preserve"><value>기술 포인트 사용, 먹이 주기 및 구매는 게임 내 창 검증을 기다리고 있습니다.</value></data>
+  <data name="Open game Companion window" xml:space="preserve"><value>게임 내 버디 창 열기</value></data>
+  <data name="Companion window requested." xml:space="preserve"><value>버디 창 열기를 요청했습니다.</value></data>
+  <data name="Companion window is unavailable." xml:space="preserve"><value>버디 창을 사용할 수 없습니다.</value></data>
+  <data name="Chocobo reload testing" xml:space="preserve"><value>초코보 다시 불러오기 테스트</value></data>
+  <data name="Run Companion discovery after reload" xml:space="preserve"><value>다시 불러온 후 버디 창 조사 실행</value></data>
+  <data name="Runs one read-only Companion probe per plugin load. Changing this switch takes effect on the next reload." xml:space="preserve"><value>플러그인을 불러올 때마다 버디 창을 읽기 전용으로 한 번만 조사합니다. 이 스위치의 변경 사항은 다음에 다시 불러올 때 적용됩니다.</value></data>
+  <data name="Run Companion discovery now" xml:space="preserve"><value>지금 버디 창 조사 실행</value></data>
+  <data name="Stop Companion discovery" xml:space="preserve"><value>버디 창 조사 중지</value></data>
+  <data name="Waiting for character readiness" xml:space="preserve"><value>캐릭터가 준비될 때까지 대기 중</value></data>
+  <data name="Companion discovery is running" xml:space="preserve"><value>버디 창 조사 진행 중</value></data>
+  <data name="No Companion discovery is pending" xml:space="preserve"><value>대기 중인 버디 창 조사가 없습니다</value></data>
+  <data name="Chocobo settings" xml:space="preserve"><value>초코보 설정</value></data>
+  <data name="Chocobo skills" xml:space="preserve"><value>초코보 기술</value></data>
+  <data name="Automatically allocate Chocobo skills" xml:space="preserve"><value>초코보 기술 자동 배분</value></data>
+  <data name="Completes the first chosen tree before the next. Waits when the next skill costs more points than are available." xml:space="preserve"><value>첫 번째로 선택한 기술 트리를 완성한 뒤 다음 트리로 진행합니다. 다음 기술에 필요한 포인트가 부족하면 기다립니다.</value></data>
+  <data name="These settings belong to the profile being edited. Allocate and Stop use the active character&apos;s runtime profile." xml:space="preserve"><value>이 설정은 편집 중인 프로필에 적용됩니다. 배분과 중지는 현재 캐릭터가 사용 중인 프로필을 따릅니다.</value></data>
+  <data name="Allocate skills now" xml:space="preserve"><value>지금 기술 배분</value></data>
+  <data name="Stop skill allocation" xml:space="preserve"><value>기술 배분 중지</value></data>
+  <data name="First skill tree" xml:space="preserve"><value>첫 번째 기술 트리</value></data>
+  <data name="Second skill tree (optional)" xml:space="preserve"><value>두 번째 기술 트리(선택 사항)</value></data>
+  <data name="Third skill tree (optional)" xml:space="preserve"><value>세 번째 기술 트리(선택 사항)</value></data>
+  <data name="Defender" xml:space="preserve"><value>방어</value></data>
+  <data name="Attacker" xml:space="preserve"><value>공격</value></data>
+  <data name="Skill priority" xml:space="preserve"><value>기술 우선순위</value></data>
+  <data name="Invalid skill priority in this profile. Choose a first skill tree." xml:space="preserve"><value>이 프로필의 기술 우선순위가 잘못되었습니다. 첫 번째 기술 트리를 선택하세요.</value></data>
+  <data name="Choose a skill tree" xml:space="preserve"><value>기술 트리 선택</value></data>
+  <data name="No skill allocation is pending." xml:space="preserve"><value>대기 중인 기술 배분이 없습니다.</value></data>
+  <data name="Skill allocation is unavailable in the current context." xml:space="preserve"><value>현재 상황에서는 기술을 배분할 수 없습니다.</value></data>
+  <data name="No affordable next skill in the configured priority." xml:space="preserve"><value>설정된 우선순위에서 다음 기술에 필요한 포인트가 부족합니다.</value></data>
+  <data name="Skill allocation failed." xml:space="preserve"><value>기술 배분에 실패했습니다.</value></data>
+  <data name="Skill allocation cancelled: context or profile changed." xml:space="preserve"><value>기술 배분이 취소되었습니다: 상황 또는 프로필이 변경되었습니다.</value></data>
+  <data name="Skill allocation cancelled: companion data unavailable." xml:space="preserve"><value>기술 배분이 취소되었습니다: 동료 데이터를 사용할 수 없습니다.</value></data>
+  <data name="Skill allocation stopped: unexpected progression change." xml:space="preserve"><value>기술 배분이 중지되었습니다: 진행 상태가 예상과 다르게 변경되었습니다.</value></data>
+  <data name="Skill allocation stopped: learning was not observed; no retry." xml:space="preserve"><value>기술 배분이 중지되었습니다: 기술 습득이 관찰되지 않았으며 재시도하지 않습니다.</value></data>
+  <data name="Skill allocation completed; progression was observed." xml:space="preserve"><value>기술 배분이 완료되었으며 진행 상태 변경이 관찰되었습니다.</value></data>
+  <data name="Waiting for observed skill learning." xml:space="preserve"><value>기술 습득이 관찰되기를 기다리는 중입니다.</value></data>
+  <data name="Skill learning request was rejected; no retry." xml:space="preserve"><value>기술 습득 요청이 거부되었으며 재시도하지 않습니다.</value></data>
+  <data name="Skill allocation stopped." xml:space="preserve"><value>기술 배분이 중지되었습니다.</value></data>
 </root>

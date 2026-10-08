@@ -34,11 +34,20 @@ Common commands:
 /fr mini
 /fr m
 /fr debug
+/fr testchocobo
+/fr testchocobo on
+/fr testchocobo off
+/fr testchocobo run
+/fr testchocobo stop
 ```
 
 `/frenrider` always opens the main window. `/fr` opens the main window when no recognized argument is supplied. `/fr settings` and `/fr s` toggle the settings window. `/fr mini` and `/fr m` toggle a separate auto-sized **MAGIA** window whose Attack, Defense, and Off buttons send `/magiaauto attack`, `/magiaauto defense`, and `/magiaauto off`. The mini window does not enable anything automatically. `/fr debug` toggles debug controls for the active character config.
 
 The main window shows run state, a read-only operator profile, party status, follow/mount/idle/teleport/respawn/Phoenix Down state, ADS state, exit mode, and collapsed debug details. Account and character selection stays in Settings; browsing another profile does not change the active automation profile.
+
+`/fr testchocobo` opens Settings → Chocobo with the reload-test switch and Run/Stop controls. The switch defaults off and saves in this client's existing global configuration, independently of character/DAD profiles. `/fr testchocobo on` or `off` changes that selection; enabling takes effect on the next reload. A selected plugin load waits for character registration, consumes one attempt before native dispatch, and never retries or rearms on toggles, redraws or login events. Stop cancels pending/current discovery without clearing the saved selection.
+
+`/fr testchocobo run` explicitly runs the same bounded probe now. It opens the game's Companion window, activates its three native tab controls and records progression, redacted text and bounded control/event metadata in the normal Dalamud log under `[FrenRider][ChocoboProbe]`. It records a tab only when the selected radio and native tab index agree. It runs independently of FrenRider's enable switch, ends within fifteen seconds, and stops on combat, logout, zoning or a changed window. It requests the original tab or hides its own window through the Buddy agent when still owned; cleanup requests remain distinct from observed completion. Discovery spends no skill points and uses or purchases no items; event metadata alone does not verify a mutation callback.
 
 The header colour swatch and language selector apply to every Fren Rider window and popup. English, German, French, Spanish, Italian, Russian, Japanese, Korean, Simplified Chinese, Vietnamese, Brazilian Portuguese, Indonesian, Polish, Turkish, and Hindi are included. Colours are calculated relative to the approved mint theme across panels, fields, borders, and foregrounds; warning and automation status colours keep their meaning. The native **C** checkbox selects compact spacing across the main, mini, Settings, and AutoDuty alert windows. Appearance preferences are also available in Settings under UI/About and save through the existing configuration.
 
@@ -67,6 +76,12 @@ Main's titlebar provides Settings, MAGIA Mini, the active-character Run toggle, 
 - DTR controls with text/icon modes.
 - Optional video notifications when enabling or disabling Fren Rider.
 - Optional Krangle mode to obfuscate character names in UI.
+
+Settings → **Chocobo** contains summon, stance and skill-allocation preferences. **Automatically allocate Chocobo skills** defaults off, and the skill priority defaults to Healer only. Optional second and third trees are explicit choices; allocation waits when the first unfinished tree's next skill is unaffordable and never resets learned skills. These settings clone and sync with the existing character profiles, including temporary DAD profiles.
+
+**Allocate skills now** uses the active character's runtime profile, even when editing another saved profile. Each request waits for both the learned level and exact point deduction before advancing. **Stop skill allocation** cancels the current attempt. Rejected, partial or unobserved results suspend automatic allocation for that selection; a new manual attempt, an explicit priority change, or switching automatic allocation off and on permits another attempt. Main and Mini titlebars provide Chocobo settings access.
+
+The progression section shows the logged-in character's native rank, stars, experience, unused points and tree levels. **Open game Companion window** only opens the native window. The separate reload-discovery selector remains read-only and never allocates skills. Feeding, onion use and purchasing remain unfinished, and live skill-learning acceptance is still pending.
 
 ## Duty And ADS Automation
 

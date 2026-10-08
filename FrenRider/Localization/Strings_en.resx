@@ -2852,4 +2852,53 @@ On: use the BossMod presets below with any rotation provider. A custom preset ma
   <data name="ADS interaction active; VBM settings pending" xml:space="preserve"><value>ADS interaction active; VBM settings pending</value></data>
   <data name="Questing idle; VBM paused" xml:space="preserve"><value>Questing idle; VBM paused</value></data>
   <data name="Questing idle; VBM pause unconfirmed" xml:space="preserve"><value>Questing idle; VBM pause unconfirmed</value></data>
+  <data name="Chocobo" xml:space="preserve"><value>Chocobo</value></data>
+  <data name="Current companion (active character)" xml:space="preserve"><value>Current companion (active character)</value></data>
+  <data name="These values describe the active character, regardless of the profile being edited." xml:space="preserve"><value>These values describe the active character, regardless of the profile being edited.</value></data>
+  <data name="Rank: {0} | Stars: {1}" xml:space="preserve"><value>Rank: {0} | Stars: {1}</value></data>
+  <data name="Experience: {0}" xml:space="preserve"><value>Experience: {0}</value></data>
+  <data name="Unused skill points: {0}" xml:space="preserve"><value>Unused skill points: {0}</value></data>
+  <data name="Defender level: {0}" xml:space="preserve"><value>Defender level: {0}</value></data>
+  <data name="Attacker level: {0}" xml:space="preserve"><value>Attacker level: {0}</value></data>
+  <data name="Healer level: {0}" xml:space="preserve"><value>Healer level: {0}</value></data>
+  <data name="No companion data available. Log in to inspect it." xml:space="preserve"><value>No companion data available. Log in to inspect it.</value></data>
+  <data name="Skill spending, feeding and purchases await native window verification." xml:space="preserve"><value>Skill spending, feeding and purchases await native window verification.</value></data>
+  <data name="Open game Companion window" xml:space="preserve"><value>Open game Companion window</value></data>
+  <data name="Companion window requested." xml:space="preserve"><value>Companion window requested.</value></data>
+  <data name="Companion window is unavailable." xml:space="preserve"><value>Companion window is unavailable.</value></data>
+  <data name="Chocobo reload testing" xml:space="preserve"><value>Chocobo reload testing</value></data>
+  <data name="Run Companion discovery after reload" xml:space="preserve"><value>Run Companion discovery after reload</value></data>
+  <data name="Runs one read-only Companion probe per plugin load. Changing this switch takes effect on the next reload." xml:space="preserve"><value>Runs one read-only Companion probe per plugin load. Changing this switch takes effect on the next reload.</value></data>
+  <data name="Run Companion discovery now" xml:space="preserve"><value>Run Companion discovery now</value></data>
+  <data name="Stop Companion discovery" xml:space="preserve"><value>Stop Companion discovery</value></data>
+  <data name="Waiting for character readiness" xml:space="preserve"><value>Waiting for character readiness</value></data>
+  <data name="Companion discovery is running" xml:space="preserve"><value>Companion discovery is running</value></data>
+  <data name="No Companion discovery is pending" xml:space="preserve"><value>No Companion discovery is pending</value></data>
+  <data name="Chocobo settings" xml:space="preserve"><value>Chocobo settings</value></data>
+  <data name="Chocobo skills" xml:space="preserve"><value>Chocobo skills</value></data>
+  <data name="Automatically allocate Chocobo skills" xml:space="preserve"><value>Automatically allocate Chocobo skills</value></data>
+  <data name="Completes the first chosen tree before the next. Waits when the next skill costs more points than are available." xml:space="preserve"><value>Completes the first chosen tree before the next. Waits when the next skill costs more points than are available.</value></data>
+  <data name="These settings belong to the profile being edited. Allocate and Stop use the active character&apos;s runtime profile." xml:space="preserve"><value>These settings belong to the profile being edited. Allocate and Stop use the active character&apos;s runtime profile.</value></data>
+  <data name="Allocate skills now" xml:space="preserve"><value>Allocate skills now</value></data>
+  <data name="Stop skill allocation" xml:space="preserve"><value>Stop skill allocation</value></data>
+  <data name="First skill tree" xml:space="preserve"><value>First skill tree</value></data>
+  <data name="Second skill tree (optional)" xml:space="preserve"><value>Second skill tree (optional)</value></data>
+  <data name="Third skill tree (optional)" xml:space="preserve"><value>Third skill tree (optional)</value></data>
+  <data name="Defender" xml:space="preserve"><value>Defender</value></data>
+  <data name="Attacker" xml:space="preserve"><value>Attacker</value></data>
+  <data name="Skill priority" xml:space="preserve"><value>Skill priority</value></data>
+  <data name="Invalid skill priority in this profile. Choose a first skill tree." xml:space="preserve"><value>Invalid skill priority in this profile. Choose a first skill tree.</value></data>
+  <data name="Choose a skill tree" xml:space="preserve"><value>Choose a skill tree</value></data>
+  <data name="No skill allocation is pending." xml:space="preserve"><value>No skill allocation is pending.</value></data>
+  <data name="Skill allocation is unavailable in the current context." xml:space="preserve"><value>Skill allocation is unavailable in the current context.</value></data>
+  <data name="No affordable next skill in the configured priority." xml:space="preserve"><value>No affordable next skill in the configured priority.</value></data>
+  <data name="Skill allocation failed." xml:space="preserve"><value>Skill allocation failed.</value></data>
+  <data name="Skill allocation cancelled: context or profile changed." xml:space="preserve"><value>Skill allocation cancelled: context or profile changed.</value></data>
+  <data name="Skill allocation cancelled: companion data unavailable." xml:space="preserve"><value>Skill allocation cancelled: companion data unavailable.</value></data>
+  <data name="Skill allocation stopped: unexpected progression change." xml:space="preserve"><value>Skill allocation stopped: unexpected progression change.</value></data>
+  <data name="Skill allocation stopped: learning was not observed; no retry." xml:space="preserve"><value>Skill allocation stopped: learning was not observed; no retry.</value></data>
+  <data name="Skill allocation completed; progression was observed." xml:space="preserve"><value>Skill allocation completed; progression was observed.</value></data>
+  <data name="Waiting for observed skill learning." xml:space="preserve"><value>Waiting for observed skill learning.</value></data>
+  <data name="Skill learning request was rejected; no retry." xml:space="preserve"><value>Skill learning request was rejected; no retry.</value></data>
+  <data name="Skill allocation stopped." xml:space="preserve"><value>Skill allocation stopped.</value></data>
 </root>
