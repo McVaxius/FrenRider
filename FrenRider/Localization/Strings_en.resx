@@ -2850,4 +2850,6 @@ On: use the BossMod presets below with any rotation provider. A custom preset ma
   </data>
   <data name="ADS interaction active; VBM setup deferred" xml:space="preserve"><value>ADS interaction active; VBM setup deferred</value></data>
   <data name="ADS interaction active; VBM settings pending" xml:space="preserve"><value>ADS interaction active; VBM settings pending</value></data>
+  <data name="Questing idle; VBM paused" xml:space="preserve"><value>Questing idle; VBM paused</value></data>
+  <data name="Questing idle; VBM pause unconfirmed" xml:space="preserve"><value>Questing idle; VBM pause unconfirmed</value></data>
 </root>

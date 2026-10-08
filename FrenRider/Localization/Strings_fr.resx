@@ -2751,4 +2751,6 @@ Activé : utilisez les préréglages BossMod ci-dessous avec tout fournisseur de
   </data>
   <data name="ADS interaction active; VBM setup deferred" xml:space="preserve"><value>Interaction ADS active ; configuration de VBM différée</value></data>
   <data name="ADS interaction active; VBM settings pending" xml:space="preserve"><value>Interaction ADS active ; paramètres VBM en attente</value></data>
+  <data name="Questing idle; VBM paused" xml:space="preserve"><value>Quêtes en attente ; VBM en pause</value></data>
+  <data name="Questing idle; VBM pause unconfirmed" xml:space="preserve"><value>Quêtes en attente ; pause VBM non confirmée</value></data>
 </root>

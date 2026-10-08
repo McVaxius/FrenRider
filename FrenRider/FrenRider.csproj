@@ -27,6 +27,7 @@
 
   <ItemGroup>
     <None Include="images\icon.png" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="images\icon.png" Link="icon.png" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="data\bm\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -56,6 +57,7 @@
       <PluginFiles Include="$(OutputPath)AethertekUI.Dalamud.dll" />
 
       <PluginFiles Include="$(ProjectDir)$(AssemblyName).json" />
+      <PluginFiles Include="$(ProjectDir)images\icon.png" />
 
       <PluginFiles Include="videos\**" />
 

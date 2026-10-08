@@ -2762,4 +2762,6 @@
   </data>
   <data name="ADS interaction active; VBM setup deferred" xml:space="preserve"><value>ADS की बातचीत जारी है; VBM की स्थापना स्थगित है</value></data>
   <data name="ADS interaction active; VBM settings pending" xml:space="preserve"><value>ADS की बातचीत जारी है; VBM की सेटिंग लंबित हैं</value></data>
+  <data name="Questing idle; VBM paused" xml:space="preserve"><value>क्वेस्ट की प्रतीक्षा; VBM रुका हुआ है</value></data>
+  <data name="Questing idle; VBM pause unconfirmed" xml:space="preserve"><value>क्वेस्ट की प्रतीक्षा; VBM के रुकने की पुष्टि नहीं हुई</value></data>
 </root>

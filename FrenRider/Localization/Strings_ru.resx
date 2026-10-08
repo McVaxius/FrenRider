@@ -2751,4 +2751,6 @@
   </data>
   <data name="ADS interaction active; VBM setup deferred" xml:space="preserve"><value>Взаимодействие ADS активно; настройка VBM отложена</value></data>
   <data name="ADS interaction active; VBM settings pending" xml:space="preserve"><value>Взаимодействие ADS активно; настройки VBM ожидают применения</value></data>
+  <data name="Questing idle; VBM paused" xml:space="preserve"><value>Ожидание заданий; VBM приостановлен</value></data>
+  <data name="Questing idle; VBM pause unconfirmed" xml:space="preserve"><value>Ожидание заданий; пауза VBM не подтверждена</value></data>
 </root>

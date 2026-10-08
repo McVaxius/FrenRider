@@ -2751,4 +2751,6 @@
   </data>
   <data name="ADS interaction active; VBM setup deferred" xml:space="preserve"><value>ADS 交互正在进行；已推迟 VBM 配置</value></data>
   <data name="ADS interaction active; VBM settings pending" xml:space="preserve"><value>ADS 交互正在进行；VBM 设置等待应用</value></data>
+  <data name="Questing idle; VBM paused" xml:space="preserve"><value>任务空闲中；VBM 已暂停</value></data>
+  <data name="Questing idle; VBM pause unconfirmed" xml:space="preserve"><value>任务空闲中；VBM 暂停未确认</value></data>
 </root>

@@ -8,6 +8,97 @@ namespace FrenRider.Tests;
 public sealed class QuestionableIpcServiceTests
 {
     [Theory]
+    [InlineData("{\"apiVersion\":2,\"running\":true}", false, true, true)]
+    [InlineData("{\"apiVersion\":2,\"running\":false,\"busy\":true}", true, true, true)]
+    [InlineData("{\"apiVersion\":2,\"running\":false,\"busy\":false}", true, true, false)]
+    [InlineData("{\"apiVersion\":2,\"success\":false,\"code\":\"internal-error\"}", false, false, false)]
+    [InlineData("{\"apiVersion\":1,\"running\":false}", false, false, false)]
+    [InlineData("{\"apiVersion\":2,\"running\":\"false\"}", false, false, false)]
+    [InlineData("{\"apiVersion\":2,\"running\":false}", true, false, false)]
+    [InlineData("null", false, false, false)]
+    [InlineData("broken", false, false, false)]
+    public void CompanionActivityRequiresVersionedBooleanReadback(string json, bool hunt, bool readable, bool running)
+        => Assert.Equal((readable, running), QuestionableIpcService.ReadCompanionActivity(json, hunt));
+
+    [Fact]
+    public void QuestSafetyLatchRetainsConfirmedActivityUntilEverySourceReadablyStops()
+    {
+        var q = false;
+        var qFails = false;
+        var companion = (Readable: true, Running: false);
+        using var service = new QuestionableIpcService(() => qFails ? throw new InvalidOperationException() : q,
+            () => DateTime.UtcNow, queryCompanionActivity: () => companion);
+        service.Refresh(force: true);
+        Assert.False(service.QuestAutomationActive);
+        companion = (true, true);
+        service.Refresh(force: true);
+        Assert.True(service.QuestAutomationActive);
+        Assert.False(service.WasRunningWithin(QuestionableIpcService.RecentRunningHold));
+        companion = (false, false);
+        service.Refresh(force: true);
+        Assert.False(service.QuestActivityReadable);
+        Assert.True(service.QuestAutomationActive);
+        companion = (true, false);
+        qFails = true;
+        service.Refresh(force: true);
+        Assert.True(service.QuestAutomationActive);
+        qFails = false;
+        service.Refresh(force: true);
+        Assert.True(service.QuestActivityReadable);
+        Assert.False(service.QuestAutomationActive);
+        q = true;
+        service.Refresh(force: true);
+        q = false;
+        service.Refresh(force: true);
+        Assert.False(service.QuestAutomationActive);
+        Assert.True(service.WasRunningWithin(QuestionableIpcService.RecentRunningHold));
+    }
+
+    [Theory]
+    [InlineData("Rotation")]
+    [InlineData("HuntLogs")]
+    [InlineData("MassGc")]
+    public void CompanionLoadedAloneIsStoppedAndEachActualFeatureCanHoldQuesting(string feature)
+    {
+        IExposedPlugin[] installed = [Exposed("QSTCompanion", true)];
+        var running = false;
+        var fail = false;
+        var calls = new List<string>();
+        var pi = Proxy<IDalamudPluginInterface>((method, args) => method.Name switch
+        {
+            "get_InstalledPlugins" => installed,
+            "GetIpcSubscriber" => Proxy(method.ReturnType, (_, _) =>
+            {
+                var endpoint = (string)args![0]!;
+                calls.Add(endpoint);
+                if (fail && endpoint.Contains(feature)) throw new InvalidOperationException();
+                return "{\"apiVersion\":2,\"running\":" + (running && endpoint.Contains(feature) ? "true" : "false") + ",\"busy\":false}";
+            }),
+            _ => null,
+        });
+        using var service = new QuestionableIpcService(pi, Proxy<IPluginLog>((_, _) => null));
+        service.Refresh(force: true);
+        Assert.False(service.Current.StatusReadable); // The original Questionable duty contract is unchanged.
+        Assert.True(service.QuestActivityReadable);
+        Assert.False(service.QuestAutomationActive);
+        Assert.Equal(3, calls.Count);
+        running = true;
+        service.Refresh(force: true);
+        Assert.True(service.QuestAutomationActive);
+        running = false;
+        fail = true;
+        service.Refresh(force: true);
+        Assert.True(service.QuestAutomationActive);
+        fail = false;
+        service.Refresh(force: true);
+        Assert.False(service.QuestAutomationActive);
+        installed = [];
+        service.Refresh(force: true);
+        Assert.True(service.QuestActivityReadable);
+        Assert.False(service.QuestAutomationActive);
+    }
+
+    [Theory]
     [InlineData("Questionable", "WigglyQuest")]
     [InlineData("WigglyQuest", "Questionable")]
     public void SelectsOneLoadedAliasAndReevaluatesAfterUnload(string name, string otherName)

@@ -35,7 +35,7 @@ internal sealed class UiText : IDisposable
         var englishManager = new ResourceManager("FrenRider.Localization.Strings_en", typeof(UiText).Assembly);
         var english = englishManager.GetResourceSet(CultureInfo.InvariantCulture, true, false)
             ?? throw new MissingManifestResourceException("en");
-        RequiredText = Values(Resources).Concat(Values(english)).Concat(Languages.Select(l => l.Name))
+        RequiredText = Values(Resources).Concat(Values(english)).Concat(Languages.Where(l => l.Code != "hi").Select(l => l.Name))
             .Append("⚠•—").Distinct().ToArray();
         englishManager.ReleaseAllResources();
         // Service messages remain English in logs; only their UI copies are localized.

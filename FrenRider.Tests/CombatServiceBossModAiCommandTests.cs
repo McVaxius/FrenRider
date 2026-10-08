@@ -8,6 +8,34 @@ namespace FrenRider.Tests;
 public sealed class CombatServiceBossModAiCommandTests
 {
     [Theory]
+    [InlineData(true, "VBM", true, false, false, true)]
+    [InlineData(true, "BMR", true, false, false, false)]
+    [InlineData(true, "RSR", true, false, false, false)]
+    [InlineData(false, "VBM", true, false, false, false)]
+    [InlineData(true, "VBM", false, false, false, false)]
+    [InlineData(true, "VBM", true, true, false, false)]
+    [InlineData(true, "VBM", true, false, true, false)]
+    public void QuestingVbmHoldAppliesOnlyToEnabledIdleOverworldVbm(bool enabled, string provider,
+        bool active, bool duty, bool combat, bool held)
+        => Assert.Equal(held, CombatService.ShouldHoldQuestingVbm(enabled, provider, active, duty, combat));
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    [InlineData(4)]
+    public void QuestingTargetPolicyPreservesSavedProfileAndOperatingMode(int mode)
+    {
+        var profile = new CharacterConfig { RotationType = mode, RsrAggroType = 3 };
+        Assert.Equal(1, CombatService.ResolveQuestingRsrAggro(profile, true, false));
+        Assert.Equal(0, CombatService.ResolveQuestingRsrAggro(profile, true, true));
+        Assert.Equal(mode == 4 ? 1 : 3, CombatService.ResolveQuestingRsrAggro(profile, false, true));
+        Assert.Equal(mode, profile.RotationType);
+        Assert.Equal(3, profile.RsrAggroType);
+    }
+
+    [Theory]
     [InlineData(ZoneType.Overworld, false, false, "general")]
     [InlineData(ZoneType.Overworld, true, false, "fate")]
     [InlineData(ZoneType.Overworld, true, true, "general")]

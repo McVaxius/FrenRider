@@ -39,6 +39,10 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static IDtrBar DtrBar { get; private set; } = null!;
     [PluginService] internal static IDataManager DataManager { get; private set; } = null!;
     [PluginService] internal static ITextureProvider TextureProvider { get; private set; } = null!;
+
+    internal Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap OriginalIcon
+        => TextureProvider.GetFromFile(System.IO.Path.Combine(
+            PluginInterface.AssemblyLocation.DirectoryName ?? "", "icon.png")).GetWrapOrEmpty();
     [PluginService] internal static ISigScanner SigScanner { get; private set; } = null!;
     [PluginService] internal static IGameInteropProvider GameInteropProvider { get; private set; } = null!;
     [PluginService] internal static ITargetManager TargetManager { get; private set; } = null!;
@@ -110,6 +114,7 @@ public sealed class Plugin : IDalamudPlugin
     private uint appliedAccent;
     private Vector3 accentDraft;
     private int checkedFontGeneration = -1;
+    private int checkedHindiGeneration = -1;
     private bool fontIssueLogged;
     private readonly MaterialWindowFold fontStatusFold = new();
     private readonly MaterialWindowDecorations fontStatusDecorations = new();
@@ -332,6 +337,16 @@ public sealed class Plugin : IDalamudPlugin
             DrawFontStatus(uiFonts.LoadException is null);
             return;
         }
+        if (checkedHindiGeneration != uiFonts.Generation)
+        {
+            var generation = uiFonts.Generation;
+            var hindiAvailable = true;
+            foreach (var height in FrenRiderPresentation.FontSizes)
+                hindiAvailable &= shapedText.Renderer.TryCheckGlyphs(["हिन्दी"], height * ImGuiHelpers.GlobalScale, out _);
+            languageOptions.Replace(UiText.Languages.Select(l => new MaterialOption<string>(l.Code, l.Code,
+                l.Code == "hi" && !hindiAvailable ? "Hindi (unavailable)" : l.Name, l.Code == "hi" && !hindiAvailable)).ToArray());
+            checkedHindiGeneration = generation;
+        }
         if (checkedFontGeneration != uiFonts.Generation)
         {
             try
@@ -376,7 +391,12 @@ public sealed class Plugin : IDalamudPlugin
             if (visible)
             {
                 fontStatusDecorations.Paint();
-                MaterialText.TextWrapped(UiText.T(loading ? "Loading UI fonts..." : "UI fonts failed to load. See the plugin log."));
+                if (appliedLanguage == "hi")
+                {
+                    ImGui.TextWrapped(loading ? "Loading Hindi UI fonts..." : "Hindi UI fonts are unavailable. See the plugin log.");
+                    if (!loading && ImGui.Button("Use English")) { Configuration.UiLanguage = "en"; Configuration.Save(); }
+                }
+                else MaterialText.TextWrapped(UiText.T(loading ? "Loading UI fonts..." : "UI fonts failed to load. See the plugin log."));
             }
         }
         finally
@@ -400,6 +420,7 @@ public sealed class Plugin : IDalamudPlugin
             languageOptions = new(UiText.Languages.Select(l => new MaterialOption<string>(l.Code, l.Code, l.Name)).ToArray());
             appliedLanguage = language;
             checkedFontGeneration = -1;
+            checkedHindiGeneration = -1;
             fontIssueLogged = false;
         }
         if (uiTheme is null || (Configuration.UiAccentRgb & 0xFFFFFF) != appliedAccent)
@@ -504,6 +525,7 @@ public sealed class Plugin : IDalamudPlugin
             RespawnService.ResetForDisable();
             PhoenixDownRecoveryService.Reset();
             AutoDutyDetectionService.HandleFrenRiderDisabled();
+            CombatService.ReleaseQuestingRsrAggroForDeparture("FrenRider disabled");
             CombatService.ReleaseDungeonRsrAggroForDeparture("FrenRider disabled");
             ExternalAutomationCleanupService.Cleanup(
                 ConfigManager.GetActiveConfig(),
@@ -526,6 +548,7 @@ public sealed class Plugin : IDalamudPlugin
     private void EndCombatSettingsSession()
     {
         var config = ConfigManager.GetActiveConfig();
+        CombatService.ReleaseQuestingRsrAggroForDeparture("combat settings session departure");
         CombatService.ReleaseDungeonRsrAggroForDeparture("combat settings session departure");
         if (ExternalAutomationCleanupService.TryGetSnapshot(GetCleanupAccountId(), GetCleanupCharacterKey(), out _))
             ExternalAutomationCleanupService.Cleanup(config, GetCleanupAccountId(), GetCleanupCharacterKey(), "combat settings session departure");

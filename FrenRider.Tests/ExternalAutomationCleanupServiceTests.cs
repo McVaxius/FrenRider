@@ -3,12 +3,15 @@ using FrenRider.Services;
 using System.Globalization;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
+using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 
 namespace FrenRider.Tests;
 
+[Collection("Questing combat lifecycle")]
 public sealed class ExternalAutomationCleanupServiceTests
 {
     [Theory]
@@ -631,6 +634,119 @@ public sealed class ExternalAutomationCleanupServiceTests
         Assert.Contains(enabled ? "/vbmai on" : "/vbmai off", result.Commands);
     }
 
+    [Fact]
+    public void QuestingVbmPauseDisablesOwnedAiAndAllRuntimePresetsWithExactReadback()
+    {
+        var native = new NativeBossModProvider("VBM", "Original|Other|VBM Multibox")
+            { AiEnabled = true, EmulateVbmMultibox = true };
+        using var service = native.CreateService();
+        Assert.True(service.PrepareOwnedBossModSettings("VBM", "account", "character", new CharacterConfig()));
+        Assert.True(service.PauseOwnedVbm(native.SendCommand));
+        Assert.False(native.AiEnabled);
+        Assert.True(native.ForceDisabled);
+        Assert.Empty(native.Active);
+        Assert.Equal(new[] { "/vbmai off", "BossMod.Presets.SetForceDisabled" }, native.Writes);
+        native.Writes.Clear();
+        Assert.True(service.PauseOwnedVbm(native.SendCommand));
+        Assert.Empty(native.Writes);
+        Assert.True(service.CanResumeOwnedVbm());
+        Assert.True(service.ApplyOwnedBossModPreset("Next"));
+        Assert.True(service.SendBossModAiCommand("/vbmai on", native.SendCommand));
+        Assert.Equal(new[] { "Next", "VBM Multibox" }, native.Active);
+        Assert.True(native.AiEnabled);
+        service.ReleaseOwnedBossModSettings(turnEverythingOff: false);
+        Assert.Equal(new[] { "Original", "Other", "VBM Multibox" }, native.Active);
+    }
+
+    [Fact]
+    public void QuestingVbmPausePreservesNewerAiRuntimeAndDepartedProviders()
+    {
+        var native = new NativeBossModProvider("VBM", "Original") { AiEnabled = true };
+        using var service = native.CreateService();
+        Assert.True(service.PrepareOwnedBossModSettings("VBM", "account", "character", new CharacterConfig()));
+        Assert.True(service.PauseOwnedVbm(native.SendCommand));
+        native.AiEnabled = true;
+        native.Writes.Clear();
+        Assert.False(service.PauseOwnedVbm(native.SendCommand));
+        Assert.False(service.CanResumeOwnedVbm());
+        Assert.Empty(native.Writes);
+        native.AiEnabled = false;
+        native.ForceDisabled = false;
+        native.Active = ["External"];
+        Assert.False(service.PauseOwnedVbm(native.SendCommand));
+        Assert.False(service.CanResumeOwnedVbm());
+        Assert.Empty(native.Writes);
+        native.Reload();
+        Assert.False(service.PauseOwnedVbm(native.SendCommand));
+        Assert.Empty(native.Writes);
+    }
+
+    [Theory]
+    [InlineData("BMR")]
+    [InlineData("VBM")]
+    public void QuestingVbmPauseNeverTouchesBmrAndRejectsUnconfirmedRuntimeWrites(string provider)
+    {
+        var native = new NativeBossModProvider(provider, "Original") { AiEnabled = true, RejectRuntimeWrite = true };
+        using var service = native.CreateService();
+        Assert.True(service.PrepareOwnedBossModSettings(provider, "account", "character", new CharacterConfig()));
+        Assert.False(service.PauseOwnedVbm(native.SendCommand));
+        Assert.False(native.ForceDisabled);
+        Assert.Equal(new[] { "Original" }, native.Active);
+        if (provider == "BMR")
+        {
+            Assert.True(native.AiEnabled);
+            Assert.Empty(native.Writes);
+        }
+        else Assert.Equal(new[] { "/vbmai off", "BossMod.Presets.SetForceDisabled" }, native.Writes);
+    }
+
+    [Theory]
+    [InlineData("enable")]
+    [InlineData("update")]
+    [InlineData("activation")]
+    [InlineData("passive")]
+    [InlineData("preset selection")]
+    [InlineData("follow startup")]
+    [InlineData("mount restoration")]
+    [InlineData("zone transition")]
+    [InlineData("pending refresh")]
+    [InlineData("preset write")]
+    [InlineData("AI setting")]
+    public void QuestingCombatRoutesKeepOwnedVbmRuntimePaused(string route)
+    {
+        var native = new NativeBossModProvider("VBM", "Original|Movement") { AiEnabled = false };
+        using var service = native.CreateService();
+        using var runtime = new QuestingCombatRuntime(service, native.Interface, native.Log, 1);
+        var saved = JsonSerializer.Serialize(runtime.Profile);
+        switch (route)
+        {
+            case "enable": Assert.False(runtime.Combat.PrepareForEnableCombatSetup()); break;
+            case "update": runtime.Combat.Update(); break;
+            case "activation": runtime.Call("ActivateRotation", runtime.Profile, true); break;
+            case "passive": runtime.Call("ApplyPassiveRotationSettings", runtime.Profile, "test"); break;
+            case "preset selection": runtime.Combat.ApplyPresetSelection("test", installPresets: false); break;
+            case "follow startup": runtime.Combat.ApplyBossModFollowStartupDefaults(); break;
+            case "mount restoration":
+                runtime.SetCombatField("mountedRotationSuppressed", true);
+                runtime.Call("RestoreMountedRotationLifecycle", runtime.Profile, false, false, "test", true);
+                break;
+            case "zone transition": runtime.Call("HandleZoneTransition", runtime.Profile, false, false); break;
+            case "pending refresh":
+                runtime.SetCombatField("pendingCombatSettingsRefreshMs", 1L);
+                runtime.Call("TryApplyPendingCombatSettingsRefresh", runtime.Profile, long.MaxValue, false, false);
+                break;
+            case "preset write": Assert.Equal(false, runtime.Call("ApplyBossModPreset", "VBM", "Next", "test", false)); break;
+            case "AI setting": Assert.Equal(false, runtime.Call("ApplyConfiguredBossModAiState", runtime.Profile, "VBM", "test")); break;
+        }
+        Assert.False(native.AiEnabled);
+        Assert.True(native.ForceDisabled);
+        Assert.Empty(native.Active);
+        Assert.Equal(new[] { "BossMod.Presets.SetForceDisabled" }, native.Writes);
+        Assert.Equal("Questing idle; VBM paused", runtime.Combat.StateDetail);
+        Assert.Null(runtime.CombatField("lastAppliedCombatSettings"));
+        Assert.Equal(saved, JsonSerializer.Serialize(runtime.Profile));
+    }
+
     private sealed record NativePreset(string Name, bool HiddenByDefault = false);
     private sealed record NativePresetDatabase(NativePreset[] AllPresets, NativePreset[] DefaultPresets, NativePreset[] UserPresets);
     private sealed record NativeRotationDatabase(NativePresetDatabase Presets);
@@ -646,6 +762,7 @@ public sealed class ExternalAutomationCleanupServiceTests
 
     private sealed class NativeBossModProvider
     {
+        internal bool EmulateVbmMultibox;
         internal readonly IDalamudPluginInterface Interface;
         internal readonly IPluginLog Log;
         internal readonly List<string> Writes = [];
@@ -838,7 +955,14 @@ public sealed class ExternalAutomationCleanupServiceTests
                 ForceDisabled = false;
             }
             else if (command is "/vbmai on" or "/vbmai off" || command.StartsWith("/vbmai follow ", StringComparison.Ordinal))
+            {
                 AiEnabled = !command.EndsWith(" off", StringComparison.Ordinal);
+                if (EmulateVbmMultibox && !ForceDisabled)
+                {
+                    Active.RemoveAll(name => name == "VBM Multibox");
+                    if (AiEnabled) Active.Add("VBM Multibox");
+                }
+            }
             return true;
         }
 
@@ -895,6 +1019,7 @@ public sealed class ExternalAutomationCleanupServiceTests
         Assert.Empty(native.Writes);
         Assert.Equal(2, native.Configured);
         Assert.True(service.ApplyDungeonRsrAggro(ownership!));
+        Assert.Equal("DAD dungeon All Attackable Targets confirmed without changing operating mode.", service.LastStatus);
         Assert.Equal(0, native.Configured);
         Assert.Equal(new[] { "HostileType AllTargetsCanAttack" }, native.Writes);
         Assert.True(service.ApplyDungeonRsrAggro(ownership!));
@@ -977,6 +1102,314 @@ public sealed class ExternalAutomationCleanupServiceTests
         Assert.Empty(native.Writes);
     }
 
+    [Fact]
+    public void QuestingRsrTransitionsUseTargetOnlyWritesAndResumeTheCurrentSavedTarget()
+    {
+        var native = new NativeRsrProvider();
+        using var service = native.CreateService();
+        var profile = new CharacterConfig { RotationType = 1, RsrAggroType = 3 };
+        Assert.True(service.TryCaptureRsrAggro(AutorotIpcService.RsrTargetHostileType.TargetsHaveTarget, out var ownership));
+        Assert.True(service.ApplyOwnedRsrAggro(ownership!, CombatService.ResolveRsrTargetHostileType(
+            CombatService.ResolveQuestingRsrAggro(profile, true, false))));
+        Assert.Equal(1, native.Configured);
+        Assert.True(service.ApplyOwnedRsrAggro(ownership!, CombatService.ResolveRsrTargetHostileType(
+            CombatService.ResolveQuestingRsrAggro(profile, true, true))));
+        Assert.Equal(0, native.Configured);
+        profile.RsrAggroType = 4; // A saved preference changed during the run is the stop target.
+        Assert.True(service.StopOwnedRsrAggro(ownership!, CombatService.ResolveRsrTargetHostileType(
+            CombatService.ResolveQuestingRsrAggro(profile, false, true)), out var confirmed));
+        Assert.True(confirmed);
+        Assert.Equal(4, native.Configured);
+        Assert.Equal(1, profile.RotationType);
+        Assert.Equal(4, profile.RsrAggroType);
+        Assert.All(native.Writes, command => Assert.StartsWith("HostileType ", command));
+        Assert.Equal(4, native.Configured); // Stop releases quest ownership; later cleanup has no pre-quest target to restore.
+    }
+
+    [Fact]
+    public void QuestingRsrOwnershipRetainsExternalChangesFailuresAndUnreadableSessionIdentity()
+    {
+        var native = new NativeRsrProvider();
+        using var service = native.CreateService();
+        native.ExternalHostile = 4;
+        Assert.False(service.TryCaptureRsrAggro(AutorotIpcService.RsrTargetHostileType.TargetsHaveTarget, out _));
+        Assert.Empty(native.Writes);
+        native.ExternalHostile = null;
+        Assert.True(service.TryCaptureRsrAggro(AutorotIpcService.RsrTargetHostileType.TargetsHaveTarget, out var owned));
+        native.RejectWrite = true;
+        Assert.False(service.ApplyOwnedRsrAggro(owned!, AutorotIpcService.RsrTargetHostileType.TargetsHaveTarget));
+        Assert.Null(owned!.ExpectedConfiguredHostile);
+        native.RejectWrite = false;
+        Assert.True(service.ApplyOwnedRsrAggro(owned, AutorotIpcService.RsrTargetHostileType.TargetsHaveTarget));
+        native.Unavailable = true;
+        Assert.False(service.TryObserveRsrAggroOwner(owned, out _));
+        native.Unavailable = false;
+        Assert.True(service.TryObserveRsrAggroOwner(owned, out var matches));
+        Assert.True(matches);
+        native.Configured = 3;
+        native.Writes.Clear();
+        Assert.False(service.ApplyOwnedRsrAggro(owned, AutorotIpcService.RsrTargetHostileType.AllTargetsCanAttack));
+        Assert.True(service.StopOwnedRsrAggro(owned, AutorotIpcService.RsrTargetHostileType.AllTargetsCanAttack, out var confirmed));
+        Assert.False(confirmed);
+        Assert.True(service.ReleaseOwnedRsrAggro(owned));
+        Assert.Equal(3, native.Configured);
+        Assert.Empty(native.Writes);
+        native.Job = 32;
+        Assert.True(service.TryObserveRsrAggroOwner(owned, out matches));
+        Assert.False(matches);
+        Assert.False(service.ReleaseOwnedRsrAggro(owned));
+        Assert.Empty(native.Writes);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    [InlineData(4)]
+    public void QuestingCombatSoloUpdateChangesOnlyTargetsAcrossEveryOperatingMode(int mode)
+    {
+        var native = new NativeRsrProvider();
+        using var service = native.CreateService();
+        using var runtime = new QuestingCombatRuntime(service, native.Interface, QuestingCombatRuntime.SilentLog(), 2);
+        runtime.Profile.RotationType = mode;
+        var saved = JsonSerializer.Serialize(runtime.Profile);
+        Assert.True(runtime.RefreshTargets(inDuty: false));
+        Assert.Equal(1, native.Configured);
+        runtime.Conditions.Add(ConditionFlag.BoundByDuty95);
+        var policy = (DutyCombatAuthorityPolicy)runtime.CombatField("dutyCombatAuthorityPolicy")!;
+        policy.Update(new(true, true, true, AdsDutyCategory.Solo, false, true, false));
+        runtime.Combat.Update();
+        runtime.Combat.Update();
+        Assert.Equal(DutyCombatAuthority.QuestionableSolo, runtime.Combat.DutyAuthority);
+        Assert.Equal(0, native.Configured);
+        Assert.Equal(new[] { "HostileType TargetsHaveTarget", "HostileType AllTargetsCanAttack" }, native.Writes);
+        Assert.Null(runtime.CombatField("lastAppliedCombatSettings"));
+        Assert.Equal(saved, JsonSerializer.Serialize(runtime.Profile));
+    }
+
+    [Fact]
+    public void QuestingCombatReadableStopReleasesOwnershipBeforeLaterDeparture()
+    {
+        var native = new NativeRsrProvider();
+        using var service = native.CreateService();
+        using var runtime = new QuestingCombatRuntime(service, native.Interface, QuestingCombatRuntime.SilentLog(), 2);
+        Assert.True(runtime.RefreshTargets(false));
+        runtime.Profile.RsrAggroType = 4;
+        runtime.StopActivity();
+        Assert.True(runtime.RefreshTargets(false));
+        Assert.Null(runtime.CombatField("questingRsrAggro"));
+        Assert.NotNull(runtime.CombatField("questingRsrStopSelection"));
+        Assert.Equal(4, native.Configured);
+        native.Writes.Clear();
+        runtime.Profile.RotationPlugin = 0;
+        Assert.False(runtime.RefreshTargets(false));
+        Assert.Null(runtime.CombatField("questingRsrStopSelection"));
+        runtime.Combat.ClearExternalAutomationRuntimeState("test departure");
+        Assert.Equal(4, native.Configured);
+        Assert.Empty(native.Writes);
+    }
+
+    [Fact]
+    public void QuestingCombatFailedStopRetainsOwnershipAndNeverMarksTheTargetApplied()
+    {
+        var native = new NativeRsrProvider();
+        using var service = native.CreateService();
+        using var runtime = new QuestingCombatRuntime(service, native.Interface, QuestingCombatRuntime.SilentLog(), 2);
+        Assert.True(runtime.RefreshTargets(false));
+        runtime.Profile.RsrAggroType = 4;
+        runtime.StopActivity();
+        native.RejectWrite = true;
+        Assert.False(runtime.RefreshTargets(false));
+        Assert.NotNull(runtime.CombatField("questingRsrAggro"));
+        Assert.Null(runtime.CombatField("questingRsrStopSelection"));
+        Assert.Null(runtime.CombatField("lastAppliedCombatSettings"));
+        Assert.Equal(1, native.Configured);
+        native.RejectWrite = false;
+        Assert.True(runtime.RefreshTargets(false));
+        Assert.Null(runtime.CombatField("questingRsrAggro"));
+        Assert.Equal(4, native.Configured);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void QuestingCombatStopPreservesNewerNativeOrExternalTargets(bool externalOverride)
+    {
+        var native = new NativeRsrProvider();
+        using var service = native.CreateService();
+        using var runtime = new QuestingCombatRuntime(service, native.Interface, QuestingCombatRuntime.SilentLog(), 2);
+        Assert.True(runtime.RefreshTargets(false));
+        if (externalOverride) native.ExternalHostile = 4;
+        else native.Configured = 4;
+        runtime.StopActivity();
+        native.Writes.Clear();
+        Assert.False(runtime.RefreshTargets(false));
+        Assert.Null(runtime.CombatField("questingRsrAggro"));
+        Assert.False(runtime.RefreshTargets(false));
+        Assert.False((bool)runtime.Call("ApplyRsrAggro", runtime.Profile)!);
+        runtime.Combat.ClearExternalAutomationRuntimeState("test departure");
+        Assert.Equal(externalOverride ? (byte)1 : (byte)4, native.Configured);
+        Assert.Empty(native.Writes);
+    }
+
+    [Theory]
+    [InlineData("profile")]
+    [InlineData("character")]
+    [InlineData("provider")]
+    [InlineData("job")]
+    [InlineData("reload")]
+    [InlineData("logout")]
+    public void QuestingCombatDeparturesNeverRestoreIntoAReplacement(string departure)
+    {
+        var native = new NativeRsrProvider();
+        using var service = native.CreateService();
+        using var runtime = new QuestingCombatRuntime(service, native.Interface, QuestingCombatRuntime.SilentLog(), 2);
+        Assert.True(runtime.RefreshTargets(false));
+        native.Writes.Clear();
+        switch (departure)
+        {
+            case "profile": runtime.Profile = new CharacterConfig { Enabled = true, RotationPlugin = 2 }; break;
+            case "character": runtime.ContentId = 2; break;
+            case "provider": runtime.Profile.RotationPlugin = 0; break;
+            case "job": native.Job = 32; break;
+            case "reload": native.Reload(); break;
+            case "logout": runtime.LoggedIn = false; break;
+        }
+        runtime.StopActivity();
+        runtime.RefreshTargets(false);
+        Assert.Null(runtime.CombatField("questingRsrAggro"));
+        if (departure is "profile" or "provider")
+        {
+            Assert.Equal(2, native.Configured);
+            Assert.Equal(new[] { "HostileType AllTargetsWhenSoloInDuty" }, native.Writes);
+        }
+        else
+        {
+            Assert.Equal(departure == "job" ? (byte)4 : (byte)1, native.Configured);
+            Assert.Empty(native.Writes);
+        }
+    }
+
+    [Fact]
+    public void QuestingCombatDefersToDadOwnershipAndRetainsAnUnreadableOwner()
+    {
+        var native = new NativeRsrProvider();
+        using var service = native.CreateService();
+        using var runtime = new QuestingCombatRuntime(service, native.Interface, QuestingCombatRuntime.SilentLog(), 2);
+        Assert.True(runtime.RefreshTargets(false));
+        var owned = runtime.CombatField("questingRsrAggro");
+        native.Unavailable = true;
+        Assert.False(runtime.RefreshTargets(false));
+        Assert.Same(owned, runtime.CombatField("questingRsrAggro"));
+        native.Unavailable = false;
+        Assert.True(runtime.Combat.ReleaseQuestingRsrAggroForDeparture("DAD acquisition"));
+        Assert.True(service.TryCaptureDungeonRsrAggro(out var dad));
+        runtime.SetCombatField("dungeonRsrAggro", new DadDungeonRsrAggroOwnership("run", runtime.Config.QuestionableCharacterIdentity,
+            runtime.Profile, 1, 1, runtime.Profile.RsrAggroType, dad!));
+        native.Writes.Clear();
+        Assert.False(runtime.RefreshTargets(false));
+        Assert.Null(runtime.CombatField("questingRsrAggro"));
+        Assert.Equal(0, ((CombatSettingsSnapshot)runtime.Call("CaptureCombatSettings", runtime.Profile)!).RsrAggroType);
+        Assert.Empty(native.Writes);
+    }
+
+    private sealed class QuestingCombatRuntime : IDisposable
+    {
+        private readonly Dictionary<PropertyInfo, object?> savedStatics = new();
+        private readonly AccountConfig account;
+        private DateTime now = DateTime.UtcNow;
+        private bool running = true;
+        internal bool LoggedIn = true;
+        internal ulong ContentId = 1;
+        internal readonly HashSet<ConditionFlag> Conditions = [];
+        internal readonly ConfigManager Config;
+        internal readonly CombatService Combat;
+        internal readonly QuestionableIpcService Activity;
+        internal CharacterConfig Profile
+        {
+            get => account.Characters["character"];
+            set => account.Characters["character"] = value;
+        }
+
+        internal QuestingCombatRuntime(AutorotIpcService service, IDalamudPluginInterface pluginInterface, IPluginLog log, int provider)
+        {
+            try
+            {
+                ReplaceStatic("Condition", Proxy<ICondition>((method, args) => method.Name == "get_Item" && Conditions.Contains((ConditionFlag)args![0]!)));
+                ReplaceStatic("ClientState", Proxy<IClientState>((method, _) => method.Name == "get_IsLoggedIn" ? LoggedIn : Default(method.ReturnType)));
+                ReplaceStatic("PlayerState", Proxy<IPlayerState>((method, _) => method.Name == "get_ContentId" ? ContentId : Default(method.ReturnType)));
+                ReplaceStatic("Log", log);
+                Config = Uninitialized<ConfigManager>();
+                account = new AccountConfig { AccountId = "account", Characters = new() { ["character"] = new()
+                    { Enabled = true, RotationPlugin = provider, RotationType = 0, RsrAggroType = 3, PositionalInCombat = 3,
+                        ConfigureRotationPresetManually = true, AutoRotationType = "Next", BossModAI = 1 } } };
+                SetField(Config, "accounts", new Dictionary<string, AccountConfig> { ["account"] = account });
+                SetField(Config, "temporaryProfileOverlay", new TemporaryProfileOverlay());
+                Config.CurrentAccountId = "account";
+                typeof(ConfigManager).GetProperty(nameof(ConfigManager.ActiveCharacterKey))!.SetValue(Config, "character");
+                var plugin = Uninitialized<Plugin>();
+                SetProperty(plugin, nameof(Plugin.ConfigManager), Config);
+                SetProperty(plugin, nameof(Plugin.AutorotIpcService), service);
+                SetProperty(plugin, nameof(Plugin.ExternalAutomationCleanupService), new ExternalAutomationCleanupService(new FakeCommandSender(), new FakeSnapshotProvider()));
+                var ads = new AdsDutyIpcService(() => false, () => false, () => "{}", () => false, () => now);
+                SetProperty(plugin, nameof(Plugin.AdsDutyIpcService), ads);
+                SetProperty(plugin, nameof(Plugin.AdsIntegrationService), new AdsIntegrationService(ads, () => Profile, () => { }, _ => false, _ => { }, _ => { }));
+                SetProperty(plugin, nameof(Plugin.AdsUtilityIpcService), new AdsUtilityIpcService(pluginInterface, log));
+                var automation = Uninitialized<AutomationService>();
+                SetField(automation, "plugin", plugin);
+                SetProperty(plugin, nameof(Plugin.AutomationService), automation);
+                var coppelia = Uninitialized<CoppeliaPowerlevelLeaseService>();
+                SetField(coppelia, "coordinator", Uninitialized<CoppeliaPowerlevelLeaseCoordinator>());
+                SetProperty(plugin, nameof(Plugin.CoppeliaPowerlevelLeaseService), coppelia);
+                var hyperFocus = Uninitialized<AdsHyperFocusLeaseService>();
+                SetField(hyperFocus, "coordinator", Uninitialized<AdsHyperFocusLeaseCoordinator>());
+                SetProperty(plugin, nameof(Plugin.AdsHyperFocusLeaseService), hyperFocus);
+                SetProperty(plugin, nameof(Plugin.PhoenixDownRecoveryService), Uninitialized<PhoenixDownRecoveryService>());
+                var zones = new ZoneService();
+                Activity = new QuestionableIpcService(() => running, () => now);
+                Activity.Refresh(force: true);
+                Combat = new CombatService(plugin, null!, zones, Activity);
+                SetProperty(plugin, nameof(Plugin.CombatService), Combat);
+            }
+            catch
+            {
+                Dispose();
+                throw;
+            }
+        }
+
+        internal void StopActivity() { running = false; now += TimeSpan.FromSeconds(1); Activity.Refresh(force: true); }
+        internal bool RefreshTargets(bool inDuty) => (bool)Call("RefreshQuestingRsrAggro", Profile, inDuty)!;
+        internal object? Call(string method, params object?[] args)
+            => typeof(CombatService).GetMethod(method, BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(Combat, args);
+        internal object? CombatField(string name) => typeof(CombatService).GetField(name, BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(Combat);
+        internal void SetCombatField(string name, object value) => SetField(Combat, name, value);
+        private static T Uninitialized<T>() => (T)RuntimeHelpers.GetUninitializedObject(typeof(T));
+        private static void SetField(object target, string name, object value)
+            => target.GetType().GetField(name, BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(target, value);
+        private static void SetProperty(object target, string name, object value)
+            => target.GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!.SetValue(target, value);
+        private void ReplaceStatic(string name, object value)
+        {
+            var property = typeof(Plugin).GetProperty(name, BindingFlags.Static | BindingFlags.NonPublic)!;
+            savedStatics[property] = property.GetValue(null);
+            property.SetValue(null, value);
+        }
+        internal static IPluginLog SilentLog() => Proxy<IPluginLog>((_, _) => null);
+        private static object? Default(Type type) => type == typeof(void) || !type.IsValueType ? null : Activator.CreateInstance(type);
+        private static T Proxy<T>(Func<MethodInfo, object?[]?, object?> handler) where T : class
+        {
+            var proxy = DispatchProxy.Create<T, QuestionableTestProxy>();
+            ((QuestionableTestProxy)(object)proxy).Handler = handler;
+            return proxy;
+        }
+        public void Dispose()
+        {
+            foreach (var (property, value) in savedStatics) property.SetValue(null, value);
+        }
+    }
+
     private sealed class NativeRsrProvider
     {
         private static int sequence;
@@ -984,6 +1417,7 @@ public sealed class ExternalAutomationCleanupServiceTests
         internal bool RejectWrite;
         internal bool Unavailable;
         private readonly IDalamudPluginInterface pluginInterface;
+        internal IDalamudPluginInterface Interface => pluginInterface;
         private readonly Type dataType;
         private readonly Type jobType;
         private readonly Type hostileType;
@@ -1530,3 +1964,6 @@ public sealed class ExternalAutomationCleanupServiceTests
         }
     }
 }
+
+[CollectionDefinition("Questing combat lifecycle", DisableParallelization = true)]
+public sealed class QuestingCombatLifecycleCollection { }

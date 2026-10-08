@@ -2751,4 +2751,6 @@ Activado: usa los ajustes de BossMod de abajo con cualquier proveedor de rotaci�
   </data>
   <data name="ADS interaction active; VBM setup deferred" xml:space="preserve"><value>Interacción de ADS activa; configuración de VBM aplazada</value></data>
   <data name="ADS interaction active; VBM settings pending" xml:space="preserve"><value>Interacción de ADS activa; ajustes de VBM pendientes</value></data>
+  <data name="Questing idle; VBM paused" xml:space="preserve"><value>Misiones en espera; VBM pausado</value></data>
+  <data name="Questing idle; VBM pause unconfirmed" xml:space="preserve"><value>Misiones en espera; pausa de VBM sin confirmar</value></data>
 </root>

@@ -2856,4 +2856,6 @@ Ativado: use as predefinições do BossMod abaixo com qualquer provedor de rota�
   </data>
   <data name="ADS interaction active; VBM setup deferred" xml:space="preserve"><value>Interação de ADS ativa; configuração de VBM adiada</value></data>
   <data name="ADS interaction active; VBM settings pending" xml:space="preserve"><value>Interação de ADS ativa; ajustes de VBM pendentes</value></data>
+  <data name="Questing idle; VBM paused" xml:space="preserve"><value>Missões em espera; VBM pausado</value></data>
+  <data name="Questing idle; VBM pause unconfirmed" xml:space="preserve"><value>Missões em espera; pausa do VBM não confirmada</value></data>
 </root>

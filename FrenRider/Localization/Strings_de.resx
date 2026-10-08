@@ -2751,4 +2751,6 @@ An: Die BossMod-Voreinstellungen unten mit jedem Rotationsanbieter verwenden. Ei
   </data>
   <data name="ADS interaction active; VBM setup deferred" xml:space="preserve"><value>ADS-Interaktion aktiv; VBM-Einrichtung zurückgestellt</value></data>
   <data name="ADS interaction active; VBM settings pending" xml:space="preserve"><value>ADS-Interaktion aktiv; VBM-Einstellungen ausstehend</value></data>
+  <data name="Questing idle; VBM paused" xml:space="preserve"><value>Quest-Automatisierung wartet; VBM pausiert</value></data>
+  <data name="Questing idle; VBM pause unconfirmed" xml:space="preserve"><value>Quest-Automatisierung wartet; VBM-Pause nicht bestätigt</value></data>
 </root>

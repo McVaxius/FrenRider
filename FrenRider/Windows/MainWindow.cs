@@ -78,7 +78,8 @@ public class MainWindow : Window, IDisposable
     {
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding,
             UiHelpers.Scale(new Vector2(12, plugin.Configuration.UiCompact ? 7 : 12)));
-        var minimumWidth = UiGui.TitleMinimumWidth(this, "Fren Rider v" + CurrentVersion) / Math.Max(.01f, MaterialTheme.Metrics.Scale);
+        var minimumWidth = (UiGui.TitleMinimumWidth(this, "Fren Rider v" + CurrentVersion)
+            + ImGui.GetFontSize() + ImGui.GetStyle().ItemInnerSpacing.X) / Math.Max(.01f, MaterialTheme.Metrics.Scale);
         SizeConstraints = new WindowSizeConstraints
         {
             MinimumSize = new Vector2(Math.Max(460, minimumWidth), 360),
@@ -90,7 +91,7 @@ public class MainWindow : Window, IDisposable
     public override void PostDraw()
     {
         motion.Restore(this);
-        UiGui.TitleWithButtons("Fren Rider", "Fren Rider v" + CurrentVersion, this);
+        UiGui.ImageTitle(this, "Fren Rider v" + CurrentVersion, plugin.OriginalIcon);
         plugin.ApplyWindowOpacity(windowOpacity, WindowName);
         ImGui.PopStyleVar();
     }
@@ -222,7 +223,10 @@ public class MainWindow : Window, IDisposable
     private void DrawTopBar(CharacterConfig config)
     {
         var compact = plugin.Configuration.UiCompact;
-        FrenRiderPresentation.People(ImGui.GetCursorScreenPos(), UiHelpers.Scale(compact ? 28 : 32), MaterialTheme.Current.Colors.Primary);
+        var icon = plugin.OriginalIcon;
+        var imageMin = ImGui.GetCursorScreenPos();
+        MaterialCanvas.DrawImage(ImGui.GetWindowDrawList(), icon.Handle, icon.Size,
+            imageMin, imageMin + UiHelpers.Scale(new Vector2(compact ? 28 : 32)));
         ImGui.Dummy(UiHelpers.Scale(new Vector2(compact ? 30 : 36, compact ? 28 : 32)));
         ImGui.SameLine();
         using (UiText.Font(UiFontRole.Title)) MaterialText.Text("Fren Rider");

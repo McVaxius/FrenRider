@@ -1,3 +1,14 @@
+2026-10-07 - Packaged image branding and operator guidance (I500/I497/I499)
+
+- Use the existing packaged icon in Main and MAGIA Mini branding/titlebars with aspect-ratio fitting and a stable reserved box. Preserve native titlebar controls, saved geometry, motion and complete-window opacity. Copy the original icon beside direct and packaged DLLs as icon.png while retaining the nested images copy.
+- Refresh concise README guidance for appearance, focus fade, titlebar shortcuts and this plugin's existing setup/automation controls.
+- Probe the optional Hindi menu caption once per existing font generation. Disable only that choice with an ASCII caption when unavailable; retain selected-catalog checks and show explicit ASCII Hindi failure status with a saved Use English action (I499).
+
+2026-10-07 - Questing combat and targeting guard (I498)
+
+- While Questionable/WigglyQuest or Questionable Companion rotation, Hunt Logs, or Mass GC is active, pause FrenRider-owned VBM AI and runtime movement presets outside duties and combat. Resume eligible configured VBM on combat/duty entry or a readable automation stop, preserving explicit AI-off, existing safety holds, and newer external settings. BMR behavior is unchanged.
+- Selected RSR uses Previously Engaged Targets outdoors and All Attackable Targets in duties during quest automation, including target-only QuestionableSolo handling. Preserve operating mode, saved profiles, matching DAD targeting priority, native overrides, and conditional lifecycle restoration. A confirmed run becoming unreadable retains the safe policy until a readable stop.
+
 2026-10-07 - Button sizing (I491)
 
 - Use font-aware Toolbar sizing for ordinary buttons and reduce the local-account All FR on/off action heights. Preserve complete labels and icons, native IDs/actions, full-width slots and small/dense controls.

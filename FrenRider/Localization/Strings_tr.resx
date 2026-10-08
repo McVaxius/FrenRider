@@ -2856,4 +2856,6 @@ Açık: aşağıdaki BossMod ön ayarlarını herhangi bir rotasyon sağlayıcı
   </data>
   <data name="ADS interaction active; VBM setup deferred" xml:space="preserve"><value>ADS etkileşimi sürüyor; VBM kurulumu ertelendi</value></data>
   <data name="ADS interaction active; VBM settings pending" xml:space="preserve"><value>ADS etkileşimi sürüyor; VBM ayarları bekliyor</value></data>
+  <data name="Questing idle; VBM paused" xml:space="preserve"><value>Görev bekleniyor; VBM duraklatıldı</value></data>
+  <data name="Questing idle; VBM pause unconfirmed" xml:space="preserve"><value>Görev bekleniyor; VBM duraklatması doğrulanmadı</value></data>
 </root>

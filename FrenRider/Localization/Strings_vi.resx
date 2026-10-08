@@ -2856,4 +2856,6 @@ Bật: dùng các preset BossMod bên dưới với mọi nhà cung cấp rotati
   </data>
   <data name="ADS interaction active; VBM setup deferred" xml:space="preserve"><value>ADS đang tương tác; hoãn thiết lập VBM</value></data>
   <data name="ADS interaction active; VBM settings pending" xml:space="preserve"><value>ADS đang tương tác; cài đặt VBM đang chờ</value></data>
+  <data name="Questing idle; VBM paused" xml:space="preserve"><value>Đang chờ nhiệm vụ; VBM đã tạm dừng</value></data>
+  <data name="Questing idle; VBM pause unconfirmed" xml:space="preserve"><value>Đang chờ nhiệm vụ; chưa xác nhận tạm dừng VBM</value></data>
 </root>

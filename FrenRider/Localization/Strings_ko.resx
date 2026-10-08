@@ -2751,4 +2751,6 @@
   </data>
   <data name="ADS interaction active; VBM setup deferred" xml:space="preserve"><value>ADS 상호작용 중; VBM 설정을 미룹니다</value></data>
   <data name="ADS interaction active; VBM settings pending" xml:space="preserve"><value>ADS 상호작용 중; VBM 설정 적용 대기 중</value></data>
+  <data name="Questing idle; VBM paused" xml:space="preserve"><value>퀘스트 대기 중; VBM 일시 중지</value></data>
+  <data name="Questing idle; VBM pause unconfirmed" xml:space="preserve"><value>퀘스트 대기 중; VBM 일시 중지 확인 안 됨</value></data>
 </root>

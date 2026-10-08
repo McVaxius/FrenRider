@@ -82,8 +82,7 @@ public sealed class MagiaMiniWindow : Window, IDisposable
     public override void PostDraw()
     {
         motion.Restore(this);
-        UiGui.TitleWithButtons("Fren Rider Mini", UiText.T("Fren Rider Mini"), this,
-            people: true, brandSize: 32, compactBrand: plugin.Configuration.UiCompact);
+        UiGui.ImageTitle(this, UiText.T("Fren Rider Mini"), plugin.OriginalIcon);
         plugin.ApplyWindowOpacity(windowOpacity, WindowName);
         ImGui.PopStyleVar();
     }

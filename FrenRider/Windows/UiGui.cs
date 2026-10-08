@@ -361,6 +361,18 @@ internal static class UiGui
         return left + ScaledTextSize(translated, renderSize / ImGui.GetFontSize()).X + iconWidth + right + style.ItemInnerSpacing.X;
     }
 
+    internal static unsafe void ImageTitle(Window owner, string visibleTitle,
+        Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap icon)
+    {
+        var window = ImGuiP.FindWindowByName(owner.WindowName);
+        if (window.Handle == null) return;
+        var count = owner.TitleBarButtons.Count(button => !owner.IsClickthrough || button.AvailableClickthrough);
+        if (owner.AllowPinning || owner.AllowClickthrough || owner.AllowBackgroundBlur) count++;
+        var extraRight = count * (ImGuiP.CalcFontSize(window) + ImGui.GetStyle().ItemInnerSpacing.X);
+        using var font = UiText.Font(UiFontRole.Body);
+        MaterialWindowHeader.PaintTitle(window, visibleTitle, icon.Handle, icon.Size, extraRight, owner.ShowCloseButton);
+    }
+
     internal static unsafe void TitleWithButtons(string original,string translated,Window? owner,bool people=false,float brandSize=0,bool compactBrand=false)
     {
         var window = owner is null ? ImGuiP.GetCurrentWindow() : ImGuiP.FindWindowByName(owner.WindowName);

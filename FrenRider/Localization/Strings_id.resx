@@ -2856,4 +2856,6 @@ Aktif: gunakan preset BossMod di bawah dengan penyedia rotasi apa pun. Preset kh
   </data>
   <data name="ADS interaction active; VBM setup deferred" xml:space="preserve"><value>Interaksi ADS aktif; penyiapan VBM ditunda</value></data>
   <data name="ADS interaction active; VBM settings pending" xml:space="preserve"><value>Interaksi ADS aktif; pengaturan VBM menunggu</value></data>
+  <data name="Questing idle; VBM paused" xml:space="preserve"><value>Menunggu quest; VBM dijeda</value></data>
+  <data name="Questing idle; VBM pause unconfirmed" xml:space="preserve"><value>Menunggu quest; jeda VBM belum dikonfirmasi</value></data>
 </root>

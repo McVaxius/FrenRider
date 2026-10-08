@@ -40,9 +40,15 @@ Common commands:
 
 The main window shows run state, a read-only operator profile, party status, follow/mount/idle/teleport/respawn/Phoenix Down state, ADS state, exit mode, and collapsed debug details. Account and character selection stays in Settings; browsing another profile does not change the active automation profile.
 
-The header colour swatch and language selector apply to every Fren Rider window and popup. English, German, French, Spanish, Italian, Russian, Japanese, Korean, Simplified Chinese, Vietnamese, Brazilian Portuguese, Indonesian, Polish, and Turkish are included. Colours are calculated relative to the approved mint theme across panels, fields, borders, and foregrounds; warning and automation status colours keep their meaning. The native **C** checkbox selects compact spacing across the main, mini, Settings, and AutoDuty alert windows. Appearance preferences are also available in Settings under UI/About and save through the existing configuration.
+The header colour swatch and language selector apply to every Fren Rider window and popup. English, German, French, Spanish, Italian, Russian, Japanese, Korean, Simplified Chinese, Vietnamese, Brazilian Portuguese, Indonesian, Polish, Turkish, and Hindi are included. Colours are calculated relative to the approved mint theme across panels, fields, borders, and foregrounds; warning and automation status colours keep their meaning. The native **C** checkbox selects compact spacing across the main, mini, Settings, and AutoDuty alert windows. Appearance preferences are also available in Settings under UI/About and save through the existing configuration.
 
 The mini keeps the enable switch and exact saved fren identity available outside Eureka; its MAGIA Attack, Defense, and Off actions appear only in Eureka. Segoe UI and host-managed CJK/symbol fonts load through Dalamud's managed atlas and are never distributed with the plugin. Font readiness and missing glyphs are reported explicitly. The approved regular and compact layouts still require mcvaxius's in-game screenshot acceptance.
+
+Hindi is enabled only when the local font check passes. Otherwise the selector shows disabled **Hindi (unavailable)** while other languages remain usable. A saved Hindi choice that fails its required-font check shows an English status and **Use English**; that button explicitly saves English. Font failures never change the saved language automatically.
+
+**Transparency** applies to the complete plugin window, including its titlebar and popups. Settings provides normal opacity, automatic focus fade, faded opacity and delay; defaults are 100%, fading to 50% after 10 seconds without focus and restoring on focus. Compact and language controls can be hidden independently on Main while remaining available in Settings.
+
+Main's titlebar provides Settings, MAGIA Mini, the active-character Run toggle, and All FR on/off for the current account. Mini provides Main, Settings and Run. The packaged icon appears in Main branding and both titlebars, including collapsed windows.
 
 ## Core Features
 
@@ -125,9 +131,15 @@ The main window has large red **All FR off** and green **All FR on** buttons ben
 
 RotationSolver Reborn configuration keeps Auto, Manual, None, and Support under **RSR Operating Mode**. **RSR Aggro Type** independently exposes all five upstream hostile-target choices and applies the selected value through RSR settings IPC. Existing per-character value `4` from the former combined operating-mode list migrates once to Auto plus Previously Engaged Targets.
 
+While Questionable/WigglyQuest or Questionable Companion's rotation, Hunt Logs, or Mass GC is active, selected RSR temporarily uses Previously Engaged Targets outdoors and All Attackable Targets inside duties. This changes targeting only, including during QuestionableSolo authority; it preserves operating mode, saved profiles, matching DAD dungeon targeting, and active native overrides. A readable automation stop resumes the current saved targeting preference when FrenRider still owns the live value. If activity becomes unreadable after a confirmed run, the safe questing policy remains until a readable stop.
+
+During the same automation, selected VBM has both its FrenRider-owned AI and runtime movement presets paused outside duties and combat. Eligible combat/duty entry or an automation stop resumes the configured setup, respecting explicit AI-off and the existing mount, ADS, recovery, utility, and lease holds. Newer external AI/preset selections are preserved. BMR behavior is unchanged; disabling FrenRider uses normal owned-settings cleanup.
+
 **Equip job stone for current class** is a per-character Automation setting and defaults off. While Fren Rider is enabled, it acts only on a level 30+ base class when equipment can be changed safely and the character has a valid current gearset. Fren Rider checks the Soul Crystal armoury chest in slot order, equips the first stone whose job belongs to the current class, confirms the equipped slot, and updates that gearset once. A character already on a job is never scanned; Arcanist uses whichever matching Summoner or Scholar stone is encountered first.
 
 BossMod preset activation is provider-specific: VBM selections receive only the VBM preset command, while BMR and non-VBM rotation selections use BMR for BossMod AI and receive only the BMR preset command. **Push Presets Now** installs the packaged presets and applies the current selection through the same routing.
+
+Combat's **Configure rotation preset manually** uses your selected existing preset for the current normal, deep-dungeon or FATE context. With it off, Fren Rider selects its packaged preset by job role. These choices belong to the active character profile; editing another profile in Settings does not redirect active automation.
 
 Daedalus is rotation option 4 and is controlled through its typed `Daedalus.IsEnabled` and `Daedalus.SetEnabled` IPC. When Daedalus is the effective normal or Foray rotation, **Daedalus Engage Mode** can send None, Focus, Split, or Kill Adds through Daedalus LAN coordination. Focus requires a living enemy hard target; failures leave Daedalus unchanged. Fren Rider disables Daedalus during conflicting rotation, mounted, Questionable, and Coppelia ownership. **Restore snapshot** returns Daedalus to the enabled state captured before Fren Rider changed it; **Turn everything off** disables it.
 

@@ -38,6 +38,9 @@ public class CombatService
     private CombatSettingsSnapshot? lastObservedCombatSettings;
     private DadDungeonRsrAggroOwnership? dungeonRsrAggro;
     private bool pendingDungeonRsrAggroApply;
+    private QuestingRsrAggroOwnership? questingRsrAggro;
+    private QuestingRsrStopSelection? questingRsrStopSelection;
+    private bool questingVbmHeld;
     private CombatSettingsSnapshot? pendingCombatSettings;
     private CombatSettingsSnapshot? lastAppliedCombatSettings;
     private string lastBossModDefaultSettingsSignature = string.Empty;
@@ -78,6 +81,9 @@ public class CombatService
 
     public void ClearExternalAutomationRuntimeState(string reason)
     {
+        ReleaseQuestingRsrAggroForDeparture(reason);
+        questingRsrStopSelection = null;
+        questingVbmHeld = false;
         if (mountedRotationSuppressed || wrathAutoActive)
             Plugin.Log.Information($"[FrenRider] Cleared local external automation runtime flags after {reason}.");
 
@@ -102,6 +108,9 @@ public class CombatService
             inDuty,
             questionableIpcService.Refresh(force: true),
             frenRiderBootstrapAllowed: false);
+        RefreshQuestingRsrAggro(config, inDuty);
+        if (HoldQuestingVbm(config, GetSelectedRotationPluginName(config)))
+            return false;
 
         // if (decision.ShouldForceCombatOff)
         //     ForceDutyCombatOff("QuestionableSolo duty authority");
@@ -149,6 +158,7 @@ public class CombatService
         }
 
         var questionableSnapshot = questionableIpcService.Refresh();
+        RefreshQuestingRsrAggro(config, inDuty);
         var authorityDecision = RefreshDutyCombatAuthority(
             config,
             inDuty,
@@ -207,8 +217,27 @@ public class CombatService
 
         LogFateCombatDecisionIfChanged(config, inCombat, inDuty, mountedOrMounting);
 
+        if (HoldQuestingVbm(config, GetSelectedRotationPluginName(config)))
+        {
+            wasInCombat = false;
+            wasInDuty = false;
+            return;
+        }
+
         if (HandleMountedRotationLifecycle(config, mountedOrMounting, inCombat, inDuty))
             return;
+
+        if (questingVbmHeld && !IsCombatSetupHeld(inDuty)
+            && (GetSelectedRotationPluginName(config) != "VBM" || plugin.AutorotIpcService.CanResumeOwnedVbm())
+            && !IsAdsInteractionVbmPauseActive(GetSelectedRotationPluginName(config)))
+        {
+            questingVbmHeld = false;
+            if (GetSelectedRotationPluginName(config) == "VBM" && !IsRotationDisabled(config))
+            {
+                if (inCombat || inDuty) ActivateRotation(config, ignoreCooldown: true);
+                else ApplyPassiveRotationSettings(config, "quest automation stopped");
+            }
+        }
 
         if (!IsRotationDisabled(config)
             && lastBossModMovementUnlockSignature.EndsWith("|VBM paused", StringComparison.Ordinal))
@@ -450,6 +479,9 @@ public class CombatService
             return;
 
         var pluginName = GetSelectedRotationPluginName(config);
+        if (HoldQuestingVbm(config, pluginName) || pluginName == "VBM" && (IsSafetyCombatSetupHeld(IsInDuty())
+            || questingVbmHeld && !plugin.AutorotIpcService.CanResumeOwnedVbm()))
+            return;
         if (DeferAdsInteractionVbmSetup(config, pluginName))
             return;
 
@@ -458,7 +490,8 @@ public class CombatService
         lastRotationToggleMs = now;
 
         // Select rotation plugin (different for foray)
-        if (pluginName == "RSR" && dungeonRsrAggro is not null && !ApplyRsrAggro(config))
+        if (pluginName == "RSR" && (dungeonRsrAggro is not null || questingRsrAggro is not null || questingRsrStopSelection is not null
+            || questionableIpcService.QuestAutomationActive) && !ApplyRsrAggro(config))
             return;
         ValidateCurrentManualPreset(config, pluginName);
         lastActivePluginIdx = Array.IndexOf(RotationPluginNames, pluginName);
@@ -541,7 +574,8 @@ public class CombatService
             return "None";
 
         var stateCommand = ResolveRsrStateCommandType(config.RotationType);
-        if (!ApplyRsrAggro(config) && dungeonRsrAggro is not null)
+        if (!ApplyRsrAggro(config) && (dungeonRsrAggro is not null || questingRsrAggro is not null || questingRsrStopSelection is not null
+            || questionableIpcService.QuestAutomationActive))
             return "Targeting unavailable";
 
         switch (config.RotationType)
@@ -719,9 +753,13 @@ public class CombatService
             return;
 
         var pluginName = GetSelectedRotationPluginName(config);
+        if (HoldQuestingVbm(config, pluginName) || pluginName == "VBM" && (IsSafetyCombatSetupHeld(IsInDuty())
+            || questingVbmHeld && !plugin.AutorotIpcService.CanResumeOwnedVbm()))
+            return;
         if (DeferAdsInteractionVbmSetup(config, pluginName))
             return;
-        if (pluginName == "RSR" && dungeonRsrAggro is not null && !ApplyRsrAggro(config))
+        if (pluginName == "RSR" && (dungeonRsrAggro is not null || questingRsrAggro is not null || questingRsrStopSelection is not null
+            || questionableIpcService.QuestAutomationActive) && !ApplyRsrAggro(config))
             return;
         ValidateCurrentManualPreset(config, pluginName);
         lastActivePluginIdx = Array.IndexOf(RotationPluginNames, pluginName);
@@ -759,6 +797,8 @@ public class CombatService
         if (plugin.AdsIntegrationService.IsSoloCombatHeld)
             return;
         var config = plugin.ConfigManager.GetActiveConfig();
+        if (HoldQuestingVbm(config, GetSelectedRotationPluginName(config)))
+            return;
         if (config.Enabled && IsCombatSetupHeld(IsInDuty()))
             return;
         var pluginName = GetSelectedRotationPluginName(config);
@@ -784,6 +824,9 @@ public class CombatService
 
     public void ApplyBossModFollowStartupDefaults()
     {
+        var config = plugin.ConfigManager.GetActiveConfig();
+        if (HoldQuestingVbm(config, GetSelectedRotationPluginName(config)))
+            return;
         if (IsCombatSetupHeld(IsInDuty()))
             return;
 
@@ -796,10 +839,35 @@ public class CombatService
     }
 
     private bool IsCombatSetupHeld(bool inDuty)
-        => ShouldSuppressFrenRiderCombatCommands || plugin.AutomationService.IsUtilityGateActive
+        => ShouldSuppressFrenRiderCombatCommands || IsSafetyCombatSetupHeld(inDuty);
+
+    private bool IsSafetyCombatSetupHeld(bool inDuty)
+        => plugin.AutomationService.IsUtilityGateActive
             || plugin.CoppeliaPowerlevelLeaseService.IsLeaseActive || plugin.AdsHyperFocusLeaseService.IsLeaseActive
             || plugin.PhoenixDownRecoveryService.HoldActions
             || !inDuty && (Plugin.Condition[ConditionFlag.Mounted] || Plugin.Condition[ConditionFlag.Mounting71]);
+
+    internal static bool ShouldHoldQuestingVbm(bool enabled, string provider, bool questActive, bool inDuty, bool inCombat)
+        => enabled && provider == "VBM" && questActive && !inDuty && !inCombat;
+
+    private bool HoldQuestingVbm(CharacterConfig config, string provider)
+    {
+        questionableIpcService.Refresh();
+        if (!ShouldHoldQuestingVbm(config.Enabled, provider, questionableIpcService.QuestAutomationActive,
+                IsInDuty(), Plugin.Condition[ConditionFlag.InCombat]))
+            return false;
+        plugin.CaptureExternalAutomationSnapshot("questing idle VBM pause");
+        var confirmed = plugin.AutorotIpcService.PauseOwnedVbm(command => TrySendCommand(command));
+        questingVbmHeld = true;
+        lastRotationToggleMs = 0;
+        lastAppliedCombatSettings = null;
+        lastObservedCombatSettings = null;
+        ResetCombatSettingsRefreshTracking();
+        State = CombatState.OutOfCombat;
+        ActivePreset = string.Empty;
+        StateDetail = confirmed ? "Questing idle; VBM paused" : "Questing idle; VBM pause unconfirmed";
+        return true;
+    }
 
     private bool IsAdsInteractionVbmPauseActive(string pluginName)
     {
@@ -897,6 +965,8 @@ public class CombatService
         var pluginName = string.IsNullOrWhiteSpace(mountedSuppressedPluginName)
             ? GetSelectedRotationPluginName(config)
             : mountedSuppressedPluginName;
+        if (HoldQuestingVbm(config, pluginName))
+            return;
 
         if (config.Enabled && !IsRotationDisabled(config) && config.BossModAI != 1
             && IsAdsInteractionVbmPauseActive(pluginName))
@@ -975,6 +1045,8 @@ public class CombatService
 
     private void TryApplyPendingCombatSettingsRefresh(CharacterConfig config, long now, bool inCombat, bool inDuty)
     {
+        if (HoldQuestingVbm(config, GetSelectedRotationPluginName(config)))
+            return;
         if (pendingCombatSettingsRefreshMs == 0 || now < pendingCombatSettingsRefreshMs)
             return;
 
@@ -1032,7 +1104,7 @@ public class CombatService
         if (settings.Provider == "RSR")
         {
             if (previous.RsrAggroType != settings.RsrAggroType || pendingDungeonRsrAggroApply)
-                ApplyRsrAggro(config);
+                if (!ApplyRsrAggro(config)) return;
             if (previous.Positional != settings.Positional)
                 SetPositional(config, settings.Provider);
         }
@@ -1087,9 +1159,9 @@ public class CombatService
                 Plugin.Log.Warning($"[FrenRider][DAD] {plugin.AutorotIpcService.LastStatus}");
             return applied;
         }
-        var hostileType = config.RotationType == RotationTypePreviouslyEngagedTargets
-            ? AutorotIpcService.RsrTargetHostileType.TargetsHaveTarget
-            : ResolveRsrTargetHostileType(config.RsrAggroType);
+        if (questionableIpcService.QuestAutomationActive || questingRsrAggro is not null || questingRsrStopSelection is not null)
+            return RefreshQuestingRsrAggro(config, IsInDuty());
+        var hostileType = ResolveRsrTargetHostileType(GetEffectiveRsrAggro(config));
         return plugin.AutorotIpcService.TrySetRsrHostileType(hostileType);
     }
 
@@ -1107,7 +1179,8 @@ public class CombatService
         if (dungeonRsrAggro is { } existing)
             return existing.RunId == runId && existing.ContentFinderConditionId == expectedContentFinderConditionId
                 && existing.TerritoryTypeId == territory && MatchesDungeonRsrOwner(existing, config);
-        if (!plugin.AutorotIpcService.TryCaptureDungeonRsrAggro(out var live))
+        if (!ReleaseQuestingRsrAggroForDeparture("DAD targeting acquisition")
+            || !plugin.AutorotIpcService.TryCaptureDungeonRsrAggro(out var live))
         {
             Plugin.Log.Warning($"[FrenRider][DAD] {plugin.AutorotIpcService.LastStatus}");
             return false;
@@ -1156,7 +1229,75 @@ public class CombatService
     }
 
     private int GetEffectiveRsrAggro(CharacterConfig config)
-        => dungeonRsrAggro?.ResolveSelection(plugin.ConfigManager.QuestionableCharacterIdentity, config) ?? config.RsrAggroType;
+        => dungeonRsrAggro is { } dad && MatchesDungeonRsrOwner(dad, config)
+            ? (int)AutorotIpcService.RsrTargetHostileType.AllTargetsCanAttack
+            : ResolveQuestingRsrAggro(config, questionableIpcService.QuestAutomationActive, IsInDuty());
+
+    internal static int ResolveQuestingRsrAggro(CharacterConfig config, bool active, bool inDuty)
+        => active ? (int)(inDuty ? AutorotIpcService.RsrTargetHostileType.AllTargetsCanAttack
+                : AutorotIpcService.RsrTargetHostileType.TargetsHaveTarget)
+            : config.RotationType == RotationTypePreviouslyEngagedTargets
+                ? (int)AutorotIpcService.RsrTargetHostileType.TargetsHaveTarget : config.RsrAggroType;
+
+    private bool RefreshQuestingRsrAggro(CharacterConfig config, bool inDuty)
+    {
+        var account = plugin.ConfigManager.CurrentAccountId;
+        var character = plugin.ConfigManager.QuestionableCharacterIdentity;
+        var active = questionableIpcService.QuestAutomationActive;
+        if (questingRsrStopSelection is { } stopped)
+        {
+            if (!active && stopped.Account == account && stopped.Character == character
+                && ReferenceEquals(stopped.Profile, config) && stopped.Aggro == config.RsrAggroType
+                && stopped.Mode == config.RotationType && GetSelectedRotationPluginName(config) == "RSR")
+            {
+                if (!plugin.AutorotIpcService.TryObserveRsrAggroOwner(stopped.Live, out var same)) return false;
+                if (same) return stopped.Confirmed;
+            }
+            questingRsrStopSelection = null;
+        }
+        if (questingRsrAggro is { } previous && (previous.Account != account || previous.Character != character
+            || !ReferenceEquals(previous.Profile, config) || GetSelectedRotationPluginName(config) != "RSR"))
+            ReleaseQuestingRsrAggroForDeparture("questing targeting identity departure");
+        if (questingRsrAggro is { } current)
+        {
+            if (!plugin.AutorotIpcService.TryObserveRsrAggroOwner(current.Live, out var matches)) return false;
+            if (!matches) ReleaseQuestingRsrAggroForDeparture("native RSR targeting departure");
+        }
+        if (!config.Enabled || GetSelectedRotationPluginName(config) != "RSR" || string.IsNullOrEmpty(character)
+            || dungeonRsrAggro is not null || plugin.AdsIntegrationService.IsSoloCombatHeld
+            || IsSafetyCombatSetupHeld(inDuty) || plugin.AdsDutyIpcService.IsInteractionVbmPauseActive)
+            return false;
+        if (!active && questingRsrAggro is null) return true;
+        var target = ResolveRsrTargetHostileType(ResolveQuestingRsrAggro(config, active, inDuty));
+        if (!active && questingRsrAggro is { } finished)
+        {
+            if (!plugin.AutorotIpcService.StopOwnedRsrAggro(finished.Live, target, out var confirmed)) return false;
+            // This remembers stop intent only. It is never used to restore the pre-quest value.
+            questingRsrStopSelection = new(account, character, config, config.RsrAggroType, config.RotationType, confirmed, finished.Live);
+            questingRsrAggro = null;
+            ResetCombatSettingsRefreshTracking();
+            lastObservedCombatSettings = CaptureCombatSettings(config);
+            if (confirmed && lastAppliedCombatSettings is { } applied)
+                lastAppliedCombatSettings = applied with { RsrAggroType = (int)target };
+            return confirmed;
+        }
+        if (questingRsrAggro is null)
+        {
+            if (!plugin.AutorotIpcService.TryCaptureRsrAggro(target, out var live)) return false;
+            questingRsrAggro = new(account, character, config, live!);
+        }
+        return plugin.AutorotIpcService.ApplyOwnedRsrAggro(questingRsrAggro.Live, target);
+    }
+
+    internal bool ReleaseQuestingRsrAggroForDeparture(string reason)
+    {
+        if (questingRsrAggro is not { } owned) return true;
+        questingRsrAggro = null;
+        if (owned.Account != plugin.ConfigManager.CurrentAccountId
+            || owned.Character != plugin.ConfigManager.QuestionableCharacterIdentity)
+            return false;
+        return plugin.AutorotIpcService.ReleaseOwnedRsrAggro(owned.Live);
+    }
 
     private bool MatchesDungeonRsrOwner(DadDungeonRsrAggroOwnership owned, CharacterConfig config)
         => owned.Matches(plugin.ConfigManager.QuestionableCharacterIdentity, config);
@@ -1316,6 +1457,9 @@ public class CombatService
             return true;
 
         var config = plugin.ConfigManager.GetActiveConfig();
+        if (HoldQuestingVbm(config, pluginName) || pluginName == "VBM" && questingVbmHeld
+            && !plugin.AutorotIpcService.CanResumeOwnedVbm())
+            return false;
         if (DeferAdsInteractionVbmSetup(config, pluginName))
             return false;
         if (config.Enabled)
@@ -1336,6 +1480,9 @@ public class CombatService
 
     private bool ApplyConfiguredBossModAiState(CharacterConfig config, string pluginName, string reason)
     {
+        if (HoldQuestingVbm(config, pluginName) || pluginName == "VBM" && questingVbmHeld
+            && !plugin.AutorotIpcService.CanResumeOwnedVbm())
+            return false;
         if (config.BossModAI != 1 && (!config.Enabled || IsRotationDisabled(config)))
             return true;
 
@@ -1679,6 +1826,12 @@ public class CombatService
 
 internal sealed record CombatSettingsSnapshot(CharacterConfig Profile, string Provider, string Preset,
     int BossModAI, int RotationType, int RsrAggroType, int Positional, DaedalusTargetMode DaedalusTargetMode);
+
+internal sealed record QuestingRsrAggroOwnership(string Account, string Character, CharacterConfig Profile,
+    DungeonRsrLiveOwnership Live);
+
+internal sealed record QuestingRsrStopSelection(string Account, string Character, CharacterConfig Profile,
+    int Aggro, int Mode, bool Confirmed, DungeonRsrLiveOwnership Live);
 
 internal sealed record DadDungeonRsrAggroOwnership(string RunId, string CharacterIdentity, CharacterConfig Profile,
     uint ContentFinderConditionId, uint TerritoryTypeId, int SavedAggroType, DungeonRsrLiveOwnership Live)

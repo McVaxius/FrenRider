@@ -604,6 +604,30 @@ public class AutorotIpcService : IDisposable
         return true;
     }
 
+    internal bool PauseOwnedVbm(Func<string, bool> sendCommand)
+    {
+        if (ownedIdentity.Provider != "VBM" || !TryReadOwnedBossModSettings(out var current) || current.AiEnabled is null
+            || !ownedSettings!.CanChangeRuntime(current) || !ownedSettings.CanChangeAi(current))
+            return false;
+        if (current.AiEnabled != false)
+        {
+            if (!SendBossModAiCommand("/vbmai off", sendCommand)
+                || !TryReadOwnedBossModSettings(out current) || current.AiEnabled != false)
+                return false;
+        }
+        var disabled = new BossModRuntimePresetState(true, Array.Empty<string>());
+        if (BossModRuntimePresetState.Matches(current.Runtime, disabled))
+        {
+            ownedSettings!.OwnRuntime(disabled);
+            return true;
+        }
+        return DisableOwnedBossModRuntime();
+    }
+
+    internal bool CanResumeOwnedVbm()
+        => ownedIdentity.Provider == "VBM" && TryReadOwnedBossModSettings(out var current)
+            && ownedSettings!.CanChangeRuntime(current) && ownedSettings.CanChangeAi(current);
+
     internal bool ApplyUnownedBossModPreset(string rotationProvider, string name)
     {
         if (ownedSettings is not null && (cleanupStarted || cleanupFailed))
@@ -790,6 +814,9 @@ public class AutorotIpcService : IDisposable
     }
 
     internal bool TryCaptureDungeonRsrAggro(out DungeonRsrLiveOwnership? ownership)
+        => TryCaptureRsrAggro(RsrTargetHostileType.AllTargetsCanAttack, out ownership);
+
+    internal bool TryCaptureRsrAggro(RsrTargetHostileType target, out DungeonRsrLiveOwnership? ownership)
     {
         ownership = null;
         if (!TryReadLiveRsrTargeting(out var current, out var detail))
@@ -797,7 +824,7 @@ public class AutorotIpcService : IDisposable
             LastStatus = detail;
             return false;
         }
-        if (current!.ExternalHostile is { } external && external != (byte)RsrTargetHostileType.AllTargetsCanAttack)
+        if (current!.ExternalHostile is { } external && external != (byte)target)
         {
             LastStatus = "DAD dungeon RSR targeting retained: an active external targeting override has priority.";
             return false;
@@ -809,6 +836,22 @@ public class AutorotIpcService : IDisposable
 
     internal bool ApplyDungeonRsrAggro(DungeonRsrLiveOwnership ownership)
     {
+        var applied = ApplyOwnedRsrAggro(ownership, RsrTargetHostileType.AllTargetsCanAttack);
+        if (applied)
+            LastStatus = "DAD dungeon All Attackable Targets confirmed without changing operating mode.";
+        return applied;
+    }
+
+    internal bool TryObserveRsrAggroOwner(DungeonRsrLiveOwnership ownership, out bool matches)
+    {
+        var readable = TryReadLiveRsrTargeting(out var current, out var detail);
+        matches = readable && ownership.MatchesIdentity(current!);
+        if (!readable) LastStatus = detail;
+        return readable;
+    }
+
+    internal bool ApplyOwnedRsrAggro(DungeonRsrLiveOwnership ownership, RsrTargetHostileType target)
+    {
         if (!TryReadLiveRsrTargeting(out var current, out var detail) || !ownership.MatchesIdentity(current!))
         {
             LastStatus = string.IsNullOrEmpty(detail)
@@ -816,7 +859,7 @@ public class AutorotIpcService : IDisposable
                 : detail;
             return false;
         }
-        const byte all = (byte)RsrTargetHostileType.AllTargetsCanAttack;
+        var all = (byte)target;
         if (current!.ExternalHostile is { } external && external != all)
         {
             LastStatus = "DAD dungeon RSR targeting retained: an active external targeting override has priority.";
@@ -829,7 +872,7 @@ public class AutorotIpcService : IDisposable
         }
         if (current.ConfiguredHostile != all)
         {
-            _ = TrySetRsrHostileType(RsrTargetHostileType.AllTargetsCanAttack);
+            _ = TrySetRsrHostileType(target);
         }
         var readable = TryReadLiveRsrTargeting(out var after, out detail) && ownership.MatchesIdentity(after!);
         if (readable && after!.ConfiguredHostile == all && current.ConfiguredHostile != all)
@@ -841,11 +884,33 @@ public class AutorotIpcService : IDisposable
                 : detail;
             return false;
         }
-        LastStatus = "DAD dungeon All Attackable Targets confirmed without changing operating mode.";
+        LastStatus = $"RSR {target} confirmed without changing operating mode.";
         return true;
     }
 
+    internal bool StopOwnedRsrAggro(DungeonRsrLiveOwnership ownership, RsrTargetHostileType savedTarget,
+        out bool targetConfirmed)
+    {
+        targetConfirmed = false;
+        if (!TryReadLiveRsrTargeting(out var current, out var detail) || !ownership.MatchesIdentity(current!))
+        {
+            LastStatus = string.IsNullOrEmpty(detail) ? "RSR targeting stop retained after a native identity change." : detail;
+            return false;
+        }
+        if (current!.ConfiguredHostile != (ownership.ExpectedConfiguredHostile ?? ownership.OriginalConfiguredHostile)
+            || current.ExternalHostile is { } external && external != (byte)savedTarget)
+        {
+            LastStatus = "RSR questing targeting released; newer native targeting is retained.";
+            return true;
+        }
+        targetConfirmed = ApplyOwnedRsrAggro(ownership, savedTarget);
+        return targetConfirmed;
+    }
+
     internal bool ReleaseDungeonRsrAggro(DungeonRsrLiveOwnership ownership, bool preserveNewerSelection = false)
+        => ReleaseOwnedRsrAggro(ownership, preserveNewerSelection);
+
+    internal bool ReleaseOwnedRsrAggro(DungeonRsrLiveOwnership ownership, bool preserveNewerSelection = false)
     {
         if (preserveNewerSelection || ownership.ExpectedConfiguredHostile is null)
         {
@@ -1362,6 +1427,8 @@ internal sealed class BossModSettingsOwnership(string provider, BossModSettingsS
     internal bool CanChangeDistance(double? current)
         => Original.PreferredDistance is { } originalDistance && double.IsFinite(originalDistance)
             && current == (OwnedDistance ?? originalDistance);
+    internal bool CanChangeAi(BossModSettingsSnapshot current)
+        => current.AiEnabled is not null && current.AiEnabled == (ownedAiEnabled ?? Original.AiEnabled);
     internal void OwnRuntime(BossModRuntimePresetState state) => OwnedRuntime = state;
     internal void OwnStoredSelector(string? selector) => OwnedStoredSelector = selector;
     internal void OwnDistance(double distance) => OwnedDistance = distance;
@@ -1396,6 +1463,11 @@ internal sealed class BossModSettingsOwnership(string provider, BossModSettingsS
             return false;
         if (BossModRuntimePresetState.Matches(before.Runtime, after.Runtime))
             return true;
+        if (provider == "VBM" && !before.Runtime.ForceDisabled && !after.Runtime.ForceDisabled)
+        {
+            var names = before.Runtime.Names.Where(name => name != "VBM Multibox");
+            return after.Runtime.Names.SequenceEqual(enabled ? names.Append("VBM Multibox") : names, StringComparer.Ordinal);
+        }
         return provider == "BMR" && after.Runtime is { ForceDisabled: false, Names.Count: 0 };
     }
     internal void ObserveAiCommand(BossModSettingsSnapshot before, BossModSettingsSnapshot after, bool enabled)
