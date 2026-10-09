@@ -2969,4 +2969,8 @@ Bật: dùng các preset BossMod bên dưới với mọi nhà cung cấp rotati
   <data name="Buy travels to the vendor and fills the stock target once. Purchasing starts only when you press Buy. Zero targets disable purchasing." xml:space="preserve"><value>Nút Mua đến người bán và bổ sung tới mục tiêu tồn kho một lần. Chỉ bắt đầu mua khi bạn nhấn Mua. Mục tiêu bằng 0 tắt mua hàng.</value></data>
   <data name="Buying companion food from Vath requires beast tribe progression through The Naming of Vath. Purchase is unavailable until the vendor is unlocked." xml:space="preserve"><value>Mua thức ăn bạn đồng hành từ Vath yêu cầu tiến triển nhiệm vụ bộ tộc đến khi hoàn thành The Naming of Vath. Không thể mua cho đến khi mở khóa người bán.</value></data>
   <data name="Companion purchase cancelled: context, profile, or settings changed." xml:space="preserve"><value>Đã hủy mua vật phẩm bạn đồng hành: ngữ cảnh, hồ sơ hoặc thiết lập thay đổi.</value></data>
+  <data name="Effective rotation: {0} ({1})" xml:space="preserve"><value>Vòng kỹ năng đang áp dụng: {0} ({1})</value></data>
+  <data name="DEFAULT CONFIG is a template. Combat uses the active character profile." xml:space="preserve"><value>DEFAULT CONFIG là mẫu. Chiến đấu dùng hồ sơ của nhân vật đang hoạt động.</value></data>
+  <data name="Temporary DAD profile supplies the effective rotation; the controls below edit the saved profile." xml:space="preserve"><value>Hồ sơ DAD tạm thời quyết định vòng kỹ năng đang áp dụng; các điều khiển bên dưới chỉnh sửa hồ sơ đã lưu.</value></data>
+  <data name="Normal" xml:space="preserve"><value>Thông thường</value></data>
 </root>

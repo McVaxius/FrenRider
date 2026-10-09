@@ -1,3 +1,11 @@
+2026-10-08 - Dedicated Window appearance settings (I505)
+
+- Move colour, language, compact mode and transparency controls into their own settings tab or sidebar page. Retain the existing controls, native IDs, saved preferences and actions; keep normal settings visible without an appearance block above them. Versions and client configuration are unchanged. Local build checks and game visual acceptance are recorded separately in the selected task checkpoint.
+
+2026-10-08 - Effective rotation in Combat settings (I490)
+
+- Show the active character's effective rotation for the current normal/Foray context. Clearly label DEFAULT CONFIG as a template and distinguish a full temporary DAD profile from the saved profile being edited. Keep existing rotation controls and combat behavior unchanged; the Questionable ADS/exit override does not select a rotation provider.
+
 2026-10-08 - Manual purchase controls on Main and Mini (I496)
 
 - Show Buy Greens, Buy Food and Stop purchasing on Main, with cart/food/stop icons on Mini inside and outside Eureka. Both windows show current NQ stock beside the corresponding action; tooltips identify the selected food, saved targets, Vath unlock requirement and current purchase status. Unknown stock displays a dash.

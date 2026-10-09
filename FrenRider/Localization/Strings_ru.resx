@@ -2864,4 +2864,8 @@
   <data name="Buy travels to the vendor and fills the stock target once. Purchasing starts only when you press Buy. Zero targets disable purchasing." xml:space="preserve"><value>Кнопка покупки перемещает к торговцу и однократно пополняет целевой запас. Покупка начинается только по нажатию кнопки. Нулевой запас отключает покупки.</value></data>
   <data name="Buying companion food from Vath requires beast tribe progression through The Naming of Vath. Purchase is unavailable until the vendor is unlocked." xml:space="preserve"><value>Для покупки еды для спутника у Vath нужно пройти племенные задания вплоть до The Naming of Vath. Покупка недоступна, пока торговец не разблокирован.</value></data>
   <data name="Companion purchase cancelled: context, profile, or settings changed." xml:space="preserve"><value>Покупка для спутника отменена: изменились условия, профиль или настройки.</value></data>
+  <data name="Effective rotation: {0} ({1})" xml:space="preserve"><value>Действующая ротация: {0} ({1})</value></data>
+  <data name="DEFAULT CONFIG is a template. Combat uses the active character profile." xml:space="preserve"><value>DEFAULT CONFIG — шаблон. В бою используется профиль активного персонажа.</value></data>
+  <data name="Temporary DAD profile supplies the effective rotation; the controls below edit the saved profile." xml:space="preserve"><value>Временный профиль DAD определяет действующую ротацию; элементы ниже изменяют сохранённый профиль.</value></data>
+  <data name="Normal" xml:space="preserve"><value>Обычный</value></data>
 </root>

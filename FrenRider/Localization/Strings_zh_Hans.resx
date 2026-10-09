@@ -2864,4 +2864,8 @@
   <data name="Buy travels to the vendor and fills the stock target once. Purchasing starts only when you press Buy. Zero targets disable purchasing." xml:space="preserve"><value>购买按钮会前往商人处并补足目标库存一次。只有点击购买按钮才会开始。目标为0会禁用购买。</value></data>
   <data name="Buying companion food from Vath requires beast tribe progression through The Naming of Vath. Purchase is unavailable until the vendor is unlocked." xml:space="preserve"><value>向瓦斯族购买搭档饲料需要推进友好部族任务并完成The Naming of Vath。解锁商人之前无法购买。</value></data>
   <data name="Companion purchase cancelled: context, profile, or settings changed." xml:space="preserve"><value>搭档用品购买已取消：当前状况、配置或设置发生变化。</value></data>
+  <data name="Effective rotation: {0} ({1})" xml:space="preserve"><value>生效的循环：{0}（{1}）</value></data>
+  <data name="DEFAULT CONFIG is a template. Combat uses the active character profile." xml:space="preserve"><value>DEFAULT CONFIG 是模板。战斗使用当前角色的配置。</value></data>
+  <data name="Temporary DAD profile supplies the effective rotation; the controls below edit the saved profile." xml:space="preserve"><value>临时 DAD 配置决定生效的循环；下方控件编辑的是已保存的配置。</value></data>
+  <data name="Normal" xml:space="preserve"><value>普通</value></data>
 </root>

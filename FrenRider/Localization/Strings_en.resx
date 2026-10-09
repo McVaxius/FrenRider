@@ -2963,4 +2963,8 @@ On: use the BossMod presets below with any rotation provider. A custom preset ma
   <data name="Buy travels to the vendor and fills the stock target once. Purchasing starts only when you press Buy. Zero targets disable purchasing." xml:space="preserve"><value>Buy travels to the vendor and fills the stock target once. Purchasing starts only when you press Buy. Zero targets disable purchasing.</value></data>
   <data name="Buying companion food from Vath requires beast tribe progression through The Naming of Vath. Purchase is unavailable until the vendor is unlocked." xml:space="preserve"><value>Buying companion food from Vath requires beast tribe progression through The Naming of Vath. Purchase is unavailable until the vendor is unlocked.</value></data>
   <data name="Companion purchase cancelled: context, profile, or settings changed." xml:space="preserve"><value>Companion purchase cancelled: context, profile, or settings changed.</value></data>
+  <data name="Effective rotation: {0} ({1})" xml:space="preserve"><value>Effective rotation: {0} ({1})</value></data>
+  <data name="DEFAULT CONFIG is a template. Combat uses the active character profile." xml:space="preserve"><value>DEFAULT CONFIG is a template. Combat uses the active character profile.</value></data>
+  <data name="Temporary DAD profile supplies the effective rotation; the controls below edit the saved profile." xml:space="preserve"><value>Temporary DAD profile supplies the effective rotation; the controls below edit the saved profile.</value></data>
+  <data name="Normal" xml:space="preserve"><value>Normal</value></data>
 </root>

@@ -2969,4 +2969,8 @@ Aktif: gunakan preset BossMod di bawah dengan penyedia rotasi apa pun. Preset kh
   <data name="Buy travels to the vendor and fills the stock target once. Purchasing starts only when you press Buy. Zero targets disable purchasing." xml:space="preserve"><value>Beli menuju pedagang dan mengisi target stok sekali. Pembelian hanya dimulai saat Anda menekan Beli. Target nol menonaktifkan pembelian.</value></data>
   <data name="Buying companion food from Vath requires beast tribe progression through The Naming of Vath. Purchase is unavailable until the vendor is unlocked." xml:space="preserve"><value>Membeli makanan pendamping dari Vath memerlukan progres misi suku hingga menyelesaikan The Naming of Vath. Pembelian tidak tersedia sampai pedagang terbuka.</value></data>
   <data name="Companion purchase cancelled: context, profile, or settings changed." xml:space="preserve"><value>Pembelian pendamping dibatalkan: konteks, profil, atau pengaturan berubah.</value></data>
+  <data name="Effective rotation: {0} ({1})" xml:space="preserve"><value>Rotasi efektif: {0} ({1})</value></data>
+  <data name="DEFAULT CONFIG is a template. Combat uses the active character profile." xml:space="preserve"><value>DEFAULT CONFIG adalah templat. Pertempuran memakai profil karakter aktif.</value></data>
+  <data name="Temporary DAD profile supplies the effective rotation; the controls below edit the saved profile." xml:space="preserve"><value>Profil DAD sementara menentukan rotasi efektif; kontrol di bawah mengedit profil tersimpan.</value></data>
+  <data name="Normal" xml:space="preserve"><value>Normal</value></data>
 </root>

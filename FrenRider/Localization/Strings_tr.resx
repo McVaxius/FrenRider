@@ -2969,4 +2969,8 @@ Açık: aşağıdaki BossMod ön ayarlarını herhangi bir rotasyon sağlayıcı
   <data name="Buy travels to the vendor and fills the stock target once. Purchasing starts only when you press Buy. Zero targets disable purchasing." xml:space="preserve"><value>Satın Al, satıcıya gider ve hedef stoku bir kez tamamlar. Satın alma yalnızca Satın Al düğmesine basınca başlar. Sıfır hedef satın almayı kapatır.</value></data>
   <data name="Buying companion food from Vath requires beast tribe progression through The Naming of Vath. Purchase is unavailable until the vendor is unlocked." xml:space="preserve"><value>Vath’tan yoldaş yemi almak için kabile görevlerinde The Naming of Vath tamamlanmalıdır. Satıcı açılana kadar satın alma kullanılamaz.</value></data>
   <data name="Companion purchase cancelled: context, profile, or settings changed." xml:space="preserve"><value>Yoldaş satın alması iptal edildi: bağlam, profil veya ayarlar değişti.</value></data>
+  <data name="Effective rotation: {0} ({1})" xml:space="preserve"><value>Etkin rotasyon: {0} ({1})</value></data>
+  <data name="DEFAULT CONFIG is a template. Combat uses the active character profile." xml:space="preserve"><value>DEFAULT CONFIG bir şablondur. Savaş, etkin karakterin profilini kullanır.</value></data>
+  <data name="Temporary DAD profile supplies the effective rotation; the controls below edit the saved profile." xml:space="preserve"><value>Geçici DAD profili etkin rotasyonu belirler; aşağıdaki kontroller kayıtlı profili düzenler.</value></data>
+  <data name="Normal" xml:space="preserve"><value>Normal</value></data>
 </root>

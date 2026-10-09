@@ -2969,4 +2969,8 @@ Ativado: use as predefinições do BossMod abaixo com qualquer provedor de rota�
   <data name="Buy travels to the vendor and fills the stock target once. Purchasing starts only when you press Buy. Zero targets disable purchasing." xml:space="preserve"><value>Comprar vai até o vendedor e completa o estoque desejado uma vez. A compra só começa ao pressionar Comprar. Uma meta de zero desativa as compras.</value></data>
   <data name="Buying companion food from Vath requires beast tribe progression through The Naming of Vath. Purchase is unavailable until the vendor is unlocked." xml:space="preserve"><value>Comprar comida para o companheiro com os Vath exige avançar nas missões tribais até concluir The Naming of Vath. A compra fica indisponível até desbloquear o vendedor.</value></data>
   <data name="Companion purchase cancelled: context, profile, or settings changed." xml:space="preserve"><value>Compra para o companheiro cancelada: contexto, perfil ou configurações alterados.</value></data>
+  <data name="Effective rotation: {0} ({1})" xml:space="preserve"><value>Rotação efetiva: {0} ({1})</value></data>
+  <data name="DEFAULT CONFIG is a template. Combat uses the active character profile." xml:space="preserve"><value>DEFAULT CONFIG é um modelo. O combate usa o perfil do personagem ativo.</value></data>
+  <data name="Temporary DAD profile supplies the effective rotation; the controls below edit the saved profile." xml:space="preserve"><value>O perfil temporário do DAD define a rotação efetiva; os controles abaixo editam o perfil salvo.</value></data>
+  <data name="Normal" xml:space="preserve"><value>Normal</value></data>
 </root>

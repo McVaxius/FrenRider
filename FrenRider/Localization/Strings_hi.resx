@@ -2875,4 +2875,8 @@
   <data name="Buy travels to the vendor and fills the stock target once. Purchasing starts only when you press Buy. Zero targets disable purchasing." xml:space="preserve"><value>खरीदें विक्रेता तक जाता है और लक्ष्य भंडार एक बार पूरा करता है। खरीद केवल खरीदें दबाने पर शुरू होती है। शून्य लक्ष्य खरीद बंद करता है।</value></data>
   <data name="Buying companion food from Vath requires beast tribe progression through The Naming of Vath. Purchase is unavailable until the vendor is unlocked." xml:space="preserve"><value>Vath से साथी का भोजन खरीदने के लिए जनजातीय प्रगति में The Naming of Vath पूरा करना आवश्यक है। विक्रेता अनलॉक होने तक खरीद उपलब्ध नहीं है।</value></data>
   <data name="Companion purchase cancelled: context, profile, or settings changed." xml:space="preserve"><value>साथी की खरीद रद्द: संदर्भ, प्रोफ़ाइल या सेटिंग बदल गई है।</value></data>
+  <data name="Effective rotation: {0} ({1})" xml:space="preserve"><value>प्रभावी रोटेशन: {0} ({1})</value></data>
+  <data name="DEFAULT CONFIG is a template. Combat uses the active character profile." xml:space="preserve"><value>DEFAULT CONFIG एक टेम्पलेट है। युद्ध में सक्रिय पात्र की प्रोफ़ाइल का उपयोग होता है।</value></data>
+  <data name="Temporary DAD profile supplies the effective rotation; the controls below edit the saved profile." xml:space="preserve"><value>अस्थायी DAD प्रोफ़ाइल प्रभावी रोटेशन तय करती है; नीचे के नियंत्रण सहेजी गई प्रोफ़ाइल संपादित करते हैं।</value></data>
+  <data name="Normal" xml:space="preserve"><value>सामान्य</value></data>
 </root>

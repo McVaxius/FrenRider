@@ -2864,4 +2864,8 @@
   <data name="Buy travels to the vendor and fills the stock target once. Purchasing starts only when you press Buy. Zero targets disable purchasing." xml:space="preserve"><value>購入ボタンで販売NPCまで移動し、目標在庫まで一度補充します。購入はボタンを押したときだけ開始します。目標が0なら購入しません。</value></data>
   <data name="Buying companion food from Vath requires beast tribe progression through The Naming of Vath. Purchase is unavailable until the vendor is unlocked." xml:space="preserve"><value>ヴァスからバディの餌を購入するには、友好部族クエストをThe Naming of Vathの完了まで進める必要があります。販売NPCを解放するまで購入できません。</value></data>
   <data name="Companion purchase cancelled: context, profile, or settings changed." xml:space="preserve"><value>バディ用品の購入を中止しました：状況、プロフィール、または設定が変更されました。</value></data>
+  <data name="Effective rotation: {0} ({1})" xml:space="preserve"><value>有効なローテーション: {0} ({1})</value></data>
+  <data name="DEFAULT CONFIG is a template. Combat uses the active character profile." xml:space="preserve"><value>DEFAULT CONFIG はテンプレートです。戦闘では現在のキャラクターのプロファイルを使用します。</value></data>
+  <data name="Temporary DAD profile supplies the effective rotation; the controls below edit the saved profile." xml:space="preserve"><value>一時的な DAD プロファイルが有効なローテーションを指定しています。下の設定は保存済みプロファイルを編集します。</value></data>
+  <data name="Normal" xml:space="preserve"><value>通常</value></data>
 </root>

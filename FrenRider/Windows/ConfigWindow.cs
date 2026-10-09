@@ -439,7 +439,7 @@ public class ConfigWindow : Window, IDisposable
 
         bool tabsOpen;
         using (MaterialText.PushLineHeight(UiText.T("Profile"), UiText.T("Follow"), UiText.T("Combat"),
-            UiText.T("Duty / ADS / Exit"), UiText.T("Automation"), UiText.T("Chocobo"), UiText.T("UI / About")))
+            UiText.T("Duty / ADS / Exit"), UiText.T("Automation"), UiText.T("Chocobo"), UiText.T("Window appearance"), UiText.T("UI / About")))
             tabsOpen = ImGui.BeginTabBar("FrenRiderTabs", ImGuiTabBarFlags.FittingPolicyScroll);
         if (tabsOpen)
         {
@@ -479,6 +479,13 @@ public class ConfigWindow : Window, IDisposable
                 currentTab = "Chocobo";
                 DrawChocoboTab(config);
                 ImGui.EndTabItem();
+            }
+            if (UiGui.BeginTabItem("Window appearance", ImGuiTabItemFlags.NoPushId))
+            {
+                currentTab = "UI";
+                ImGui.PushID("UI / About");
+                try { plugin.DrawWindowAppearance(); }
+                finally { ImGui.PopID(); ImGui.EndTabItem(); }
             }
             if (UiGui.BeginTabItem("UI / About"))
             {
@@ -1432,6 +1439,19 @@ public class ConfigWindow : Window, IDisposable
     private void DrawCombatTab(CharacterConfig config)
     {
         ImGui.Spacing();
+
+        if (configManager.TryGetActiveConfig(out var activeConfig) && activeConfig != null)
+        {
+            UiGui.Text(UiText.F("Effective rotation: {0} ({1})",
+                plugin.CombatService.GetConfiguredRotationProvider(activeConfig),
+                UiText.T(plugin.ZoneService.CurrentZone == ZoneType.Foray ? "Foray" : "Normal")));
+        }
+        if (IsDefaultConfigSelected())
+            UiGui.TextWrapped("DEFAULT CONFIG is a template. Combat uses the active character profile.");
+        else if (configManager.HasTemporaryProfile &&
+                 string.Equals(editingCharacterKey, configManager.ActiveCharacterKey, StringComparison.Ordinal) &&
+                 GetEditingRemoteProfile() == null)
+            UiGui.TextWrapped("Temporary DAD profile supplies the effective rotation; the controls below edit the saved profile.");
 
         // Rotation Plugin (dropdown)
         var rotPlugin = Array.IndexOf(RotationPluginIds, config.RotationPlugin);
@@ -2417,8 +2437,6 @@ public class ConfigWindow : Window, IDisposable
 
     private void DrawUiSettingsSection()
     {
-        plugin.DrawWindowAppearance();
-        ImGui.Separator();
         var videoNotificationsEnabled = configuration.VideoNotificationsEnabled;
         if (UiGui.Checkbox("Video Notifications", ref videoNotificationsEnabled))
         {

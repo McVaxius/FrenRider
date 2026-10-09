@@ -2864,4 +2864,8 @@
   <data name="Buy travels to the vendor and fills the stock target once. Purchasing starts only when you press Buy. Zero targets disable purchasing." xml:space="preserve"><value>구매 버튼은 상인에게 이동하여 목표 재고를 한 번 채웁니다. 구매는 버튼을 눌렀을 때만 시작됩니다. 목표가 0이면 구매하지 않습니다.</value></data>
   <data name="Buying companion food from Vath requires beast tribe progression through The Naming of Vath. Purchase is unavailable until the vendor is unlocked." xml:space="preserve"><value>바스에게 버디 먹이를 구매하려면 우호 부족 퀘스트를 The Naming of Vath까지 완료해야 합니다. 상인이 해제되기 전에는 구매할 수 없습니다.</value></data>
   <data name="Companion purchase cancelled: context, profile, or settings changed." xml:space="preserve"><value>버디 용품 구매 취소: 상황, 프로필 또는 설정이 변경되었습니다.</value></data>
+  <data name="Effective rotation: {0} ({1})" xml:space="preserve"><value>적용 중인 로테이션: {0} ({1})</value></data>
+  <data name="DEFAULT CONFIG is a template. Combat uses the active character profile." xml:space="preserve"><value>DEFAULT CONFIG는 템플릿입니다. 전투에는 현재 캐릭터의 프로필이 사용됩니다.</value></data>
+  <data name="Temporary DAD profile supplies the effective rotation; the controls below edit the saved profile." xml:space="preserve"><value>임시 DAD 프로필이 적용 중인 로테이션을 지정합니다. 아래 설정은 저장된 프로필을 편집합니다.</value></data>
+  <data name="Normal" xml:space="preserve"><value>일반</value></data>
 </root>
