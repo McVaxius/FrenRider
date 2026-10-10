@@ -268,9 +268,12 @@ public class MainWindow : Window, IDisposable
         if (ImGui.IsItemHovered())
             UiGui.SetTooltip("Obfuscate character names in FrenRider UI.");
 
-        NextGroup((ImGui.GetFrameHeight() + MaterialText.Measure(UiText.T("Transparency")).X + ImGui.GetStyle().ItemInnerSpacing.X)
-            / Math.Max(.01f, MaterialTheme.Metrics.Scale));
-        plugin.DrawTransparency();
+        if (plugin.Configuration.UiTransparencyVisibleOnMainWindow)
+        {
+            NextGroup((ImGui.GetFrameHeight() + MaterialText.Measure(UiText.T("Transparency")).X + ImGui.GetStyle().ItemInnerSpacing.X)
+                / Math.Max(.01f, MaterialTheme.Metrics.Scale));
+            plugin.DrawTransparency();
+        }
 
         NextButton("Settings");
         if (UiGui.Button("Settings", icon: MaterialIcon.Settings))

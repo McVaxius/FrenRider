@@ -2899,4 +2899,5 @@
   <data name="Open XA Slave log tools" xml:space="preserve"><value>XA Slave 로그 도구 열기</value></data>
   <data name="Opens XA Slave's Utility &gt; XA Mods panel, which contains Dalamud Log Cleaner." xml:space="preserve"><value>Dalamud Log Cleaner가 있는 XA Slave의 Utility &gt; XA Mods 패널을 엽니다.</value></data>
   <data name="XA Slave log tools could not be opened." xml:space="preserve"><value>XA Slave 로그 도구를 열지 못했습니다.</value></data>
+  <data name="Transparency visible on main window" xml:space="preserve"><value>메인 창에 투명도 표시</value></data>
 </root>

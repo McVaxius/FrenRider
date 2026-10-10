@@ -1,3 +1,7 @@
+2026-10-10 - Compact defaults and main appearance controls (I521)
+
+- Apply Compact on once, with main Compact and Transparency controls hidden. Keep density, transparency and independent visibility choices in Appearance settings; preserve later choices, opacity, automation and unknown saved fields. Advance the release from 2.0.0.6 to 2.0.0.7.
+
 2026-10-09 - Tight compact list grids (I503/I509)
 
 

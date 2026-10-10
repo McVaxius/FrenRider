@@ -2998,4 +2998,5 @@ On: use the BossMod presets below with any rotation provider. A custom preset ma
   <data name="Open XA Slave log tools" xml:space="preserve"><value>Open XA Slave log tools</value></data>
   <data name="Opens XA Slave's Utility &gt; XA Mods panel, which contains Dalamud Log Cleaner." xml:space="preserve"><value>Opens XA Slave's Utility &gt; XA Mods panel, which contains Dalamud Log Cleaner.</value></data>
   <data name="XA Slave log tools could not be opened." xml:space="preserve"><value>XA Slave log tools could not be opened.</value></data>
+  <data name="Transparency visible on main window" xml:space="preserve"><value>Transparency visible on main window</value></data>
 </root>

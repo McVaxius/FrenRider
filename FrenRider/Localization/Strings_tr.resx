@@ -3004,4 +3004,5 @@ Açık: aşağıdaki BossMod ön ayarlarını herhangi bir rotasyon sağlayıcı
   <data name="Open XA Slave log tools" xml:space="preserve"><value>XA Slave günlük araçlarını aç</value></data>
   <data name="Opens XA Slave's Utility &gt; XA Mods panel, which contains Dalamud Log Cleaner." xml:space="preserve"><value>Dalamud Log Cleaner'ı içeren XA Slave Utility &gt; XA Mods panelini açar.</value></data>
   <data name="XA Slave log tools could not be opened." xml:space="preserve"><value>XA Slave günlük araçları açılamadı.</value></data>
+  <data name="Transparency visible on main window" xml:space="preserve"><value>Ana pencerede saydamlığı göster</value></data>
 </root>

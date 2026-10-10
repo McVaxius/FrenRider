@@ -3004,4 +3004,5 @@ Włączone: używaj poniższych presetów BossMod z dowolnym dostawcą rotacji. 
   <data name="Open XA Slave log tools" xml:space="preserve"><value>Otwórz narzędzia logów XA Slave</value></data>
   <data name="Opens XA Slave's Utility &gt; XA Mods panel, which contains Dalamud Log Cleaner." xml:space="preserve"><value>Otwiera panel Utility &gt; XA Mods w XA Slave, zawierający Dalamud Log Cleaner.</value></data>
   <data name="XA Slave log tools could not be opened." xml:space="preserve"><value>Nie udało się otworzyć narzędzi logów XA Slave.</value></data>
+  <data name="Transparency visible on main window" xml:space="preserve"><value>Pokaż przezroczystość w głównym oknie</value></data>
 </root>

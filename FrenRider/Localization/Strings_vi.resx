@@ -3004,4 +3004,5 @@ Bật: dùng các preset BossMod bên dưới với mọi nhà cung cấp rotati
   <data name="Open XA Slave log tools" xml:space="preserve"><value>Mở công cụ nhật ký XA Slave</value></data>
   <data name="Opens XA Slave's Utility &gt; XA Mods panel, which contains Dalamud Log Cleaner." xml:space="preserve"><value>Mở bảng Utility &gt; XA Mods của XA Slave, chứa Dalamud Log Cleaner.</value></data>
   <data name="XA Slave log tools could not be opened." xml:space="preserve"><value>Không thể mở công cụ nhật ký XA Slave.</value></data>
+  <data name="Transparency visible on main window" xml:space="preserve"><value>Hiện độ trong suốt trên cửa sổ chính</value></data>
 </root>

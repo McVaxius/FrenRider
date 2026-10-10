@@ -13,8 +13,21 @@ public class Configuration : IPluginConfiguration
     // --- Global UI Settings ---
     public string UiLanguage { get; set; } = "en";
     public uint UiAccentRgb { get; set; } = 0x70C677;
-    public bool UiCompact { get; set; } = false;
-    public bool UiCompactVisibleOnMainWindow { get; set; } = true;
+    public bool UiCompact { get; set; } = true;
+    public bool UiCompactVisibleOnMainWindow { get; set; }
+    public bool UiTransparencyVisibleOnMainWindow { get; set; }
+    public bool UiCompactDefaultsApplied { get; set; }
+    [Newtonsoft.Json.JsonExtensionData]
+    public System.Collections.Generic.Dictionary<string, Newtonsoft.Json.Linq.JToken>? AdditionalSettings { get; set; }
+
+    internal bool ApplyCompactDefaults()
+    {
+        if (UiCompactDefaultsApplied) return false;
+        UiCompact = true;
+        UiCompactVisibleOnMainWindow = UiTransparencyVisibleOnMainWindow = false;
+        UiCompactDefaultsApplied = true;
+        return true;
+    }
     public bool UiLanguageVisibleOnMainWindow { get; set; } = true;
     public bool UiTransparencyEnabled { get; set; } = true;
     public int UiWindowOpacityPercent { get; set; } = 100;
@@ -53,7 +66,7 @@ public class Configuration : IPluginConfiguration
 
         Version = version;
         DontMoveWhileCasting = dontMoveWhileCasting;
-        return migrated;
+        return ApplyCompactDefaults() || migrated;
     }
 
     public void Save()

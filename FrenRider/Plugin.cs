@@ -1340,6 +1340,9 @@ public sealed class Plugin : IDalamudPlugin
         var compactVisibleOnMainWindow = config.UiCompactVisibleOnMainWindow;
         if (UiGui.Checkbox("Compact visible on main window" + "###UiCompactVisibleOnMainWindowSettings", ref compactVisibleOnMainWindow))
         { config.UiCompactVisibleOnMainWindow = compactVisibleOnMainWindow; changed = true; }
+        var transparencyVisibleOnMainWindow = config.UiTransparencyVisibleOnMainWindow;
+        if (UiGui.Checkbox("Transparency visible on main window###UiTransparencyVisibleOnMainWindowSettings", ref transparencyVisibleOnMainWindow))
+        { config.UiTransparencyVisibleOnMainWindow = transparencyVisibleOnMainWindow; changed = true; }
         var languageVisibleOnMainWindow = config.UiLanguageVisibleOnMainWindow;
         if (UiGui.Checkbox("Language visible on main window" + "###UiLanguageVisibleOnMainWindowSettings", ref languageVisibleOnMainWindow))
         { config.UiLanguageVisibleOnMainWindow = languageVisibleOnMainWindow; changed = true; }

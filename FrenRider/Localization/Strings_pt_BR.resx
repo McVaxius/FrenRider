@@ -3004,4 +3004,5 @@ Ativado: use as predefinições do BossMod abaixo com qualquer provedor de rota�
   <data name="Open XA Slave log tools" xml:space="preserve"><value>Abrir ferramentas de log do XA Slave</value></data>
   <data name="Opens XA Slave's Utility &gt; XA Mods panel, which contains Dalamud Log Cleaner." xml:space="preserve"><value>Abre o painel Utility &gt; XA Mods do XA Slave, que contém o Dalamud Log Cleaner.</value></data>
   <data name="XA Slave log tools could not be opened." xml:space="preserve"><value>Não foi possível abrir as ferramentas de log do XA Slave.</value></data>
+  <data name="Transparency visible on main window" xml:space="preserve"><value>Mostrar transparência na janela principal</value></data>
 </root>
