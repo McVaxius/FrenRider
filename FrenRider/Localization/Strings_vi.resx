@@ -3005,4 +3005,217 @@ Bật: dùng các preset BossMod bên dưới với mọi nhà cung cấp rotati
   <data name="Opens XA Slave's Utility &gt; XA Mods panel, which contains Dalamud Log Cleaner." xml:space="preserve"><value>Mở bảng Utility &gt; XA Mods của XA Slave, chứa Dalamud Log Cleaner.</value></data>
   <data name="XA Slave log tools could not be opened." xml:space="preserve"><value>Không thể mở công cụ nhật ký XA Slave.</value></data>
   <data name="Transparency visible on main window" xml:space="preserve"><value>Hiện độ trong suốt trên cửa sổ chính</value></data>
+  <data name="About" xml:space="preserve">
+    <value>Giới thiệu</value>
+  </data>
+  <data name="Advanced / BMR" xml:space="preserve">
+    <value>Nâng cao / BMR</value>
+  </data>
+  <data name="BossMod presets" xml:space="preserve">
+    <value>Mẫu BossMod</value>
+  </data>
+  <data name="Commands" xml:space="preserve">
+    <value>Lệnh</value>
+  </data>
+  <data name="Current companion" xml:space="preserve">
+    <value>Bạn đồng hành hiện tại</value>
+  </data>
+  <data name="DTR Bar" xml:space="preserve">
+    <value>Thanh DTR</value>
+  </data>
+  <data name="Dependencies" xml:space="preserve">
+    <value>Phụ thuộc</value>
+  </data>
+  <data name="Dialogs &amp; Invites" xml:space="preserve">
+    <value>Hộp thoại &amp; lời mời</value>
+  </data>
+  <data name="Distance limits" xml:space="preserve">
+    <value>Giới hạn khoảng cách</value>
+  </data>
+  <data name="FATE behavior" xml:space="preserve">
+    <value>Hành vi FATE</value>
+  </data>
+  <data name="Feeding" xml:space="preserve">
+    <value>Cho ăn</value>
+  </data>
+  <data name="Formation &amp; Combat" xml:space="preserve">
+    <value>Đội hình &amp; chiến đấu</value>
+  </data>
+  <data name="Fren &amp; Profile" xml:space="preserve">
+    <value>Fren &amp; hồ sơ</value>
+  </data>
+  <data name="Interface" xml:space="preserve">
+    <value>Giao diện</value>
+  </data>
+  <data name="Loot &amp; Equipment" xml:space="preserve">
+    <value>Chiến lợi phẩm &amp; trang bị</value>
+  </data>
+  <data name="Manual purchasing" xml:space="preserve">
+    <value>Mua thủ công</value>
+  </data>
+  <data name="Movement &amp; Targeting" xml:space="preserve">
+    <value>Di chuyển &amp; chọn mục tiêu</value>
+  </data>
+  <data name="Navigation" xml:space="preserve">
+    <value>Điều hướng</value>
+  </data>
+  <data name="Personal space" xml:space="preserve">
+    <value>Không gian cá nhân</value>
+  </data>
+  <data name="RSR options" xml:space="preserve">
+    <value>Tùy chọn RSR</value>
+  </data>
+  <data name="Recovery" xml:space="preserve">
+    <value>Hồi phục</value>
+  </data>
+  <data name="Reload testing" xml:space="preserve">
+    <value>Kiểm tra tải lại</value>
+  </data>
+  <data name="Rotation" xml:space="preserve">
+    <value>Luân phiên kỹ năng</value>
+  </data>
+  <data name="Skill allocation" xml:space="preserve">
+    <value>Phân bổ kỹ năng</value>
+  </data>
+  <data name="Summon &amp; Stance" xml:space="preserve">
+    <value>Triệu hồi &amp; tư thế</value>
+  </data>
+  <data name="Support &amp; Logs" xml:space="preserve">
+    <value>Hỗ trợ &amp; nhật ký</value>
+  </data>
+  <data name="Travel" xml:space="preserve">
+    <value>Di chuyển</value>
+  </data>
+  <data name="Theme &amp; Language" xml:space="preserve">
+    <value>Giao diện &amp; ngôn ngữ</value>
+  </data>
+  <data name="Main window controls" xml:space="preserve">
+    <value>Điều khiển cửa sổ chính</value>
+  </data>
+  <data name="Window opacity" xml:space="preserve">
+    <value>Độ đục cửa sổ</value>
+  </data>
+  <data name="When unfocused" xml:space="preserve">
+    <value>Khi mất tiêu điểm</value>
+  </data>
+  <data name="Links" xml:space="preserve">
+    <value>Liên kết</value>
+  </data>
+  <data name="Global settings" xml:space="preserve">
+    <value>Cài đặt chung</value>
+  </data>
+  <data name="Family" xml:space="preserve">
+    <value>Nhóm</value>
+  </data>
+  <data name="Maturity" xml:space="preserve">
+    <value>Mức xác minh</value>
+  </data>
+  <data name="Ready delay" xml:space="preserve">
+    <value>Độ trễ sẵn sàng</value>
+  </data>
+  <data name="Target" xml:space="preserve">
+    <value>Mục tiêu</value>
+  </data>
+  <data name="On hand" xml:space="preserve">
+    <value>Hiện có</value>
+  </data>
+  <data name="Action" xml:space="preserve">
+    <value>Thao tác</value>
+  </data>
+  <data name="Code" xml:space="preserve">
+    <value>Mã</value>
+  </data>
+  <data name="Editing: {0}" xml:space="preserve">
+    <value>Đang sửa: {0}</value>
+  </data>
+  <data name="Buy fills stock once. Active character only." xml:space="preserve">
+    <value>Mua một lần để đủ số lượng. Chỉ nhân vật đang dùng.</value>
+  </data>
+  <data name="Vath food requires The Naming of Vath." xml:space="preserve">
+    <value>Thức ăn Vath cần hoàn thành The Naming of Vath.</value>
+  </data>
+  <data name="Allow use during combat" xml:space="preserve">
+    <value>Cho phép khi chiến đấu</value>
+  </data>
+  <data name="Automatically allocate skills" xml:space="preserve">
+    <value>Tự phân bổ kỹ năng</value>
+  </data>
+  <data name="Capture HP: &gt;5 levels below" xml:space="preserve">
+    <value>HP bắt: thấp hơn trên 5 cấp</value>
+  </data>
+  <data name="Capture HP: within 5 levels" xml:space="preserve">
+    <value>HP bắt: trong 5 cấp thấp hơn</value>
+  </data>
+  <data name="Disable Hunt Modules" xml:space="preserve">
+    <value>Tắt mô-đun săn</value>
+  </data>
+  <data name="Disable Queen Lunatender" xml:space="preserve">
+    <value>Tắt Queen Lunatender</value>
+  </data>
+  <data name="First tree" xml:space="preserve">
+    <value>Cây thứ nhất</value>
+  </data>
+  <data name="Second tree" xml:space="preserve">
+    <value>Cây thứ hai</value>
+  </data>
+  <data name="Third tree" xml:space="preserve">
+    <value>Cây thứ ba</value>
+  </data>
+  <data name="Harmonized reset" xml:space="preserve">
+    <value>Đặt lại đồng bộ</value>
+  </data>
+  <data name="Mount Name" xml:space="preserve">
+    <value>Tên thú cưỡi</value>
+  </data>
+  <data name="Mount-up to chase" xml:space="preserve">
+    <value>Lên thú cưỡi để đuổi</value>
+  </data>
+  <data name="Nudge in duty when fren is absent" xml:space="preserve">
+    <value>Nhích trong phụ bản khi thiếu fren</value>
+  </data>
+  <data name="Reduce outdoor activation range" xml:space="preserve">
+    <value>Giảm tầm kích hoạt ngoài trời</value>
+  </data>
+  <data name="Repair At" xml:space="preserve">
+    <value>Sửa khi</value>
+  </data>
+  <data name="Respawn inside duties" xml:space="preserve">
+    <value>Hồi sinh trong phụ bản</value>
+  </data>
+  <data name="Respawn outside duties" xml:space="preserve">
+    <value>Hồi sinh ngoài phụ bản</value>
+  </data>
+  <data name="Revive anyone outdoors" xml:space="preserve">
+    <value>Hồi sinh mọi người ngoài trời</value>
+  </data>
+  <data name="Social Distance" xml:space="preserve">
+    <value>Khoảng cách xã hội</value>
+  </data>
+  <data name="Teleport to fren" xml:space="preserve">
+    <value>Dịch chuyển tới fren</value>
+  </data>
+  <data name="Update Interval" xml:space="preserve">
+    <value>Chu kỳ cập nhật</value>
+  </data>
+  <data name="Use Phoenix Downs" xml:space="preserve">
+    <value>Dùng lông phượng hoàng</value>
+  </data>
+  <data name="s" xml:space="preserve">
+    <value>s</value>
+  </data>
+  <data name="X" xml:space="preserve">
+    <value>X</value>
+  </data>
+  <data name="Z" xml:space="preserve">
+    <value>Z</value>
+  </data>
+  <data name="DAD" xml:space="preserve">
+    <value>DAD</value>
+  </data>
+  <data name="DD" xml:space="preserve">
+    <value>DD</value>
+  </data>
+  <data name="FATE" xml:space="preserve">
+    <value>FATE</value>
+  </data>
 </root>

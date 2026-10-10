@@ -1,3 +1,8 @@
+2026-10-10 - Grouped settings layouts (I523)
+
+- Organize all eight settings tabs into compact semantic groups, with two columns when they fit and whole groups stacked at narrower widths. Keep each ADS family on one aligned row and Chocobo supply targets in a stock/target/Buy grid. Measure profile actions against the visible pane and keep subsection alignment independent between tabs.
+- Use the shared AethertekUI Appearance standard with inline colour choices and separate main-window, opacity and focus groups. Preserve every setting, conditional action, profile/sync/save behavior, native identity and release version; translate new captions across all existing catalogs.
+
 2026-10-10 - Restore window scopes after drawing errors
 
 - Always close Main's scrolling child, nested tables and party row IDs when drawing fails. Restore Main/Mini PreDraw styles even if title painting or opacity fails, preventing leaked scopes from causing a secondary titlebar error. Keep native Retry/error handling, titlebar controls, saved settings and release version unchanged; the supplied screenshot does not identify the original Draw error.

@@ -2911,4 +2911,217 @@
   <data name="Opens XA Slave's Utility &gt; XA Mods panel, which contains Dalamud Log Cleaner." xml:space="preserve"><value>XA Slave का Utility &gt; XA Mods पैनल खोलता है, जिसमें Dalamud Log Cleaner है।</value></data>
   <data name="XA Slave log tools could not be opened." xml:space="preserve"><value>XA Slave के लॉग उपकरण नहीं खोले जा सके।</value></data>
   <data name="Transparency visible on main window" xml:space="preserve"><value>मुख्य विंडो में पारदर्शिता दिखाएँ</value></data>
+  <data name="About" xml:space="preserve">
+    <value>परिचय</value>
+  </data>
+  <data name="Advanced / BMR" xml:space="preserve">
+    <value>उन्नत / BMR</value>
+  </data>
+  <data name="BossMod presets" xml:space="preserve">
+    <value>BossMod प्रीसेट</value>
+  </data>
+  <data name="Commands" xml:space="preserve">
+    <value>कमांड</value>
+  </data>
+  <data name="Current companion" xml:space="preserve">
+    <value>वर्तमान साथी</value>
+  </data>
+  <data name="DTR Bar" xml:space="preserve">
+    <value>DTR पट्टी</value>
+  </data>
+  <data name="Dependencies" xml:space="preserve">
+    <value>निर्भरताएँ</value>
+  </data>
+  <data name="Dialogs &amp; Invites" xml:space="preserve">
+    <value>संवाद और निमंत्रण</value>
+  </data>
+  <data name="Distance limits" xml:space="preserve">
+    <value>दूरी सीमाएँ</value>
+  </data>
+  <data name="FATE behavior" xml:space="preserve">
+    <value>FATE व्यवहार</value>
+  </data>
+  <data name="Feeding" xml:space="preserve">
+    <value>खिलाना</value>
+  </data>
+  <data name="Formation &amp; Combat" xml:space="preserve">
+    <value>व्यूह और युद्ध</value>
+  </data>
+  <data name="Fren &amp; Profile" xml:space="preserve">
+    <value>Fren और प्रोफ़ाइल</value>
+  </data>
+  <data name="Interface" xml:space="preserve">
+    <value>इंटरफ़ेस</value>
+  </data>
+  <data name="Loot &amp; Equipment" xml:space="preserve">
+    <value>लूट और उपकरण</value>
+  </data>
+  <data name="Manual purchasing" xml:space="preserve">
+    <value>मैन्युअल खरीद</value>
+  </data>
+  <data name="Movement &amp; Targeting" xml:space="preserve">
+    <value>गति और लक्ष्य चयन</value>
+  </data>
+  <data name="Navigation" xml:space="preserve">
+    <value>नेविगेशन</value>
+  </data>
+  <data name="Personal space" xml:space="preserve">
+    <value>व्यक्तिगत दूरी</value>
+  </data>
+  <data name="RSR options" xml:space="preserve">
+    <value>RSR विकल्प</value>
+  </data>
+  <data name="Recovery" xml:space="preserve">
+    <value>पुनर्प्राप्ति</value>
+  </data>
+  <data name="Reload testing" xml:space="preserve">
+    <value>रीलोड परीक्षण</value>
+  </data>
+  <data name="Rotation" xml:space="preserve">
+    <value>रोटेशन</value>
+  </data>
+  <data name="Skill allocation" xml:space="preserve">
+    <value>कौशल आवंटन</value>
+  </data>
+  <data name="Summon &amp; Stance" xml:space="preserve">
+    <value>बुलाना और मुद्रा</value>
+  </data>
+  <data name="Support &amp; Logs" xml:space="preserve">
+    <value>सहायता और लॉग</value>
+  </data>
+  <data name="Travel" xml:space="preserve">
+    <value>यात्रा</value>
+  </data>
+  <data name="Theme &amp; Language" xml:space="preserve">
+    <value>थीम और भाषा</value>
+  </data>
+  <data name="Main window controls" xml:space="preserve">
+    <value>मुख्य विंडो नियंत्रण</value>
+  </data>
+  <data name="Window opacity" xml:space="preserve">
+    <value>विंडो अपारदर्शिता</value>
+  </data>
+  <data name="When unfocused" xml:space="preserve">
+    <value>फ़ोकस न होने पर</value>
+  </data>
+  <data name="Links" xml:space="preserve">
+    <value>लिंक</value>
+  </data>
+  <data name="Global settings" xml:space="preserve">
+    <value>वैश्विक सेटिंग</value>
+  </data>
+  <data name="Family" xml:space="preserve">
+    <value>प्रकार</value>
+  </data>
+  <data name="Maturity" xml:space="preserve">
+    <value>परिपक्वता</value>
+  </data>
+  <data name="Ready delay" xml:space="preserve">
+    <value>तैयार होने की देरी</value>
+  </data>
+  <data name="Target" xml:space="preserve">
+    <value>लक्ष्य</value>
+  </data>
+  <data name="On hand" xml:space="preserve">
+    <value>उपलब्ध</value>
+  </data>
+  <data name="Action" xml:space="preserve">
+    <value>क्रिया</value>
+  </data>
+  <data name="Code" xml:space="preserve">
+    <value>कोड</value>
+  </data>
+  <data name="Editing: {0}" xml:space="preserve">
+    <value>संपादन: {0}</value>
+  </data>
+  <data name="Buy fills stock once. Active character only." xml:space="preserve">
+    <value>एक बार खरीदकर स्टॉक भरें। केवल सक्रिय पात्र।</value>
+  </data>
+  <data name="Vath food requires The Naming of Vath." xml:space="preserve">
+    <value>Vath भोजन के लिए The Naming of Vath क्वेस्ट आवश्यक है।</value>
+  </data>
+  <data name="Allow use during combat" xml:space="preserve">
+    <value>युद्ध में उपयोग की अनुमति</value>
+  </data>
+  <data name="Automatically allocate skills" xml:space="preserve">
+    <value>कौशल स्वतः आवंटित करें</value>
+  </data>
+  <data name="Capture HP: &gt;5 levels below" xml:space="preserve">
+    <value>पकड़ने का HP: &gt;5 स्तर कम</value>
+  </data>
+  <data name="Capture HP: within 5 levels" xml:space="preserve">
+    <value>पकड़ने का HP: 5 स्तर के भीतर</value>
+  </data>
+  <data name="Disable Hunt Modules" xml:space="preserve">
+    <value>शिकार मॉड्यूल बंद करें</value>
+  </data>
+  <data name="Disable Queen Lunatender" xml:space="preserve">
+    <value>Queen Lunatender बंद करें</value>
+  </data>
+  <data name="First tree" xml:space="preserve">
+    <value>पहला कौशल वृक्ष</value>
+  </data>
+  <data name="Second tree" xml:space="preserve">
+    <value>दूसरा कौशल वृक्ष</value>
+  </data>
+  <data name="Third tree" xml:space="preserve">
+    <value>तीसरा कौशल वृक्ष</value>
+  </data>
+  <data name="Harmonized reset" xml:space="preserve">
+    <value>समन्वित रीसेट</value>
+  </data>
+  <data name="Mount Name" xml:space="preserve">
+    <value>सवारी का नाम</value>
+  </data>
+  <data name="Mount-up to chase" xml:space="preserve">
+    <value>पीछा करने के लिए सवारी</value>
+  </data>
+  <data name="Nudge in duty when fren is absent" xml:space="preserve">
+    <value>Fren अनुपस्थित हो तो ड्यूटी में आगे बढ़ें</value>
+  </data>
+  <data name="Reduce outdoor activation range" xml:space="preserve">
+    <value>बाहरी सक्रियण दूरी घटाएँ</value>
+  </data>
+  <data name="Repair At" xml:space="preserve">
+    <value>इस सीमा पर मरम्मत</value>
+  </data>
+  <data name="Respawn inside duties" xml:space="preserve">
+    <value>ड्यूटी के अंदर पुनर्जीवित हों</value>
+  </data>
+  <data name="Respawn outside duties" xml:space="preserve">
+    <value>ड्यूटी के बाहर पुनर्जीवित हों</value>
+  </data>
+  <data name="Revive anyone outdoors" xml:space="preserve">
+    <value>बाहर किसी को भी पुनर्जीवित करें</value>
+  </data>
+  <data name="Social Distance" xml:space="preserve">
+    <value>सामाजिक दूरी</value>
+  </data>
+  <data name="Teleport to fren" xml:space="preserve">
+    <value>Fren के पास टेलीपोर्ट</value>
+  </data>
+  <data name="Update Interval" xml:space="preserve">
+    <value>अद्यतन अंतराल</value>
+  </data>
+  <data name="Use Phoenix Downs" xml:space="preserve">
+    <value>Phoenix Down उपयोग करें</value>
+  </data>
+  <data name="s" xml:space="preserve">
+    <value>s</value>
+  </data>
+  <data name="X" xml:space="preserve">
+    <value>X</value>
+  </data>
+  <data name="Z" xml:space="preserve">
+    <value>Z</value>
+  </data>
+  <data name="DAD" xml:space="preserve">
+    <value>DAD</value>
+  </data>
+  <data name="DD" xml:space="preserve">
+    <value>DD</value>
+  </data>
+  <data name="FATE" xml:space="preserve">
+    <value>FATE</value>
+  </data>
 </root>

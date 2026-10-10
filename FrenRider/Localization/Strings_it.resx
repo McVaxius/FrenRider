@@ -2900,4 +2900,217 @@ Attivato: usa i preset BossMod sottostanti con qualsiasi provider di rotazione. 
   <data name="Opens XA Slave's Utility &gt; XA Mods panel, which contains Dalamud Log Cleaner." xml:space="preserve"><value>Apre il pannello Utility &gt; XA Mods di XA Slave, che contiene Dalamud Log Cleaner.</value></data>
   <data name="XA Slave log tools could not be opened." xml:space="preserve"><value>Impossibile aprire gli strumenti di log XA Slave.</value></data>
   <data name="Transparency visible on main window" xml:space="preserve"><value>Mostra trasparenza nella finestra principale</value></data>
+  <data name="About" xml:space="preserve">
+    <value>Informazioni</value>
+  </data>
+  <data name="Advanced / BMR" xml:space="preserve">
+    <value>Avanzate / BMR</value>
+  </data>
+  <data name="BossMod presets" xml:space="preserve">
+    <value>Preset BossMod</value>
+  </data>
+  <data name="Commands" xml:space="preserve">
+    <value>Comandi</value>
+  </data>
+  <data name="Current companion" xml:space="preserve">
+    <value>Compagno attuale</value>
+  </data>
+  <data name="DTR Bar" xml:space="preserve">
+    <value>Barra DTR</value>
+  </data>
+  <data name="Dependencies" xml:space="preserve">
+    <value>Dipendenze</value>
+  </data>
+  <data name="Dialogs &amp; Invites" xml:space="preserve">
+    <value>Dialoghi e inviti</value>
+  </data>
+  <data name="Distance limits" xml:space="preserve">
+    <value>Limiti di distanza</value>
+  </data>
+  <data name="FATE behavior" xml:space="preserve">
+    <value>Comportamento FATE</value>
+  </data>
+  <data name="Feeding" xml:space="preserve">
+    <value>Alimentazione</value>
+  </data>
+  <data name="Formation &amp; Combat" xml:space="preserve">
+    <value>Formazione e combattimento</value>
+  </data>
+  <data name="Fren &amp; Profile" xml:space="preserve">
+    <value>Fren e profilo</value>
+  </data>
+  <data name="Interface" xml:space="preserve">
+    <value>Interfaccia</value>
+  </data>
+  <data name="Loot &amp; Equipment" xml:space="preserve">
+    <value>Bottino ed equipaggiamento</value>
+  </data>
+  <data name="Manual purchasing" xml:space="preserve">
+    <value>Acquisti manuali</value>
+  </data>
+  <data name="Movement &amp; Targeting" xml:space="preserve">
+    <value>Movimento e bersagli</value>
+  </data>
+  <data name="Navigation" xml:space="preserve">
+    <value>Navigazione</value>
+  </data>
+  <data name="Personal space" xml:space="preserve">
+    <value>Spazio personale</value>
+  </data>
+  <data name="RSR options" xml:space="preserve">
+    <value>Opzioni RSR</value>
+  </data>
+  <data name="Recovery" xml:space="preserve">
+    <value>Recupero</value>
+  </data>
+  <data name="Reload testing" xml:space="preserve">
+    <value>Test di ricaricamento</value>
+  </data>
+  <data name="Rotation" xml:space="preserve">
+    <value>Rotazione</value>
+  </data>
+  <data name="Skill allocation" xml:space="preserve">
+    <value>Assegnazione abilità</value>
+  </data>
+  <data name="Summon &amp; Stance" xml:space="preserve">
+    <value>Evocazione e postura</value>
+  </data>
+  <data name="Support &amp; Logs" xml:space="preserve">
+    <value>Assistenza e registri</value>
+  </data>
+  <data name="Travel" xml:space="preserve">
+    <value>Viaggio</value>
+  </data>
+  <data name="Theme &amp; Language" xml:space="preserve">
+    <value>Tema e lingua</value>
+  </data>
+  <data name="Main window controls" xml:space="preserve">
+    <value>Controlli finestra principale</value>
+  </data>
+  <data name="Window opacity" xml:space="preserve">
+    <value>Opacità finestra</value>
+  </data>
+  <data name="When unfocused" xml:space="preserve">
+    <value>Senza focus</value>
+  </data>
+  <data name="Links" xml:space="preserve">
+    <value>Collegamenti</value>
+  </data>
+  <data name="Global settings" xml:space="preserve">
+    <value>Impostazioni globali</value>
+  </data>
+  <data name="Family" xml:space="preserve">
+    <value>Famiglia</value>
+  </data>
+  <data name="Maturity" xml:space="preserve">
+    <value>Maturità</value>
+  </data>
+  <data name="Ready delay" xml:space="preserve">
+    <value>Ritardo pronto</value>
+  </data>
+  <data name="Target" xml:space="preserve">
+    <value>Obiettivo</value>
+  </data>
+  <data name="On hand" xml:space="preserve">
+    <value>Disponibili</value>
+  </data>
+  <data name="Action" xml:space="preserve">
+    <value>Azione</value>
+  </data>
+  <data name="Code" xml:space="preserve">
+    <value>Codice</value>
+  </data>
+  <data name="Editing: {0}" xml:space="preserve">
+    <value>Modifica: {0}</value>
+  </data>
+  <data name="Buy fills stock once. Active character only." xml:space="preserve">
+    <value>Acquisto singolo per rifornire. Solo personaggio attivo.</value>
+  </data>
+  <data name="Vath food requires The Naming of Vath." xml:space="preserve">
+    <value>Il cibo vath richiede la missione The Naming of Vath.</value>
+  </data>
+  <data name="Allow use during combat" xml:space="preserve">
+    <value>Consenti in combattimento</value>
+  </data>
+  <data name="Automatically allocate skills" xml:space="preserve">
+    <value>Assegna abilità automaticamente</value>
+  </data>
+  <data name="Capture HP: &gt;5 levels below" xml:space="preserve">
+    <value>HP cattura: oltre 5 livelli sotto</value>
+  </data>
+  <data name="Capture HP: within 5 levels" xml:space="preserve">
+    <value>HP cattura: entro 5 livelli sotto</value>
+  </data>
+  <data name="Disable Hunt Modules" xml:space="preserve">
+    <value>Disabilita moduli di caccia</value>
+  </data>
+  <data name="Disable Queen Lunatender" xml:space="preserve">
+    <value>Disabilita Queen Lunatender</value>
+  </data>
+  <data name="First tree" xml:space="preserve">
+    <value>Primo albero</value>
+  </data>
+  <data name="Second tree" xml:space="preserve">
+    <value>Secondo albero</value>
+  </data>
+  <data name="Third tree" xml:space="preserve">
+    <value>Terzo albero</value>
+  </data>
+  <data name="Harmonized reset" xml:space="preserve">
+    <value>Ripristino armonizzato</value>
+  </data>
+  <data name="Mount Name" xml:space="preserve">
+    <value>Nome cavalcatura</value>
+  </data>
+  <data name="Mount-up to chase" xml:space="preserve">
+    <value>Monta per raggiungere</value>
+  </data>
+  <data name="Nudge in duty when fren is absent" xml:space="preserve">
+    <value>Avanza in istanza senza fren</value>
+  </data>
+  <data name="Reduce outdoor activation range" xml:space="preserve">
+    <value>Riduci portata attivazione all'aperto</value>
+  </data>
+  <data name="Repair At" xml:space="preserve">
+    <value>Ripara al</value>
+  </data>
+  <data name="Respawn inside duties" xml:space="preserve">
+    <value>Rinasci nelle istanze</value>
+  </data>
+  <data name="Respawn outside duties" xml:space="preserve">
+    <value>Rinasci fuori dalle istanze</value>
+  </data>
+  <data name="Revive anyone outdoors" xml:space="preserve">
+    <value>Rianima chiunque all'aperto</value>
+  </data>
+  <data name="Social Distance" xml:space="preserve">
+    <value>Distanza sociale</value>
+  </data>
+  <data name="Teleport to fren" xml:space="preserve">
+    <value>Teletrasporto al fren</value>
+  </data>
+  <data name="Update Interval" xml:space="preserve">
+    <value>Intervallo aggiornamento</value>
+  </data>
+  <data name="Use Phoenix Downs" xml:space="preserve">
+    <value>Usa code di fenice</value>
+  </data>
+  <data name="s" xml:space="preserve">
+    <value>s</value>
+  </data>
+  <data name="X" xml:space="preserve">
+    <value>X</value>
+  </data>
+  <data name="Z" xml:space="preserve">
+    <value>Z</value>
+  </data>
+  <data name="DAD" xml:space="preserve">
+    <value>DAD</value>
+  </data>
+  <data name="DD" xml:space="preserve">
+    <value>DD</value>
+  </data>
+  <data name="FATE" xml:space="preserve">
+    <value>FATE</value>
+  </data>
 </root>

@@ -3005,4 +3005,217 @@ Aktif: gunakan preset BossMod di bawah dengan penyedia rotasi apa pun. Preset kh
   <data name="Opens XA Slave's Utility &gt; XA Mods panel, which contains Dalamud Log Cleaner." xml:space="preserve"><value>Membuka panel Utility &gt; XA Mods XA Slave yang berisi Dalamud Log Cleaner.</value></data>
   <data name="XA Slave log tools could not be opened." xml:space="preserve"><value>Alat log XA Slave tidak dapat dibuka.</value></data>
   <data name="Transparency visible on main window" xml:space="preserve"><value>Tampilkan transparansi di jendela utama</value></data>
+  <data name="About" xml:space="preserve">
+    <value>Tentang</value>
+  </data>
+  <data name="Advanced / BMR" xml:space="preserve">
+    <value>Lanjutan / BMR</value>
+  </data>
+  <data name="BossMod presets" xml:space="preserve">
+    <value>Preset BossMod</value>
+  </data>
+  <data name="Commands" xml:space="preserve">
+    <value>Perintah</value>
+  </data>
+  <data name="Current companion" xml:space="preserve">
+    <value>Pendamping saat ini</value>
+  </data>
+  <data name="DTR Bar" xml:space="preserve">
+    <value>Bilah DTR</value>
+  </data>
+  <data name="Dependencies" xml:space="preserve">
+    <value>Dependensi</value>
+  </data>
+  <data name="Dialogs &amp; Invites" xml:space="preserve">
+    <value>Dialog &amp; undangan</value>
+  </data>
+  <data name="Distance limits" xml:space="preserve">
+    <value>Batas jarak</value>
+  </data>
+  <data name="FATE behavior" xml:space="preserve">
+    <value>Perilaku FATE</value>
+  </data>
+  <data name="Feeding" xml:space="preserve">
+    <value>Pemberian makan</value>
+  </data>
+  <data name="Formation &amp; Combat" xml:space="preserve">
+    <value>Formasi &amp; pertempuran</value>
+  </data>
+  <data name="Fren &amp; Profile" xml:space="preserve">
+    <value>Fren &amp; profil</value>
+  </data>
+  <data name="Interface" xml:space="preserve">
+    <value>Antarmuka</value>
+  </data>
+  <data name="Loot &amp; Equipment" xml:space="preserve">
+    <value>Jarahan &amp; perlengkapan</value>
+  </data>
+  <data name="Manual purchasing" xml:space="preserve">
+    <value>Pembelian manual</value>
+  </data>
+  <data name="Movement &amp; Targeting" xml:space="preserve">
+    <value>Gerakan &amp; penargetan</value>
+  </data>
+  <data name="Navigation" xml:space="preserve">
+    <value>Navigasi</value>
+  </data>
+  <data name="Personal space" xml:space="preserve">
+    <value>Ruang pribadi</value>
+  </data>
+  <data name="RSR options" xml:space="preserve">
+    <value>Opsi RSR</value>
+  </data>
+  <data name="Recovery" xml:space="preserve">
+    <value>Pemulihan</value>
+  </data>
+  <data name="Reload testing" xml:space="preserve">
+    <value>Pengujian muat ulang</value>
+  </data>
+  <data name="Rotation" xml:space="preserve">
+    <value>Rotasi</value>
+  </data>
+  <data name="Skill allocation" xml:space="preserve">
+    <value>Alokasi keterampilan</value>
+  </data>
+  <data name="Summon &amp; Stance" xml:space="preserve">
+    <value>Panggilan &amp; sikap</value>
+  </data>
+  <data name="Support &amp; Logs" xml:space="preserve">
+    <value>Dukungan &amp; log</value>
+  </data>
+  <data name="Travel" xml:space="preserve">
+    <value>Perjalanan</value>
+  </data>
+  <data name="Theme &amp; Language" xml:space="preserve">
+    <value>Tema &amp; bahasa</value>
+  </data>
+  <data name="Main window controls" xml:space="preserve">
+    <value>Kontrol jendela utama</value>
+  </data>
+  <data name="Window opacity" xml:space="preserve">
+    <value>Opasitas jendela</value>
+  </data>
+  <data name="When unfocused" xml:space="preserve">
+    <value>Saat tidak fokus</value>
+  </data>
+  <data name="Links" xml:space="preserve">
+    <value>Tautan</value>
+  </data>
+  <data name="Global settings" xml:space="preserve">
+    <value>Pengaturan global</value>
+  </data>
+  <data name="Family" xml:space="preserve">
+    <value>Kategori</value>
+  </data>
+  <data name="Maturity" xml:space="preserve">
+    <value>Kematangan</value>
+  </data>
+  <data name="Ready delay" xml:space="preserve">
+    <value>Jeda siap</value>
+  </data>
+  <data name="Target" xml:space="preserve">
+    <value>Target</value>
+  </data>
+  <data name="On hand" xml:space="preserve">
+    <value>Dimiliki</value>
+  </data>
+  <data name="Action" xml:space="preserve">
+    <value>Tindakan</value>
+  </data>
+  <data name="Code" xml:space="preserve">
+    <value>Kode</value>
+  </data>
+  <data name="Editing: {0}" xml:space="preserve">
+    <value>Mengedit: {0}</value>
+  </data>
+  <data name="Buy fills stock once. Active character only." xml:space="preserve">
+    <value>Beli sekali untuk mengisi stok. Hanya karakter aktif.</value>
+  </data>
+  <data name="Vath food requires The Naming of Vath." xml:space="preserve">
+    <value>Makanan Vath memerlukan misi The Naming of Vath.</value>
+  </data>
+  <data name="Allow use during combat" xml:space="preserve">
+    <value>Izinkan saat bertempur</value>
+  </data>
+  <data name="Automatically allocate skills" xml:space="preserve">
+    <value>Alokasi keterampilan otomatis</value>
+  </data>
+  <data name="Capture HP: &gt;5 levels below" xml:space="preserve">
+    <value>HP tangkap: &gt;5 level di bawah</value>
+  </data>
+  <data name="Capture HP: within 5 levels" xml:space="preserve">
+    <value>HP tangkap: hingga 5 level di bawah</value>
+  </data>
+  <data name="Disable Hunt Modules" xml:space="preserve">
+    <value>Nonaktifkan modul perburuan</value>
+  </data>
+  <data name="Disable Queen Lunatender" xml:space="preserve">
+    <value>Nonaktifkan Queen Lunatender</value>
+  </data>
+  <data name="First tree" xml:space="preserve">
+    <value>Pohon pertama</value>
+  </data>
+  <data name="Second tree" xml:space="preserve">
+    <value>Pohon kedua</value>
+  </data>
+  <data name="Third tree" xml:space="preserve">
+    <value>Pohon ketiga</value>
+  </data>
+  <data name="Harmonized reset" xml:space="preserve">
+    <value>Reset selaras</value>
+  </data>
+  <data name="Mount Name" xml:space="preserve">
+    <value>Nama tunggangan</value>
+  </data>
+  <data name="Mount-up to chase" xml:space="preserve">
+    <value>Naik tunggangan untuk mengejar</value>
+  </data>
+  <data name="Nudge in duty when fren is absent" xml:space="preserve">
+    <value>Dorong di duty saat fren tidak ada</value>
+  </data>
+  <data name="Reduce outdoor activation range" xml:space="preserve">
+    <value>Kurangi jangkauan aktivasi luar</value>
+  </data>
+  <data name="Repair At" xml:space="preserve">
+    <value>Perbaiki pada</value>
+  </data>
+  <data name="Respawn inside duties" xml:space="preserve">
+    <value>Bangkit dalam duty</value>
+  </data>
+  <data name="Respawn outside duties" xml:space="preserve">
+    <value>Bangkit di luar duty</value>
+  </data>
+  <data name="Revive anyone outdoors" xml:space="preserve">
+    <value>Hidupkan siapa pun di luar</value>
+  </data>
+  <data name="Social Distance" xml:space="preserve">
+    <value>Jarak sosial</value>
+  </data>
+  <data name="Teleport to fren" xml:space="preserve">
+    <value>Teleportasi ke fren</value>
+  </data>
+  <data name="Update Interval" xml:space="preserve">
+    <value>Interval pembaruan</value>
+  </data>
+  <data name="Use Phoenix Downs" xml:space="preserve">
+    <value>Gunakan Phoenix Down</value>
+  </data>
+  <data name="s" xml:space="preserve">
+    <value>s</value>
+  </data>
+  <data name="X" xml:space="preserve">
+    <value>X</value>
+  </data>
+  <data name="Z" xml:space="preserve">
+    <value>Z</value>
+  </data>
+  <data name="DAD" xml:space="preserve">
+    <value>DAD</value>
+  </data>
+  <data name="DD" xml:space="preserve">
+    <value>DD</value>
+  </data>
+  <data name="FATE" xml:space="preserve">
+    <value>FATE</value>
+  </data>
 </root>

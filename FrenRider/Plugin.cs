@@ -1332,48 +1332,98 @@ public sealed class Plugin : IDalamudPlugin
 
     internal void DrawWindowAppearance()
     {
-        UiGui.TextUnformatted("Window appearance");
-        DrawAppearanceSelector();
-        DrawCompactSelector();
+        using (UiText.Font(UiFontRole.BodyStrong)) UiGui.Text("Window appearance");
+        UiGui.TextDisabled("Global settings");
         var config = Configuration;
         var changed = false;
-        var compactVisibleOnMainWindow = config.UiCompactVisibleOnMainWindow;
-        if (UiGui.Checkbox("Compact visible on main window" + "###UiCompactVisibleOnMainWindowSettings", ref compactVisibleOnMainWindow))
-        { config.UiCompactVisibleOnMainWindow = compactVisibleOnMainWindow; changed = true; }
-        var transparencyVisibleOnMainWindow = config.UiTransparencyVisibleOnMainWindow;
-        if (UiGui.Checkbox("Transparency visible on main window###UiTransparencyVisibleOnMainWindowSettings", ref transparencyVisibleOnMainWindow))
-        { config.UiTransparencyVisibleOnMainWindow = transparencyVisibleOnMainWindow; changed = true; }
-        var languageVisibleOnMainWindow = config.UiLanguageVisibleOnMainWindow;
-        if (UiGui.Checkbox("Language visible on main window" + "###UiLanguageVisibleOnMainWindowSettings", ref languageVisibleOnMainWindow))
-        { config.UiLanguageVisibleOnMainWindow = languageVisibleOnMainWindow; changed = true; }
-        var transparencyEnabled = config.UiTransparencyEnabled;
-        if (UiGui.Checkbox("Transparency" + "###UiTransparencyEnabledSettings", ref transparencyEnabled))
-        { config.UiTransparencyEnabled = transparencyEnabled; changed = true; }
-        var autoFade = config.UiAutoFade;
-        if (UiGui.Checkbox("Auto-fade when unfocused" + "###UiAutoFadeSettings", ref autoFade))
-        { config.UiAutoFade = autoFade; changed = true; }
-        ImGui.BeginDisabled(!transparencyEnabled);
-        try
+        var labels = new MaterialAppearanceLabels(UiText.T("Color"), UiText.T("Language"), UiText.T("Teal"),
+            UiText.T("Blue"), UiText.T("Pink"), UiText.T("Custom RGB"));
+        var paletteWidth = new[] { labels.Color, labels.Teal, labels.Blue, labels.Pink, labels.Custom }
+            .Sum(label => MaterialText.Measure(label).X) + 10 * ImGui.GetStyle().FramePadding.X
+            + 5 * ImGui.GetStyle().ItemSpacing.X;
+        var minimum = Math.Max(paletteWidth, UiGui.SettingsMinimum("Auto-fade when unfocused", "Unfocused opacity (%)"));
+        MaterialAppearanceTab.Draw("##WindowAppearanceGroups", new(UiText.T("Theme & Language"), UiText.T("Main window controls"),
+            UiText.T("Window opacity"), UiText.T("When unfocused")), minimum, () =>
         {
-        var opacity = Math.Clamp(config.UiWindowOpacityPercent, 10, 100);
-        ImGui.SetNextItemWidth(180 * MaterialTheme.Metrics.Scale);
-        if (UiGui.AppearanceSliderInt("Opacity (%)" + "###UiWindowOpacityPercentSettings", ref opacity, 10, 100, "%d%%", ImGuiSliderFlags.AlwaysClamp))
-        { config.UiWindowOpacityPercent = opacity; changed = true; }
-        var fadedOpacity = Math.Clamp(config.UiFadedOpacityPercent, 10, 100);
-        ImGui.SetNextItemWidth(180 * MaterialTheme.Metrics.Scale);
-        if (UiGui.AppearanceSliderInt("Unfocused opacity (%)" + "###UiFadedOpacityPercentSettings", ref fadedOpacity, 10, 100, "%d%%", ImGuiSliderFlags.AlwaysClamp))
-        { config.UiFadedOpacityPercent = fadedOpacity; changed = true; }
-        ImGui.BeginDisabled(!autoFade);
-        try
+            if (MaterialAppearanceSelector.DrawPalette("appearance", ref accentDraft, labels))
+            {
+                config.UiAccentRgb = ((uint)Math.Clamp((int)MathF.Round(accentDraft.X * 255), 0, 255) << 16)
+                    | ((uint)Math.Clamp((int)MathF.Round(accentDraft.Y * 255), 0, 255) << 8)
+                    | (uint)Math.Clamp((int)MathF.Round(accentDraft.Z * 255), 0, 255);
+                changed = true;
+            }
+            using (UiGui.SettingRow("Language"))
+            {
+                UiGui.SettingLabel(); ImGui.SameLine(); DrawLanguageSelector();
+            }
+            using (UiGui.SettingRow("Compact mode"))
+            {
+                var compact = config.UiCompact;
+                if (UiGui.Checkbox("C", ref compact)) { config.UiCompact = compact; changed = true; }
+            }
+        }, () =>
         {
-        var delay = float.IsFinite(config.UiUnfocusedDelaySeconds) ? Math.Max(0, config.UiUnfocusedDelaySeconds) : 10;
-        ImGui.SetNextItemWidth(180 * MaterialTheme.Metrics.Scale);
-        if (UiGui.AppearanceInputFloat("Unfocused delay (seconds)" + "###UiUnfocusedDelaySecondsSettings", ref delay))
-        { delay = float.IsFinite(delay) ? Math.Max(0, delay) : 10; config.UiUnfocusedDelaySeconds = delay; changed = true; }
-        }
-        finally { ImGui.EndDisabled(); }
-        }
-        finally { ImGui.EndDisabled(); }
+            var compactVisible = config.UiCompactVisibleOnMainWindow;
+            using (UiGui.SettingRow("Compact visible on main window"))
+                if (UiGui.Checkbox("Compact visible on main window###UiCompactVisibleOnMainWindowSettings", ref compactVisible))
+                { config.UiCompactVisibleOnMainWindow = compactVisible; changed = true; }
+            var transparencyVisible = config.UiTransparencyVisibleOnMainWindow;
+            using (UiGui.SettingRow("Transparency visible on main window"))
+                if (UiGui.Checkbox("Transparency visible on main window###UiTransparencyVisibleOnMainWindowSettings", ref transparencyVisible))
+                { config.UiTransparencyVisibleOnMainWindow = transparencyVisible; changed = true; }
+            var languageVisible = config.UiLanguageVisibleOnMainWindow;
+            using (UiGui.SettingRow("Language visible on main window"))
+                if (UiGui.Checkbox("Language visible on main window###UiLanguageVisibleOnMainWindowSettings", ref languageVisible))
+                { config.UiLanguageVisibleOnMainWindow = languageVisible; changed = true; }
+        }, () =>
+        {
+            var enabled = config.UiTransparencyEnabled;
+            using (UiGui.SettingRow("Transparency"))
+                if (UiGui.Checkbox("Transparency###UiTransparencyEnabledSettings", ref enabled))
+                { config.UiTransparencyEnabled = enabled; changed = true; }
+            ImGui.BeginDisabled(!config.UiTransparencyEnabled);
+            try
+            {
+                var opacity = Math.Clamp(config.UiWindowOpacityPercent, 10, 100);
+                using (UiGui.SettingRow("Opacity (%)"))
+                {
+                    ImGui.SetNextItemWidth(180 * MaterialTheme.Metrics.Scale);
+                    if (UiGui.AppearanceSliderInt("Opacity (%)###UiWindowOpacityPercentSettings", ref opacity, 10, 100, "%d%%", ImGuiSliderFlags.AlwaysClamp))
+                    { config.UiWindowOpacityPercent = opacity; changed = true; }
+                }
+            }
+            finally { ImGui.EndDisabled(); }
+        }, () =>
+        {
+            var autoFade = config.UiAutoFade;
+            using (UiGui.SettingRow("Auto-fade when unfocused"))
+                if (UiGui.Checkbox("Auto-fade when unfocused###UiAutoFadeSettings", ref autoFade))
+                { config.UiAutoFade = autoFade; changed = true; }
+            ImGui.BeginDisabled(!config.UiTransparencyEnabled);
+            try
+            {
+                var faded = Math.Clamp(config.UiFadedOpacityPercent, 10, 100);
+                using (UiGui.SettingRow("Unfocused opacity (%)"))
+                {
+                    ImGui.SetNextItemWidth(180 * MaterialTheme.Metrics.Scale);
+                    if (UiGui.AppearanceSliderInt("Unfocused opacity (%)###UiFadedOpacityPercentSettings", ref faded, 10, 100, "%d%%", ImGuiSliderFlags.AlwaysClamp))
+                    { config.UiFadedOpacityPercent = faded; changed = true; }
+                }
+                ImGui.BeginDisabled(!autoFade);
+                try
+                {
+                    var delay = float.IsFinite(config.UiUnfocusedDelaySeconds) ? Math.Max(0, config.UiUnfocusedDelaySeconds) : 10;
+                    using (UiGui.SettingRow("Unfocused delay (seconds)"))
+                    {
+                        ImGui.SetNextItemWidth(110 * MaterialTheme.Metrics.Scale);
+                        if (UiGui.AppearanceInputFloat("Unfocused delay (seconds)###UiUnfocusedDelaySecondsSettings", ref delay))
+                        { config.UiUnfocusedDelaySeconds = float.IsFinite(delay) ? Math.Max(0, delay) : 10; changed = true; }
+                    }
+                }
+                finally { ImGui.EndDisabled(); }
+            }
+            finally { ImGui.EndDisabled(); }
+        });
         if (changed) config.Save();
     }
 

@@ -13,6 +13,107 @@ namespace FrenRider.Windows;
 // This also preserves English-derived helper IDs and existing saved window identities.
 internal static class UiGui
 {
+    private static uint settingWindow;
+    private static float settingFieldWidth;
+    private static string settingLabel = "";
+    private static bool settingLabelDrawn;
+    private static float sectionLabelWidth;
+    private static float settingRowX;
+    internal static bool SettingsDefaultProfile { get; set; }
+    internal static void ResetSettingsAlignment() => sectionLabelWidth = 0;
+    internal static bool InSettingRow => settingWindow != 0 && ImGuiP.GetCurrentWindow().ID == settingWindow;
+    internal static void SettingFieldWidth(float width) => settingFieldWidth = Math.Max(1, width);
+    internal static SettingRowScope SettingRow(string label) => new(label);
+    internal static bool SettingColumn(int column)
+    {
+        if (!InSettingRow) return false;
+        if (column is 2 or 3 && settingLabelDrawn) ImGui.SameLine();
+        return true;
+    }
+
+    internal static void SettingLabel()
+    {
+        if (!InSettingRow || settingLabelDrawn) return;
+        ImGui.AlignTextToFramePadding();
+        MaterialText.Text(UiText.T(ShortLabel(settingLabel.Split("##", 2)[0])));
+        settingLabelDrawn = true;
+    }
+
+    internal static void SettingsSection(string label, params string[] fieldLabels)
+    {
+        sectionLabelWidth = fieldLabels.Select(field => MaterialText.Measure(UiText.T(ShortLabel(field))).X).DefaultIfEmpty(0).Max();
+        MaterialSettings.Section(UiText.T(label));
+    }
+    internal static float SettingsMinimum(params string[] labels)
+        => Math.Max(390 * MaterialTheme.Metrics.Scale, labels.Select(label => MaterialText.Measure(UiText.T(ShortLabel(label))).X)
+            .DefaultIfEmpty(0).Max() + 210 * MaterialTheme.Metrics.Scale
+                + (SettingsDefaultProfile ? MaterialText.Measure(UiText.T("Sync all")).X + 2 * ImGui.GetStyle().FramePadding.X : 0));
+
+    private static string ShortLabel(string label) => label switch
+    {
+        "Fly You Fools (fly alongside instead of pillion)" => "Fly You Fools",
+        "Try Teleport to Fren When Out of Zone" => "Teleport to fren",
+        "Nudge in duty when fren not nearby/in-zone" => "Nudge in duty when fren is absent",
+        "Use Phoenix Downs for recovery" => "Use Phoenix Downs",
+        "Revive anyone within range outdoors" => "Revive anyone outdoors",
+        "Allow Phoenix Down use during combat" => "Allow use during combat",
+        "Respawn after death outside duties after" => "Respawn outside duties",
+        "Respawn after death inside duties after" => "Respawn inside duties",
+        "Mount-up to chase fren if >" => "Mount-up to chase",
+        "Mount Name (if flying solo)" => "Mount Name",
+        "Update Interval (seconds)" => "Update Interval",
+        "Social Distance (yalms)" => "Social Distance",
+        "Harmonized Cling Reset Ticks" => "Harmonized reset",
+        "Rotation Plugin (Foray)" => "Rotation Plugin (Foray)",
+        "Configure rotation preset manually" => "Configure rotation preset manually",
+        "BMR reduce activation range for outdoor areas" => "Reduce outdoor activation range",
+        "BMR Disable Hunt Modules" => "Disable Hunt Modules",
+        "BMR Disable Queen Lunatender" => "Disable Queen Lunatender",
+        "Capture HP: more than 5 levels below you" => "Capture HP: >5 levels below",
+        "Capture HP: within 5 levels below you or equal" => "Capture HP: within 5 levels",
+        "Repair At % Durability" => "Repair At",
+        "Automatically allocate Chocobo skills" => "Automatically allocate skills",
+        "First skill tree" => "First tree",
+        "Second skill tree (optional)" => "Second tree",
+        "Third skill tree (optional)" => "Third tree",
+        _ => label,
+    };
+
+    internal ref struct SettingRowScope
+    {
+        private MaterialStyleScope style;
+        private readonly uint previousWindow;
+        private readonly float previousWidth;
+        private readonly string previousLabel;
+        private readonly bool previousDrawn;
+        private readonly float previousRowX;
+        public SettingRowScope(string label)
+        {
+            previousWindow = settingWindow;
+            previousWidth = settingFieldWidth;
+            previousLabel = settingLabel;
+            previousDrawn = settingLabelDrawn;
+            previousRowX = settingRowX;
+            settingRowX = ImGui.GetCursorPosX();
+            settingFieldWidth = 0;
+            settingLabel = label;
+            settingLabelDrawn = false;
+            style = new MaterialStyleScope();
+            style.Style(ImGuiStyleVar.ItemSpacing, new Vector2(ImGui.GetStyle().ItemSpacing.X, 2 * MaterialTheme.Metrics.Scale));
+            ImGui.BeginGroup();
+            settingWindow = ImGuiP.GetCurrentWindow().ID;
+        }
+        public void Dispose()
+        {
+            settingWindow = previousWindow;
+            settingFieldWidth = previousWidth;
+            settingLabel = previousLabel;
+            settingLabelDrawn = previousDrawn;
+            settingRowX = previousRowX;
+            ImGui.EndGroup();
+            style.Dispose();
+        }
+    }
     internal static void DrawCompanionPurchases(Plugin plugin, CharacterConfig config, bool mini)
     {
         using var font = UiText.Font(UiFontRole.Action);
@@ -111,7 +212,8 @@ internal static class UiGui
     }
     internal static bool RadioButton(string label, bool active)
     {
-        var display = UiText.T(label);
+        var display = UiText.T(InSettingRow ? ShortLabel(label) : label);
+        if (InSettingRow) settingLabelDrawn = true;
         using var height = MaterialText.PushLineHeight(display);
         var gap = ImGui.GetStyle().ItemInnerSpacing;
         var foreground = ImGui.GetStyle().Colors[(int)ImGuiCol.Text];
@@ -268,13 +370,16 @@ internal static class UiGui
     internal static bool Checkbox(string label,ref bool value)
     {
         var visible=label.Split("##",2)[0];
-        var translated=UiText.T(visible);
+        var translated=UiText.T(InSettingRow ? ShortLabel(settingLabel.Split("##",2)[0]) : visible);
+        if (InSettingRow) settingLabelDrawn = true;
         using var height = MaterialText.PushLineHeight(translated);
         var foreground=ImGui.GetStyle().Colors[(int)ImGuiCol.Text];
         var gap=ImGui.GetStyle().ItemInnerSpacing;
         // Native Checkbox sizes its hit area from the original label. Adjust that size for the
         // translated ink while keeping the native widget and its original ID.
-        ImGui.PushStyleVar(ImGuiStyleVar.ItemInnerSpacing,new Vector2(Math.Max(0,gap.X+MaterialText.Measure(translated).X-MaterialText.Measure(visible).X),gap.Y));
+        ImGui.PushStyleVar(ImGuiStyleVar.ItemInnerSpacing,new Vector2(InSettingRow
+            ? gap.X+MaterialText.Measure(translated).X-MaterialText.Measure(visible).X
+            : Math.Max(0,gap.X+MaterialText.Measure(translated).X-MaterialText.Measure(visible).X),gap.Y));
         ImGui.PushStyleColor(ImGuiCol.Text,Vector4.Zero);
         var changed=ImGui.Checkbox(label,ref value);
         ImGui.PopStyleColor();
@@ -301,6 +406,31 @@ internal static class UiGui
     }
     private static void BeginField(string label, bool hasStepButtons = false)
     {
+        if (InSettingRow)
+        {
+            var requestedWidth = settingFieldWidth > 0 ? settingFieldWidth : ImGui.CalcItemWidth();
+            if (!settingLabelDrawn)
+            {
+                SettingLabel();
+                ImGui.SameLine();
+                if (sectionLabelWidth > 0)
+                    ImGui.SetCursorPosX(Math.Max(ImGui.GetCursorPosX(), settingRowX + sectionLabelWidth + ImGui.GetStyle().ItemSpacing.X));
+            }
+            else ImGui.SameLine();
+            var available = Math.Max(1, ImGui.GetContentRegionAvail().X);
+            var fieldMinimum = Math.Max(70 * MaterialTheme.Metrics.Scale, MaterialText.Measure("000000").X + 2 * ImGui.GetStyle().FramePadding.X);
+            if (hasStepButtons) fieldMinimum += 2 * (ImGui.GetFrameHeight() + ImGui.GetStyle().ItemInnerSpacing.X);
+            else if (settingFieldWidth > 0) fieldMinimum = Math.Min(fieldMinimum, settingFieldWidth);
+            if (available < fieldMinimum + 26 * MaterialTheme.Metrics.Scale)
+            {
+                ImGui.NewLine();
+                available = Math.Max(1, ImGui.GetContentRegionAvail().X);
+            }
+            ImGui.SetNextItemWidth(Math.Max(fieldMinimum, Math.Min(requestedWidth, available - 26 * MaterialTheme.Metrics.Scale)));
+            settingFieldWidth = 0;
+            ImGuiP.PushOverrideID(ImGui.GetID(label));
+            return;
+        }
         var requested = ImGui.CalcItemWidth();
         var minimum = Math.Max(80 * MaterialTheme.Metrics.Scale,
             MaterialText.Measure("00000000").X + 2 * ImGui.GetStyle().FramePadding.X);
@@ -342,6 +472,12 @@ internal static class UiGui
     // Appearance controls retain their native numeric field, format, steps and caption placement.
     internal static bool AppearanceSliderInt(string label, ref int value, int min, int max, string format, ImGuiSliderFlags flags)
     {
+        if (InSettingRow)
+        {
+            BeginField(label);
+            try { return ImGui.SliderInt("", ref value, min, max, format, flags); }
+            finally { ImGui.PopID(); }
+        }
         var nativeLabel = UiText.T(label.Split("##", 2)[0]) + label[label.Split("##", 2)[0].Length..];
         if (!MaterialText.RequiresShaping(nativeLabel)) return ImGui.SliderInt(nativeLabel, ref value, min, max, format, flags);
         using var height = MaterialText.PushLineHeight(UiText.T(label.Split("##", 2)[0]));
@@ -356,6 +492,12 @@ internal static class UiGui
     }
     internal static bool AppearanceInputFloat(string label, ref float value)
     {
+        if (InSettingRow)
+        {
+            BeginField(label);
+            try { return ImGui.InputFloat("", ref value); }
+            finally { ImGui.PopID(); }
+        }
         var visible = label.Split("##", 2)[0]; var nativeLabel = UiText.T(visible) + label[visible.Length..];
         if (!MaterialText.RequiresShaping(nativeLabel)) return ImGui.InputFloat(nativeLabel, ref value);
         using var height = MaterialText.PushLineHeight(UiText.T(visible));

@@ -2900,4 +2900,217 @@
   <data name="Opens XA Slave's Utility &gt; XA Mods panel, which contains Dalamud Log Cleaner." xml:space="preserve"><value>Dalamud Log Cleaner가 있는 XA Slave의 Utility &gt; XA Mods 패널을 엽니다.</value></data>
   <data name="XA Slave log tools could not be opened." xml:space="preserve"><value>XA Slave 로그 도구를 열지 못했습니다.</value></data>
   <data name="Transparency visible on main window" xml:space="preserve"><value>메인 창에 투명도 표시</value></data>
+  <data name="About" xml:space="preserve">
+    <value>정보</value>
+  </data>
+  <data name="Advanced / BMR" xml:space="preserve">
+    <value>고급 / BMR</value>
+  </data>
+  <data name="BossMod presets" xml:space="preserve">
+    <value>BossMod 프리셋</value>
+  </data>
+  <data name="Commands" xml:space="preserve">
+    <value>명령어</value>
+  </data>
+  <data name="Current companion" xml:space="preserve">
+    <value>현재 버디</value>
+  </data>
+  <data name="DTR Bar" xml:space="preserve">
+    <value>DTR 바</value>
+  </data>
+  <data name="Dependencies" xml:space="preserve">
+    <value>의존 플러그인</value>
+  </data>
+  <data name="Dialogs &amp; Invites" xml:space="preserve">
+    <value>대화 및 초대</value>
+  </data>
+  <data name="Distance limits" xml:space="preserve">
+    <value>거리 제한</value>
+  </data>
+  <data name="FATE behavior" xml:space="preserve">
+    <value>돌발 임무 동작</value>
+  </data>
+  <data name="Feeding" xml:space="preserve">
+    <value>먹이 주기</value>
+  </data>
+  <data name="Formation &amp; Combat" xml:space="preserve">
+    <value>대형 및 전투</value>
+  </data>
+  <data name="Fren &amp; Profile" xml:space="preserve">
+    <value>프렌 및 프로필</value>
+  </data>
+  <data name="Interface" xml:space="preserve">
+    <value>인터페이스</value>
+  </data>
+  <data name="Loot &amp; Equipment" xml:space="preserve">
+    <value>전리품 및 장비</value>
+  </data>
+  <data name="Manual purchasing" xml:space="preserve">
+    <value>수동 구매</value>
+  </data>
+  <data name="Movement &amp; Targeting" xml:space="preserve">
+    <value>이동 및 대상 지정</value>
+  </data>
+  <data name="Navigation" xml:space="preserve">
+    <value>탐색</value>
+  </data>
+  <data name="Personal space" xml:space="preserve">
+    <value>개인 공간</value>
+  </data>
+  <data name="RSR options" xml:space="preserve">
+    <value>RSR 옵션</value>
+  </data>
+  <data name="Recovery" xml:space="preserve">
+    <value>부활 및 복귀</value>
+  </data>
+  <data name="Reload testing" xml:space="preserve">
+    <value>다시 로드 테스트</value>
+  </data>
+  <data name="Rotation" xml:space="preserve">
+    <value>전투 로테이션</value>
+  </data>
+  <data name="Skill allocation" xml:space="preserve">
+    <value>스킬 배분</value>
+  </data>
+  <data name="Summon &amp; Stance" xml:space="preserve">
+    <value>소환 및 태세</value>
+  </data>
+  <data name="Support &amp; Logs" xml:space="preserve">
+    <value>지원 및 로그</value>
+  </data>
+  <data name="Travel" xml:space="preserve">
+    <value>이동</value>
+  </data>
+  <data name="Theme &amp; Language" xml:space="preserve">
+    <value>테마 및 언어</value>
+  </data>
+  <data name="Main window controls" xml:space="preserve">
+    <value>메인 창 컨트롤</value>
+  </data>
+  <data name="Window opacity" xml:space="preserve">
+    <value>창 불투명도</value>
+  </data>
+  <data name="When unfocused" xml:space="preserve">
+    <value>포커스가 없을 때</value>
+  </data>
+  <data name="Links" xml:space="preserve">
+    <value>링크</value>
+  </data>
+  <data name="Global settings" xml:space="preserve">
+    <value>전역 설정</value>
+  </data>
+  <data name="Family" xml:space="preserve">
+    <value>유형</value>
+  </data>
+  <data name="Maturity" xml:space="preserve">
+    <value>검증 단계</value>
+  </data>
+  <data name="Ready delay" xml:space="preserve">
+    <value>준비 후 대기</value>
+  </data>
+  <data name="Target" xml:space="preserve">
+    <value>목표</value>
+  </data>
+  <data name="On hand" xml:space="preserve">
+    <value>보유 수량</value>
+  </data>
+  <data name="Action" xml:space="preserve">
+    <value>동작</value>
+  </data>
+  <data name="Code" xml:space="preserve">
+    <value>코드</value>
+  </data>
+  <data name="Editing: {0}" xml:space="preserve">
+    <value>편집 중: {0}</value>
+  </data>
+  <data name="Buy fills stock once. Active character only." xml:space="preserve">
+    <value>한 번 구매하여 목표 수량 보충. 현재 캐릭터만 가능.</value>
+  </data>
+  <data name="Vath food requires The Naming of Vath." xml:space="preserve">
+    <value>바스족 먹이는 The Naming of Vath 퀘스트 완료가 필요합니다.</value>
+  </data>
+  <data name="Allow use during combat" xml:space="preserve">
+    <value>전투 중 사용 허용</value>
+  </data>
+  <data name="Automatically allocate skills" xml:space="preserve">
+    <value>자동 스킬 배분</value>
+  </data>
+  <data name="Capture HP: &gt;5 levels below" xml:space="preserve">
+    <value>포획 HP: 6레벨 이상 낮음</value>
+  </data>
+  <data name="Capture HP: within 5 levels" xml:space="preserve">
+    <value>포획 HP: 같거나 5레벨 이내 낮음</value>
+  </data>
+  <data name="Disable Hunt Modules" xml:space="preserve">
+    <value>마물 사냥 모듈 비활성화</value>
+  </data>
+  <data name="Disable Queen Lunatender" xml:space="preserve">
+    <value>Queen Lunatender 비활성화</value>
+  </data>
+  <data name="First tree" xml:space="preserve">
+    <value>첫 번째 계열</value>
+  </data>
+  <data name="Second tree" xml:space="preserve">
+    <value>두 번째 계열</value>
+  </data>
+  <data name="Third tree" xml:space="preserve">
+    <value>세 번째 계열</value>
+  </data>
+  <data name="Harmonized reset" xml:space="preserve">
+    <value>조화 초기화</value>
+  </data>
+  <data name="Mount Name" xml:space="preserve">
+    <value>탈것 이름</value>
+  </data>
+  <data name="Mount-up to chase" xml:space="preserve">
+    <value>추격 시 탑승</value>
+  </data>
+  <data name="Nudge in duty when fren is absent" xml:space="preserve">
+    <value>임무에서 프렌 부재 시 전진</value>
+  </data>
+  <data name="Reduce outdoor activation range" xml:space="preserve">
+    <value>야외 활성화 범위 축소</value>
+  </data>
+  <data name="Repair At" xml:space="preserve">
+    <value>수리 기준</value>
+  </data>
+  <data name="Respawn inside duties" xml:space="preserve">
+    <value>임무 안에서 부활</value>
+  </data>
+  <data name="Respawn outside duties" xml:space="preserve">
+    <value>임무 밖에서 부활</value>
+  </data>
+  <data name="Revive anyone outdoors" xml:space="preserve">
+    <value>야외에서 누구나 부활</value>
+  </data>
+  <data name="Social Distance" xml:space="preserve">
+    <value>사회적 거리</value>
+  </data>
+  <data name="Teleport to fren" xml:space="preserve">
+    <value>프렌에게 텔레포트</value>
+  </data>
+  <data name="Update Interval" xml:space="preserve">
+    <value>갱신 간격</value>
+  </data>
+  <data name="Use Phoenix Downs" xml:space="preserve">
+    <value>불사조의 깃털 사용</value>
+  </data>
+  <data name="s" xml:space="preserve">
+    <value>s</value>
+  </data>
+  <data name="X" xml:space="preserve">
+    <value>X</value>
+  </data>
+  <data name="Z" xml:space="preserve">
+    <value>Z</value>
+  </data>
+  <data name="DAD" xml:space="preserve">
+    <value>DAD</value>
+  </data>
+  <data name="DD" xml:space="preserve">
+    <value>DD</value>
+  </data>
+  <data name="FATE" xml:space="preserve">
+    <value>FATE</value>
+  </data>
 </root>

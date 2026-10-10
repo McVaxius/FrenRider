@@ -3005,4 +3005,217 @@ Açık: aşağıdaki BossMod ön ayarlarını herhangi bir rotasyon sağlayıcı
   <data name="Opens XA Slave's Utility &gt; XA Mods panel, which contains Dalamud Log Cleaner." xml:space="preserve"><value>Dalamud Log Cleaner'ı içeren XA Slave Utility &gt; XA Mods panelini açar.</value></data>
   <data name="XA Slave log tools could not be opened." xml:space="preserve"><value>XA Slave günlük araçları açılamadı.</value></data>
   <data name="Transparency visible on main window" xml:space="preserve"><value>Ana pencerede saydamlığı göster</value></data>
+  <data name="About" xml:space="preserve">
+    <value>Hakkında</value>
+  </data>
+  <data name="Advanced / BMR" xml:space="preserve">
+    <value>Gelişmiş / BMR</value>
+  </data>
+  <data name="BossMod presets" xml:space="preserve">
+    <value>BossMod ön ayarları</value>
+  </data>
+  <data name="Commands" xml:space="preserve">
+    <value>Komutlar</value>
+  </data>
+  <data name="Current companion" xml:space="preserve">
+    <value>Mevcut yoldaş</value>
+  </data>
+  <data name="DTR Bar" xml:space="preserve">
+    <value>DTR çubuğu</value>
+  </data>
+  <data name="Dependencies" xml:space="preserve">
+    <value>Bağımlılıklar</value>
+  </data>
+  <data name="Dialogs &amp; Invites" xml:space="preserve">
+    <value>İletişimler ve davetler</value>
+  </data>
+  <data name="Distance limits" xml:space="preserve">
+    <value>Mesafe sınırları</value>
+  </data>
+  <data name="FATE behavior" xml:space="preserve">
+    <value>FATE davranışı</value>
+  </data>
+  <data name="Feeding" xml:space="preserve">
+    <value>Besleme</value>
+  </data>
+  <data name="Formation &amp; Combat" xml:space="preserve">
+    <value>Düzen ve savaş</value>
+  </data>
+  <data name="Fren &amp; Profile" xml:space="preserve">
+    <value>Fren ve profil</value>
+  </data>
+  <data name="Interface" xml:space="preserve">
+    <value>Arayüz</value>
+  </data>
+  <data name="Loot &amp; Equipment" xml:space="preserve">
+    <value>Ganimet ve ekipman</value>
+  </data>
+  <data name="Manual purchasing" xml:space="preserve">
+    <value>Elle satın alma</value>
+  </data>
+  <data name="Movement &amp; Targeting" xml:space="preserve">
+    <value>Hareket ve hedefleme</value>
+  </data>
+  <data name="Navigation" xml:space="preserve">
+    <value>Gezinme</value>
+  </data>
+  <data name="Personal space" xml:space="preserve">
+    <value>Kişisel alan</value>
+  </data>
+  <data name="RSR options" xml:space="preserve">
+    <value>RSR seçenekleri</value>
+  </data>
+  <data name="Recovery" xml:space="preserve">
+    <value>Kurtarma</value>
+  </data>
+  <data name="Reload testing" xml:space="preserve">
+    <value>Yeniden yükleme testi</value>
+  </data>
+  <data name="Rotation" xml:space="preserve">
+    <value>Rotasyon</value>
+  </data>
+  <data name="Skill allocation" xml:space="preserve">
+    <value>Beceri dağılımı</value>
+  </data>
+  <data name="Summon &amp; Stance" xml:space="preserve">
+    <value>Çağırma ve duruş</value>
+  </data>
+  <data name="Support &amp; Logs" xml:space="preserve">
+    <value>Destek ve günlükler</value>
+  </data>
+  <data name="Travel" xml:space="preserve">
+    <value>Seyahat</value>
+  </data>
+  <data name="Theme &amp; Language" xml:space="preserve">
+    <value>Tema ve dil</value>
+  </data>
+  <data name="Main window controls" xml:space="preserve">
+    <value>Ana pencere kontrolleri</value>
+  </data>
+  <data name="Window opacity" xml:space="preserve">
+    <value>Pencere opaklığı</value>
+  </data>
+  <data name="When unfocused" xml:space="preserve">
+    <value>Odak dışındayken</value>
+  </data>
+  <data name="Links" xml:space="preserve">
+    <value>Bağlantılar</value>
+  </data>
+  <data name="Global settings" xml:space="preserve">
+    <value>Genel ayarlar</value>
+  </data>
+  <data name="Family" xml:space="preserve">
+    <value>Tür</value>
+  </data>
+  <data name="Maturity" xml:space="preserve">
+    <value>Olgunluk</value>
+  </data>
+  <data name="Ready delay" xml:space="preserve">
+    <value>Hazır olma gecikmesi</value>
+  </data>
+  <data name="Target" xml:space="preserve">
+    <value>Hedef</value>
+  </data>
+  <data name="On hand" xml:space="preserve">
+    <value>Mevcut</value>
+  </data>
+  <data name="Action" xml:space="preserve">
+    <value>İşlem</value>
+  </data>
+  <data name="Code" xml:space="preserve">
+    <value>Kod</value>
+  </data>
+  <data name="Editing: {0}" xml:space="preserve">
+    <value>Düzenlenen: {0}</value>
+  </data>
+  <data name="Buy fills stock once. Active character only." xml:space="preserve">
+    <value>Stoku bir kez tamamlar. Yalnızca etkin karakter.</value>
+  </data>
+  <data name="Vath food requires The Naming of Vath." xml:space="preserve">
+    <value>Vath yiyecekleri için The Naming of Vath görevi gerekir.</value>
+  </data>
+  <data name="Allow use during combat" xml:space="preserve">
+    <value>Savaşta kullanıma izin ver</value>
+  </data>
+  <data name="Automatically allocate skills" xml:space="preserve">
+    <value>Becerileri otomatik dağıt</value>
+  </data>
+  <data name="Capture HP: &gt;5 levels below" xml:space="preserve">
+    <value>Yakalama HP: &gt;5 seviye düşük</value>
+  </data>
+  <data name="Capture HP: within 5 levels" xml:space="preserve">
+    <value>Yakalama HP: en fazla 5 seviye düşük</value>
+  </data>
+  <data name="Disable Hunt Modules" xml:space="preserve">
+    <value>Av modüllerini kapat</value>
+  </data>
+  <data name="Disable Queen Lunatender" xml:space="preserve">
+    <value>Queen Lunatender'ı kapat</value>
+  </data>
+  <data name="First tree" xml:space="preserve">
+    <value>İlk ağaç</value>
+  </data>
+  <data name="Second tree" xml:space="preserve">
+    <value>İkinci ağaç</value>
+  </data>
+  <data name="Third tree" xml:space="preserve">
+    <value>Üçüncü ağaç</value>
+  </data>
+  <data name="Harmonized reset" xml:space="preserve">
+    <value>Uyumlu sıfırlama</value>
+  </data>
+  <data name="Mount Name" xml:space="preserve">
+    <value>Binek adı</value>
+  </data>
+  <data name="Mount-up to chase" xml:space="preserve">
+    <value>Yetişmek için bin</value>
+  </data>
+  <data name="Nudge in duty when fren is absent" xml:space="preserve">
+    <value>Duty'de fren yokken ilerle</value>
+  </data>
+  <data name="Reduce outdoor activation range" xml:space="preserve">
+    <value>Açık alan etkinleşme mesafesini azalt</value>
+  </data>
+  <data name="Repair At" xml:space="preserve">
+    <value>Şu değerde onar</value>
+  </data>
+  <data name="Respawn inside duties" xml:space="preserve">
+    <value>Duty içinde yeniden doğ</value>
+  </data>
+  <data name="Respawn outside duties" xml:space="preserve">
+    <value>Duty dışında yeniden doğ</value>
+  </data>
+  <data name="Revive anyone outdoors" xml:space="preserve">
+    <value>Açık alanda herkesi dirilt</value>
+  </data>
+  <data name="Social Distance" xml:space="preserve">
+    <value>Sosyal mesafe</value>
+  </data>
+  <data name="Teleport to fren" xml:space="preserve">
+    <value>Fren'e ışınlan</value>
+  </data>
+  <data name="Update Interval" xml:space="preserve">
+    <value>Güncelleme aralığı</value>
+  </data>
+  <data name="Use Phoenix Downs" xml:space="preserve">
+    <value>Phoenix Down kullan</value>
+  </data>
+  <data name="s" xml:space="preserve">
+    <value>s</value>
+  </data>
+  <data name="X" xml:space="preserve">
+    <value>X</value>
+  </data>
+  <data name="Z" xml:space="preserve">
+    <value>Z</value>
+  </data>
+  <data name="DAD" xml:space="preserve">
+    <value>DAD</value>
+  </data>
+  <data name="DD" xml:space="preserve">
+    <value>DD</value>
+  </data>
+  <data name="FATE" xml:space="preserve">
+    <value>FATE</value>
+  </data>
 </root>
