@@ -1,5 +1,6 @@
 2026-10-09 - Tight compact list grids (I503/I509)
 
+
 - Use adjacent compact rows in saved beasts and party status. Size party rows to their retained job icons and text; keep every stock/purchase/feed action.
 
 2026-10-09 - Separate XA Slave log-tools shortcut (I512)
