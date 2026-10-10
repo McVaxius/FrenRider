@@ -526,9 +526,9 @@ public class MainWindow : Window, IDisposable
                     ImGui.TableNextColumn(); MaterialText.Text(UiText.F("{0}", member.PartyIndex + 1));
                     ImGui.TableNextColumn(); UiHelpers.SafeWrappedText(Disp(member.Name), localize: false);
                     ImGui.TableNextColumn();
-                    if (!string.IsNullOrWhiteSpace(member.ClassJobName))
+                    if (member.ClassJobId != 0)
                     {
-                        FrenRiderPresentation.Job(ImGui.GetCursorScreenPos(), UiHelpers.Scale(24), member.ClassJobName, member.Role);
+                        FrenRiderPresentation.Job(ImGui.GetCursorScreenPos(), UiHelpers.Scale(24), member.ClassJobId);
                         ImGui.Dummy(UiHelpers.Scale(new Vector2(24)));
                         ImGui.SameLine();
                     }

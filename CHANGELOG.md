@@ -1,3 +1,7 @@
+2026-10-10 - Use real job icons
+
+- Load the official FFXIV class/job textures from numeric sheet IDs in the party display. Replace the custom role drawings while retaining the existing icon size, job text and layout.
+
 2026-10-10 - Grouped settings layouts (I523)
 
 - Organize all eight settings tabs into compact semantic groups, with two columns when they fit and whole groups stacked at narrower widths. Keep each ADS family on one aligned row and Chocobo supply targets in a stock/target/Buy grid. Measure profile actions against the visible pane and keep subsection alignment independent between tabs.

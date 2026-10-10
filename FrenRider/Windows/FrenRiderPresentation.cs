@@ -79,29 +79,15 @@ internal static class FrenRiderPresentation
         dl.AddRectFilled(origin + new Vector2(.12f, .48f) * size, origin + new Vector2(.88f, .94f) * size, ink, size * .2f);
     }
 
-    internal static void Job(Vector2 origin, float size, string job, string role)
+    internal static void Job(Vector2 origin, float size, uint classJobId)
     {
-        var dl = ImGui.GetWindowDrawList();
-        var gold = Rgb(0xF3CB49);
-        var ink = MaterialCanvas.Color(gold);
-        var stroke = Math.Max(1, size / 16);
-        dl.AddRectFilled(origin, origin + new Vector2(size), MaterialCanvas.Color(Rgb(role == "Tank" ? 0x163F84u : 0x245B32u)), size * .15f);
-        dl.AddRect(origin, origin + new Vector2(size), ink, size * .15f, ImDrawFlags.None, stroke);
-        if (job == "WHM")
-        {
-            dl.AddCircle(origin + new Vector2(.53f, .24f) * size, size * .13f, ink, 16, stroke);
-            dl.AddLine(origin + new Vector2(.53f, .38f) * size, origin + new Vector2(.46f, .85f) * size, ink, stroke);
-            dl.AddLine(origin + new Vector2(.31f, .46f) * size, origin + new Vector2(.68f, .51f) * size, ink, stroke);
-        }
-        else if (job == "SCH")
-        {
-            dl.AddCircle(origin + new Vector2(.32f, .57f) * size, size * .18f, ink, 20, stroke);
-            dl.AddCircle(origin + new Vector2(.72f, .57f) * size, size * .18f, ink, 20, stroke);
-            dl.AddLine(origin + new Vector2(.47f, .51f) * size, origin + new Vector2(.58f, .51f) * size, ink, stroke);
-            dl.AddLine(origin + new Vector2(.22f, .32f) * size, origin + new Vector2(.83f, .26f) * size, ink, stroke);
-        }
-        else MaterialIcons.Draw(role == "Tank" ? MaterialIcon.Shield : role == "Healer" ? MaterialIcon.Sparkle : MaterialIcon.Sword,
-            origin + new Vector2(size * .12f), size * .76f, gold);
+        if (classJobId == 0 || !Plugin.DataManager.GetExcelSheet<Lumina.Excel.Sheets.ClassJob>().TryGetRow(classJobId, out var job))
+            return;
+
+        // The game's job-icon family is indexed by the sheet row, independent of translated names.
+        var texture = Plugin.TextureProvider.GetFromGameIcon(new(62000u + job.RowId)).GetWrapOrDefault();
+        if (texture != null)
+            ImGui.GetWindowDrawList().AddImage(texture.Handle, origin, origin + new Vector2(size));
     }
 
     internal static void Flag(Vector2 origin, float size, Vector4 color)
