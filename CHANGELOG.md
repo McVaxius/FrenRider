@@ -1,3 +1,7 @@
+2026-10-10 - Restore window scopes after drawing errors
+
+- Always close Main's scrolling child, nested tables and party row IDs when drawing fails. Restore Main/Mini PreDraw styles even if title painting or opacity fails, preventing leaked scopes from causing a secondary titlebar error. Keep native Retry/error handling, titlebar controls, saved settings and release version unchanged; the supplied screenshot does not identify the original Draw error.
+
 2026-10-10 - Compact defaults and main appearance controls (I521)
 
 - Apply Compact on once, with main Compact and Transparency controls hidden. Keep density, transparency and independent visibility choices in Appearance settings; preserve later choices, opacity, automation and unknown saved fields. Advance the release from 2.0.0.6 to 2.0.0.7.
