@@ -2973,4 +2973,35 @@ Aktif: gunakan preset BossMod di bawah dengan penyedia rotasi apa pun. Preset kh
   <data name="DEFAULT CONFIG is a template. Combat uses the active character profile." xml:space="preserve"><value>DEFAULT CONFIG adalah templat. Pertempuran memakai profil karakter aktif.</value></data>
   <data name="Temporary DAD profile supplies the effective rotation; the controls below edit the saved profile." xml:space="preserve"><value>Profil DAD sementara menentukan rotasi efektif; kontrol di bawah mengedit profil tersimpan.</value></data>
   <data name="Normal" xml:space="preserve"><value>Normal</value></data>
+  <data name="Copy / ZIP Dalamud log" xml:space="preserve">
+    <value>Salin / ZIP log Dalamud</value>
+  </data>
+  <data name="Export capped log anyway" xml:space="preserve">
+    <value>Tetap ekspor log yang penuh</value>
+  </data>
+  <data name="Exporting log..." xml:space="preserve">
+    <value>Mengekspor log...</value>
+  </data>
+  <data name="Log ZIP ready. Share it manually; remove old exports when you no longer need them." xml:space="preserve">
+    <value>ZIP log siap. Bagikan secara manual dan hapus ekspor lama yang tidak dibutuhkan.</value>
+  </data>
+  <data name="Log export failed." xml:space="preserve">
+    <value>Ekspor log gagal.</value>
+  </data>
+  <data name="Open Export Folder" xml:space="preserve">
+    <value>Buka Folder Ekspor</value>
+  </data>
+  <data name="This log has reached Dalamud's 100 MiB limit. Logging may have stopped, so recent activity may be missing and this log may not help troubleshoot your current issue." xml:space="preserve">
+    <value>Log ini mencapai batas 100 MiB Dalamud. Pencatatan mungkin berhenti; aktivitas terbaru mungkin tidak tercatat sehingga log mungkin tidak membantu mendiagnosis masalah saat ini.</value>
+  </data>
+  <data name="Increases EXP earned by your chocobo companion." xml:space="preserve"><value>Meningkatkan EXP yang diperoleh chocobo pendampingmu.</value></data>
+  <data name="Increases your chocobo companion's attack potency." xml:space="preserve"><value>Meningkatkan kekuatan serangan chocobo pendampingmu.</value></data>
+  <data name="Increases your chocobo companion's healing magic potency." xml:space="preserve"><value>Meningkatkan kekuatan sihir penyembuhan chocobo pendampingmu.</value></data>
+  <data name="Increases your chocobo companion's maximum HP." xml:space="preserve"><value>Meningkatkan HP maksimum chocobo pendampingmu.</value></data>
+  <data name="Increases your chocobo companion's enmity." xml:space="preserve"><value>Meningkatkan enmity chocobo pendampingmu.</value></data>
+  <data name="No companion food selected." xml:space="preserve"><value>Belum memilih makanan pendamping.</value></data>
+  <data name="Field feeding grants this buff. If this is your chocobo's favorite food, it grants the stronger version. Favorite food is established through stable training." xml:space="preserve"><value>Memberi makanan di lapangan memberikan buff ini. Jika ini makanan favorit chocobomu, buff yang lebih kuat diberikan. Makanan favorit ditetapkan melalui latihan di kandang.</value></data>
+  <data name="Open XA Slave log tools" xml:space="preserve"><value>Buka alat log XA Slave</value></data>
+  <data name="Opens XA Slave's Utility &gt; XA Mods panel, which contains Dalamud Log Cleaner." xml:space="preserve"><value>Membuka panel Utility &gt; XA Mods XA Slave yang berisi Dalamud Log Cleaner.</value></data>
+  <data name="XA Slave log tools could not be opened." xml:space="preserve"><value>Alat log XA Slave tidak dapat dibuka.</value></data>
 </root>

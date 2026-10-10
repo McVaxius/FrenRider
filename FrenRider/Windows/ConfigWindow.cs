@@ -17,6 +17,7 @@ namespace FrenRider.Windows;
 
 public class ConfigWindow : Window, IDisposable
 {
+    private readonly AethertekUI.Dalamud.MaterialSupportLog supportLog = new();
     private readonly MaterialWindowMotion motion = new();
     private readonly AethertekUI.MaterialWindowOpacity windowOpacity = new();
     private readonly Plugin plugin;
@@ -54,6 +55,21 @@ public class ConfigWindow : Window, IDisposable
     };
     internal static string ChocoboFoodName(int itemId)
         => ChocoboFoods.FirstOrDefault(food => food.ItemId == itemId).Name ?? "Unsupported companion food";
+    internal static string ChocoboFoodTooltip(int itemId)
+    {
+        var effect = itemId switch
+        {
+            7894 => "Increases EXP earned by your chocobo companion.",
+            7895 => "Increases your chocobo companion's attack potency.",
+            7897 => "Increases your chocobo companion's healing magic potency.",
+            7898 => "Increases your chocobo companion's maximum HP.",
+            7900 => "Increases your chocobo companion's enmity.",
+            _ => null,
+        };
+        return effect == null ? UiText.T(itemId == 0 ? "No companion food selected." : "Unsupported companion food")
+            : UiText.T(ChocoboFoodName(itemId)) + "\n" + UiText.T(effect) + "\n\n"
+                + UiText.T("Field feeding grants this buff. If this is your chocobo's favorite food, it grants the stronger version. Favorite food is established through stable training.");
+    }
     private static readonly string[] ChocoboSkillTrees = { "Defender", "Attacker", "Healer" };
     private static readonly string[] ChocoboSkillPriorityLabels = { "First skill tree", "Second skill tree (optional)", "Third skill tree (optional)" };
     private static readonly string[] ClingTypes = { "NavMesh", "Visland", "BossMod Follow", "Vanilla Follow" };
@@ -892,7 +908,10 @@ public class ConfigWindow : Window, IDisposable
         ImGui.Spacing();
         UiGui.Text("Companion purchasing");
         var foodPreview = ChocoboFoodName(config.ChocoboFoodItemId);
-        if (UiGui.BeginCombo("Companion food", foodPreview))
+        var foodComboOpen = UiGui.BeginCombo("Companion food", foodPreview);
+        if (!foodComboOpen && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+            MaterialText.SetTooltip(ChocoboFoodTooltip(config.ChocoboFoodItemId));
+        if (foodComboOpen)
         {
             try
             {
@@ -904,6 +923,8 @@ public class ConfigWindow : Window, IDisposable
                         config.ChocoboFoodItemId = food.ItemId;
                         configManager.SaveCurrentAccount();
                     }
+                    if (ImGui.IsItemHovered())
+                        MaterialText.SetTooltip(ChocoboFoodTooltip(food.ItemId));
                     if (selected) ImGui.SetItemDefaultFocus();
                 }
             }
@@ -923,6 +944,8 @@ public class ConfigWindow : Window, IDisposable
             config.ChocoboFoodStockTarget = Math.Max(0, foodStockTarget);
             configManager.SaveCurrentAccount();
         }
+        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+            MaterialText.SetTooltip(ChocoboFoodTooltip(config.ChocoboFoodItemId));
         DrawDefaultSettingSyncButton("Companion food stock target");
         UiGui.TextWrapped("Buy travels to the vendor and fills the stock target once. Purchasing starts only when you press Buy. Zero targets disable purchasing.");
         UiGui.TextWrapped("Purchase actions use the active character's profile. Select that character to purchase.");
@@ -933,10 +956,14 @@ public class ConfigWindow : Window, IDisposable
         var selectedFoodStock = foodCount < 0 ? "-" : foodCount.ToString();
         UiGui.Text(UiText.F("Selected food: {0} | NQ stock: {1} | Target: {2}",
             UiText.T(foodPreview), selectedFoodStock, config.ChocoboFoodStockTarget));
+        if (ImGui.IsItemHovered())
+            MaterialText.SetTooltip(ChocoboFoodTooltip(config.ChocoboFoodItemId));
         ImGui.BeginDisabled(!canPurchase);
         if (UiGui.Button("BUY GREENS")) plugin.PurchaseChocoboGreensNow();
         ImGui.SameLine();
         if (UiGui.Button("BUY FOOD")) plugin.PurchaseChocoboFoodNow();
+        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+            MaterialText.SetTooltip(ChocoboFoodTooltip(config.ChocoboFoodItemId));
         ImGui.EndDisabled();
         ImGui.SameLine();
         if (UiGui.Button("Stop companion purchasing")) plugin.StopChocoboPurchasing();
@@ -1008,6 +1035,9 @@ public class ConfigWindow : Window, IDisposable
         UiGui.TextWrapped("These settings belong to the profile being edited. Feed and Stop use the active character's runtime profile.");
         ImGui.BeginDisabled(!Plugin.ClientState.IsLoggedIn || !configManager.TryGetLocalActiveConfig(out _));
         if (UiGui.Button("Feed companion now")) plugin.FeedChocoboNow();
+        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)
+            && configManager.TryGetActiveConfig(out var feedingConfig) && feedingConfig != null)
+            MaterialText.SetTooltip(ChocoboFoodTooltip(feedingConfig.ChocoboFoodItemId));
         ImGui.EndDisabled();
         ImGui.SameLine();
         if (UiGui.Button("Stop companion feeding")) plugin.StopChocoboFeeding();
@@ -1686,6 +1716,7 @@ public class ConfigWindow : Window, IDisposable
                 UiGui.TextWrapped(owned == null
                     ? "No confirmed list saved yet. This character's list refreshes while on Beastmaster."
                     : "Saved ownership refreshes while on Beastmaster, including when automatic Capture is off.");
+                using var tightRows = plugin.Configuration.UiCompact ? MaterialTable.PushTightRows() : default;
                 if (ImGui.BeginTable("SavedBeasts", 2, ImGuiTableFlags.ScrollY | ImGuiTableFlags.RowBg,
                         new Vector2(0, 220)))
                 {
@@ -2914,6 +2945,8 @@ public class ConfigWindow : Window, IDisposable
 
     private void DrawAboutTab()
     {
+        supportLog.Draw(Plugin.PluginInterface, key => UiText.T(key),
+            path => System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo { FileName = path, UseShellExecute = true }), ex => Plugin.Log.Error(ex, "Dalamud log export failed."), Plugin.CommandManager);
         ImGui.Spacing();
         UiGui.TextColored(AethertekUI.MaterialTheme.Current.Colors.Primary, "Fren Rider");
         UiGui.Text("A Dalamud plugin for FFXIV multiplayer follow/combat automation.");

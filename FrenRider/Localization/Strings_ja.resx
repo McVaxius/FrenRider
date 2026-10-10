@@ -2868,4 +2868,35 @@
   <data name="DEFAULT CONFIG is a template. Combat uses the active character profile." xml:space="preserve"><value>DEFAULT CONFIG はテンプレートです。戦闘では現在のキャラクターのプロファイルを使用します。</value></data>
   <data name="Temporary DAD profile supplies the effective rotation; the controls below edit the saved profile." xml:space="preserve"><value>一時的な DAD プロファイルが有効なローテーションを指定しています。下の設定は保存済みプロファイルを編集します。</value></data>
   <data name="Normal" xml:space="preserve"><value>通常</value></data>
+  <data name="Copy / ZIP Dalamud log" xml:space="preserve">
+    <value>Dalamudログをコピー／ZIP化</value>
+  </data>
+  <data name="Export capped log anyway" xml:space="preserve">
+    <value>上限に達したログをエクスポート</value>
+  </data>
+  <data name="Exporting log..." xml:space="preserve">
+    <value>ログをエクスポート中...</value>
+  </data>
+  <data name="Log ZIP ready. Share it manually; remove old exports when you no longer need them." xml:space="preserve">
+    <value>ログのZIPを作成しました。手動で共有し、不要になった古いファイルは削除してください。</value>
+  </data>
+  <data name="Log export failed." xml:space="preserve">
+    <value>ログのエクスポートに失敗しました。</value>
+  </data>
+  <data name="Open Export Folder" xml:space="preserve">
+    <value>エクスポートフォルダーを開く</value>
+  </data>
+  <data name="This log has reached Dalamud's 100 MiB limit. Logging may have stopped, so recent activity may be missing and this log may not help troubleshoot your current issue." xml:space="preserve">
+    <value>このログはDalamudの100 MiB上限に達しています。記録が停止し、最近の動作が含まれていない可能性があるため、現在の問題の調査に役立たない場合があります。</value>
+  </data>
+  <data name="Increases EXP earned by your chocobo companion." xml:space="preserve"><value>チョコボバディの獲得経験値が増加します。</value></data>
+  <data name="Increases your chocobo companion's attack potency." xml:space="preserve"><value>チョコボバディの攻撃威力が上昇します。</value></data>
+  <data name="Increases your chocobo companion's healing magic potency." xml:space="preserve"><value>チョコボバディの回復魔法威力が上昇します。</value></data>
+  <data name="Increases your chocobo companion's maximum HP." xml:space="preserve"><value>チョコボバディの最大HPが上昇します。</value></data>
+  <data name="Increases your chocobo companion's enmity." xml:space="preserve"><value>チョコボバディの敵視が上昇します。</value></data>
+  <data name="No companion food selected." xml:space="preserve"><value>バディの餌が選択されていません。</value></data>
+  <data name="Field feeding grants this buff. If this is your chocobo's favorite food, it grants the stronger version. Favorite food is established through stable training." xml:space="preserve"><value>フィールドで与えるとこの効果を得られます。チョコボの好物の場合は、より強い効果になります。好物は厩舎での訓練によって決まります。</value></data>
+  <data name="Open XA Slave log tools" xml:space="preserve"><value>XA Slaveのログツールを開く</value></data>
+  <data name="Opens XA Slave's Utility &gt; XA Mods panel, which contains Dalamud Log Cleaner." xml:space="preserve"><value>Dalamud Log Cleanerを含むXA SlaveのUtility &gt; XA Modsパネルを開きます。</value></data>
+  <data name="XA Slave log tools could not be opened." xml:space="preserve"><value>XA Slaveのログツールを開けませんでした。</value></data>
 </root>

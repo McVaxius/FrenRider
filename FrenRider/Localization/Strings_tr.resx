@@ -2973,4 +2973,35 @@ Açık: aşağıdaki BossMod ön ayarlarını herhangi bir rotasyon sağlayıcı
   <data name="DEFAULT CONFIG is a template. Combat uses the active character profile." xml:space="preserve"><value>DEFAULT CONFIG bir şablondur. Savaş, etkin karakterin profilini kullanır.</value></data>
   <data name="Temporary DAD profile supplies the effective rotation; the controls below edit the saved profile." xml:space="preserve"><value>Geçici DAD profili etkin rotasyonu belirler; aşağıdaki kontroller kayıtlı profili düzenler.</value></data>
   <data name="Normal" xml:space="preserve"><value>Normal</value></data>
+  <data name="Copy / ZIP Dalamud log" xml:space="preserve">
+    <value>Dalamud günlüğünü kopyala / ZIP yap</value>
+  </data>
+  <data name="Export capped log anyway" xml:space="preserve">
+    <value>Dolu günlüğü yine de dışa aktar</value>
+  </data>
+  <data name="Exporting log..." xml:space="preserve">
+    <value>Günlük dışa aktarılıyor...</value>
+  </data>
+  <data name="Log ZIP ready. Share it manually; remove old exports when you no longer need them." xml:space="preserve">
+    <value>Günlük ZIP’i hazır. Elle paylaşın ve artık gerekmeyen eski dışa aktarımları silin.</value>
+  </data>
+  <data name="Log export failed." xml:space="preserve">
+    <value>Günlük dışa aktarılamadı.</value>
+  </data>
+  <data name="Open Export Folder" xml:space="preserve">
+    <value>Dışa Aktarım Klasörünü Aç</value>
+  </data>
+  <data name="This log has reached Dalamud's 100 MiB limit. Logging may have stopped, so recent activity may be missing and this log may not help troubleshoot your current issue." xml:space="preserve">
+    <value>Bu günlük Dalamud’un 100 MiB sınırına ulaştı. Kayıt durmuş olabilir; son etkinlikler eksik olabilir ve günlük mevcut sorunu teşhis etmeye yardımcı olmayabilir.</value>
+  </data>
+  <data name="Increases EXP earned by your chocobo companion." xml:space="preserve"><value>Chocobo yoldaşının kazandığı EXP'yi artırır.</value></data>
+  <data name="Increases your chocobo companion's attack potency." xml:space="preserve"><value>Chocobo yoldaşının saldırı gücünü artırır.</value></data>
+  <data name="Increases your chocobo companion's healing magic potency." xml:space="preserve"><value>Chocobo yoldaşının iyileştirme büyüsü gücünü artırır.</value></data>
+  <data name="Increases your chocobo companion's maximum HP." xml:space="preserve"><value>Chocobo yoldaşının azami HP'sini artırır.</value></data>
+  <data name="Increases your chocobo companion's enmity." xml:space="preserve"><value>Chocobo yoldaşının oluşturduğu düşmanlığı artırır.</value></data>
+  <data name="No companion food selected." xml:space="preserve"><value>Yoldaş yemi seçilmedi.</value></data>
+  <data name="Field feeding grants this buff. If this is your chocobo's favorite food, it grants the stronger version. Favorite food is established through stable training." xml:space="preserve"><value>Arazide yem vermek bu güçlendirmeyi sağlar. Bu, chocobo'nun favori yemiyse daha güçlü sürümünü sağlar. Favori yem, ahır eğitimiyle belirlenir.</value></data>
+  <data name="Open XA Slave log tools" xml:space="preserve"><value>XA Slave günlük araçlarını aç</value></data>
+  <data name="Opens XA Slave's Utility &gt; XA Mods panel, which contains Dalamud Log Cleaner." xml:space="preserve"><value>Dalamud Log Cleaner'ı içeren XA Slave Utility &gt; XA Mods panelini açar.</value></data>
+  <data name="XA Slave log tools could not be opened." xml:space="preserve"><value>XA Slave günlük araçları açılamadı.</value></data>
 </root>

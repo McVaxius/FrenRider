@@ -39,6 +39,7 @@ internal static class UiGui
             if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
                 MaterialText.SetTooltip(UiText.T("BUY FOOD") + "\n" + UiText.F("Selected food: {0} | NQ stock: {1} | Target: {2}",
                     UiText.T(ConfigWindow.ChocoboFoodName(config.ChocoboFoodItemId)), foodCount, config.ChocoboFoodStockTarget)
+                    + "\n\n" + ConfigWindow.ChocoboFoodTooltip(config.ChocoboFoodItemId)
                     + "\n" + UiText.T("Buying companion food from Vath requires beast tribe progression through The Naming of Vath. Purchase is unavailable until the vendor is unlocked."));
         }
         finally { ImGui.EndDisabled(); }

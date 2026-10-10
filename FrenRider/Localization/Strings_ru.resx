@@ -2868,4 +2868,35 @@
   <data name="DEFAULT CONFIG is a template. Combat uses the active character profile." xml:space="preserve"><value>DEFAULT CONFIG — шаблон. В бою используется профиль активного персонажа.</value></data>
   <data name="Temporary DAD profile supplies the effective rotation; the controls below edit the saved profile." xml:space="preserve"><value>Временный профиль DAD определяет действующую ротацию; элементы ниже изменяют сохранённый профиль.</value></data>
   <data name="Normal" xml:space="preserve"><value>Обычный</value></data>
+  <data name="Copy / ZIP Dalamud log" xml:space="preserve">
+    <value>Копировать / ZIP журнала Dalamud</value>
+  </data>
+  <data name="Export capped log anyway" xml:space="preserve">
+    <value>Всё равно экспортировать полный журнал</value>
+  </data>
+  <data name="Exporting log..." xml:space="preserve">
+    <value>Экспорт журнала...</value>
+  </data>
+  <data name="Log ZIP ready. Share it manually; remove old exports when you no longer need them." xml:space="preserve">
+    <value>ZIP журнала готов. Отправьте его вручную и удалите ненужные старые экспорты.</value>
+  </data>
+  <data name="Log export failed." xml:space="preserve">
+    <value>Не удалось экспортировать журнал.</value>
+  </data>
+  <data name="Open Export Folder" xml:space="preserve">
+    <value>Открыть папку экспорта</value>
+  </data>
+  <data name="This log has reached Dalamud's 100 MiB limit. Logging may have stopped, so recent activity may be missing and this log may not help troubleshoot your current issue." xml:space="preserve">
+    <value>Этот журнал достиг лимита Dalamud в 100 МиБ. Запись могла остановиться; последние события могут отсутствовать, и журнал может не помочь в диагностике текущей проблемы.</value>
+  </data>
+  <data name="Increases EXP earned by your chocobo companion." xml:space="preserve"><value>Увеличивает опыт, получаемый вашим чокобо-компаньоном.</value></data>
+  <data name="Increases your chocobo companion's attack potency." xml:space="preserve"><value>Увеличивает силу атак вашего чокобо-компаньона.</value></data>
+  <data name="Increases your chocobo companion's healing magic potency." xml:space="preserve"><value>Увеличивает силу исцеляющей магии вашего чокобо-компаньона.</value></data>
+  <data name="Increases your chocobo companion's maximum HP." xml:space="preserve"><value>Увеличивает максимальное HP вашего чокобо-компаньона.</value></data>
+  <data name="Increases your chocobo companion's enmity." xml:space="preserve"><value>Увеличивает враждебность, создаваемую вашим чокобо-компаньоном.</value></data>
+  <data name="No companion food selected." xml:space="preserve"><value>Корм для компаньона не выбран.</value></data>
+  <data name="Field feeding grants this buff. If this is your chocobo's favorite food, it grants the stronger version. Favorite food is established through stable training." xml:space="preserve"><value>Кормление в поле даёт этот эффект. Если это любимый корм вашего чокобо, эффект будет сильнее. Любимый корм определяется тренировками в стойле.</value></data>
+  <data name="Open XA Slave log tools" xml:space="preserve"><value>Открыть инструменты журналов XA Slave</value></data>
+  <data name="Opens XA Slave's Utility &gt; XA Mods panel, which contains Dalamud Log Cleaner." xml:space="preserve"><value>Открывает панель Utility &gt; XA Mods в XA Slave, содержащую Dalamud Log Cleaner.</value></data>
+  <data name="XA Slave log tools could not be opened." xml:space="preserve"><value>Не удалось открыть инструменты журналов XA Slave.</value></data>
 </root>

@@ -2868,4 +2868,35 @@
   <data name="DEFAULT CONFIG is a template. Combat uses the active character profile." xml:space="preserve"><value>DEFAULT CONFIG 是模板。战斗使用当前角色的配置。</value></data>
   <data name="Temporary DAD profile supplies the effective rotation; the controls below edit the saved profile." xml:space="preserve"><value>临时 DAD 配置决定生效的循环；下方控件编辑的是已保存的配置。</value></data>
   <data name="Normal" xml:space="preserve"><value>普通</value></data>
+  <data name="Copy / ZIP Dalamud log" xml:space="preserve">
+    <value>复制 / 压缩 Dalamud 日志</value>
+  </data>
+  <data name="Export capped log anyway" xml:space="preserve">
+    <value>仍然导出已满日志</value>
+  </data>
+  <data name="Exporting log..." xml:space="preserve">
+    <value>正在导出日志...</value>
+  </data>
+  <data name="Log ZIP ready. Share it manually; remove old exports when you no longer need them." xml:space="preserve">
+    <value>日志 ZIP 已就绪。请手动分享，并删除不再需要的旧导出文件。</value>
+  </data>
+  <data name="Log export failed." xml:space="preserve">
+    <value>日志导出失败。</value>
+  </data>
+  <data name="Open Export Folder" xml:space="preserve">
+    <value>打开导出文件夹</value>
+  </data>
+  <data name="This log has reached Dalamud's 100 MiB limit. Logging may have stopped, so recent activity may be missing and this log may not help troubleshoot your current issue." xml:space="preserve">
+    <value>此日志已达到 Dalamud 的 100 MiB 上限。日志记录可能已停止，最近的活动可能缺失，因此可能无法帮助诊断当前问题。</value>
+  </data>
+  <data name="Increases EXP earned by your chocobo companion." xml:space="preserve"><value>提高陆行鸟搭档获得的经验值。</value></data>
+  <data name="Increases your chocobo companion's attack potency." xml:space="preserve"><value>提高陆行鸟搭档的攻击威力。</value></data>
+  <data name="Increases your chocobo companion's healing magic potency." xml:space="preserve"><value>提高陆行鸟搭档的治疗魔法威力。</value></data>
+  <data name="Increases your chocobo companion's maximum HP." xml:space="preserve"><value>提高陆行鸟搭档的最大体力。</value></data>
+  <data name="Increases your chocobo companion's enmity." xml:space="preserve"><value>提高陆行鸟搭档产生的仇恨。</value></data>
+  <data name="No companion food selected." xml:space="preserve"><value>未选择搭档食物。</value></data>
+  <data name="Field feeding grants this buff. If this is your chocobo's favorite food, it grants the stronger version. Favorite food is established through stable training." xml:space="preserve"><value>在野外喂食可获得此效果。如果这是陆行鸟最喜欢的食物，则会获得更强的效果。最喜欢的食物通过鸟房训练确定。</value></data>
+  <data name="Open XA Slave log tools" xml:space="preserve"><value>打开XA Slave日志工具</value></data>
+  <data name="Opens XA Slave's Utility &gt; XA Mods panel, which contains Dalamud Log Cleaner." xml:space="preserve"><value>打开XA Slave的Utility &gt; XA Mods面板，其中包含Dalamud Log Cleaner。</value></data>
+  <data name="XA Slave log tools could not be opened." xml:space="preserve"><value>无法打开XA Slave日志工具。</value></data>
 </root>

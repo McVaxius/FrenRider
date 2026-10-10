@@ -2973,4 +2973,35 @@ Ativado: use as predefinições do BossMod abaixo com qualquer provedor de rota�
   <data name="DEFAULT CONFIG is a template. Combat uses the active character profile." xml:space="preserve"><value>DEFAULT CONFIG é um modelo. O combate usa o perfil do personagem ativo.</value></data>
   <data name="Temporary DAD profile supplies the effective rotation; the controls below edit the saved profile." xml:space="preserve"><value>O perfil temporário do DAD define a rotação efetiva; os controles abaixo editam o perfil salvo.</value></data>
   <data name="Normal" xml:space="preserve"><value>Normal</value></data>
+  <data name="Copy / ZIP Dalamud log" xml:space="preserve">
+    <value>Copiar / compactar log do Dalamud</value>
+  </data>
+  <data name="Export capped log anyway" xml:space="preserve">
+    <value>Exportar o log cheio mesmo assim</value>
+  </data>
+  <data name="Exporting log..." xml:space="preserve">
+    <value>Exportando log...</value>
+  </data>
+  <data name="Log ZIP ready. Share it manually; remove old exports when you no longer need them." xml:space="preserve">
+    <value>ZIP do log pronto. Compartilhe manualmente e exclua exportações antigas que não precisar mais.</value>
+  </data>
+  <data name="Log export failed." xml:space="preserve">
+    <value>Falha ao exportar o log.</value>
+  </data>
+  <data name="Open Export Folder" xml:space="preserve">
+    <value>Abra a pasta de exportação</value>
+  </data>
+  <data name="This log has reached Dalamud's 100 MiB limit. Logging may have stopped, so recent activity may be missing and this log may not help troubleshoot your current issue." xml:space="preserve">
+    <value>Este log atingiu o limite de 100 MiB do Dalamud. O registro pode ter parado; atividades recentes podem estar ausentes e o log pode não ajudar a diagnosticar o problema atual.</value>
+  </data>
+  <data name="Increases EXP earned by your chocobo companion." xml:space="preserve"><value>Aumenta a EXP obtida pelo seu chocobo companheiro.</value></data>
+  <data name="Increases your chocobo companion's attack potency." xml:space="preserve"><value>Aumenta a potência de ataque do seu chocobo companheiro.</value></data>
+  <data name="Increases your chocobo companion's healing magic potency." xml:space="preserve"><value>Aumenta a potência da magia de cura do seu chocobo companheiro.</value></data>
+  <data name="Increases your chocobo companion's maximum HP." xml:space="preserve"><value>Aumenta o HP máximo do seu chocobo companheiro.</value></data>
+  <data name="Increases your chocobo companion's enmity." xml:space="preserve"><value>Aumenta a inimizade do seu chocobo companheiro.</value></data>
+  <data name="No companion food selected." xml:space="preserve"><value>Nenhuma comida de companheiro selecionada.</value></data>
+  <data name="Field feeding grants this buff. If this is your chocobo's favorite food, it grants the stronger version. Favorite food is established through stable training." xml:space="preserve"><value>Alimentá-lo em campo concede este bônus. Se esta for a comida favorita do seu chocobo, concede a versão mais forte. A comida favorita é definida pelo treinamento no estábulo.</value></data>
+  <data name="Open XA Slave log tools" xml:space="preserve"><value>Abrir ferramentas de log do XA Slave</value></data>
+  <data name="Opens XA Slave's Utility &gt; XA Mods panel, which contains Dalamud Log Cleaner." xml:space="preserve"><value>Abre o painel Utility &gt; XA Mods do XA Slave, que contém o Dalamud Log Cleaner.</value></data>
+  <data name="XA Slave log tools could not be opened." xml:space="preserve"><value>Não foi possível abrir as ferramentas de log do XA Slave.</value></data>
 </root>

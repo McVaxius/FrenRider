@@ -85,6 +85,8 @@ Settings → **Chocobo** contains summon, stance and skill-allocation preference
 
 Companion purchases are manual. **BUY FOOD**, **BUY GREENS** and **Stop companion purchasing** are on Main and at the top of the Chocobo tab; Mini provides cart, food and stop icons inside and outside Eureka. Main and Mini show current NQ supply counts; a dash means inventory is unavailable. Hover for the selected food, stock targets, purchase status and Vath unlock warning. Buy starts one vendor trip and fills the deficit to the saved stock target using available gil; zero targets disable purchasing. There is no gil-cap setting, travel checkbox or automatic restocking. Stock targets clone, sync and reset through the existing profile controls. Purchase buttons use the active character's runtime profile; select that character's profile to use them in Settings.
 
+Hover the companion food selector, its choices, stock target/summary, BUY FOOD on Settings/Main/Mini, or Feed companion now to see the selected food's effect. Tooltips explain the stronger favorite-food version and that favorite food is established through stable training. Feed uses the active character's effective profile.
+
 ADS owns vendor travel, shop opening and purchases. FrenRider calculates the affordable additional quantity needed for the stock target and sends the item, quantity, exact expected gil cost and explicit travel authorization through ADS IPC only after a purchase-button press. ADS must advertise `shopPurchaseTravelPolicy:1` or later before accepting this handoff. ADS uses only verified city merchants or the unlocked Vath gil shop. Gysahl Greens are offered by Maisenta, Bango Zango, Roarich and Vath; Sylkis Bud, Mimett Gourd, Tantalplant and Pahsana Fruit require Vath beast tribe progression through **The Naming of Vath**. The Buy Food controls warn that purchasing is unavailable until this vendor is unlocked. Curiel Root and onions have no verified gil offer and are not purchased. Teleporting requires an unlocked destination.
 
 ADS selects the exact native gil-shop handler, then verifies the offer, price, main-bag capacity and authorized exact cost before each purchase request. Completion requires the exact inventory increase, exact gil debit and settled owned transaction. ADS closes the owned vendor interaction after its transaction settles, including the returning NPC menu. **Stop companion purchasing** delegates cancellation of the owned ADS request. Missing ADS support, rejected requests and unverified results stop the operation without retry. If cancellation or the outcome is unreadable, FrenRider keeps its movement and companion-action holds until the matching ADS operation is observed terminal with navigation released; that readback does not rearm purchasing. Onion use remains unfinished.
@@ -233,3 +235,9 @@ AGPL-3.0-or-later
 Original Lua script: https://github.com/McVaxius/dhogsbreakfeast/blob/main/Dungeons%20and%20Multiboxing/frenrider/frenrider_McVaxius.lua
 
 Dalamud Plugin Framework: https://github.com/goatcorp/Dalamud
+
+## Support logs
+
+Use **Copy / ZIP Dalamud log** in Settings > UI / About to create a local ZIP and open its folder. At 100 MiB or above, the first click warns that logging may have stopped and recent activity may be missing; click **Export capped log anyway** only if you still want that snapshot. Share the ZIP manually and remove exports when no longer needed. **Open Export Folder** reopens the completed export’s folder.
+
+When XA Slave is loaded, **Open XA Slave log tools** opens its **Utility > XA Mods** panel, which contains Dalamud Log Cleaner. The existing **Copy / ZIP Dalamud log** action remains separate. Opening the panel does not run cleanup or change XA Slave settings.

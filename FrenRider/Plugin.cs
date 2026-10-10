@@ -332,6 +332,7 @@ public sealed class Plugin : IDalamudPlugin
         var loadedVersion = typeof(Plugin).Assembly.GetName().Version?.ToString() ?? "unknown";
         Log.Information($"[FrenRider] Loaded version {loadedVersion} from {PluginInterface.AssemblyLocation.FullName}");
         Log.Information("===Fren Rider loaded!===");
+        Log.Information("[FrenRider][UI] build=devhub-I503-I510-I512-20261009-03; companion food effect tooltips; separate XA Slave log UI shortcut; tight compact list rows");
         Log.Information($"[FrenRider][ChocoboProbe] available build={ChocoboExplorationService.BuildMarker}; command=/fr testchocobo");
         Log.Information("[FrenRider][ChocoboPurchase] available build=I496-food-03; manual=true; main-mini-stock-controls=true; gil-cap-setting=false; travel-checkbox=false");
     }

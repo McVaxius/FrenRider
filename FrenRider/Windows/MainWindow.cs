@@ -450,6 +450,7 @@ public class MainWindow : Window, IDisposable
         tableStyle.Color(ImGuiCol.TableRowBg, Vector4.Zero);
         tableStyle.Color(ImGuiCol.TableRowBgAlt, Vector4.Zero);
         tableStyle.Color(ImGuiCol.ChildBg, Vector4.Zero);
+        using var tightRows = compact ? MaterialTable.PushTightRows() : default;
         var available = Math.Max(1, ImGui.GetContentRegionAvail().X - UiHelpers.Scale(compact ? 3 : 6));
         var statusMinimum = Math.Max(MaterialText.Measure(UiText.T("Mounted")).X,
             Math.Max(MaterialText.Measure(UiText.T("On foot")).X, MaterialText.Measure(UiText.T("Not visible")).X))
@@ -466,7 +467,7 @@ public class MainWindow : Window, IDisposable
         var statusWeight = compact ? 1.135f : 1.16f;
         var minimumWidth = Math.Max(UiHelpers.Scale(640), indexWidth + distanceMinimum + ImGui.GetStyle().CellPadding.X * 10
             + MathF.Ceiling(Math.Max(jobMinimum, statusMinimum / statusWeight) * (nameWeight + 1 + statusWeight)));
-        var rowHeight = UiHelpers.Scale(plugin.Configuration.UiCompact ? 32 : 35);
+        var rowHeight = compact ? Math.Max(UiHelpers.Scale(24), ImGui.GetTextLineHeight()) : UiHelpers.Scale(35);
         var height = MathF.Ceiling(ImGui.GetTextLineHeight() + ImGui.GetStyle().CellPadding.Y * 2
             + Math.Max(4, plugin.FrenTracker.Party.Count) * rowHeight)
             + (available < minimumWidth ? ImGui.GetStyle().ScrollbarSize : 0);

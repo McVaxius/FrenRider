@@ -1,3 +1,19 @@
+2026-10-09 - Tight compact list grids (I503/I509)
+
+- Use adjacent compact rows in saved beasts and party status. Size party rows to their retained job icons and text; keep every stock/purchase/feed action.
+
+2026-10-09 - Separate XA Slave log-tools shortcut (I512)
+
+- Add Open XA Slave log tools beside the existing manual support exporter when XA Slave is loaded. The new action opens Utility > XA Mods only; preserve the Copy / ZIP button, its handler and cap warning. No automatic cleanup, provider loading or settings changes.
+
+2026-10-09 - Companion food effect tooltips (I510)
+
+- Explain each field food's effect and favorite-food distinction on hover in the selector, its choices and stock summary, purchase actions on Settings/Main/Mini, and the active-profile Feed action. Preserve existing stock targets, native IDs and manual purchase/feed behavior.
+
+2026-10-09 - Manual Dalamud support log export (I506)
+
+- Add Copy / ZIP Dalamud log and Open Export Folder to the existing settings/support interface. At 100 MiB or above, warn that logging may have stopped and recent activity may be missing; require another explicit click to export. Exports stay local and can be shared or removed manually. Preserve saved settings and release versions.
+
 2026-10-08 - Dedicated Window appearance settings (I505)
 
 - Move colour, language, compact mode and transparency controls into their own settings tab or sidebar page. Retain the existing controls, native IDs, saved preferences and actions; keep normal settings visible without an appearance block above them. Versions and client configuration are unchanged. Local build checks and game visual acceptance are recorded separately in the selected task checkpoint.

@@ -2973,4 +2973,35 @@ Bật: dùng các preset BossMod bên dưới với mọi nhà cung cấp rotati
   <data name="DEFAULT CONFIG is a template. Combat uses the active character profile." xml:space="preserve"><value>DEFAULT CONFIG là mẫu. Chiến đấu dùng hồ sơ của nhân vật đang hoạt động.</value></data>
   <data name="Temporary DAD profile supplies the effective rotation; the controls below edit the saved profile." xml:space="preserve"><value>Hồ sơ DAD tạm thời quyết định vòng kỹ năng đang áp dụng; các điều khiển bên dưới chỉnh sửa hồ sơ đã lưu.</value></data>
   <data name="Normal" xml:space="preserve"><value>Thông thường</value></data>
+  <data name="Copy / ZIP Dalamud log" xml:space="preserve">
+    <value>Sao chép / nén ZIP nhật ký Dalamud</value>
+  </data>
+  <data name="Export capped log anyway" xml:space="preserve">
+    <value>Vẫn xuất nhật ký đã đầy</value>
+  </data>
+  <data name="Exporting log..." xml:space="preserve">
+    <value>Đang xuất nhật ký...</value>
+  </data>
+  <data name="Log ZIP ready. Share it manually; remove old exports when you no longer need them." xml:space="preserve">
+    <value>ZIP nhật ký đã sẵn sàng. Chia sẻ thủ công và xóa các bản xuất cũ không còn cần.</value>
+  </data>
+  <data name="Log export failed." xml:space="preserve">
+    <value>Xuất nhật ký thất bại.</value>
+  </data>
+  <data name="Open Export Folder" xml:space="preserve">
+    <value>Mở thư mục xuất</value>
+  </data>
+  <data name="This log has reached Dalamud's 100 MiB limit. Logging may have stopped, so recent activity may be missing and this log may not help troubleshoot your current issue." xml:space="preserve">
+    <value>Nhật ký này đã đạt giới hạn 100 MiB của Dalamud. Việc ghi có thể đã dừng; hoạt động gần đây có thể bị thiếu nên nhật ký có thể không giúp chẩn đoán vấn đề hiện tại.</value>
+  </data>
+  <data name="Increases EXP earned by your chocobo companion." xml:space="preserve"><value>Tăng EXP mà chocobo đồng hành của bạn nhận được.</value></data>
+  <data name="Increases your chocobo companion's attack potency." xml:space="preserve"><value>Tăng uy lực tấn công của chocobo đồng hành.</value></data>
+  <data name="Increases your chocobo companion's healing magic potency." xml:space="preserve"><value>Tăng uy lực phép hồi phục của chocobo đồng hành.</value></data>
+  <data name="Increases your chocobo companion's maximum HP." xml:space="preserve"><value>Tăng HP tối đa của chocobo đồng hành.</value></data>
+  <data name="Increases your chocobo companion's enmity." xml:space="preserve"><value>Tăng thù địch do chocobo đồng hành tạo ra.</value></data>
+  <data name="No companion food selected." xml:space="preserve"><value>Chưa chọn thức ăn cho đồng hành.</value></data>
+  <data name="Field feeding grants this buff. If this is your chocobo's favorite food, it grants the stronger version. Favorite food is established through stable training." xml:space="preserve"><value>Cho ăn ngoài thực địa sẽ nhận hiệu ứng này. Nếu đây là thức ăn yêu thích của chocobo, hiệu ứng sẽ mạnh hơn. Thức ăn yêu thích được xác định qua huấn luyện trong chuồng.</value></data>
+  <data name="Open XA Slave log tools" xml:space="preserve"><value>Mở công cụ nhật ký XA Slave</value></data>
+  <data name="Opens XA Slave's Utility &gt; XA Mods panel, which contains Dalamud Log Cleaner." xml:space="preserve"><value>Mở bảng Utility &gt; XA Mods của XA Slave, chứa Dalamud Log Cleaner.</value></data>
+  <data name="XA Slave log tools could not be opened." xml:space="preserve"><value>Không thể mở công cụ nhật ký XA Slave.</value></data>
 </root>

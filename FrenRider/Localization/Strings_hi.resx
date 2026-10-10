@@ -2879,4 +2879,35 @@
   <data name="DEFAULT CONFIG is a template. Combat uses the active character profile." xml:space="preserve"><value>DEFAULT CONFIG एक टेम्पलेट है। युद्ध में सक्रिय पात्र की प्रोफ़ाइल का उपयोग होता है।</value></data>
   <data name="Temporary DAD profile supplies the effective rotation; the controls below edit the saved profile." xml:space="preserve"><value>अस्थायी DAD प्रोफ़ाइल प्रभावी रोटेशन तय करती है; नीचे के नियंत्रण सहेजी गई प्रोफ़ाइल संपादित करते हैं।</value></data>
   <data name="Normal" xml:space="preserve"><value>सामान्य</value></data>
+  <data name="Copy / ZIP Dalamud log" xml:space="preserve">
+    <value>Dalamud लॉग कॉपी / ZIP करें</value>
+  </data>
+  <data name="Export capped log anyway" xml:space="preserve">
+    <value>भरा हुआ लॉग फिर भी निर्यात करें</value>
+  </data>
+  <data name="Exporting log..." xml:space="preserve">
+    <value>लॉग निर्यात हो रहा है...</value>
+  </data>
+  <data name="Log ZIP ready. Share it manually; remove old exports when you no longer need them." xml:space="preserve">
+    <value>लॉग ZIP तैयार है। इसे स्वयं साझा करें और पुराने अनावश्यक निर्यात हटाएँ।</value>
+  </data>
+  <data name="Log export failed." xml:space="preserve">
+    <value>लॉग निर्यात विफल हुआ।</value>
+  </data>
+  <data name="Open Export Folder" xml:space="preserve">
+    <value>निर्यात फ़ोल्डर खोलें</value>
+  </data>
+  <data name="This log has reached Dalamud's 100 MiB limit. Logging may have stopped, so recent activity may be missing and this log may not help troubleshoot your current issue." xml:space="preserve">
+    <value>यह लॉग Dalamud की 100 MiB सीमा पर पहुँच गया है। लॉग लिखना रुक गया हो सकता है; हाल की गतिविधि गायब हो सकती है और यह लॉग वर्तमान समस्या की जाँच में उपयोगी नहीं हो सकता।</value>
+  </data>
+  <data name="Increases EXP earned by your chocobo companion." xml:space="preserve"><value>आपके चोकोबो साथी को मिलने वाला EXP बढ़ाता है।</value></data>
+  <data name="Increases your chocobo companion's attack potency." xml:space="preserve"><value>आपके चोकोबो साथी की आक्रमण क्षमता बढ़ाता है।</value></data>
+  <data name="Increases your chocobo companion's healing magic potency." xml:space="preserve"><value>आपके चोकोबो साथी के उपचार जादू की क्षमता बढ़ाता है।</value></data>
+  <data name="Increases your chocobo companion's maximum HP." xml:space="preserve"><value>आपके चोकोबो साथी का अधिकतम HP बढ़ाता है।</value></data>
+  <data name="Increases your chocobo companion's enmity." xml:space="preserve"><value>आपके चोकोबो साथी के प्रति शत्रुओं का ध्यान बढ़ाता है।</value></data>
+  <data name="No companion food selected." xml:space="preserve"><value>साथी के लिए कोई भोजन नहीं चुना गया है।</value></data>
+  <data name="Field feeding grants this buff. If this is your chocobo's favorite food, it grants the stronger version. Favorite food is established through stable training." xml:space="preserve"><value>मैदान में यह भोजन खिलाने से यह लाभ मिलता है। अगर यह आपके चोकोबो का पसंदीदा भोजन है, तो इसका अधिक शक्तिशाली रूप मिलता है। पसंदीदा भोजन अस्तबल में प्रशिक्षण से तय होता है।</value></data>
+  <data name="Open XA Slave log tools" xml:space="preserve"><value>XA Slave के लॉग उपकरण खोलें</value></data>
+  <data name="Opens XA Slave's Utility &gt; XA Mods panel, which contains Dalamud Log Cleaner." xml:space="preserve"><value>XA Slave का Utility &gt; XA Mods पैनल खोलता है, जिसमें Dalamud Log Cleaner है।</value></data>
+  <data name="XA Slave log tools could not be opened." xml:space="preserve"><value>XA Slave के लॉग उपकरण नहीं खोले जा सके।</value></data>
 </root>
