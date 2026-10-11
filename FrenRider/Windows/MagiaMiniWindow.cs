@@ -90,7 +90,7 @@ public sealed class MagiaMiniWindow : Window, IDisposable
         try
         {
             motion.Restore(this);
-            UiGui.ImageTitle(this, UiText.T("Fren Rider Mini"), plugin.OriginalIcon);
+            UiGui.ImageTitleWithStatus(this, UiText.T("Fren Rider Mini"), plugin.OriginalIcon, plugin.TitlebarStatus());
             plugin.DrawAppearanceTitleBarPopups(this);
             plugin.ApplyWindowOpacity(windowOpacity, WindowName);
         }

@@ -44,6 +44,7 @@ public class AutoDutyWarningWindow : Window
     public override void PostDraw()
     {
         motion.Restore(this);
+        UiGui.ImageTitleWithStatus(this, UiText.T(WindowName.Split("##", 2)[0]), plugin.OriginalIcon, plugin.TitlebarStatus());
         plugin.DrawAppearanceTitleBarPopups(this);
         plugin.ApplyWindowOpacity(windowOpacity, WindowName);
     }

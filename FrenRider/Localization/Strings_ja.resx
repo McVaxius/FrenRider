@@ -3113,4 +3113,9 @@
   <data name="FATE" xml:space="preserve">
     <value>FATE</value>
   </data>
+  <data name="Show titlebar status" xml:space="preserve"><value>タイトルバーに状態を表示</value></data>
+  <data name="Detailed titlebar status" xml:space="preserve"><value>タイトルバーに詳細な状態を表示</value></data>
+  <data name="Configured rotation provider" xml:space="preserve"><value>設定されたローテーション提供元</value></data>
+  <data name="Duty owner" xml:space="preserve"><value>コンテンツの制御元</value></data>
+  <data name="Titlebar.Unavailable" xml:space="preserve"><value>利用不可</value></data>
 </root>

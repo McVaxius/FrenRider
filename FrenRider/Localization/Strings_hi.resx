@@ -3124,4 +3124,9 @@
   <data name="FATE" xml:space="preserve">
     <value>FATE</value>
   </data>
+  <data name="Show titlebar status" xml:space="preserve"><value>शीर्षक पट्टी की स्थिति दिखाएँ</value></data>
+  <data name="Detailed titlebar status" xml:space="preserve"><value>शीर्षक पट्टी की विस्तृत स्थिति</value></data>
+  <data name="Configured rotation provider" xml:space="preserve"><value>कॉन्फ़िगर किया गया रोटेशन प्रदाता</value></data>
+  <data name="Duty owner" xml:space="preserve"><value>कंटेंट नियंत्रक</value></data>
+  <data name="Titlebar.Unavailable" xml:space="preserve"><value>अनुपलब्ध</value></data>
 </root>

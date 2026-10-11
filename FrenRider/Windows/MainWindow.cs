@@ -99,7 +99,7 @@ public class MainWindow : Window, IDisposable
         try
         {
             motion.Restore(this);
-            UiGui.ImageTitle(this, "Fren Rider v" + CurrentVersion, plugin.OriginalIcon);
+            UiGui.ImageTitleWithStatus(this, "Fren Rider v" + CurrentVersion, plugin.OriginalIcon, plugin.TitlebarStatus());
             plugin.DrawAppearanceTitleBarPopups(this);
             plugin.ApplyWindowOpacity(windowOpacity, WindowName);
         }

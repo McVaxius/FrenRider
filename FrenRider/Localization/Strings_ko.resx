@@ -3113,4 +3113,9 @@
   <data name="FATE" xml:space="preserve">
     <value>FATE</value>
   </data>
+  <data name="Show titlebar status" xml:space="preserve"><value>제목 표시줄 상태 표시</value></data>
+  <data name="Detailed titlebar status" xml:space="preserve"><value>제목 표시줄 상세 상태</value></data>
+  <data name="Configured rotation provider" xml:space="preserve"><value>설정된 로테이션 제공자</value></data>
+  <data name="Duty owner" xml:space="preserve"><value>콘텐츠 제어 주체</value></data>
+  <data name="Titlebar.Unavailable" xml:space="preserve"><value>사용 불가</value></data>
 </root>

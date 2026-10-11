@@ -3218,4 +3218,9 @@ Aktif: gunakan preset BossMod di bawah dengan penyedia rotasi apa pun. Preset kh
   <data name="FATE" xml:space="preserve">
     <value>FATE</value>
   </data>
+  <data name="Show titlebar status" xml:space="preserve"><value>Tampilkan status bilah judul</value></data>
+  <data name="Detailed titlebar status" xml:space="preserve"><value>Status bilah judul terperinci</value></data>
+  <data name="Configured rotation provider" xml:space="preserve"><value>Penyedia rotasi yang dikonfigurasi</value></data>
+  <data name="Duty owner" xml:space="preserve"><value>Pengendali konten</value></data>
+  <data name="Titlebar.Unavailable" xml:space="preserve"><value>Tidak tersedia</value></data>
 </root>

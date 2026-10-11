@@ -1,3 +1,8 @@
+2026-10-11 - Native titlebar runtime status (I536)
+
+- Show the current following state, configured rotation provider and observed duty owner in native titlebars. Use the packaged plugin icon in Settings and warning windows.
+- Add default-on Show titlebar status and Detailed titlebar status controls in Appearance. Detailed off retains the concise state, provider and owner; hover retains the full reasons and runtime details. Preserve active profiles, titlebar actions, window sizing and save routes. No release version change.
+
 2026-10-11 - Post-duty desynthesis handoff (I533)
 
 - Expose the existing configured post-duty desynthesis state to VERMAXION so selling/discarding can wait for it. Keep current toggles, ADS item rules and action ownership; report only the current character's flow and clear a departed character's pending flow. No new settings, action runner or version change.

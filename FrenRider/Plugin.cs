@@ -432,6 +432,28 @@ public sealed class Plugin : IDalamudPlugin
         if (appearanceTitleBars.TryGetValue(owner, out var actions)) actions.DrawPopups();
     }
 
+    internal MaterialTitlebarStatus? TitlebarStatus()
+    {
+        if (!Configuration.UiShowTitlebarStatus) return null;
+        var active = ConfigManager.GetActiveConfig();
+        var state = UiText.T(!ClientState.IsLoggedIn ? "Not logged in" : !active.Enabled ? "Disabled" : FollowService.State.ToString());
+        var provider = CombatService.GetConfiguredRotationProvider(active);
+        var inDuty = Condition[ConditionFlag.BoundByDuty] || Condition[ConditionFlag.BoundByDuty56] || Condition[ConditionFlag.BoundByDuty95];
+        var dutyOwner = !inDuty ? UiText.T("None")
+            : AdsIntegrationService.IsControllingDuty ? "ADS"
+            : CombatService.DutyAuthority == DutyCombatAuthority.QuestionableSolo ? "Questionable"
+            : AdsIntegrationService.IsHandoffPending ? UiText.T("Titlebar.Unavailable")
+            : active.Enabled && CombatService.DutyAuthority == DutyCombatAuthority.FrenRider ? "FrenRider" : UiText.T("Titlebar.Unavailable");
+        var rotation = UiText.T("Configured rotation provider") + ": " + provider;
+        var ownership = UiText.T("Duty owner") + ": " + dutyOwner;
+        var followDetail = ClientState.IsLoggedIn && active.Enabled ? UiText.T(FollowService.StateDetail) : string.Empty;
+        var concise = string.Join(" | ", new[] { state, rotation, ownership });
+        var detailed = string.Join(" | ", new[] { concise, followDetail }.Where(value => !string.IsNullOrWhiteSpace(value)));
+        var tooltip = string.Join("\n", state, followDetail, rotation, ownership,
+            UiText.T(CombatService.State.ToString()), UiText.T(CombatService.StateDetail), UiText.T(AdsIntegrationService.StatusText));
+        return new(Configuration.UiDetailedTitlebarStatus ? detailed : concise, state, tooltip);
+    }
+
     private void DrawTitleColour()
     {
         using var controls = MaterialControls.Push(FrenRiderPresentation.Controls(Configuration.UiCompact ? 28 : 32, 18));
@@ -1400,6 +1422,14 @@ public sealed class Plugin : IDalamudPlugin
             }
         }, () =>
         {
+            var showStatus = config.UiShowTitlebarStatus;
+            using (UiGui.SettingRow("Show titlebar status"))
+                if (UiGui.Checkbox("Show titlebar status###UiShowTitlebarStatus", ref showStatus))
+                { config.UiShowTitlebarStatus = showStatus; changed = true; }
+            var detailedStatus = config.UiDetailedTitlebarStatus;
+            using (UiGui.SettingRow("Detailed titlebar status"))
+                if (UiGui.Checkbox("Detailed titlebar status###UiDetailedTitlebarStatus", ref detailedStatus))
+                { config.UiDetailedTitlebarStatus = detailedStatus; changed = true; }
             var compactVisible = config.UiCompactVisibleOnMainWindow;
             using (UiGui.SettingRow("Compact visible on main window"))
                 if (UiGui.Checkbox("Compact visible on main window###UiCompactVisibleOnMainWindowSettings", ref compactVisible))

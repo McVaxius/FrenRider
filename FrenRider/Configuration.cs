@@ -29,6 +29,8 @@ public class Configuration : IPluginConfiguration
         return true;
     }
     public bool UiLanguageVisibleOnMainWindow { get; set; } = true;
+    public bool UiShowTitlebarStatus { get; set; } = true;
+    public bool UiDetailedTitlebarStatus { get; set; } = true;
     public bool UiTransparencyEnabled { get; set; } = true;
     public int UiWindowOpacityPercent { get; set; } = 100;
     public bool UiAutoFade { get; set; } = true;

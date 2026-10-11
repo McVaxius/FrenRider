@@ -3113,4 +3113,9 @@
   <data name="FATE" xml:space="preserve">
     <value>FATE</value>
   </data>
+  <data name="Show titlebar status" xml:space="preserve"><value>Показывать статус в заголовке</value></data>
+  <data name="Detailed titlebar status" xml:space="preserve"><value>Подробный статус в заголовке</value></data>
+  <data name="Configured rotation provider" xml:space="preserve"><value>Настроенный провайдер ротации</value></data>
+  <data name="Duty owner" xml:space="preserve"><value>Кто управляет заданием</value></data>
+  <data name="Titlebar.Unavailable" xml:space="preserve"><value>Недоступно</value></data>
 </root>

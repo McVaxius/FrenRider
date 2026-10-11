@@ -3218,4 +3218,9 @@ Bật: dùng các preset BossMod bên dưới với mọi nhà cung cấp rotati
   <data name="FATE" xml:space="preserve">
     <value>FATE</value>
   </data>
+  <data name="Show titlebar status" xml:space="preserve"><value>Hiện trạng thái trên thanh tiêu đề</value></data>
+  <data name="Detailed titlebar status" xml:space="preserve"><value>Trạng thái chi tiết trên thanh tiêu đề</value></data>
+  <data name="Configured rotation provider" xml:space="preserve"><value>Nhà cung cấp xoay chiêu đã cấu hình</value></data>
+  <data name="Duty owner" xml:space="preserve"><value>Bên điều khiển nội dung</value></data>
+  <data name="Titlebar.Unavailable" xml:space="preserve"><value>Không khả dụng</value></data>
 </root>

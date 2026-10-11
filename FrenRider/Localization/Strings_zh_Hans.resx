@@ -3113,4 +3113,9 @@
   <data name="FATE" xml:space="preserve">
     <value>FATE</value>
   </data>
+  <data name="Show titlebar status" xml:space="preserve"><value>显示标题栏状态</value></data>
+  <data name="Detailed titlebar status" xml:space="preserve"><value>详细标题栏状态</value></data>
+  <data name="Configured rotation provider" xml:space="preserve"><value>配置的循环提供方</value></data>
+  <data name="Duty owner" xml:space="preserve"><value>副本控制方</value></data>
+  <data name="Titlebar.Unavailable" xml:space="preserve"><value>不可用</value></data>
 </root>

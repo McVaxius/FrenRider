@@ -3218,4 +3218,9 @@ Açık: aşağıdaki BossMod ön ayarlarını herhangi bir rotasyon sağlayıcı
   <data name="FATE" xml:space="preserve">
     <value>FATE</value>
   </data>
+  <data name="Show titlebar status" xml:space="preserve"><value>Başlık çubuğu durumunu göster</value></data>
+  <data name="Detailed titlebar status" xml:space="preserve"><value>Ayrıntılı başlık çubuğu durumu</value></data>
+  <data name="Configured rotation provider" xml:space="preserve"><value>Yapılandırılmış rotasyon sağlayıcısı</value></data>
+  <data name="Duty owner" xml:space="preserve"><value>İçeriği yöneten</value></data>
+  <data name="Titlebar.Unavailable" xml:space="preserve"><value>Kullanılamıyor</value></data>
 </root>

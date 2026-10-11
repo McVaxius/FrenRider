@@ -3113,4 +3113,9 @@ Activé : utilisez les préréglages BossMod ci-dessous avec tout fournisseur de
   <data name="FATE" xml:space="preserve">
     <value>FATE</value>
   </data>
+  <data name="Show titlebar status" xml:space="preserve"><value>Afficher le statut dans la barre de titre</value></data>
+  <data name="Detailed titlebar status" xml:space="preserve"><value>Statut détaillé dans la barre de titre</value></data>
+  <data name="Configured rotation provider" xml:space="preserve"><value>Fournisseur de rotation configuré</value></data>
+  <data name="Duty owner" xml:space="preserve"><value>Responsable du contenu</value></data>
+  <data name="Titlebar.Unavailable" xml:space="preserve"><value>Indisponible</value></data>
 </root>
