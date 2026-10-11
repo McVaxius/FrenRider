@@ -1,5 +1,8 @@
 using System;
+using System.Linq;
+using System.Text.Json;
 using Dalamud.Game.ClientState.Conditions;
+using Dalamud.Plugin.Ipc;
 using FrenRider.Models;
 
 namespace FrenRider.Services;
@@ -66,6 +69,9 @@ public class AutomationService : IDisposable
     private int repairRequestAttempts;
     private AutoDesynthFlowState autoDesynthFlowState;
     private long autoDesynthFlowStartedMs;
+    private DateTime autoDesynthDutyCompletedUtc;
+    private ulong autoDesynthCharacter;
+    private readonly ICallGateProvider<string> autoDesynthStatusProvider;
     private long lastAutoDesynthAttemptMs;
     private DateTime lastAutoDesynthAttemptUtc = DateTime.MinValue;
     private int autoDesynthRequestAttempts;
@@ -115,11 +121,37 @@ public class AutomationService : IDisposable
         this.plugin = plugin;
         this.tracker = tracker;
         this.zoneService = zoneService;
+        autoDesynthStatusProvider = Plugin.PluginInterface.GetIpcProvider<string>("FrenRider.GetAutoDesynthStatusJson");
+        autoDesynthStatusProvider.RegisterFunc(GetAutoDesynthStatusJson);
         Plugin.DutyState.DutyCompleted += OnDutyCompleted;
+        Plugin.Log.Information("[FrenRider][AutoDesynth] handoff build=fr-I533-cleanup-20261011-01");
     }
 
     public void Dispose()
-        => Plugin.DutyState.DutyCompleted -= OnDutyCompleted;
+    {
+        Plugin.DutyState.DutyCompleted -= OnDutyCompleted;
+        autoDesynthStatusProvider?.UnregisterFunc();
+    }
+
+    public string GetAutoDesynthStatusJson()
+    {
+        var config = plugin.ConfigManager.GetActiveConfig();
+        var enabled = config.Enabled && config.EnableAutoDesynth;
+        var sameCharacter = autoDesynthCharacter == Plugin.PlayerState.ContentId;
+        return JsonSerializer.Serialize(new
+        {
+            schema = "frenrider.auto-desynth/v1",
+            characterId = Plugin.PlayerState.ContentId,
+            enabled,
+            pending = enabled && sameCharacter && autoDesynthFlowState is
+                AutoDesynthFlowState.PendingExit or AutoDesynthFlowState.WaitingStart or
+                AutoDesynthFlowState.Running or AutoDesynthFlowState.RetryWait,
+            failed = sameCharacter && autoDesynthFlowState == AutoDesynthFlowState.Failed,
+            status = sameCharacter ? AutoDesynthStatus : string.Empty,
+            dutyCompletedAtUtc = sameCharacter && autoDesynthDutyCompletedUtc != DateTime.MinValue
+                ? autoDesynthDutyCompletedUtc.ToString("O") : null,
+        });
+    }
 
     public void Update()
     {
@@ -162,6 +194,11 @@ public class AutomationService : IDisposable
         var now = Environment.TickCount64;
 
         CheckAutoDesynth(config, now);
+        if (VermaxionOwnsPostVoyageCleanup())
+        {
+            LastIdleAction = "VERMAXION";
+            return;
+        }
         if (!IsAutoDesynthPendingAfterDutyExit)
             CheckRepair(config, now);
         if (IsUtilityGateActive)
@@ -269,8 +306,35 @@ public class AutomationService : IDisposable
         var now = Environment.TickCount64;
         plugin.AdsUtilityIpcService.Refresh(force: IsRepairFlowActive || IsAutoDesynthPendingAfterDutyExit);
         CheckAutoDesynth(config, now);
+        if (VermaxionOwnsPostVoyageCleanup()) return;
         if (!IsAutoDesynthPendingAfterDutyExit)
             CheckRepair(config, now);
+    }
+
+    private static bool VermaxionOwnsPostVoyageCleanup()
+    {
+        if (!Plugin.PluginInterface.InstalledPlugins.Any(p => p.IsLoaded && p.InternalName == "VERMAXION"))
+            return false;
+        try
+        {
+            var json = Plugin.PluginInterface.GetIpcSubscriber<string>("VERMAXION.GetAutomationStatusJson").InvokeFunc();
+            return ReadVermaxionCleanupOwnership(json);
+        }
+        catch
+        {
+            // Do not let automatic repairs/discard compete with an unreadable cleanup owner.
+            return true;
+        }
+    }
+
+    internal static bool ReadVermaxionCleanupOwnership(string json)
+    {
+        using var document = JsonDocument.Parse(json);
+        var root = document.RootElement;
+        if (root.GetProperty("version").GetInt32() != 1)
+            throw new InvalidOperationException("Unsupported VERMAXION automation status.");
+        return root.GetProperty("isBusy").GetBoolean()
+            && root.GetProperty("activity").GetString() == "FishingCleanup";
     }
 
     private void PerformIdleAction(CharacterConfig config)
@@ -634,6 +698,8 @@ public class AutomationService : IDisposable
 
         autoDesynthFlowState = AutoDesynthFlowState.PendingExit;
         autoDesynthFlowStartedMs = Environment.TickCount64;
+        autoDesynthDutyCompletedUtc = DateTime.UtcNow;
+        autoDesynthCharacter = Plugin.PlayerState.ContentId;
         lastAutoDesynthAttemptMs = 0;
         lastAutoDesynthAttemptUtc = DateTime.MinValue;
         autoDesynthRequestAttempts = 0;
@@ -643,7 +709,7 @@ public class AutomationService : IDisposable
 
     private void CheckAutoDesynth(CharacterConfig config, long now)
     {
-        if (!config.EnableAutoDesynth)
+        if (!config.EnableAutoDesynth || autoDesynthCharacter != Plugin.PlayerState.ContentId)
         {
             if (autoDesynthFlowState is not AutoDesynthFlowState.Idle)
                 ResetAutoDesynth("");
@@ -751,6 +817,8 @@ public class AutomationService : IDisposable
     {
         autoDesynthFlowState = AutoDesynthFlowState.Idle;
         autoDesynthFlowStartedMs = 0;
+        autoDesynthDutyCompletedUtc = DateTime.MinValue;
+        autoDesynthCharacter = 0;
         lastAutoDesynthAttemptMs = 0;
         lastAutoDesynthAttemptUtc = DateTime.MinValue;
         autoDesynthRequestAttempts = 0;

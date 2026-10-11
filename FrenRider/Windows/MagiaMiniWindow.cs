@@ -91,6 +91,7 @@ public sealed class MagiaMiniWindow : Window, IDisposable
         {
             motion.Restore(this);
             UiGui.ImageTitle(this, UiText.T("Fren Rider Mini"), plugin.OriginalIcon);
+            plugin.DrawAppearanceTitleBarPopups(this);
             plugin.ApplyWindowOpacity(windowOpacity, WindowName);
         }
         finally { ImGui.PopStyleVar(); }

@@ -1,3 +1,17 @@
+2026-10-11 - Post-duty desynthesis handoff (I533)
+
+- Expose the existing configured post-duty desynthesis state to VERMAXION so selling/discarding can wait for it. Keep current toggles, ADS item rules and action ownership; report only the current character's flow and clear a departed character's pending flow. No new settings, action runner or version change.
+- Keep automatic repair/discard from competing with VERMAXION's post-voyage cleanup, using its existing status IPC. Its configured desynthesis still runs first.
+
+2026-10-11 - Native titlebar appearance shortcuts (I532)
+
+- Add Language, Compact, Transparency and Colour to applicable native window titlebars through AethertekUI. Reuse current editors and save routes, retain main visibility preferences and grouped Settings, remove the moved body shortcuts and their unused spacing, and preserve existing action order, title clipping, motion, opacity and release versions.
+- Correct the titlebar registration declaration so builds and dependent test projects compile.
+
+2026-10-10 - Preserve DDuck casting controls during reload
+
+- Skip the startup casting-lock apply while the loaded DDuck reports automation ownership or its status cannot be verified. Preserve DDuck's shared BMR/RSR controls during FrenRider reload; idle startup and explicit checkbox choices keep their existing behavior. No queued reapply or version change.
+
 2026-10-10 - Use real job icons
 
 - Load the official FFXIV class/job textures from numeric sheet IDs in the party display. Replace the custom role drawings while retaining the existing icon size, job text and layout.

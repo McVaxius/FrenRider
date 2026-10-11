@@ -44,13 +44,14 @@ public class AutoDutyWarningWindow : Window
     public override void PostDraw()
     {
         motion.Restore(this);
+        plugin.DrawAppearanceTitleBarPopups(this);
         plugin.ApplyWindowOpacity(windowOpacity, WindowName);
     }
 
     public override void Draw()
     {
         motion.DrawChrome();
-        UiGui.Title("⚠️ AutoDuty Detected - Action Required", UiText.T("AutoDuty Detected - Action Required"));
+        UiGui.TitleWithButtons("⚠️ AutoDuty Detected - Action Required", UiText.T("AutoDuty Detected - Action Required"), this);
         ImGui.PushTextWrapPos(0);
         UiGui.TextColored(new Vector4(1.0f, 0.3f, 0.3f, 1.0f), "⚠️ WARNING: AutoDuty Plugin Detected");
         ImGui.Spacing();

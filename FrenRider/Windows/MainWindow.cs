@@ -100,6 +100,7 @@ public class MainWindow : Window, IDisposable
         {
             motion.Restore(this);
             UiGui.ImageTitle(this, "Fren Rider v" + CurrentVersion, plugin.OriginalIcon);
+            plugin.DrawAppearanceTitleBarPopups(this);
             plugin.ApplyWindowOpacity(windowOpacity, WindowName);
         }
         finally { ImGui.PopStyleVar(); }
@@ -275,13 +276,6 @@ public class MainWindow : Window, IDisposable
         if (ImGui.IsItemHovered())
             UiGui.SetTooltip("Obfuscate character names in FrenRider UI.");
 
-        if (plugin.Configuration.UiTransparencyVisibleOnMainWindow)
-        {
-            NextGroup((ImGui.GetFrameHeight() + MaterialText.Measure(UiText.T("Transparency")).X + ImGui.GetStyle().ItemInnerSpacing.X)
-                / Math.Max(.01f, MaterialTheme.Metrics.Scale));
-            plugin.DrawTransparency();
-        }
-
         NextButton("Settings");
         if (UiGui.Button("Settings", icon: MaterialIcon.Settings))
             plugin.ToggleConfigUi();
@@ -300,27 +294,6 @@ public class MainWindow : Window, IDisposable
         if (UiGui.Button("Chocobo", icon: MaterialIcon.Egg))
             plugin.OpenChocoboSettings();
 
-        if (plugin.Configuration.UiLanguageVisibleOnMainWindow)
-        {
-            var languageName = "English";
-            foreach (var language in UiText.Languages)
-                if (language.Code == UiText.Current.Language) languageName = language.Name;
-            var appearanceMetrics = FrenRiderPresentation.Controls(compact ? 28 : 32, 18);
-            var languageWidth = Math.Max(UiHelpers.Scale(140), MathF.Ceiling(MaterialText.Measure(languageName).X
-                + appearanceMetrics.Height + appearanceMetrics.Gap * 3 + Math.Min(appearanceMetrics.IconSize, appearanceMetrics.Height)));
-            NextGroup(languageWidth / Math.Max(.01f, MaterialTheme.Metrics.Scale));
-            plugin.DrawLanguageSelector();
-        }
-        if (plugin.Configuration.UiCompactVisibleOnMainWindow)
-        {
-            using (var compactStyle = new MaterialStyleScope())
-            {
-                compactStyle.Style(ImGuiStyleVar.FramePadding, new Vector2(ImGui.GetStyle().FramePadding.X, 0));
-                NextGroup((ImGui.GetFrameHeight() + MaterialText.Measure("C").X + ImGui.GetStyle().ItemInnerSpacing.X)
-                    / Math.Max(.01f, MaterialTheme.Metrics.Scale));
-                plugin.DrawCompactSelector();
-            }
-        }
         NextGroup(Math.Max(ImGui.GetFrameHeight(), MaterialControls.Metrics.Height) / Math.Max(.01f, MaterialTheme.Metrics.Scale));
         if (UiGui.IconButton("Close", MaterialIcon.Close)) IsOpen = false;
     }

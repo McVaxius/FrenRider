@@ -15,6 +15,65 @@ namespace FrenRider.Tests;
 public sealed class ExternalAutomationCleanupServiceTests
 {
     [Theory]
+    [InlineData(true, "FishingCleanup", true)]
+    [InlineData(false, "FishingCleanup", false)]
+    [InlineData(true, "Fishing", false)]
+    [InlineData(true, "Engine", false)]
+    [InlineData(false, "Idle", false)]
+    public void VermaxionCleanupDefersAutomaticRepairDiscardWithoutBlockingItsDesynth(bool busy, string activity, bool expected)
+    {
+        var json = JsonSerializer.Serialize(new { version = 1, isBusy = busy, activity });
+        Assert.Equal(expected, AutomationService.ReadVermaxionCleanupOwnership(json));
+    }
+
+    [Theory]
+    [InlineData("{}")]
+    [InlineData("not json")]
+    [InlineData("{\"version\":2,\"isBusy\":false,\"activity\":\"Idle\"}")]
+    [InlineData("{\"version\":1,\"isBusy\":\"false\",\"activity\":\"Idle\"}")]
+    public void UnreadableVermaxionCleanupOwnershipCannotAdmitCompetingAutomaticWork(string json)
+        => Assert.ThrowsAny<Exception>(() => AutomationService.ReadVermaxionCleanupOwnership(json));
+
+    [Theory]
+    [InlineData("Idle", false, false)]
+    [InlineData("PendingExit", true, false)]
+    [InlineData("WaitingStart", true, false)]
+    [InlineData("Running", true, false)]
+    [InlineData("RetryWait", true, false)]
+    [InlineData("Completed", false, false)]
+    [InlineData("Failed", false, true)]
+    public void PostDutyDesynthHandoffReportsOnlyTheConfiguredCurrentCharacterFlow(string state, bool pending, bool failed)
+    {
+        var native = new NativeRsrProvider();
+        using var service = native.CreateService();
+        using var runtime = new QuestingCombatRuntime(service, native.Interface, QuestingCombatRuntime.SilentLog(), 2);
+        runtime.Profile.EnableAutoDesynth = true;
+        runtime.SetAutoDesynth(state);
+        using (var snapshot = JsonDocument.Parse(runtime.Automation.GetAutoDesynthStatusJson()))
+        {
+            Assert.Equal("frenrider.auto-desynth/v1", snapshot.RootElement.GetProperty("schema").GetString());
+            Assert.Equal(pending, snapshot.RootElement.GetProperty("pending").GetBoolean());
+            Assert.Equal(failed, snapshot.RootElement.GetProperty("failed").GetBoolean());
+            Assert.NotEqual(JsonValueKind.Null, snapshot.RootElement.GetProperty("dutyCompletedAtUtc").ValueKind);
+        }
+        runtime.Profile.EnableAutoDesynth = false;
+        using (var snapshot = JsonDocument.Parse(runtime.Automation.GetAutoDesynthStatusJson()))
+            Assert.False(snapshot.RootElement.GetProperty("pending").GetBoolean());
+        runtime.Profile.EnableAutoDesynth = true;
+        runtime.Profile.Enabled = false;
+        using (var snapshot = JsonDocument.Parse(runtime.Automation.GetAutoDesynthStatusJson()))
+            Assert.False(snapshot.RootElement.GetProperty("pending").GetBoolean());
+        runtime.Profile.Enabled = true;
+        runtime.ContentId = 2;
+        using (var snapshot = JsonDocument.Parse(runtime.Automation.GetAutoDesynthStatusJson()))
+        {
+            Assert.False(snapshot.RootElement.GetProperty("pending").GetBoolean());
+            Assert.False(snapshot.RootElement.GetProperty("failed").GetBoolean());
+            Assert.Equal(JsonValueKind.Null, snapshot.RootElement.GetProperty("dutyCompletedAtUtc").ValueKind);
+        }
+    }
+
+    [Theory]
     [InlineData("BMR", false, "Original")]
     [InlineData("BMR", false, "")]
     [InlineData("BMR", true, "")]
@@ -1325,6 +1384,7 @@ public sealed class ExternalAutomationCleanupServiceTests
         internal readonly HashSet<ConditionFlag> Conditions = [];
         internal readonly ConfigManager Config;
         internal readonly CombatService Combat;
+        internal readonly AutomationService Automation;
         internal readonly QuestionableIpcService Activity;
         internal CharacterConfig Profile
         {
@@ -1356,9 +1416,9 @@ public sealed class ExternalAutomationCleanupServiceTests
                 SetProperty(plugin, nameof(Plugin.AdsDutyIpcService), ads);
                 SetProperty(plugin, nameof(Plugin.AdsIntegrationService), new AdsIntegrationService(ads, () => Profile, () => { }, _ => false, _ => { }, _ => { }));
                 SetProperty(plugin, nameof(Plugin.AdsUtilityIpcService), new AdsUtilityIpcService(pluginInterface, log));
-                var automation = Uninitialized<AutomationService>();
-                SetField(automation, "plugin", plugin);
-                SetProperty(plugin, nameof(Plugin.AutomationService), automation);
+                Automation = Uninitialized<AutomationService>();
+                SetField(Automation, "plugin", plugin);
+                SetProperty(plugin, nameof(Plugin.AutomationService), Automation);
                 var coppelia = Uninitialized<CoppeliaPowerlevelLeaseService>();
                 SetField(coppelia, "coordinator", Uninitialized<CoppeliaPowerlevelLeaseCoordinator>());
                 SetProperty(plugin, nameof(Plugin.CoppeliaPowerlevelLeaseService), coppelia);
@@ -1385,6 +1445,14 @@ public sealed class ExternalAutomationCleanupServiceTests
             => typeof(CombatService).GetMethod(method, BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(Combat, args);
         internal object? CombatField(string name) => typeof(CombatService).GetField(name, BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(Combat);
         internal void SetCombatField(string name, object value) => SetField(Combat, name, value);
+        internal void SetAutoDesynth(string state)
+        {
+            var type = typeof(AutomationService).GetNestedType("AutoDesynthFlowState", BindingFlags.NonPublic)!;
+            SetField(Automation, "autoDesynthFlowState", Enum.Parse(type, state));
+            SetField(Automation, "autoDesynthCharacter", 1UL);
+            SetField(Automation, "autoDesynthDutyCompletedUtc", DateTime.UtcNow);
+            SetProperty(Automation, nameof(AutomationService.AutoDesynthStatus), "Configured desynthesis outcome");
+        }
         private static T Uninitialized<T>() => (T)RuntimeHelpers.GetUninitializedObject(typeof(T));
         private static void SetField(object target, string name, object value)
             => target.GetType().GetField(name, BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(target, value);

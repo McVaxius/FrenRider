@@ -175,6 +175,7 @@ public class ConfigWindow : Window, IDisposable
     public override void PostDraw()
     {
         motion.Restore(this);
+        plugin.DrawAppearanceTitleBarPopups(this);
         plugin.ApplyWindowOpacity(windowOpacity, WindowName);
     }
 
@@ -186,7 +187,7 @@ public class ConfigWindow : Window, IDisposable
 
         var selectedLabel = remote is not null ? UiText.F("REMOTE: {0}", Disp(GetRemoteDisplayLabel(remote)))
             : string.IsNullOrEmpty(editingCharacterKey) ? UiText.T("DEFAULT CONFIG") : Disp(editingCharacterKey);
-        UiGui.Title(WindowName.Split("###", 2)[0], UiText.F("Fren Rider Settings - {0}", selectedLabel));
+        UiGui.TitleWithButtons(WindowName.Split("###", 2)[0], UiText.F("Fren Rider Settings - {0}", selectedLabel), this);
         var panelWidth = Math.Clamp(configuration.LeftPanelWidth, UiHelpers.Scale(120), Math.Max(UiHelpers.Scale(120), ImGui.GetContentRegionAvail().X * .45f));
 
         // Left panel (user-resizable)

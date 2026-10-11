@@ -1,10 +1,82 @@
 using System.Numerics;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using FrenRider.Services;
 
 namespace FrenRider.Tests;
 
 public sealed class CastingFailureRecoveryTests
 {
+    [Theory]
+    [InlineData(false, null, 1)]
+    [InlineData(true, "{\"schema\":\"dduck.run-status/v1\",\"owner\":\"none\",\"engine\":{\"running\":false}}", 1)]
+    [InlineData(true, "{\"schema\":\"dduck.run-status/v1\",\"owner\":\"engine\",\"engine\":{\"running\":true}}", 0)]
+    [InlineData(true, "{\"schema\":\"dduck.run-status/v1\",\"owner\":\"recovery\",\"engine\":{\"running\":false}}", 0)]
+    [InlineData(true, "{\"schema\":\"dduck.run-status/v1\",\"owner\":\"none\",\"engine\":{\"running\":true}}", 0)]
+    [InlineData(true, null, 0)]
+    [InlineData(true, "{}", 0)]
+    [InlineData(true, "{\"schema\":\"dduck.run-status/v2\",\"owner\":\"none\",\"engine\":{\"running\":false}}", 0)]
+    public void StartupCastingApplyRetainsDDuckControlsWhileStandaloneAndExplicitChoicesStillApply(
+        bool dduckLoaded, string? status, int startupWrites)
+    {
+        var commands = new List<string>();
+        var queries = 0;
+        var dduck = (IExposedPlugin)Proxy(typeof(IExposedPlugin), (method, _) => method.Name switch
+        {
+            "get_InternalName" => "DDuck",
+            "get_IsLoaded" => dduckLoaded,
+            _ => null,
+        });
+        var pi = (IDalamudPluginInterface)Proxy(typeof(IDalamudPluginInterface), (method, args) => method.Name switch
+        {
+            "get_InstalledPlugins" => new[] { dduck },
+            "GetIpcSubscriber" => Proxy(method.ReturnType, (call, values) =>
+            {
+                var channel = (string)args![0]!;
+                if (channel == "DDuck.GetStatus")
+                {
+                    Assert.Equal("InvokeFunc", call.Name);
+                    queries++;
+                    return status ?? throw new InvalidOperationException("status unavailable");
+                }
+                Assert.Equal("RotationSolverReborn.OtherCommand", channel);
+                Assert.Equal("InvokeAction", call.Name);
+                Assert.Equal(AutorotIpcService.RsrOtherCommandType.Settings, values![0]);
+                commands.Add((string)values[1]!);
+                return null;
+            }),
+            _ => null,
+        });
+        var log = (IPluginLog)Proxy(typeof(IPluginLog), (_, _) => null);
+        var service = (BossModActionTweaksService)RuntimeHelpers.GetUninitializedObject(typeof(BossModActionTweaksService));
+        var fields = BindingFlags.Instance | BindingFlags.NonPublic;
+        typeof(BossModActionTweaksService).GetField("pluginInterface", fields)!.SetValue(service, pi);
+        typeof(BossModActionTweaksService).GetField("log", fields)!.SetValue(service, log);
+        typeof(BossModActionTweaksService).GetField("autorotIpcService", fields)!.SetValue(service, new AutorotIpcService(pi, log));
+        typeof(BossModActionTweaksService).GetField("recovery", fields)!.SetValue(service, new CastingFailureRecovery(() => [], _ => { }));
+
+        service.ApplyDontMoveWhileCastingOnLoad(true);
+        Assert.Equal(startupWrites, commands.Count);
+        Assert.Equal(dduckLoaded ? 1 : 0, queries);
+        Assert.All(commands, command => Assert.Equal("PoslockCasting true", command));
+        Assert.Equal(startupWrites != 0, service.HasResult);
+
+        // An explicit checkbox choice keeps its existing immediate application.
+        service.ApplyDontMoveWhileCasting(false);
+        Assert.Equal(startupWrites + 1, commands.Count);
+        Assert.Equal("PoslockCasting false", commands[^1]);
+        Assert.Equal(dduckLoaded ? 1 : 0, queries);
+    }
+
+    private static object Proxy(Type type, Func<MethodInfo, object?[]?, object?> handler)
+    {
+        var proxy = DispatchProxy.Create(type, typeof(QuestionableTestProxy));
+        ((QuestionableTestProxy)proxy).Handler = handler;
+        return proxy;
+    }
+
     public static IEnumerable<object?[]> RecoveryCases()
     {
         foreach (var values in new bool?[][]

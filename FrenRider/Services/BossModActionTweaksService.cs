@@ -5,6 +5,7 @@ using System.Linq;
 using System.Numerics;
 using System.Reflection;
 using System.Runtime.Loader;
+using System.Text.Json;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.Types;
@@ -56,6 +57,32 @@ public sealed class BossModActionTweaksService
     public bool HasFailures { get; private set; }
     public bool HasNotLoadedTargets { get; private set; }
     public string StatusText { get; private set; } = string.Empty;
+
+    public void ApplyDontMoveWhileCastingOnLoad(bool enabled)
+    {
+        log.Information("[BossMod ActionTweaks] Startup casting apply; build=fr-dd-casting-20261011-01; requested={Requested}", enabled);
+        if (pluginInterface.InstalledPlugins.Any(p => p.IsLoaded && p.InternalName == "DDuck"))
+        {
+            try
+            {
+                using var status = JsonDocument.Parse(pluginInterface.GetIpcSubscriber<string>("DDuck.GetStatus").InvokeFunc());
+                var root = status.RootElement;
+                if (root.GetProperty("schema").GetString() != "dduck.run-status/v1"
+                    || root.GetProperty("owner").GetString() != "none"
+                    || root.GetProperty("engine").GetProperty("running").GetBoolean())
+                {
+                    log.Information("[BossMod ActionTweaks] Startup casting settings retained while DDuck owns automation or its status is unverified.");
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                log.Debug(ex, "[BossMod ActionTweaks] DDuck status unavailable; startup casting settings retained.");
+                return;
+            }
+        }
+        ApplyDontMoveWhileCasting(enabled);
+    }
 
     public void ApplyDontMoveWhileCasting(bool enabled)
     {
