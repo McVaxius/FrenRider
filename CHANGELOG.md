@@ -1,3 +1,7 @@
+2026-10-11 - Culture-independent ADS timestamps (I538)
+
+- Read ADS utility completion timestamps using the JSON timestamp contract so status and cleanup retain the same UTC instant across system locales. Preserve the provider-specific BMR command and configuration number formats.
+
 2026-10-11 - Native titlebar runtime status (I536)
 
 - Show the current following state, configured rotation provider and observed duty owner in native titlebars. Use the packaged plugin icon in Settings and warning windows.
