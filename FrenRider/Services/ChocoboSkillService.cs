@@ -146,10 +146,10 @@ internal sealed class ChocoboSkillService
                 || active?.ChocoboSkillPriority == null
                 || !active.ChocoboSkillPriority.SequenceEqual(priority.Select(tree => (int)tree))
                 || (automatic && (!active.Enabled || !active.ChocoboAutoAllocateSkills)))
-            { Stop("Skill allocation cancelled: context or profile changed."); return; }
+            { Stop("Skill allocation cancelled: context or profile changed.", contextChanged: true); return; }
             var snapshot = read();
             if (!snapshot.HasValue || !pending.HasValue)
-            { Stop("Skill allocation cancelled: companion data unavailable."); return; }
+            { Stop("Skill allocation cancelled: companion data unavailable.", contextChanged: true); return; }
             var step = pending.Value;
             if (awaitingPreparation)
             {
@@ -216,10 +216,13 @@ internal sealed class ChocoboSkillService
         if (!dispatch(snapshot, step)) Stop("Skill learning request was rejected; no retry.");
     }
 
-    internal void Stop(string reason = "Skill allocation stopped.")
+    internal void Stop(string reason = "Skill allocation stopped.", bool contextChanged = false)
     {
         var wasActive = IsActive;
-        if (pending.HasValue) automaticSuspended = true;
+        // Preparation has not sent a learning request. A temporary interruption can
+        // use the next normal automatic check; manual Stop and uncertain sends cannot.
+        if (contextChanged && awaitingPreparation) ResetAutomaticState();
+        else if (pending.HasValue) automaticSuspended = true;
         IsActive = false;
         pending = null;
         awaitingPreparation = false;

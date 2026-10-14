@@ -1,3 +1,7 @@
+2026-10-13 - Resume interrupted companion skill preparation (I559)
+
+- Let automatic skill allocation resume after a temporary context interruption before a learning request was sent. Keep manual Stop, preparation failures, and unacknowledged learning requests from automatically replaying.
+
 2026-10-11 - Culture-independent ADS timestamps (I538)
 
 - Read ADS utility completion timestamps using the JSON timestamp contract so status and cleanup retain the same UTC instant across system locales. Preserve the provider-specific BMR command and configuration number formats.

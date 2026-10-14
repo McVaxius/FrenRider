@@ -541,6 +541,51 @@ public sealed class ChocoboSkillServiceTests
         Assert.Empty(test.Commands);
     }
 
+    [Theory]
+    [InlineData("unsafe")]
+    [InlineData("missing")]
+    [InlineData("transition")]
+    public void InterruptedPreparationCanResumeOnTheNextEligibleAutomaticCheck(string interruption)
+    {
+        var test = new Scenario(withPreparation: true);
+        test.Profile.ChocoboAutoAllocateSkills = true;
+        test.Service.CheckAutomatic();
+        var original = test.State;
+        if (interruption == "unsafe") test.Safe = false;
+        else if (interruption == "missing") test.State = null;
+        else test.Service.Stop("Skill allocation cancelled: context or profile changed.", contextChanged: true);
+        test.Service.Tick();
+        Assert.False(test.Service.IsActive);
+        Assert.Empty(test.Commands);
+        Assert.Equal(1, test.Releases);
+
+        test.Safe = true;
+        test.State = original;
+        test.Service.CheckAutomatic();
+        Assert.True(test.Service.IsActive);
+        Assert.Equal(2, test.Preparations);
+        test.Prepared = true;
+        test.Service.Tick();
+        Assert.Single(test.Commands);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ManualStopOrInterruptedSubmittedLearningCannotAutomaticallyReplay(bool submitted)
+    {
+        var test = new Scenario(withPreparation: true) { Prepared = true };
+        test.Profile.ChocoboAutoAllocateSkills = true;
+        test.Service.CheckAutomatic();
+        if (submitted) test.Service.Tick();
+        test.Service.Stop(contextChanged: submitted);
+        for (var i = 0; i < 3; i++) test.Service.CheckAutomatic();
+        Assert.False(test.Service.IsActive);
+        Assert.Equal(submitted ? 1 : 0, test.Commands.Count);
+        Assert.Equal(1, test.Preparations);
+        Assert.Equal(1, test.Releases);
+    }
+
     private sealed class Scenario
     {
         internal CharacterConfig Profile = new() { Enabled = true };

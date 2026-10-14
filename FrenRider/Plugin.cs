@@ -829,7 +829,7 @@ public sealed class Plugin : IDalamudPlugin
     private void CancelChocoboSkillSession()
     {
         System.Threading.Interlocked.Increment(ref chocoboSkillRequestGeneration);
-        chocoboSkills.Stop("Skill allocation cancelled: context or profile changed.");
+        chocoboSkills.Stop("Skill allocation cancelled: context or profile changed.", contextChanged: true);
     }
 
     private bool CanAllocateChocoboSkills()
