@@ -1,4 +1,6 @@
 using System;
+using System.Linq;
+using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Conditions;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
@@ -52,18 +54,19 @@ public sealed class RespawnService
             return;
         }
 
-        if (plugin.PhoenixDownRecoveryService.DeferReturn)
+        var config = plugin.ConfigManager.GetActiveConfig();
+        var inDuty = IsInDuty();
+        var fullPartyWipe = inDuty && IsConfirmedFullPartyWipe(config);
+        if (HasActiveRevival() || plugin.PhoenixDownRecoveryService.DeferReturn && !fullPartyWipe)
         {
             Reset(RespawnState.Waiting, "Waiting for party recovery; Return deferred");
             return;
         }
 
-        var config = plugin.ConfigManager.GetActiveConfig();
-        var inDuty = IsInDuty();
         var respawnEnabled = RespawnNotificationRecoveryPolicy.IsRespawnEnabledForDutyState(
             config.RespawnOutsideDuties,
             config.RespawnInsideDuties,
-            inDuty);
+            inDuty, fullPartyWipe);
         var delaySeconds = Math.Max(
             1,
             inDuty
@@ -294,7 +297,9 @@ public sealed class RespawnService
     {
         var config = plugin.ConfigManager.GetActiveConfig();
         var inDuty = IsInDuty();
-        var enabled = inDuty ? config.RespawnInsideDuties : config.RespawnOutsideDuties;
+        var fullPartyWipe = inDuty && IsConfirmedFullPartyWipe(config);
+        var enabled = RespawnNotificationRecoveryPolicy.IsRespawnEnabledForDutyState(
+            config.RespawnOutsideDuties, config.RespawnInsideDuties, inDuty, fullPartyWipe);
         var delay = Math.Max(1, inDuty ? config.RespawnInsideDutiesDelaySeconds : config.RespawnOutsideDutiesDelaySeconds);
         if (SettingsChanged(config, enabled, delay, inDuty))
         {
@@ -303,7 +308,8 @@ public sealed class RespawnService
         }
         if (!Plugin.ClientState.IsLoggedIn || !config.Enabled || !enabled
             || IsAreaTransitionActive() || !Plugin.Condition[ConditionFlag.Unconscious]
-            || plugin.AutoYesService.RaiseOfferActive || plugin.PhoenixDownRecoveryService.DeferReturn
+            || plugin.AutoYesService.RaiseOfferActive || HasActiveRevival()
+            || plugin.PhoenixDownRecoveryService.DeferReturn && !fullPartyWipe
             || plugin.AutomationService.IsUtilityGateActive)
             return false;
         var previousSolo = soloDutyIdentity;
@@ -319,9 +325,63 @@ public sealed class RespawnService
         => Plugin.Condition[ConditionFlag.BetweenAreas]
             || Plugin.Condition[ConditionFlag.BetweenAreas51];
 
+    private unsafe bool IsConfirmedFullPartyWipe(CharacterConfig config)
+    {
+        if (!config.Enabled || !Plugin.ClientState.IsLoggedIn || IsAreaTransitionActive()
+            || !Plugin.Condition[ConditionFlag.Unconscious]
+            || !plugin.ConfigManager.TryGetLocalActiveConfig(out _)
+            || !TryReadConfirmedDutyIdentity(out var territory, out var duty))
+            return false;
+        try
+        {
+            var count = Plugin.PartyList.Length;
+            var partyId = Plugin.PartyList.PartyId;
+            var members = Plugin.PartyList.ToArray();
+            var local = Plugin.ObjectTable.LocalPlayer;
+            var hud = AgentHUD.Instance();
+            if (local == null || hud == null || hud->PartyMemberCount != count
+                || count is < 2 or > 8 || members.Length != count)
+                return false;
+            var ids = members.Select(member => member.ContentId).ToArray();
+            if (ids.Any(id => id == 0) || ids.Distinct().Count() != count)
+                return false;
+            var allDead = members.All(member => member.MaxHP > 0 && member.CurrentHP == 0
+                && Plugin.ObjectTable.OfType<IPlayerCharacter>().Any(actor => actor.EntityId == member.EntityId
+                    && actor.Address != 0 && ((Character*)actor.Address)->ContentId == member.ContentId
+                    && actor.MaxHp > 0 && actor.CurrentHp == 0 && actor.IsDead));
+            return RespawnNotificationRecoveryPolicy.IsConfirmedPartyWipe(count, members.Length, allDead,
+                members.Any(member => member.ContentId == Plugin.PlayerState.ContentId && member.EntityId == local.EntityId),
+                Plugin.PartyList.Length == count && Plugin.PartyList.PartyId == partyId
+                    && Plugin.PartyList.Select(member => member.ContentId).SequenceEqual(ids)
+                    && TryReadConfirmedDutyIdentity(out var currentTerritory, out var currentDuty)
+                    && currentTerritory == territory && currentDuty == duty);
+        }
+        catch { return false; }
+    }
+
+    private static unsafe bool HasActiveRevival()
+    {
+        var local = Plugin.ObjectTable.LocalPlayer;
+        if (local == null || !local.IsDead)
+            return false;
+        if (local.StatusList.Any(status => status.StatusId == 148))
+            return true;
+        // Keep native revival independent of the Phoenix feature toggle/budget.
+        foreach (var actor in Plugin.ObjectTable.OfType<IPlayerCharacter>())
+        {
+            if (actor.Address == 0 || actor.IsDead)
+                continue;
+            var cast = ((BattleChara*)actor.Address)->GetCastInfo();
+            if (cast != null && cast->IsCasting && cast->TargetId == local.GameObjectId)
+                return true;
+        }
+        return false;
+    }
+
     public bool ShouldOwnCurrentUnconsciousReviveFlow(CharacterConfig config)
     {
-        if (plugin.PhoenixDownRecoveryService.DeferReturn)
+        var fullPartyWipe = IsInDuty() && IsConfirmedFullPartyWipe(config);
+        if (HasActiveRevival() || plugin.PhoenixDownRecoveryService.DeferReturn && !fullPartyWipe)
             return false;
         var visiblePromptKind = TryGetVisibleSelectYesnoPromptKind(out _);
 
@@ -329,7 +389,7 @@ public sealed class RespawnService
             Plugin.ClientState.IsLoggedIn,
             config.Enabled,
             config.RespawnOutsideDuties,
-            config.RespawnInsideDuties,
+            config.RespawnInsideDuties || fullPartyWipe,
             plugin.AutomationService.IsUtilityGateActive,
             IsInDuty(),
             IsAreaTransitionActive(),

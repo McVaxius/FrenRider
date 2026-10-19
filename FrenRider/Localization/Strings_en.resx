@@ -3217,4 +3217,27 @@ On: use the BossMod presets below with any rotation provider. A custom preset ma
   <data name="Configured rotation provider" xml:space="preserve"><value>Configured rotation provider</value></data>
   <data name="Duty owner" xml:space="preserve"><value>Duty owner</value></data>
   <data name="Titlebar.Unavailable" xml:space="preserve"><value>Unavailable</value></data>
+  <data name="Recovery limit" xml:space="preserve"><value>Recovery limit</value></data>
+  <data name="Full stickiness" xml:space="preserve"><value>Full stickiness</value></data>
+  <data name="Time limit" xml:space="preserve"><value>Time limit</value></data>
+  <data name="Started casts" xml:space="preserve"><value>Started casts</value></data>
+  <data name="casts" xml:space="preserve"><value>casts</value></data>
+  <data name="Phoenix Down recovery limits" xml:space="preserve"><value>Phoenix Down recovery limits</value></data>
+  <data name="Give up immediately when" xml:space="preserve"><value>Give up immediately when</value></data>
+  <data name="No Phoenix Down available" xml:space="preserve"><value>No Phoenix Down available</value></data>
+  <data name="Corpse is unreachable" xml:space="preserve"><value>Corpse is unreachable</value></data>
+  <data name="ADS recovery support is unavailable" xml:space="preserve"><value>ADS recovery support is unavailable</value></data>
+  <data name="Resurrection" xml:space="preserve"><value>Resurrection</value></data>
+  <data name="Keep trying until revival; a nearby party healer takes priority." xml:space="preserve"><value>Keep trying until revival; a nearby party healer takes priority.</value></data>
+  <data name="Only actual cast starts count; waiting without a cast can continue indefinitely." xml:space="preserve"><value>Only actual cast starts count; waiting without a cast can continue indefinitely.</value></data>
+  <data name="Release recovery holds and ignore these deaths until a new death." xml:space="preserve"><value>Release recovery holds and ignore these deaths until a new death.</value></data>
+  <data name="Full-party wipes always return after the inside-duty delay. Raise and active revival take priority." xml:space="preserve"><value>Full-party wipes always return after the inside-duty delay. Raise and active revival take priority.</value></data>
+  <data name="Recover party members in four-player dungeons and outdoors; yield to a party healer within 20 yalms." xml:space="preserve"><value>Recover party members in four-player dungeons and outdoors; yield to a party healer within 20 yalms.</value></data>
+  <data name="Inside-duty timed Return. A confirmed full-party wipe also returns when this option is off." xml:space="preserve"><value>Inside-duty timed Return. A confirmed full-party wipe also returns when this option is off.</value></data>
+  <data name="Recovery given up; waiting for a new death" xml:space="preserve"><value>Recovery given up; waiting for a new death</value></data>
+  <data name="Recovery limit reached; waiting for a new death" xml:space="preserve"><value>Recovery limit reached; waiting for a new death</value></data>
+  <data name="ADS recovery support unavailable; waiting for a new death" xml:space="preserve"><value>ADS recovery support unavailable; waiting for a new death</value></data>
+  <data name="No Phoenix Down available; waiting for a new death" xml:space="preserve"><value>No Phoenix Down available; waiting for a new death</value></data>
+  <data name="Corpse is unreachable; waiting for a new death" xml:space="preserve"><value>Corpse is unreachable; waiting for a new death</value></data>
+  <data name="Blocked: Phoenix Down readiness unavailable" xml:space="preserve"><value>Blocked: Phoenix Down readiness unavailable</value></data>
 </root>

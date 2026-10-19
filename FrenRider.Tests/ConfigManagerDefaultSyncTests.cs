@@ -262,7 +262,7 @@ public sealed class ConfigManagerDefaultSyncTests
     }
 
     [Fact]
-    public void ProfileTabSyncCopiesIndependentRespawnScopes()
+    public void RecoveryTabSyncCopiesIndependentRespawnScopes()
     {
         var account = CreateAccount();
         account.DefaultConfig.RespawnOutsideDuties = true;
@@ -276,7 +276,7 @@ public sealed class ConfigManagerDefaultSyncTests
         target.RespawnInsideDuties = false;
         target.RespawnInsideDutiesDelaySeconds = 37;
 
-        var count = ConfigManager.ApplyDefaultTabToAllCharacters(account, "Profile");
+        var count = ConfigManager.ApplyDefaultTabToAllCharacters(account, "Recovery");
 
         Assert.Equal(2, count);
         Assert.True(target.RespawnOutsideDuties);

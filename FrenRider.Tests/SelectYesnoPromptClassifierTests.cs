@@ -19,6 +19,9 @@ public sealed class SelectYesnoPromptClassifierTests
     [InlineData("Return to the aetheryte plaza?")]
     [InlineData("Return to Limsa Lominsa?")]
     [InlineData("Return Home?")]
+    [InlineData("Return to the starting point?")]
+    [InlineData("Return to the starting point of Sastasha?")]
+    [InlineData("Return to the starting point for the Praetorium?")]
     public void DeathReturnPromptsClassifyAsDeathReturn(string prompt)
     {
         Assert.Equal(SelectYesnoPromptKind.DeathReturn, SelectYesnoPromptClassifier.Classify(prompt));
@@ -42,8 +45,7 @@ public sealed class SelectYesnoPromptClassifierTests
 
     [Theory]
     [InlineData("Return to the levemete?")]
-    [InlineData("Return to the starting point for the Praetorium?")]
-    public void LeveAndStartingPointReturnsDoNotClassifyAsDeathReturn(string prompt)
+    public void LeveReturnsDoNotClassifyAsDeathReturn(string prompt)
     {
         var kind = SelectYesnoPromptClassifier.Classify(prompt);
 

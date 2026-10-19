@@ -60,8 +60,14 @@ public sealed class RespawnNotificationRecoveryPolicy
     public static bool IsRespawnEnabledForDutyState(
         bool respawnOutsideDuties,
         bool respawnInsideDuties,
-        bool inDuty)
-        => inDuty ? respawnInsideDuties : respawnOutsideDuties;
+        bool inDuty,
+        bool confirmedFullPartyWipe = false)
+        => inDuty ? respawnInsideDuties || confirmedFullPartyWipe : respawnOutsideDuties;
+
+    internal static bool IsConfirmedPartyWipe(int nativeCount, int observedCount,
+        bool allKnownDead, bool includesLocal, bool stableRoster)
+        => nativeCount is >= 2 and <= 8 && observedCount == nativeCount
+            && allKnownDead && includesLocal && stableRoster;
 
     public static bool ShouldOwnFlow(
         bool loggedIn,

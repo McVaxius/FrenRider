@@ -480,7 +480,7 @@ public class ConfigWindow : Window, IDisposable
 
         bool tabsOpen;
         using (MaterialText.PushLineHeight(UiText.T("Profile"), UiText.T("Follow"), UiText.T("Combat"),
-            UiText.T("Duty / ADS / Exit"), UiText.T("Automation"), UiText.T("Chocobo"), UiText.T("Window appearance"), UiText.T("UI / About")))
+            UiText.T("Duty / ADS / Exit"), UiText.T("Recovery"), UiText.T("Automation"), UiText.T("Chocobo"), UiText.T("Window appearance"), UiText.T("UI / About")))
             tabsOpen = ImGui.BeginTabBar("FrenRiderTabs", ImGuiTabBarFlags.FittingPolicyScroll);
         if (tabsOpen)
         {
@@ -506,6 +506,12 @@ public class ConfigWindow : Window, IDisposable
             {
                 currentTab = "Duty";
                 DrawDutyAdsExitTab(config);
+                ImGui.EndTabItem();
+            }
+            if (UiGui.BeginTabItem("Recovery"))
+            {
+                currentTab = "Recovery";
+                DrawRecoveryTab(config);
                 ImGui.EndTabItem();
             }
             if (UiGui.BeginTabItem("Automation"))
@@ -833,7 +839,48 @@ public class ConfigWindow : Window, IDisposable
             }
         }, () =>
         {
-            UiGui.SettingsSection("Recovery");
+            UiGui.SettingsSection("Maintenance", "Update Interval");
+            // Auto Discard
+            var autoDiscard = config.EnableAutoDiscard;
+            using (UiGui.SettingRow("Auto Discard (/ays discard)"))
+            {
+                if (UiGui.Checkbox("Auto Discard (/ays discard)", ref autoDiscard))
+                {
+                    config.EnableAutoDiscard = autoDiscard;
+                    configManager.SaveCurrentAccount();
+                }
+                HelpMarker("Runs /ays discard every 10s only while mounted and in a safe idle window.\nFrenRider defers discard during combat, cutscenes, and area transitions.\nRequires AutoRetainer plugin.");
+                DrawDefaultSettingSyncButton("Auto Discard");
+            }
+
+
+            // Update Interval
+            var updateInterval = config.UpdateInterval;
+            using (UiGui.SettingRow("Update Interval (seconds)"))
+            {
+                ImGui.SetNextItemWidth(200);
+                if (UiGui.InputFloat("Update Interval (seconds)", ref updateInterval, 0.01f, 0.1f, "%.3f"))
+                {
+                    config.UpdateInterval = Math.Max(0.05f, updateInterval);
+                    configManager.SaveCurrentAccount();
+                }
+                HelpMarker("How often the plugin runs its main logic loop.\nLower values = more responsive but higher CPU usage.\nDefault: 0.3s. WARNING: Values below 0.1 may impact performance.");
+                DrawDefaultSettingSyncButton("Update Interval");
+            }
+            if (updateInterval < 0.1f)
+            {
+                UiGui.TextColored(new Vector4(1, 0.4f, 0.4f, 1), "WARNING: Very low update interval may impact game performance!");
+            }
+        });
+    }
+
+    private void DrawRecoveryTab(CharacterConfig config)
+    {
+        using (UiText.Font(UiFontRole.BodyStrong)) UiGui.Text("Recovery");
+        MaterialSettings.Columns("##RecoveryGroups", Math.Max(420 * MaterialTheme.Metrics.Scale,
+            UiGui.SettingsMinimum("Use Phoenix Downs for recovery", "Give up immediately when")), () =>
+        {
+            UiGui.SettingsSection("Phoenix Down");
             var phoenixRecovery = config.UsePhoenixDownsForRecovery;
             using (UiGui.SettingRow("Use Phoenix Downs for recovery"))
             {
@@ -842,7 +889,7 @@ public class ConfigWindow : Window, IDisposable
                     config.UsePhoenixDownsForRecovery = phoenixRecovery;
                     configManager.SaveCurrentAccount();
                 }
-                HelpMarker("Recover party members in regular four-player dungeons and outdoors. A living healer within 20 yalms of the corpse blocks item use. Party recovery pauses progression and defers Return while a living party rescuer remains.");
+                HelpMarker("Recover party members in four-player dungeons and outdoors; yield to a party healer within 20 yalms.");
                 DrawDefaultSettingSyncButton("Use Phoenix Downs for recovery");
             }
 
@@ -870,6 +917,58 @@ public class ConfigWindow : Window, IDisposable
                 DrawDefaultSettingSyncButton("Allow Phoenix Down use during combat");
             }
 
+            UiGui.SettingsSection("Recovery limit");
+            RecoveryFlag("Full stickiness", config.PhoenixFullStickiness, value => config.PhoenixFullStickiness = value);
+            UiGui.TextWrapped("Keep trying until revival; a nearby party healer takes priority.");
+            ImGui.BeginDisabled(config.PhoenixFullStickiness);
+            ImGui.Indent(8 * MaterialTheme.Metrics.Scale);
+            var mode = config.PhoenixRecoveryLimit;
+            if (UiGui.RadioButton("Time limit", mode == PhoenixRecoveryLimitMode.Time))
+            {
+                config.PhoenixRecoveryLimit = PhoenixRecoveryLimitMode.Time;
+                configManager.SaveCurrentAccount();
+            }
+            ImGui.SameLine();
+            ImGui.BeginDisabled(mode != PhoenixRecoveryLimitMode.Time);
+            ImGui.SetNextItemWidth(90 * MaterialTheme.Metrics.Scale);
+            var seconds = config.PhoenixRecoverySeconds;
+            if (UiGui.InputInt("##PhoenixRecoverySeconds", ref seconds))
+            {
+                config.PhoenixRecoverySeconds = Math.Max(1, seconds);
+                configManager.SaveCurrentAccount();
+            }
+            ImGui.EndDisabled();
+            ImGui.SameLine(); UiGui.Text("seconds");
+            if (UiGui.RadioButton("Started casts", mode == PhoenixRecoveryLimitMode.StartedCasts))
+            {
+                config.PhoenixRecoveryLimit = PhoenixRecoveryLimitMode.StartedCasts;
+                configManager.SaveCurrentAccount();
+            }
+            ImGui.SameLine();
+            ImGui.BeginDisabled(mode != PhoenixRecoveryLimitMode.StartedCasts);
+            ImGui.SetNextItemWidth(90 * MaterialTheme.Metrics.Scale);
+            var casts = config.PhoenixRecoveryStartedCasts;
+            if (UiGui.InputInt("##PhoenixRecoveryStartedCasts", ref casts))
+            {
+                config.PhoenixRecoveryStartedCasts = Math.Max(1, casts);
+                configManager.SaveCurrentAccount();
+            }
+            ImGui.EndDisabled();
+            ImGui.SameLine(); UiGui.Text("casts");
+            ImGui.Unindent(8 * MaterialTheme.Metrics.Scale);
+            ImGui.EndDisabled();
+            DrawDefaultSettingSyncButton("Phoenix Down recovery limits");
+            UiGui.TextWrapped("Only actual cast starts count; waiting without a cast can continue indefinitely.");
+            UiGui.SettingsSection("Give up immediately when");
+            RecoveryFlag("No Phoenix Down available", config.PhoenixGiveUpWithoutItem, value => config.PhoenixGiveUpWithoutItem = value);
+            RecoveryFlag("Corpse is unreachable", config.PhoenixGiveUpUnreachable, value => config.PhoenixGiveUpUnreachable = value);
+            RecoveryFlag("ADS recovery support is unavailable", config.PhoenixGiveUpWithoutAds, value => config.PhoenixGiveUpWithoutAds = value);
+            UiGui.TextWrapped("Release recovery holds and ignore these deaths until a new death.");
+        }, () =>
+        {
+            UiGui.SettingsSection("Resurrection");
+            UiGui.TextWrapped("Raise offers are accepted automatically while FrenRider is enabled.");
+            UiGui.SettingsSection("Respawn");
             var respawnOutsideDuties = config.RespawnOutsideDuties;
             using (UiGui.SettingRow("Respawn after death outside duties after"))
             {
@@ -923,43 +1022,25 @@ public class ConfigWindow : Window, IDisposable
                     configManager.SaveCurrentAccount();
                 }
                 ImGui.SameLine(); UiGui.TextDisabled("s");
-                HelpMarker("After remaining continuously unconscious inside duties for this delay, open the Return prompt and accept it. Duty scope is selected only by BoundByDuty. Minimum: 1 second. Default: 60.");
+                HelpMarker("Inside-duty timed Return. A confirmed full-party wipe also returns when this option is off.");
 
                 DrawDefaultSettingSyncButton("Respawn after death inside duties");
             }
-            UiGui.SettingsSection("Maintenance", "Update Interval");
-            // Auto Discard
-            var autoDiscard = config.EnableAutoDiscard;
-            using (UiGui.SettingRow("Auto Discard (/ays discard)"))
-            {
-                if (UiGui.Checkbox("Auto Discard (/ays discard)", ref autoDiscard))
-                {
-                    config.EnableAutoDiscard = autoDiscard;
-                    configManager.SaveCurrentAccount();
-                }
-                HelpMarker("Runs /ays discard every 10s only while mounted and in a safe idle window.\nFrenRider defers discard during combat, cutscenes, and area transitions.\nRequires AutoRetainer plugin.");
-                DrawDefaultSettingSyncButton("Auto Discard");
-            }
-
-
-            // Update Interval
-            var updateInterval = config.UpdateInterval;
-            using (UiGui.SettingRow("Update Interval (seconds)"))
-            {
-                ImGui.SetNextItemWidth(200);
-                if (UiGui.InputFloat("Update Interval (seconds)", ref updateInterval, 0.01f, 0.1f, "%.3f"))
-                {
-                    config.UpdateInterval = Math.Max(0.05f, updateInterval);
-                    configManager.SaveCurrentAccount();
-                }
-                HelpMarker("How often the plugin runs its main logic loop.\nLower values = more responsive but higher CPU usage.\nDefault: 0.3s. WARNING: Values below 0.1 may impact performance.");
-                DrawDefaultSettingSyncButton("Update Interval");
-            }
-            if (updateInterval < 0.1f)
-            {
-                UiGui.TextColored(new Vector4(1, 0.4f, 0.4f, 1), "WARNING: Very low update interval may impact game performance!");
-            }
+            UiGui.TextWrapped("Full-party wipes always return after the inside-duty delay. Raise and active revival take priority.");
         });
+    }
+
+    private void RecoveryFlag(string label, bool value, Action<bool> set)
+    {
+        using (UiGui.SettingRow(label))
+        {
+            if (UiGui.Checkbox(label, ref value))
+            {
+                set(value);
+                configManager.SaveCurrentAccount();
+            }
+            DrawDefaultSettingSyncButton(label);
+        }
     }
 
     private void DrawChocoboTab(CharacterConfig config)
@@ -2586,7 +2667,7 @@ public class ConfigWindow : Window, IDisposable
 
     private void DrawAutoYesSection(CharacterConfig config)
     {
-        UiGui.TextWrapped("Raise offers are accepted automatically while FrenRider is enabled.");
+
 
         var teleportOffer = config.TeleportOfferAutoAccept;
         using (UiGui.SettingRow("Teleport offers"))

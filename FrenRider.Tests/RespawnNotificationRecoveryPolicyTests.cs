@@ -5,6 +5,24 @@ namespace FrenRider.Tests;
 public sealed class RespawnNotificationRecoveryPolicyTests
 {
     [Theory]
+    [InlineData(true, false, true)]
+    [InlineData(false, false, false)]
+    [InlineData(false, true, true)]
+    public void ConfirmedDutyWipeEnablesReturnIndependentlyOfOrdinaryToggle(bool wipe, bool enabled, bool expected)
+        => Assert.Equal(expected, RespawnNotificationRecoveryPolicy.IsRespawnEnabledForDutyState(false, enabled, true, wipe));
+
+    [Theory]
+    [InlineData(4, 4, true, true, true, true)]
+    [InlineData(4, 3, true, true, true, false)]
+    [InlineData(4, 4, false, true, true, false)]
+    [InlineData(4, 4, true, false, true, false)]
+    [InlineData(4, 4, true, true, false, false)]
+    [InlineData(0, 0, true, true, true, false)]
+    [InlineData(1, 1, true, true, true, false)]
+    public void WipeRequiresCompleteStableDeadPartyIncludingLocal(int native, int seen, bool dead, bool local, bool stable, bool expected)
+        => Assert.Equal(expected, RespawnNotificationRecoveryPolicy.IsConfirmedPartyWipe(native, seen, dead, local, stable));
+
+    [Theory]
     [InlineData(0, 0, false, 0, false, 0, false, 0, true)]
     [InlineData(0, 0, false, 0, false, 1, true, 0, true)]
     [InlineData(1, 42, false, 1, true, 1, true, 0, true)]

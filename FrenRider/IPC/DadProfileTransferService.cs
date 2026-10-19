@@ -241,7 +241,10 @@ internal sealed class DadProfileTransferService : IDisposable
             if (actualProperties.Distinct(StringComparer.Ordinal).Count() != actualProperties.Length
                 || actualProperties.Any(property => !ExpectedProfileProperties.Contains(property))
                 || ExpectedProfileProperties.Except(actualProperties, StringComparer.Ordinal)
-                    .Any(property => property is not ("clingExcludedTerritoryIds" or "pauseClingForFate" or "ignoreFates")))
+                    .Any(property => property is not ("clingExcludedTerritoryIds" or "pauseClingForFate" or "ignoreFates"
+                        or "phoenixFullStickiness" or "phoenixRecoveryLimit" or "phoenixRecoverySeconds"
+                        or "phoenixRecoveryStartedCasts" or "phoenixGiveUpWithoutItem" or "phoenixGiveUpUnreachable"
+                        or "phoenixGiveUpWithoutAds")))
             {
                 code = "incompatible-profile";
                 return false;
@@ -333,7 +336,8 @@ internal sealed class DadProfileTransferService : IDisposable
 
     private static bool IsValidProfile(CharacterConfig config)
     {
-        if (config.FrenName == null
+        if (config.PhoenixRecoverySeconds < 1 || config.PhoenixRecoveryStartedCasts < 1
+            || config.FrenName == null
             || config.FoolFlier == null
             || config.FulfType == null
             || config.CompanionStrat == null

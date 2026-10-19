@@ -65,13 +65,13 @@ public sealed class PhoenixDownRecoveryTests
             Assert.Equal(1, ConfigManager.ApplyDefaultSettingToAllCharacters(account, name));
         AssertOverrides(target);
         account.Characters["Synthetic@World"] = new();
-        Assert.Equal(1, ConfigManager.ApplyDefaultTabToAllCharacters(account, "Profile"));
+        Assert.Equal(1, ConfigManager.ApplyDefaultTabToAllCharacters(account, "Recovery"));
         AssertOverrides(account.Characters.Values.Single());
         account.Characters["Synthetic@World"] = new();
         Assert.Equal(1, ConfigManager.ApplyDefaultToAllCharacters(account));
         AssertOverrides(account.Characters.Values.Single());
         Assert.True((bool)typeof(ConfigManager).GetMethod("ApplyTabSettings", BindingFlags.Static | BindingFlags.NonPublic)!
-            .Invoke(null, new object[] { new CharacterConfig(), account.Characters.Values.Single(), "Profile" })!);
+            .Invoke(null, new object[] { new CharacterConfig(), account.Characters.Values.Single(), "Recovery" })!);
         Assert.True(account.Characters.Values.Single().UsePhoenixDownsForRecovery);
         Assert.True(account.Characters.Values.Single().ReviveAnyoneOutdoors);
         Assert.False(account.Characters.Values.Single().AllowPhoenixDownInCombat);
@@ -94,7 +94,7 @@ public sealed class PhoenixDownRecoveryTests
     [InlineData(20f, false, true, 0)]
     [InlineData(20.01f, false, true, 1)]
     [InlineData(20f, true, true, 1)]
-    [InlineData(20f, false, false, 0)]
+    [InlineData(20f, false, false, 1)]
     [InlineData(20.01f, false, false, 1)]
     public void OnlyLivingHealersAtOrInsideTwentyYalmsBlock(float distance, bool dead, bool party, int expected)
     {
@@ -102,7 +102,7 @@ public sealed class PhoenixDownRecoveryTests
         lab.Actors.Add(new PhoenixActor(3, 30, party, dead, true, Corpse.Position + new Vector3(distance, 0, 0), PendingRaise: dead));
         lab.Service.Update(1000);
         Assert.Equal(expected, lab.Attempts.Count);
-        Assert.True(lab.Service.PartyRecoveryActive);
+        Assert.Equal(expected != 0, lab.Service.PartyRecoveryActive);
     }
 
     [Theory]
@@ -252,10 +252,10 @@ public sealed class PhoenixDownRecoveryTests
         Assert.False(lab.Movement);
         Assert.False(lab.Actions);
         lab.Actors[1] = Corpse;
-        lab.Actors.Add(new PhoenixActor(3, 30, false, false, true, Corpse.Position));
+        lab.Actors.Add(new PhoenixActor(3, 30, true, false, true, Corpse.Position));
         lab.Service.Update(10000);
         Assert.Single(lab.Attempts);
-        Assert.True(lab.Movement);
+        Assert.False(lab.Movement);
     }
 
     [Fact]
@@ -309,7 +309,7 @@ public sealed class PhoenixDownRecoveryTests
             switch (change)
             {
                 case "combat": lab.Frame = lab.Frame with { InCombat = true }; break;
-                case "healer": lab.Actors.Add(new PhoenixActor(3, 30, false, false, true, Corpse.Position)); break;
+                case "healer": lab.Actors.Add(new PhoenixActor(3, 30, true, false, true, Corpse.Position)); break;
                 case "cooldown": lab.Item = lab.Item with { Cooldown = true }; break;
                 case "revived": lab.Actors[1] = Corpse with { Dead = false }; break;
                 case "disabled": lab.Frame.Config.UsePhoenixDownsForRecovery = false; break;
@@ -399,6 +399,171 @@ public sealed class PhoenixDownRecoveryTests
         Assert.False(config.UsePhoenixDownsForRecovery);
         Assert.False(config.ReviveAnyoneOutdoors);
         Assert.True(config.AllowPhoenixDownInCombat);
+    }
+
+    [Fact]
+    public void TimedBudgetIncludesWaitingAndOnlyANewDeathReadmitsRecovery()
+    {
+        using var lab = new Lab();
+        lab.Frame.Config.PhoenixRecoveryLimit = PhoenixRecoveryLimitMode.Time;
+        lab.Frame.Config.PhoenixRecoverySeconds = 2;
+        lab.Item = new(false, false, true, true);
+        lab.Service.Update(1000);
+        Assert.True(lab.Movement);
+        lab.Service.Update(3000);
+        Assert.False(lab.Movement);
+        Assert.False(lab.PreventPulls);
+        lab.Item = new(true, false, true, true);
+        lab.Actors[1] = Corpse with { Id = 42 }; // A different handle for the same corpse is not a new death.
+        lab.Service.Update(4000);
+        Assert.Empty(lab.Attempts);
+        var originalFrame = lab.Frame;
+        lab.Frame = new PhoenixRecoveryFrame { Config = originalFrame.Config }; // Temporary unreadability has no identity.
+        lab.Service.Update(4010);
+        lab.Frame = originalFrame;
+        lab.Service.Update(4020);
+        Assert.Empty(lab.Attempts);
+        Assert.False(lab.Movement);
+        lab.Actors[1] = Corpse with { Dead = false };
+        lab.Service.Update(4100);
+        lab.Actors[1] = Corpse;
+        lab.Service.Update(4200);
+        Assert.Single(lab.Attempts);
+    }
+
+    [Fact]
+    public void StartedCastBudgetCountsObservedStartsEvenWhenRequestReportedRejection()
+    {
+        using var lab = new Lab { Accepted = false };
+        lab.Frame.Config.PhoenixRecoveryStartedCasts = 1;
+        lab.Service.Update(1000);
+        lab.Service.Update(2000);
+        Assert.Equal(2, lab.Attempts.Count); // Rejected requests have not consumed the one-start budget.
+        lab.Actors[0] = Local with { PhoenixCast = true, CastTarget = Corpse.Id };
+        lab.Service.Update(2100);
+        lab.Service.Update(5000);
+        Assert.True(lab.Actions); // Allow the observed native cast to finish safely.
+        Assert.False(lab.PreventPulls);
+        lab.Actors[0] = Local;
+        lab.Service.Update(5100);
+        lab.Service.Update(10000);
+        Assert.Equal(2, lab.Attempts.Count);
+        Assert.False(lab.Actions);
+        Assert.False(lab.Movement);
+    }
+
+    [Fact]
+    public void SameCastAcrossFramesAndTemporaryUnreadabilityConsumesOnlyOneStart()
+    {
+        using var lab = new Lab();
+        lab.Frame.Config.PhoenixRecoveryStartedCasts = 2;
+        lab.Service.Update(1000);
+        lab.Actors[0] = Local with { PhoenixCast = true, CastTarget = Corpse.Id };
+        lab.Service.Update(1100);
+        lab.Service.Update(2000);
+        var frame = lab.Frame;
+        lab.Frame = new PhoenixRecoveryFrame { Config = frame.Config };
+        lab.Service.Update(2100);
+        Assert.False(lab.Movement);
+        lab.Frame = frame;
+        lab.Service.Update(2200);
+        Assert.True(lab.Actions);
+        lab.Actors[0] = Local;
+        lab.Service.Update(3000);
+        lab.Service.Update(4000);
+        Assert.Equal(2, lab.Attempts.Count);
+    }
+
+    [Theory]
+    [InlineData("item", false)]
+    [InlineData("item", true)]
+    [InlineData("navigation", false)]
+    [InlineData("navigation", true)]
+    [InlineData("ads", false)]
+    [InlineData("ads", true)]
+    public void ImmediateGiveUpFlagsAreIndependentAndStillApplyToFullStickiness(string condition, bool enabled)
+    {
+        using var lab = new Lab();
+        lab.Frame.Config.PhoenixFullStickiness = true;
+        if (condition == "item") { lab.Item = new(false, false, true, true); lab.Frame.Config.PhoenixGiveUpWithoutItem = enabled; }
+        if (condition == "navigation")
+        {
+            lab.Actors[1] = Corpse with { Position = new Vector3(30, 0, 0) };
+            lab.ApproachResult = PhoenixApproachResult.Unreachable;
+            lab.Frame.Config.PhoenixGiveUpUnreachable = enabled;
+        }
+        if (condition == "ads") { lab.AdsOwnsDuty = true; lab.AcknowledgementAvailable = false; lab.Frame.Config.PhoenixGiveUpWithoutAds = enabled; }
+        lab.Service.Update(1000);
+        lab.Service.Update(900000);
+        Assert.Equal(!enabled, lab.Movement);
+        Assert.Equal(!enabled, lab.PreventPulls);
+        Assert.Empty(lab.Attempts);
+    }
+
+    [Fact]
+    public void UnknownItemReadinessAndUnavailableNavigationAreNotConfirmedGiveUpConditions()
+    {
+        using var lab = new Lab();
+        lab.Frame.Config.PhoenixGiveUpWithoutItem = lab.Frame.Config.PhoenixGiveUpUnreachable = true;
+        lab.Item = default;
+        lab.Service.Update(1000);
+        Assert.True(lab.Movement);
+        lab.Item = new(true, false, true, true);
+        lab.Actors[1] = Corpse with { Position = new Vector3(30, 0, 0) };
+        lab.ApproachResult = PhoenixApproachResult.Blocked;
+        lab.Service.Update(2000);
+        Assert.True(lab.Movement);
+        Assert.Empty(lab.Attempts);
+    }
+
+    [Fact]
+    public void ExhaustionReleasesReturnExceptForActualPendingRevival()
+    {
+        using var lab = new Lab();
+        lab.Frame.Config.PhoenixRecoveryLimit = PhoenixRecoveryLimitMode.Time;
+        lab.Frame.Config.PhoenixRecoverySeconds = 1;
+        lab.Actors[0] = Local with { Dead = true };
+        lab.Actors[1] = Corpse with { Dead = false };
+        lab.Service.Update(1000);
+        Assert.True(lab.Service.DeferReturn);
+        lab.Service.Update(2000);
+        Assert.False(lab.Service.DeferReturn);
+        lab.Actors[0] = lab.Actors[0] with { PendingRaise = true };
+        lab.Service.Update(2100);
+        Assert.True(lab.Service.DeferReturn);
+        Assert.False(lab.Movement);
+    }
+
+    [Fact]
+    public void RecoverySettingsCloneTransferSyncResetAndOlderProfileDefaults()
+    {
+        var defaults = JsonSerializer.Deserialize<CharacterConfig>("{}")!;
+        Assert.False(defaults.PhoenixFullStickiness);
+        Assert.Equal(PhoenixRecoveryLimitMode.StartedCasts, defaults.PhoenixRecoveryLimit);
+        Assert.Equal(30, defaults.PhoenixRecoverySeconds);
+        Assert.Equal(5, defaults.PhoenixRecoveryStartedCasts);
+        Assert.False(defaults.PhoenixGiveUpWithoutItem || defaults.PhoenixGiveUpUnreachable || defaults.PhoenixGiveUpWithoutAds);
+        var source = new CharacterConfig { PhoenixFullStickiness = true, PhoenixRecoveryLimit = PhoenixRecoveryLimitMode.Time,
+            PhoenixRecoverySeconds = 12, PhoenixRecoveryStartedCasts = 3, PhoenixGiveUpWithoutItem = true,
+            PhoenixGiveUpUnreachable = true, PhoenixGiveUpWithoutAds = true };
+        var account = new AccountConfig { DefaultConfig = source, Characters = new() { ["Synthetic@World"] = new() } };
+        Assert.Equal(1, ConfigManager.ApplyDefaultTabToAllCharacters(account, "Recovery"));
+        foreach (var copy in new[] { source.Clone(), account.Characters.Values.Single() })
+        {
+            Assert.True(copy.PhoenixFullStickiness && copy.PhoenixGiveUpWithoutItem && copy.PhoenixGiveUpUnreachable && copy.PhoenixGiveUpWithoutAds);
+            Assert.Equal(12, copy.PhoenixRecoverySeconds);
+            Assert.Equal(3, copy.PhoenixRecoveryStartedCasts);
+        }
+        Assert.True(DadProfileTransferService.TrySerializeProfile(source, out var json, out _));
+        Assert.True(DadProfileTransferService.TryDeserializeProfile(json, out var shared, out _));
+        Assert.True(shared!.PhoenixFullStickiness);
+        var legacy = System.Text.Json.Nodes.JsonNode.Parse(json)!;
+        var config = legacy["config"]!.AsObject();
+        foreach (var key in config.Select(pair => pair.Key).Where(key => key.StartsWith("phoenix", StringComparison.Ordinal)).ToArray())
+            config.Remove(key);
+        Assert.True(DadProfileTransferService.TryDeserializeProfile(legacy.ToJsonString(), out var old, out _));
+        Assert.Equal(5, old!.PhoenixRecoveryStartedCasts);
+        Assert.False(old.PhoenixFullStickiness);
     }
 
     internal sealed class Lab : IPhoenixRecoveryRuntime, IDisposable

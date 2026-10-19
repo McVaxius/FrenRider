@@ -51,15 +51,31 @@ public class ConfigManager : IDadProfileStore
                 Setting("Follow local aetheryte networks", (source, target) => target.FollowLocalAetheryteNetworks = source.FollowLocalAetheryteNetworks),
                 Setting("Teleport Delay", (source, target) => target.TeleportToFrenDelaySeconds = source.TeleportToFrenDelaySeconds),
                 Setting("Nudge in duty when fren not nearby/in-zone", (source, target) => target.NudgeInDutyWhenFrenNotNearbyOrInZone = source.NudgeInDutyWhenFrenNotNearbyOrInZone),
+                Setting("Mount-up to chase fren", CopyMountUpToChaseFren),
+                Setting("Mount Name", (source, target) => target.FoolFlier = source.FoolFlier),
+                Setting("Update Interval", (source, target) => target.UpdateInterval = source.UpdateInterval),
+                Setting("Auto Discard", (source, target) => target.EnableAutoDiscard = source.EnableAutoDiscard),
+            }),
+        new(
+            "Recovery",
+            new[] { "Recovery" },
+            new[]
+            {
                 Setting("Respawn after death outside duties", CopyRespawnOutsideDuties),
                 Setting("Respawn after death inside duties", CopyRespawnInsideDuties),
                 Setting("Use Phoenix Downs for recovery", (source, target) => target.UsePhoenixDownsForRecovery = source.UsePhoenixDownsForRecovery),
                 Setting("Revive anyone within range outdoors", (source, target) => target.ReviveAnyoneOutdoors = source.ReviveAnyoneOutdoors),
                 Setting("Allow Phoenix Down use during combat", (source, target) => target.AllowPhoenixDownInCombat = source.AllowPhoenixDownInCombat),
-                Setting("Mount-up to chase fren", CopyMountUpToChaseFren),
-                Setting("Mount Name", (source, target) => target.FoolFlier = source.FoolFlier),
-                Setting("Update Interval", (source, target) => target.UpdateInterval = source.UpdateInterval),
-                Setting("Auto Discard", (source, target) => target.EnableAutoDiscard = source.EnableAutoDiscard),
+                Setting("Full stickiness", (source, target) => target.PhoenixFullStickiness = source.PhoenixFullStickiness),
+                Setting("Phoenix Down recovery limits", (source, target) =>
+                {
+                    target.PhoenixRecoveryLimit = source.PhoenixRecoveryLimit;
+                    target.PhoenixRecoverySeconds = source.PhoenixRecoverySeconds;
+                    target.PhoenixRecoveryStartedCasts = source.PhoenixRecoveryStartedCasts;
+                }),
+                Setting("No Phoenix Down available", (source, target) => target.PhoenixGiveUpWithoutItem = source.PhoenixGiveUpWithoutItem),
+                Setting("Corpse is unreachable", (source, target) => target.PhoenixGiveUpUnreachable = source.PhoenixGiveUpUnreachable),
+                Setting("ADS recovery support is unavailable", (source, target) => target.PhoenixGiveUpWithoutAds = source.PhoenixGiveUpWithoutAds),
             }),
         new(
             "Chocobo",

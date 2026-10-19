@@ -4,6 +4,8 @@ using System.Linq;
 
 namespace FrenRider.Models;
 
+public enum PhoenixRecoveryLimitMode { StartedCasts, Time }
+
 public enum FrenRiderCleanupMode
 {
     RestoreSnapshot,
@@ -64,6 +66,13 @@ public class CharacterConfig
     public bool UsePhoenixDownsForRecovery { get; set; } = true;
     public bool ReviveAnyoneOutdoors { get; set; } = true;
     public bool AllowPhoenixDownInCombat { get; set; } = false;
+    public bool PhoenixFullStickiness { get; set; }
+    public PhoenixRecoveryLimitMode PhoenixRecoveryLimit { get; set; } = PhoenixRecoveryLimitMode.StartedCasts;
+    public int PhoenixRecoverySeconds { get; set; } = 30;
+    public int PhoenixRecoveryStartedCasts { get; set; } = 5;
+    public bool PhoenixGiveUpWithoutItem { get; set; }
+    public bool PhoenixGiveUpUnreachable { get; set; }
+    public bool PhoenixGiveUpWithoutAds { get; set; }
     public int RespawnInsideDutiesDelaySeconds
     {
         get => respawnInsideDutiesDelaySeconds;
@@ -262,6 +271,13 @@ public class CharacterConfig
             UsePhoenixDownsForRecovery = UsePhoenixDownsForRecovery,
             ReviveAnyoneOutdoors = ReviveAnyoneOutdoors,
             AllowPhoenixDownInCombat = AllowPhoenixDownInCombat,
+            PhoenixFullStickiness = PhoenixFullStickiness,
+            PhoenixRecoveryLimit = PhoenixRecoveryLimit,
+            PhoenixRecoverySeconds = PhoenixRecoverySeconds,
+            PhoenixRecoveryStartedCasts = PhoenixRecoveryStartedCasts,
+            PhoenixGiveUpWithoutItem = PhoenixGiveUpWithoutItem,
+            PhoenixGiveUpUnreachable = PhoenixGiveUpUnreachable,
+            PhoenixGiveUpWithoutAds = PhoenixGiveUpWithoutAds,
             RespawnInsideDutiesDelaySeconds = RespawnInsideDutiesDelaySeconds,
             MountUpToChaseFren = MountUpToChaseFren,
             MountUpToChaseFrenDistance = MountUpToChaseFrenDistance,

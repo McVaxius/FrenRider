@@ -3118,4 +3118,27 @@
   <data name="Configured rotation provider" xml:space="preserve"><value>設定されたローテーション提供元</value></data>
   <data name="Duty owner" xml:space="preserve"><value>コンテンツの制御元</value></data>
   <data name="Titlebar.Unavailable" xml:space="preserve"><value>利用不可</value></data>
+  <data name="Recovery limit" xml:space="preserve"><value>蘇生試行の上限</value></data>
+  <data name="Full stickiness" xml:space="preserve"><value>完了まで継続</value></data>
+  <data name="Time limit" xml:space="preserve"><value>時間制限</value></data>
+  <data name="Started casts" xml:space="preserve"><value>詠唱開始回数</value></data>
+  <data name="casts" xml:space="preserve"><value>回</value></data>
+  <data name="Phoenix Down recovery limits" xml:space="preserve"><value>フェニックスの尾の蘇生上限</value></data>
+  <data name="Give up immediately when" xml:space="preserve"><value>次の場合は即座に断念</value></data>
+  <data name="No Phoenix Down available" xml:space="preserve"><value>フェニックスの尾がない</value></data>
+  <data name="Corpse is unreachable" xml:space="preserve"><value>戦闘不能者に到達できない</value></data>
+  <data name="ADS recovery support is unavailable" xml:space="preserve"><value>ADSの蘇生支援が利用できない</value></data>
+  <data name="Resurrection" xml:space="preserve"><value>蘇生</value></data>
+  <data name="Keep trying until revival; a nearby party healer takes priority." xml:space="preserve"><value>蘇生するまで試行します。近くのパーティヒーラーを優先します。</value></data>
+  <data name="Only actual cast starts count; waiting without a cast can continue indefinitely." xml:space="preserve"><value>実際に始まった詠唱だけを数えます。開始できなければ無期限に待つ場合があります。</value></data>
+  <data name="Release recovery holds and ignore these deaths until a new death." xml:space="preserve"><value>蘇生による制止を解除し、新たな死亡を確認するまで現在の死亡を無視します。</value></data>
+  <data name="Full-party wipes always return after the inside-duty delay. Raise and active revival take priority." xml:space="preserve"><value>全滅が確認されると、コンテンツ内の待機時間後に必ず帰還します。蘇生の申し出と実行中の蘇生を優先します。</value></data>
+  <data name="Recover party members in four-player dungeons and outdoors; yield to a party healer within 20 yalms." xml:space="preserve"><value>4人用ダンジョンと屋外でパーティを蘇生します。20ヤルム以内のパーティヒーラーを優先します。</value></data>
+  <data name="Inside-duty timed Return. A confirmed full-party wipe also returns when this option is off." xml:space="preserve"><value>コンテンツ内の時間指定帰還です。全滅が確認されれば、この設定が無効でも帰還します。</value></data>
+  <data name="Recovery given up; waiting for a new death" xml:space="preserve"><value>蘇生試行を断念; 新たな死亡を待機中</value></data>
+  <data name="Recovery limit reached; waiting for a new death" xml:space="preserve"><value>蘇生試行の上限に到達; 新たな死亡を待機中</value></data>
+  <data name="ADS recovery support unavailable; waiting for a new death" xml:space="preserve"><value>ADSの蘇生支援が利用できない; 新たな死亡を待機中</value></data>
+  <data name="No Phoenix Down available; waiting for a new death" xml:space="preserve"><value>フェニックスの尾がない; 新たな死亡を待機中</value></data>
+  <data name="Corpse is unreachable; waiting for a new death" xml:space="preserve"><value>戦闘不能者に到達できない; 新たな死亡を待機中</value></data>
+  <data name="Blocked: Phoenix Down readiness unavailable" xml:space="preserve"><value>停止中：フェニックスの尾の使用可否が不明</value></data>
 </root>

@@ -3118,4 +3118,27 @@
   <data name="Configured rotation provider" xml:space="preserve"><value>설정된 로테이션 제공자</value></data>
   <data name="Duty owner" xml:space="preserve"><value>콘텐츠 제어 주체</value></data>
   <data name="Titlebar.Unavailable" xml:space="preserve"><value>사용 불가</value></data>
+  <data name="Recovery limit" xml:space="preserve"><value>부활 시도 제한</value></data>
+  <data name="Full stickiness" xml:space="preserve"><value>완료까지 계속</value></data>
+  <data name="Time limit" xml:space="preserve"><value>시간 제한</value></data>
+  <data name="Started casts" xml:space="preserve"><value>시작된 시전</value></data>
+  <data name="casts" xml:space="preserve"><value>회</value></data>
+  <data name="Phoenix Down recovery limits" xml:space="preserve"><value>불사조의 깃털 부활 제한</value></data>
+  <data name="Give up immediately when" xml:space="preserve"><value>다음 상황에서 즉시 포기</value></data>
+  <data name="No Phoenix Down available" xml:space="preserve"><value>불사조의 깃털 없음</value></data>
+  <data name="Corpse is unreachable" xml:space="preserve"><value>시체에 도달할 수 없음</value></data>
+  <data name="ADS recovery support is unavailable" xml:space="preserve"><value>ADS 부활 지원을 사용할 수 없음</value></data>
+  <data name="Resurrection" xml:space="preserve"><value>부활</value></data>
+  <data name="Keep trying until revival; a nearby party healer takes priority." xml:space="preserve"><value>부활할 때까지 시도하며 가까운 파티 치유사를 우선합니다.</value></data>
+  <data name="Only actual cast starts count; waiting without a cast can continue indefinitely." xml:space="preserve"><value>실제로 시작한 시전만 셉니다. 시전이 시작되지 않으면 무기한 기다릴 수 있습니다.</value></data>
+  <data name="Release recovery holds and ignore these deaths until a new death." xml:space="preserve"><value>부활 대기 제어를 해제하고 새 사망이 발생할 때까지 현재 사망을 무시합니다.</value></data>
+  <data name="Full-party wipes always return after the inside-duty delay. Raise and active revival take priority." xml:space="preserve"><value>전원 사망이 확인되면 임무 내 지연 후 항상 귀환합니다. 부활 제안과 진행 중인 부활을 우선합니다.</value></data>
+  <data name="Recover party members in four-player dungeons and outdoors; yield to a party healer within 20 yalms." xml:space="preserve"><value>4인 던전과 야외에서 파티를 부활시키며 20얄름 이내의 파티 치유사에게 양보합니다.</value></data>
+  <data name="Inside-duty timed Return. A confirmed full-party wipe also returns when this option is off." xml:space="preserve"><value>임무 내 시간 지정 귀환입니다. 전원 사망이 확인되면 이 옵션이 꺼져 있어도 귀환합니다.</value></data>
+  <data name="Recovery given up; waiting for a new death" xml:space="preserve"><value>부활 시도 포기; 새 사망 대기 중</value></data>
+  <data name="Recovery limit reached; waiting for a new death" xml:space="preserve"><value>부활 시도 제한 도달; 새 사망 대기 중</value></data>
+  <data name="ADS recovery support unavailable; waiting for a new death" xml:space="preserve"><value>ADS 부활 지원을 사용할 수 없음; 새 사망 대기 중</value></data>
+  <data name="No Phoenix Down available; waiting for a new death" xml:space="preserve"><value>불사조의 깃털 없음; 새 사망 대기 중</value></data>
+  <data name="Corpse is unreachable; waiting for a new death" xml:space="preserve"><value>시체에 도달할 수 없음; 새 사망 대기 중</value></data>
+  <data name="Blocked: Phoenix Down readiness unavailable" xml:space="preserve"><value>차단됨: 불사조의 깃털 준비 상태를 알 수 없음</value></data>
 </root>

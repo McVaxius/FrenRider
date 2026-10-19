@@ -3118,4 +3118,27 @@ An: Die BossMod-Voreinstellungen unten mit jedem Rotationsanbieter verwenden. Ei
   <data name="Configured rotation provider" xml:space="preserve"><value>Konfigurierter Rotationsanbieter</value></data>
   <data name="Duty owner" xml:space="preserve"><value>Instanzsteuerung</value></data>
   <data name="Titlebar.Unavailable" xml:space="preserve"><value>Nicht verfügbar</value></data>
+  <data name="Recovery limit" xml:space="preserve"><value>Wiederbelebungslimit</value></data>
+  <data name="Full stickiness" xml:space="preserve"><value>Vollständig beharren</value></data>
+  <data name="Time limit" xml:space="preserve"><value>Zeitlimit</value></data>
+  <data name="Started casts" xml:space="preserve"><value>Begonnene Anwendungen</value></data>
+  <data name="casts" xml:space="preserve"><value>Anwendungen</value></data>
+  <data name="Phoenix Down recovery limits" xml:space="preserve"><value>Phönixfeder-Wiederbelebungslimits</value></data>
+  <data name="Give up immediately when" xml:space="preserve"><value>Sofort aufgeben, wenn</value></data>
+  <data name="No Phoenix Down available" xml:space="preserve"><value>Keine Phönixfeder verfügbar</value></data>
+  <data name="Corpse is unreachable" xml:space="preserve"><value>Leichnam ist unerreichbar</value></data>
+  <data name="ADS recovery support is unavailable" xml:space="preserve"><value>ADS-Wiederbelebungsunterstützung fehlt</value></data>
+  <data name="Resurrection" xml:space="preserve"><value>Wiederbelebung</value></data>
+  <data name="Keep trying until revival; a nearby party healer takes priority." xml:space="preserve"><value>Bis zur Wiederbelebung versuchen; ein naher Gruppenheiler hat Vorrang.</value></data>
+  <data name="Only actual cast starts count; waiting without a cast can continue indefinitely." xml:space="preserve"><value>Nur tatsächlich begonnene Anwendungen zählen; ohne Beginn kann das Warten unbegrenzt dauern.</value></data>
+  <data name="Release recovery holds and ignore these deaths until a new death." xml:space="preserve"><value>Wiederbelebungssperren lösen und diese Tode bis zu einem neuen Tod ignorieren.</value></data>
+  <data name="Full-party wipes always return after the inside-duty delay. Raise and active revival take priority." xml:space="preserve"><value>Ein bestätigter Gruppentod führt nach der Instanzverzögerung immer zur Rückkehr. Raise und laufende Wiederbelebung haben Vorrang.</value></data>
+  <data name="Recover party members in four-player dungeons and outdoors; yield to a party healer within 20 yalms." xml:space="preserve"><value>Gruppenmitglieder in Viererinstanzen und im Freien wiederbeleben; Gruppenheilern innerhalb von 20 Yalmen Vorrang geben.</value></data>
+  <data name="Inside-duty timed Return. A confirmed full-party wipe also returns when this option is off." xml:space="preserve"><value>Zeitgesteuerte Rückkehr in Instanzen. Ein bestätigter Gruppentod löst die Rückkehr auch bei ausgeschalteter Option aus.</value></data>
+  <data name="Recovery given up; waiting for a new death" xml:space="preserve"><value>Wiederbelebung aufgegeben; Warten auf einen neuen Tod</value></data>
+  <data name="Recovery limit reached; waiting for a new death" xml:space="preserve"><value>Wiederbelebungslimit erreicht; Warten auf einen neuen Tod</value></data>
+  <data name="ADS recovery support unavailable; waiting for a new death" xml:space="preserve"><value>ADS-Wiederbelebungsunterstützung fehlt; Warten auf einen neuen Tod</value></data>
+  <data name="No Phoenix Down available; waiting for a new death" xml:space="preserve"><value>Keine Phönixfeder verfügbar; Warten auf einen neuen Tod</value></data>
+  <data name="Corpse is unreachable; waiting for a new death" xml:space="preserve"><value>Leichnam ist unerreichbar; Warten auf einen neuen Tod</value></data>
+  <data name="Blocked: Phoenix Down readiness unavailable" xml:space="preserve"><value>Blockiert: Phönixfeder-Bereitschaft unbekannt</value></data>
 </root>

@@ -200,7 +200,10 @@ public sealed class DadProfileTransferTests
         var config = profile["config"]!.AsObject();
 
         foreach (var property in config.Select(pair => pair.Key)
-                     .Where(key => key is not ("clingExcludedTerritoryIds" or "pauseClingForFate" or "ignoreFates")))
+                     .Where(key => key is not ("clingExcludedTerritoryIds" or "pauseClingForFate" or "ignoreFates"
+                         or "phoenixFullStickiness" or "phoenixRecoveryLimit" or "phoenixRecoverySeconds"
+                         or "phoenixRecoveryStartedCasts" or "phoenixGiveUpWithoutItem" or "phoenixGiveUpUnreachable"
+                         or "phoenixGiveUpWithoutAds")))
         {
             var incomplete = profile.DeepClone();
             incomplete["config"]!.AsObject().Remove(property);

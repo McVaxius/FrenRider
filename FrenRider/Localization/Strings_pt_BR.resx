@@ -3223,4 +3223,27 @@ Ativado: use as predefinições do BossMod abaixo com qualquer provedor de rota�
   <data name="Configured rotation provider" xml:space="preserve"><value>Provedor de rotação configurado</value></data>
   <data name="Duty owner" xml:space="preserve"><value>Responsável pelo conteúdo</value></data>
   <data name="Titlebar.Unavailable" xml:space="preserve"><value>Indisponível</value></data>
+  <data name="Recovery limit" xml:space="preserve"><value>Limite de recuperação</value></data>
+  <data name="Full stickiness" xml:space="preserve"><value>Persistência total</value></data>
+  <data name="Time limit" xml:space="preserve"><value>Limite de tempo</value></data>
+  <data name="Started casts" xml:space="preserve"><value>Conjurações iniciadas</value></data>
+  <data name="casts" xml:space="preserve"><value>conjurações</value></data>
+  <data name="Phoenix Down recovery limits" xml:space="preserve"><value>Limites de recuperação com Phoenix Down</value></data>
+  <data name="Give up immediately when" xml:space="preserve"><value>Desistir imediatamente quando</value></data>
+  <data name="No Phoenix Down available" xml:space="preserve"><value>Nenhum Phoenix Down disponível</value></data>
+  <data name="Corpse is unreachable" xml:space="preserve"><value>O corpo está inacessível</value></data>
+  <data name="ADS recovery support is unavailable" xml:space="preserve"><value>O suporte de recuperação ADS está indisponível</value></data>
+  <data name="Resurrection" xml:space="preserve"><value>Ressurreição</value></data>
+  <data name="Keep trying until revival; a nearby party healer takes priority." xml:space="preserve"><value>Continuar até reviver; um curandeiro próximo do grupo tem prioridade.</value></data>
+  <data name="Only actual cast starts count; waiting without a cast can continue indefinitely." xml:space="preserve"><value>Só contam conjurações que realmente começam; sem início, a espera pode ser indefinida.</value></data>
+  <data name="Release recovery holds and ignore these deaths until a new death." xml:space="preserve"><value>Liberar os bloqueios de recuperação e ignorar essas mortes até uma nova morte.</value></data>
+  <data name="Full-party wipes always return after the inside-duty delay. Raise and active revival take priority." xml:space="preserve"><value>A morte confirmada do grupo inteiro sempre ativa Return após o atraso da instância. Raise e ressurreições em andamento têm prioridade.</value></data>
+  <data name="Recover party members in four-player dungeons and outdoors; yield to a party healer within 20 yalms." xml:space="preserve"><value>Reviver o grupo em masmorras de quatro e ao ar livre; ceder a um curandeiro do grupo a até 20 yalms.</value></data>
+  <data name="Inside-duty timed Return. A confirmed full-party wipe also returns when this option is off." xml:space="preserve"><value>Return temporizado na instância. A morte confirmada do grupo inteiro também ativa Return com esta opção desligada.</value></data>
+  <data name="Recovery given up; waiting for a new death" xml:space="preserve"><value>Recuperação abandonada; Aguardando uma nova morte</value></data>
+  <data name="Recovery limit reached; waiting for a new death" xml:space="preserve"><value>Limite de recuperação atingido; Aguardando uma nova morte</value></data>
+  <data name="ADS recovery support unavailable; waiting for a new death" xml:space="preserve"><value>O suporte de recuperação ADS está indisponível; Aguardando uma nova morte</value></data>
+  <data name="No Phoenix Down available; waiting for a new death" xml:space="preserve"><value>Nenhum Phoenix Down disponível; Aguardando uma nova morte</value></data>
+  <data name="Corpse is unreachable; waiting for a new death" xml:space="preserve"><value>O corpo está inacessível; Aguardando uma nova morte</value></data>
+  <data name="Blocked: Phoenix Down readiness unavailable" xml:space="preserve"><value>Bloqueado: disponibilidade de Phoenix Down desconhecida</value></data>
 </root>

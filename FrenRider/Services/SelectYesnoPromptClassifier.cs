@@ -67,7 +67,6 @@ public static class SelectYesnoPromptClassifier
         => text.Contains("Use the teleporter", StringComparison.OrdinalIgnoreCase)
             || text.Contains("Return to the levemete", StringComparison.OrdinalIgnoreCase)
             || text.Contains("Return to a levemete", StringComparison.OrdinalIgnoreCase)
-            || text.Contains("Return to the starting point", StringComparison.OrdinalIgnoreCase)
             || text.Contains("Duty calls", StringComparison.OrdinalIgnoreCase)
             || text.Contains("Are you interested", StringComparison.OrdinalIgnoreCase)
             || text.Contains("Move immediately to sealed area", StringComparison.OrdinalIgnoreCase);
@@ -77,11 +76,11 @@ public static class SelectYesnoPromptClassifier
         if (!text.Contains("Return", StringComparison.OrdinalIgnoreCase))
             return false;
 
-        if (text.Contains("levemete", StringComparison.OrdinalIgnoreCase)
-            || text.Contains("starting point", StringComparison.OrdinalIgnoreCase))
+        if (text.Contains("levemete", StringComparison.OrdinalIgnoreCase))
             return false;
 
-        return text.Contains("home point", StringComparison.OrdinalIgnoreCase)
+        return Regex.IsMatch(text, @"^Return to the starting point(?: of .+)?\?$", RegexOptions.IgnoreCase)
+            || text.Contains("home point", StringComparison.OrdinalIgnoreCase)
             || text.Contains("return to your", StringComparison.OrdinalIgnoreCase)
             || text.Contains("return to the aetheryte", StringComparison.OrdinalIgnoreCase)
             || text.Contains("return to an aetheryte", StringComparison.OrdinalIgnoreCase)

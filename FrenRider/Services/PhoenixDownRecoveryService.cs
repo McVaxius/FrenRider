@@ -7,7 +7,7 @@ using FrenRider.Models;
 namespace FrenRider.Services;
 
 internal enum PhoenixRecoveryScope { None, Outdoors, Dungeon }
-internal enum PhoenixApproachResult { Moving, Blocked }
+internal enum PhoenixApproachResult { Moving, Blocked, Unreachable }
 internal readonly record struct PhoenixActor(ulong Id, ulong ContentId, bool Party, bool Dead,
     bool Healer, Vector3 Position, bool PendingRaise = false, ulong CastTarget = 0, bool PhoenixCast = false);
 internal sealed record PhoenixRecoveryFrame
@@ -17,6 +17,7 @@ internal sealed record PhoenixRecoveryFrame
     internal uint TerritoryId { get; init; }
     internal uint DutyId { get; init; }
     internal bool Ready { get; init; }
+    internal bool ContextEnded { get; init; }
     internal PhoenixRecoveryScope Scope { get; init; }
     internal ulong LocalId { get; init; }
     internal bool InCombat { get; init; }
@@ -28,7 +29,7 @@ internal sealed record PhoenixRecoveryFrame
     internal IReadOnlyList<PhoenixActor> Actors { get; init; } = Array.Empty<PhoenixActor>();
     internal IReadOnlyList<ulong> PartyContentIds { get; init; } = Array.Empty<ulong>();
 }
-internal readonly record struct PhoenixItemReadiness(bool HasItem, bool Cooldown, bool Available, bool LineOfSight);
+internal readonly record struct PhoenixItemReadiness(bool HasItem, bool Cooldown, bool Available, bool LineOfSight, bool Known = true);
 
 // The same coordinator runs against native state and the offline recovery lab.
 internal interface IPhoenixRecoveryRuntime
@@ -57,6 +58,12 @@ internal sealed class PhoenixDownRecoveryService : IDisposable
     private long attemptStartedMs;
     private bool attemptPending;
     private bool castObserved;
+    private bool requestTracked;
+    private readonly Dictionary<(ulong Id, bool Content), bool> observedDeaths = new();
+    private bool episodeActive;
+    private bool episodeSuppressed;
+    private long episodeStartedMs;
+    private int episodeStartedCasts;
     private bool movementHeld;
     internal bool HoldMovement => movementHeld;
     internal bool HoldActions { get; private set; }
@@ -73,12 +80,12 @@ internal sealed class PhoenixDownRecoveryService : IDisposable
         try
         {
             var frame = runtime.ReadFrame();
-            Observe(frame);
+            Observe(frame, Environment.TickCount64);
             return PartyRecoveryActive && frame.Scope == PhoenixRecoveryScope.Dungeon;
         }
         catch
         {
-            Reset();
+            Suspend();
             return false;
         }
     }
@@ -88,35 +95,73 @@ internal sealed class PhoenixDownRecoveryService : IDisposable
             : outdoors ? PhoenixRecoveryScope.Outdoors : PhoenixRecoveryScope.None;
 
     internal static bool HasNearbyHealer(PhoenixActor recipient, IEnumerable<PhoenixActor> actors)
-        => actors.Any(actor => actor.Healer && !actor.Dead
+        => actors.Any(actor => actor.Party && actor.Healer && !actor.Dead
             && Vector3.DistanceSquared(actor.Position, recipient.Position) <= 20f * 20f);
 
-    private bool Observe(PhoenixRecoveryFrame frame)
+    private bool Observe(PhoenixRecoveryFrame frame, long now)
     {
         var currentIdentity = (frame.CharacterId, frame.TerritoryId, frame.DutyId);
-        if (identity != currentIdentity)
+        if (frame.CharacterId != 0 && frame.TerritoryId != 0 && identity != currentIdentity)
         {
             Reset();
             identity = currentIdentity;
         }
-        if (!frame.Ready || !frame.Config.Enabled || !frame.Config.UsePhoenixDownsForRecovery
-            || frame.Scope == PhoenixRecoveryScope.None)
+        if (frame.ContextEnded || !frame.Config.Enabled || !frame.Config.UsePhoenixDownsForRecovery
+            || frame.Ready && frame.Scope == PhoenixRecoveryScope.None)
         {
             Reset();
+            return false;
+        }
+        if (!frame.Ready || frame.Scope == PhoenixRecoveryScope.None)
+        {
+            Suspend();
             return false;
         }
 
         var local = frame.Actors.FirstOrDefault(actor => actor.Id == frame.LocalId);
         if (local.Id == 0 || frame.CharacterId == 0 || local.ContentId != frame.CharacterId)
         {
-            Reset();
+            Suspend();
             return false;
         }
         var deadParty = frame.Actors.Where(actor => actor.Party && actor.Dead).ToArray();
-        PartyRecoveryActive = (deadParty.Length > 0 || frame.PartyHasDeadMember)
+        var subjects = frame.Actors.Where(actor => actor.Party || frame.Scope == PhoenixRecoveryScope.Outdoors
+            && frame.Config.ReviveAnyoneOutdoors
+            && Vector3.DistanceSquared(local.Position, actor.Position) <= ItemRange * ItemRange).ToArray();
+        var newDeath = false;
+        foreach (var actor in subjects)
+        {
+            var key = (actor.ContentId != 0 ? actor.ContentId : actor.Id, actor.ContentId != 0);
+            if (observedDeaths.TryGetValue(key, out var dead) && !dead && actor.Dead)
+                newDeath = true;
+            observedDeaths[key] = actor.Dead;
+        }
+        var hasDeaths = subjects.Any(actor => actor.Dead) || frame.PartyHasDeadMember;
+        if (newDeath || hasDeaths && !episodeActive && !episodeSuppressed)
+        {
+            episodeActive = true;
+            episodeSuppressed = false;
+            episodeStartedMs = now;
+            episodeStartedCasts = 0;
+        }
+        if (requestTracked && !castObserved && local.PhoenixCast && local.CastTarget == recipientId)
+        {
+            castObserved = attemptPending = true;
+            episodeStartedCasts++;
+        }
+        if (episodeActive && !frame.Config.PhoenixFullStickiness &&
+            (frame.Config.PhoenixRecoveryLimit == PhoenixRecoveryLimitMode.Time
+                ? now - episodeStartedMs >= Math.Max(1, frame.Config.PhoenixRecoverySeconds) * 1000L
+                : episodeStartedCasts >= Math.Max(1, frame.Config.PhoenixRecoveryStartedCasts)))
+            GiveUp("Recovery limit reached");
+        if (!hasDeaths && !attemptPending)
+            episodeActive = false;
+        PartyRecoveryActive = !episodeSuppressed && (deadParty.Length == 0 && frame.PartyHasDeadMember
+                || deadParty.Any(actor => !HasNearbyHealer(actor, frame.Actors)))
             && (frame.PartyHasLivingMember || frame.Actors.Any(actor => actor.Party && !actor.Dead));
-        DeferReturn = PartyRecoveryActive && local.Party && local.Dead;
-        SetHolds(PartyRecoveryActive || attemptPending, HoldActions && attemptPending, PartyRecoveryActive);
+        DeferReturn = local.Dead && (PartyRecoveryActive || local.PendingRaise || HasObservedReviveCast(local, frame.Actors));
+        SetHolds(PartyRecoveryActive || attemptPending,
+            attemptPending && (HoldActions || local.PhoenixCast && local.CastTarget == recipientId), PartyRecoveryActive);
         return true;
     }
 
@@ -126,7 +171,7 @@ internal sealed class PhoenixDownRecoveryService : IDisposable
         try
         {
             var frame = runtime.ReadFrame();
-            if (!Observe(frame))
+            if (!Observe(frame, now))
                 return;
             var local = frame.Actors.First(actor => actor.Id == frame.LocalId);
             if (local.Dead)
@@ -136,7 +181,7 @@ internal sealed class PhoenixDownRecoveryService : IDisposable
                 return;
             }
 
-            if (attemptPending)
+            if (attemptPending || requestTracked)
             {
                 // Track the cast independently of UseAction's return and recipient revival.
                 if (local.PhoenixCast && local.CastTarget == recipientId)
@@ -152,6 +197,14 @@ internal sealed class PhoenixDownRecoveryService : IDisposable
                 }
                 else
                     return;
+            }
+
+            if (episodeSuppressed)
+            {
+                runtime.StopApproach();
+                SetHolds(false, false, false);
+                StatusText = "Recovery given up; waiting for a new death";
+                return;
             }
 
             var target = frame.Actors.Where(actor => actor.Dead && actor.Id != local.Id
@@ -184,6 +237,7 @@ internal sealed class PhoenixDownRecoveryService : IDisposable
             {
                 if (!runtime.TryGetAdsAcknowledgement(out var acknowledged))
                 {
+                    if (frame.Config.PhoenixGiveUpWithoutAds) { GiveUp("ADS recovery support unavailable"); return; }
                     Block("ADS recovery hold IPC unavailable; update ADS");
                     return;
                 }
@@ -216,8 +270,10 @@ internal sealed class PhoenixDownRecoveryService : IDisposable
             }
 
             var readiness = runtime.ReadItem(target.Id);
+            if (!readiness.Known) { Block("Phoenix Down readiness unavailable"); return; }
             if (!readiness.HasItem || readiness.Cooldown)
             {
+                if (!readiness.HasItem && frame.Config.PhoenixGiveUpWithoutItem) { GiveUp("No Phoenix Down available"); return; }
                 Block(!readiness.HasItem ? "No Phoenix Downs; waiting for party recovery" : "Medicine cooldown; waiting for recovery");
                 return;
             }
@@ -236,7 +292,10 @@ internal sealed class PhoenixDownRecoveryService : IDisposable
                 }
                 else
                 {
-                    StatusText = runtime.Approach(target, StopRange, now) == PhoenixApproachResult.Moving
+                    var approach = runtime.Approach(target, StopRange, now);
+                    if (approach == PhoenixApproachResult.Unreachable && frame.Config.PhoenixGiveUpUnreachable)
+                    { GiveUp("Corpse is unreachable"); return; }
+                    StatusText = approach == PhoenixApproachResult.Moving
                         ? "Approaching party corpse" : "Blocked: navigation unavailable or corpse unreachable";
                     return;
                 }
@@ -264,11 +323,11 @@ internal sealed class PhoenixDownRecoveryService : IDisposable
                 || HasObservedReviveCast(corpse, fresh.Actors)
                 || !corpse.Party && !fresh.Config.ReviveAnyoneOutdoors
                 || Vector3.DistanceSquared(rescuer.Position, corpse.Position) > ItemRange * ItemRange
-                || !readiness.HasItem || readiness.Cooldown || !readiness.Available || !readiness.LineOfSight
+                || !readiness.Known || !readiness.HasItem || readiness.Cooldown || !readiness.Available || !readiness.LineOfSight
                 || frame.Scope == PhoenixRecoveryScope.Dungeon && runtime.AdsOwnsDuty
                     && (!runtime.TryGetAdsAcknowledgement(out var ack) || !ack))
             {
-                Observe(fresh);
+                Observe(fresh, now);
                 SetHolds(PartyRecoveryActive, false, PartyRecoveryActive);
                 nextAttemptMs = now + 1000;
                 StatusText = "Blocked: Phoenix Down readiness changed";
@@ -278,6 +337,7 @@ internal sealed class PhoenixDownRecoveryService : IDisposable
             nextAttemptMs = now + 1000;
             attemptStartedMs = now;
             castObserved = false;
+            requestTracked = true;
             attemptPending = runtime.UsePhoenixDown(target.Id);
             StatusText = attemptPending ? "Phoenix Down requested; waiting for actual cast" : "Item attempt rejected; rechecking in one second";
             if (!attemptPending)
@@ -285,7 +345,7 @@ internal sealed class PhoenixDownRecoveryService : IDisposable
         }
         catch (Exception)
         {
-            Reset();
+            Suspend();
             StatusText = "Blocked: recovery state unavailable";
         }
     }
@@ -305,6 +365,7 @@ internal sealed class PhoenixDownRecoveryService : IDisposable
         if (attemptPending)
             nextAttemptMs = Math.Max(nextAttemptMs, now + 1000);
         attemptPending = false;
+        requestTracked = false;
         SetHolds(PartyRecoveryActive, false, PartyRecoveryActive);
         runtime.StopApproach();
     }
@@ -316,10 +377,34 @@ internal sealed class PhoenixDownRecoveryService : IDisposable
         runtime.SetHolds(movement, actions, preventPulls);
     }
 
+    private void GiveUp(string reason)
+    {
+        episodeSuppressed = true;
+        PartyRecoveryActive = DeferReturn = false;
+        runtime.StopApproach();
+        attemptPending &= castObserved;
+        SetHolds(attemptPending, attemptPending, false);
+        StatusText = reason + "; waiting for a new death";
+    }
+
+    private void Suspend()
+    {
+        // A missing actor or unreadable frame is not proof of a new death/run.
+        // Release owned controls while retaining the episode's budget/suppression.
+        runtime.StopApproach();
+        PartyRecoveryActive = DeferReturn = false;
+        SetHolds(false, false, false);
+        StatusText = "Blocked: recovery state unavailable";
+    }
+
     internal void Reset()
     {
         runtime.StopApproach();
-        attemptPending = castObserved = false;
+        attemptPending = castObserved = requestTracked = false;
+        episodeActive = episodeSuppressed = false;
+        episodeStartedMs = 0;
+        episodeStartedCasts = 0;
+        observedDeaths.Clear();
         recipientId = 0;
         PartyRecoveryActive = DeferReturn = false;
         SetHolds(false, false, false);

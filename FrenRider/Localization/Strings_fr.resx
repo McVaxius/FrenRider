@@ -3118,4 +3118,27 @@ Activé : utilisez les préréglages BossMod ci-dessous avec tout fournisseur de
   <data name="Configured rotation provider" xml:space="preserve"><value>Fournisseur de rotation configuré</value></data>
   <data name="Duty owner" xml:space="preserve"><value>Responsable du contenu</value></data>
   <data name="Titlebar.Unavailable" xml:space="preserve"><value>Indisponible</value></data>
+  <data name="Recovery limit" xml:space="preserve"><value>Limite de récupération</value></data>
+  <data name="Full stickiness" xml:space="preserve"><value>Persistance totale</value></data>
+  <data name="Time limit" xml:space="preserve"><value>Limite de temps</value></data>
+  <data name="Started casts" xml:space="preserve"><value>Incantations commencées</value></data>
+  <data name="casts" xml:space="preserve"><value>incantations</value></data>
+  <data name="Phoenix Down recovery limits" xml:space="preserve"><value>Limites de récupération par Queue de phénix</value></data>
+  <data name="Give up immediately when" xml:space="preserve"><value>Abandonner immédiatement si</value></data>
+  <data name="No Phoenix Down available" xml:space="preserve"><value>Aucune Queue de phénix disponible</value></data>
+  <data name="Corpse is unreachable" xml:space="preserve"><value>Le corps est inaccessible</value></data>
+  <data name="ADS recovery support is unavailable" xml:space="preserve"><value>Le soutien de récupération ADS est indisponible</value></data>
+  <data name="Resurrection" xml:space="preserve"><value>Résurrection</value></data>
+  <data name="Keep trying until revival; a nearby party healer takes priority." xml:space="preserve"><value>Continuer jusqu&apos;à la résurrection ; un soigneur du groupe à proximité est prioritaire.</value></data>
+  <data name="Only actual cast starts count; waiting without a cast can continue indefinitely." xml:space="preserve"><value>Seuls les débuts réels d&apos;incantation comptent ; sans début, l&apos;attente peut être indéfinie.</value></data>
+  <data name="Release recovery holds and ignore these deaths until a new death." xml:space="preserve"><value>Libérer les blocages de récupération et ignorer ces morts jusqu&apos;à un nouveau décès.</value></data>
+  <data name="Full-party wipes always return after the inside-duty delay. Raise and active revival take priority." xml:space="preserve"><value>Une mort confirmée de tout le groupe déclenche toujours le Retour après le délai en instance. Raise et la résurrection en cours sont prioritaires.</value></data>
+  <data name="Recover party members in four-player dungeons and outdoors; yield to a party healer within 20 yalms." xml:space="preserve"><value>Réanimer le groupe en donjon à quatre et à l&apos;extérieur ; priorité à un soigneur du groupe à moins de 20 yalms.</value></data>
+  <data name="Inside-duty timed Return. A confirmed full-party wipe also returns when this option is off." xml:space="preserve"><value>Retour temporisé en instance. Une mort confirmée de tout le groupe déclenche aussi le Retour si cette option est désactivée.</value></data>
+  <data name="Recovery given up; waiting for a new death" xml:space="preserve"><value>Récupération abandonnée; En attente d&apos;un nouveau décès</value></data>
+  <data name="Recovery limit reached; waiting for a new death" xml:space="preserve"><value>Limite de récupération atteinte; En attente d&apos;un nouveau décès</value></data>
+  <data name="ADS recovery support unavailable; waiting for a new death" xml:space="preserve"><value>Le soutien de récupération ADS est indisponible; En attente d&apos;un nouveau décès</value></data>
+  <data name="No Phoenix Down available; waiting for a new death" xml:space="preserve"><value>Aucune Queue de phénix disponible; En attente d&apos;un nouveau décès</value></data>
+  <data name="Corpse is unreachable; waiting for a new death" xml:space="preserve"><value>Le corps est inaccessible; En attente d&apos;un nouveau décès</value></data>
+  <data name="Blocked: Phoenix Down readiness unavailable" xml:space="preserve"><value>Bloqué : disponibilité de Queue de phénix inconnue</value></data>
 </root>

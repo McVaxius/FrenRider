@@ -1,3 +1,9 @@
+2026-10-18 - Recovery controls and duty Return (I599/F602)
+
+- Add a Recovery tab with full stickiness off, five actual started casts by default, a 30-second elapsed alternative, and independent opt-in give-up conditions for no item, confirmed unreachable corpses and unavailable ADS support. Keep Raise automatic and preserve inside/outside respawn values.
+- Release exhausted recovery holds until an observed new death, preserve suppression through temporary unreadability and object-handle changes, yield to nearby living party healers, and let an already started cast finish safely. Include settings in profile copying, synchronization, defaults and compatible transfer.
+- Recognize duty starting-point Return prompts in the unconscious respawn path. Return after a confirmed full-party wipe even when ordinary inside-duty respawn is off, retaining the configured delay, Raise/transition guards and native confirmation path. Preserve current duty-scope and confirmed-solo behavior.
+
 2026-10-13 - Resume interrupted companion skill preparation (I559)
 
 - Let automatic skill allocation resume after a temporary context interruption before a learning request was sent. Keep manual Stop, preparation failures, and unacknowledged learning requests from automatically replaying.

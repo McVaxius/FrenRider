@@ -3223,4 +3223,27 @@ Aktif: gunakan preset BossMod di bawah dengan penyedia rotasi apa pun. Preset kh
   <data name="Configured rotation provider" xml:space="preserve"><value>Penyedia rotasi yang dikonfigurasi</value></data>
   <data name="Duty owner" xml:space="preserve"><value>Pengendali konten</value></data>
   <data name="Titlebar.Unavailable" xml:space="preserve"><value>Tidak tersedia</value></data>
+  <data name="Recovery limit" xml:space="preserve"><value>Batas pemulihan</value></data>
+  <data name="Full stickiness" xml:space="preserve"><value>Terus sampai selesai</value></data>
+  <data name="Time limit" xml:space="preserve"><value>Batas waktu</value></data>
+  <data name="Started casts" xml:space="preserve"><value>Cast yang dimulai</value></data>
+  <data name="casts" xml:space="preserve"><value>cast</value></data>
+  <data name="Phoenix Down recovery limits" xml:space="preserve"><value>Batas pemulihan Phoenix Down</value></data>
+  <data name="Give up immediately when" xml:space="preserve"><value>Langsung menyerah jika</value></data>
+  <data name="No Phoenix Down available" xml:space="preserve"><value>Phoenix Down tidak tersedia</value></data>
+  <data name="Corpse is unreachable" xml:space="preserve"><value>Jasad tidak dapat dijangkau</value></data>
+  <data name="ADS recovery support is unavailable" xml:space="preserve"><value>Dukungan pemulihan ADS tidak tersedia</value></data>
+  <data name="Resurrection" xml:space="preserve"><value>Kebangkitan</value></data>
+  <data name="Keep trying until revival; a nearby party healer takes priority." xml:space="preserve"><value>Terus mencoba sampai hidup kembali; utamakan healer party di dekatnya.</value></data>
+  <data name="Only actual cast starts count; waiting without a cast can continue indefinitely." xml:space="preserve"><value>Hanya cast yang benar-benar mulai dihitung; tanpa cast, penantian dapat berlangsung tanpa batas.</value></data>
+  <data name="Release recovery holds and ignore these deaths until a new death." xml:space="preserve"><value>Lepaskan penahanan pemulihan dan abaikan kematian ini sampai ada kematian baru.</value></data>
+  <data name="Full-party wipes always return after the inside-duty delay. Raise and active revival take priority." xml:space="preserve"><value>Jika seluruh party dipastikan mati, selalu Return setelah jeda dalam duty. Raise dan kebangkitan yang berlangsung diutamakan.</value></data>
+  <data name="Recover party members in four-player dungeons and outdoors; yield to a party healer within 20 yalms." xml:space="preserve"><value>Bangkitkan anggota party di dungeon empat pemain dan area luar; dahulukan healer party dalam 20 yalm.</value></data>
+  <data name="Inside-duty timed Return. A confirmed full-party wipe also returns when this option is off." xml:space="preserve"><value>Return terjadwal dalam duty. Jika seluruh party dipastikan mati, Return tetap dilakukan saat opsi ini mati.</value></data>
+  <data name="Recovery given up; waiting for a new death" xml:space="preserve"><value>Pemulihan dihentikan; Menunggu kematian baru</value></data>
+  <data name="Recovery limit reached; waiting for a new death" xml:space="preserve"><value>Batas pemulihan tercapai; Menunggu kematian baru</value></data>
+  <data name="ADS recovery support unavailable; waiting for a new death" xml:space="preserve"><value>Dukungan pemulihan ADS tidak tersedia; Menunggu kematian baru</value></data>
+  <data name="No Phoenix Down available; waiting for a new death" xml:space="preserve"><value>Phoenix Down tidak tersedia; Menunggu kematian baru</value></data>
+  <data name="Corpse is unreachable; waiting for a new death" xml:space="preserve"><value>Jasad tidak dapat dijangkau; Menunggu kematian baru</value></data>
+  <data name="Blocked: Phoenix Down readiness unavailable" xml:space="preserve"><value>Diblokir: kesiapan Phoenix Down tidak diketahui</value></data>
 </root>

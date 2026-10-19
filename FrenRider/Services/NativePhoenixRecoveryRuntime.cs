@@ -51,8 +51,9 @@ internal sealed unsafe class NativePhoenixRecoveryRuntime : IPhoenixRecoveryRunt
     {
         var local = Plugin.ObjectTable.LocalPlayer;
         var config = plugin.ConfigManager.GetActiveConfig();
-        if (!Plugin.ClientState.IsLoggedIn || local == null || !config.Enabled || !config.UsePhoenixDownsForRecovery
-            || !plugin.ConfigManager.TryGetLocalActiveConfig(out _))
+        if (!Plugin.ClientState.IsLoggedIn || !config.Enabled || !config.UsePhoenixDownsForRecovery)
+            return new PhoenixRecoveryFrame { Config = config, ContextEnded = true };
+        if (local == null || !plugin.ConfigManager.TryGetLocalActiveConfig(out _))
             return new PhoenixRecoveryFrame { Config = config };
         var condition = Plugin.Condition;
         var gameMain = GameMain.Instance();
@@ -69,7 +70,9 @@ internal sealed unsafe class NativePhoenixRecoveryRuntime : IPhoenixRecoveryRunt
         var outdoors = territory?.TerritoryIntendedUse.RowId == 1;
         var scope = PhoenixDownRecoveryService.ResolveScope(inInstance, dutyMatchesTerritory ? duty?.ContentType.RowId ?? 0 : 0, partySize, outdoors);
         if (scope == PhoenixRecoveryScope.None)
-            return new PhoenixRecoveryFrame { Config = config };
+            return new PhoenixRecoveryFrame { Config = config,
+                CharacterId = Plugin.PlayerState.ContentId, TerritoryId = Plugin.ClientState.TerritoryType, DutyId = dutyId,
+                ContextEnded = dutyMatchesTerritory || !inInstance && territory.HasValue && !outdoors };
         var actors = new List<PhoenixActor>();
         var partyMembers = Plugin.PartyList.Where(member => member.ContentId != 0).ToArray();
         var partyIds = partyMembers.Select(member => member.ContentId).ToArray();
@@ -124,7 +127,7 @@ internal sealed unsafe class NativePhoenixRecoveryRuntime : IPhoenixRecoveryRunt
         var manager = ActionManager.Instance();
         var local = Plugin.ObjectTable.LocalPlayer;
         var target = Plugin.ObjectTable.OfType<IPlayerCharacter>().FirstOrDefault(actor => actor.GameObjectId == targetId);
-        if (manager == null || local == null || target == null)
+        if (manager == null || InventoryManager.Instance() == null || local == null || target == null)
             return default;
         var source = local.Position + new Vector3(0, 2, 0);
         var offset = target.Position + new Vector3(0, 2, 0) - source;
@@ -252,7 +255,7 @@ internal sealed unsafe class NativePhoenixRecoveryRuntime : IPhoenixRecoveryRunt
                 progressMs = now;
             }
             if (unreachable)
-                return PhoenixApproachResult.Blocked;
+                return PhoenixApproachResult.Unreachable;
             if (Vector3.DistanceSquared(local.Position, progressPosition) >= 1f)
             {
                 progressPosition = local.Position;
@@ -262,7 +265,7 @@ internal sealed unsafe class NativePhoenixRecoveryRuntime : IPhoenixRecoveryRunt
             {
                 StopNavigation();
                 unreachable = true;
-                return PhoenixApproachResult.Blocked;
+                return PhoenixApproachResult.Unreachable;
             }
             if (!navigating)
             {
@@ -274,7 +277,7 @@ internal sealed unsafe class NativePhoenixRecoveryRuntime : IPhoenixRecoveryRunt
                 if (!navigating)
                 {
                     unreachable = true;
-                    return PhoenixApproachResult.Blocked;
+                    return PhoenixApproachResult.Unreachable;
                 }
             }
             return PhoenixApproachResult.Moving;

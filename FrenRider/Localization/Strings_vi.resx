@@ -3223,4 +3223,27 @@ Bật: dùng các preset BossMod bên dưới với mọi nhà cung cấp rotati
   <data name="Configured rotation provider" xml:space="preserve"><value>Nhà cung cấp xoay chiêu đã cấu hình</value></data>
   <data name="Duty owner" xml:space="preserve"><value>Bên điều khiển nội dung</value></data>
   <data name="Titlebar.Unavailable" xml:space="preserve"><value>Không khả dụng</value></data>
+  <data name="Recovery limit" xml:space="preserve"><value>Giới hạn hồi sinh</value></data>
+  <data name="Full stickiness" xml:space="preserve"><value>Kiên trì đến cùng</value></data>
+  <data name="Time limit" xml:space="preserve"><value>Giới hạn thời gian</value></data>
+  <data name="Started casts" xml:space="preserve"><value>Lần niệm đã bắt đầu</value></data>
+  <data name="casts" xml:space="preserve"><value>lần</value></data>
+  <data name="Phoenix Down recovery limits" xml:space="preserve"><value>Giới hạn hồi sinh Phoenix Down</value></data>
+  <data name="Give up immediately when" xml:space="preserve"><value>Bỏ cuộc ngay khi</value></data>
+  <data name="No Phoenix Down available" xml:space="preserve"><value>Không có Phoenix Down</value></data>
+  <data name="Corpse is unreachable" xml:space="preserve"><value>Không thể đến thi thể</value></data>
+  <data name="ADS recovery support is unavailable" xml:space="preserve"><value>Hỗ trợ hồi sinh ADS không khả dụng</value></data>
+  <data name="Resurrection" xml:space="preserve"><value>Hồi sinh</value></data>
+  <data name="Keep trying until revival; a nearby party healer takes priority." xml:space="preserve"><value>Tiếp tục đến khi hồi sinh; ưu tiên người hồi máu trong nhóm ở gần.</value></data>
+  <data name="Only actual cast starts count; waiting without a cast can continue indefinitely." xml:space="preserve"><value>Chỉ tính lần niệm thực sự bắt đầu; nếu không bắt đầu được, có thể chờ vô hạn.</value></data>
+  <data name="Release recovery holds and ignore these deaths until a new death." xml:space="preserve"><value>Gỡ các chặn hồi sinh và bỏ qua những cái chết này đến khi có cái chết mới.</value></data>
+  <data name="Full-party wipes always return after the inside-duty delay. Raise and active revival take priority." xml:space="preserve"><value>Khi xác nhận cả nhóm chết, luôn Return sau thời gian chờ trong phụ bản. Raise và hồi sinh đang diễn ra được ưu tiên.</value></data>
+  <data name="Recover party members in four-player dungeons and outdoors; yield to a party healer within 20 yalms." xml:space="preserve"><value>Hồi sinh đồng đội trong phụ bản bốn người và ngoài trời; nhường người hồi máu trong nhóm cách tối đa 20 yalm.</value></data>
+  <data name="Inside-duty timed Return. A confirmed full-party wipe also returns when this option is off." xml:space="preserve"><value>Return theo thời gian trong phụ bản. Cả nhóm chết được xác nhận vẫn Return khi tùy chọn này tắt.</value></data>
+  <data name="Recovery given up; waiting for a new death" xml:space="preserve"><value>Đã bỏ hồi sinh; Đang chờ cái chết mới</value></data>
+  <data name="Recovery limit reached; waiting for a new death" xml:space="preserve"><value>Đã đạt giới hạn hồi sinh; Đang chờ cái chết mới</value></data>
+  <data name="ADS recovery support unavailable; waiting for a new death" xml:space="preserve"><value>Hỗ trợ hồi sinh ADS không khả dụng; Đang chờ cái chết mới</value></data>
+  <data name="No Phoenix Down available; waiting for a new death" xml:space="preserve"><value>Không có Phoenix Down; Đang chờ cái chết mới</value></data>
+  <data name="Corpse is unreachable; waiting for a new death" xml:space="preserve"><value>Không thể đến thi thể; Đang chờ cái chết mới</value></data>
+  <data name="Blocked: Phoenix Down readiness unavailable" xml:space="preserve"><value>Bị chặn: chưa rõ trạng thái sẵn sàng của Phoenix Down</value></data>
 </root>

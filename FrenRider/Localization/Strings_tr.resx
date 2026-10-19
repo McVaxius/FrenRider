@@ -3223,4 +3223,27 @@ Açık: aşağıdaki BossMod ön ayarlarını herhangi bir rotasyon sağlayıcı
   <data name="Configured rotation provider" xml:space="preserve"><value>Yapılandırılmış rotasyon sağlayıcısı</value></data>
   <data name="Duty owner" xml:space="preserve"><value>İçeriği yöneten</value></data>
   <data name="Titlebar.Unavailable" xml:space="preserve"><value>Kullanılamıyor</value></data>
+  <data name="Recovery limit" xml:space="preserve"><value>Diriltme sınırı</value></data>
+  <data name="Full stickiness" xml:space="preserve"><value>Tam ısrar</value></data>
+  <data name="Time limit" xml:space="preserve"><value>Süre sınırı</value></data>
+  <data name="Started casts" xml:space="preserve"><value>Başlayan kullanımlar</value></data>
+  <data name="casts" xml:space="preserve"><value>kullanım</value></data>
+  <data name="Phoenix Down recovery limits" xml:space="preserve"><value>Phoenix Down diriltme sınırları</value></data>
+  <data name="Give up immediately when" xml:space="preserve"><value>Şu durumda hemen vazgeç</value></data>
+  <data name="No Phoenix Down available" xml:space="preserve"><value>Phoenix Down yok</value></data>
+  <data name="Corpse is unreachable" xml:space="preserve"><value>Cesede ulaşılamıyor</value></data>
+  <data name="ADS recovery support is unavailable" xml:space="preserve"><value>ADS diriltme desteği kullanılamıyor</value></data>
+  <data name="Resurrection" xml:space="preserve"><value>Diriltme</value></data>
+  <data name="Keep trying until revival; a nearby party healer takes priority." xml:space="preserve"><value>Dirilene kadar dene; yakındaki parti şifacısına öncelik ver.</value></data>
+  <data name="Only actual cast starts count; waiting without a cast can continue indefinitely." xml:space="preserve"><value>Yalnızca gerçekten başlayan kullanımlar sayılır; başlamazsa bekleme süresiz olabilir.</value></data>
+  <data name="Release recovery holds and ignore these deaths until a new death." xml:space="preserve"><value>Diriltme engellerini kaldır ve yeni bir ölüm görülene kadar bu ölümleri yok say.</value></data>
+  <data name="Full-party wipes always return after the inside-duty delay. Raise and active revival take priority." xml:space="preserve"><value>Tüm partinin öldüğü doğrulanınca görev içi gecikmeden sonra her zaman Return yapılır. Raise ve süren diriltme önceliklidir.</value></data>
+  <data name="Recover party members in four-player dungeons and outdoors; yield to a party healer within 20 yalms." xml:space="preserve"><value>Dört kişilik zindanlarda ve açık alanda partiyi dirilt; 20 yalm içindeki parti şifacısına öncelik ver.</value></data>
+  <data name="Inside-duty timed Return. A confirmed full-party wipe also returns when this option is off." xml:space="preserve"><value>Görev içinde zamanlı Return. Tüm partinin ölümü doğrulanırsa bu seçenek kapalıyken de Return yapılır.</value></data>
+  <data name="Recovery given up; waiting for a new death" xml:space="preserve"><value>Diriltmeden vazgeçildi; Yeni bir ölüm bekleniyor</value></data>
+  <data name="Recovery limit reached; waiting for a new death" xml:space="preserve"><value>Diriltme sınırına ulaşıldı; Yeni bir ölüm bekleniyor</value></data>
+  <data name="ADS recovery support unavailable; waiting for a new death" xml:space="preserve"><value>ADS diriltme desteği kullanılamıyor; Yeni bir ölüm bekleniyor</value></data>
+  <data name="No Phoenix Down available; waiting for a new death" xml:space="preserve"><value>Phoenix Down yok; Yeni bir ölüm bekleniyor</value></data>
+  <data name="Corpse is unreachable; waiting for a new death" xml:space="preserve"><value>Cesede ulaşılamıyor; Yeni bir ölüm bekleniyor</value></data>
+  <data name="Blocked: Phoenix Down readiness unavailable" xml:space="preserve"><value>Engellendi: Phoenix Down hazırlığı bilinmiyor</value></data>
 </root>
