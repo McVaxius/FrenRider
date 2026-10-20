@@ -15,7 +15,7 @@ using Lumina.Excel.Sheets;
 
 namespace FrenRider.Windows;
 
-public class ConfigWindow : Window, IDisposable
+public partial class ConfigWindow : Window, IDisposable
 {
     private readonly AethertekUI.Dalamud.MaterialSupportLog supportLog = new();
     private readonly MaterialWindowMotion motion = new();
@@ -479,7 +479,7 @@ public class ConfigWindow : Window, IDisposable
             DrawRemoteProfileBanner(remote);
 
         bool tabsOpen;
-        using (MaterialText.PushLineHeight(UiText.T("Profile"), UiText.T("Follow"), UiText.T("Combat"),
+        using (MaterialText.PushLineHeight(UiText.T("Profile"), UiText.T("Follow"), UiText.T("Combat"), UiText.T("Limit Break"),
             UiText.T("Duty / ADS / Exit"), UiText.T("Recovery"), UiText.T("Automation"), UiText.T("Chocobo"), UiText.T("Window appearance"), UiText.T("UI / About")))
             tabsOpen = ImGui.BeginTabBar("FrenRiderTabs", ImGuiTabBarFlags.FittingPolicyScroll);
         if (tabsOpen)
@@ -500,6 +500,12 @@ public class ConfigWindow : Window, IDisposable
             {
                 currentTab = "Combat";
                 DrawCombatTab(config);
+                ImGui.EndTabItem();
+            }
+            if (UiGui.BeginTabItem("Limit Break"))
+            {
+                currentTab = "Limit Break";
+                DrawLimitBreakTab(config);
                 ImGui.EndTabItem();
             }
             if (UiGui.BeginTabItem("Duty / ADS / Exit"))
@@ -567,6 +573,12 @@ public class ConfigWindow : Window, IDisposable
                 DrawAllFrenRiderButton(true);
                 ImGui.Spacing();
             }
+
+            using (UiText.Font(UiFontRole.BodyStrong)) UiGui.Text("Activation mode");
+            if (UiGui.ActivationModeControls(config)) configManager.SaveCurrentAccount();
+            DrawDefaultSettingSyncButton("Activation mode", inline: false);
+            UiGui.TextWrapped("New profiles inherit this mode. Sync updates existing profiles.");
+            UiGui.TextWrapped("Existing configurations default to Always on.");
 
             // Fren Name with party dropdown and capitalization fix
             using (UiGui.SettingRow("Fren Name"))
@@ -1878,18 +1890,6 @@ public class ConfigWindow : Window, IDisposable
                 DrawDefaultSettingSyncButton("Max AI Distance");
             }
 
-            var limitPct = config.LimitPct;
-            using (UiGui.SettingRow("LB Threshold %"))
-            {
-                ImGui.SetNextItemWidth(200);
-                if (UiGui.InputFloat("LB Threshold %", ref limitPct))
-                {
-                    config.LimitPct = limitPct;
-                    configManager.SaveCurrentAccount();
-                }
-                HelpMarker("Target HP percentage to use Limit Break.\n-1 = Disabled.\nAutomatically uses LB3 if available, otherwise LB2.");
-                DrawDefaultSettingSyncButton("LB Threshold %");
-            }
         }, () =>
         {
             UiGui.SettingsSection("BossMod presets", "BM Rotation Preset", "BM Rotation Preset (DD)", "BM Rotation Preset (FATE)");

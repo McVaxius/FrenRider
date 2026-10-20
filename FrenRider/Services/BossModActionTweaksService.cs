@@ -148,7 +148,7 @@ public sealed class BossModActionTweaksService
             Plugin.ClientState.TerritoryType,
             livingHostile ? target!.GameObjectId : 0,
             player?.Position ?? default,
-            playerReady && plugin.ConfigManager.GetActiveConfig().Enabled,
+            playerReady && plugin.IsFrenRiderEffectivelyEnabled,
             Plugin.Condition[ConditionFlag.InCombat],
             inDuty,
             ads.IsControllingDuty || ownership.IsOwned,

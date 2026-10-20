@@ -21,6 +21,23 @@ internal static class UiGui
     private static float settingRowX;
     internal static bool SettingsDefaultProfile { get; set; }
     internal static void ResetSettingsAlignment() => sectionLabelWidth = 0;
+    internal static bool ActivationModeControls(CharacterConfig config)
+    {
+        var changed = false;
+        if (RadioButton("Always on", config.ActivationMode == FrenRiderActivationMode.AlwaysOn))
+        {
+            config.ActivationMode = FrenRiderActivationMode.AlwaysOn;
+            changed = true;
+        }
+        TextWrapped("On applies inside and outside duties.");
+        if (RadioButton("Duty only", config.ActivationMode == FrenRiderActivationMode.DutyOnly))
+        {
+            config.ActivationMode = FrenRiderActivationMode.DutyOnly;
+            changed = true;
+        }
+        TextWrapped("On waits outside duties; normal duty start rules apply inside.");
+        return changed;
+    }
     internal static bool InSettingRow => settingWindow != 0 && ImGuiP.GetCurrentWindow().ID == settingWindow;
     internal static void SettingFieldWidth(float width) => settingFieldWidth = Math.Max(1, width);
     internal static SettingRowScope SettingRow(string label) => new(label);

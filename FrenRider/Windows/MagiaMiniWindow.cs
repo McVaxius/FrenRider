@@ -155,10 +155,12 @@ public sealed class MagiaMiniWindow : Window, IDisposable
         ImGui.SameLine();
         ImGui.SetCursorScreenPos(statusTop);
         var dot = statusTop + new Vector2(UiHelpers.Scale(7), rowHeight * .5f);
-        ImGui.GetWindowDrawList().AddCircleFilled(dot, UiHelpers.Scale(7), MaterialCanvas.Color(enabled ? UiHelpers.Green : UiHelpers.Grey), 24);
+        var statusColor = plugin.IsWaitingForDuty ? UiHelpers.Yellow : enabled ? UiHelpers.Green : UiHelpers.Grey;
+        ImGui.GetWindowDrawList().AddCircleFilled(dot, UiHelpers.Scale(7), MaterialCanvas.Color(statusColor), 24);
         ImGui.Dummy(new Vector2(UiHelpers.Scale(14), rowHeight));
         ImGui.SameLine(0, UiHelpers.Scale(compact ? 10 : 11));
-        UiGui.TextColored(enabled ? UiHelpers.Green : UiHelpers.Grey, enabled ? "ON" : "OFF");
+        UiGui.TextColored(statusColor, enabled ? "ON" : "OFF");
+        if (plugin.IsWaitingForDuty && ImGui.IsItemHovered()) UiGui.SetTooltip("Waiting for duty");
 
         ImGui.SetCursorScreenPos(position + new Vector2(compact ? 22 : 21, compact ? 112 : eureka ? 122 : 129) * scale);
         ImGui.Separator();

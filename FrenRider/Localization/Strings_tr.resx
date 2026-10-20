@@ -3246,4 +3246,51 @@ Açık: aşağıdaki BossMod ön ayarlarını herhangi bir rotasyon sağlayıcı
   <data name="No Phoenix Down available; waiting for a new death" xml:space="preserve"><value>Phoenix Down yok; Yeni bir ölüm bekleniyor</value></data>
   <data name="Corpse is unreachable; waiting for a new death" xml:space="preserve"><value>Cesede ulaşılamıyor; Yeni bir ölüm bekleniyor</value></data>
   <data name="Blocked: Phoenix Down readiness unavailable" xml:space="preserve"><value>Engellendi: Phoenix Down hazırlığı bilinmiyor</value></data>
+  <data name="Activation mode" xml:space="preserve"><value>Etkinleştirme modu</value></data>
+  <data name="Always on" xml:space="preserve"><value>Her zaman açık</value></data>
+  <data name="Duty only" xml:space="preserve"><value>Yalnızca görevde</value></data>
+  <data name="On applies inside and outside duties." xml:space="preserve"><value>Açık durumu, görev içinde ve dışında geçerlidir.</value></data>
+  <data name="On waits outside duties; normal duty start rules apply inside." xml:space="preserve"><value>Açıkken görev dışında bekler; görev içinde normal başlatma kuralları geçerlidir.</value></data>
+  <data name="Waiting for duty" xml:space="preserve"><value>Görev bekleniyor</value></data>
+  <data name="Run is On. Automation is inactive outside duties." xml:space="preserve"><value>Run açık. Görev dışında otomasyon etkin değildir.</value></data>
+  <data name="New profiles inherit this mode. Sync updates existing profiles." xml:space="preserve"><value>Yeni profiller bu modu devralır. Eşitleme mevcut profilleri günceller.</value></data>
+  <data name="Existing configurations default to Always on." xml:space="preserve"><value>Mevcut yapılandırmalar varsayılan olarak Her zaman açık modunu kullanır.</value></data>
+  <data name="Limit Break" xml:space="preserve"><value>Limit Break</value></data>
+  <data name="Damage roles" xml:space="preserve"><value>Hasar rolleri</value></data>
+  <data name="Physical ranged" xml:space="preserve"><value>Fiziksel menzilli</value></data>
+  <data name="Magical ranged" xml:space="preserve"><value>Büyülü menzilli</value></data>
+  <data name="Automatic LB" xml:space="preserve"><value>Otomatik LB</value></data>
+  <data name="Gauge requirement" xml:space="preserve"><value>Gösterge gereksinimi</value></data>
+  <data name="Full available gauge" xml:space="preserve"><value>Kullanılabilir tüm çubuklar dolu</value></data>
+  <data name="LB1 only" xml:space="preserve"><value>Yalnızca LB1</value></data>
+  <data name="LB2 only" xml:space="preserve"><value>Yalnızca LB2</value></data>
+  <data name="LB3 only" xml:space="preserve"><value>Yalnızca LB3</value></data>
+  <data name="Boss only" xml:space="preserve"><value>Yalnızca boss</value></data>
+  <data name="Current target" xml:space="preserve"><value>Geçerli hedef</value></data>
+  <data name="Any enemy" xml:space="preserve"><value>Herhangi bir düşman</value></data>
+  <data name="Target HP at or below (%)" xml:space="preserve"><value>Hedef HP üst sınırı (%)</value></data>
+  <data name="Minimum enemies" xml:space="preserve"><value>En az düşman sayısı</value></data>
+  <data name="Party average HP at or below (%)" xml:space="preserve"><value>Grup ortalama HP üst sınırı (%)</value></data>
+  <data name="Minimum KO members" xml:space="preserve"><value>En az KO üye sayısı</value></data>
+  <data name="Revive — LB3" xml:space="preserve"><value>Diriltme — LB3</value></data>
+  <data name="Heal — LB1 / LB2" xml:space="preserve"><value>İyileştirme — LB1 / LB2</value></data>
+  <data name="Use when party members are KO" xml:space="preserve"><value>Grup üyeleri KO olduğunda kullan</value></data>
+  <data name="Allow healing Limit Break" xml:space="preserve"><value>İyileştirme Limit Break kullanımına izin ver</value></data>
+  <data name="Role overview" xml:space="preserve"><value>Rol özeti</value></data>
+  <data name="Choose when each role may spend the party gauge." xml:space="preserve"><value>Her rolün grup göstergesini ne zaman harcayabileceğini seçin.</value></data>
+  <data name="FrenRider must be active and in combat." xml:space="preserve"><value>FrenRider etkin ve savaşta olmalıdır.</value></data>
+  <data name="Full available waits until every available bar is full." xml:space="preserve"><value>Kullanılabilir tüm çubuklar dolana kadar bekler.</value></data>
+  <data name="100% permits use as soon as the gauge is ready. Count includes enemies inside the action area." xml:space="preserve"><value>%100, gösterge hazır olduğunda kullanıma izin verir. Etki alanındaki düşmanlar sayılır.</value></data>
+  <data name="Damage reduction. Independent of damage-role policies." xml:space="preserve"><value>Hasar azaltma. Hasar rolü kurallarından bağımsızdır.</value></data>
+  <data name="Revival requires LB3. Healing never spends LB3." xml:space="preserve"><value>Diriltme için LB3 gerekir. İyileştirme asla LB3 harcamaz.</value></data>
+  <data name="Saved policies only. This overview is not live telemetry." xml:space="preserve"><value>Yalnızca kayıtlı kurallar. Bu özet canlı veri göstermez.</value></data>
+  <data name="Example: {0}" xml:space="preserve"><value>Örnek: {0}</value></data>
+  <data name="{0}; {1}; party HP ≤ {2}%" xml:space="preserve"><value>{0}; {1}; grup HP ≤ %{2}</value></data>
+  <data name="{0}; revive LB3: {1} ({2}+ KO); heal LB1/LB2: {3} (HP ≤ {4}%)" xml:space="preserve"><value>{0}; LB3 diriltme: {1} ({2}+ KO); LB1/LB2 iyileştirme: {3} (HP ≤ %{4})</value></data>
+  <data name="{0}; {1}; {2}; target HP ≤ {3}%; {4}+ enemies" xml:space="preserve"><value>{0}; {1}; {2}; hedef HP ≤ %{3}; {4}+ düşman</value></data>
+  <data name="Tank Limit Break" xml:space="preserve"><value>Tank Limit Break</value></data>
+  <data name="Healer Limit Break" xml:space="preserve"><value>Şifacı Limit Break</value></data>
+  <data name="Melee Limit Break" xml:space="preserve"><value>Yakın dövüş Limit Break</value></data>
+  <data name="Physical ranged Limit Break" xml:space="preserve"><value>Fiziksel menzilli Limit Break</value></data>
+  <data name="Magical ranged Limit Break" xml:space="preserve"><value>Büyülü menzilli Limit Break</value></data>
 </root>

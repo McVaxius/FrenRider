@@ -102,6 +102,23 @@ public sealed class Plugin : IDalamudPlugin
     private bool loggingOutCleanupDone;
     private int loginDetectionDelay;
     private bool wasPluginEnabled = false;
+    private bool wasEffectivelyEnabled;
+    private bool startupCastingSettingsPending = true;
+
+    internal bool IsFrenRiderEffectivelyEnabled
+    {
+        get
+        {
+            var config = ConfigManager.GetActiveConfig();
+            return config.ActivationMode == FrenRiderActivationMode.AlwaysOn ? config.Enabled
+                : config.IsEnabledForDuty(Condition is not null
+                    && (Condition[ConditionFlag.BoundByDuty] || Condition[ConditionFlag.BoundByDuty56]
+                        || Condition[ConditionFlag.BoundByDuty95]));
+        }
+    }
+
+    internal bool IsWaitingForDuty => ConfigManager.GetActiveConfig() is { Enabled: true,
+        ActivationMode: FrenRiderActivationMode.DutyOnly } && !IsFrenRiderEffectivelyEnabled;
     private readonly ChocoboExplorationService chocoboExploration = new();
     private int chocoboRequestGeneration;
     private readonly ChocoboSkillService chocoboSkills;
@@ -167,7 +184,6 @@ public sealed class Plugin : IDalamudPlugin
         DaedalusTargetModeService = new DaedalusTargetModeService(PluginInterface, TargetManager, ToastGui, Log);
         BossModConflictWarningService = new BossModConflictWarningService(PluginInterface, ToastGui, Log);
         BossModActionTweaksService = new BossModActionTweaksService(this);
-        BossModActionTweaksService.ApplyDontMoveWhileCastingOnLoad(Configuration.DontMoveWhileCasting);
         var externalAutomationCommandSender = new DalamudExternalAutomationCommandSender();
         var daedalusAutomationController = new AutorotDaedalusAutomationController(AutorotIpcService);
         ExternalAutomationCleanupService = new ExternalAutomationCleanupService(
@@ -614,7 +630,24 @@ public sealed class Plugin : IDalamudPlugin
         if (ImGui.IsItemHovered()) MaterialText.SetTooltip(UiText.T("Compact mode"));
     }
 
-    private void OnFrenRiderEnabledChanged(bool enabled)
+    private void OnFrenRiderEnabledChanged(bool enabled) => RefreshEffectiveActivation();
+
+    private void RefreshEffectiveActivation()
+    {
+        if (startupCastingSettingsPending && ConfigManager.TryGetActiveConfig(out var startupProfile)
+            && startupProfile != null && (startupProfile.ActivationMode == FrenRiderActivationMode.AlwaysOn
+                || IsFrenRiderEffectivelyEnabled))
+        {
+            startupCastingSettingsPending = false;
+            BossModActionTweaksService.ApplyDontMoveWhileCastingOnLoad(Configuration.DontMoveWhileCasting);
+        }
+        var enabled = IsFrenRiderEffectivelyEnabled;
+        if (enabled == wasEffectivelyEnabled) return;
+        wasEffectivelyEnabled = enabled;
+        ApplyEffectiveActivation(enabled);
+    }
+
+    private void ApplyEffectiveActivation(bool enabled)
     {
         Log.Information($"[FrenRider] FrenRider enabled state changed to: {enabled}");
         BossModConflictWarningService.Update(enabled);
@@ -664,6 +697,14 @@ public sealed class Plugin : IDalamudPlugin
         }
         else
         {
+            if (IsWaitingForDuty)
+            {
+                CancelChocoboSkillSession();
+                CancelChocoboFoodSession();
+                CancelChocoboPurchaseSession();
+                chocoboExploration.Stop("FrenRider inactive", restore: false);
+                FollowService.SuspendForActivation();
+            }
             BossModActionTweaksService.ResetRecovery();
             CoppeliaPowerlevelLeaseService.HandleManualFrenRiderDisable();
             AdsHyperFocusLeaseService.HandleManualFrenRiderDisable();
@@ -688,6 +729,7 @@ public sealed class Plugin : IDalamudPlugin
     internal void CaptureExternalAutomationSnapshot(string reason)
     {
         var config = ConfigManager.GetActiveConfig();
+        if (IsWaitingForDuty) return;
         if (config.Enabled)
             AutorotIpcService.PrepareOwnedBossModSettings(CombatService.GetConfiguredRotationProvider(config),
                 GetCleanupAccountId(), GetCleanupCharacterKey(), config);
@@ -1047,6 +1089,7 @@ public sealed class Plugin : IDalamudPlugin
             Measure("dtr", UpdateDtrBar);
             Measure("dad-questionable-settings", DadIPC.UpdateQuestionableDutySettings);
             Measure("zone", ZoneService.Update);
+            Measure("effective-activation", RefreshEffectiveActivation);
             Measure("ads-readiness", AdsIntegrationService.ObserveHandoffReadiness);
             Measure("casting-recovery", BossModActionTweaksService.UpdateRecovery);
             Measure("coppelia-powerlevel-lease", CoppeliaPowerlevelLeaseService.Update);
@@ -1113,7 +1156,9 @@ public sealed class Plugin : IDalamudPlugin
                     Measure("login", OnLogin);
             }
 
-            Measure("chocobo-discovery", () =>
+            RefreshEffectiveActivation();
+
+            if (!IsWaitingForDuty) Measure("chocobo-discovery", () =>
             {
                 if (chocoboExploration.PendingReload)
                 {
@@ -1127,23 +1172,24 @@ public sealed class Plugin : IDalamudPlugin
             });
 
             // Update fren tracking
-            Measure("fren-tracker", FrenTracker.Update);
+            if (!IsWaitingForDuty) Measure("fren-tracker", FrenTracker.Update);
             Measure("coppelia-powerlevel-lease", CoppeliaPowerlevelLeaseService.Update);
             Measure("ads-hyper-focus-lease", AdsHyperFocusLeaseService.Update);
 
             // Check for plugin enable/disable state changes
             var config = ConfigManager.GetActiveConfig();
-            Measure("bossmod-conflict-warning", () => BossModConflictWarningService.Update(config?.Enabled == true));
+            var effectivelyEnabled = IsFrenRiderEffectivelyEnabled;
+            Measure("bossmod-conflict-warning", () => BossModConflictWarningService.Update(effectivelyEnabled));
             if (config != null)
             {
                 Measure("config-state", () =>
                 {
                     // YesAlready pause/unpause on enable/disable
-                    if (config.Enabled && !YesAlreadyIPC.IsPaused)
+                    if (effectivelyEnabled && !YesAlreadyIPC.IsPaused)
                     {
                         YesAlreadyIPC.Pause();
                     }
-                    else if (!config.Enabled && YesAlreadyIPC.IsPaused)
+                    else if (!effectivelyEnabled && YesAlreadyIPC.IsPaused)
                     {
                         YesAlreadyIPC.Unpause();
                     }
@@ -1195,6 +1241,8 @@ public sealed class Plugin : IDalamudPlugin
                     }
                 });
             }
+
+            if (IsWaitingForDuty) return;
 
             // Resolve ADS/utility state, then establish combat authority before
             // ADS pauses FrenRider's movement and other duty systems.
@@ -1314,6 +1362,13 @@ public sealed class Plugin : IDalamudPlugin
         }
 
         using var text = uiText.Enter();
+        if (IsWaitingForDuty)
+        {
+            dtrEntry.Tooltip = new SeString(new TextPayload(uiText.Language == "hi"
+                ? "Run is On. Automation is inactive outside duties."
+                : UiText.T("Run is On. Automation is inactive outside duties.")));
+            return;
+        }
         var fren = Configuration.KrangleEnabled ? KrangleService.KrangleName(config.FrenName) : config.FrenName;
         // Game-rendered DTR text cannot use the ImGui shaping route.
         if (uiText.Language == "hi")

@@ -5,6 +5,7 @@ using System.Linq;
 namespace FrenRider.Models;
 
 public enum PhoenixRecoveryLimitMode { StartedCasts, Time }
+public enum FrenRiderActivationMode { AlwaysOn, DutyOnly }
 
 public enum FrenRiderCleanupMode
 {
@@ -151,7 +152,13 @@ public class CharacterConfig
     public bool ObstacleMapsOn { get; set; } = false;
     public int PositionalInCombat { get; set; } = 3; // 0=Front, 1=Rear, 2=Any, 3=Auto
     public float MaxAIDistance { get; set; } = 424242f;
-    public float LimitPct { get; set; } = -1f;
+    public float LimitPct { get; set; } = -1f; // Retained for old profile compatibility.
+    private LimitBreakSettings? limitBreak;
+    public LimitBreakSettings LimitBreak
+    {
+        get => limitBreak ??= LimitBreakSettings.FromLegacy(LimitPct);
+        set => limitBreak = value;
+    }
     public int RotationType { get; set; } = 0; // 0=Auto, 1=Manual, 2=None, 3=Support
     public int RsrAggroType { get; set; } = 0; // Matches RSR TargetHostileType ordering
     public bool BmrReduceActivationRangeForOutdoorAreas { get; set; } = false;
@@ -254,6 +261,11 @@ public class CharacterConfig
     public FrenRiderProfileAcceptancePolicy ProfileAcceptancePolicy { get; set; } =
         FrenRiderProfileAcceptancePolicy.Temporary;
     public bool Enabled { get; set; } = false;
+    public FrenRiderActivationMode ActivationMode { get; set; } = FrenRiderActivationMode.AlwaysOn;
+
+    public bool IsEnabledForDuty(bool inDuty)
+        => Enabled && (ActivationMode == FrenRiderActivationMode.AlwaysOn
+            || ActivationMode == FrenRiderActivationMode.DutyOnly && inDuty);
 
     public CharacterConfig Clone()
     {
@@ -332,6 +344,7 @@ public class CharacterConfig
             PositionalInCombat = PositionalInCombat,
             MaxAIDistance = MaxAIDistance,
             LimitPct = LimitPct,
+            LimitBreak = LimitBreak.Clone(),
             RotationType = RotationType,
             RsrAggroType = RsrAggroType,
             BmrReduceActivationRangeForOutdoorAreas = BmrReduceActivationRangeForOutdoorAreas,
@@ -389,6 +402,7 @@ public class CharacterConfig
             AutorotPushOnEnable = AutorotPushOnEnable,
             ProfileAcceptancePolicy = ProfileAcceptancePolicy,
             Enabled = Enabled,
+            ActivationMode = ActivationMode,
         };
     }
 

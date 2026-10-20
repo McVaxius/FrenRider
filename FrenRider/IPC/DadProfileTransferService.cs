@@ -67,7 +67,9 @@ internal sealed class DadProfileTransferService : IDisposable
             if (row?.Config == null)
                 return Serialize(Failure("incompatible-profile"));
 
-            if (!TrySerializeProfile(row.Config, out var profileJson, out code))
+            var exported = row.Config.Clone();
+            if (request.DutyRun) exported.ActivationMode = FrenRiderActivationMode.DutyOnly;
+            if (!TrySerializeProfile(exported, out var profileJson, out code))
                 return Serialize(Failure(code));
 
             return Serialize(Success("exported", profileJson));
@@ -244,7 +246,14 @@ internal sealed class DadProfileTransferService : IDisposable
                     .Any(property => property is not ("clingExcludedTerritoryIds" or "pauseClingForFate" or "ignoreFates"
                         or "phoenixFullStickiness" or "phoenixRecoveryLimit" or "phoenixRecoverySeconds"
                         or "phoenixRecoveryStartedCasts" or "phoenixGiveUpWithoutItem" or "phoenixGiveUpUnreachable"
-                        or "phoenixGiveUpWithoutAds")))
+                        or "phoenixGiveUpWithoutAds" or "activationMode" or "limitBreak")))
+            {
+                code = "incompatible-profile";
+                return false;
+            }
+
+            if (configElement.TryGetProperty("limitBreak", out var lb)
+                && (lb.ValueKind != JsonValueKind.Object || !ValidateLimitBreakJson(lb)))
             {
                 code = "incompatible-profile";
                 return false;
@@ -269,6 +278,25 @@ internal sealed class DadProfileTransferService : IDisposable
         {
             code = "incompatible-profile";
             return false;
+        }
+    }
+
+    private static bool ValidateLimitBreakJson(JsonElement root)
+    {
+        // Nested policies are complete: reject null, duplicate and missing fields.
+        var expected = JsonSerializer.SerializeToElement(new LimitBreakSettings(), ContractJsonOptions);
+        return SameShape(root, expected);
+        static bool SameShape(JsonElement actual, JsonElement template)
+        {
+            if (template.ValueKind is JsonValueKind.True or JsonValueKind.False)
+                return actual.ValueKind is JsonValueKind.True or JsonValueKind.False;
+            if (template.ValueKind != JsonValueKind.Object) return actual.ValueKind == template.ValueKind;
+            if (actual.ValueKind != JsonValueKind.Object) return false;
+            var properties = actual.EnumerateObject().ToArray();
+            var names = properties.Select(p => p.Name).ToArray();
+            return names.Distinct(StringComparer.Ordinal).Count() == names.Length
+                && names.Length == template.EnumerateObject().Count()
+                && properties.All(p => template.TryGetProperty(p.Name, out var value) && SameShape(p.Value, value));
         }
     }
 
@@ -336,7 +364,7 @@ internal sealed class DadProfileTransferService : IDisposable
 
     private static bool IsValidProfile(CharacterConfig config)
     {
-        if (config.PhoenixRecoverySeconds < 1 || config.PhoenixRecoveryStartedCasts < 1
+        if (!config.LimitBreak.IsValid || config.PhoenixRecoverySeconds < 1 || config.PhoenixRecoveryStartedCasts < 1
             || config.FrenName == null
             || config.FoolFlier == null
             || config.FulfType == null
@@ -405,6 +433,7 @@ internal abstract class DadProfileIdentityRequest
 internal sealed class DadProfileResolveRequest : DadProfileIdentityRequest
 {
     public string DisplayLabel { get; set; } = "";
+    public bool DutyRun { get; set; }
 }
 
 internal sealed class DadProfileApplyRequest : DadProfileIdentityRequest

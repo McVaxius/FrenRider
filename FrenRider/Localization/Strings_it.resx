@@ -3141,4 +3141,51 @@ Attivato: usa i preset BossMod sottostanti con qualsiasi provider di rotazione. 
   <data name="No Phoenix Down available; waiting for a new death" xml:space="preserve"><value>Nessun Phoenix Down disponibile; In attesa di una nuova morte</value></data>
   <data name="Corpse is unreachable; waiting for a new death" xml:space="preserve"><value>Il corpo è irraggiungibile; In attesa di una nuova morte</value></data>
   <data name="Blocked: Phoenix Down readiness unavailable" xml:space="preserve"><value>Bloccato: disponibilità di Phoenix Down sconosciuta</value></data>
+  <data name="Activation mode" xml:space="preserve"><value>Modalità di attivazione</value></data>
+  <data name="Always on" xml:space="preserve"><value>Sempre attivo</value></data>
+  <data name="Duty only" xml:space="preserve"><value>Solo in istanza</value></data>
+  <data name="On applies inside and outside duties." xml:space="preserve"><value>Attivo si applica dentro e fuori dalle istanze.</value></data>
+  <data name="On waits outside duties; normal duty start rules apply inside." xml:space="preserve"><value>Attivo attende fuori dalle istanze; all’interno valgono le normali regole di avvio.</value></data>
+  <data name="Waiting for duty" xml:space="preserve"><value>In attesa di un’istanza</value></data>
+  <data name="Run is On. Automation is inactive outside duties." xml:space="preserve"><value>Run è attivo. L’automazione è inattiva fuori dalle istanze.</value></data>
+  <data name="New profiles inherit this mode. Sync updates existing profiles." xml:space="preserve"><value>I nuovi profili ereditano questa modalità. La sincronizzazione aggiorna i profili esistenti.</value></data>
+  <data name="Existing configurations default to Always on." xml:space="preserve"><value>Le configurazioni esistenti usano Sempre attivo come impostazione predefinita.</value></data>
+  <data name="Limit Break" xml:space="preserve"><value>Limit Break</value></data>
+  <data name="Damage roles" xml:space="preserve"><value>Ruoli di danno</value></data>
+  <data name="Physical ranged" xml:space="preserve"><value>Distanza fisica</value></data>
+  <data name="Magical ranged" xml:space="preserve"><value>Distanza magica</value></data>
+  <data name="Automatic LB" xml:space="preserve"><value>LB automatico</value></data>
+  <data name="Gauge requirement" xml:space="preserve"><value>Barre richieste</value></data>
+  <data name="Full available gauge" xml:space="preserve"><value>Tutte le barre disponibili piene</value></data>
+  <data name="LB1 only" xml:space="preserve"><value>Solo LB1</value></data>
+  <data name="LB2 only" xml:space="preserve"><value>Solo LB2</value></data>
+  <data name="LB3 only" xml:space="preserve"><value>Solo LB3</value></data>
+  <data name="Boss only" xml:space="preserve"><value>Solo boss</value></data>
+  <data name="Current target" xml:space="preserve"><value>Bersaglio attuale</value></data>
+  <data name="Any enemy" xml:space="preserve"><value>Qualsiasi nemico</value></data>
+  <data name="Target HP at or below (%)" xml:space="preserve"><value>PV del bersaglio al massimo (%)</value></data>
+  <data name="Minimum enemies" xml:space="preserve"><value>Nemici minimi</value></data>
+  <data name="Party average HP at or below (%)" xml:space="preserve"><value>PV medi del gruppo al massimo (%)</value></data>
+  <data name="Minimum KO members" xml:space="preserve"><value>Membri KO minimi</value></data>
+  <data name="Revive — LB3" xml:space="preserve"><value>Resurrezione — LB3</value></data>
+  <data name="Heal — LB1 / LB2" xml:space="preserve"><value>Cura — LB1 / LB2</value></data>
+  <data name="Use when party members are KO" xml:space="preserve"><value>Usa quando ci sono membri del gruppo KO</value></data>
+  <data name="Allow healing Limit Break" xml:space="preserve"><value>Consenti Limit Break curativo</value></data>
+  <data name="Role overview" xml:space="preserve"><value>Riepilogo dei ruoli</value></data>
+  <data name="Choose when each role may spend the party gauge." xml:space="preserve"><value>Scegli quando ogni ruolo può consumare la barra del gruppo.</value></data>
+  <data name="FrenRider must be active and in combat." xml:space="preserve"><value>FrenRider deve essere attivo e in combattimento.</value></data>
+  <data name="Full available waits until every available bar is full." xml:space="preserve"><value>Attende che tutte le barre disponibili siano piene.</value></data>
+  <data name="100% permits use as soon as the gauge is ready. Count includes enemies inside the action area." xml:space="preserve"><value>100% consente l’uso appena la barra è pronta. Conta i nemici nell’area d’effetto.</value></data>
+  <data name="Damage reduction. Independent of damage-role policies." xml:space="preserve"><value>Riduzione dei danni. Indipendente dalle regole dei ruoli di danno.</value></data>
+  <data name="Revival requires LB3. Healing never spends LB3." xml:space="preserve"><value>La resurrezione richiede LB3. La cura non consuma mai LB3.</value></data>
+  <data name="Saved policies only. This overview is not live telemetry." xml:space="preserve"><value>Solo regole salvate. Questo riepilogo non mostra dati in tempo reale.</value></data>
+  <data name="Example: {0}" xml:space="preserve"><value>Esempio: {0}</value></data>
+  <data name="{0}; {1}; party HP ≤ {2}%" xml:space="preserve"><value>{0}; {1}; PV del gruppo ≤ {2}%</value></data>
+  <data name="{0}; revive LB3: {1} ({2}+ KO); heal LB1/LB2: {3} (HP ≤ {4}%)" xml:space="preserve"><value>{0}; resurrezione LB3: {1} ({2}+ KO); cura LB1/LB2: {3} (PV ≤ {4}%)</value></data>
+  <data name="{0}; {1}; {2}; target HP ≤ {3}%; {4}+ enemies" xml:space="preserve"><value>{0}; {1}; {2}; PV del bersaglio ≤ {3}%; {4}+ nemici</value></data>
+  <data name="Tank Limit Break" xml:space="preserve"><value>Limit Break del tank</value></data>
+  <data name="Healer Limit Break" xml:space="preserve"><value>Limit Break del guaritore</value></data>
+  <data name="Melee Limit Break" xml:space="preserve"><value>Limit Break da mischia</value></data>
+  <data name="Physical ranged Limit Break" xml:space="preserve"><value>Limit Break a distanza fisica</value></data>
+  <data name="Magical ranged Limit Break" xml:space="preserve"><value>Limit Break a distanza magica</value></data>
 </root>

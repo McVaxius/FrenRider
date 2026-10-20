@@ -277,7 +277,7 @@ public sealed class CoppeliaPowerlevelLeaseService : IDisposable
         var (companionActive, companionName, companionObjectId) = FindCompanion();
 
         return new CoppeliaPowerlevelEnvironment(
-            config.Enabled,
+            plugin.IsFrenRiderEffectivelyEnabled,
             config.FrenName ?? string.Empty,
             fren is { IsFound: true, IsVisible: true } ? fren.Name : string.Empty,
             fren is { IsFound: true, IsVisible: true } ? FindObjectIdByName(fren.Name) : 0,
@@ -290,7 +290,7 @@ public sealed class CoppeliaPowerlevelLeaseService : IDisposable
     private void RecoverAfterLease(string reason)
     {
         var config = plugin.ConfigManager.GetActiveConfig();
-        if (!config.Enabled)
+        if (!plugin.IsFrenRiderEffectivelyEnabled)
             return;
 
         recoveryCycleActive = true;

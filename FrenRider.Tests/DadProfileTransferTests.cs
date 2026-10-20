@@ -10,6 +10,36 @@ namespace FrenRider.Tests;
 
 public sealed class DadProfileTransferTests
 {
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void DutyExportSelectsDutyOnlyWithoutChangingDefaultOrRemoteStoredChoice(bool dutyRun)
+    {
+        var account = CreateAccount();
+        account.DefaultConfig.Enabled = true;
+        var store = new TestProfileStore(account, ActiveCharacterKey);
+        using var service = new DadProfileTransferService(store);
+        var request = JsonNode.Parse(ResolveRequest())!.AsObject();
+        request["dutyRun"] = dutyRun;
+        var result = ReadResult(service.ResolveOrCreateProfile(request.ToJsonString()));
+        Assert.Equal("ok", result.Code);
+        Assert.True(DadProfileTransferService.TryDeserializeProfile(result.ProfileJson!, out var exported, out _));
+        Assert.Equal(dutyRun ? FrenRiderActivationMode.DutyOnly : FrenRiderActivationMode.AlwaysOn,
+            exported!.ActivationMode);
+        Assert.Equal(FrenRiderActivationMode.AlwaysOn, account.DefaultConfig.ActivationMode);
+        Assert.Equal(FrenRiderActivationMode.AlwaysOn, Assert.Single(account.RemoteProfiles).Config.ActivationMode);
+    }
+
+    [Fact]
+    public void LegacyProfileWithoutActivationModeKeepsAlwaysOnCompatibility()
+    {
+        var profile = JsonNode.Parse(Export(new CharacterConfig { Enabled = true }))!;
+        profile["config"]!.AsObject().Remove("activationMode");
+        Assert.True(DadProfileTransferService.TryDeserializeProfile(profile.ToJsonString(), out var restored, out _));
+        Assert.Equal(FrenRiderActivationMode.AlwaysOn, restored!.ActivationMode);
+        Assert.True(restored.IsEnabledForDuty(false));
+    }
+
     private const string ActiveCharacterKey = "Local Character@World";
 
     [Fact]
@@ -203,7 +233,7 @@ public sealed class DadProfileTransferTests
                      .Where(key => key is not ("clingExcludedTerritoryIds" or "pauseClingForFate" or "ignoreFates"
                          or "phoenixFullStickiness" or "phoenixRecoveryLimit" or "phoenixRecoverySeconds"
                          or "phoenixRecoveryStartedCasts" or "phoenixGiveUpWithoutItem" or "phoenixGiveUpUnreachable"
-                         or "phoenixGiveUpWithoutAds")))
+                         or "phoenixGiveUpWithoutAds" or "activationMode" or "limitBreak")))
         {
             var incomplete = profile.DeepClone();
             incomplete["config"]!.AsObject().Remove(property);

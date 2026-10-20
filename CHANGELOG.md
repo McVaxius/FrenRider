@@ -1,3 +1,10 @@
+2026-10-19 - Activation modes and role-specific Limit Break (I606/I607)
+
+- Default new and existing profiles to Always on. Add explicit Duty only radios in Main and Profile, retaining saved Run intent while waiting outside duties. Release owned movement/combat/recovery on deactivation and defer enable-time setup until effective activation.
+- Carry the mode through cloning, default sync and compatible DAD profiles. DAD duty preparations choose Duty only; temporary enable updates the overlay and preserves the restored local profile.
+- Replace the inactive Combat LB threshold control with a dedicated Limit Break tab. Save independent default-off tank, healer, melee, physical-ranged and magical-ranged policies; show real saved summaries at regular and compact widths.
+- Use native available/full gauge bars and job-specific LB actions with combat, target, range, line-of-sight, action readiness and pending-request checks. Keep LB3 revival separate from LB1/LB2 healing. Include all policies in deep copying, synchronization and validated profile transfer; legacy thresholds remain available without opting old profiles into automatic spending.
+
 2026-10-18 - Recovery controls and duty Return (I599/F602)
 
 - Add a Recovery tab with full stickiness off, five actual started casts by default, a 30-second elapsed alternative, and independent opt-in give-up conditions for no item, confirmed unreachable corpses and unavailable ADS support. Keep Raise automatic and preserve inside/outside respawn values.

@@ -44,6 +44,7 @@ public class ConfigManager : IDadProfileStore
             new[]
             {
                 Setting("Fren Rider enabled by default", (source, target) => target.Enabled = source.Enabled),
+                Setting("Activation mode", (source, target) => target.ActivationMode = source.ActivationMode),
                 Setting("Fren Name", (source, target) => target.FrenName = source.FrenName),
                 Setting("DAD Profile Acceptance", (source, target) => target.ProfileAcceptancePolicy = source.ProfileAcceptancePolicy),
                 Setting("Fly You Fools", (source, target) => target.FlyYouFools = source.FlyYouFools),
@@ -142,6 +143,17 @@ public class ConfigManager : IDadProfileStore
                 Setting("BMR Disable Hunt Modules", (source, target) => target.BmrDisableHuntModules = source.BmrDisableHuntModules),
                 Setting("BMR Disable Queen Lunatender", (source, target) => target.BmrDisableQueenLunatender = source.BmrDisableQueenLunatender),
                 Setting("Cleanup Mode", (source, target) => target.CleanupMode = source.CleanupMode),
+            }),
+        new(
+            "Limit Break",
+            new[] { "Limit Break" },
+            new[]
+            {
+                Setting("Tank Limit Break", (source, target) => target.LimitBreak.Tank = source.LimitBreak.Tank.Clone()),
+                Setting("Healer Limit Break", (source, target) => target.LimitBreak.Healer = source.LimitBreak.Healer.Clone()),
+                Setting("Melee Limit Break", (source, target) => target.LimitBreak.Melee = source.LimitBreak.Melee.Clone()),
+                Setting("Physical ranged Limit Break", (source, target) => target.LimitBreak.PhysicalRanged = source.LimitBreak.PhysicalRanged.Clone()),
+                Setting("Magical ranged Limit Break", (source, target) => target.LimitBreak.MagicalRanged = source.LimitBreak.MagicalRanged.Clone()),
             }),
         new(
             "Duty",
@@ -1069,12 +1081,13 @@ public class ConfigManager : IDadProfileStore
             return false;
         }
 
-        var succeeded = TryConfigureAndEnableActiveCharacter(
-            account,
-            ActiveCharacterKey,
-            nameAtWorld,
-            () => SaveAccount(CurrentAccountId),
-            out var becameEnabled);
+        if (!IsValidExactNameAtWorld(nameAtWorld)) return false;
+        var temporary = temporaryProfileOverlay.Resolve(CurrentAccountId, ActiveCharacterKey);
+        bool becameEnabled;
+        var succeeded = temporary == null
+            ? TryConfigureAndEnableActiveCharacter(account, ActiveCharacterKey, nameAtWorld,
+                () => SaveAccount(CurrentAccountId), out becameEnabled)
+            : TryConfigureAndEnableProfile(temporary, nameAtWorld, () => true, out becameEnabled);
 
         if (!succeeded)
             return false;
@@ -1119,15 +1132,24 @@ public class ConfigManager : IDadProfileStore
             return false;
         }
 
-        var exactNameAtWorld = nameAtWorld!;
+        return TryConfigureAndEnableProfile(activeConfig, nameAtWorld!, persist, out becameEnabled);
+    }
+
+    private static bool TryConfigureAndEnableProfile(CharacterConfig activeConfig, string exactNameAtWorld,
+        Func<bool> persist, out bool becameEnabled)
+    {
+        becameEnabled = false;
         var previousFrenName = activeConfig.FrenName;
         var wasEnabled = activeConfig.Enabled;
+        var previousActivation = activeConfig.ActivationMode;
 
-        if (wasEnabled && string.Equals(previousFrenName, exactNameAtWorld, StringComparison.Ordinal))
+        if (wasEnabled && previousActivation == FrenRiderActivationMode.DutyOnly
+            && string.Equals(previousFrenName, exactNameAtWorld, StringComparison.Ordinal))
             return true;
 
         activeConfig.FrenName = exactNameAtWorld;
         activeConfig.Enabled = true;
+        activeConfig.ActivationMode = FrenRiderActivationMode.DutyOnly;
 
         var saved = false;
         try
@@ -1144,6 +1166,7 @@ public class ConfigManager : IDadProfileStore
         {
             activeConfig.FrenName = previousFrenName;
             activeConfig.Enabled = wasEnabled;
+            activeConfig.ActivationMode = previousActivation;
             return false;
         }
 

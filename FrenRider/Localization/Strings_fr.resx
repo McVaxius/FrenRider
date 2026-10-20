@@ -3141,4 +3141,51 @@ Activé : utilisez les préréglages BossMod ci-dessous avec tout fournisseur de
   <data name="No Phoenix Down available; waiting for a new death" xml:space="preserve"><value>Aucune Queue de phénix disponible; En attente d&apos;un nouveau décès</value></data>
   <data name="Corpse is unreachable; waiting for a new death" xml:space="preserve"><value>Le corps est inaccessible; En attente d&apos;un nouveau décès</value></data>
   <data name="Blocked: Phoenix Down readiness unavailable" xml:space="preserve"><value>Bloqué : disponibilité de Queue de phénix inconnue</value></data>
+  <data name="Activation mode" xml:space="preserve"><value>Mode d’activation</value></data>
+  <data name="Always on" xml:space="preserve"><value>Toujours actif</value></data>
+  <data name="Duty only" xml:space="preserve"><value>En instance uniquement</value></data>
+  <data name="On applies inside and outside duties." xml:space="preserve"><value>Actif s’applique dans les instances et en dehors.</value></data>
+  <data name="On waits outside duties; normal duty start rules apply inside." xml:space="preserve"><value>Actif attend hors instance ; les règles de démarrage habituelles s’appliquent en instance.</value></data>
+  <data name="Waiting for duty" xml:space="preserve"><value>En attente d’instance</value></data>
+  <data name="Run is On. Automation is inactive outside duties." xml:space="preserve"><value>Run est actif. L’automatisation est inactive hors instance.</value></data>
+  <data name="New profiles inherit this mode. Sync updates existing profiles." xml:space="preserve"><value>Les nouveaux profils héritent de ce mode. La synchronisation met à jour les profils existants.</value></data>
+  <data name="Existing configurations default to Always on." xml:space="preserve"><value>Les configurations existantes utilisent Toujours actif par défaut.</value></data>
+  <data name="Limit Break" xml:space="preserve"><value>Transcendance</value></data>
+  <data name="Damage roles" xml:space="preserve"><value>Rôles de dégâts</value></data>
+  <data name="Physical ranged" xml:space="preserve"><value>Distance physique</value></data>
+  <data name="Magical ranged" xml:space="preserve"><value>Distance magique</value></data>
+  <data name="Automatic LB" xml:space="preserve"><value>Transcendance automatique</value></data>
+  <data name="Gauge requirement" xml:space="preserve"><value>Jauge requise</value></data>
+  <data name="Full available gauge" xml:space="preserve"><value>Toutes les barres disponibles pleines</value></data>
+  <data name="LB1 only" xml:space="preserve"><value>LB1 uniquement</value></data>
+  <data name="LB2 only" xml:space="preserve"><value>LB2 uniquement</value></data>
+  <data name="LB3 only" xml:space="preserve"><value>LB3 uniquement</value></data>
+  <data name="Boss only" xml:space="preserve"><value>Boss uniquement</value></data>
+  <data name="Current target" xml:space="preserve"><value>Cible actuelle</value></data>
+  <data name="Any enemy" xml:space="preserve"><value>Tout ennemi</value></data>
+  <data name="Target HP at or below (%)" xml:space="preserve"><value>PV de la cible au maximum (%)</value></data>
+  <data name="Minimum enemies" xml:space="preserve"><value>Nombre minimum d’ennemis</value></data>
+  <data name="Party average HP at or below (%)" xml:space="preserve"><value>PV moyens du groupe au maximum (%)</value></data>
+  <data name="Minimum KO members" xml:space="preserve"><value>Membres KO minimum</value></data>
+  <data name="Revive — LB3" xml:space="preserve"><value>Résurrection — LB3</value></data>
+  <data name="Heal — LB1 / LB2" xml:space="preserve"><value>Soin — LB1 / LB2</value></data>
+  <data name="Use when party members are KO" xml:space="preserve"><value>Utiliser si des membres du groupe sont KO</value></data>
+  <data name="Allow healing Limit Break" xml:space="preserve"><value>Autoriser la transcendance de soin</value></data>
+  <data name="Role overview" xml:space="preserve"><value>Aperçu des rôles</value></data>
+  <data name="Choose when each role may spend the party gauge." xml:space="preserve"><value>Choisissez quand chaque rôle peut dépenser la jauge du groupe.</value></data>
+  <data name="FrenRider must be active and in combat." xml:space="preserve"><value>FrenRider doit être actif et en combat.</value></data>
+  <data name="Full available waits until every available bar is full." xml:space="preserve"><value>Attend que toutes les barres disponibles soient pleines.</value></data>
+  <data name="100% permits use as soon as the gauge is ready. Count includes enemies inside the action area." xml:space="preserve"><value>100% permet l’utilisation dès que la jauge est prête. Compte les ennemis dans la zone d’effet.</value></data>
+  <data name="Damage reduction. Independent of damage-role policies." xml:space="preserve"><value>Réduction des dégâts. Indépendante des règles des rôles de dégâts.</value></data>
+  <data name="Revival requires LB3. Healing never spends LB3." xml:space="preserve"><value>La résurrection exige LB3. Le soin ne dépense jamais LB3.</value></data>
+  <data name="Saved policies only. This overview is not live telemetry." xml:space="preserve"><value>Règles enregistrées uniquement. Cet aperçu ne montre pas de données en direct.</value></data>
+  <data name="Example: {0}" xml:space="preserve"><value>Exemple : {0}</value></data>
+  <data name="{0}; {1}; party HP ≤ {2}%" xml:space="preserve"><value>{0} ; {1} ; PV du groupe ≤ {2}%</value></data>
+  <data name="{0}; revive LB3: {1} ({2}+ KO); heal LB1/LB2: {3} (HP ≤ {4}%)" xml:space="preserve"><value>{0} ; résurrection LB3 : {1} ({2}+ KO) ; soin LB1/LB2 : {3} (PV ≤ {4}%)</value></data>
+  <data name="{0}; {1}; {2}; target HP ≤ {3}%; {4}+ enemies" xml:space="preserve"><value>{0} ; {1} ; {2} ; PV de la cible ≤ {3}% ; {4}+ ennemis</value></data>
+  <data name="Tank Limit Break" xml:space="preserve"><value>Transcendance du tank</value></data>
+  <data name="Healer Limit Break" xml:space="preserve"><value>Transcendance du soigneur</value></data>
+  <data name="Melee Limit Break" xml:space="preserve"><value>Transcendance de mêlée</value></data>
+  <data name="Physical ranged Limit Break" xml:space="preserve"><value>Transcendance à distance physique</value></data>
+  <data name="Magical ranged Limit Break" xml:space="preserve"><value>Transcendance à distance magique</value></data>
 </root>

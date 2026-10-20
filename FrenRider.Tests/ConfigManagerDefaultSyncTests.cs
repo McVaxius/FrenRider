@@ -502,6 +502,14 @@ public sealed class ConfigManagerDefaultSyncTests
                 var type when type == typeof(List<string>) => new List<string> { $"value-{offset}-{property.Name}" },
                 var type when type == typeof(List<uint>) => new List<uint> { (uint)(offset + index + 1) },
                 var type when type == typeof(List<int>) => new List<int> { offset == 0 ? 2 : 0 },
+                var type when type == typeof(LimitBreakSettings) => new LimitBreakSettings
+                {
+                    Tank = new() { Enabled = boolValue, PartyHpPercent = offset == 0 ? 25 : 35 },
+                    Healer = new() { Enabled = boolValue, Revive = boolValue, Heal = boolValue, MinimumKoMembers = offset == 0 ? 2 : 4 },
+                    Melee = new() { Enabled = boolValue, TargetHpPercent = offset == 0 ? 40 : 60 },
+                    PhysicalRanged = new() { Enabled = boolValue, MinimumEnemies = offset == 0 ? 3 : 5 },
+                    MagicalRanged = new() { Enabled = boolValue, Gauge = offset == 0 ? LimitBreakGauge.LB2 : LimitBreakGauge.LB3 },
+                },
                 var type when type.IsEnum => Enum.GetValues(type).GetValue(enumIndex % Enum.GetValues(type).Length)!,
                 _ => throw new InvalidOperationException($"Add a persisted-value test fixture for {property.Name} ({property.PropertyType})."),
             };
@@ -531,6 +539,16 @@ public sealed class ConfigManagerDefaultSyncTests
             Assert.True(expectedPriority.SequenceEqual(actualPriority), $"{property.Name} list values differ.");
             Assert.NotSame(expectedPriority, actualPriority);
         }
+        else if (expected is LimitBreakSettings expectedLb && actual is LimitBreakSettings actualLb)
+        {
+            Assert.Equal(System.Text.Json.JsonSerializer.Serialize(expectedLb), System.Text.Json.JsonSerializer.Serialize(actualLb));
+            Assert.NotSame(expectedLb, actualLb);
+            Assert.NotSame(expectedLb.Melee, actualLb.Melee);
+            Assert.NotSame(expectedLb.Tank, actualLb.Tank);
+            Assert.NotSame(expectedLb.Healer, actualLb.Healer);
+            Assert.NotSame(expectedLb.PhysicalRanged, actualLb.PhysicalRanged);
+            Assert.NotSame(expectedLb.MagicalRanged, actualLb.MagicalRanged);
+        }
         else
             Assert.True(Equals(expected, actual), $"{property.Name}: expected {expected}, actual {actual}.");
     }
@@ -550,6 +568,8 @@ public sealed class ConfigManagerDefaultSyncTests
             Assert.False(expectedIds.SequenceEqual(actualIds), $"{property.Name} must begin with distinct list values.");
         else if (expected is List<int> expectedPriority && actual is List<int> actualPriority)
             Assert.False(expectedPriority.SequenceEqual(actualPriority), $"{property.Name} must begin with distinct list values.");
+        else if (expected is LimitBreakSettings expectedLb && actual is LimitBreakSettings actualLb)
+            Assert.NotEqual(System.Text.Json.JsonSerializer.Serialize(expectedLb), System.Text.Json.JsonSerializer.Serialize(actualLb));
         else
             Assert.NotEqual(expected, actual);
     }

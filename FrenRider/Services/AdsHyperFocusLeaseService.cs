@@ -255,7 +255,7 @@ public sealed class AdsHyperFocusLeaseService : IDisposable
             || Plugin.Condition[ConditionFlag.BoundByDuty56]
             || Plugin.Condition[ConditionFlag.BoundByDuty95];
         return new AdsHyperFocusEnvironment(
-            config.Enabled,
+            plugin.IsFrenRiderEffectivelyEnabled,
             inDuty,
             plugin.AdsIntegrationService.GetCurrentDutyCategory(),
             plugin.AdsIntegrationService.IsHandoffPending,

@@ -149,6 +149,15 @@ public class FollowService
         StateDetail = "Teleport or dialog active";
     }
 
+    internal void SuspendForActivation()
+    {
+        ResetFarChaseDelay();
+        SetFarChaseRequested(false, "waiting for duty");
+        StopAllFollowing(plugin.ConfigManager.GetActiveConfig(), "waiting for duty");
+        State = FollowState.Idle;
+        StateDetail = "Waiting for duty";
+    }
+
     public void CancelFlyingStuckRecovery(string reason)
     {
         if (flyingStuckRecoveryPhase == FlyingStuckRecoveryPhase.None

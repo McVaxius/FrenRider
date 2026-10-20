@@ -3141,4 +3141,51 @@
   <data name="No Phoenix Down available; waiting for a new death" xml:space="preserve"><value>フェニックスの尾がない; 新たな死亡を待機中</value></data>
   <data name="Corpse is unreachable; waiting for a new death" xml:space="preserve"><value>戦闘不能者に到達できない; 新たな死亡を待機中</value></data>
   <data name="Blocked: Phoenix Down readiness unavailable" xml:space="preserve"><value>停止中：フェニックスの尾の使用可否が不明</value></data>
+  <data name="Activation mode" xml:space="preserve"><value>有効化モード</value></data>
+  <data name="Always on" xml:space="preserve"><value>常時有効</value></data>
+  <data name="Duty only" xml:space="preserve"><value>コンテンツ内のみ</value></data>
+  <data name="On applies inside and outside duties." xml:space="preserve"><value>オンはコンテンツ内外の両方に適用されます。</value></data>
+  <data name="On waits outside duties; normal duty start rules apply inside." xml:space="preserve"><value>オンのままコンテンツ外では待機し、コンテンツ内では通常の開始ルールに従います。</value></data>
+  <data name="Waiting for duty" xml:space="preserve"><value>コンテンツ待機中</value></data>
+  <data name="Run is On. Automation is inactive outside duties." xml:space="preserve"><value>Run はオンです。コンテンツ外では自動化は動作しません。</value></data>
+  <data name="New profiles inherit this mode. Sync updates existing profiles." xml:space="preserve"><value>新しいプロファイルはこのモードを継承します。同期すると既存のプロファイルが更新されます。</value></data>
+  <data name="Existing configurations default to Always on." xml:space="preserve"><value>既存の設定の既定値は常時有効です。</value></data>
+  <data name="Limit Break" xml:space="preserve"><value>リミットブレイク</value></data>
+  <data name="Damage roles" xml:space="preserve"><value>攻撃ロール</value></data>
+  <data name="Physical ranged" xml:space="preserve"><value>遠隔物理</value></data>
+  <data name="Magical ranged" xml:space="preserve"><value>遠隔魔法</value></data>
+  <data name="Automatic LB" xml:space="preserve"><value>LBを自動使用</value></data>
+  <data name="Gauge requirement" xml:space="preserve"><value>必要なゲージ</value></data>
+  <data name="Full available gauge" xml:space="preserve"><value>使用可能な全ゲージが満タン</value></data>
+  <data name="LB1 only" xml:space="preserve"><value>LB1のみ</value></data>
+  <data name="LB2 only" xml:space="preserve"><value>LB2のみ</value></data>
+  <data name="LB3 only" xml:space="preserve"><value>LB3のみ</value></data>
+  <data name="Boss only" xml:space="preserve"><value>ボスのみ</value></data>
+  <data name="Current target" xml:space="preserve"><value>現在のターゲット</value></data>
+  <data name="Any enemy" xml:space="preserve"><value>任意の敵</value></data>
+  <data name="Target HP at or below (%)" xml:space="preserve"><value>対象のHPが次の値以下（%）</value></data>
+  <data name="Minimum enemies" xml:space="preserve"><value>最小敵数</value></data>
+  <data name="Party average HP at or below (%)" xml:space="preserve"><value>パーティ平均HPが次の値以下（%）</value></data>
+  <data name="Minimum KO members" xml:space="preserve"><value>戦闘不能人数の下限</value></data>
+  <data name="Revive — LB3" xml:space="preserve"><value>蘇生 — LB3</value></data>
+  <data name="Heal — LB1 / LB2" xml:space="preserve"><value>回復 — LB1 / LB2</value></data>
+  <data name="Use when party members are KO" xml:space="preserve"><value>パーティメンバーが戦闘不能のときに使用</value></data>
+  <data name="Allow healing Limit Break" xml:space="preserve"><value>回復LBを許可</value></data>
+  <data name="Role overview" xml:space="preserve"><value>ロール別一覧</value></data>
+  <data name="Choose when each role may spend the party gauge." xml:space="preserve"><value>各ロールがパーティのゲージを使う条件を設定します。</value></data>
+  <data name="FrenRider must be active and in combat." xml:space="preserve"><value>FrenRiderが有効で戦闘中である必要があります。</value></data>
+  <data name="Full available waits until every available bar is full." xml:space="preserve"><value>使用可能なすべてのゲージが満タンになるまで待ちます。</value></data>
+  <data name="100% permits use as soon as the gauge is ready. Count includes enemies inside the action area." xml:space="preserve"><value>100%ならゲージが準備でき次第使用できます。効果範囲内の敵を数えます。</value></data>
+  <data name="Damage reduction. Independent of damage-role policies." xml:space="preserve"><value>被ダメージ軽減。攻撃ロールの設定とは独立しています。</value></data>
+  <data name="Revival requires LB3. Healing never spends LB3." xml:space="preserve"><value>蘇生にはLB3が必要です。回復でLB3を消費することはありません。</value></data>
+  <data name="Saved policies only. This overview is not live telemetry." xml:space="preserve"><value>保存された設定の一覧です。現在の戦闘状況は表示しません。</value></data>
+  <data name="Example: {0}" xml:space="preserve"><value>例：{0}</value></data>
+  <data name="{0}; {1}; party HP ≤ {2}%" xml:space="preserve"><value>{0}、{1}、パーティHP ≤ {2}%</value></data>
+  <data name="{0}; revive LB3: {1} ({2}+ KO); heal LB1/LB2: {3} (HP ≤ {4}%)" xml:space="preserve"><value>{0}、LB3蘇生：{1}（戦闘不能{2}人以上）、LB1/LB2回復：{3}（HP ≤ {4}%）</value></data>
+  <data name="{0}; {1}; {2}; target HP ≤ {3}%; {4}+ enemies" xml:space="preserve"><value>{0}、{1}、{2}、対象HP ≤ {3}%、敵{4}体以上</value></data>
+  <data name="Tank Limit Break" xml:space="preserve"><value>タンクのリミットブレイク</value></data>
+  <data name="Healer Limit Break" xml:space="preserve"><value>ヒーラーのリミットブレイク</value></data>
+  <data name="Melee Limit Break" xml:space="preserve"><value>近接のリミットブレイク</value></data>
+  <data name="Physical ranged Limit Break" xml:space="preserve"><value>遠隔物理のリミットブレイク</value></data>
+  <data name="Magical ranged Limit Break" xml:space="preserve"><value>遠隔魔法のリミットブレイク</value></data>
 </root>

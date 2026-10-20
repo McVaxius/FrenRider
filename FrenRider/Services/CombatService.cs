@@ -16,7 +16,7 @@ public enum CombatState
     LeavingCombat,   // Just left combat, deactivating rotation
 }
 
-public class CombatService
+public partial class CombatService
 {
     private const int RotationTypeAuto = 0;
     private const int RotationTypeManual = 1;
@@ -65,7 +65,7 @@ public class CombatService
     internal bool IsQuestionableSoloAuthorityActive
         => dutyCombatAuthorityPolicy.Authority == DutyCombatAuthority.QuestionableSolo;
     private bool ShouldSuppressFrenRiderCombatCommands
-        => IsQuestionableSoloAuthorityActive || plugin.AdsIntegrationService.IsSoloCombatHeld;
+        => IsQuestionableSoloAuthorityActive || plugin.IsWaitingForDuty || plugin.AdsIntegrationService.IsSoloCombatHeld;
 
     public CombatService(
         Plugin plugin,
@@ -142,7 +142,7 @@ public class CombatService
         plugin.AutorotIpcService.ObserveOwnedBossModIdentity(GetSelectedRotationPluginName(config),
             plugin.ConfigManager.CurrentAccountId, plugin.ConfigManager.ActiveCharacterKey, config);
 
-        if (!config.Enabled)
+        if (!config.IsEnabledForDuty(inDuty))
         {
             ClearExternalAutomationRuntimeState("plugin disabled");
             ResetCombatSettingsRefreshTracking();
@@ -333,10 +333,7 @@ public class CombatService
             State = CombatState.InCombat;
 
             // LB check
-            if (config.LimitPct >= 0)
-            {
-                CheckLimitBreak(config);
-            }
+            CheckLimitBreak(config);
         }
         else
         {
@@ -1758,14 +1755,6 @@ public class CombatService
         if (enabled)
             plugin.MarkWrathAutoStartedByFrenRider(reason);
         Plugin.Log.Information($"Combat: Wrath auto {(enabled ? "on" : "off")} after {reason}");
-    }
-
-    private void CheckLimitBreak(CharacterConfig config)
-    {
-        // LB automation: send LB command when HP threshold reached
-        // This is a stub — actual implementation needs target HP checking
-        // config.LimitPct: percentage threshold (-1 = disabled)
-        // Future: check target's HP % and send /ac "Limit Break" when below threshold
     }
 
     private void SendCommand(string command, bool allowWhileSuppressed = false)

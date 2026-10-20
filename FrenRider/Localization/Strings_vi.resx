@@ -3246,4 +3246,51 @@ Bật: dùng các preset BossMod bên dưới với mọi nhà cung cấp rotati
   <data name="No Phoenix Down available; waiting for a new death" xml:space="preserve"><value>Không có Phoenix Down; Đang chờ cái chết mới</value></data>
   <data name="Corpse is unreachable; waiting for a new death" xml:space="preserve"><value>Không thể đến thi thể; Đang chờ cái chết mới</value></data>
   <data name="Blocked: Phoenix Down readiness unavailable" xml:space="preserve"><value>Bị chặn: chưa rõ trạng thái sẵn sàng của Phoenix Down</value></data>
+  <data name="Activation mode" xml:space="preserve"><value>Chế độ kích hoạt</value></data>
+  <data name="Always on" xml:space="preserve"><value>Luôn bật</value></data>
+  <data name="Duty only" xml:space="preserve"><value>Chỉ trong nhiệm vụ</value></data>
+  <data name="On applies inside and outside duties." xml:space="preserve"><value>Khi bật, áp dụng cả trong và ngoài nhiệm vụ.</value></data>
+  <data name="On waits outside duties; normal duty start rules apply inside." xml:space="preserve"><value>Khi bật, chờ ngoài nhiệm vụ; bên trong áp dụng quy tắc bắt đầu thông thường.</value></data>
+  <data name="Waiting for duty" xml:space="preserve"><value>Đang chờ nhiệm vụ</value></data>
+  <data name="Run is On. Automation is inactive outside duties." xml:space="preserve"><value>Run đang bật. Tự động hóa không hoạt động ngoài nhiệm vụ.</value></data>
+  <data name="New profiles inherit this mode. Sync updates existing profiles." xml:space="preserve"><value>Hồ sơ mới kế thừa chế độ này. Đồng bộ cập nhật các hồ sơ hiện có.</value></data>
+  <data name="Existing configurations default to Always on." xml:space="preserve"><value>Cấu hình hiện có mặc định dùng Luôn bật.</value></data>
+  <data name="Limit Break" xml:space="preserve"><value>Limit Break</value></data>
+  <data name="Damage roles" xml:space="preserve"><value>Vai trò gây sát thương</value></data>
+  <data name="Physical ranged" xml:space="preserve"><value>Tầm xa vật lý</value></data>
+  <data name="Magical ranged" xml:space="preserve"><value>Tầm xa phép</value></data>
+  <data name="Automatic LB" xml:space="preserve"><value>Tự động dùng LB</value></data>
+  <data name="Gauge requirement" xml:space="preserve"><value>Yêu cầu thanh năng lượng</value></data>
+  <data name="Full available gauge" xml:space="preserve"><value>Đầy mọi thanh khả dụng</value></data>
+  <data name="LB1 only" xml:space="preserve"><value>Chỉ LB1</value></data>
+  <data name="LB2 only" xml:space="preserve"><value>Chỉ LB2</value></data>
+  <data name="LB3 only" xml:space="preserve"><value>Chỉ LB3</value></data>
+  <data name="Boss only" xml:space="preserve"><value>Chỉ trùm</value></data>
+  <data name="Current target" xml:space="preserve"><value>Mục tiêu hiện tại</value></data>
+  <data name="Any enemy" xml:space="preserve"><value>Bất kỳ kẻ địch</value></data>
+  <data name="Target HP at or below (%)" xml:space="preserve"><value>HP mục tiêu không quá (%)</value></data>
+  <data name="Minimum enemies" xml:space="preserve"><value>Số kẻ địch tối thiểu</value></data>
+  <data name="Party average HP at or below (%)" xml:space="preserve"><value>HP trung bình tổ đội không quá (%)</value></data>
+  <data name="Minimum KO members" xml:space="preserve"><value>Số thành viên KO tối thiểu</value></data>
+  <data name="Revive — LB3" xml:space="preserve"><value>Hồi sinh — LB3</value></data>
+  <data name="Heal — LB1 / LB2" xml:space="preserve"><value>Hồi máu — LB1 / LB2</value></data>
+  <data name="Use when party members are KO" xml:space="preserve"><value>Dùng khi có thành viên tổ đội KO</value></data>
+  <data name="Allow healing Limit Break" xml:space="preserve"><value>Cho phép Limit Break hồi máu</value></data>
+  <data name="Role overview" xml:space="preserve"><value>Tổng quan vai trò</value></data>
+  <data name="Choose when each role may spend the party gauge." xml:space="preserve"><value>Chọn khi nào mỗi vai trò được dùng thanh năng lượng tổ đội.</value></data>
+  <data name="FrenRider must be active and in combat." xml:space="preserve"><value>FrenRider phải đang hoạt động và trong giao tranh.</value></data>
+  <data name="Full available waits until every available bar is full." xml:space="preserve"><value>Đợi đến khi mọi thanh khả dụng đều đầy.</value></data>
+  <data name="100% permits use as soon as the gauge is ready. Count includes enemies inside the action area." xml:space="preserve"><value>100% cho phép dùng ngay khi đủ năng lượng. Đếm kẻ địch trong vùng tác dụng.</value></data>
+  <data name="Damage reduction. Independent of damage-role policies." xml:space="preserve"><value>Giảm sát thương. Độc lập với chính sách vai trò gây sát thương.</value></data>
+  <data name="Revival requires LB3. Healing never spends LB3." xml:space="preserve"><value>Hồi sinh cần LB3. Hồi máu không bao giờ dùng LB3.</value></data>
+  <data name="Saved policies only. This overview is not live telemetry." xml:space="preserve"><value>Chỉ hiển thị chính sách đã lưu, không phải dữ liệu trực tiếp.</value></data>
+  <data name="Example: {0}" xml:space="preserve"><value>Ví dụ: {0}</value></data>
+  <data name="{0}; {1}; party HP ≤ {2}%" xml:space="preserve"><value>{0}; {1}; HP tổ đội ≤ {2}%</value></data>
+  <data name="{0}; revive LB3: {1} ({2}+ KO); heal LB1/LB2: {3} (HP ≤ {4}%)" xml:space="preserve"><value>{0}; hồi sinh LB3: {1} ({2}+ KO); hồi máu LB1/LB2: {3} (HP ≤ {4}%)</value></data>
+  <data name="{0}; {1}; {2}; target HP ≤ {3}%; {4}+ enemies" xml:space="preserve"><value>{0}; {1}; {2}; HP mục tiêu ≤ {3}%; {4}+ kẻ địch</value></data>
+  <data name="Tank Limit Break" xml:space="preserve"><value>Limit Break đỡ đòn</value></data>
+  <data name="Healer Limit Break" xml:space="preserve"><value>Limit Break hồi phục</value></data>
+  <data name="Melee Limit Break" xml:space="preserve"><value>Limit Break cận chiến</value></data>
+  <data name="Physical ranged Limit Break" xml:space="preserve"><value>Limit Break tầm xa vật lý</value></data>
+  <data name="Magical ranged Limit Break" xml:space="preserve"><value>Limit Break tầm xa phép</value></data>
 </root>

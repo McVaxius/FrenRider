@@ -51,7 +51,7 @@ internal sealed unsafe class NativePhoenixRecoveryRuntime : IPhoenixRecoveryRunt
     {
         var local = Plugin.ObjectTable.LocalPlayer;
         var config = plugin.ConfigManager.GetActiveConfig();
-        if (!Plugin.ClientState.IsLoggedIn || !config.Enabled || !config.UsePhoenixDownsForRecovery)
+        if (!Plugin.ClientState.IsLoggedIn || !plugin.IsFrenRiderEffectivelyEnabled || !config.UsePhoenixDownsForRecovery)
             return new PhoenixRecoveryFrame { Config = config, ContextEnded = true };
         if (local == null || !plugin.ConfigManager.TryGetLocalActiveConfig(out _))
             return new PhoenixRecoveryFrame { Config = config };
