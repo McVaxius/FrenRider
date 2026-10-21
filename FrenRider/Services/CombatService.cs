@@ -32,6 +32,8 @@ public partial class CombatService
 
     private bool wasInCombat;
     private bool wasInDuty;
+    private bool dutyOnlyRotationHeld;
+    private string dutyOnlyHeldProvider = string.Empty;
     private long lastRotationToggleMs;
     private int lastActivePluginIdx = -1;
     private long pendingCombatSettingsRefreshMs;
@@ -87,6 +89,7 @@ public partial class CombatService
         if (mountedRotationSuppressed || wrathAutoActive)
             Plugin.Log.Information($"[FrenRider] Cleared local external automation runtime flags after {reason}.");
 
+        dutyOnlyRotationHeld = false;
         mountedRotationSuppressed = false;
         mountedSuppressedPluginName = string.Empty;
         wrathAutoActive = false;
@@ -101,6 +104,7 @@ public partial class CombatService
 
     public bool PrepareForEnableCombatSetup()
     {
+        if (plugin.IsWaitingForDuty) return false;
         var config = plugin.ConfigManager.GetActiveConfig();
         var inDuty = IsInDuty();
         var decision = RefreshDutyCombatAuthority(
@@ -142,7 +146,7 @@ public partial class CombatService
         plugin.AutorotIpcService.ObserveOwnedBossModIdentity(GetSelectedRotationPluginName(config),
             plugin.ConfigManager.CurrentAccountId, plugin.ConfigManager.ActiveCharacterKey, config);
 
-        if (!config.IsEnabledForDuty(inDuty))
+        if (!config.Enabled)
         {
             ClearExternalAutomationRuntimeState("plugin disabled");
             ResetCombatSettingsRefreshTracking();
@@ -196,6 +200,13 @@ public partial class CombatService
             HandleAdsHyperFocusLease(inCombat, inDuty);
             return;
         }
+
+        if (plugin.IsWaitingForDuty)
+        {
+            HoldDutyOnlyRotation(config);
+            return;
+        }
+        dutyOnlyRotationHeld = false;
 
         if (authorityDecision.ShouldBootstrapFrenRider)
         {
@@ -443,6 +454,42 @@ public partial class CombatService
         State = CombatState.OutOfCombat;
         StateDetail = $"Combat held: {plugin.AdsIntegrationService.StatusText}";
         ActivePreset = "";
+    }
+
+    private void HoldDutyOnlyRotation(CharacterConfig config)
+    {
+        // Retain movement/AI ownership and all noncombat services. Only the
+        // configured rotation and our owned runtime preset are paused here.
+        var provider = GetSelectedRotationPluginName(config);
+        if (!dutyOnlyRotationHeld || dutyOnlyHeldProvider != provider)
+        {
+            plugin.CaptureExternalAutomationSnapshot("Duty only combat hold");
+            plugin.AutorotIpcService.DisableOwnedBossModRuntime();
+            switch (GetLastActiveRotationPluginName(config))
+            {
+                case "RSR":
+                    if (!plugin.AutorotIpcService.TrySetRsrMode(AutorotIpcService.RsrStateCommandType.Off))
+                        SendCommand("/rotation cancel", allowWhileSuppressed: true);
+                    break;
+                case "WRATH":
+                    SendCommand("/wrath auto off", allowWhileSuppressed: true);
+                    break;
+                case "DAEDALUS":
+                    SetDaedalusEnabled(false, "Duty only combat hold");
+                    break;
+            }
+            dutyOnlyRotationHeld = true;
+            dutyOnlyHeldProvider = provider;
+        }
+        ResetCombatSettingsRefreshTracking();
+        lastObservedCombatSettings = lastAppliedCombatSettings = null;
+        lastBossModDefaultSettingsSignature = lastBossModMovementUnlockSignature = string.Empty;
+        lastActivePluginIdx = -1;
+        lastRotationToggleMs = 0;
+        wrathAutoActive = wasInCombat = wasInDuty = false;
+        State = CombatState.OutOfCombat;
+        StateDetail = "Combat rotations paused outside duties";
+        ActivePreset = string.Empty;
     }
 
     private void ForceDutyCombatOff(string reason)

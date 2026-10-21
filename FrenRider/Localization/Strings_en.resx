@@ -3244,9 +3244,9 @@ On: use the BossMod presets below with any rotation provider. A custom preset ma
   <data name="Always on" xml:space="preserve"><value>Always on</value></data>
   <data name="Duty only" xml:space="preserve"><value>Duty only</value></data>
   <data name="On applies inside and outside duties." xml:space="preserve"><value>On applies inside and outside duties.</value></data>
-  <data name="On waits outside duties; normal duty start rules apply inside." xml:space="preserve"><value>On waits outside duties; normal duty start rules apply inside.</value></data>
-  <data name="Waiting for duty" xml:space="preserve"><value>Waiting for duty</value></data>
-  <data name="Run is On. Automation is inactive outside duties." xml:space="preserve"><value>Run is On. Automation is inactive outside duties.</value></data>
+  <data name="Only combat rotations wait outside duties. Following, repairs and other configured actions continue." xml:space="preserve"><value>Only combat rotations wait outside duties. Following, repairs and other configured actions continue.</value></data>
+  <data name="Combat rotations paused outside duties" xml:space="preserve"><value>Combat rotations paused outside duties</value></data>
+  <data name="Run is On. Following, repairs and other configured actions continue. Combat rotations wait for a duty." xml:space="preserve"><value>Run is On. Following, repairs and other configured actions continue. Combat rotations wait for a duty.</value></data>
   <data name="New profiles inherit this mode. Sync updates existing profiles." xml:space="preserve"><value>New profiles inherit this mode. Sync updates existing profiles.</value></data>
   <data name="Existing configurations default to Always on." xml:space="preserve"><value>Existing configurations default to Always on.</value></data>
   <data name="Limit Break" xml:space="preserve"><value>Limit Break</value></data>
@@ -3287,4 +3287,16 @@ On: use the BossMod presets below with any rotation provider. A custom preset ma
   <data name="Melee Limit Break" xml:space="preserve"><value>Melee Limit Break</value></data>
   <data name="Physical ranged Limit Break" xml:space="preserve"><value>Physical ranged Limit Break</value></data>
   <data name="Magical ranged Limit Break" xml:space="preserve"><value>Magical ranged Limit Break</value></data>
+  <data name="Picker" xml:space="preserve"><value>Picker</value></data>
+  <data name="Default" xml:space="preserve"><value>Default</value></data>
+  <data name="Background, controls and text follow your theme." xml:space="preserve"><value>Background, controls and text follow your theme.</value></data>
+  <data name="Theme colour" xml:space="preserve"><value>Theme colour</value></data>
+  <data name="Choose each colour independently." xml:space="preserve"><value>Choose each colour independently.</value></data>
+  <data name="Background" xml:space="preserve"><value>Background</value></data>
+  <data name="Controls" xml:space="preserve"><value>Controls</value></data>
+  <data name="Text" xml:space="preserve"><value>Text</value></data>
+  <data name="Aa  Preview text" xml:space="preserve"><value>Aa  Preview text</value></data>
+  <data name="Control" xml:space="preserve"><value>Control</value></data>
+  <data name="Switch to Picker to set each colour yourself." xml:space="preserve"><value>Switch to Picker to set each colour yourself.</value></data>
+  <data name="Switch back to Auto to use the automatic theme." xml:space="preserve"><value>Switch back to Auto to use the automatic theme.</value></data>
 </root>

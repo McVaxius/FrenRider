@@ -3250,9 +3250,9 @@ Aktif: gunakan preset BossMod di bawah dengan penyedia rotasi apa pun. Preset kh
   <data name="Always on" xml:space="preserve"><value>Selalu aktif</value></data>
   <data name="Duty only" xml:space="preserve"><value>Hanya dalam duty</value></data>
   <data name="On applies inside and outside duties." xml:space="preserve"><value>Saat aktif, berlaku di dalam dan di luar duty.</value></data>
-  <data name="On waits outside duties; normal duty start rules apply inside." xml:space="preserve"><value>Saat aktif, menunggu di luar duty; di dalam mengikuti aturan mulai normal.</value></data>
-  <data name="Waiting for duty" xml:space="preserve"><value>Menunggu duty</value></data>
-  <data name="Run is On. Automation is inactive outside duties." xml:space="preserve"><value>Run aktif. Otomatisasi tidak aktif di luar duty.</value></data>
+  <data name="Only combat rotations wait outside duties. Following, repairs and other configured actions continue." xml:space="preserve"><value>Hanya rotasi tempur yang menunggu di luar duty. Mengikuti, perbaikan, dan tindakan lain yang dikonfigurasi tetap berjalan.</value></data>
+  <data name="Combat rotations paused outside duties" xml:space="preserve"><value>Rotasi tempur dijeda di luar duty</value></data>
+  <data name="Run is On. Following, repairs and other configured actions continue. Combat rotations wait for a duty." xml:space="preserve"><value>Run aktif. Mengikuti, perbaikan, dan tindakan lain yang dikonfigurasi tetap berjalan. Rotasi tempur menunggu duty.</value></data>
   <data name="New profiles inherit this mode. Sync updates existing profiles." xml:space="preserve"><value>Profil baru mewarisi mode ini. Sinkronisasi memperbarui profil yang ada.</value></data>
   <data name="Existing configurations default to Always on." xml:space="preserve"><value>Konfigurasi yang ada menggunakan Selalu aktif secara bawaan.</value></data>
   <data name="Limit Break" xml:space="preserve"><value>Limit Break</value></data>
@@ -3293,4 +3293,16 @@ Aktif: gunakan preset BossMod di bawah dengan penyedia rotasi apa pun. Preset kh
   <data name="Melee Limit Break" xml:space="preserve"><value>Limit Break jarak dekat</value></data>
   <data name="Physical ranged Limit Break" xml:space="preserve"><value>Limit Break jarak jauh fisik</value></data>
   <data name="Magical ranged Limit Break" xml:space="preserve"><value>Limit Break jarak jauh sihir</value></data>
+  <data name="Picker" xml:space="preserve"><value>Pemilih</value></data>
+  <data name="Default" xml:space="preserve"><value>Bawaan</value></data>
+  <data name="Background, controls and text follow your theme." xml:space="preserve"><value>Latar belakang, kontrol, dan teks mengikuti tema.</value></data>
+  <data name="Theme colour" xml:space="preserve"><value>Warna tema</value></data>
+  <data name="Choose each colour independently." xml:space="preserve"><value>Pilih setiap warna secara terpisah.</value></data>
+  <data name="Background" xml:space="preserve"><value>Latar belakang</value></data>
+  <data name="Controls" xml:space="preserve"><value>Kontrol</value></data>
+  <data name="Text" xml:space="preserve"><value>Teks</value></data>
+  <data name="Aa  Preview text" xml:space="preserve"><value>Aa  Pratinjau teks</value></data>
+  <data name="Control" xml:space="preserve"><value>Kontrol</value></data>
+  <data name="Switch to Picker to set each colour yourself." xml:space="preserve"><value>Beralih ke Pemilih untuk menentukan setiap warna.</value></data>
+  <data name="Switch back to Auto to use the automatic theme." xml:space="preserve"><value>Kembali ke Otomatis untuk menggunakan tema otomatis.</value></data>
 </root>

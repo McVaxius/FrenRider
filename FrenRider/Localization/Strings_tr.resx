@@ -3250,9 +3250,9 @@ Açık: aşağıdaki BossMod ön ayarlarını herhangi bir rotasyon sağlayıcı
   <data name="Always on" xml:space="preserve"><value>Her zaman açık</value></data>
   <data name="Duty only" xml:space="preserve"><value>Yalnızca görevde</value></data>
   <data name="On applies inside and outside duties." xml:space="preserve"><value>Açık durumu, görev içinde ve dışında geçerlidir.</value></data>
-  <data name="On waits outside duties; normal duty start rules apply inside." xml:space="preserve"><value>Açıkken görev dışında bekler; görev içinde normal başlatma kuralları geçerlidir.</value></data>
-  <data name="Waiting for duty" xml:space="preserve"><value>Görev bekleniyor</value></data>
-  <data name="Run is On. Automation is inactive outside duties." xml:space="preserve"><value>Run açık. Görev dışında otomasyon etkin değildir.</value></data>
+  <data name="Only combat rotations wait outside duties. Following, repairs and other configured actions continue." xml:space="preserve"><value>Görev dışında yalnızca savaş rotasyonları bekler. Takip, onarım ve yapılandırılmış diğer eylemler devam eder.</value></data>
+  <data name="Combat rotations paused outside duties" xml:space="preserve"><value>Görev dışında savaş rotasyonları duraklatıldı</value></data>
+  <data name="Run is On. Following, repairs and other configured actions continue. Combat rotations wait for a duty." xml:space="preserve"><value>Run açık. Takip, onarım ve yapılandırılmış diğer eylemler devam eder. Savaş rotasyonları görev bekler.</value></data>
   <data name="New profiles inherit this mode. Sync updates existing profiles." xml:space="preserve"><value>Yeni profiller bu modu devralır. Eşitleme mevcut profilleri günceller.</value></data>
   <data name="Existing configurations default to Always on." xml:space="preserve"><value>Mevcut yapılandırmalar varsayılan olarak Her zaman açık modunu kullanır.</value></data>
   <data name="Limit Break" xml:space="preserve"><value>Limit Break</value></data>
@@ -3293,4 +3293,16 @@ Açık: aşağıdaki BossMod ön ayarlarını herhangi bir rotasyon sağlayıcı
   <data name="Melee Limit Break" xml:space="preserve"><value>Yakın dövüş Limit Break</value></data>
   <data name="Physical ranged Limit Break" xml:space="preserve"><value>Fiziksel menzilli Limit Break</value></data>
   <data name="Magical ranged Limit Break" xml:space="preserve"><value>Büyülü menzilli Limit Break</value></data>
+  <data name="Picker" xml:space="preserve"><value>Seçici</value></data>
+  <data name="Default" xml:space="preserve"><value>Varsayılan</value></data>
+  <data name="Background, controls and text follow your theme." xml:space="preserve"><value>Arka plan, denetimler ve metin temanızı izler.</value></data>
+  <data name="Theme colour" xml:space="preserve"><value>Tema rengi</value></data>
+  <data name="Choose each colour independently." xml:space="preserve"><value>Her rengi bağımsız olarak seçin.</value></data>
+  <data name="Background" xml:space="preserve"><value>Arka plan</value></data>
+  <data name="Controls" xml:space="preserve"><value>Denetimler</value></data>
+  <data name="Text" xml:space="preserve"><value>Metin</value></data>
+  <data name="Aa  Preview text" xml:space="preserve"><value>Aa  Metin önizlemesi</value></data>
+  <data name="Control" xml:space="preserve"><value>Denetim</value></data>
+  <data name="Switch to Picker to set each colour yourself." xml:space="preserve"><value>Her rengi ayarlamak için Seçici'ye geçin.</value></data>
+  <data name="Switch back to Auto to use the automatic theme." xml:space="preserve"><value>Otomatik temayı kullanmak için Otomatik'e dönün.</value></data>
 </root>

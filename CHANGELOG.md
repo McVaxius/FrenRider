@@ -1,3 +1,15 @@
+2026-10-20 - Independent theme colours
+
+- Add Auto and Picker radio choices to the native titlebar Colour editor and Settings. Auto remains the default and retains the existing automatic theme; Picker saves separate Background, Controls and Text colours, including native hexadecimal entry and a preview.
+- Share the selected colours across all windows, retain manual choices when returning to Auto, and preserve semantic status colours and the existing global appearance save owner.
+
+2026-10-20 - Combat-only Duty mode and saved profile editing (I612-I614)
+
+- Keep following, repairs, recovery and other configured noncombat actions running while Run is On in Duty only mode. Pause only combat rotations outside duties; retain movement/AI ownership and perform full cleanup only for master Off. Always on remains the default.
+- Bind settings edits and saves to the selected existing account and DEFAULT, character or remote profile, including at the title screen. Selecting an account for editing never activates it for automation. Keep Limit Break role choices independent of runtime state and temporary DAD profiles.
+- Correct Main, Mini, DTR and all fifteen locale explanations to describe the combat-only hold.
+- Validation: Release build with SDK 10.0.201 passed with zero warnings/errors; all 1,348 tests passed, including native role-editor save/readback and BMR/VBM combat-hold ownership. A final translated/compact native UI rerun passed all four cases. Live gameplay acceptance remains separate; no client deployment or version change.
+
 2026-10-19 - Activation modes and role-specific Limit Break (I606/I607)
 
 - Default new and existing profiles to Always on. Add explicit Duty only radios in Main and Profile, retaining saved Run intent while waiting outside duties. Release owned movement/combat/recovery on deactivation and defer enable-time setup until effective activation.

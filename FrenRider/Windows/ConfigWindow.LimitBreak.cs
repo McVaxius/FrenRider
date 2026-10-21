@@ -11,7 +11,7 @@ public partial class ConfigWindow
     private LimitBreakRole selectedLimitBreakRole = LimitBreakRole.Melee;
     private void DrawLimitBreakTab(CharacterConfig config)
         => DrawLimitBreakSettings(config.LimitBreak, selectedLimitBreakRole,
-            role => selectedLimitBreakRole = role, () => configManager.SaveCurrentAccount(),
+            role => selectedLimitBreakRole = role, SaveEditingAccount,
             label => DrawDefaultSettingSyncButton(label, inline: false));
 
     private static readonly string[] GaugeLabels = { "Full available gauge", "LB1 only", "LB2 only", "LB3 only" };

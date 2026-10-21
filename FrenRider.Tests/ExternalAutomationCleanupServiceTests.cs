@@ -806,6 +806,38 @@ public sealed class ExternalAutomationCleanupServiceTests
         Assert.Equal(saved, JsonSerializer.Serialize(runtime.Profile));
     }
 
+    [Theory]
+    [InlineData("BMR", 0)]
+    [InlineData("VBM", 1)]
+    public void DutyOnlyUpdatePausesOwnedRotationAndRetainsAiAndFollowSettings(string provider, int index)
+    {
+        var native = new NativeBossModProvider(provider, "Original") { AiEnabled = true };
+        using var service = native.CreateService();
+        using var runtime = new QuestingCombatRuntime(service, native.Interface, native.Log, index);
+        runtime.StopActivity();
+        runtime.Profile.ActivationMode = FrenRiderActivationMode.DutyOnly;
+        Assert.True(service.PrepareOwnedBossModSettings(provider, "account", "character", runtime.Profile));
+        Assert.True(service.ApplyOwnedBossModPreset("Next"));
+        var selector = native.Selector;
+        var distance = native.Distance;
+        native.Writes.Clear();
+        runtime.Combat.Update();
+        runtime.Combat.Update();
+        Assert.Equal("Combat rotations paused outside duties", runtime.Combat.StateDetail);
+        Assert.True(runtime.Profile.Enabled);
+        Assert.True(native.AiEnabled);
+        Assert.True(native.ForceDisabled);
+        Assert.Empty(native.Active);
+        Assert.Equal(selector, native.Selector);
+        Assert.Equal(distance, native.Distance);
+        Assert.Equal(new[] { "BossMod.Presets.SetForceDisabled" }, native.Writes);
+        // The same owned baseline remains available for normal master-Off cleanup.
+        service.ReleaseOwnedBossModSettings(turnEverythingOff: false);
+        Assert.Equal(new[] { "Original" }, native.Active);
+        Assert.False(native.ForceDisabled);
+        Assert.True(native.AiEnabled);
+    }
+
     private sealed record NativePreset(string Name, bool HiddenByDefault = false);
     private sealed record NativePresetDatabase(NativePreset[] AllPresets, NativePreset[] DefaultPresets, NativePreset[] UserPresets);
     private sealed record NativeRotationDatabase(NativePresetDatabase Presets);

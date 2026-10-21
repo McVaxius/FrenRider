@@ -101,7 +101,7 @@ public partial class CombatService
     {
         var settings = config.LimitBreak;
         var player = Plugin.ObjectTable.LocalPlayer;
-        if (player == null || !plugin.IsFrenRiderEffectivelyEnabled || ShouldSuppressFrenRiderCombatCommands
+        if (player == null || !plugin.AreCombatRotationsEnabled || ShouldSuppressFrenRiderCombatCommands
             || !Plugin.Condition[ConditionFlag.InCombat] || !settings.IsValid) return;
         var role = LimitBreakPolicy.Role(player.ClassJob.RowId);
         if (!(role == LimitBreakRole.Tank ? settings.Tank.Enabled

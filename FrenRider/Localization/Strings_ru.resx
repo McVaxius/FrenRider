@@ -3145,9 +3145,9 @@
   <data name="Always on" xml:space="preserve"><value>Всегда включено</value></data>
   <data name="Duty only" xml:space="preserve"><value>Только в задании</value></data>
   <data name="On applies inside and outside duties." xml:space="preserve"><value>Включение действует внутри и вне заданий.</value></data>
-  <data name="On waits outside duties; normal duty start rules apply inside." xml:space="preserve"><value>Вне заданий включённый режим ожидает; внутри действуют обычные правила запуска.</value></data>
-  <data name="Waiting for duty" xml:space="preserve"><value>Ожидание задания</value></data>
-  <data name="Run is On. Automation is inactive outside duties." xml:space="preserve"><value>Run включён. Вне заданий автоматизация неактивна.</value></data>
+  <data name="Only combat rotations wait outside duties. Following, repairs and other configured actions continue." xml:space="preserve"><value>Вне заданий ожидают только боевые ротации. Следование, ремонт и другие настроенные действия продолжаются.</value></data>
+  <data name="Combat rotations paused outside duties" xml:space="preserve"><value>Боевые ротации приостановлены вне заданий</value></data>
+  <data name="Run is On. Following, repairs and other configured actions continue. Combat rotations wait for a duty." xml:space="preserve"><value>Run включён. Следование, ремонт и другие настроенные действия продолжаются. Боевые ротации ждут задания.</value></data>
   <data name="New profiles inherit this mode. Sync updates existing profiles." xml:space="preserve"><value>Новые профили наследуют этот режим. Синхронизация обновляет существующие профили.</value></data>
   <data name="Existing configurations default to Always on." xml:space="preserve"><value>Для существующих настроек по умолчанию выбрано Всегда включено.</value></data>
   <data name="Limit Break" xml:space="preserve"><value>Предельный приём</value></data>
@@ -3188,4 +3188,16 @@
   <data name="Melee Limit Break" xml:space="preserve"><value>Предельный приём ближнего боя</value></data>
   <data name="Physical ranged Limit Break" xml:space="preserve"><value>Предельный приём физического дальнего боя</value></data>
   <data name="Magical ranged Limit Break" xml:space="preserve"><value>Предельный приём магического дальнего боя</value></data>
+  <data name="Picker" xml:space="preserve"><value>Палитра</value></data>
+  <data name="Default" xml:space="preserve"><value>По умолчанию</value></data>
+  <data name="Background, controls and text follow your theme." xml:space="preserve"><value>Фон, элементы управления и текст следуют теме.</value></data>
+  <data name="Theme colour" xml:space="preserve"><value>Цвет темы</value></data>
+  <data name="Choose each colour independently." xml:space="preserve"><value>Выберите каждый цвет отдельно.</value></data>
+  <data name="Background" xml:space="preserve"><value>Фон</value></data>
+  <data name="Controls" xml:space="preserve"><value>Элементы управления</value></data>
+  <data name="Text" xml:space="preserve"><value>Текст</value></data>
+  <data name="Aa  Preview text" xml:space="preserve"><value>Aa  Образец текста</value></data>
+  <data name="Control" xml:space="preserve"><value>Кнопка</value></data>
+  <data name="Switch to Picker to set each colour yourself." xml:space="preserve"><value>Переключитесь на Палитру, чтобы задать каждый цвет.</value></data>
+  <data name="Switch back to Auto to use the automatic theme." xml:space="preserve"><value>Вернитесь в Авто, чтобы использовать автоматическую тему.</value></data>
 </root>

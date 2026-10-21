@@ -3145,9 +3145,9 @@ Activado: usa los ajustes de BossMod de abajo con cualquier proveedor de rotaci�
   <data name="Always on" xml:space="preserve"><value>Siempre activo</value></data>
   <data name="Duty only" xml:space="preserve"><value>Solo en instancia</value></data>
   <data name="On applies inside and outside duties." xml:space="preserve"><value>Activado se aplica dentro y fuera de las instancias.</value></data>
-  <data name="On waits outside duties; normal duty start rules apply inside." xml:space="preserve"><value>Activado espera fuera de las instancias; dentro se aplican las reglas de inicio habituales.</value></data>
-  <data name="Waiting for duty" xml:space="preserve"><value>Esperando una instancia</value></data>
-  <data name="Run is On. Automation is inactive outside duties." xml:space="preserve"><value>Run está activado. La automatización está inactiva fuera de las instancias.</value></data>
+  <data name="Only combat rotations wait outside duties. Following, repairs and other configured actions continue." xml:space="preserve"><value>Solo las rotaciones de combate esperan fuera de instancias. El seguimiento, las reparaciones y las demás acciones configuradas continúan.</value></data>
+  <data name="Combat rotations paused outside duties" xml:space="preserve"><value>Rotaciones de combate en pausa fuera de instancias</value></data>
+  <data name="Run is On. Following, repairs and other configured actions continue. Combat rotations wait for a duty." xml:space="preserve"><value>Run está activado. El seguimiento, las reparaciones y las demás acciones configuradas continúan. Las rotaciones esperan una instancia.</value></data>
   <data name="New profiles inherit this mode. Sync updates existing profiles." xml:space="preserve"><value>Los perfiles nuevos heredan este modo. La sincronización actualiza los perfiles existentes.</value></data>
   <data name="Existing configurations default to Always on." xml:space="preserve"><value>Las configuraciones existentes usan Siempre activo de forma predeterminada.</value></data>
   <data name="Limit Break" xml:space="preserve"><value>Límite</value></data>
@@ -3188,4 +3188,16 @@ Activado: usa los ajustes de BossMod de abajo con cualquier proveedor de rotaci�
   <data name="Melee Limit Break" xml:space="preserve"><value>Límite cuerpo a cuerpo</value></data>
   <data name="Physical ranged Limit Break" xml:space="preserve"><value>Límite a distancia física</value></data>
   <data name="Magical ranged Limit Break" xml:space="preserve"><value>Límite a distancia mágica</value></data>
+  <data name="Picker" xml:space="preserve"><value>Selector</value></data>
+  <data name="Default" xml:space="preserve"><value>Predeterminado</value></data>
+  <data name="Background, controls and text follow your theme." xml:space="preserve"><value>El fondo, los controles y el texto siguen el tema.</value></data>
+  <data name="Theme colour" xml:space="preserve"><value>Color del tema</value></data>
+  <data name="Choose each colour independently." xml:space="preserve"><value>Elige cada color por separado.</value></data>
+  <data name="Background" xml:space="preserve"><value>Fondo</value></data>
+  <data name="Controls" xml:space="preserve"><value>Controles</value></data>
+  <data name="Text" xml:space="preserve"><value>Texto</value></data>
+  <data name="Aa  Preview text" xml:space="preserve"><value>Aa  Vista previa</value></data>
+  <data name="Control" xml:space="preserve"><value>Control</value></data>
+  <data name="Switch to Picker to set each colour yourself." xml:space="preserve"><value>Cambia a Selector para definir cada color.</value></data>
+  <data name="Switch back to Auto to use the automatic theme." xml:space="preserve"><value>Vuelve a Automático para usar el tema automático.</value></data>
 </root>

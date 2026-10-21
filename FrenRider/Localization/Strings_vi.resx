@@ -3250,9 +3250,9 @@ Bật: dùng các preset BossMod bên dưới với mọi nhà cung cấp rotati
   <data name="Always on" xml:space="preserve"><value>Luôn bật</value></data>
   <data name="Duty only" xml:space="preserve"><value>Chỉ trong nhiệm vụ</value></data>
   <data name="On applies inside and outside duties." xml:space="preserve"><value>Khi bật, áp dụng cả trong và ngoài nhiệm vụ.</value></data>
-  <data name="On waits outside duties; normal duty start rules apply inside." xml:space="preserve"><value>Khi bật, chờ ngoài nhiệm vụ; bên trong áp dụng quy tắc bắt đầu thông thường.</value></data>
-  <data name="Waiting for duty" xml:space="preserve"><value>Đang chờ nhiệm vụ</value></data>
-  <data name="Run is On. Automation is inactive outside duties." xml:space="preserve"><value>Run đang bật. Tự động hóa không hoạt động ngoài nhiệm vụ.</value></data>
+  <data name="Only combat rotations wait outside duties. Following, repairs and other configured actions continue." xml:space="preserve"><value>Chỉ vòng kỹ năng chiến đấu chờ ngoài nhiệm vụ. Đi theo, sửa chữa và các hành động đã cấu hình khác vẫn tiếp tục.</value></data>
+  <data name="Combat rotations paused outside duties" xml:space="preserve"><value>Tạm dừng vòng kỹ năng chiến đấu ngoài nhiệm vụ</value></data>
+  <data name="Run is On. Following, repairs and other configured actions continue. Combat rotations wait for a duty." xml:space="preserve"><value>Run đang bật. Đi theo, sửa chữa và các hành động đã cấu hình khác vẫn tiếp tục. Vòng kỹ năng chiến đấu chờ nhiệm vụ.</value></data>
   <data name="New profiles inherit this mode. Sync updates existing profiles." xml:space="preserve"><value>Hồ sơ mới kế thừa chế độ này. Đồng bộ cập nhật các hồ sơ hiện có.</value></data>
   <data name="Existing configurations default to Always on." xml:space="preserve"><value>Cấu hình hiện có mặc định dùng Luôn bật.</value></data>
   <data name="Limit Break" xml:space="preserve"><value>Limit Break</value></data>
@@ -3293,4 +3293,16 @@ Bật: dùng các preset BossMod bên dưới với mọi nhà cung cấp rotati
   <data name="Melee Limit Break" xml:space="preserve"><value>Limit Break cận chiến</value></data>
   <data name="Physical ranged Limit Break" xml:space="preserve"><value>Limit Break tầm xa vật lý</value></data>
   <data name="Magical ranged Limit Break" xml:space="preserve"><value>Limit Break tầm xa phép</value></data>
+  <data name="Picker" xml:space="preserve"><value>Bộ chọn</value></data>
+  <data name="Default" xml:space="preserve"><value>Mặc định</value></data>
+  <data name="Background, controls and text follow your theme." xml:space="preserve"><value>Nền, điều khiển và văn bản theo chủ đề của bạn.</value></data>
+  <data name="Theme colour" xml:space="preserve"><value>Màu chủ đề</value></data>
+  <data name="Choose each colour independently." xml:space="preserve"><value>Chọn từng màu riêng biệt.</value></data>
+  <data name="Background" xml:space="preserve"><value>Nền</value></data>
+  <data name="Controls" xml:space="preserve"><value>Điều khiển</value></data>
+  <data name="Text" xml:space="preserve"><value>Văn bản</value></data>
+  <data name="Aa  Preview text" xml:space="preserve"><value>Aa  Xem trước văn bản</value></data>
+  <data name="Control" xml:space="preserve"><value>Điều khiển</value></data>
+  <data name="Switch to Picker to set each colour yourself." xml:space="preserve"><value>Chuyển sang Bộ chọn để tự đặt từng màu.</value></data>
+  <data name="Switch back to Auto to use the automatic theme." xml:space="preserve"><value>Chuyển về Tự động để dùng chủ đề tự động.</value></data>
 </root>

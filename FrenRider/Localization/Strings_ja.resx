@@ -3145,9 +3145,9 @@
   <data name="Always on" xml:space="preserve"><value>常時有効</value></data>
   <data name="Duty only" xml:space="preserve"><value>コンテンツ内のみ</value></data>
   <data name="On applies inside and outside duties." xml:space="preserve"><value>オンはコンテンツ内外の両方に適用されます。</value></data>
-  <data name="On waits outside duties; normal duty start rules apply inside." xml:space="preserve"><value>オンのままコンテンツ外では待機し、コンテンツ内では通常の開始ルールに従います。</value></data>
-  <data name="Waiting for duty" xml:space="preserve"><value>コンテンツ待機中</value></data>
-  <data name="Run is On. Automation is inactive outside duties." xml:space="preserve"><value>Run はオンです。コンテンツ外では自動化は動作しません。</value></data>
+  <data name="Only combat rotations wait outside duties. Following, repairs and other configured actions continue." xml:space="preserve"><value>コンテンツ外で待機するのは戦闘ローテーションのみです。追従、修理、その他の設定済み動作は継続します。</value></data>
+  <data name="Combat rotations paused outside duties" xml:space="preserve"><value>コンテンツ外では戦闘ローテーションを停止</value></data>
+  <data name="Run is On. Following, repairs and other configured actions continue. Combat rotations wait for a duty." xml:space="preserve"><value>Run はオンです。追従、修理、その他の設定済み動作は継続します。戦闘ローテーションはコンテンツ開始を待ちます。</value></data>
   <data name="New profiles inherit this mode. Sync updates existing profiles." xml:space="preserve"><value>新しいプロファイルはこのモードを継承します。同期すると既存のプロファイルが更新されます。</value></data>
   <data name="Existing configurations default to Always on." xml:space="preserve"><value>既存の設定の既定値は常時有効です。</value></data>
   <data name="Limit Break" xml:space="preserve"><value>リミットブレイク</value></data>
@@ -3188,4 +3188,16 @@
   <data name="Melee Limit Break" xml:space="preserve"><value>近接のリミットブレイク</value></data>
   <data name="Physical ranged Limit Break" xml:space="preserve"><value>遠隔物理のリミットブレイク</value></data>
   <data name="Magical ranged Limit Break" xml:space="preserve"><value>遠隔魔法のリミットブレイク</value></data>
+  <data name="Picker" xml:space="preserve"><value>ピッカー</value></data>
+  <data name="Default" xml:space="preserve"><value>既定</value></data>
+  <data name="Background, controls and text follow your theme." xml:space="preserve"><value>背景、コントロール、テキストはテーマに従います。</value></data>
+  <data name="Theme colour" xml:space="preserve"><value>テーマの色</value></data>
+  <data name="Choose each colour independently." xml:space="preserve"><value>各色を個別に選択します。</value></data>
+  <data name="Background" xml:space="preserve"><value>背景</value></data>
+  <data name="Controls" xml:space="preserve"><value>コントロール</value></data>
+  <data name="Text" xml:space="preserve"><value>テキスト</value></data>
+  <data name="Aa  Preview text" xml:space="preserve"><value>Aa  テキストのプレビュー</value></data>
+  <data name="Control" xml:space="preserve"><value>コントロール</value></data>
+  <data name="Switch to Picker to set each colour yourself." xml:space="preserve"><value>各色を自分で設定するにはピッカーに切り替えます。</value></data>
+  <data name="Switch back to Auto to use the automatic theme." xml:space="preserve"><value>自動テーマを使うには「自動」に戻します。</value></data>
 </root>

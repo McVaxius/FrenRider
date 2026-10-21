@@ -127,8 +127,8 @@ public class MainWindow : Window, IDisposable
             if (UiGui.ActivationModeControls(config)) plugin.ConfigManager.SaveCurrentAccount();
             if (plugin.IsWaitingForDuty)
             {
-                UiHelpers.StatusPill("Waiting for duty", UiHelpers.Yellow);
-                UiGui.TextWrapped("Run is On. Automation is inactive outside duties.");
+                UiHelpers.StatusPill("Combat rotations paused outside duties", UiHelpers.Yellow);
+                UiGui.TextWrapped("Run is On. Following, repairs and other configured actions continue. Combat rotations wait for a duty.");
             }
         });
         DrawAccountControls();
@@ -257,7 +257,7 @@ public class MainWindow : Window, IDisposable
         ImGui.SameLine();
         using (UiText.Font(UiFontRole.Title)) MaterialText.Text("Fren Rider");
         NextGroup(110);
-        UiHelpers.StatusPill(plugin.IsWaitingForDuty ? "Waiting for duty" : config.Enabled ? "Enabled" : "Disabled",
+        UiHelpers.StatusPill(plugin.IsWaitingForDuty ? "Combat rotations paused outside duties" : config.Enabled ? "Enabled" : "Disabled",
             plugin.IsWaitingForDuty ? UiHelpers.Yellow : config.Enabled ? UiHelpers.Green : UiHelpers.Grey);
 
         NextGroup(MaterialText.Measure(UiText.T("Run")).X / Math.Max(.01f, MaterialTheme.Metrics.Scale) + 52);

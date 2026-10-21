@@ -105,20 +105,14 @@ public sealed class Plugin : IDalamudPlugin
     private bool wasEffectivelyEnabled;
     private bool startupCastingSettingsPending = true;
 
-    internal bool IsFrenRiderEffectivelyEnabled
-    {
-        get
-        {
-            var config = ConfigManager.GetActiveConfig();
-            return config.ActivationMode == FrenRiderActivationMode.AlwaysOn ? config.Enabled
-                : config.IsEnabledForDuty(Condition is not null
-                    && (Condition[ConditionFlag.BoundByDuty] || Condition[ConditionFlag.BoundByDuty56]
-                        || Condition[ConditionFlag.BoundByDuty95]));
-        }
-    }
+    internal bool IsFrenRiderEffectivelyEnabled => ConfigManager.GetActiveConfig().Enabled;
+
+    internal bool AreCombatRotationsEnabled => ConfigManager.GetActiveConfig().IsEnabledForDuty(
+        Condition is not null && (Condition[ConditionFlag.BoundByDuty]
+            || Condition[ConditionFlag.BoundByDuty56] || Condition[ConditionFlag.BoundByDuty95]));
 
     internal bool IsWaitingForDuty => ConfigManager.GetActiveConfig() is { Enabled: true,
-        ActivationMode: FrenRiderActivationMode.DutyOnly } && !IsFrenRiderEffectivelyEnabled;
+        ActivationMode: FrenRiderActivationMode.DutyOnly } && !AreCombatRotationsEnabled;
     private readonly ChocoboExplorationService chocoboExploration = new();
     private int chocoboRequestGeneration;
     private readonly ChocoboSkillService chocoboSkills;
@@ -138,6 +132,9 @@ public sealed class Plugin : IDalamudPlugin
     private string appliedLanguage = "";
     private uint appliedAccent;
     private Vector3 accentDraft;
+    private MaterialColorSettings colorDraft = new();
+    private MaterialColorSettings? appliedSavedColors;
+    private MaterialColorSettings? appliedColors;
     private int checkedFontGeneration = -1;
     private int checkedHindiGeneration = -1;
     private bool fontIssueLogged;
@@ -473,12 +470,23 @@ public sealed class Plugin : IDalamudPlugin
     private void DrawTitleColour()
     {
         using var controls = MaterialControls.Push(FrenRiderPresentation.Controls(Configuration.UiCompact ? 28 : 32, 18));
-        if (!MaterialAppearanceSelector.DrawPalette("titlebar-colour", ref accentDraft,
-            new(UiText.T("Color"), UiText.T("Language"), UiText.T("Teal"), UiText.T("Blue"), UiText.T("Pink"), UiText.T("Custom RGB")))) return;
-        Configuration.UiAccentRgb = ((uint)Math.Clamp((int)MathF.Round(accentDraft.X * 255), 0, 255) << 16)
-            | ((uint)Math.Clamp((int)MathF.Round(accentDraft.Y * 255), 0, 255) << 8)
-            | (uint)Math.Clamp((int)MathF.Round(accentDraft.Z * 255), 0, 255);
+        if (!DrawColourEditor("titlebar-colour")) return;
         Configuration.Save();
+    }
+
+    private bool DrawColourEditor(string id)
+    {
+        var changed = MaterialAppearanceSelector.DrawColors(id, ref colorDraft, ref accentDraft,
+            new(UiText.T("Color"), UiText.T("Language"), UiText.T("Teal"), UiText.T("Blue"), UiText.T("Pink"), UiText.T("Custom RGB")),
+            new(UiText.T("Auto"), UiText.T("Picker"), UiText.T("Default"), UiText.T("Background, controls and text follow your theme."),
+                UiText.T("Theme colour"), UiText.T("Choose each colour independently."), UiText.T("Background"), UiText.T("Controls"),
+                UiText.T("Text"), UiText.T("Aa  Preview text"), UiText.T("Control"),
+                UiText.T("Switch to Picker to set each colour yourself."), UiText.T("Switch back to Auto to use the automatic theme.")),
+            Configuration.UiCompact ? 298 : 316);
+        if (!changed) return false;
+        Configuration.UiColors = colorDraft;
+        Configuration.UiAccentRgb = MaterialColorSettings.ToRgb(accentDraft);
+        return true;
     }
 
 
@@ -588,10 +596,17 @@ public sealed class Plugin : IDalamudPlugin
             checkedHindiGeneration = -1;
             fontIssueLogged = false;
         }
-        if (uiTheme is null || (Configuration.UiAccentRgb & 0xFFFFFF) != appliedAccent)
+        var savedColors = Configuration.UiColors ?? new MaterialColorSettings();
+        if (savedColors != appliedSavedColors)
+        {
+            colorDraft = savedColors;
+            appliedSavedColors = savedColors;
+        }
+        if (uiTheme is null || (Configuration.UiAccentRgb & 0xFFFFFF) != appliedAccent || colorDraft != appliedColors)
         {
             appliedAccent = Configuration.UiAccentRgb & 0xFFFFFF;
-            uiTheme = FrenRiderPresentation.Theme(appliedAccent);
+            appliedColors = colorDraft;
+            uiTheme = FrenRiderPresentation.Theme(appliedAccent, colorDraft);
             var color = FrenRiderPresentation.Rgb(appliedAccent);
             accentDraft = new(color.X, color.Y, color.Z);
         }
@@ -606,12 +621,7 @@ public sealed class Plugin : IDalamudPlugin
 
     internal void DrawAccentSelector()
     {
-        using var controls = MaterialControls.Push(FrenRiderPresentation.Controls(Configuration.UiCompact ? 28 : 32, 18));
-        if (!MaterialAppearanceSelector.DrawAccent("appearance", ref accentDraft,
-            new(UiText.T("Color"), UiText.T("Language"), UiText.T("Teal"), UiText.T("Blue"), UiText.T("Pink"), UiText.T("Custom RGB")))) return;
-        Configuration.UiAccentRgb = ((uint)Math.Clamp((int)MathF.Round(accentDraft.X * 255), 0, 255) << 16)
-            | ((uint)Math.Clamp((int)MathF.Round(accentDraft.Y * 255), 0, 255) << 8) | (uint)Math.Clamp((int)MathF.Round(accentDraft.Z * 255), 0, 255);
-        Configuration.Save();
+        DrawTitleColour();
     }
 
     internal void DrawLanguageSelector()
@@ -635,8 +645,7 @@ public sealed class Plugin : IDalamudPlugin
     private void RefreshEffectiveActivation()
     {
         if (startupCastingSettingsPending && ConfigManager.TryGetActiveConfig(out var startupProfile)
-            && startupProfile != null && (startupProfile.ActivationMode == FrenRiderActivationMode.AlwaysOn
-                || IsFrenRiderEffectivelyEnabled))
+            && startupProfile != null)
         {
             startupCastingSettingsPending = false;
             BossModActionTweaksService.ApplyDontMoveWhileCastingOnLoad(Configuration.DontMoveWhileCasting);
@@ -697,14 +706,6 @@ public sealed class Plugin : IDalamudPlugin
         }
         else
         {
-            if (IsWaitingForDuty)
-            {
-                CancelChocoboSkillSession();
-                CancelChocoboFoodSession();
-                CancelChocoboPurchaseSession();
-                chocoboExploration.Stop("FrenRider inactive", restore: false);
-                FollowService.SuspendForActivation();
-            }
             BossModActionTweaksService.ResetRecovery();
             CoppeliaPowerlevelLeaseService.HandleManualFrenRiderDisable();
             AdsHyperFocusLeaseService.HandleManualFrenRiderDisable();
@@ -729,7 +730,6 @@ public sealed class Plugin : IDalamudPlugin
     internal void CaptureExternalAutomationSnapshot(string reason)
     {
         var config = ConfigManager.GetActiveConfig();
-        if (IsWaitingForDuty) return;
         if (config.Enabled)
             AutorotIpcService.PrepareOwnedBossModSettings(CombatService.GetConfiguredRotationProvider(config),
                 GetCleanupAccountId(), GetCleanupCharacterKey(), config);
@@ -1158,7 +1158,7 @@ public sealed class Plugin : IDalamudPlugin
 
             RefreshEffectiveActivation();
 
-            if (!IsWaitingForDuty) Measure("chocobo-discovery", () =>
+            Measure("chocobo-discovery", () =>
             {
                 if (chocoboExploration.PendingReload)
                 {
@@ -1172,7 +1172,7 @@ public sealed class Plugin : IDalamudPlugin
             });
 
             // Update fren tracking
-            if (!IsWaitingForDuty) Measure("fren-tracker", FrenTracker.Update);
+            Measure("fren-tracker", FrenTracker.Update);
             Measure("coppelia-powerlevel-lease", CoppeliaPowerlevelLeaseService.Update);
             Measure("ads-hyper-focus-lease", AdsHyperFocusLeaseService.Update);
 
@@ -1241,8 +1241,6 @@ public sealed class Plugin : IDalamudPlugin
                     }
                 });
             }
-
-            if (IsWaitingForDuty) return;
 
             // Resolve ADS/utility state, then establish combat authority before
             // ADS pauses FrenRider's movement and other duty systems.
@@ -1365,8 +1363,8 @@ public sealed class Plugin : IDalamudPlugin
         if (IsWaitingForDuty)
         {
             dtrEntry.Tooltip = new SeString(new TextPayload(uiText.Language == "hi"
-                ? "Run is On. Automation is inactive outside duties."
-                : UiText.T("Run is On. Automation is inactive outside duties.")));
+                ? "Run is On. Following, repairs and other configured actions continue. Combat rotations wait for a duty."
+                : UiText.T("Run is On. Following, repairs and other configured actions continue. Combat rotations wait for a duty.")));
             return;
         }
         var fren = Configuration.KrangleEnabled ? KrangleService.KrangleName(config.FrenName) : config.FrenName;
@@ -1459,13 +1457,7 @@ public sealed class Plugin : IDalamudPlugin
         MaterialAppearanceTab.Draw("##WindowAppearanceGroups", new(UiText.T("Theme & Language"), UiText.T("Main window controls"),
             UiText.T("Window opacity"), UiText.T("When unfocused")), minimum, () =>
         {
-            if (MaterialAppearanceSelector.DrawPalette("appearance", ref accentDraft, labels))
-            {
-                config.UiAccentRgb = ((uint)Math.Clamp((int)MathF.Round(accentDraft.X * 255), 0, 255) << 16)
-                    | ((uint)Math.Clamp((int)MathF.Round(accentDraft.Y * 255), 0, 255) << 8)
-                    | (uint)Math.Clamp((int)MathF.Round(accentDraft.Z * 255), 0, 255);
-                changed = true;
-            }
+            changed |= DrawColourEditor("appearance");
             using (UiGui.SettingRow("Language"))
             {
                 UiGui.SettingLabel(); ImGui.SameLine(); DrawLanguageSelector();

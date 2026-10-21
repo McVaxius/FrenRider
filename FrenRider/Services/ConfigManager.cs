@@ -418,10 +418,11 @@ public class ConfigManager : IDadProfileStore
 
     public IReadOnlyDictionary<string, AccountConfig> Accounts => accounts;
 
-    public AccountConfig? GetCurrentAccount()
+    public AccountConfig? GetCurrentAccount(string? accountId = null)
     {
-        if (string.IsNullOrEmpty(CurrentAccountId)) return null;
-        return accounts.TryGetValue(CurrentAccountId, out var acc) ? acc : null;
+        accountId ??= CurrentAccountId;
+        if (string.IsNullOrEmpty(accountId)) return null;
+        return accounts.TryGetValue(accountId, out var acc) ? acc : null;
     }
 
     public CharacterConfig GetActiveConfig()
@@ -461,9 +462,9 @@ public class ConfigManager : IDadProfileStore
            (TryResolveActiveConfig(GetCurrentAccount(), CurrentAccountId, ActiveCharacterKey, out var saved) &&
             ReferenceEquals(config, saved));
 
-    public CharacterConfig GetCurrentCharacterConfig(string charKey)
+    public CharacterConfig GetCurrentCharacterConfig(string charKey, string? accountId = null)
     {
-        var account = GetCurrentAccount();
+        var account = GetCurrentAccount(accountId);
         return ResolveEditingConfigOrDisabled(account, charKey);
     }
 
@@ -1037,6 +1038,11 @@ public class ConfigManager : IDadProfileStore
             SaveAccount(CurrentAccountId);
     }
 
+    internal void SaveEditingAccount(string accountId)
+    {
+        if (GetCurrentAccount(accountId) is { } account) SaveAccount(account.AccountId);
+    }
+
     internal void SaveUnlockedBeasts(IReadOnlySet<uint> beastIds)
     {
         if (UpdateUnlockedBeasts(GetCurrentAccount(), ActiveCharacterKey, beastIds))
@@ -1222,25 +1228,25 @@ public class ConfigManager : IDadProfileStore
         }
     }
 
-    public int SetAllFrenRiderEnabled(bool enabled)
+    public int SetAllFrenRiderEnabled(bool enabled, string? accountId = null)
     {
-        var account = GetCurrentAccount();
+        var account = GetCurrentAccount(accountId);
         if (account == null) return 0;
 
         account.DefaultConfig.Enabled = enabled;
         // Apply the lifecycle before syncing the backing profiles, including a live DAD overlay.
-        if (TryGetActiveConfig(out _))
+        if (ReferenceEquals(account, GetCurrentAccount()) && TryGetActiveConfig(out _))
             SetFrenRiderEnabled(enabled);
 
-        var count = ApplyDefaultSettingToAllCharacters("Fren Rider enabled by default");
+        var count = ApplyDefaultSettingToAllCharacters("Fren Rider enabled by default", accountId);
         if (count == 0)
-            SaveCurrentAccount();
+            SaveAccount(account!.AccountId);
         return count;
     }
 
-    public void ResetCharacterToDefault(string charKey)
+    public void ResetCharacterToDefault(string charKey, string? accountId = null)
     {
-        var account = GetCurrentAccount();
+        var account = GetCurrentAccount(accountId);
         if (account == null) return;
 
         if (string.IsNullOrEmpty(charKey))
@@ -1256,19 +1262,19 @@ public class ConfigManager : IDadProfileStore
             account.Characters[charKey] = account.DefaultConfig.Clone();
         }
 
-        SaveCurrentAccount();
+        SaveAccount(account!.AccountId);
     }
 
-    public int ApplyDefaultToAllCharacters()
+    public int ApplyDefaultToAllCharacters(string? accountId = null)
     {
-        var account = GetCurrentAccount();
+        var account = GetCurrentAccount(accountId);
         if (account == null) return 0;
 
         var previousEffectiveEnabled = GetActiveConfig().Enabled;
         var count = ApplyDefaultToAllCharacters(account);
         if (count > 0)
         {
-            SaveCurrentAccount();
+            SaveAccount(account!.AccountId);
             NotifyEffectiveEnabledChanged(
                 previousEffectiveEnabled,
                 GetActiveConfig().Enabled,
@@ -1279,16 +1285,16 @@ public class ConfigManager : IDadProfileStore
         return count;
     }
 
-    public int ApplyDefaultTabToAllCharacters(string tabName)
+    public int ApplyDefaultTabToAllCharacters(string tabName, string? accountId = null)
     {
-        var account = GetCurrentAccount();
+        var account = GetCurrentAccount(accountId);
         if (account == null) return 0;
 
         var previousEffectiveEnabled = GetActiveConfig().Enabled;
         var count = ApplyDefaultTabToAllCharacters(account, tabName);
         if (count > 0)
         {
-            SaveCurrentAccount();
+            SaveAccount(account!.AccountId);
             NotifyEffectiveEnabledChanged(
                 previousEffectiveEnabled,
                 GetActiveConfig().Enabled,
@@ -1299,7 +1305,7 @@ public class ConfigManager : IDadProfileStore
         return count;
     }
 
-    public int ApplyDefaultSettingToAllCharacters(string label)
+    public int ApplyDefaultSettingToAllCharacters(string label, string? accountId = null)
     {
         var setting = FindSetting(label);
         if (setting == null)
@@ -1308,19 +1314,19 @@ public class ConfigManager : IDadProfileStore
             return 0;
         }
 
-        return ApplyDefaultSettingToAllCharacters(label, setting.Copy);
+        return ApplyDefaultSettingToAllCharacters(label, setting.Copy, accountId);
     }
 
-    public int ApplyDefaultSettingToAllCharacters(string label, Action<CharacterConfig, CharacterConfig> copy)
+    public int ApplyDefaultSettingToAllCharacters(string label, Action<CharacterConfig, CharacterConfig> copy, string? accountId = null)
     {
-        var account = GetCurrentAccount();
+        var account = GetCurrentAccount(accountId);
         if (account == null) return 0;
 
         var previousEffectiveEnabled = GetActiveConfig().Enabled;
         var count = ApplyDefaultSettingToAllCharacters(account, copy);
         if (count > 0)
         {
-            SaveCurrentAccount();
+            SaveAccount(account!.AccountId);
             NotifyEffectiveEnabledChanged(
                 previousEffectiveEnabled,
                 GetActiveConfig().Enabled,
@@ -1379,9 +1385,9 @@ public class ConfigManager : IDadProfileStore
         return account.Characters.Count;
     }
 
-    public void ResetCharacterTabToDefault(string charKey, string tabName)
+    public void ResetCharacterTabToDefault(string charKey, string tabName, string? accountId = null)
     {
-        var account = GetCurrentAccount();
+        var account = GetCurrentAccount(accountId);
         if (account == null) return;
 
         var target = string.IsNullOrEmpty(charKey) ? account.DefaultConfig : null;
@@ -1393,20 +1399,20 @@ public class ConfigManager : IDadProfileStore
         if (!ApplyTabSettings(source, target, tabName))
             return;
 
-        SaveCurrentAccount();
+        SaveAccount(account!.AccountId);
     }
 
-    public bool DeleteCharacter(string charKey)
+    public bool DeleteCharacter(string charKey, string? accountId = null)
     {
-        var account = GetCurrentAccount();
-        if (!TryDeleteCharacter(account, ActiveCharacterKey, charKey))
+        var account = GetCurrentAccount(accountId);
+        if (!TryDeleteCharacter(account, ReferenceEquals(account, GetCurrentAccount()) ? ActiveCharacterKey : "", charKey))
         {
             if (string.Equals(ActiveCharacterKey, charKey, StringComparison.Ordinal))
                 log.Warning($"Cannot delete active character config: {charKey}");
             return false;
         }
 
-        SaveCurrentAccount();
+        SaveAccount(account!.AccountId);
         log.Information($"Deleted character config: {charKey}");
         return true;
     }
@@ -1511,9 +1517,9 @@ public class ConfigManager : IDadProfileStore
         return true;
     }
 
-    public IEnumerable<RemoteProfileRow> GetSortedRemoteProfiles()
+    public IEnumerable<RemoteProfileRow> GetSortedRemoteProfiles(string? accountId = null)
     {
-        var account = GetCurrentAccount();
+        var account = GetCurrentAccount(accountId);
         return account?.RemoteProfiles?
                    .Where(row => row != null)
                    .OrderBy(row => row.DisplayLabel, StringComparer.OrdinalIgnoreCase)
@@ -1521,9 +1527,9 @@ public class ConfigManager : IDadProfileStore
                ?? Enumerable.Empty<RemoteProfileRow>();
     }
 
-    public RemoteProfileRow? GetRemoteProfile(string rowId)
+    public RemoteProfileRow? GetRemoteProfile(string rowId, string? accountId = null)
     {
-        var account = GetCurrentAccount();
+        var account = GetCurrentAccount(accountId);
         if (account?.RemoteProfiles == null || string.IsNullOrWhiteSpace(rowId))
             return null;
 
@@ -1534,36 +1540,36 @@ public class ConfigManager : IDadProfileStore
         return matches.Count == 1 ? matches[0] : null;
     }
 
-    public bool DeleteRemoteProfile(string rowId)
+    public bool DeleteRemoteProfile(string rowId, string? accountId = null)
     {
-        var account = GetCurrentAccount();
-        var row = GetRemoteProfile(rowId);
+        var account = GetCurrentAccount(accountId);
+        var row = GetRemoteProfile(rowId, accountId);
         if (account?.RemoteProfiles == null || row == null)
             return false;
 
         if (!account.RemoteProfiles.Remove(row))
             return false;
 
-        if (SaveAccount(CurrentAccountId))
+        if (SaveAccount(account!.AccountId))
             return true;
 
         account.RemoteProfiles.Add(row);
         return false;
     }
 
-    public IEnumerable<string> GetSortedCharacterKeys()
+    public IEnumerable<string> GetSortedCharacterKeys(string? accountId = null)
     {
-        var account = GetCurrentAccount();
+        var account = GetCurrentAccount(accountId);
         if (account == null) return Enumerable.Empty<string>();
         return account.Characters.Keys.OrderBy(k => k, StringComparer.OrdinalIgnoreCase);
     }
 
-    public void UpdateAccountAlias(string alias)
+    public void UpdateAccountAlias(string alias, string? accountId = null)
     {
-        var account = GetCurrentAccount();
+        var account = GetCurrentAccount(accountId);
         if (account == null) return;
         account.AccountAlias = alias;
-        SaveCurrentAccount();
+        SaveAccount(account!.AccountId);
     }
 
     private void LoadAllAccounts()

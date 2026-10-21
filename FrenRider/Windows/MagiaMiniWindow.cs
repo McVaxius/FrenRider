@@ -160,7 +160,7 @@ public sealed class MagiaMiniWindow : Window, IDisposable
         ImGui.Dummy(new Vector2(UiHelpers.Scale(14), rowHeight));
         ImGui.SameLine(0, UiHelpers.Scale(compact ? 10 : 11));
         UiGui.TextColored(statusColor, enabled ? "ON" : "OFF");
-        if (plugin.IsWaitingForDuty && ImGui.IsItemHovered()) UiGui.SetTooltip("Waiting for duty");
+        if (plugin.IsWaitingForDuty && ImGui.IsItemHovered()) UiGui.SetTooltip("Combat rotations paused outside duties");
 
         ImGui.SetCursorScreenPos(position + new Vector2(compact ? 22 : 21, compact ? 112 : eureka ? 122 : 129) * scale);
         ImGui.Separator();

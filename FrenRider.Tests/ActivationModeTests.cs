@@ -68,7 +68,7 @@ public sealed class ActivationModeTests
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public void EnableCallbackOutsideDutyDoesNotReachAnySetupServices(bool enabled)
+    public void DutyTransitionsChangeOnlyCombatEligibilityWithoutPluginLifecycleCleanup(bool enabled)
     {
         WithManager((manager, _) =>
         {
@@ -77,21 +77,29 @@ public sealed class ActivationModeTests
             config.ActivationMode = FrenRiderActivationMode.DutyOnly;
             var condition = typeof(Plugin).GetProperty("Condition", BindingFlags.Static | BindingFlags.NonPublic)!;
             var previous = condition.GetValue(null);
+            var inDuty = false;
             try
             {
-                condition.SetValue(null, Proxy<ICondition>((_, _) => false));
+                condition.SetValue(null, Proxy<ICondition>((method, args) => method.Name == "get_Item"
+                    && args![0] is Dalamud.Game.ClientState.Conditions.ConditionFlag flag
+                    && flag == Dalamud.Game.ClientState.Conditions.ConditionFlag.BoundByDuty && inDuty));
                 var plugin = (Plugin)RuntimeHelpers.GetUninitializedObject(typeof(Plugin));
                 typeof(Plugin).GetField("<ConfigManager>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic)!
                     .SetValue(plugin, manager);
-                typeof(Plugin).GetField("startupCastingSettingsPending", BindingFlags.Instance | BindingFlags.NonPublic)!
-                    .SetValue(plugin, true);
-                // All setup services deliberately remain absent: the real enable
-                // callback must stop before touching them while waiting outside.
-                typeof(Plugin).GetMethod("OnFrenRiderEnabledChanged", BindingFlags.Instance | BindingFlags.NonPublic)!
-                    .Invoke(plugin, [true]);
-                Assert.Equal(enabled, config.Enabled);
-                Assert.Equal(enabled, plugin.IsWaitingForDuty);
-                Assert.False(plugin.IsFrenRiderEffectivelyEnabled);
+                typeof(Plugin).GetField("wasEffectivelyEnabled", BindingFlags.Instance | BindingFlags.NonPublic)!
+                    .SetValue(plugin, enabled);
+                // Setup/cleanup services are absent: entering/leaving duties must
+                // never invoke the master activation lifecycle.
+                foreach (var duty in new[] { false, true, false, true, false })
+                {
+                    inDuty = duty;
+                    typeof(Plugin).GetMethod("RefreshEffectiveActivation", BindingFlags.Instance | BindingFlags.NonPublic)!
+                        .Invoke(plugin, null);
+                    Assert.Equal(enabled, config.Enabled);
+                    Assert.Equal(enabled, plugin.IsFrenRiderEffectivelyEnabled);
+                    Assert.Equal(enabled && duty, plugin.AreCombatRotationsEnabled);
+                    Assert.Equal(enabled && !duty, plugin.IsWaitingForDuty);
+                }
             }
             finally { condition.SetValue(null, previous); }
         });
@@ -114,7 +122,7 @@ public sealed class ActivationModeTests
         });
     }
 
-    private static void WithManager(Action<ConfigManager, CharacterConfig> verify)
+    internal static void WithManager(Action<ConfigManager, CharacterConfig> verify)
     {
         var directory = Directory.CreateTempSubdirectory("fr-activation-");
         try
@@ -138,7 +146,7 @@ public sealed class ActivationModeTests
         }
     }
 
-    private static T Proxy<T>(Func<MethodInfo, object?[]?, object?> handler) where T : class
+    internal static T Proxy<T>(Func<MethodInfo, object?[]?, object?> handler) where T : class
     {
         var result = DispatchProxy.Create<T, TestProxy>();
         ((TestProxy)(object)result).Handler = handler;

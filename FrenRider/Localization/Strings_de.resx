@@ -3145,9 +3145,9 @@ An: Die BossMod-Voreinstellungen unten mit jedem Rotationsanbieter verwenden. Ei
   <data name="Always on" xml:space="preserve"><value>Immer an</value></data>
   <data name="Duty only" xml:space="preserve"><value>Nur in Inhalten</value></data>
   <data name="On applies inside and outside duties." xml:space="preserve"><value>Ein gilt innerhalb und außerhalb von Inhalten.</value></data>
-  <data name="On waits outside duties; normal duty start rules apply inside." xml:space="preserve"><value>Ein wartet außerhalb von Inhalten; innerhalb gelten die normalen Startregeln.</value></data>
-  <data name="Waiting for duty" xml:space="preserve"><value>Auf Inhalt warten</value></data>
-  <data name="Run is On. Automation is inactive outside duties." xml:space="preserve"><value>Run ist eingeschaltet. Außerhalb von Inhalten ist die Automatisierung inaktiv.</value></data>
+  <data name="Only combat rotations wait outside duties. Following, repairs and other configured actions continue." xml:space="preserve"><value>Nur Kampfrotationen warten außerhalb von Inhalten. Folgen, Reparaturen und andere konfigurierte Aktionen laufen weiter.</value></data>
+  <data name="Combat rotations paused outside duties" xml:space="preserve"><value>Kampfrotationen außerhalb von Inhalten pausiert</value></data>
+  <data name="Run is On. Following, repairs and other configured actions continue. Combat rotations wait for a duty." xml:space="preserve"><value>Run ist eingeschaltet. Folgen, Reparaturen und andere konfigurierte Aktionen laufen weiter. Kampfrotationen warten auf einen Inhalt.</value></data>
   <data name="New profiles inherit this mode. Sync updates existing profiles." xml:space="preserve"><value>Neue Profile übernehmen diesen Modus. Synchronisieren aktualisiert bestehende Profile.</value></data>
   <data name="Existing configurations default to Always on." xml:space="preserve"><value>Bestehende Konfigurationen verwenden standardmäßig Immer an.</value></data>
   <data name="Limit Break" xml:space="preserve"><value>Limitrausch</value></data>
@@ -3188,4 +3188,16 @@ An: Die BossMod-Voreinstellungen unten mit jedem Rotationsanbieter verwenden. Ei
   <data name="Melee Limit Break" xml:space="preserve"><value>Nahkampf-Limitrausch</value></data>
   <data name="Physical ranged Limit Break" xml:space="preserve"><value>Physischer Fernkampf-Limitrausch</value></data>
   <data name="Magical ranged Limit Break" xml:space="preserve"><value>Magischer Fernkampf-Limitrausch</value></data>
+  <data name="Picker" xml:space="preserve"><value>Farbwahl</value></data>
+  <data name="Default" xml:space="preserve"><value>Standard</value></data>
+  <data name="Background, controls and text follow your theme." xml:space="preserve"><value>Hintergrund, Steuerelemente und Text folgen deinem Design.</value></data>
+  <data name="Theme colour" xml:space="preserve"><value>Designfarbe</value></data>
+  <data name="Choose each colour independently." xml:space="preserve"><value>Wähle jede Farbe unabhängig aus.</value></data>
+  <data name="Background" xml:space="preserve"><value>Hintergrund</value></data>
+  <data name="Controls" xml:space="preserve"><value>Steuerelemente</value></data>
+  <data name="Text" xml:space="preserve"><value>Text</value></data>
+  <data name="Aa  Preview text" xml:space="preserve"><value>Aa  Textvorschau</value></data>
+  <data name="Control" xml:space="preserve"><value>Steuerelement</value></data>
+  <data name="Switch to Picker to set each colour yourself." xml:space="preserve"><value>Wechsle zur Farbwahl, um jede Farbe selbst festzulegen.</value></data>
+  <data name="Switch back to Auto to use the automatic theme." xml:space="preserve"><value>Wechsle zurück zu Automatisch, um das automatische Design zu verwenden.</value></data>
 </root>

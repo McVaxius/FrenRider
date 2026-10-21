@@ -3145,9 +3145,9 @@
   <data name="Always on" xml:space="preserve"><value>始终启用</value></data>
   <data name="Duty only" xml:space="preserve"><value>仅限副本内</value></data>
   <data name="On applies inside and outside duties." xml:space="preserve"><value>开启后在副本内外均生效。</value></data>
-  <data name="On waits outside duties; normal duty start rules apply inside." xml:space="preserve"><value>开启后在副本外等待，进入副本后遵循正常的启动规则。</value></data>
-  <data name="Waiting for duty" xml:space="preserve"><value>等待进入副本</value></data>
-  <data name="Run is On. Automation is inactive outside duties." xml:space="preserve"><value>Run 已开启。副本外不执行自动操作。</value></data>
+  <data name="Only combat rotations wait outside duties. Following, repairs and other configured actions continue." xml:space="preserve"><value>副本外仅暂停战斗循环。跟随、修理及其他已配置操作继续运行。</value></data>
+  <data name="Combat rotations paused outside duties" xml:space="preserve"><value>副本外暂停战斗循环</value></data>
+  <data name="Run is On. Following, repairs and other configured actions continue. Combat rotations wait for a duty." xml:space="preserve"><value>Run 已开启。跟随、修理及其他已配置操作继续运行。战斗循环等待进入副本。</value></data>
   <data name="New profiles inherit this mode. Sync updates existing profiles." xml:space="preserve"><value>新配置继承此模式。同步会更新已有配置。</value></data>
   <data name="Existing configurations default to Always on." xml:space="preserve"><value>已有配置默认使用始终启用。</value></data>
   <data name="Limit Break" xml:space="preserve"><value>极限技</value></data>
@@ -3188,4 +3188,16 @@
   <data name="Melee Limit Break" xml:space="preserve"><value>近战极限技</value></data>
   <data name="Physical ranged Limit Break" xml:space="preserve"><value>远程物理极限技</value></data>
   <data name="Magical ranged Limit Break" xml:space="preserve"><value>远程魔法极限技</value></data>
+  <data name="Picker" xml:space="preserve"><value>选色器</value></data>
+  <data name="Default" xml:space="preserve"><value>默认</value></data>
+  <data name="Background, controls and text follow your theme." xml:space="preserve"><value>背景、控件和文本跟随主题。</value></data>
+  <data name="Theme colour" xml:space="preserve"><value>主题颜色</value></data>
+  <data name="Choose each colour independently." xml:space="preserve"><value>分别选择每种颜色。</value></data>
+  <data name="Background" xml:space="preserve"><value>背景</value></data>
+  <data name="Controls" xml:space="preserve"><value>控件</value></data>
+  <data name="Text" xml:space="preserve"><value>文本</value></data>
+  <data name="Aa  Preview text" xml:space="preserve"><value>Aa  文本预览</value></data>
+  <data name="Control" xml:space="preserve"><value>控件</value></data>
+  <data name="Switch to Picker to set each colour yourself." xml:space="preserve"><value>切换到选色器以自行设置每种颜色。</value></data>
+  <data name="Switch back to Auto to use the automatic theme." xml:space="preserve"><value>切换回自动以使用自动主题。</value></data>
 </root>

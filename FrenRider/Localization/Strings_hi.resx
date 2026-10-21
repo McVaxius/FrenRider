@@ -3156,9 +3156,9 @@
   <data name="Always on" xml:space="preserve"><value>हमेशा चालू</value></data>
   <data name="Duty only" xml:space="preserve"><value>केवल ड्यूटी में</value></data>
   <data name="On applies inside and outside duties." xml:space="preserve"><value>चालू स्थिति ड्यूटी के अंदर और बाहर दोनों जगह लागू होती है।</value></data>
-  <data name="On waits outside duties; normal duty start rules apply inside." xml:space="preserve"><value>चालू होने पर ड्यूटी के बाहर प्रतीक्षा करता है; अंदर सामान्य आरंभ नियम लागू होते हैं।</value></data>
-  <data name="Waiting for duty" xml:space="preserve"><value>ड्यूटी की प्रतीक्षा में</value></data>
-  <data name="Run is On. Automation is inactive outside duties." xml:space="preserve"><value>Run चालू है। ड्यूटी के बाहर स्वचालन निष्क्रिय है।</value></data>
+  <data name="Only combat rotations wait outside duties. Following, repairs and other configured actions continue." xml:space="preserve"><value>ड्यूटी के बाहर केवल कॉम्बैट रोटेशन रुकते हैं। फ़ॉलो करना, मरम्मत और अन्य कॉन्फ़िगर की गई क्रियाएँ जारी हैं।</value></data>
+  <data name="Combat rotations paused outside duties" xml:space="preserve"><value>ड्यूटी के बाहर कॉम्बैट रोटेशन रुके हैं</value></data>
+  <data name="Run is On. Following, repairs and other configured actions continue. Combat rotations wait for a duty." xml:space="preserve"><value>Run चालू है। फ़ॉलो करना, मरम्मत और अन्य कॉन्फ़िगर की गई क्रियाएँ जारी हैं। कॉम्बैट रोटेशन ड्यूटी की प्रतीक्षा करते हैं।</value></data>
   <data name="New profiles inherit this mode. Sync updates existing profiles." xml:space="preserve"><value>नई प्रोफ़ाइल यह मोड अपनाती हैं। सिंक मौजूदा प्रोफ़ाइल को अपडेट करता है।</value></data>
   <data name="Existing configurations default to Always on." xml:space="preserve"><value>मौजूदा कॉन्फ़िगरेशन में डिफ़ॉल्ट रूप से हमेशा चालू चुना जाता है।</value></data>
   <data name="Limit Break" xml:space="preserve"><value>लिमिट ब्रेक</value></data>
@@ -3199,4 +3199,16 @@
   <data name="Melee Limit Break" xml:space="preserve"><value>निकट युद्ध लिमिट ब्रेक</value></data>
   <data name="Physical ranged Limit Break" xml:space="preserve"><value>दूरस्थ भौतिक लिमिट ब्रेक</value></data>
   <data name="Magical ranged Limit Break" xml:space="preserve"><value>दूरस्थ जादुई लिमिट ब्रेक</value></data>
+  <data name="Picker" xml:space="preserve"><value>चयनकर्ता</value></data>
+  <data name="Default" xml:space="preserve"><value>डिफ़ॉल्ट</value></data>
+  <data name="Background, controls and text follow your theme." xml:space="preserve"><value>पृष्ठभूमि, नियंत्रण और पाठ आपकी थीम का पालन करते हैं।</value></data>
+  <data name="Theme colour" xml:space="preserve"><value>थीम का रंग</value></data>
+  <data name="Choose each colour independently." xml:space="preserve"><value>हर रंग अलग से चुनें।</value></data>
+  <data name="Background" xml:space="preserve"><value>पृष्ठभूमि</value></data>
+  <data name="Controls" xml:space="preserve"><value>नियंत्रण</value></data>
+  <data name="Text" xml:space="preserve"><value>पाठ</value></data>
+  <data name="Aa  Preview text" xml:space="preserve"><value>Aa  पाठ का पूर्वावलोकन</value></data>
+  <data name="Control" xml:space="preserve"><value>नियंत्रण</value></data>
+  <data name="Switch to Picker to set each colour yourself." xml:space="preserve"><value>हर रंग स्वयं तय करने के लिए चयनकर्ता चुनें।</value></data>
+  <data name="Switch back to Auto to use the automatic theme." xml:space="preserve"><value>स्वचालित थीम के लिए स्वचालित विकल्प चुनें।</value></data>
 </root>

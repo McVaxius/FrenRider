@@ -35,7 +35,7 @@ internal static class UiGui
             config.ActivationMode = FrenRiderActivationMode.DutyOnly;
             changed = true;
         }
-        TextWrapped("On waits outside duties; normal duty start rules apply inside.");
+        TextWrapped("Only combat rotations wait outside duties. Following, repairs and other configured actions continue.");
         return changed;
     }
     internal static bool InSettingRow => settingWindow != 0 && ImGuiP.GetCurrentWindow().ID == settingWindow;
