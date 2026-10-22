@@ -3305,4 +3305,13 @@ Açık: aşağıdaki BossMod ön ayarlarını herhangi bir rotasyon sağlayıcı
   <data name="Control" xml:space="preserve"><value>Denetim</value></data>
   <data name="Switch to Picker to set each colour yourself." xml:space="preserve"><value>Her rengi ayarlamak için Seçici'ye geçin.</value></data>
   <data name="Switch back to Auto to use the automatic theme." xml:space="preserve"><value>Otomatik temayı kullanmak için Otomatik'e dönün.</value></data>
+  <data name="Profile actions" xml:space="preserve">
+    <value>Profil i?lemleri</value>
+  </data>
+  <data name="Waiting: ADS status unavailable." xml:space="preserve"><value>Bekleniyor: ADS durumu kullanılamıyor.</value></data>
+  <data name="Waiting: equipped gear durability unavailable." xml:space="preserve"><value>Bekleniyor: kuşanılan ekipmanın dayanıklılık bilgisi kullanılamıyor.</value></data>
+  <data name="{0} repair interrupted: ADS is running a different utility ({1}, {2})." xml:space="preserve"><value>Onarım ({0}) kesildi: ADS başka bir yardımcı işlem çalıştırıyor ({1}, {2}).</value></data>
+  <data name="{0} repair failed: {1}" xml:space="preserve"><value>Onarım ({0}) başarısız: {1}</value></data>
+  <data name="{0} repair requested; waiting for equipped gear durability." xml:space="preserve"><value>Onarım ({0}) istendi; kuşanılan ekipmanın dayanıklılık bilgisi bekleniyor.</value></data>
+  <data name="{0} repair threshold met; waiting for ADS completion." xml:space="preserve"><value>Onarım ({0}): dayanıklılık eşiğine ulaşıldı; ADS&apos;nin tamamlanması bekleniyor.</value></data>
 </root>

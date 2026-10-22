@@ -3211,4 +3211,13 @@
   <data name="Control" xml:space="preserve"><value>नियंत्रण</value></data>
   <data name="Switch to Picker to set each colour yourself." xml:space="preserve"><value>हर रंग स्वयं तय करने के लिए चयनकर्ता चुनें।</value></data>
   <data name="Switch back to Auto to use the automatic theme." xml:space="preserve"><value>स्वचालित थीम के लिए स्वचालित विकल्प चुनें।</value></data>
+  <data name="Profile actions" xml:space="preserve">
+    <value>प्रोफ़ाइल कार्रवाइयाँ</value>
+  </data>
+  <data name="Waiting: ADS status unavailable." xml:space="preserve"><value>प्रतीक्षा: ADS की स्थिति उपलब्ध नहीं है।</value></data>
+  <data name="Waiting: equipped gear durability unavailable." xml:space="preserve"><value>प्रतीक्षा: पहने हुए उपकरणों का टिकाऊपन उपलब्ध नहीं है।</value></data>
+  <data name="{0} repair interrupted: ADS is running a different utility ({1}, {2})." xml:space="preserve"><value>मरम्मत ({0}) बाधित: ADS कोई अन्य कार्य चला रहा है ({1}, {2})।</value></data>
+  <data name="{0} repair failed: {1}" xml:space="preserve"><value>मरम्मत ({0}) विफल: {1}</value></data>
+  <data name="{0} repair requested; waiting for equipped gear durability." xml:space="preserve"><value>मरम्मत ({0}) का अनुरोध किया गया; पहने हुए उपकरणों के टिकाऊपन की जानकारी की प्रतीक्षा है।</value></data>
+  <data name="{0} repair threshold met; waiting for ADS completion." xml:space="preserve"><value>मरम्मत ({0}): टिकाऊपन की सीमा पूरी हो गई; ADS के पूरा होने की प्रतीक्षा है।</value></data>
 </root>

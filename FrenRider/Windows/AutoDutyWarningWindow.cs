@@ -52,19 +52,19 @@ public class AutoDutyWarningWindow : Window
     public override void Draw()
     {
         motion.DrawChrome();
-        UiGui.TitleWithButtons("⚠️ AutoDuty Detected - Action Required", UiText.T("AutoDuty Detected - Action Required"), this);
+        using var controls = MaterialControls.Push(MaterialControlContext.Toolbar);
+        using var spacing = new MaterialStyleScope();
+        spacing.Style(ImGuiStyleVar.ItemSpacing, UiHelpers.Scale(new Vector2(8, plugin.Configuration.UiCompact ? 4 : 6)));
         ImGui.PushTextWrapPos(0);
-        UiGui.TextColored(new Vector4(1.0f, 0.3f, 0.3f, 1.0f), "⚠️ WARNING: AutoDuty Plugin Detected");
-        ImGui.Spacing();
+        using (UiText.Font(UiFontRole.BodyStrong))
+            UiGui.TextColored(UiHelpers.Yellow, "⚠️ WARNING: AutoDuty Plugin Detected");
         
         UiGui.TextWrapped("AutoDuty is enabled and may cause issues:");
         UiGui.TextWrapped("• Force respawn at entrance");
         UiGui.TextWrapped("• Leave instances at random times");
         UiGui.TextWrapped("• Interfere with FrenRider automation");
-        ImGui.Spacing();
-        
-        UiGui.TextColored(new Vector4(0.8f, 0.8f, 0.8f, 1.0f), "FrenRider requires AutoDuty to be disabled for proper operation.");
-        ImGui.Spacing();
+        ImGui.Separator();
+        UiGui.TextWrapped("FrenRider requires AutoDuty to be disabled for proper operation.");
 
         // Disable AutoDuty button - centered
         var buttonWidth = Math.Max(UiHelpers.Scale(120), MaterialText.Measure(UiText.T("Disable AutoDuty")).X + ImGui.GetStyle().FramePadding.X * 2);
@@ -86,8 +86,7 @@ public class AutoDutyWarningWindow : Window
             }
         }
 
-        ImGui.Spacing();
-        UiGui.TextColored(new Vector4(0.6f, 0.6f, 0.6f, 1.0f), "This window will close automatically after disabling AutoDuty.");
+        UiGui.TextDisabled("This window will close automatically after disabling AutoDuty.");
         ImGui.PopTextWrapPos();
         if (ImGui.IsWindowAppearing())
         {

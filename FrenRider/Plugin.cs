@@ -1444,7 +1444,7 @@ public sealed class Plugin : IDalamudPlugin
 
     internal void DrawWindowAppearance()
     {
-        using (UiText.Font(UiFontRole.BodyStrong)) UiGui.Text("Window appearance");
+        using (UiText.Font(UiFontRole.PluginName)) UiGui.Text("Window appearance");
         UiGui.TextDisabled("Global settings");
         var config = Configuration;
         var changed = false;

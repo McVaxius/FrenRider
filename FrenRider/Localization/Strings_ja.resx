@@ -3200,4 +3200,13 @@
   <data name="Control" xml:space="preserve"><value>コントロール</value></data>
   <data name="Switch to Picker to set each colour yourself." xml:space="preserve"><value>各色を自分で設定するにはピッカーに切り替えます。</value></data>
   <data name="Switch back to Auto to use the automatic theme." xml:space="preserve"><value>自動テーマを使うには「自動」に戻します。</value></data>
+  <data name="Profile actions" xml:space="preserve">
+    <value>プロファイル操作</value>
+  </data>
+  <data name="Waiting: ADS status unavailable." xml:space="preserve"><value>待機中：ADSの状態を取得できません。</value></data>
+  <data name="Waiting: equipped gear durability unavailable." xml:space="preserve"><value>待機中：装備中のアイテムの耐久度を取得できません。</value></data>
+  <data name="{0} repair interrupted: ADS is running a different utility ({1}, {2})." xml:space="preserve"><value>修理（{0}）を中断しました。ADSが別の処理を実行中です（{1}、{2}）。</value></data>
+  <data name="{0} repair failed: {1}" xml:space="preserve"><value>修理（{0}）に失敗しました：{1}</value></data>
+  <data name="{0} repair requested; waiting for equipped gear durability." xml:space="preserve"><value>修理（{0}）を要求しました。装備中のアイテムの耐久度を待っています。</value></data>
+  <data name="{0} repair threshold met; waiting for ADS completion." xml:space="preserve"><value>修理（{0}）：耐久度が基準値に達しました。ADSの完了を待っています。</value></data>
 </root>

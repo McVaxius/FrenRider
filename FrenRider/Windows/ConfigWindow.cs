@@ -25,6 +25,9 @@ public partial class ConfigWindow : Window, IDisposable
     private readonly ConfigManager configManager;
 
     private string currentTab = "Profile";
+    private string currentPage = "Profile";
+    private static readonly string[] SettingsPages = { "Profile", "Follow", "Combat", "Limit Break", "Duty / ADS / Exit",
+        "Recovery", "Automation", "Chocobo", "Window appearance", "UI / About" };
     private string editingAccountId = "";
     private string editingCharacterKey = "";
     private string editingRemoteRowId = "";
@@ -195,19 +198,40 @@ public partial class ConfigWindow : Window, IDisposable
 
         var selectedLabel = remote is not null ? UiText.F("REMOTE: {0}", Disp(GetRemoteDisplayLabel(remote)))
             : string.IsNullOrEmpty(editingCharacterKey) ? UiText.T("DEFAULT CONFIG") : Disp(editingCharacterKey);
-        UiGui.TitleWithButtons(WindowName.Split("###", 2)[0], UiText.F("Fren Rider Settings - {0}", selectedLabel), this);
+        var account = configManager.GetCurrentAccount(editingAccountId);
+        var scopeLabel = (account is null ? UiText.T("ACCOUNT") : Disp(account.AccountAlias)) + "  /  " + selectedLabel;
+        if (UiGui.Button("##FrenRiderProfileScope", display: scopeLabel)) ImGui.OpenPopup("##FrenRiderProfileScopePopup");
+        var actionsWidth = MaterialText.Measure(UiText.T("Profile actions")).X + ImGui.GetStyle().FramePadding.X * 2;
+        if (ImGui.GetItemRectMax().X + ImGui.GetStyle().ItemSpacing.X + actionsWidth
+            <= ImGui.GetWindowPos().X + ImGui.GetWindowContentRegionMax().X) ImGui.SameLine();
+        ImGui.BeginDisabled(account is null);
+        if (UiGui.Button("Profile actions")) ImGui.OpenPopup("##FrenRiderProfileActions");
+        ImGui.EndDisabled();
+        ImGui.Separator();
+        var footerHeight = ImGui.GetTextLineHeight() + ImGui.GetStyle().ItemSpacing.Y * 3 + 1;
+        var bodyHeight = Math.Max(ImGui.GetFrameHeight(), ImGui.GetContentRegionAvail().Y - footerHeight);
+        if (selectChocoboTab)
+        {
+            currentPage = currentTab = "Chocobo";
+            selectChocoboTab = false;
+        }
         var panelWidth = Math.Clamp(configuration.LeftPanelWidth, UiHelpers.Scale(120), Math.Max(UiHelpers.Scale(120), ImGui.GetContentRegionAvail().X * .45f));
 
-        // Left panel (user-resizable)
-        ImGui.BeginChild("LeftPanel", new Vector2(panelWidth, 0), true);
-        DrawLeftPanel();
-        ImGui.EndChild();
+        // Retain the original child roots for moved profile fields and page controls.
+        uint profileRoot;
+        var navigationVisible = ImGui.BeginChild("LeftPanel", new Vector2(panelWidth, bodyHeight), false);
+        try
+        {
+            profileRoot = ImGui.GetID("");
+            if (navigationVisible) DrawSettingsNavigation();
+        }
+        finally { ImGui.EndChild(); }
 
         ImGui.SameLine();
 
         // Splitter handle (vertical drag bar)
         var cursorPos = ImGui.GetCursorScreenPos();
-        var splitterHeight = ImGui.GetContentRegionAvail().Y;
+        var splitterHeight = bodyHeight;
         ImGui.InvisibleButton("##Splitter", new Vector2(UiHelpers.Scale(6), splitterHeight));
         if (ImGui.IsItemActive())
         {
@@ -236,15 +260,78 @@ public partial class ConfigWindow : Window, IDisposable
 
         ImGui.SameLine();
 
-        // Right panel
-        ImGui.SetNextWindowContentSize(new Vector2(Math.Max(ImGui.GetContentRegionAvail().X, UiHelpers.Scale(620)), 0));
-        ImGui.BeginChild("RightPanel", Vector2.Zero, false, ImGuiWindowFlags.HorizontalScrollbar);
-        remote = GetEditingRemoteProfile();
-        if (configManager.GetCurrentAccount(editingAccountId) is not null)
-            DrawRightPanel(GetEditingConfig(), remote);
-        else
-            UiGui.TextWrapped("Log in to a character to create one.");
-        ImGui.EndChild();
+        uint pageRoot;
+        var pageVisible = ImGui.BeginChild("RightPanel", new Vector2(0, bodyHeight), false);
+        try
+        {
+            pageRoot = ImGui.GetID("");
+            remote = GetEditingRemoteProfile();
+            if (pageVisible)
+            {
+                if (configManager.GetCurrentAccount(editingAccountId) is not null)
+                    DrawRightPanel(GetEditingConfig(), remote);
+                else
+                    UiGui.TextWrapped("Log in to a character to create one.");
+            }
+        }
+        finally { ImGui.EndChild(); }
+
+        ImGui.Separator();
+        MaterialText.TextDisabled(UiText.F("Editing: {0}", selectedLabel));
+
+        var popupWidth = Math.Max(UiHelpers.Scale(320), MaterialText.Measure(scopeLabel).X + ImGui.GetStyle().WindowPadding.X * 2);
+        ImGui.SetNextWindowSizeConstraints(new Vector2(Math.Min(popupWidth, ImGui.GetMainViewport().WorkSize.X * .8f), 0),
+            new Vector2(ImGui.GetMainViewport().WorkSize.X * .8f, ImGui.GetMainViewport().WorkSize.Y * .8f));
+        if (ImGui.BeginPopup("##FrenRiderProfileScopePopup"))
+        {
+            try
+            {
+                ImGuiP.PushOverrideID(profileRoot);
+                try { DrawLeftPanel(); }
+                finally { ImGui.PopID(); }
+            }
+            finally { ImGui.EndPopup(); }
+        }
+        ImGui.SetNextWindowSize(new Vector2(Math.Min(UiHelpers.Scale(380),
+            Math.Max(1, ImGui.GetMainViewport().WorkSize.X - ImGui.GetStyle().WindowPadding.X * 2)), 0), ImGuiCond.Always);
+        if (ImGui.BeginPopup("##FrenRiderProfileActions"))
+        {
+            try
+            {
+                if (configManager.GetCurrentAccount(editingAccountId) is not null)
+                {
+                    ImGuiP.PushOverrideID(pageRoot);
+                    try { DrawProfileActions(GetEditingRemoteProfile()); }
+                    finally { ImGui.PopID(); }
+                }
+            }
+            finally { ImGui.EndPopup(); }
+        }
+    }
+
+    private void DrawSettingsNavigation()
+    {
+        using var style = new MaterialStyleScope();
+        style.Style(ImGuiStyleVar.ItemSpacing, UiHelpers.Scale(new Vector2(4, configuration.UiCompact ? 3 : 5)));
+        foreach (var page in SettingsPages)
+        {
+            var caption = UiText.T(page);
+            var width = Math.Max(1, ImGui.GetContentRegionAvail().X);
+            var inset = UiHelpers.Scale(new Vector2(8, configuration.UiCompact ? 5 : 7));
+            var measured = MaterialText.Measure(caption, false, Math.Max(1, width - inset.X * 2));
+            var origin = ImGui.GetCursorScreenPos();
+            var selected = currentPage == page;
+            var clicked = ImGui.Selectable("##Page" + page, selected, ImGuiSelectableFlags.None,
+                new Vector2(width, Math.Max(ImGui.GetTextLineHeight(), measured.Y) + inset.Y * 2));
+            MaterialText.AddText(ImGui.GetWindowDrawList(), ImGui.GetFont(), ImGui.GetFontSize(), origin + inset,
+                MaterialCanvas.Color(selected ? MaterialTheme.Current.Colors.OnSecondaryContainer : MaterialTheme.Current.Colors.OnSurface),
+                caption, Math.Max(1, width - inset.X * 2));
+            if (clicked)
+            {
+                currentPage = page;
+                currentTab = page == "Duty / ADS / Exit" ? "Duty" : page is "Window appearance" or "UI / About" ? "UI" : page;
+            }
+        }
     }
 
     private void DrawLeftPanel()
@@ -367,15 +454,8 @@ public partial class ConfigWindow : Window, IDisposable
         }
     }
 
-    private void DrawRightPanel(CharacterConfig config, RemoteProfileRow? remote)
+    private void DrawProfileActions(RemoteProfileRow? remote)
     {
-        UiGui.ResetSettingsAlignment();
-        UiGui.SettingsDefaultProfile = IsDefaultConfigSelected();
-        var editingLabel = remote != null ? Disp(GetRemoteDisplayLabel(remote))
-            : IsDefaultConfigSelected() ? UiText.T("DEFAULT CONFIG") : Disp(editingCharacterKey);
-        UiGui.TextColored(MaterialTheme.Current.Colors.Primary, UiText.F("Editing: {0}", editingLabel));
-        if (ImGui.GetContentRegionAvail().X > 700 * MaterialTheme.Metrics.Scale) ImGui.SameLine();
-        // Existing profile actions retain their IDs and handlers.
         var isDefaultConfig = IsDefaultConfigSelected();
         var krangleEnabled = configuration.KrangleEnabled;
         if (UiGui.Checkbox("Krangle", ref krangleEnabled))
@@ -502,86 +582,38 @@ public partial class ConfigWindow : Window, IDisposable
                     : "Hold CTRL and click to delete this character's config.\nThis cannot be undone.");
         }
 
-        ImGui.Spacing();
+    }
 
-        if (remote != null)
-            DrawRemoteProfileBanner(remote);
-
-        bool tabsOpen;
-        using (MaterialText.PushLineHeight(UiText.T("Profile"), UiText.T("Follow"), UiText.T("Combat"), UiText.T("Limit Break"),
-            UiText.T("Duty / ADS / Exit"), UiText.T("Recovery"), UiText.T("Automation"), UiText.T("Chocobo"), UiText.T("Window appearance"), UiText.T("UI / About")))
-            tabsOpen = ImGui.BeginTabBar("FrenRiderTabs", ImGuiTabBarFlags.FittingPolicyScroll);
-        if (tabsOpen)
+    private void DrawRightPanel(CharacterConfig config, RemoteProfileRow? remote)
+    {
+        UiGui.ResetSettingsAlignment();
+        UiGui.SettingsDefaultProfile = IsDefaultConfigSelected();
+        if (remote != null) DrawRemoteProfileBanner(remote);
+        // Match the native BeginTabBar / BeginTabItem seeds used before the sidebar.
+        ImGui.PushID("FrenRiderTabs");
+        ImGui.PushID(currentPage == "Window appearance" ? "UI / About" : currentPage);
+        try
         {
-            if (UiGui.BeginTabItem("Profile"))
+            switch (currentPage)
             {
-                currentTab = "Profile";
-                DrawPartyTab(config);
-                ImGui.EndTabItem();
+                case "Profile": DrawPartyTab(config); break;
+                case "Follow": DrawDistanceTab(config); break;
+                case "Combat": DrawCombatTab(config); break;
+                case "Limit Break": DrawLimitBreakTab(config); break;
+                case "Duty / ADS / Exit": DrawDutyAdsExitTab(config); break;
+                case "Recovery": DrawRecoveryTab(config); break;
+                case "Automation": DrawAutomationTab(config); break;
+                case "Chocobo": DrawChocoboTab(config); break;
+                case "Window appearance": plugin.DrawWindowAppearance(); break;
+                case "UI / About": DrawUiAboutTab(); break;
             }
-            if (UiGui.BeginTabItem("Follow"))
-            {
-                currentTab = "Follow";
-                DrawDistanceTab(config);
-                ImGui.EndTabItem();
-            }
-            if (UiGui.BeginTabItem("Combat"))
-            {
-                currentTab = "Combat";
-                DrawCombatTab(config);
-                ImGui.EndTabItem();
-            }
-            if (UiGui.BeginTabItem("Limit Break"))
-            {
-                currentTab = "Limit Break";
-                DrawLimitBreakTab(config);
-                ImGui.EndTabItem();
-            }
-            if (UiGui.BeginTabItem("Duty / ADS / Exit"))
-            {
-                currentTab = "Duty";
-                DrawDutyAdsExitTab(config);
-                ImGui.EndTabItem();
-            }
-            if (UiGui.BeginTabItem("Recovery"))
-            {
-                currentTab = "Recovery";
-                DrawRecoveryTab(config);
-                ImGui.EndTabItem();
-            }
-            if (UiGui.BeginTabItem("Automation"))
-            {
-                currentTab = "Automation";
-                DrawAutomationTab(config);
-                ImGui.EndTabItem();
-            }
-            if (UiGui.BeginTabItem("Chocobo", selectChocoboTab ? ImGuiTabItemFlags.SetSelected : ImGuiTabItemFlags.None))
-            {
-                selectChocoboTab = false;
-                currentTab = "Chocobo";
-                DrawChocoboTab(config);
-                ImGui.EndTabItem();
-            }
-            if (UiGui.BeginTabItem("Window appearance", ImGuiTabItemFlags.NoPushId))
-            {
-                currentTab = "UI";
-                ImGui.PushID("UI / About");
-                try { plugin.DrawWindowAppearance(); }
-                finally { ImGui.PopID(); ImGui.EndTabItem(); }
-            }
-            if (UiGui.BeginTabItem("UI / About"))
-            {
-                currentTab = "UI";
-                DrawUiAboutTab();
-                ImGui.EndTabItem();
-            }
-            ImGui.EndTabBar();
         }
+        finally { ImGui.PopID(); ImGui.PopID(); }
     }
 
     private void DrawPartyTab(CharacterConfig config)
     {
-        using (UiText.Font(UiFontRole.BodyStrong)) UiGui.Text("Profile");
+        using (UiText.Font(UiFontRole.PluginName)) UiGui.Text("Profile");
         MaterialSettings.Columns("##ProfileGroups", UiGui.SettingsMinimum("DAD Profile Acceptance", "Mount-up to chase fren if >"), () =>
         {
             UiGui.SettingsSection("Fren & Profile", "Fren Name", "DAD Profile Acceptance");
@@ -917,7 +949,7 @@ public partial class ConfigWindow : Window, IDisposable
 
     private void DrawRecoveryTab(CharacterConfig config)
     {
-        using (UiText.Font(UiFontRole.BodyStrong)) UiGui.Text("Recovery");
+        using (UiText.Font(UiFontRole.PluginName)) UiGui.Text("Recovery");
         MaterialSettings.Columns("##RecoveryGroups", Math.Max(420 * MaterialTheme.Metrics.Scale,
             UiGui.SettingsMinimum("Use Phoenix Downs for recovery", "Give up immediately when")), () =>
         {
@@ -1087,7 +1119,7 @@ public partial class ConfigWindow : Window, IDisposable
     private void DrawChocoboTab(CharacterConfig config)
     {
 
-        using (UiText.Font(UiFontRole.BodyStrong)) UiGui.Text("Chocobo");
+        using (UiText.Font(UiFontRole.PluginName)) UiGui.Text("Chocobo");
         MaterialSettings.Columns("##ChocoboGroups", Math.Max(UiGui.SettingsMinimum("Automatically allocate Chocobo skills", "Companion Stance"), 520 * MaterialTheme.Metrics.Scale), () =>
         {
             UiGui.SettingsSection("Manual purchasing");
@@ -1124,6 +1156,7 @@ public partial class ConfigWindow : Window, IDisposable
                 && ReferenceEquals(config, activePurchaseConfig);
             UiGui.TextDisabled("Buy fills stock once. Active character only.");
             var shopRoot = ImGui.GetID("");
+            using (MaterialTable.PushControls())
             using (MaterialTable.PushTightRows())
             {
                 if (ImGui.BeginTable("##CompanionSupplyTargets", IsDefaultConfigSelected() ? 5 : 4,
@@ -1371,7 +1404,7 @@ public partial class ConfigWindow : Window, IDisposable
 
     private void DrawDistanceTab(CharacterConfig config)
     {
-        using (UiText.Font(UiFontRole.BodyStrong)) UiGui.Text("Follow");
+        using (UiText.Font(UiFontRole.PluginName)) UiGui.Text("Follow");
         MaterialSettings.Columns("##FollowGroups", UiGui.SettingsMinimum("Cling Type (Duty)", "Max Follow Distance (Foray)"), () =>
         {
             UiGui.SettingsSection("Navigation", "Cling Distance", "Cling Type", "Cling Type (Duty)");
@@ -1740,7 +1773,7 @@ public partial class ConfigWindow : Window, IDisposable
 
     private void DrawCombatTab(CharacterConfig config)
     {
-        using (UiText.Font(UiFontRole.BodyStrong)) UiGui.Text("Combat");
+        using (UiText.Font(UiFontRole.PluginName)) UiGui.Text("Combat");
         if (configManager.TryGetActiveConfig(out var activeConfig) && activeConfig != null)
         {
             UiGui.Text(UiText.F("Effective rotation: {0} ({1})",
@@ -2120,6 +2153,7 @@ public partial class ConfigWindow : Window, IDisposable
         var syncWidth = IsDefaultConfigSelected() ? MaterialText.Measure(UiText.T("Sync all")).X + 2 * ImGui.GetStyle().FramePadding.X : 0;
         var minimumWidth = familyWidth + maturityWidth + delayColumnWidth + syncWidth + 12 * MaterialTheme.Metrics.Scale;
         var root = ImGui.GetID("");
+        using (MaterialTable.PushControls())
         using (MaterialTable.PushTightRows())
         {
             var tableHeight = ImGui.GetTextLineHeight() + 8 * ImGui.GetFrameHeight()
@@ -2227,7 +2261,7 @@ public partial class ConfigWindow : Window, IDisposable
     private void DrawDutyAdsExitTab(CharacterConfig config)
     {
 
-        using (UiText.Font(UiFontRole.BodyStrong)) UiGui.Text("Duty / ADS / Exit");
+        using (UiText.Font(UiFontRole.PluginName)) UiGui.Text("Duty / ADS / Exit");
         MaterialSettings.Columns("##DutyGroups", Math.Max(UiGui.SettingsMinimum("Duty-end delay"), AdsDutyCategoryCatalog.Entries.Max(entry => MaterialText.Measure(UiText.T(entry.Label)).X)
             + AdsMaturityOptions.Max(option => MaterialText.Measure(UiText.T(option)).X)
             + 240 * MaterialTheme.Metrics.Scale + (IsDefaultConfigSelected() ? 100 * MaterialTheme.Metrics.Scale : 0)), () =>
@@ -2246,7 +2280,7 @@ public partial class ConfigWindow : Window, IDisposable
 
     private void DrawAutomationTab(CharacterConfig config)
     {
-        using (UiText.Font(UiFontRole.BodyStrong)) UiGui.Text("Automation");
+        using (UiText.Font(UiFontRole.PluginName)) UiGui.Text("Automation");
         MaterialSettings.Columns("##AutomationGroups", UiGui.SettingsMinimum("Equip job stone for current class", "Idle Ticks Before Action"), () =>
         {
             UiGui.SettingsSection("Loot & Equipment", "Loot Type");
@@ -2287,7 +2321,7 @@ public partial class ConfigWindow : Window, IDisposable
 
     private void DrawUiAboutTab()
     {
-        using (UiText.Font(UiFontRole.BodyStrong)) UiGui.Text("UI / About");
+        using (UiText.Font(UiFontRole.PluginName)) UiGui.Text("UI / About");
         UiGui.TextDisabled("Global settings");
         MaterialSettings.Columns("##UiAboutGroups", UiGui.SettingsMinimum("Open XA Slave log tools", "Movable Config Window"), () =>
         {
@@ -3368,14 +3402,29 @@ public partial class ConfigWindow : Window, IDisposable
 
     private void DrawRemoteProfileBanner(RemoteProfileRow remote)
     {
-        ImGui.PushStyleColor(ImGuiCol.ChildBg, new Vector4(0.18f, 0.08f, 0.24f, 0.75f));
-        if (ImGui.BeginChild("RemoteProfileIdentity", new Vector2(0, 190f), true))
+        using var style = new MaterialStyleScope();
+        style.Color(ImGuiCol.ChildBg, new Vector4(0.18f, 0.08f, 0.24f, 0.75f));
+        var padding = ImGui.GetStyle().WindowPadding;
+        var contentWidth = Math.Max(1, ImGui.GetContentRegionAvail().X - padding.X * 2);
+        var textRows = new[] { UiText.T("REMOTE DAD PROFILE"),
+            UiText.T("This row is separate from local characters and can never become the active-character profile."),
+            UiText.T("Display label"), UiText.F($"Owner: {Disp(remote.OwnerId)}"),
+            UiText.F($"Island: {Disp(remote.IslandId)}"), UiText.F($"Opaque character: {Disp(remote.CharacterId)}"),
+            UiText.F($"Row ID: {remote.RowId}") };
+        var controlsHeight = new[] { remote.DisplayLabel, UiText.T("Enabled when transferred") }
+            .Sum(text => Math.Max(ImGui.GetFrameHeight(), MaterialText.Measure(text).Y + ImGui.GetStyle().FramePadding.Y * 2));
+        var height = textRows.Sum(text => Math.Max(ImGui.GetTextLineHeight(), MaterialText.Measure(text, false, contentWidth).Y))
+            + controlsHeight + ImGui.GetStyle().ItemSpacing.Y * 8 + padding.Y * 2;
+        var visible = ImGui.BeginChild("RemoteProfileIdentity", new Vector2(0, MathF.Ceiling(height)), false,
+            ImGuiWindowFlags.AlwaysUseWindowPadding);
+        try
         {
+            if (!visible) return;
             UiGui.TextColored(new Vector4(0.95f, 0.65f, 1f, 1f), "REMOTE DAD PROFILE");
             UiGui.TextWrapped("This row is separate from local characters and can never become the active-character profile.");
 
             var displayLabel = remote.DisplayLabel;
-            ImGui.SetNextItemWidth(320f);
+            ImGui.SetNextItemWidth(Math.Min(320 * MaterialTheme.Metrics.Scale, ImGui.GetContentRegionAvail().X));
             if (UiGui.InputText("Display label", ref displayLabel, 256))
             {
                 remote.DisplayLabel = displayLabel;
@@ -3394,8 +3443,7 @@ public partial class ConfigWindow : Window, IDisposable
                 SaveEditingAccount();
             }
         }
-        ImGui.EndChild();
-        ImGui.PopStyleColor();
+        finally { ImGui.EndChild(); }
         ImGui.Spacing();
     }
 

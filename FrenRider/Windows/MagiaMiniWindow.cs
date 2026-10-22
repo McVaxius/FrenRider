@@ -15,7 +15,6 @@ public sealed class MagiaMiniWindow : Window, IDisposable
     private readonly MaterialWindowMotion motion = new();
     private readonly AethertekUI.MaterialWindowOpacity windowOpacity = new();
     private readonly Plugin plugin;
-    private Vector2 contentFramePadding;
 
     public MagiaMiniWindow(Plugin plugin)
         : base("Fren Rider Mini###FrenRiderMagiaMini")
@@ -62,25 +61,18 @@ public sealed class MagiaMiniWindow : Window, IDisposable
 
     public override void PreDraw()
     {
-        // Native Begin must establish the work rectangle before the inset content measures it.
         var compact = plugin.Configuration.UiCompact;
-        var width = UiHelpers.Scale(FrenRiderPresentation.MiniWidth(compact));
-        var statusWidth = Math.Max(MaterialText.Measure(UiText.T("ON")).X, MaterialText.Measure(UiText.T("OFF")).X);
-        var headerLabelWidth = Math.Max(MaterialText.Measure(UiText.T("FrenRider")).X, UiHelpers.Scale(compact ? 148 : 138));
-        width = Math.Max(width, headerLabelWidth + statusWidth + UiHelpers.Scale(compact ? 172 : 173));
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, UiHelpers.Scale(new Vector2(compact ? 10 : 12)));
+        var width = UiHelpers.Scale(compact ? 400 : 440);
+        width = Math.Max(width, UiGui.TitleMinimumWidth(this, UiText.T("Fren Rider Mini"), people: true, brandSize: 32, compactBrand: compact));
         if (IsEurekaTerritory(plugin.ZoneService.TerritoryId))
         {
             using var actionFont = UiText.Font(UiFontRole.Action);
             var labelWidth = Math.Max(MaterialText.Measure(UiText.T("Attack")).X,
                 Math.Max(MaterialText.Measure(UiText.T("Defense")).X, MaterialText.Measure(UiText.T("Off")).X));
-            var style = ImGui.GetStyle();
-            var rowWidth = MathF.Ceiling(labelWidth + style.FramePadding.X * 2) * 3 + UiHelpers.Scale(24);
-            width = Math.Max(width, rowWidth + UiHelpers.Scale(42));
+            width = Math.Max(width, (labelWidth + ImGui.GetStyle().FramePadding.X * 2) * 3
+                + ImGui.GetStyle().ItemSpacing.X * 2 + ImGui.GetStyle().WindowPadding.X * 2);
         }
-        contentFramePadding = ImGui.GetStyle().FramePadding;
-        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding,
-            new Vector2(UiHelpers.Scale(compact ? 7 : 9), (UiHelpers.Scale(FrenRiderPresentation.MiniTitleHeight(compact)) - ImGui.GetFontSize()) * .5f));
-        width = Math.Max(width, UiGui.TitleMinimumWidth(this, UiText.T("Fren Rider Mini"), people: true, brandSize: 32, compactBrand: compact));
         ImGui.SetNextWindowSize(new Vector2(MathF.Ceiling(width), 0));
         motion.Prepare(this, reducedMotion: false, roundedCorners: true);
     }
@@ -100,119 +92,72 @@ public sealed class MagiaMiniWindow : Window, IDisposable
     public override void Draw()
     {
         motion.DrawChrome();
-        var compact = plugin.Configuration.UiCompact;
         using var fields = new MaterialStyleScope();
-        fields.Style(ImGuiStyleVar.FramePadding, contentFramePadding);
         fields.Style(ImGuiStyleVar.FrameBorderSize, 1);
         fields.Color(ImGuiCol.FrameBg, MaterialTheme.Current.Colors.SurfaceContainer);
         fields.Color(ImGuiCol.Border, MaterialTheme.Current.Colors.OutlineVariant);
-        var position = ImGui.GetWindowPos();
-        var scale = MaterialTheme.Metrics.Scale;
-        var start = position + new Vector2(21, compact ? 64 : 78) * scale;
-        var width = ImGui.GetWindowSize().X - UiHelpers.Scale(42);
-        var colors = MaterialTheme.Current.Colors;
-        MaterialCanvas.Surface(position + new Vector2(7, FrenRiderPresentation.MiniTitleHeight(compact) + 6) * scale,
-            position + ImGui.GetWindowSize() - new Vector2(7) * scale, colors.SurfaceContainerLowest, colors.Background, UiHelpers.Scale(4));
+        using var controls = MaterialControls.Push(MaterialControlContext.Toolbar);
         var originalIdRoot = ImGui.GetID("");
-        ImGui.SetCursorScreenPos(start);
-        ImGui.PushStyleVar(ImGuiStyleVar.CellPadding, Vector2.Zero);
-        var visible = ImGui.BeginTable("##FrenRiderMiniBounds", 1, ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.NoSavedSettings,
-            new Vector2(Math.Max(1, width), 0));
-        ImGui.PopStyleVar();
+        using var tableStyle = new MaterialStyleScope();
+        tableStyle.Style(ImGuiStyleVar.CellPadding, Vector2.Zero);
+        var width = Math.Max(1, ImGui.GetContentRegionAvail().X);
+        if (!ImGui.BeginTable("##FrenRiderMiniBounds", 1, ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.NoSavedSettings,
+                new Vector2(width, 0))) return;
         try
         {
-            if (!visible) return;
-            ImGui.TableSetupColumn("Content", ImGuiTableColumnFlags.WidthFixed, Math.Max(1, width));
+            ImGui.TableSetupColumn("Content", ImGuiTableColumnFlags.WidthFixed, width);
             ImGui.TableNextColumn();
             ImGuiP.PushOverrideID(originalIdRoot);
             try { DrawContent(); }
             finally { ImGui.PopID(); }
         }
-        finally { if (visible) ImGui.EndTable(); }
-        ImGui.SetCursorScreenPos(new Vector2(start.X,
-            Math.Max(ImGui.GetCursorScreenPos().Y - ImGui.GetStyle().ItemSpacing.Y, position.Y + UiHelpers.Scale(FrenRiderPresentation.MiniHeight(compact,
-                IsEurekaTerritory(plugin.ZoneService.TerritoryId))) - ImGui.GetStyle().WindowPadding.Y)));
-        ImGui.Dummy(new Vector2(width, 0));
+        finally { ImGui.EndTable(); }
     }
 
     private void DrawContent()
     {
         var config = plugin.ConfigManager.GetActiveConfig();
         var compact = plugin.Configuration.UiCompact;
-        var eureka = IsEurekaTerritory(plugin.ZoneService.TerritoryId);
-        var position = ImGui.GetWindowPos();
-        var scale = MaterialTheme.Metrics.Scale;
-        var left = position.X + (compact ? 28 : 29) * scale;
-
-        ImGui.SetCursorScreenPos(new Vector2(left, position.Y + (compact ? 64 : 78) * scale));
-        var enabled = config.Enabled;
-        if (UiGui.HeaderToggle("FrenRider", ref enabled, compact ? 148 : 138, new Vector2(54, 32)))
-            plugin.ConfigManager.SetFrenRiderEnabled(enabled);
-
-        var statusTop = new Vector2(ImGui.GetItemRectMax().X + UiHelpers.Scale(compact ? 37 : 36),
-            ImGui.GetItemRectMin().Y);
-        var rowHeight = ImGui.GetItemRectMax().Y - ImGui.GetItemRectMin().Y;
+        var icon = plugin.OriginalIcon;
+        var imageMin = ImGui.GetCursorScreenPos();
+        var brandSize = UiHelpers.Scale(compact ? 26 : 30);
+        MaterialCanvas.DrawImage(ImGui.GetWindowDrawList(), icon.Handle, icon.Size, imageMin, imageMin + new Vector2(brandSize));
+        ImGui.Dummy(new Vector2(brandSize));
         ImGui.SameLine();
-        ImGui.SetCursorScreenPos(statusTop);
-        var dot = statusTop + new Vector2(UiHelpers.Scale(7), rowHeight * .5f);
-        var statusColor = plugin.IsWaitingForDuty ? UiHelpers.Yellow : enabled ? UiHelpers.Green : UiHelpers.Grey;
-        ImGui.GetWindowDrawList().AddCircleFilled(dot, UiHelpers.Scale(7), MaterialCanvas.Color(statusColor), 24);
-        ImGui.Dummy(new Vector2(UiHelpers.Scale(14), rowHeight));
-        ImGui.SameLine(0, UiHelpers.Scale(compact ? 10 : 11));
-        UiGui.TextColored(statusColor, enabled ? "ON" : "OFF");
-        if (plugin.IsWaitingForDuty && ImGui.IsItemHovered()) UiGui.SetTooltip("Combat rotations paused outside duties");
+        using (UiText.Font(UiFontRole.Title)) UiGui.Text("Fren Rider");
 
-        ImGui.SetCursorScreenPos(position + new Vector2(compact ? 22 : 21, compact ? 112 : eureka ? 122 : 129) * scale);
-        ImGui.Separator();
-        ImGui.SetCursorScreenPos(new Vector2(left, position.Y + (compact ? 124 : eureka ? 128 : 142) * scale));
-        using (var selectorStyle = new MaterialStyleScope())
+        var enabled = config.Enabled;
+        if (UiGui.HeaderToggle("FrenRider", ref enabled, display: UiText.T("Run")))
+            plugin.ConfigManager.SetFrenRiderEnabled(enabled);
+        var status = plugin.IsWaitingForDuty ? UiHelpers.Yellow : enabled ? UiHelpers.Green : UiHelpers.Grey;
+        ContinueButton(enabled ? "ON" : "OFF", 0);
+        UiHelpers.StatusPill(enabled ? "ON" : "OFF", status,
+            plugin.IsWaitingForDuty ? "Combat rotations paused outside duties" : null);
+        DrawFrenSelector(config);
+
+        if (IsEurekaTerritory(plugin.ZoneService.TerritoryId))
         {
-            selectorStyle.Style(ImGuiStyleVar.FramePadding,
-                new Vector2(contentFramePadding.X, ((compact ? 42 : 40) * scale - ImGui.GetFontSize()) * .5f));
-            DrawFrenSelector(config);
+            UiGui.SettingsSection("MAGIA");
+            using var actionFont = UiText.Font(UiFontRole.Action);
+            var labelWidth = Math.Max(MaterialText.Measure(UiText.T("Attack")).X,
+                Math.Max(MaterialText.Measure(UiText.T("Defense")).X, MaterialText.Measure(UiText.T("Off")).X));
+            var size = new Vector2(Math.Max(labelWidth + ImGui.GetStyle().FramePadding.X * 2,
+                (ImGui.GetContentRegionAvail().X - ImGui.GetStyle().ItemSpacing.X * 2) / 3), 0);
+            var colors = MaterialTheme.Current.Colors;
+            using (var attackStyle = new MaterialStyleScope())
+            {
+                var fill = MaterialColor.Layer(colors.PrimaryContainer, colors.Primary, .25f);
+                attackStyle.Color(ImGuiCol.Button, fill);
+                attackStyle.Color(ImGuiCol.ButtonHovered, MaterialColor.Layer(fill, colors.OnSurface, .08f));
+                attackStyle.Color(ImGuiCol.ButtonActive, MaterialColor.Layer(fill, colors.OnSurface, .12f));
+                if (UiGui.Button("Attack", size, gradientBottom: colors.PrimaryContainer))
+                    GameHelpers.SendChatCommand("/magiaauto attack", "Fren Rider mini");
+            }
+            ContinueButton("Defense", size.X);
+            if (UiGui.Button("Defense", size)) GameHelpers.SendChatCommand("/magiaauto defense", "Fren Rider mini");
+            ContinueButton("Off", size.X);
+            if (UiGui.Button("Off", size)) GameHelpers.SendChatCommand("/magiaauto off", "Fren Rider mini");
         }
-
-        if (!eureka)
-        {
-            DrawCompanionPurchases(config, left);
-            return;
-        }
-
-        ImGui.SetCursorScreenPos(position + new Vector2(21, compact ? 182 : 186) * scale);
-        ImGui.Separator();
-        ImGui.SetCursorScreenPos(position + new Vector2(25, compact ? 198 : 206) * scale);
-        UiGui.TextColored(MaterialTheme.Current.Colors.Secondary, "MAGIA");
-
-        using var actionFont = UiText.Font(UiFontRole.Action);
-        using var buttonSpacing = new MaterialStyleScope();
-        buttonSpacing.Style(ImGuiStyleVar.ItemSpacing, new Vector2(12 * scale, ImGui.GetStyle().ItemSpacing.Y));
-        ImGui.SetCursorScreenPos(position + new Vector2(21, compact ? 224 : 234) * scale);
-        var size = new Vector2((ImGui.GetContentRegionAvail().X - ImGui.GetStyle().ItemSpacing.X * 2) / 3,
-            UiHelpers.Scale(compact ? 42 : 44));
-        var colors = MaterialTheme.Current.Colors;
-        using (var attackStyle = new MaterialStyleScope())
-        {
-            var fill = MaterialColor.Layer(colors.PrimaryContainer, colors.Primary, .25f);
-            attackStyle.Color(ImGuiCol.Button, fill);
-            attackStyle.Color(ImGuiCol.ButtonHovered, MaterialColor.Layer(fill, colors.OnSurface, .08f));
-            attackStyle.Color(ImGuiCol.ButtonActive, MaterialColor.Layer(fill, colors.OnSurface, .12f));
-            if (UiGui.Button("Attack", size, gradientBottom: colors.PrimaryContainer))
-                GameHelpers.SendChatCommand("/magiaauto attack", "Fren Rider mini");
-        }
-
-        ContinueButton("Defense", size.X);
-        if (UiGui.Button("Defense", size))
-            GameHelpers.SendChatCommand("/magiaauto defense", "Fren Rider mini");
-
-        ContinueButton("Off", size.X);
-        if (UiGui.Button("Off", size))
-            GameHelpers.SendChatCommand("/magiaauto off", "Fren Rider mini");
-        DrawCompanionPurchases(config, left);
-    }
-
-    private void DrawCompanionPurchases(CharacterConfig config, float left)
-    {
-        ImGui.SetCursorScreenPos(new Vector2(left, ImGui.GetCursorScreenPos().Y + UiHelpers.Scale(6)));
         ImGui.Separator();
         UiGui.DrawCompanionPurchases(plugin, config, mini: true);
     }
@@ -226,7 +171,7 @@ public sealed class MagiaMiniWindow : Window, IDisposable
 
     private void DrawFrenSelector(CharacterConfig config)
     {
-        var fieldStart = ImGui.GetCursorScreenPos().X + Math.Max(UiHelpers.Scale(plugin.Configuration.UiCompact ? 96 : 88), MaterialText.Measure(UiText.T("Fren")).X + ImGui.GetStyle().ItemSpacing.X);
+        var fieldStart = ImGui.GetCursorScreenPos().X + MaterialText.Measure(UiText.T("Fren")).X + ImGui.GetStyle().ItemSpacing.X;
         ImGui.AlignTextToFramePadding();
         UiGui.TextUnformatted("Fren");
         ImGui.SameLine();

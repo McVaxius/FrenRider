@@ -3200,4 +3200,13 @@ Activado: usa los ajustes de BossMod de abajo con cualquier proveedor de rotaci�
   <data name="Control" xml:space="preserve"><value>Control</value></data>
   <data name="Switch to Picker to set each colour yourself." xml:space="preserve"><value>Cambia a Selector para definir cada color.</value></data>
   <data name="Switch back to Auto to use the automatic theme." xml:space="preserve"><value>Vuelve a Automático para usar el tema automático.</value></data>
+  <data name="Profile actions" xml:space="preserve">
+    <value>Acciones del perfil</value>
+  </data>
+  <data name="Waiting: ADS status unavailable." xml:space="preserve"><value>Esperando: estado de ADS no disponible.</value></data>
+  <data name="Waiting: equipped gear durability unavailable." xml:space="preserve"><value>Esperando: durabilidad del equipo en uso no disponible.</value></data>
+  <data name="{0} repair interrupted: ADS is running a different utility ({1}, {2})." xml:space="preserve"><value>Reparación ({0}) interrumpida: ADS está ejecutando otra tarea ({1}, {2}).</value></data>
+  <data name="{0} repair failed: {1}" xml:space="preserve"><value>Reparación ({0}) fallida: {1}</value></data>
+  <data name="{0} repair requested; waiting for equipped gear durability." xml:space="preserve"><value>Reparación ({0}) solicitada; esperando la durabilidad del equipo en uso.</value></data>
+  <data name="{0} repair threshold met; waiting for ADS completion." xml:space="preserve"><value>Reparación ({0}): umbral de durabilidad alcanzado; esperando a que ADS termine.</value></data>
 </root>

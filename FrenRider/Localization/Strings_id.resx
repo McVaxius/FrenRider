@@ -3305,4 +3305,13 @@ Aktif: gunakan preset BossMod di bawah dengan penyedia rotasi apa pun. Preset kh
   <data name="Control" xml:space="preserve"><value>Kontrol</value></data>
   <data name="Switch to Picker to set each colour yourself." xml:space="preserve"><value>Beralih ke Pemilih untuk menentukan setiap warna.</value></data>
   <data name="Switch back to Auto to use the automatic theme." xml:space="preserve"><value>Kembali ke Otomatis untuk menggunakan tema otomatis.</value></data>
+  <data name="Profile actions" xml:space="preserve">
+    <value>Tindakan profil</value>
+  </data>
+  <data name="Waiting: ADS status unavailable." xml:space="preserve"><value>Menunggu: status ADS tidak tersedia.</value></data>
+  <data name="Waiting: equipped gear durability unavailable." xml:space="preserve"><value>Menunggu: durabilitas perlengkapan yang dipakai tidak tersedia.</value></data>
+  <data name="{0} repair interrupted: ADS is running a different utility ({1}, {2})." xml:space="preserve"><value>Perbaikan ({0}) terputus: ADS sedang menjalankan utilitas lain ({1}, {2}).</value></data>
+  <data name="{0} repair failed: {1}" xml:space="preserve"><value>Perbaikan ({0}) gagal: {1}</value></data>
+  <data name="{0} repair requested; waiting for equipped gear durability." xml:space="preserve"><value>Perbaikan ({0}) diminta; menunggu durabilitas perlengkapan yang dipakai.</value></data>
+  <data name="{0} repair threshold met; waiting for ADS completion." xml:space="preserve"><value>Perbaikan ({0}): ambang durabilitas tercapai; menunggu ADS selesai.</value></data>
 </root>

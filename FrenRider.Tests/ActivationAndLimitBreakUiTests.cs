@@ -179,6 +179,34 @@ public sealed class ActivationAndLimitBreakUiTests
                 }
             }
 
+            // The sidebar must keep the native seeds formerly owned by each tab.
+            foreach (var page in new[] { "Profile", "Duty / ADS / Exit", "Window appearance", "UI / About" })
+            {
+                ImGui.NewFrame();
+                ImGui.SetNextWindowPos(new(20, 20));
+                ImGui.SetNextWindowSize(new(800, 700));
+                ImGui.Begin("Native page identity " + page, ImGuiWindowFlags.NoSavedSettings);
+                uint nativeField = 0;
+                var appearance = page == "Window appearance";
+                if (ImGui.BeginTabBar("FrenRiderTabs"))
+                {
+                    if (ImGui.BeginTabItem(page, appearance ? ImGuiTabItemFlags.NoPushId : ImGuiTabItemFlags.None))
+                    {
+                        if (appearance) ImGui.PushID("UI / About");
+                        nativeField = ImGui.GetID("##ProfileField");
+                        if (appearance) ImGui.PopID();
+                        ImGui.EndTabItem();
+                    }
+                    ImGui.EndTabBar();
+                }
+                ImGui.PushID("FrenRiderTabs");
+                ImGui.PushID(appearance ? "UI / About" : page);
+                Assert.NotEqual(0u, nativeField);
+                Assert.Equal(nativeField, ImGui.GetID("##ProfileField"));
+                ImGui.PopID(); ImGui.PopID();
+                ImGui.End(); ImGui.Render();
+            }
+
             // Exercise the actual damage editor's first checkbox through native mouse input.
             var drawDamage = typeof(ConfigWindow).GetMethod("DamageControls", BindingFlags.NonPublic | BindingFlags.Static)!;
             var saves = 0;

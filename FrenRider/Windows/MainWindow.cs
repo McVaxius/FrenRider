@@ -115,39 +115,57 @@ public class MainWindow : Window, IDisposable
         fields.Color(ImGuiCol.Border, MaterialTheme.Current.Colors.OutlineVariant);
         using var controls = MaterialControls.Push(FrenRiderPresentation.Controls(plugin.Configuration.UiCompact ? 32 : 36));
         var config = plugin.ConfigManager.GetActiveConfig();
-
-        var headerStart = ImGui.GetCursorScreenPos();
+        var actionRoot = ImGui.GetID("");
         DrawTopBar(config);
-        var actionsY = Math.Max(headerStart.Y + UiHelpers.Scale(FrenRiderPresentation.HeaderHeight(plugin.Configuration.UiCompact)),
-            ImGui.GetCursorScreenPos().Y);
         ImGui.Separator();
-        ImGui.SetCursorScreenPos(new Vector2(headerStart.X, actionsY));
-        Panel("Activation mode", MaterialIcon.Power, () =>
-        {
-            if (UiGui.ActivationModeControls(config)) plugin.ConfigManager.SaveCurrentAccount();
-            if (plugin.IsWaitingForDuty)
-            {
-                UiHelpers.StatusPill("Combat rotations paused outside duties", UiHelpers.Yellow);
-                UiGui.TextWrapped("Run is On. Following, repairs and other configured actions continue. Combat rotations wait for a duty.");
-            }
-        });
-        DrawAccountControls();
-        ImGui.SetCursorScreenPos(new Vector2(headerStart.X,
-            ImGui.GetItemRectMax().Y + ImGui.GetStyle().ItemSpacing.Y));
-        UiGui.DrawCompanionPurchases(plugin, config, mini: false);
-        ImGui.SetCursorScreenPos(new Vector2(headerStart.X,
-            ImGui.GetItemRectMax().Y + UiHelpers.Scale(plugin.Configuration.UiCompact ? 13 : 14)));
+        var footerHeight = ImGui.GetTextLineHeight() + ImGui.GetStyle().ItemSpacing.Y * 3 + 1;
         var visible = ImGui.BeginChild("##FrenRiderOperatorScroll",
-            new Vector2(Math.Max(1, ImGui.GetContentRegionAvail().X - UiHelpers.Scale(2)), 0), false);
+            new Vector2(0, -footerHeight), false);
         try
         {
             if (visible)
             {
                 DrawWarnings();
-                Panel("Operator", MaterialIcon.Info, () => DrawOperatorProfile(config));
+                Panel("Activation mode", MaterialIcon.Power, () =>
+                {
+                    // Run and activation originally belong to the main window's root.
+                    ImGuiP.PushOverrideID(actionRoot);
+                    try
+                    {
+                        MaterialSettings.Columns("##RunGroups", UiHelpers.Scale(330), () =>
+                        {
+                            var enabled = config.Enabled;
+                            if (UiGui.HeaderToggle("Run", ref enabled))
+                                plugin.ConfigManager.SetFrenRiderEnabled(enabled);
+                            NextButton(config.Enabled ? "Enabled" : "Disabled");
+                            UiHelpers.StatusPill(config.Enabled ? "Enabled" : "Disabled", config.Enabled ? UiHelpers.Green : UiHelpers.Grey);
+                            UiHelpers.AlignedRow("Fren", string.IsNullOrWhiteSpace(config.FrenName)
+                                ? UiText.T("No fren configured") : Disp(config.FrenName));
+                        }, () =>
+                        {
+                            UiGui.TextDisabled("Activation mode");
+                            if (UiGui.ActivationModeControls(config)) plugin.ConfigManager.SaveCurrentAccount();
+                        });
+                        if (plugin.IsWaitingForDuty)
+                        {
+                            UiGui.TextColored(UiHelpers.Yellow, "Combat rotations paused outside duties");
+                            if (ImGui.IsItemHovered()) UiGui.SetTooltip("Run is On. Following, repairs and other configured actions continue. Combat rotations wait for a duty.");
+                        }
+                    }
+                    finally { ImGui.PopID(); }
+                }, heading: false);
+                MaterialSettings.Columns("##OperatorDutyGroups", UiHelpers.Scale(390),
+                    () => Panel("Operator", MaterialIcon.Info, () => DrawOperatorProfile(config)),
+                    () => Panel("Duty / ADS / Exit", MaterialIcon.Return, () => DrawDutyPanel(config)));
                 Panel("Party", MaterialIcon.Table, DrawPartySummary);
-                Panel("Automation", MaterialIcon.Settings, DrawAutomationStack);
-                Panel("Duty / ADS / Exit", MaterialIcon.Return, () => DrawDutyPanel(config));
+                Panel("Automation", MaterialIcon.Settings, () =>
+                {
+                    DrawAutomationStack();
+                    ImGui.Separator();
+                    ImGuiP.PushOverrideID(actionRoot);
+                    try { UiGui.DrawCompanionPurchases(plugin, config, mini: false); }
+                    finally { ImGui.PopID(); }
+                });
                 ImGui.Indent(UiHelpers.Scale(2));
                 try { DrawDebugDetails(config); }
                 finally { ImGui.Unindent(UiHelpers.Scale(2)); }
@@ -155,90 +173,52 @@ public class MainWindow : Window, IDisposable
             }
         }
         finally { ImGui.EndChild(); }
+        ImGui.Separator();
+        MaterialText.TextDisabled("FrenRider " + CurrentVersion);
     }
 
-    private void Panel(string title, MaterialIcon icon, Action draw)
+    private void Panel(string title, MaterialIcon icon, Action draw, bool heading = true)
     {
-        var c = MaterialTheme.Current.Colors;
-        var dl = ImGui.GetWindowDrawList();
-        var min = ImGui.GetCursorScreenPos();
-        var width = ImGui.GetContentRegionAvail().X;
-        var padding = UiHelpers.Scale(12);
-        var topPadding = UiHelpers.Scale(plugin.Configuration.UiCompact ? 10 : 12);
-        var bottomPadding = UiHelpers.Scale(title switch
-        {
-            "Operator" => plugin.Configuration.UiCompact ? 5 : 11,
-            "Party" => plugin.Configuration.UiCompact ? 3 : 9,
-            "Automation" => plugin.Configuration.UiCompact ? 4 : 10,
-            _ => plugin.Configuration.UiCompact ? 11 : 14,
-        });
         var originalIdRoot = ImGui.GetID("");
         using var spacing = new MaterialStyleScope();
-        spacing.Style(ImGuiStyleVar.ItemSpacing, new Vector2(ImGui.GetStyle().ItemSpacing.X, UiHelpers.Scale(plugin.Configuration.UiCompact ? 2 : 4)));
-        spacing.Style(ImGuiStyleVar.CellPadding, new Vector2(UiHelpers.Scale(4), UiHelpers.Scale(plugin.Configuration.UiCompact ? 2 : 2.5f)));
-        var headerBottom = min.Y;
-        dl.ChannelsSplit(2);
+        spacing.Style(ImGuiStyleVar.ItemSpacing, new Vector2(ImGui.GetStyle().ItemSpacing.X, UiHelpers.Scale(plugin.Configuration.UiCompact ? 3 : 5)));
+        spacing.Style(ImGuiStyleVar.CellPadding, UiHelpers.Scale(new Vector2(10, plugin.Configuration.UiCompact ? 6 : 8)));
+        if (!ImGui.BeginTable("##FrenRiderPanelBounds" + title, 1,
+                ImGuiTableFlags.SizingStretchSame | ImGuiTableFlags.NoSavedSettings | ImGuiTableFlags.PadOuterX)) return;
         try
         {
-            dl.ChannelsSetCurrent(1);
-            ImGui.BeginGroup();
+            ImGui.TableNextColumn();
+            var min = ImGui.GetCursorScreenPos();
+            var width = ImGui.GetContentRegionAvail().X;
+            ImGuiP.PushOverrideID(originalIdRoot);
             try
             {
-                ImGui.Dummy(new Vector2(0, Math.Max(0, topPadding - ImGui.GetStyle().ItemSpacing.Y)));
-                ImGui.SetCursorScreenPos(min + new Vector2(padding, topPadding));
-                ImGui.PushStyleVar(ImGuiStyleVar.CellPadding, Vector2.Zero);
-                var visible = ImGui.BeginTable("##FrenRiderPanelBounds" + title, 1,
-                    ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.NoSavedSettings,
-                    new Vector2(Math.Max(1, width - padding * 2), 0));
-                ImGui.PopStyleVar();
-                try
+                if (heading)
                 {
-                    if (!visible) return;
-                    ImGui.TableSetupColumn("Content", ImGuiTableColumnFlags.WidthFixed, Math.Max(1, width - padding * 2));
-                    ImGui.TableNextColumn();
-                    ImGuiP.PushOverrideID(originalIdRoot);
-                    try
-                    {
-                    using (UiText.Font(UiFontRole.PluginName))
-                    {
-                        var p = ImGui.GetCursorScreenPos();
-                        if (title == "Operator") FrenRiderPresentation.Person(p, UiHelpers.Scale(24), c.OnSurface);
-                        else if (title == "Party") FrenRiderPresentation.People(p, UiHelpers.Scale(24), c.OnSurface);
-                        else if (title == "Duty / ADS / Exit") FrenRiderPresentation.Flag(p, UiHelpers.Scale(24), c.OnSurface);
-                        else MaterialIcons.Draw(icon, p, UiHelpers.Scale(24), c.OnSurface);
-                        ImGui.Dummy(UiHelpers.Scale(new Vector2(28, 24)));
-                        ImGui.SameLine();
-                        UiGui.TextUnformatted(title);
-                    }
-                    headerBottom = ImGui.GetCursorScreenPos().Y;
-                    ImGui.Separator();
-                    var inset = UiHelpers.Scale(title == "Automation"
-                        ? plugin.Configuration.UiCompact ? 15 : 20
-                        : plugin.Configuration.UiCompact ? 1 : 6);
-                    ImGui.Indent(inset);
-                    try { draw(); }
-                    finally { ImGui.Unindent(inset); }
-                    }
-                    finally { ImGui.PopID(); }
+                    using (UiText.Font(UiFontRole.PluginName)) UiGui.TextUnformatted(title);
                 }
-                finally { if (visible) ImGui.EndTable(); }
-                ImGui.SetCursorScreenPos(new Vector2(min.X, ImGui.GetCursorScreenPos().Y));
-                ImGui.Dummy(new Vector2(width, Math.Max(0, bottomPadding - ImGui.GetStyle().ItemSpacing.Y)));
+                draw();
             }
-            finally { ImGui.EndGroup(); }
-            var max = new Vector2(min.X + width, ImGui.GetItemRectMax().Y);
-            dl.ChannelsSetCurrent(0);
-            MaterialCanvas.Surface(min, max, c.Surface, c.Background, UiHelpers.Scale(4));
-            dl.AddRectFilled(min, new Vector2(max.X, headerBottom), MaterialCanvas.Color(c.SurfaceContainerLow), UiHelpers.Scale(4));
-            dl.AddRect(min, max, MaterialCanvas.Color(c.OutlineVariant), UiHelpers.Scale(4));
+            finally { ImGui.PopID(); }
+            var inset = UiHelpers.Scale(new Vector2(8, plugin.Configuration.UiCompact ? 4 : 6));
+            var max = new Vector2(min.X + width, ImGui.GetCursorScreenPos().Y - ImGui.GetStyle().ItemSpacing.Y);
+            ImGuiP.TablePushBackgroundChannel();
+            try
+            {
+                var c = MaterialTheme.Current.Colors;
+                var dl = ImGui.GetWindowDrawList();
+                dl.AddRectFilled(min - inset, max + inset, MaterialCanvas.Color(c.SurfaceContainerLow), UiHelpers.Scale(6));
+                dl.AddRect(min - inset, max + inset, MaterialCanvas.Color(c.OutlineVariant), UiHelpers.Scale(6));
+            }
+            finally { ImGuiP.TablePopBackgroundChannel(); }
         }
-        finally { dl.ChannelsMerge(); }
-        ImGui.Dummy(new Vector2(0, UiHelpers.Scale(plugin.Configuration.UiCompact ? 8 : 5)));
+        finally { ImGui.EndTable(); }
+        ImGui.Dummy(new Vector2(0, UiHelpers.Scale(plugin.Configuration.UiCompact ? 3 : 5)));
     }
 
     private static void NextGroup(float logicalWidth)
     {
-        var right = ImGui.GetWindowPos().X + ImGui.GetWindowContentRegionMax().X;
+        var right = ImGui.GetCursorScreenPos().X + ImGui.GetContentRegionAvail().X;
         if (ImGui.GetItemRectMax().X + ImGui.GetStyle().ItemSpacing.X + UiHelpers.Scale(logicalWidth) <= right) ImGui.SameLine();
     }
 
@@ -256,39 +236,17 @@ public class MainWindow : Window, IDisposable
         ImGui.Dummy(UiHelpers.Scale(new Vector2(compact ? 30 : 36, compact ? 28 : 32)));
         ImGui.SameLine();
         using (UiText.Font(UiFontRole.Title)) MaterialText.Text("Fren Rider");
-        NextGroup(110);
-        UiHelpers.StatusPill(plugin.IsWaitingForDuty ? "Combat rotations paused outside duties" : config.Enabled ? "Enabled" : "Disabled",
-            plugin.IsWaitingForDuty ? UiHelpers.Yellow : config.Enabled ? UiHelpers.Green : UiHelpers.Grey);
-
-        NextGroup(MaterialText.Measure(UiText.T("Run")).X / Math.Max(.01f, MaterialTheme.Metrics.Scale) + 52);
-        var enabled = config.Enabled;
-        if (UiGui.HeaderToggle("Run", ref enabled))
-            plugin.ConfigManager.SetFrenRiderEnabled(enabled);
-
-        NextGroup(MaterialText.Measure(UiText.T("DTR")).X / Math.Max(.01f, MaterialTheme.Metrics.Scale) + 52);
-        var dtrEnabled = plugin.Configuration.DtrBarEnabled;
-        if (UiGui.HeaderToggle("DTR", ref dtrEnabled))
-        {
-            plugin.Configuration.DtrBarEnabled = dtrEnabled;
-            plugin.Configuration.Save();
-        }
-        if (ImGui.IsItemHovered())
-            UiGui.SetTooltip("Show Fren Rider status in the server info bar.");
-
-        NextGroup(MaterialText.Measure(UiText.T("Krangle")).X / Math.Max(.01f, MaterialTheme.Metrics.Scale) + 52);
-        var krangleEnabled = plugin.Configuration.KrangleEnabled;
-        if (UiGui.HeaderToggle("Krangle", ref krangleEnabled))
-        {
-            plugin.Configuration.KrangleEnabled = krangleEnabled;
-            plugin.Configuration.Save();
-            KrangleService.ClearCache();
-        }
-        if (ImGui.IsItemHovered())
-            UiGui.SetTooltip("Obfuscate character names in FrenRider UI.");
 
         NextButton("Settings");
         if (UiGui.Button("Settings", icon: MaterialIcon.Settings))
             plugin.ToggleConfigUi();
+
+        NextButton("Account");
+        if (UiGui.Button("Account")) ImGui.OpenPopup("##FrenRiderAccountActions");
+
+        NextButton("Chocobo");
+        if (UiGui.Button("Chocobo", icon: MaterialIcon.Egg))
+            plugin.OpenChocoboSettings();
 
         NextButton("Ko-fi");
         if (UiGui.Button("Ko-fi", icon: MaterialIcon.Heart))
@@ -300,12 +258,25 @@ public class MainWindow : Window, IDisposable
             });
         }
 
-        NextButton("Chocobo");
-        if (UiGui.Button("Chocobo", icon: MaterialIcon.Egg))
-            plugin.OpenChocoboSettings();
-
         NextGroup(Math.Max(ImGui.GetFrameHeight(), MaterialControls.Metrics.Height) / Math.Max(.01f, MaterialTheme.Metrics.Scale));
         if (UiGui.IconButton("Close", MaterialIcon.Close)) IsOpen = false;
+        UiGui.TextDisabled("A Dalamud plugin for FFXIV multiplayer follow/combat automation.");
+        var originalIdRoot = ImGui.GetID("");
+        var accountWidth = Math.Max(UiHelpers.Scale(360),
+            new[] { "All FR off", "All FR on", "Krangle", "DTR" }.Max(label => MaterialText.Measure(UiText.T(label)).X)
+                + UiHelpers.Scale(80));
+        ImGui.SetNextWindowSize(new Vector2(Math.Min(accountWidth,
+            Math.Max(1, ImGui.GetMainViewport().WorkSize.X - ImGui.GetStyle().WindowPadding.X * 2)), 0), ImGuiCond.Always);
+        if (ImGui.BeginPopup("##FrenRiderAccountActions"))
+        {
+            try
+            {
+                ImGuiP.PushOverrideID(originalIdRoot);
+                try { DrawAccountControls(); }
+                finally { ImGui.PopID(); }
+            }
+            finally { ImGui.EndPopup(); }
+        }
     }
 
     private void DrawAccountControls()
@@ -327,6 +298,22 @@ public class MainWindow : Window, IDisposable
         if (sameRow) ImGui.SameLine();
         DrawAllFrenRiderButton(true, buttonSize);
         ImGui.EndDisabled();
+        ImGui.Separator();
+        var dtrEnabled = plugin.Configuration.DtrBarEnabled;
+        if (UiGui.HeaderToggle("DTR", ref dtrEnabled))
+        {
+            plugin.Configuration.DtrBarEnabled = dtrEnabled;
+            plugin.Configuration.Save();
+        }
+        if (ImGui.IsItemHovered()) UiGui.SetTooltip("Show Fren Rider status in the server info bar.");
+        var krangleEnabled = plugin.Configuration.KrangleEnabled;
+        if (UiGui.HeaderToggle("Krangle", ref krangleEnabled))
+        {
+            plugin.Configuration.KrangleEnabled = krangleEnabled;
+            plugin.Configuration.Save();
+            KrangleService.ClearCache();
+        }
+        if (ImGui.IsItemHovered()) UiGui.SetTooltip("Obfuscate character names in FrenRider UI.");
     }
 
     private void DrawAllFrenRiderButton(bool enabled, Vector2 size)
@@ -352,21 +339,16 @@ public class MainWindow : Window, IDisposable
     private void DrawWarnings()
     {
         if (!Plugin.ClientState.IsLoggedIn)
-            UiHelpers.WarningStrip("Not logged in. FrenRider waits until a character is loaded.");
+            UiHelpers.SafeWrappedText("Not logged in. FrenRider waits until a character is loaded.", UiHelpers.Yellow);
 
         if (plugin.AutoDutyDetectionService.ShouldShowMainWindowWarning())
-            UiHelpers.WarningStrip("AutoDuty detected while FrenRider is enabled.");
+            UiHelpers.SafeWrappedText("AutoDuty detected while FrenRider is enabled.", UiHelpers.Yellow);
     }
 
     private void DrawOperatorProfile(CharacterConfig config)
     {
-        var compact = plugin.Configuration.UiCompact;
-        using var fields = MaterialControls.Push(FrenRiderPresentation.Controls(36));
         using var columnStyle = new MaterialStyleScope();
-        columnStyle.Style(ImGuiStyleVar.FramePadding,
-            new Vector2(UiHelpers.Scale(compact ? 14 : 16), ImGui.GetStyle().FramePadding.Y));
-        columnStyle.Style(ImGuiStyleVar.CellPadding,
-            UiHelpers.Scale(new Vector2(compact ? 7 : 10, compact ? 2 : 3)));
+        columnStyle.Style(ImGuiStyleVar.CellPadding, UiHelpers.Scale(new Vector2(2, 2)));
         var fren = plugin.FrenTracker.Fren;
         var account = plugin.ConfigManager.GetCurrentAccount();
         var visible = fren?.IsFound == true && fren.IsVisible;
@@ -383,29 +365,27 @@ public class MainWindow : Window, IDisposable
             ("Tracking", tracking, fren is null ? UiHelpers.Grey : visible ? UiHelpers.Green : fren.IsFound ? UiHelpers.Yellow : UiHelpers.Red),
             ("Position", visible ? UiText.F("{0:F0} / {1:F0} / {2:F0}", fren!.Position.X, fren.Position.Y, fren.Position.Z) : "—", null),
         };
-        var fieldWidth = Math.Max(1, ImGui.GetContentRegionAvail().X - UiHelpers.Scale(compact ? 2 : 3));
-        var columns = fieldWidth >= UiHelpers.Scale(900) ? 5 : fieldWidth >= UiHelpers.Scale(520) ? 3 : 1;
-        if (ImGui.BeginTable("##OperatorFields", columns, ImGuiTableFlags.SizingStretchProp, new Vector2(fieldWidth, 0)))
+        var columns = ImGui.GetContentRegionAvail().X >= UiHelpers.Scale(340) ? 2 : 1;
+        if (ImGui.BeginTable("##OperatorFields", columns, ImGuiTableFlags.SizingStretchSame | ImGuiTableFlags.NoSavedSettings))
         {
             try
             {
-                for (var column = 0; column < columns; column++)
-                {
-                    var weight = columns != 5 ? 1 : compact
-                        ? column switch { 0 => 2, 1 or 2 => 1.95f, 3 => 2.5f, _ => 1.48f }
-                        : column switch { 0 => 2.1f, 1 or 2 => 2.05f, 3 => 2.35f, _ => 1.45f };
-                    ImGui.TableSetupColumn("##operator" + column, ImGuiTableColumnFlags.WidthStretch,
-                        weight);
-                }
-                foreach (var cell in cells)
+                for (var i = 0; i < 2; i++)
                 {
                     ImGui.TableNextColumn();
-                    UiGui.TextUnformatted(cell.Label);
-                    UiHelpers.ReadOnlyField(cell.Value, cell.Color, localize: false);
+                    UiGui.TextDisabled(cells[i].Label);
+                    using (UiText.Font(UiFontRole.BodyStrong))
+                        UiHelpers.SafeWrappedText(cells[i].Value, localize: false);
                 }
             }
             finally { ImGui.EndTable(); }
         }
+        UiGui.TextDisabled("Fren");
+        using (UiText.Font(UiFontRole.BodyStrong)) UiHelpers.SafeWrappedText(cells[2].Value, localize: false);
+        ImGui.Separator();
+        UiHelpers.AlignedRow("Tracking", cells[3].Value, cells[3].Color, 90);
+        ImGui.Separator();
+        UiHelpers.AlignedRow("Position", cells[4].Value, labelWidth: 90);
     }
 
     private void DrawFrenStatus(CharacterConfig config)
@@ -446,7 +426,7 @@ public class MainWindow : Window, IDisposable
         tableStyle.Color(ImGuiCol.TableRowBg, Vector4.Zero);
         tableStyle.Color(ImGuiCol.TableRowBgAlt, Vector4.Zero);
         tableStyle.Color(ImGuiCol.ChildBg, Vector4.Zero);
-        using var tightRows = compact ? MaterialTable.PushTightRows() : default;
+        using var tightRows = MaterialTable.PushTightRows();
         var available = Math.Max(1, ImGui.GetContentRegionAvail().X - UiHelpers.Scale(compact ? 3 : 6));
         var statusMinimum = Math.Max(MaterialText.Measure(UiText.T("Mounted")).X,
             Math.Max(MaterialText.Measure(UiText.T("On foot")).X, MaterialText.Measure(UiText.T("Not visible")).X))
@@ -463,9 +443,9 @@ public class MainWindow : Window, IDisposable
         var statusWeight = compact ? 1.135f : 1.16f;
         var minimumWidth = Math.Max(UiHelpers.Scale(640), indexWidth + distanceMinimum + ImGui.GetStyle().CellPadding.X * 10
             + MathF.Ceiling(Math.Max(jobMinimum, statusMinimum / statusWeight) * (nameWeight + 1 + statusWeight)));
-        var rowHeight = compact ? Math.Max(UiHelpers.Scale(24), ImGui.GetTextLineHeight()) : UiHelpers.Scale(35);
+        var rowHeight = Math.Max(UiHelpers.Scale(compact ? 24 : 27), ImGui.GetTextLineHeight());
         var height = MathF.Ceiling(ImGui.GetTextLineHeight() + ImGui.GetStyle().CellPadding.Y * 2
-            + Math.Max(4, plugin.FrenTracker.Party.Count) * rowHeight)
+            + Math.Max(1, plugin.FrenTracker.Party.Count) * rowHeight)
             + (available < minimumWidth ? ImGui.GetStyle().ScrollbarSize : 0);
         if (!ImGui.BeginTable("##FrenRiderParty", 5, ImGuiTableFlags.RowBg | ImGuiTableFlags.BordersInnerH | ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY | ImGuiTableFlags.PadOuterX,
                 new Vector2(available, height), Math.Max(available, minimumWidth))) return;
@@ -532,12 +512,6 @@ public class MainWindow : Window, IDisposable
                 ImGui.TableNextRow(); ImGui.TableNextColumn(); MaterialText.Text("—");
                 ImGui.TableNextColumn(); UiGui.TextDisabled("Not in a party");
             }
-            for (var slot = Math.Max(1, plugin.FrenTracker.Party.Count); slot < 4; slot++)
-            {
-                ImGui.TableNextRow(ImGuiTableRowFlags.None, rowHeight);
-                ImGui.TableNextColumn(); MaterialText.Text(UiText.F("{0}", slot + 1));
-                for (var column = 1; column < 5; column++) { ImGui.TableNextColumn(); MaterialText.Text("—"); }
-            }
         }
         finally { ImGui.EndTable(); }
     }
@@ -545,11 +519,7 @@ public class MainWindow : Window, IDisposable
     private void DrawAutomationStack()
     {
         var compact = plugin.Configuration.UiCompact;
-        using var fields = MaterialControls.Push(FrenRiderPresentation.Controls(compact ? 30 : 36));
-        using var rowSpacing = new MaterialStyleScope();
-        rowSpacing.Style(ImGuiStyleVar.FramePadding,
-            new Vector2(UiHelpers.Scale(compact ? 14 : 16), ImGui.GetStyle().FramePadding.Y));
-        rowSpacing.Style(ImGuiStyleVar.CellPadding, UiHelpers.Scale(new Vector2(compact ? 8 : 12, 3)));
+        using var tightRows = MaterialTable.PushTightRows();
         var follow = plugin.FollowService;
         var mount = plugin.MountService;
         var combat = plugin.CombatService;
@@ -579,32 +549,20 @@ public class MainWindow : Window, IDisposable
                 buddyTime > 0 ? UiHelpers.Green : UiHelpers.Grey));
         }
         if (plugin.FormationService.IsActive) rows.Add(("Formation", UiText.F("Slot {0}", plugin.FormationService.AssignedSlot), UiHelpers.Blue));
-        var firstLabelWidth = UiHelpers.Scale(compact ? 135 : 140);
-        var secondLabelWidth = UiHelpers.Scale(compact ? 152 : 150);
-        for (var row = 0; row < rows.Count; row++)
-        {
-            var labelWidth = MathF.Ceiling(MaterialText.Measure(UiText.T(rows[row].Label)).X + UiHelpers.Scale(2));
-            if (row % 2 == 0) firstLabelWidth = Math.Max(firstLabelWidth, labelWidth);
-            else secondLabelWidth = Math.Max(secondLabelWidth, labelWidth);
-        }
-        var groupGap = UiHelpers.Scale(compact ? 27 : 31);
-        var fieldWidth = Math.Max(1, ImGui.GetContentRegionAvail().X - UiHelpers.Scale(compact ? 6 : 15));
-        var columns = fieldWidth >= Math.Max(UiHelpers.Scale(760), firstLabelWidth + secondLabelWidth + groupGap
-            + ImGui.GetStyle().CellPadding.X * 6 + UiHelpers.Scale(300)) ? 4 : 2;
-        if (!ImGui.BeginTable("##AutomationFields", columns, ImGuiTableFlags.SizingStretchProp, new Vector2(fieldWidth, 0))) return;
+        var labelWidth = rows.Max(row => MaterialText.Measure(UiText.T(row.Label)).X) + UiHelpers.Scale(4);
+        var fieldWidth = Math.Max(1, ImGui.GetContentRegionAvail().X);
+        var columns = fieldWidth >= Math.Max(UiHelpers.Scale(720), labelWidth * 2 + UiHelpers.Scale(420)) ? 4 : 2;
+        if (!ImGui.BeginTable("##AutomationFields", columns, ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.BordersInnerH,
+                new Vector2(fieldWidth, 0))) return;
         try
         {
             for (var i = 0; i < columns; i++)
                 ImGui.TableSetupColumn("##automation" + i, i % 2 == 0 ? ImGuiTableColumnFlags.WidthFixed : ImGuiTableColumnFlags.WidthStretch,
-                    i % 2 == 0 ? columns == 2 ? Math.Max(firstLabelWidth, secondLabelWidth) : i == 0 ? firstLabelWidth : secondLabelWidth + groupGap
-                        : i == 1 && columns == 4 ? compact ? .965f : .952f : 1);
+                    i % 2 == 0 ? labelWidth : 1);
             foreach (var row in rows)
             {
-                ImGui.TableNextColumn();
-                if (columns == 4 && ImGui.TableGetColumnIndex() == 2)
-                    ImGui.SetCursorPosX(ImGui.GetCursorPosX() + groupGap);
-                UiHelpers.SafeWrappedText(row.Label);
-                ImGui.TableNextColumn(); UiHelpers.ReadOnlyField(row.Value, row.Color);
+                ImGui.TableNextColumn(); UiGui.TextDisabled(row.Label);
+                ImGui.TableNextColumn(); UiHelpers.SafeWrappedText(row.Value, row.Color);
             }
         }
         finally { ImGui.EndTable(); }
@@ -652,10 +610,7 @@ public class MainWindow : Window, IDisposable
 
     private void DrawDutyPanel(CharacterConfig config)
     {
-        var compact = plugin.Configuration.UiCompact;
-        using var fields = new MaterialStyleScope();
-        fields.Style(ImGuiStyleVar.FramePadding,
-            new Vector2(UiHelpers.Scale(compact ? 14 : 16), ImGui.GetStyle().FramePadding.Y));
+        using var tightRows = MaterialTable.PushTightRows();
         var zone = plugin.ZoneService;
         var zoneExtra = "";
         if (zone.InFate) zoneExtra += UiText.F(", FATE {0}", zone.CurrentFateId);
@@ -676,39 +631,19 @@ public class MainWindow : Window, IDisposable
                 : config.LeaveWhenAllLeft
                     ? UiText.T("FrenRider: leave when party leaves")
                     : UiText.T("No automatic exit");
-        var labels = new[] { "Zone", "ADS", "Exit method" };
-        var labelWidths = compact ? new[] { 76f, 94f, 141f } : new[] { 73f, 95f, 150f };
-        var labelInsets = compact ? new[] { 8f, 35f, 31f } : new[] { 7f, 34f, 35f };
-        var totalLabelWidth = 0f;
-        var maximumLabelWidth = 0f;
-        for (var i = 0; i < labels.Length; i++)
-        {
-            labelWidths[i] = MathF.Ceiling(Math.Max(UiHelpers.Scale(labelWidths[i]), MaterialText.Measure(UiText.T(labels[i])).X
-                + UiHelpers.Scale(labelInsets[i] + 2)));
-            totalLabelWidth += labelWidths[i];
-            maximumLabelWidth = Math.Max(maximumLabelWidth, labelWidths[i]);
-        }
-        var fieldWidth = Math.Max(1, ImGui.GetContentRegionAvail().X - UiHelpers.Scale(compact ? 6 : 10));
-        var columns = fieldWidth >= Math.Max(UiHelpers.Scale(760), totalLabelWidth + ImGui.GetStyle().CellPadding.X * 10 + UiHelpers.Scale(420)) ? 6 : 2;
-        if (!ImGui.BeginTable("##DutyFields", columns, ImGuiTableFlags.SizingStretchProp, new Vector2(fieldWidth, 0))) return;
+        var labelWidth = new[] { "Zone", "ADS", "Exit method" }.Max(label => MaterialText.Measure(UiText.T(label)).X)
+            + UiHelpers.Scale(4);
+        if (!ImGui.BeginTable("##DutyFields", 2, ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.BordersInnerH)) return;
         try
         {
-            for (var i = 0; i < columns; i++)
-                ImGui.TableSetupColumn("##duty" + i, i % 2 == 0 ? ImGuiTableColumnFlags.WidthFixed : ImGuiTableColumnFlags.WidthStretch,
-                    i % 2 == 0 ? columns == 6 ? labelWidths[i / 2] : maximumLabelWidth
-                        : columns == 2 || i == 3 ? 1 : i == 1 ? compact ? 1.065f : 1.216f : compact ? .93f : .907f);
-            ImGui.TableNextColumn();
-            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + UiHelpers.Scale(labelInsets[0]));
-            UiHelpers.SafeWrappedText("Zone");
-            ImGui.TableNextColumn(); UiHelpers.ReadOnlyField(zoneText);
-            ImGui.TableNextColumn();
-            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + UiHelpers.Scale(labelInsets[columns == 6 ? 1 : 0]));
-            UiHelpers.SafeWrappedText("ADS");
-            ImGui.TableNextColumn(); UiHelpers.ReadOnlyField(ads.StatusText, adsColor);
-            ImGui.TableNextColumn();
-            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + UiHelpers.Scale(labelInsets[columns == 6 ? 2 : 0]));
-            UiHelpers.SafeWrappedText("Exit method");
-            ImGui.TableNextColumn(); UiHelpers.ReadOnlyField(exitMethod, config.UseAdsLeaveAfterAdsDuty ? UiHelpers.Blue : UiHelpers.Grey);
+            ImGui.TableSetupColumn("##duty0", ImGuiTableColumnFlags.WidthFixed, labelWidth);
+            ImGui.TableSetupColumn("##duty1", ImGuiTableColumnFlags.WidthStretch);
+            ImGui.TableNextColumn(); UiGui.TextDisabled("Zone");
+            ImGui.TableNextColumn(); UiHelpers.SafeWrappedText(zoneText);
+            ImGui.TableNextColumn(); UiGui.TextDisabled("ADS");
+            ImGui.TableNextColumn(); UiHelpers.SafeWrappedText(ads.StatusText, adsColor);
+            ImGui.TableNextColumn(); UiGui.TextDisabled("Exit method");
+            ImGui.TableNextColumn(); UiHelpers.SafeWrappedText(exitMethod, config.UseAdsLeaveAfterAdsDuty ? UiHelpers.Blue : UiHelpers.Grey);
         }
         finally { ImGui.EndTable(); }
     }

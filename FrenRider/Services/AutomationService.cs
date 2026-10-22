@@ -65,6 +65,7 @@ public class AutomationService : IDisposable
     private RepairFlowState repairFlowState;
     private bool adsRepairUtilityObserved;
     private bool repairReturnsToInn;
+    private string activeRepairMode = "";
     private DateTime repairRequestedUtc;
     private int repairRequestAttempts;
     private AutoDesynthFlowState autoDesynthFlowState;
@@ -933,13 +934,26 @@ public class AutomationService : IDisposable
             return;
         }
 
-        if (repairReturnsToInn && repairFlowState is not (RepairFlowState.Idle or RepairFlowState.WaitingForDismount))
+        // ADS owns the accepted request until its terminal result, even when
+        // durability has already crossed our trigger threshold.
+        if (repairFlowState is not (RepairFlowState.Idle or RepairFlowState.WaitingForDismount))
         {
-            TrackActiveRepair(now, "npc-yes-inn", threshold, adsStatus);
+            TrackActiveRepair(now, activeRepairMode, threshold, adsStatus);
             return;
         }
 
-        var needsRepair = GameHelpers.NeedsRepair(threshold);
+        if (!adsStatus.StatusReadable)
+        {
+            RepairStatus = "Waiting: ADS status unavailable.";
+            return;
+        }
+
+        if (!GameHelpers.TryGetEquippedGearNeedsRepair(threshold, out var needsRepair))
+        {
+            RepairStatus = "Waiting: equipped gear durability unavailable.";
+            return;
+        }
+
         if (!needsRepair)
         {
             if (repairFlowState != RepairFlowState.Idle)
@@ -1086,6 +1100,15 @@ public class AutomationService : IDisposable
             return;
         }
 
+        if (adsStatus.UtilityRunning && (!adsStatus.IsRepairRunning ||
+            !string.Equals(adsStatus.UtilityMode, repairMode, StringComparison.Ordinal)))
+        {
+            RepairStatus = $"{GetRepairModeLabel(repairMode)} repair interrupted: ADS is running a different utility ({adsStatus.UtilityMode}, {adsStatus.UtilityTask}).";
+            Plugin.Log.Warning($"[FrenRider][Repair] {RepairStatus}");
+            ResetRepairFlow(preserveStatus: true);
+            return;
+        }
+
         if (adsStatus.IsRepairRunning)
         {
             adsRepairUtilityObserved = true;
@@ -1097,20 +1120,28 @@ public class AutomationService : IDisposable
             return;
         }
 
-        if (repairReturnsToInn && adsStatus.UtilityCompletedAtUtc >= repairRequestedUtc)
+        var hasFreshResult = adsStatus.UtilityCompletedAtUtc >= repairRequestedUtc;
+        if (hasFreshResult && !string.IsNullOrWhiteSpace(adsStatus.UtilityLastFailure))
         {
-            if (!string.IsNullOrWhiteSpace(adsStatus.UtilityLastFailure))
-            {
-                RepairStatus = $"NPC repair + inn room failed: {adsStatus.UtilityLastFailure}";
-                Plugin.Log.Warning($"[FrenRider][Repair] {RepairStatus}");
-                ResetRepairFlow(preserveStatus: true);
-                return;
-            }
-            if (!string.IsNullOrWhiteSpace(adsStatus.UtilityLastSuccess) && !GameHelpers.NeedsRepair(threshold))
-            {
+            RepairStatus = $"{GetRepairModeLabel(repairMode)} repair failed: {adsStatus.UtilityLastFailure}";
+            Plugin.Log.Warning($"[FrenRider][Repair] {RepairStatus}");
+            ResetRepairFlow(preserveStatus: true);
+            return;
+        }
+
+        if (!GameHelpers.TryGetEquippedGearNeedsRepair(threshold, out var needsRepair))
+        {
+            RepairStatus = $"{GetRepairModeLabel(repairMode)} repair requested; waiting for equipped gear durability.";
+            return;
+        }
+
+        if (!needsRepair)
+        {
+            if (hasFreshResult && !string.IsNullOrWhiteSpace(adsStatus.UtilityLastSuccess))
                 CompleteRepairFlow(threshold);
-                return;
-            }
+            else
+                RepairStatus = $"{GetRepairModeLabel(repairMode)} repair threshold met; waiting for ADS completion.";
+            return;
         }
 
         if (!adsRepairUtilityObserved && elapsedSinceRequest < RepairStartGraceMs)
@@ -1140,6 +1171,7 @@ public class AutomationService : IDisposable
     private void IssueRepairRequest(long now, string repairMode, int threshold, string reason)
     {
         repairReturnsToInn = repairMode == "npc-yes-inn";
+        activeRepairMode = repairMode;
         repairRequestedUtc = DateTime.UtcNow;
         repairRequestAttempts++;
         lastRepairAttemptMs = now;
@@ -1189,6 +1221,7 @@ public class AutomationService : IDisposable
     private void ResetRepairFlow(bool preserveStatus = false, bool refreshAdsStatus = false)
     {
         repairReturnsToInn = false;
+        activeRepairMode = "";
         repairFlowState = RepairFlowState.Idle;
         lastRepairAttemptMs = 0;
         repairDismountStartedMs = 0;
@@ -1245,7 +1278,8 @@ public class AutomationService : IDisposable
         }
 
         if (Plugin.Condition[ConditionFlag.BoundByDuty] ||
-            Plugin.Condition[ConditionFlag.BoundByDuty56])
+            Plugin.Condition[ConditionFlag.BoundByDuty56] ||
+            Plugin.Condition[ConditionFlag.BoundByDuty95])
         {
             reason = "in duty";
             return false;

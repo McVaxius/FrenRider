@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Numerics;
 using AethertekUI;
 using Dalamud.Bindings.ImGui;
@@ -25,51 +26,54 @@ public partial class ConfigWindow
     internal static void DrawLimitBreakSettings(LimitBreakSettings settings, LimitBreakRole selected,
         Action<LimitBreakRole> select, Action save, Action<string> sync)
     {
-        using (UiText.Font(UiFontRole.Title)) UiGui.Text("Limit Break");
-        UiGui.TextWrapped("Choose when each role may spend the party gauge.");
-        UiGui.TextWrapped("FrenRider must be active and in combat.");
+        using (UiText.Font(UiFontRole.PluginName)) UiGui.Text("Limit Break");
+        if (ImGui.IsItemHovered()) UiGui.SetTooltip("Choose when each role may spend the party gauge.");
+        UiGui.TextDisabled("FrenRider must be active and in combat.");
         var wide = ImGui.GetContentRegionAvail().X >= 840 * MaterialTheme.Metrics.Scale;
+        uint damageRoot = 0;
         if (wide)
         {
-            MaterialSettings.Columns("##LimitBreakGroups", 380 * MaterialTheme.Metrics.Scale, () =>
-            {
-                Card("Damage roles", () =>
-                {
-                    var damageRole = settings.Damage(selected) == null ? LimitBreakRole.Melee : selected;
-                    RoleButtons(damageRole, select, false);
-                    DamageControls(settings.Damage(damageRole)!, damageRole, save, sync);
-                });
-            }, () =>
-            {
-                Card("Tank", () => TankControls(settings.Tank, save, sync));
-                Card("Healer", () => HealerControls(settings.Healer, save, sync));
-            });
+            ImGui.PushID("Damage roles");
+            damageRoot = ImGui.GetID("##Card");
+            ImGui.PopID();
         }
-        else
+        RoleButtons(selected, select, true, damageRoot);
+        var title = LimitBreakRoleLabel(selected);
+        Card(title, () =>
         {
-            RoleButtons(selected, select, true);
-            Card(LimitBreakRoleLabel(selected), () =>
-            {
-                if (selected == LimitBreakRole.Tank) TankControls(settings.Tank, save, sync);
-                else if (selected == LimitBreakRole.Healer) HealerControls(settings.Healer, save, sync);
-                else DamageControls(settings.Damage(selected)!, selected, save, sync);
-            });
-        }
+            if (selected == LimitBreakRole.Tank) TankControls(settings.Tank, save, sync);
+            else if (selected == LimitBreakRole.Healer) HealerControls(settings.Healer, save, sync);
+            else DamageControls(settings.Damage(selected)!, selected, save, sync);
+        }, wide && selected is not LimitBreakRole.Tank and not LimitBreakRole.Healer ? "Damage roles" : title);
         Card("Role overview", () =>
         {
-            // A wrapping row keeps all saved values available at compact widths and large scales.
-            foreach (var role in new[] { LimitBreakRole.Tank, LimitBreakRole.Healer, LimitBreakRole.Melee,
-                         LimitBreakRole.PhysicalRanged, LimitBreakRole.MagicalRanged })
+            using var rows = MaterialTable.PushTightRows();
+            if (ImGui.BeginTable("##LimitBreakRoleOverview", 2,
+                    ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.BordersInnerH | ImGuiTableFlags.NoSavedSettings))
             {
-                using (UiText.Font(UiFontRole.BodyStrong)) UiGui.Text(LimitBreakRoleLabel(role));
-                UiGui.TextWrapped(LimitBreakSummary(settings, role));
-                ImGui.Separator();
+                try
+                {
+                    var roleWidth = new[] { LimitBreakRole.Tank, LimitBreakRole.Healer, LimitBreakRole.Melee,
+                        LimitBreakRole.PhysicalRanged, LimitBreakRole.MagicalRanged }
+                        .Max(role => MaterialText.Measure(UiText.T(LimitBreakRoleLabel(role))).X);
+                    ImGui.TableSetupColumn("##Role", ImGuiTableColumnFlags.WidthFixed,
+                        Math.Min(roleWidth, ImGui.GetContentRegionAvail().X * .35f));
+                    ImGui.TableSetupColumn("##Policy", ImGuiTableColumnFlags.WidthStretch);
+                    foreach (var role in new[] { LimitBreakRole.Tank, LimitBreakRole.Healer, LimitBreakRole.Melee,
+                                 LimitBreakRole.PhysicalRanged, LimitBreakRole.MagicalRanged })
+                    {
+                        ImGui.TableNextColumn();
+                        using (UiText.Font(UiFontRole.BodyStrong)) UiGui.TextWrapped(LimitBreakRoleLabel(role));
+                        ImGui.TableNextColumn(); UiGui.TextWrapped(LimitBreakSummary(settings, role));
+                    }
+                }
+                finally { ImGui.EndTable(); }
             }
             UiGui.TextWrapped("Saved policies only. This overview is not live telemetry.");
         });
     }
 
-    private static void RoleButtons(LimitBreakRole selected, Action<LimitBreakRole> select, bool all)
+    private static void RoleButtons(LimitBreakRole selected, Action<LimitBreakRole> select, bool all, uint damageRoot = 0)
     {
         var first = true;
         foreach (var role in new[] { LimitBreakRole.Tank, LimitBreakRole.Healer, LimitBreakRole.Melee,
@@ -81,7 +85,10 @@ public partial class ConfigWindow
                 + ImGui.GetStyle().ItemInnerSpacing.X;
             if (!first && ImGui.GetItemRectMax().X + ImGui.GetStyle().ItemSpacing.X + width
                 <= ImGui.GetWindowPos().X + ImGui.GetWindowContentRegionMax().X) ImGui.SameLine();
-            if (UiGui.RadioButton(label, selected == role)) select(role);
+            var restoreDamageRoot = damageRoot != 0 && role is not LimitBreakRole.Tank and not LimitBreakRole.Healer;
+            if (restoreDamageRoot) ImGuiP.PushOverrideID(damageRoot);
+            try { if (UiGui.RadioButton(label, selected == role)) select(role); }
+            finally { if (restoreDamageRoot) ImGui.PopID(); }
             first = false;
         }
         ImGui.Spacing();
@@ -97,7 +104,7 @@ public partial class ConfigWindow
             var gauge = (int)p.Gauge;
             Field("Gauge requirement");
             if (UiGui.Combo("##Gauge", ref gauge, GaugeLabels, GaugeLabels.Length)) { p.Gauge = (LimitBreakGauge)gauge; save(); }
-            UiGui.TextWrapped("Full available waits until every available bar is full.");
+            if (ImGui.IsItemHovered()) UiGui.SetTooltip("Full available waits until every available bar is full.");
             var target = (int)p.Target;
             Field("Target");
             if (UiGui.Combo("##Target", ref target, TargetLabels, TargetLabels.Length)) { p.Target = (LimitBreakTarget)target; save(); }
@@ -107,7 +114,7 @@ public partial class ConfigWindow
             var count = p.MinimumEnemies;
             Field("Minimum enemies");
             if (UiGui.InputInt("##Enemies", ref count)) { p.MinimumEnemies = Math.Clamp(count, 1, 100); save(); }
-            UiGui.TextWrapped("100% permits use as soon as the gauge is ready. Count includes enemies inside the action area.");
+            if (ImGui.IsItemHovered()) UiGui.SetTooltip("100% permits use as soon as the gauge is ready. Count includes enemies inside the action area.");
             UiGui.TextWrapped(UiText.F("Example: {0}", DamageSummary(p)));
             sync(LimitBreakRoleLabel(role) + " Limit Break");
         }
@@ -161,37 +168,42 @@ public partial class ConfigWindow
     private static float Percent(float value) => float.IsFinite(value) ? Math.Clamp(value, 0, 100) : 100;
     private static void Field(string label)
     {
-        UiGui.TextWrapped(label);
-        ImGui.SetNextItemWidth(Math.Max(1, ImGui.GetContentRegionAvail().X));
+        var scale = MaterialTheme.Metrics.Scale;
+        var choices = label == "Gauge requirement" ? GaugeLabels : label == "Target" ? TargetLabels : null;
+        var minimum = choices is null ? 120 * scale : choices.Max(value => MaterialText.Measure(UiText.T(value)).X)
+            + ImGui.GetFrameHeight() + ImGui.GetStyle().FramePadding.X * 2;
+        var width = Math.Max(minimum, Math.Min(300 * scale, ImGui.GetContentRegionAvail().X * .5f));
+        var labelWidth = MaterialText.Measure(UiText.T(label)).X;
+        var available = ImGui.GetContentRegionAvail().X;
+        var start = ImGui.GetCursorPosX();
+        if (labelWidth + ImGui.GetStyle().ItemSpacing.X + width <= available)
+        {
+            ImGui.AlignTextToFramePadding();
+            UiGui.TextUnformatted(label);
+            ImGui.SameLine(start + available - width);
+        }
+        else UiGui.TextWrapped(label);
+        ImGui.SetNextItemWidth(Math.Min(width, Math.Max(1, ImGui.GetContentRegionAvail().X)));
     }
 
-    private static void Card(string title, Action draw)
+    private static void Card(string title, Action draw, string? idTitle = null)
     {
-        ImGui.PushID(title);
+        ImGui.PushID(idTitle ?? title);
         try
         {
-            if (!ImGui.BeginTable("##Card", 1, ImGuiTableFlags.NoSavedSettings | ImGuiTableFlags.PadOuterX)) return;
+            using var style = new MaterialStyleScope();
+            style.Style(ImGuiStyleVar.CellPadding, Vector2.Zero);
+            // Keep the old native table seed without its padded background frame.
+            if (!ImGui.BeginTable("##Card", 1, ImGuiTableFlags.NoSavedSettings)) return;
             try
             {
-                ImGui.TableNextRow();
                 ImGui.TableNextColumn();
-                var min = ImGui.GetCursorScreenPos();
-                var width = ImGui.GetContentRegionAvail().X;
-                using (UiText.Font(UiFontRole.BodyStrong)) UiGui.Text(title);
+                UiGui.SettingsSection(title);
                 draw();
-                var max = new Vector2(min.X + width, ImGui.GetCursorScreenPos().Y);
-                ImGuiP.TablePushBackgroundChannel();
-                try
-                {
-                    ImGui.GetWindowDrawList().AddRectFilled(min - new Vector2(4), max + new Vector2(4),
-                        MaterialCanvas.Color(MaterialTheme.Current.Colors.SurfaceContainerLow), 6);
-                }
-                finally { ImGuiP.TablePopBackgroundChannel(); }
             }
             finally { ImGui.EndTable(); }
         }
         finally { ImGui.PopID(); }
-        ImGui.Spacing();
     }
 
     internal static string LimitBreakSummary(LimitBreakSettings settings, LimitBreakRole role)

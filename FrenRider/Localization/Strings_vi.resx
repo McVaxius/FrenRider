@@ -3305,4 +3305,13 @@ Bật: dùng các preset BossMod bên dưới với mọi nhà cung cấp rotati
   <data name="Control" xml:space="preserve"><value>Điều khiển</value></data>
   <data name="Switch to Picker to set each colour yourself." xml:space="preserve"><value>Chuyển sang Bộ chọn để tự đặt từng màu.</value></data>
   <data name="Switch back to Auto to use the automatic theme." xml:space="preserve"><value>Chuyển về Tự động để dùng chủ đề tự động.</value></data>
+  <data name="Profile actions" xml:space="preserve">
+    <value>Thao t?c h? s?</value>
+  </data>
+  <data name="Waiting: ADS status unavailable." xml:space="preserve"><value>Đang chờ: không có trạng thái ADS.</value></data>
+  <data name="Waiting: equipped gear durability unavailable." xml:space="preserve"><value>Đang chờ: không có thông tin độ bền của trang bị đang dùng.</value></data>
+  <data name="{0} repair interrupted: ADS is running a different utility ({1}, {2})." xml:space="preserve"><value>Sửa chữa ({0}) bị gián đoạn: ADS đang chạy tác vụ khác ({1}, {2}).</value></data>
+  <data name="{0} repair failed: {1}" xml:space="preserve"><value>Sửa chữa ({0}) thất bại: {1}</value></data>
+  <data name="{0} repair requested; waiting for equipped gear durability." xml:space="preserve"><value>Đã yêu cầu sửa chữa ({0}); đang chờ thông tin độ bền của trang bị đang dùng.</value></data>
+  <data name="{0} repair threshold met; waiting for ADS completion." xml:space="preserve"><value>Sửa chữa ({0}): đã đạt ngưỡng độ bền; đang chờ ADS hoàn tất.</value></data>
 </root>

@@ -24,18 +24,25 @@ internal static class UiGui
     internal static bool ActivationModeControls(CharacterConfig config)
     {
         var changed = false;
+        var right = ImGui.GetCursorScreenPos().X + ImGui.GetContentRegionAvail().X;
         if (RadioButton("Always on", config.ActivationMode == FrenRiderActivationMode.AlwaysOn))
         {
             config.ActivationMode = FrenRiderActivationMode.AlwaysOn;
             changed = true;
         }
-        TextWrapped("On applies inside and outside duties.");
+        if (ImGui.IsItemHovered()) SetTooltip("On applies inside and outside duties.");
+        var dutyWidth = MaterialText.Measure(UiText.T("Duty only")).X + ImGui.GetFrameHeight() + ImGui.GetStyle().ItemInnerSpacing.X;
+        if (ImGui.GetItemRectMax().X + ImGui.GetStyle().ItemSpacing.X + dutyWidth
+            <= right) ImGui.SameLine();
         if (RadioButton("Duty only", config.ActivationMode == FrenRiderActivationMode.DutyOnly))
         {
             config.ActivationMode = FrenRiderActivationMode.DutyOnly;
             changed = true;
         }
-        TextWrapped("Only combat rotations wait outside duties. Following, repairs and other configured actions continue.");
+        if (ImGui.IsItemHovered()) SetTooltip("Only combat rotations wait outside duties. Following, repairs and other configured actions continue.");
+        TextDisabled(config.ActivationMode == FrenRiderActivationMode.AlwaysOn
+            ? "On applies inside and outside duties."
+            : "Only combat rotations wait outside duties. Following, repairs and other configured actions continue.");
         return changed;
     }
     internal static bool InSettingRow => settingWindow != 0 && ImGuiP.GetCurrentWindow().ID == settingWindow;
@@ -141,8 +148,8 @@ internal static class UiGui
         var food = available ? GameHelpers.GetCompanionSupplyStock(config.ChocoboFoodItemId) : -1;
         var greensCount = greens < 0 ? "-" : greens.ToString();
         var foodCount = food < 0 ? "-" : food.ToString();
-        var greensLabel = mini ? greensCount : UiText.T("BUY GREENS") + " · " + greensCount;
-        var foodLabel = mini ? foodCount : UiText.T("BUY FOOD") + " · " + foodCount;
+        var greensLabel = UiText.T("BUY GREENS") + " · " + greensCount;
+        var foodLabel = UiText.T("BUY FOOD") + " · " + foodCount;
         var stopLabel = UiText.T("Stop companion purchasing");
 
         ImGui.BeginDisabled(!available);
@@ -161,10 +168,11 @@ internal static class UiGui
                     + "\n" + UiText.T("Buying companion food from Vath requires beast tribe progression through The Naming of Vath. Purchase is unavailable until the vendor is unlocked."));
         }
         finally { ImGui.EndDisabled(); }
-        ContinuePurchaseAction(mini ? "" : stopLabel, icon: true);
-        if (mini ? IconButton("Stop companion purchasing", MaterialIcon.Stop)
-            : Button("Stop companion purchasing", icon: MaterialIcon.Stop)) plugin.StopChocoboPurchasing();
+        ContinuePurchaseAction(stopLabel, icon: true);
+        if (Button("Stop companion purchasing", icon: MaterialIcon.Stop)) plugin.StopChocoboPurchasing();
         if (ImGui.IsItemHovered()) MaterialText.SetTooltip(stopLabel + "\n" + UiText.T(plugin.ChocoboPurchaseStatus));
+        if (mini) TextDisabled(UiText.T("Gysahl Greens stock target") + ": " + config.ChocoboGreensStockTarget
+            + " · " + UiText.T("Companion food stock target") + ": " + config.ChocoboFoodStockTarget);
     }
 
     private static void ContinuePurchaseAction(string display, bool icon)
@@ -280,14 +288,14 @@ internal static class UiGui
     }
 
     // Native controls retain the original ID, hit testing, focus and keyboard behavior.
-    internal static bool HeaderToggle(string original, ref bool value, float minimumLabelWidth = 0, Vector2? trackSize = null)
+    internal static bool HeaderToggle(string original, ref bool value, float minimumLabelWidth = 0, Vector2? trackSize = null, string? display = null)
     {
         var s = MaterialTheme.Metrics.Scale;
         var c = MaterialTheme.Current.Colors;
-        var text = UiText.T(original);
+        var text = display ?? UiText.T(original);
         var size = trackSize ?? new Vector2(44, 26);
         var radius = size.Y * .5f;
-        var width = Math.Max(MaterialText.Measure(text).X, minimumLabelWidth * s) + (size.X + 8) * s;
+        var width = Math.Max(Math.Max(MaterialText.Measure(text).X, MaterialText.Measure(original).X), minimumLabelWidth * s) + (size.X + 8) * s;
         var textSize = MaterialText.Measure(text);
         var height = Math.Max(Math.Max(28, size.Y) * s, Math.Max(ImGui.GetTextLineHeight(), textSize.Y) + 4 * s);
         ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(0, Math.Max(0, (height - ImGui.GetTextLineHeight()) * .5f)));

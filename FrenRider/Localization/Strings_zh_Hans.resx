@@ -3200,4 +3200,13 @@
   <data name="Control" xml:space="preserve"><value>控件</value></data>
   <data name="Switch to Picker to set each colour yourself." xml:space="preserve"><value>切换到选色器以自行设置每种颜色。</value></data>
   <data name="Switch back to Auto to use the automatic theme." xml:space="preserve"><value>切换回自动以使用自动主题。</value></data>
+  <data name="Profile actions" xml:space="preserve">
+    <value>配置操作</value>
+  </data>
+  <data name="Waiting: ADS status unavailable." xml:space="preserve"><value>等待中：无法获取 ADS 状态。</value></data>
+  <data name="Waiting: equipped gear durability unavailable." xml:space="preserve"><value>等待中：无法获取已装备物品的耐久度。</value></data>
+  <data name="{0} repair interrupted: ADS is running a different utility ({1}, {2})." xml:space="preserve"><value>修理（{0}）已中断：ADS 正在执行其他任务（{1}，{2}）。</value></data>
+  <data name="{0} repair failed: {1}" xml:space="preserve"><value>修理（{0}）失败：{1}</value></data>
+  <data name="{0} repair requested; waiting for equipped gear durability." xml:space="preserve"><value>已请求修理（{0}）；等待已装备物品的耐久度信息。</value></data>
+  <data name="{0} repair threshold met; waiting for ADS completion." xml:space="preserve"><value>修理（{0}）：耐久度已达到阈值；等待 ADS 完成。</value></data>
 </root>

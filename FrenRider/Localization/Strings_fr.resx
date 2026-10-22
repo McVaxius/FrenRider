@@ -3200,4 +3200,13 @@ Activé : utilisez les préréglages BossMod ci-dessous avec tout fournisseur de
   <data name="Control" xml:space="preserve"><value>Commande</value></data>
   <data name="Switch to Picker to set each colour yourself." xml:space="preserve"><value>Passez au Sélecteur pour définir chaque couleur.</value></data>
   <data name="Switch back to Auto to use the automatic theme." xml:space="preserve"><value>Revenez à Automatique pour utiliser le thème automatique.</value></data>
+  <data name="Profile actions" xml:space="preserve">
+    <value>Actions du profil</value>
+  </data>
+  <data name="Waiting: ADS status unavailable." xml:space="preserve"><value>En attente : statut d&apos;ADS indisponible.</value></data>
+  <data name="Waiting: equipped gear durability unavailable." xml:space="preserve"><value>En attente : durabilité de l&apos;équipement porté indisponible.</value></data>
+  <data name="{0} repair interrupted: ADS is running a different utility ({1}, {2})." xml:space="preserve"><value>Réparation ({0}) interrompue : ADS exécute une autre tâche ({1}, {2}).</value></data>
+  <data name="{0} repair failed: {1}" xml:space="preserve"><value>Échec de la réparation ({0}) : {1}</value></data>
+  <data name="{0} repair requested; waiting for equipped gear durability." xml:space="preserve"><value>Réparation ({0}) demandée ; en attente de la durabilité de l&apos;équipement porté.</value></data>
+  <data name="{0} repair threshold met; waiting for ADS completion." xml:space="preserve"><value>Réparation ({0}) : seuil de durabilité atteint ; en attente de la fin d&apos;ADS.</value></data>
 </root>

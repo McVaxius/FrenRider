@@ -3305,4 +3305,13 @@ Włączone: używaj poniższych presetów BossMod z dowolnym dostawcą rotacji. 
   <data name="Control" xml:space="preserve"><value>Przycisk</value></data>
   <data name="Switch to Picker to set each colour yourself." xml:space="preserve"><value>Przejdź do opcji Wybór, aby ustawić każdy kolor.</value></data>
   <data name="Switch back to Auto to use the automatic theme." xml:space="preserve"><value>Wróć do Auto, aby używać motywu automatycznego.</value></data>
+  <data name="Profile actions" xml:space="preserve">
+    <value>Dzia?ania profilu</value>
+  </data>
+  <data name="Waiting: ADS status unavailable." xml:space="preserve"><value>Oczekiwanie: stan ADS jest niedostępny.</value></data>
+  <data name="Waiting: equipped gear durability unavailable." xml:space="preserve"><value>Oczekiwanie: wytrzymałość założonego wyposażenia jest niedostępna.</value></data>
+  <data name="{0} repair interrupted: ADS is running a different utility ({1}, {2})." xml:space="preserve"><value>Naprawa ({0}) przerwana: ADS wykonuje inne zadanie ({1}, {2}).</value></data>
+  <data name="{0} repair failed: {1}" xml:space="preserve"><value>Naprawa ({0}) nie powiodła się: {1}</value></data>
+  <data name="{0} repair requested; waiting for equipped gear durability." xml:space="preserve"><value>Zażądano naprawy ({0}); oczekiwanie na wytrzymałość założonego wyposażenia.</value></data>
+  <data name="{0} repair threshold met; waiting for ADS completion." xml:space="preserve"><value>Naprawa ({0}): osiągnięto próg wytrzymałości; oczekiwanie na zakończenie ADS.</value></data>
 </root>

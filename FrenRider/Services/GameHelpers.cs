@@ -811,8 +811,12 @@ public static class GameHelpers
     /// <summary>
     /// Check if any equipped gear needs repair (below specified condition percentage).
     /// </summary>
-    public static unsafe bool NeedsRepair(int conditionPercent = 0)
+    public static bool NeedsRepair(int conditionPercent = 0)
+        => TryGetEquippedGearNeedsRepair(conditionPercent, out var needsRepair) && needsRepair;
+
+    internal static unsafe bool TryGetEquippedGearNeedsRepair(int conditionPercent, out bool needsRepair)
     {
+        needsRepair = false;
         try
         {
             var thresholdPercent = Math.Clamp(conditionPercent, 0, 100);
@@ -823,19 +827,24 @@ public static class GameHelpers
 
             // Check equipped gear slots
             var equippedContainer = im->GetInventoryContainer(InventoryType.EquippedItems);
-            if (equippedContainer == null) return false;
+            if (equippedContainer == null || !equippedContainer->IsLoaded
+                || equippedContainer->Items == null || equippedContainer->Size <= 0) return false;
 
             for (var i = 0; i < equippedContainer->Size; i++)
             {
                 var item = equippedContainer->GetInventorySlot(i);
-                if (item == null || item->ItemId == 0) continue;
+                if (item == null) return false;
+                if (item->ItemId == 0) continue;
 
                 // InventoryItem.Condition is scaled 0..30000, where 30000 is 100%.
                 if (item->Condition < thresholdRaw)
+                {
+                    needsRepair = true;
                     return true;
+                }
             }
 
-            return false;
+            return true;
         }
         catch (Exception ex)
         {

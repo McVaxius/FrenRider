@@ -1,3 +1,16 @@
+2026-10-22 - Approved window layouts
+
+- Put Run, the follow target and activation mode together; group account actions in their own popup, place Operator beside Duty when space allows, and tighten Party and Automation readouts.
+- Keep Settings independent with a profile scope picker, profile actions and a task sidebar. Retain every settings page, native field identity, account/profile save boundary, default sync/reset and guarded delete action. Use one focused Limit Break role editor with a compact saved-policy overview.
+- Let Mini measure its content, retain Eureka-only MAGIA and companion actions, and tighten the independent AutoDuty warning. Preserve font recovery, saved appearance and release version; game visual acceptance remains pending.
+
+2026-10-22 - Automatic repair completion tracking (I626/I627)
+
+- Require readable idle ADS status, success timestamped at or after the request, and readable equipped gear with none below the configured threshold before reporting automatic repair complete. Preserve the requested repair mode while tracking; report provider failures, hold unreadable status, and invalidate old tracking when a different ADS utility or repair mode is observed. Existing cancellation and timeout boundaries remain in effect.
+- Retain all four enabled repair modes outside duties with Run On in Duty only and Always on, including the remaining duty safety flag. Disabled and existing prerequisites still hold requests.
+- Translate the new repair states across all supported languages and restore corrupted Profile actions labels in five catalogs.
+- Verified local repair-state regressions; supplies, NPC travel, actual repairs and inn arrival still require live acceptance. No version or release change.
+
 2026-10-20 - Independent theme colours
 
 - Add Auto and Picker radio choices to the native titlebar Colour editor and Settings. Auto remains the default and retains the existing automatic theme; Picker saves separate Background, Controls and Text colours, including native hexadecimal entry and a preview.

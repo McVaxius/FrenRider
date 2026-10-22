@@ -3200,4 +3200,13 @@ Attivato: usa i preset BossMod sottostanti con qualsiasi provider di rotazione. 
   <data name="Control" xml:space="preserve"><value>Controllo</value></data>
   <data name="Switch to Picker to set each colour yourself." xml:space="preserve"><value>Passa a Selettore per impostare ogni colore.</value></data>
   <data name="Switch back to Auto to use the automatic theme." xml:space="preserve"><value>Torna ad Automatico per usare il tema automatico.</value></data>
+  <data name="Profile actions" xml:space="preserve">
+    <value>Azioni del profilo</value>
+  </data>
+  <data name="Waiting: ADS status unavailable." xml:space="preserve"><value>In attesa: stato ADS non disponibile.</value></data>
+  <data name="Waiting: equipped gear durability unavailable." xml:space="preserve"><value>In attesa: durabilità dell&apos;equipaggiamento indossato non disponibile.</value></data>
+  <data name="{0} repair interrupted: ADS is running a different utility ({1}, {2})." xml:space="preserve"><value>Riparazione ({0}) interrotta: ADS sta eseguendo un&apos;altra attività ({1}, {2}).</value></data>
+  <data name="{0} repair failed: {1}" xml:space="preserve"><value>Riparazione ({0}) non riuscita: {1}</value></data>
+  <data name="{0} repair requested; waiting for equipped gear durability." xml:space="preserve"><value>Riparazione ({0}) richiesta; in attesa della durabilità dell&apos;equipaggiamento indossato.</value></data>
+  <data name="{0} repair threshold met; waiting for ADS completion." xml:space="preserve"><value>Riparazione ({0}): soglia di durabilità raggiunta; attesa del completamento di ADS.</value></data>
 </root>

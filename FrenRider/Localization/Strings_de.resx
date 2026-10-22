@@ -3200,4 +3200,13 @@ An: Die BossMod-Voreinstellungen unten mit jedem Rotationsanbieter verwenden. Ei
   <data name="Control" xml:space="preserve"><value>Steuerelement</value></data>
   <data name="Switch to Picker to set each colour yourself." xml:space="preserve"><value>Wechsle zur Farbwahl, um jede Farbe selbst festzulegen.</value></data>
   <data name="Switch back to Auto to use the automatic theme." xml:space="preserve"><value>Wechsle zurück zu Automatisch, um das automatische Design zu verwenden.</value></data>
+  <data name="Profile actions" xml:space="preserve">
+    <value>Profilaktionen</value>
+  </data>
+  <data name="Waiting: ADS status unavailable." xml:space="preserve"><value>Warten: ADS-Status nicht verfügbar.</value></data>
+  <data name="Waiting: equipped gear durability unavailable." xml:space="preserve"><value>Warten: Haltbarkeit der angelegten Ausrüstung nicht verfügbar.</value></data>
+  <data name="{0} repair interrupted: ADS is running a different utility ({1}, {2})." xml:space="preserve"><value>Reparatur ({0}) unterbrochen: ADS führt eine andere Aufgabe aus ({1}, {2}).</value></data>
+  <data name="{0} repair failed: {1}" xml:space="preserve"><value>Reparatur ({0}) fehlgeschlagen: {1}</value></data>
+  <data name="{0} repair requested; waiting for equipped gear durability." xml:space="preserve"><value>Reparatur ({0}) angefordert; auf die Haltbarkeit der angelegten Ausrüstung warten.</value></data>
+  <data name="{0} repair threshold met; waiting for ADS completion." xml:space="preserve"><value>Reparatur ({0}): Haltbarkeitsschwelle erreicht; auf ADS-Abschluss warten.</value></data>
 </root>

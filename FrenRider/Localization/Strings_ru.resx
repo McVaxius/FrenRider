@@ -3200,4 +3200,13 @@
   <data name="Control" xml:space="preserve"><value>Кнопка</value></data>
   <data name="Switch to Picker to set each colour yourself." xml:space="preserve"><value>Переключитесь на Палитру, чтобы задать каждый цвет.</value></data>
   <data name="Switch back to Auto to use the automatic theme." xml:space="preserve"><value>Вернитесь в Авто, чтобы использовать автоматическую тему.</value></data>
+  <data name="Profile actions" xml:space="preserve">
+    <value>Действия с профилем</value>
+  </data>
+  <data name="Waiting: ADS status unavailable." xml:space="preserve"><value>Ожидание: состояние ADS недоступно.</value></data>
+  <data name="Waiting: equipped gear durability unavailable." xml:space="preserve"><value>Ожидание: прочность надетой экипировки недоступна.</value></data>
+  <data name="{0} repair interrupted: ADS is running a different utility ({1}, {2})." xml:space="preserve"><value>Ремонт ({0}) прерван: ADS выполняет другую задачу ({1}, {2}).</value></data>
+  <data name="{0} repair failed: {1}" xml:space="preserve"><value>Ремонт ({0}) не удался: {1}</value></data>
+  <data name="{0} repair requested; waiting for equipped gear durability." xml:space="preserve"><value>Ремонт ({0}) запрошен; ожидание данных о прочности надетой экипировки.</value></data>
+  <data name="{0} repair threshold met; waiting for ADS completion." xml:space="preserve"><value>Ремонт ({0}): порог прочности достигнут; ожидание завершения ADS.</value></data>
 </root>
