@@ -312,6 +312,23 @@ public sealed class CombatServiceBossModAiCommandTests
         Assert.True(CombatService.RequiresCombatActivation(before, before with { RotationType = 1 }));
     }
 
+    [Fact]
+    public void NewVbmCatalogUsesItsRegisteredDatabaseAndRejectsAnotherRuntimeType()
+    {
+        var assembly = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("SyntheticVbmCatalog"), AssemblyBuilderAccess.Run);
+        var module = assembly.DefineDynamicModule("Provider");
+        module.DefineType("BossMod.Services.TickService", TypeAttributes.Public).CreateType();
+        var databaseType = module.DefineType("BossMod.Autorotation.RotationDatabase", TypeAttributes.Public).CreateType()!;
+        var database = Activator.CreateInstance(databaseType)!;
+        var services = new NativeServices(database);
+        var provider = new NativeHostedPlugin(new NativeHost(services));
+
+        Assert.Same(database, AutorotIpcService.ReadRotationDatabase("VBM", provider, assembly));
+        Assert.Equal(databaseType, services.RequestedType);
+        services.Service = new object();
+        Assert.Null(AutorotIpcService.ReadRotationDatabase("VBM", provider, assembly));
+    }
+
     private sealed record NativePreset(string Name, bool HiddenByDefault = false);
     private sealed record NativePlugin(object _rotationDB);
     private sealed record NativeHost(IServiceProvider Services);

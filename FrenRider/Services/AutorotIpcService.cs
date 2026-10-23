@@ -180,8 +180,16 @@ public class AutorotIpcService : IDisposable
         var host = LiveMember(instance, "Host");
         if (tickType is null || host is null || LiveMember(host, "Services") is not IServiceProvider services)
             return null;
-        var tick = services.GetService(tickType);
-        return tick is not null && tick.GetType() == tickType ? LiveMember(tick, "_rotationDB") : null;
+        // The released provider owns this field; the newer provider registers
+        // RotationDatabase directly. Do not resolve a generated constructor field.
+        if (tickType.GetField("_rotationDB", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic) is not null)
+        {
+            var tick = services.GetService(tickType);
+            return tick?.GetType() == tickType ? LiveMember(tick, "_rotationDB") : null;
+        }
+        var databaseType = assembly.GetType("BossMod.Autorotation.RotationDatabase");
+        var database = databaseType is null ? null : services.GetService(databaseType);
+        return database?.GetType() == databaseType ? database : null;
     }
 
     private static object? LiveMember(object root, string name)
