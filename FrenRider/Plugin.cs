@@ -23,7 +23,7 @@ using System.Numerics;
 
 namespace FrenRider;
 
-public sealed class Plugin : IDalamudPlugin
+public sealed partial class Plugin : IDalamudPlugin
 {
     [PluginService] internal static IDalamudPluginInterface PluginInterface { get; private set; } = null!;
     [PluginService] internal static ICommandManager CommandManager { get; private set; } = null!;
@@ -377,6 +377,7 @@ public sealed class Plugin : IDalamudPlugin
         PluginInterface.UiBuilder.OpenMainUi -= ToggleMainUi;
 
         WindowSystem.RemoveAllWindows();
+        uiSoundPlayer?.Dispose();
 
         ConfigWindow.Dispose();
         MainWindow.Dispose();
@@ -481,7 +482,8 @@ public sealed class Plugin : IDalamudPlugin
             new(UiText.T("Auto"), UiText.T("Picker"), UiText.T("Default"), UiText.T("Background, controls and text follow your theme."),
                 UiText.T("Theme colour"), UiText.T("Choose each colour independently."), UiText.T("Background"), UiText.T("Controls"),
                 UiText.T("Text"), UiText.T("Aa  Preview text"), UiText.T("Control"),
-                UiText.T("Switch to Picker to set each colour yourself."), UiText.T("Switch back to Auto to use the automatic theme.")),
+                UiText.T("Switch to Picker to set each colour yourself."), UiText.T("Switch back to Auto to use the automatic theme."))
+                { Lcars = UiText.T("LCARS"), LcarsHelp = UiText.T("LCARS panels, bars and controls") },
             Configuration.UiCompact ? 298 : 316);
         if (!changed) return false;
         Configuration.UiColors = colorDraft;
@@ -543,12 +545,13 @@ public sealed class Plugin : IDalamudPlugin
         geometry.Style(ImGuiStyleVar.ItemSpacing, new Vector2(compact ? 8 : 12, compact ? 6 : 10) * scale);
         geometry.Style(ImGuiStyleVar.FramePadding, new Vector2(compact ? 8 : 12, compact ? 4 : 7) * scale);
         geometry.Style(ImGuiStyleVar.CellPadding, new Vector2(compact ? 8 : 12, compact ? 5 : 8) * scale);
-        geometry.Style(ImGuiStyleVar.FrameRounding, 4 * scale);
+        geometry.Style(ImGuiStyleVar.FrameRounding, (uiTheme.IsLcars ? compact ? 14 : 18 : 4) * scale);
         geometry.Style(ImGuiStyleVar.ChildRounding, 4 * scale);
         using var body = uiFonts.Push(UiFontRole.Body);
         using var chrome = MaterialWindowChrome.Push();
         PrepareAppearanceTitleBars();
         foreach (var actions in appearanceTitleBars.Values) actions.RefreshVisibility();
+        RefreshLcarsSoundButtons();
         WindowSystem.Draw();
     }
 
@@ -604,12 +607,15 @@ public sealed class Plugin : IDalamudPlugin
         }
         if (uiTheme is null || (Configuration.UiAccentRgb & 0xFFFFFF) != appliedAccent || colorDraft != appliedColors)
         {
+            if (uiTheme is { IsLcars: true } && colorDraft.Mode != MaterialColorMode.Lcars) uiSoundPlayer?.Stop();
             appliedAccent = Configuration.UiAccentRgb & 0xFFFFFF;
             appliedColors = colorDraft;
             uiTheme = FrenRiderPresentation.Theme(appliedAccent, colorDraft);
+            uiTheme.Feedback = PlayLcarsSound;
             var color = FrenRiderPresentation.Rgb(appliedAccent);
             accentDraft = new(color.X, color.Y, color.Z);
         }
+        if (uiTheme.IsLcars) uiTheme.Density = Configuration.UiCompact ? MaterialDensity.Compact : MaterialDensity.Standard;
     }
 
     internal void DrawAppearanceSelector()
@@ -1539,6 +1545,7 @@ public sealed class Plugin : IDalamudPlugin
             finally { ImGui.EndDisabled(); }
         });
         if (changed) config.Save();
+        DrawLcarsSounds();
     }
 
     internal void DrawTransparency()

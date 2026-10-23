@@ -3209,4 +3209,15 @@
   <data name="{0} repair failed: {1}" xml:space="preserve"><value>修理（{0}）失败：{1}</value></data>
   <data name="{0} repair requested; waiting for equipped gear durability." xml:space="preserve"><value>已请求修理（{0}）；等待已装备物品的耐久度信息。</value></data>
   <data name="{0} repair threshold met; waiting for ADS completion." xml:space="preserve"><value>修理（{0}）：耐久度已达到阈值；等待 ADS 完成。</value></data>
+  <data name="LCARS" xml:space="preserve"><value>LCARS</value></data>
+  <data name="LCARS panels, bars and controls" xml:space="preserve"><value>LCARS 面板、栏和控件</value></data>
+  <data name="LCARS UI sounds" xml:space="preserve"><value>LCARS 界面音效</value></data>
+  <data name="UI sounds" xml:space="preserve"><value>界面音效</value></data>
+  <data name="Custom UI tones. The titlebar speaker toggles the same setting." xml:space="preserve"><value>自定义界面音效。标题栏扬声器切换同一设置。</value></data>
+  <data name="Preview sound" xml:space="preserve"><value>试听音效</value></data>
+  <data name="Select LCARS to use UI sounds." xml:space="preserve"><value>选择 LCARS 以使用界面音效。</value></data>
+  <data name="Turn on UI sounds to preview." xml:space="preserve"><value>开启界面音效后即可试听。</value></data>
+  <data name="Audio output is unavailable." xml:space="preserve"><value>音频输出不可用。</value></data>
+  <data name="UI sounds muted" xml:space="preserve"><value>界面音效已静音</value></data>
+  <data name="UI sounds on" xml:space="preserve"><value>界面音效已开启</value></data>
 </root>

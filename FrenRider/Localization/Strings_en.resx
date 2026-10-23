@@ -3308,4 +3308,15 @@ On: use the BossMod presets below with any rotation provider. A custom preset ma
   <data name="{0} repair failed: {1}" xml:space="preserve"><value>{0} repair failed: {1}</value></data>
   <data name="{0} repair requested; waiting for equipped gear durability." xml:space="preserve"><value>{0} repair requested; waiting for equipped gear durability.</value></data>
   <data name="{0} repair threshold met; waiting for ADS completion." xml:space="preserve"><value>{0} repair threshold met; waiting for ADS completion.</value></data>
+  <data name="LCARS" xml:space="preserve"><value>LCARS</value></data>
+  <data name="LCARS panels, bars and controls" xml:space="preserve"><value>LCARS panels, bars and controls</value></data>
+  <data name="LCARS UI sounds" xml:space="preserve"><value>LCARS UI sounds</value></data>
+  <data name="UI sounds" xml:space="preserve"><value>UI sounds</value></data>
+  <data name="Custom UI tones. The titlebar speaker toggles the same setting." xml:space="preserve"><value>Custom UI tones. The titlebar speaker toggles the same setting.</value></data>
+  <data name="Preview sound" xml:space="preserve"><value>Preview sound</value></data>
+  <data name="Select LCARS to use UI sounds." xml:space="preserve"><value>Select LCARS to use UI sounds.</value></data>
+  <data name="Turn on UI sounds to preview." xml:space="preserve"><value>Turn on UI sounds to preview.</value></data>
+  <data name="Audio output is unavailable." xml:space="preserve"><value>Audio output is unavailable.</value></data>
+  <data name="UI sounds muted" xml:space="preserve"><value>UI sounds muted</value></data>
+  <data name="UI sounds on" xml:space="preserve"><value>UI sounds on</value></data>
 </root>

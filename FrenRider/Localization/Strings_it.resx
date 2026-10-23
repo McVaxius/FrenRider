@@ -3209,4 +3209,15 @@ Attivato: usa i preset BossMod sottostanti con qualsiasi provider di rotazione. 
   <data name="{0} repair failed: {1}" xml:space="preserve"><value>Riparazione ({0}) non riuscita: {1}</value></data>
   <data name="{0} repair requested; waiting for equipped gear durability." xml:space="preserve"><value>Riparazione ({0}) richiesta; in attesa della durabilità dell&apos;equipaggiamento indossato.</value></data>
   <data name="{0} repair threshold met; waiting for ADS completion." xml:space="preserve"><value>Riparazione ({0}): soglia di durabilità raggiunta; attesa del completamento di ADS.</value></data>
+  <data name="LCARS" xml:space="preserve"><value>LCARS</value></data>
+  <data name="LCARS panels, bars and controls" xml:space="preserve"><value>Pannelli, barre e controlli LCARS</value></data>
+  <data name="LCARS UI sounds" xml:space="preserve"><value>Suoni dell’interfaccia LCARS</value></data>
+  <data name="UI sounds" xml:space="preserve"><value>Suoni dell’interfaccia</value></data>
+  <data name="Custom UI tones. The titlebar speaker toggles the same setting." xml:space="preserve"><value>Toni personalizzati. L’altoparlante nella barra del titolo modifica la stessa impostazione.</value></data>
+  <data name="Preview sound" xml:space="preserve"><value>Anteprima suono</value></data>
+  <data name="Select LCARS to use UI sounds." xml:space="preserve"><value>Seleziona LCARS per usare i suoni dell’interfaccia.</value></data>
+  <data name="Turn on UI sounds to preview." xml:space="preserve"><value>Attiva i suoni dell’interfaccia per ascoltarli.</value></data>
+  <data name="Audio output is unavailable." xml:space="preserve"><value>L’uscita audio non è disponibile.</value></data>
+  <data name="UI sounds muted" xml:space="preserve"><value>Suoni dell’interfaccia disattivati</value></data>
+  <data name="UI sounds on" xml:space="preserve"><value>Suoni dell’interfaccia attivi</value></data>
 </root>

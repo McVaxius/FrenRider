@@ -45,6 +45,11 @@ internal static class UiGui
             : "Only combat rotations wait outside duties. Following, repairs and other configured actions continue.");
         return changed;
     }
+    private static bool Feedback(bool activated, MaterialUiSoundCue cue = MaterialUiSoundCue.Click)
+    {
+        MaterialLcars.Feedback(activated, cue);
+        return activated;
+    }
     internal static bool InSettingRow => settingWindow != 0 && ImGuiP.GetCurrentWindow().ID == settingWindow;
     internal static void SettingFieldWidth(float width) => settingFieldWidth = Math.Max(1, width);
     internal static SettingRowScope SettingRow(string label) => new(label);
@@ -248,10 +253,11 @@ internal static class UiGui
         ImGui.PopStyleColor(); ImGui.PopStyleVar();
         foreground.W *= ImGui.GetStyle().Alpha;
         MaterialText.AddText(ImGui.GetWindowDrawList(),ImGui.GetItemRectMin() + new Vector2(ImGui.GetFrameHeight() + gap.X, ImGui.GetStyle().FramePadding.Y), ImGui.ColorConvertFloat4ToU32(foreground), display);
-        return clicked;
+        return Feedback(clicked);
     }
     internal static bool Button(string label, Vector2 size, MaterialIcon? icon = null, Vector4? gradientBottom = null)
     {
+        using var lcars = MaterialLcars.NativeButtonStyle();
         var translated = UiText.T(label.Split("##", 2)[0]);
         using var controls = ImGui.GetStyle().FramePadding.Y == 0 || MaterialControls.Context == MaterialControlContext.Dense
             ? default(MaterialControls.ControlScope) : MaterialControls.Push(MaterialControlContext.Toolbar);
@@ -284,7 +290,7 @@ internal static class UiGui
         MaterialText.AddText(dl,position + new Vector2(iconWidth, 0), ImGui.ColorConvertFloat4ToU32(foreground), translated);
         }
         finally { dl.PopClipRect(); }
-        return clicked;
+        return Feedback(clicked);
     }
 
     // Native controls retain the original ID, hit testing, focus and keyboard behavior.
@@ -320,7 +326,7 @@ internal static class UiGui
         dl.AddCircleFilled(track + new Vector2(value ? size.X - radius : radius, radius) * s, (radius - 3) * s, MaterialCanvas.Color(foreground), 24);
         if (ImGui.IsItemFocused() && ImGui.GetIO().NavVisible) dl.AddRect(min, min + new Vector2(width, height), MaterialCanvas.Color(c.Primary), 4 * s);
         MaterialText.AddText(dl,min + new Vector2(0, Math.Max(0, (height - textSize.Y) * .5f)), MaterialCanvas.Color(foreground), text);
-        return changed;
+        return Feedback(changed, MaterialUiSoundCue.Toggle);
     }
 
     internal static bool SliderFloat(string label, ref float value, float min, float max, string format)
@@ -350,6 +356,7 @@ internal static class UiGui
     }
     internal static bool Button(string label,string? display=null,MaterialIcon? icon=null)
     {
+        using var lcars = MaterialLcars.NativeButtonStyle();
         var translated=display ?? UiText.T(label.Split("##",2)[0]);
         using var controls = ImGui.GetStyle().FramePadding.Y == 0 || MaterialControls.Context == MaterialControlContext.Dense
             ? default(MaterialControls.ControlScope) : MaterialControls.Push(MaterialControlContext.Toolbar);
@@ -372,7 +379,7 @@ internal static class UiGui
         MaterialText.AddText(ImGui.GetWindowDrawList(),position+new Vector2(iconWidth,0),ImGui.ColorConvertFloat4ToU32(foreground),translated);
         }
         finally { ImGui.GetWindowDrawList().PopClipRect(); }
-        return clicked;
+        return Feedback(clicked);
     }
     internal static bool SmallButton(string label,string? display=null)
     {
@@ -383,14 +390,16 @@ internal static class UiGui
     }
     internal static bool IconButton(string original, MaterialIcon icon)
     {
+        using var lcars = MaterialLcars.NativeButtonStyle();
         var size = Math.Max(ImGui.GetFrameHeight(), MaterialControls.Metrics.Height);
         ImGui.PushStyleColor(ImGuiCol.Text, Vector4.Zero);
         var clicked = ImGui.Button(original, new Vector2(size));
         ImGui.PopStyleColor();
         var min = ImGui.GetItemRectMin();
-        MaterialIcons.Draw(icon, min + new Vector2(size * .2f), size * .6f, MaterialTheme.Current.Colors.OnSurface);
+        MaterialIcons.Draw(icon, min + new Vector2(size * .2f), size * .6f,
+            MaterialTheme.Current.IsLcars ? ImGui.GetStyle().Colors[(int)ImGuiCol.Text] : MaterialTheme.Current.Colors.OnSurface);
         if (ImGui.IsItemHovered()) SetTooltip(original);
-        return clicked;
+        return Feedback(clicked);
     }
     internal static bool Checkbox(string label,ref bool value)
     {
@@ -412,7 +421,7 @@ internal static class UiGui
         var p=ImGui.GetItemRectMin()+new Vector2(ImGui.GetFrameHeight()+gap.X,ImGui.GetStyle().FramePadding.Y);
         foreground.W*=ImGui.GetStyle().Alpha;
         MaterialText.AddText(ImGui.GetWindowDrawList(),p,ImGui.ColorConvertFloat4ToU32(foreground),translated);
-        return changed;
+        return Feedback(changed, MaterialUiSoundCue.Toggle);
     }
     internal static bool Selectable(string original,bool selected = false,string? display=null)
     {
@@ -427,7 +436,7 @@ internal static class UiGui
         var dl=ImGui.GetWindowDrawList();
         MaterialText.AddText(dl,origin,ImGui.ColorConvertFloat4ToU32(foreground),translated);
         if(MaterialText.Measure(translated).X>width && ImGui.IsItemHovered()) MaterialText.SetTooltip(translated);
-        return clicked;
+        return Feedback(clicked);
     }
     private static void BeginField(string label, bool hasStepButtons = false)
     {

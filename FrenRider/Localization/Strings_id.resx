@@ -3314,4 +3314,15 @@ Aktif: gunakan preset BossMod di bawah dengan penyedia rotasi apa pun. Preset kh
   <data name="{0} repair failed: {1}" xml:space="preserve"><value>Perbaikan ({0}) gagal: {1}</value></data>
   <data name="{0} repair requested; waiting for equipped gear durability." xml:space="preserve"><value>Perbaikan ({0}) diminta; menunggu durabilitas perlengkapan yang dipakai.</value></data>
   <data name="{0} repair threshold met; waiting for ADS completion." xml:space="preserve"><value>Perbaikan ({0}): ambang durabilitas tercapai; menunggu ADS selesai.</value></data>
+  <data name="LCARS" xml:space="preserve"><value>LCARS</value></data>
+  <data name="LCARS panels, bars and controls" xml:space="preserve"><value>Panel, bilah, dan kontrol LCARS</value></data>
+  <data name="LCARS UI sounds" xml:space="preserve"><value>Suara antarmuka LCARS</value></data>
+  <data name="UI sounds" xml:space="preserve"><value>Suara antarmuka</value></data>
+  <data name="Custom UI tones. The titlebar speaker toggles the same setting." xml:space="preserve"><value>Nada antarmuka khusus. Ikon pengeras suara di bilah judul mengubah pengaturan yang sama.</value></data>
+  <data name="Preview sound" xml:space="preserve"><value>Pratinjau suara</value></data>
+  <data name="Select LCARS to use UI sounds." xml:space="preserve"><value>Pilih LCARS untuk menggunakan suara antarmuka.</value></data>
+  <data name="Turn on UI sounds to preview." xml:space="preserve"><value>Aktifkan suara antarmuka untuk mendengarkan pratinjau.</value></data>
+  <data name="Audio output is unavailable." xml:space="preserve"><value>Keluaran audio tidak tersedia.</value></data>
+  <data name="UI sounds muted" xml:space="preserve"><value>Suara antarmuka dibisukan</value></data>
+  <data name="UI sounds on" xml:space="preserve"><value>Suara antarmuka aktif</value></data>
 </root>

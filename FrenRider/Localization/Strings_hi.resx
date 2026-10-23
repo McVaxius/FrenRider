@@ -3220,4 +3220,15 @@
   <data name="{0} repair failed: {1}" xml:space="preserve"><value>मरम्मत ({0}) विफल: {1}</value></data>
   <data name="{0} repair requested; waiting for equipped gear durability." xml:space="preserve"><value>मरम्मत ({0}) का अनुरोध किया गया; पहने हुए उपकरणों के टिकाऊपन की जानकारी की प्रतीक्षा है।</value></data>
   <data name="{0} repair threshold met; waiting for ADS completion." xml:space="preserve"><value>मरम्मत ({0}): टिकाऊपन की सीमा पूरी हो गई; ADS के पूरा होने की प्रतीक्षा है।</value></data>
+  <data name="LCARS" xml:space="preserve"><value>LCARS</value></data>
+  <data name="LCARS panels, bars and controls" xml:space="preserve"><value>LCARS पैनल, पट्टियाँ और नियंत्रण</value></data>
+  <data name="LCARS UI sounds" xml:space="preserve"><value>LCARS इंटरफ़ेस ध्वनियाँ</value></data>
+  <data name="UI sounds" xml:space="preserve"><value>इंटरफ़ेस ध्वनियाँ</value></data>
+  <data name="Custom UI tones. The titlebar speaker toggles the same setting." xml:space="preserve"><value>विशेष इंटरफ़ेस ध्वनियाँ। शीर्षक पट्टी का स्पीकर इसी सेटिंग को बदलता है।</value></data>
+  <data name="Preview sound" xml:space="preserve"><value>ध्वनि सुनें</value></data>
+  <data name="Select LCARS to use UI sounds." xml:space="preserve"><value>इंटरफ़ेस ध्वनियों के लिए LCARS चुनें।</value></data>
+  <data name="Turn on UI sounds to preview." xml:space="preserve"><value>सुनने के लिए इंटरफ़ेस ध्वनियाँ चालू करें।</value></data>
+  <data name="Audio output is unavailable." xml:space="preserve"><value>ऑडियो आउटपुट उपलब्ध नहीं है।</value></data>
+  <data name="UI sounds muted" xml:space="preserve"><value>इंटरफ़ेस ध्वनियाँ मूक हैं</value></data>
+  <data name="UI sounds on" xml:space="preserve"><value>इंटरफ़ेस ध्वनियाँ चालू हैं</value></data>
 </root>

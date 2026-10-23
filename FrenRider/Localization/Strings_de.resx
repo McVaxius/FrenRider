@@ -3209,4 +3209,15 @@ An: Die BossMod-Voreinstellungen unten mit jedem Rotationsanbieter verwenden. Ei
   <data name="{0} repair failed: {1}" xml:space="preserve"><value>Reparatur ({0}) fehlgeschlagen: {1}</value></data>
   <data name="{0} repair requested; waiting for equipped gear durability." xml:space="preserve"><value>Reparatur ({0}) angefordert; auf die Haltbarkeit der angelegten Ausrüstung warten.</value></data>
   <data name="{0} repair threshold met; waiting for ADS completion." xml:space="preserve"><value>Reparatur ({0}): Haltbarkeitsschwelle erreicht; auf ADS-Abschluss warten.</value></data>
+  <data name="LCARS" xml:space="preserve"><value>LCARS</value></data>
+  <data name="LCARS panels, bars and controls" xml:space="preserve"><value>LCARS-Bedienfelder, Leisten und Steuerelemente</value></data>
+  <data name="LCARS UI sounds" xml:space="preserve"><value>LCARS-Oberflächentöne</value></data>
+  <data name="UI sounds" xml:space="preserve"><value>Oberflächentöne</value></data>
+  <data name="Custom UI tones. The titlebar speaker toggles the same setting." xml:space="preserve"><value>Eigene Oberflächentöne. Der Lautsprecher in der Titelleiste schaltet dieselbe Einstellung um.</value></data>
+  <data name="Preview sound" xml:space="preserve"><value>Ton vorhören</value></data>
+  <data name="Select LCARS to use UI sounds." xml:space="preserve"><value>LCARS auswählen, um Oberflächentöne zu verwenden.</value></data>
+  <data name="Turn on UI sounds to preview." xml:space="preserve"><value>Oberflächentöne zum Vorhören einschalten.</value></data>
+  <data name="Audio output is unavailable." xml:space="preserve"><value>Die Audioausgabe ist nicht verfügbar.</value></data>
+  <data name="UI sounds muted" xml:space="preserve"><value>Oberflächentöne stumm</value></data>
+  <data name="UI sounds on" xml:space="preserve"><value>Oberflächentöne an</value></data>
 </root>

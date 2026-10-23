@@ -3209,4 +3209,15 @@
   <data name="{0} repair failed: {1}" xml:space="preserve"><value>修理（{0}）に失敗しました：{1}</value></data>
   <data name="{0} repair requested; waiting for equipped gear durability." xml:space="preserve"><value>修理（{0}）を要求しました。装備中のアイテムの耐久度を待っています。</value></data>
   <data name="{0} repair threshold met; waiting for ADS completion." xml:space="preserve"><value>修理（{0}）：耐久度が基準値に達しました。ADSの完了を待っています。</value></data>
+  <data name="LCARS" xml:space="preserve"><value>LCARS</value></data>
+  <data name="LCARS panels, bars and controls" xml:space="preserve"><value>LCARSのパネル、バー、コントロール</value></data>
+  <data name="LCARS UI sounds" xml:space="preserve"><value>LCARSの操作音</value></data>
+  <data name="UI sounds" xml:space="preserve"><value>操作音</value></data>
+  <data name="Custom UI tones. The titlebar speaker toggles the same setting." xml:space="preserve"><value>専用の操作音です。タイトルバーのスピーカーも同じ設定を切り替えます。</value></data>
+  <data name="Preview sound" xml:space="preserve"><value>音を試聴</value></data>
+  <data name="Select LCARS to use UI sounds." xml:space="preserve"><value>操作音を使うにはLCARSを選択してください。</value></data>
+  <data name="Turn on UI sounds to preview." xml:space="preserve"><value>試聴するには操作音をオンにしてください。</value></data>
+  <data name="Audio output is unavailable." xml:space="preserve"><value>音声出力を利用できません。</value></data>
+  <data name="UI sounds muted" xml:space="preserve"><value>操作音はミュート中</value></data>
+  <data name="UI sounds on" xml:space="preserve"><value>操作音はオン</value></data>
 </root>

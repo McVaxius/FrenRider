@@ -3209,4 +3209,15 @@
   <data name="{0} repair failed: {1}" xml:space="preserve"><value>수리({0}) 실패: {1}</value></data>
   <data name="{0} repair requested; waiting for equipped gear durability." xml:space="preserve"><value>수리({0})를 요청했습니다. 착용 장비의 내구도 정보를 기다리는 중입니다.</value></data>
   <data name="{0} repair threshold met; waiting for ADS completion." xml:space="preserve"><value>수리({0}): 내구도 기준을 충족했습니다. ADS 완료를 기다리는 중입니다.</value></data>
+  <data name="LCARS" xml:space="preserve"><value>LCARS</value></data>
+  <data name="LCARS panels, bars and controls" xml:space="preserve"><value>LCARS 패널, 막대 및 컨트롤</value></data>
+  <data name="LCARS UI sounds" xml:space="preserve"><value>LCARS UI 소리</value></data>
+  <data name="UI sounds" xml:space="preserve"><value>UI 소리</value></data>
+  <data name="Custom UI tones. The titlebar speaker toggles the same setting." xml:space="preserve"><value>전용 UI 소리입니다. 제목 표시줄의 스피커도 같은 설정을 전환합니다.</value></data>
+  <data name="Preview sound" xml:space="preserve"><value>소리 미리 듣기</value></data>
+  <data name="Select LCARS to use UI sounds." xml:space="preserve"><value>UI 소리를 사용하려면 LCARS를 선택하세요.</value></data>
+  <data name="Turn on UI sounds to preview." xml:space="preserve"><value>미리 들으려면 UI 소리를 켜세요.</value></data>
+  <data name="Audio output is unavailable." xml:space="preserve"><value>오디오 출력을 사용할 수 없습니다.</value></data>
+  <data name="UI sounds muted" xml:space="preserve"><value>UI 소리 음소거됨</value></data>
+  <data name="UI sounds on" xml:space="preserve"><value>UI 소리 켜짐</value></data>
 </root>

@@ -1,3 +1,10 @@
+2026-10-23 - LCARS appearance (3.0.0.2)
+
+- Add LCARS as the third shared colour choice after Auto and Picker, with black surfaces, pastel elbow/rail/panel chrome and retained native controls. Keep saved Picker colours and semantic status meanings.
+- Add original optional UI tones, default muted, with one global setting shared by Settings and titlebar mute. Playback and cleanup own only FrenRider's audio output; other plugins' sounds remain independent.
+- Translate the new controls/help across all fifteen supported languages. Keep existing Main, Mini, Settings and auxiliary actions, character/profile storage and native identities.
+- Build against the published LCARS AethertekUI commit before publishing this FrenRider patch. User feedback owns later game visual and audible-output accuracy revisions.
+
 2026-10-22 - VBM preset-catalog compatibility (I507)
 
 - Read the live preset database from the published TickService field or the newer registered RotationDatabase service. Select the demonstrated provider layout and validate the returned native type without constructing a service or reading generated constructor fields.

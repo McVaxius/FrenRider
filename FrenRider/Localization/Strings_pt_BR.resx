@@ -3314,4 +3314,15 @@ Ativado: use as predefinições do BossMod abaixo com qualquer provedor de rota�
   <data name="{0} repair failed: {1}" xml:space="preserve"><value>Reparo ({0}) falhou: {1}</value></data>
   <data name="{0} repair requested; waiting for equipped gear durability." xml:space="preserve"><value>Reparo ({0}) solicitado; aguardando a durabilidade do equipamento em uso.</value></data>
   <data name="{0} repair threshold met; waiting for ADS completion." xml:space="preserve"><value>Reparo ({0}): limite de durabilidade atingido; aguardando a conclusão do ADS.</value></data>
+  <data name="LCARS" xml:space="preserve"><value>LCARS</value></data>
+  <data name="LCARS panels, bars and controls" xml:space="preserve"><value>Painéis, barras e controles LCARS</value></data>
+  <data name="LCARS UI sounds" xml:space="preserve"><value>Sons da interface LCARS</value></data>
+  <data name="UI sounds" xml:space="preserve"><value>Sons da interface</value></data>
+  <data name="Custom UI tones. The titlebar speaker toggles the same setting." xml:space="preserve"><value>Tons personalizados da interface. O alto-falante na barra de título altera a mesma configuração.</value></data>
+  <data name="Preview sound" xml:space="preserve"><value>Ouvir prévia</value></data>
+  <data name="Select LCARS to use UI sounds." xml:space="preserve"><value>Selecione LCARS para usar os sons da interface.</value></data>
+  <data name="Turn on UI sounds to preview." xml:space="preserve"><value>Ative os sons da interface para ouvir a prévia.</value></data>
+  <data name="Audio output is unavailable." xml:space="preserve"><value>A saída de áudio está indisponível.</value></data>
+  <data name="UI sounds muted" xml:space="preserve"><value>Sons da interface silenciados</value></data>
+  <data name="UI sounds on" xml:space="preserve"><value>Sons da interface ativados</value></data>
 </root>

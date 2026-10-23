@@ -116,9 +116,14 @@ public class MainWindow : Window, IDisposable
         using var controls = MaterialControls.Push(FrenRiderPresentation.Controls(plugin.Configuration.UiCompact ? 32 : 36));
         var config = plugin.ConfigManager.GetActiveConfig();
         var actionRoot = ImGui.GetID("");
+        if (MaterialTheme.Current.IsLcars)
+        {
+            using (UiText.Font(UiFontRole.Title)) MaterialLcars.Header("Fren Rider");
+        }
         DrawTopBar(config);
         ImGui.Separator();
         var footerHeight = ImGui.GetTextLineHeight() + ImGui.GetStyle().ItemSpacing.Y * 3 + 1;
+        if (MaterialTheme.Current.IsLcars) footerHeight += 8 * MaterialTheme.Metrics.Scale;
         var visible = ImGui.BeginChild("##FrenRiderOperatorScroll",
             new Vector2(0, -footerHeight), false);
         try
@@ -173,8 +178,12 @@ public class MainWindow : Window, IDisposable
             }
         }
         finally { ImGui.EndChild(); }
-        ImGui.Separator();
-        MaterialText.TextDisabled("FrenRider " + CurrentVersion);
+        if (MaterialTheme.Current.IsLcars) MaterialLcars.Footer("FrenRider " + CurrentVersion + " · LCARS");
+        else
+        {
+            ImGui.Separator();
+            MaterialText.TextDisabled("FrenRider " + CurrentVersion);
+        }
     }
 
     private void Panel(string title, MaterialIcon icon, Action draw, bool heading = true)
@@ -193,7 +202,11 @@ public class MainWindow : Window, IDisposable
             ImGuiP.PushOverrideID(originalIdRoot);
             try
             {
-                if (heading)
+                if (MaterialTheme.Current.IsLcars)
+                {
+                    using (UiText.Font(UiFontRole.PluginName)) MaterialLcars.PanelHeading(UiText.T(title), LcarsAccent(title));
+                }
+                else if (heading)
                 {
                     using (UiText.Font(UiFontRole.PluginName)) UiGui.TextUnformatted(title);
                 }
@@ -207,8 +220,12 @@ public class MainWindow : Window, IDisposable
             {
                 var c = MaterialTheme.Current.Colors;
                 var dl = ImGui.GetWindowDrawList();
-                dl.AddRectFilled(min - inset, max + inset, MaterialCanvas.Color(c.SurfaceContainerLow), UiHelpers.Scale(6));
-                dl.AddRect(min - inset, max + inset, MaterialCanvas.Color(c.OutlineVariant), UiHelpers.Scale(6));
+                if (MaterialTheme.Current.IsLcars) MaterialLcars.PanelFrame(min - inset, max + inset, LcarsAccent(title));
+                else
+                {
+                    dl.AddRectFilled(min - inset, max + inset, MaterialCanvas.Color(c.SurfaceContainerLow), UiHelpers.Scale(6));
+                    dl.AddRect(min - inset, max + inset, MaterialCanvas.Color(c.OutlineVariant), UiHelpers.Scale(6));
+                }
             }
             finally { ImGuiP.TablePopBackgroundChannel(); }
         }
@@ -222,6 +239,11 @@ public class MainWindow : Window, IDisposable
         if (ImGui.GetItemRectMax().X + ImGui.GetStyle().ItemSpacing.X + UiHelpers.Scale(logicalWidth) <= right) ImGui.SameLine();
     }
 
+    private static int LcarsAccent(string title) => title switch
+    {
+        "Operator" => 1, "Duty / ADS / Exit" => 2, "Party" => 0, "Automation" => 1, _ => 0,
+    };
+
     private static void NextButton(string label)
         => NextGroup((MaterialText.Measure(UiText.T(label)).X + ImGui.GetTextLineHeight()
             + UiHelpers.Scale(8) + ImGui.GetStyle().FramePadding.X * 2) / Math.Max(.01f, MaterialTheme.Metrics.Scale));
@@ -234,8 +256,11 @@ public class MainWindow : Window, IDisposable
         MaterialCanvas.DrawImage(ImGui.GetWindowDrawList(), icon.Handle, icon.Size,
             imageMin, imageMin + UiHelpers.Scale(new Vector2(compact ? 28 : 32)));
         ImGui.Dummy(UiHelpers.Scale(new Vector2(compact ? 30 : 36, compact ? 28 : 32)));
-        ImGui.SameLine();
-        using (UiText.Font(UiFontRole.Title)) MaterialText.Text("Fren Rider");
+        if (!MaterialTheme.Current.IsLcars)
+        {
+            ImGui.SameLine();
+            using (UiText.Font(UiFontRole.Title)) MaterialText.Text("Fren Rider");
+        }
 
         NextButton("Settings");
         if (UiGui.Button("Settings", icon: MaterialIcon.Settings))

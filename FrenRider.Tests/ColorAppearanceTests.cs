@@ -19,6 +19,7 @@ public sealed unsafe class ColorAppearanceTests
         var legacy = JsonConvert.DeserializeObject<Configuration>(
             """{"Version":2,"UiAccentRgb":1193046,"UiLanguage":"ja","DtrBarEnabled":false,"LastAccountId":"fixture-account","UnrelatedFixture":17}""")!;
         Assert.Equal(MaterialColorMode.Auto, legacy.UiColors.Mode);
+        Assert.True(legacy.UiLcarsSoundsMuted);
         Assert.Equal(0x123456u, legacy.UiAccentRgb);
         Assert.Equal("ja", legacy.UiLanguage);
         Assert.False(legacy.DtrBarEnabled);
@@ -47,7 +48,10 @@ public sealed unsafe class ColorAppearanceTests
     {
         string[] keys = ["Auto", "Picker", "Default", "Background, controls and text follow your theme.", "Theme colour",
             "Choose each colour independently.", "Background", "Controls", "Text", "Aa  Preview text", "Control",
-            "Switch to Picker to set each colour yourself.", "Switch back to Auto to use the automatic theme."];
+            "Switch to Picker to set each colour yourself.", "Switch back to Auto to use the automatic theme.",
+            "LCARS", "LCARS panels, bars and controls", "LCARS UI sounds", "UI sounds", "Preview sound",
+            "Custom UI tones. The titlebar speaker toggles the same setting.", "Select LCARS to use UI sounds.",
+            "Turn on UI sounds to preview.", "Audio output is unavailable.", "UI sounds muted", "UI sounds on"];
         foreach (var language in UiText.Languages)
         {
             using var text = new UiText(language.Code, _ => new NoFont());
@@ -166,6 +170,13 @@ public sealed unsafe class ColorAppearanceTests
             restored = JsonConvert.DeserializeObject<Configuration>(saves[^1])!;
             Assert.Equal(config.UiColors, restored.UiColors);
             Assert.Equal(manual with { Mode = MaterialColorMode.Auto }, restored.UiColors);
+            Click("LCARS"); Frame(); Frame();
+            restored = JsonConvert.DeserializeObject<Configuration>(saves[^1])!;
+            Assert.Equal(manual with { Mode = MaterialColorMode.Lcars }, restored.UiColors);
+            Assert.True(((MaterialTheme)themeField.GetValue(plugin)!).IsLcars);
+            Assert.True(restored.UiLcarsSoundsMuted);
+            Click("Picker"); Frame();
+            Assert.Equal(manual, config.UiColors);
         }
         finally
         {

@@ -3314,4 +3314,15 @@ Açık: aşağıdaki BossMod ön ayarlarını herhangi bir rotasyon sağlayıcı
   <data name="{0} repair failed: {1}" xml:space="preserve"><value>Onarım ({0}) başarısız: {1}</value></data>
   <data name="{0} repair requested; waiting for equipped gear durability." xml:space="preserve"><value>Onarım ({0}) istendi; kuşanılan ekipmanın dayanıklılık bilgisi bekleniyor.</value></data>
   <data name="{0} repair threshold met; waiting for ADS completion." xml:space="preserve"><value>Onarım ({0}): dayanıklılık eşiğine ulaşıldı; ADS&apos;nin tamamlanması bekleniyor.</value></data>
+  <data name="LCARS" xml:space="preserve"><value>LCARS</value></data>
+  <data name="LCARS panels, bars and controls" xml:space="preserve"><value>LCARS panelleri, çubukları ve denetimleri</value></data>
+  <data name="LCARS UI sounds" xml:space="preserve"><value>LCARS arayüz sesleri</value></data>
+  <data name="UI sounds" xml:space="preserve"><value>Arayüz sesleri</value></data>
+  <data name="Custom UI tones. The titlebar speaker toggles the same setting." xml:space="preserve"><value>Özel arayüz sesleri. Başlık çubuğundaki hoparlör aynı ayarı değiştirir.</value></data>
+  <data name="Preview sound" xml:space="preserve"><value>Sesi dinle</value></data>
+  <data name="Select LCARS to use UI sounds." xml:space="preserve"><value>Arayüz seslerini kullanmak için LCARS seçin.</value></data>
+  <data name="Turn on UI sounds to preview." xml:space="preserve"><value>Önizleme için arayüz seslerini açın.</value></data>
+  <data name="Audio output is unavailable." xml:space="preserve"><value>Ses çıkışı kullanılamıyor.</value></data>
+  <data name="UI sounds muted" xml:space="preserve"><value>Arayüz sesleri kapalı</value></data>
+  <data name="UI sounds on" xml:space="preserve"><value>Arayüz sesleri açık</value></data>
 </root>

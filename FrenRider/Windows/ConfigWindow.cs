@@ -194,6 +194,10 @@ public partial class ConfigWindow : Window, IDisposable
     public override void Draw()
     {
         motion.DrawChrome();
+        if (MaterialTheme.Current.IsLcars)
+        {
+            using (UiText.Font(UiFontRole.Title)) MaterialLcars.Header(UiText.T("Settings"));
+        }
         var remote = GetEditingRemoteProfile();
 
         var selectedLabel = remote is not null ? UiText.F("REMOTE: {0}", Disp(GetRemoteDisplayLabel(remote)))

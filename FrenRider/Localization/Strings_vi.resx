@@ -3314,4 +3314,15 @@ Bật: dùng các preset BossMod bên dưới với mọi nhà cung cấp rotati
   <data name="{0} repair failed: {1}" xml:space="preserve"><value>Sửa chữa ({0}) thất bại: {1}</value></data>
   <data name="{0} repair requested; waiting for equipped gear durability." xml:space="preserve"><value>Đã yêu cầu sửa chữa ({0}); đang chờ thông tin độ bền của trang bị đang dùng.</value></data>
   <data name="{0} repair threshold met; waiting for ADS completion." xml:space="preserve"><value>Sửa chữa ({0}): đã đạt ngưỡng độ bền; đang chờ ADS hoàn tất.</value></data>
+  <data name="LCARS" xml:space="preserve"><value>LCARS</value></data>
+  <data name="LCARS panels, bars and controls" xml:space="preserve"><value>Bảng, thanh và điều khiển LCARS</value></data>
+  <data name="LCARS UI sounds" xml:space="preserve"><value>Âm thanh giao diện LCARS</value></data>
+  <data name="UI sounds" xml:space="preserve"><value>Âm thanh giao diện</value></data>
+  <data name="Custom UI tones. The titlebar speaker toggles the same setting." xml:space="preserve"><value>Âm giao diện tùy chỉnh. Loa trên thanh tiêu đề cũng bật tắt thiết lập này.</value></data>
+  <data name="Preview sound" xml:space="preserve"><value>Nghe thử âm thanh</value></data>
+  <data name="Select LCARS to use UI sounds." xml:space="preserve"><value>Chọn LCARS để dùng âm thanh giao diện.</value></data>
+  <data name="Turn on UI sounds to preview." xml:space="preserve"><value>Bật âm thanh giao diện để nghe thử.</value></data>
+  <data name="Audio output is unavailable." xml:space="preserve"><value>Không có đầu ra âm thanh.</value></data>
+  <data name="UI sounds muted" xml:space="preserve"><value>Âm thanh giao diện đã tắt</value></data>
+  <data name="UI sounds on" xml:space="preserve"><value>Âm thanh giao diện đang bật</value></data>
 </root>
