@@ -1,3 +1,10 @@
+2026-10-23 - LCARS control fidelity and Krangle (3.0.0.3)
+
+- Restore the existing Krangle privacy toggle in the native titlebars, using the same saved setting and masking paths. Retain existing window actions and append appearance actions without changing their priorities.
+- Match the LCARS artwork with dark outlined buttons, per-action borders, blue switches and sliders, a bird icon for Chocobo and an Account icon. Use globe, monitor and droplet titlebar glyphs in LCARS, preserving conventional glyphs in other modes.
+- Strengthen LCARS panel framing and make the selected Settings page readable with dark text on lilac. Preserve native IDs, semantic status colours, saved Picker values and default-muted sounds.
+- Verify the real Settings shell and privacy callbacks, then publish the shared library before this pinned FrenRider patch. Game visual acceptance remains with user testing.
+
 2026-10-23 - LCARS appearance (3.0.0.2)
 
 - Add LCARS as the third shared colour choice after Auto and Picker, with black surfaces, pastel elbow/rail/panel chrome and retained native controls. Keep saved Picker colours and semantic status meanings.

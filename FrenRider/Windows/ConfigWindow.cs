@@ -317,6 +317,11 @@ public partial class ConfigWindow : Window, IDisposable
     {
         using var style = new MaterialStyleScope();
         style.Style(ImGuiStyleVar.ItemSpacing, UiHelpers.Scale(new Vector2(4, configuration.UiCompact ? 3 : 5)));
+        if (MaterialTheme.Current.IsLcars)
+        {
+            style.Color(ImGuiCol.Header, MaterialLcars.Lilac);
+            style.Color(ImGuiCol.HeaderActive, MaterialLcars.Lilac);
+        }
         foreach (var page in SettingsPages)
         {
             var caption = UiText.T(page);
@@ -328,7 +333,9 @@ public partial class ConfigWindow : Window, IDisposable
             var clicked = ImGui.Selectable("##Page" + page, selected, ImGuiSelectableFlags.None,
                 new Vector2(width, Math.Max(ImGui.GetTextLineHeight(), measured.Y) + inset.Y * 2));
             MaterialText.AddText(ImGui.GetWindowDrawList(), ImGui.GetFont(), ImGui.GetFontSize(), origin + inset,
-                MaterialCanvas.Color(selected ? MaterialTheme.Current.Colors.OnSecondaryContainer : MaterialTheme.Current.Colors.OnSurface),
+                MaterialCanvas.Color(MaterialTheme.Current.IsLcars && (selected || ImGui.IsItemActive())
+                    ? MaterialLcars.Background
+                    : selected ? MaterialTheme.Current.Colors.OnSecondaryContainer : MaterialTheme.Current.Colors.OnSurface),
                 caption, Math.Max(1, width - inset.X * 2));
             if (clicked)
             {

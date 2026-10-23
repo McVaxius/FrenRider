@@ -6,6 +6,7 @@ using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Windowing;
 using FrenRider.Windows;
+using FrenRider.Services;
 
 namespace FrenRider;
 
@@ -14,6 +15,13 @@ public sealed partial class Plugin
     private MaterialUiSoundPlayer? uiSoundPlayer;
     private readonly Dictionary<Window, TitleBarButton> lcarsSoundButtons = new();
     internal bool LcarsActive => Configuration.UiColors?.Mode == MaterialColorMode.Lcars;
+
+    internal void SetKrangle(bool enabled)
+    {
+        Configuration.KrangleEnabled = enabled;
+        KrangleService.ClearCache();
+        Configuration.Save();
+    }
 
     private void PlayLcarsSound(MaterialUiSoundCue cue)
     {

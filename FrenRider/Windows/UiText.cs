@@ -36,7 +36,7 @@ internal sealed class UiText : IDisposable
         var english = englishManager.GetResourceSet(CultureInfo.InvariantCulture, true, false)
             ?? throw new MissingManifestResourceException("en");
         RequiredText = Values(Resources).Concat(Values(english)).Concat(Languages.Where(l => l.Code != "hi").Select(l => l.Name))
-            .Append("⚠•—").Distinct().ToArray();
+            .Append("⚠•—").SelectMany(value => new[] { value, Culture.TextInfo.ToUpper(value) }).Distinct().ToArray();
         englishManager.ReleaseAllResources();
         // Service messages remain English in logs; only their UI copies are localized.
         var parameter = new Regex(@"\{(\d+)(?::([^}]+))?\}");

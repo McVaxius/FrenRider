@@ -435,6 +435,8 @@ public sealed partial class Plugin : IDalamudPlugin
                 DrawLanguageSelector,
                 () => { Configuration.UiCompact = !Configuration.UiCompact; Configuration.Save(); },
                 DrawWindowAppearance, DrawTitleColour,
+                () => SetKrangle(!Configuration.KrangleEnabled),
+                () => UiText.T("Krangle") + ": " + UiText.T(Configuration.KrangleEnabled ? "On" : "Off"),
                 () => owner is MainWindow
                     ? new(Configuration.UiLanguageVisibleOnMainWindow, Configuration.UiCompactVisibleOnMainWindow, Configuration.UiTransparencyVisibleOnMainWindow, true)
                     : new(true, true, true, true)));
@@ -545,12 +547,16 @@ public sealed partial class Plugin : IDalamudPlugin
         geometry.Style(ImGuiStyleVar.ItemSpacing, new Vector2(compact ? 8 : 12, compact ? 6 : 10) * scale);
         geometry.Style(ImGuiStyleVar.FramePadding, new Vector2(compact ? 8 : 12, compact ? 4 : 7) * scale);
         geometry.Style(ImGuiStyleVar.CellPadding, new Vector2(compact ? 8 : 12, compact ? 5 : 8) * scale);
-        geometry.Style(ImGuiStyleVar.FrameRounding, (uiTheme.IsLcars ? compact ? 14 : 18 : 4) * scale);
+        geometry.Style(ImGuiStyleVar.FrameRounding, 4 * scale);
         geometry.Style(ImGuiStyleVar.ChildRounding, 4 * scale);
         using var body = uiFonts.Push(UiFontRole.Body);
         using var chrome = MaterialWindowChrome.Push();
         PrepareAppearanceTitleBars();
-        foreach (var actions in appearanceTitleBars.Values) actions.RefreshVisibility();
+        foreach (var actions in appearanceTitleBars.Values)
+        {
+            actions.RefreshVisibility();
+            actions.SetLcarsIcons(uiTheme.IsLcars);
+        }
         RefreshLcarsSoundButtons();
         WindowSystem.Draw();
     }

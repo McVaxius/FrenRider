@@ -50,6 +50,26 @@ internal static class UiGui
         MaterialLcars.Feedback(activated, cue);
         return activated;
     }
+    private static Vector4 ButtonAccent(string label) => label.Split("##", 2)[0] switch
+    {
+        "Account" or "BUY FOOD" => MaterialLcars.Periwinkle,
+        "Chocobo" or "Ko-fi" => MaterialLcars.Amber,
+        "BUY GREENS" => UiHelpers.Green,
+        _ => MaterialLcars.Lilac,
+    };
+
+    private static Vector4 ButtonIconColour(MaterialIcon icon, Vector4 foreground)
+    {
+        if (!MaterialTheme.Current.IsLcars) return foreground;
+        var colour = icon switch
+        {
+            MaterialIcon.Chocobo => MaterialLcars.Amber,
+            MaterialIcon.Heart => new(1, .35f, .4f, foreground.W),
+            _ => foreground,
+        };
+        colour.W = foreground.W;
+        return colour;
+    }
     internal static bool InSettingRow => settingWindow != 0 && ImGuiP.GetCurrentWindow().ID == settingWindow;
     internal static void SettingFieldWidth(float width) => settingFieldWidth = Math.Max(1, width);
     internal static SettingRowScope SettingRow(string label) => new(label);
@@ -71,7 +91,8 @@ internal static class UiGui
     internal static void SettingsSection(string label, params string[] fieldLabels)
     {
         sectionLabelWidth = fieldLabels.Select(field => MaterialText.Measure(UiText.T(ShortLabel(field))).X).DefaultIfEmpty(0).Max();
-        MaterialSettings.Section(UiText.T(label));
+        var caption = UiText.T(label);
+        MaterialSettings.Section(MaterialTheme.Current.IsLcars ? UiText.Current.Culture.TextInfo.ToUpper(caption) : caption);
     }
     internal static float SettingsMinimum(params string[] labels)
         => Math.Max(390 * MaterialTheme.Metrics.Scale, labels.Select(label => MaterialText.Measure(UiText.T(ShortLabel(label))).X)
@@ -257,10 +278,10 @@ internal static class UiGui
     }
     internal static bool Button(string label, Vector2 size, MaterialIcon? icon = null, Vector4? gradientBottom = null)
     {
-        using var lcars = MaterialLcars.NativeButtonStyle();
         var translated = UiText.T(label.Split("##", 2)[0]);
         using var controls = ImGui.GetStyle().FramePadding.Y == 0 || MaterialControls.Context == MaterialControlContext.Dense
             ? default(MaterialControls.ControlScope) : MaterialControls.Push(MaterialControlContext.Toolbar);
+        using var lcars = MaterialLcars.NativeButtonStyle(ButtonAccent(label));
         var paddingY = ImGui.GetStyle().FramePadding.Y;
         using var height = MaterialText.PushLineHeight(translated);
         size.Y = Math.Max(size.Y, Math.Max(ImGui.GetTextLineHeight(), MaterialText.Measure(translated).Y) + 2 * paddingY);
@@ -286,7 +307,7 @@ internal static class UiGui
         foreground.W *= ImGui.GetStyle().Alpha;
         var textSize = MaterialText.Measure(translated);
         var position = min + (max - min - new Vector2(textSize.X + iconWidth, Math.Max(textSize.Y, iconSize))) * .5f;
-        if (icon.HasValue) MaterialIcons.Draw(icon.Value, position, iconSize, foreground, 1);
+        if (icon.HasValue) MaterialIcons.Draw(icon.Value, position, iconSize, ButtonIconColour(icon.Value, foreground), 1);
         MaterialText.AddText(dl,position + new Vector2(iconWidth, 0), ImGui.ColorConvertFloat4ToU32(foreground), translated);
         }
         finally { dl.PopClipRect(); }
@@ -317,7 +338,9 @@ internal static class UiGui
         ImGui.PopStyleVar(3);
         var min = ImGui.GetItemRectMin();
         var track = min + new Vector2(width - size.X * s, Math.Max(0, (height - size.Y * s) * .5f));
-        var fill = value ? c.Primary : c.Outline;
+        var fill = MaterialTheme.Current.IsLcars
+            ? value ? MaterialLcars.ControlBlue : c.SurfaceContainerHighest
+            : value ? c.Primary : c.Outline;
         if (ImGui.IsItemHovered()) fill = MaterialColor.Layer(fill, c.OnSurface, .08f);
         if (ImGui.IsItemActive()) fill = MaterialColor.Layer(fill, c.OnSurface, .12f);
         var foreground = c.OnSurface;
@@ -356,10 +379,10 @@ internal static class UiGui
     }
     internal static bool Button(string label,string? display=null,MaterialIcon? icon=null)
     {
-        using var lcars = MaterialLcars.NativeButtonStyle();
         var translated=display ?? UiText.T(label.Split("##",2)[0]);
         using var controls = ImGui.GetStyle().FramePadding.Y == 0 || MaterialControls.Context == MaterialControlContext.Dense
             ? default(MaterialControls.ControlScope) : MaterialControls.Push(MaterialControlContext.Toolbar);
+        using var lcars = MaterialLcars.NativeButtonStyle(ButtonAccent(label));
         using var height = MaterialText.PushLineHeight(translated);
         var iconSize=ImGui.GetTextLineHeight();
         var iconWidth=icon.HasValue?iconSize+8*MaterialTheme.Metrics.Scale:0;
@@ -375,7 +398,7 @@ internal static class UiGui
         {
         var textSize=MaterialText.Measure(translated);
         var position=min+(max-min-new Vector2(textSize.X+iconWidth,Math.Max(textSize.Y,iconSize)))*.5f;
-        if(icon.HasValue) MaterialIcons.Draw(icon.Value,position,iconSize,foreground,1);
+        if(icon.HasValue) MaterialIcons.Draw(icon.Value,position,iconSize,ButtonIconColour(icon.Value, foreground),1);
         MaterialText.AddText(ImGui.GetWindowDrawList(),position+new Vector2(iconWidth,0),ImGui.ColorConvertFloat4ToU32(foreground),translated);
         }
         finally { ImGui.GetWindowDrawList().PopClipRect(); }
@@ -403,6 +426,14 @@ internal static class UiGui
     }
     internal static bool Checkbox(string label,ref bool value)
     {
+        using var lcarsCheck = new MaterialStyleScope();
+        if (MaterialTheme.Current.IsLcars && value)
+        {
+            lcarsCheck.Color(ImGuiCol.FrameBg, MaterialLcars.ControlBlue);
+            lcarsCheck.Color(ImGuiCol.FrameBgHovered, MaterialColor.Layer(MaterialLcars.ControlBlue, MaterialLcars.Text, .12f));
+            lcarsCheck.Color(ImGuiCol.FrameBgActive, MaterialColor.Layer(MaterialLcars.ControlBlue, MaterialLcars.Text, .2f));
+            lcarsCheck.Color(ImGuiCol.CheckMark, MaterialLcars.Background);
+        }
         var visible=label.Split("##",2)[0];
         var translated=UiText.T(InSettingRow ? ShortLabel(settingLabel.Split("##",2)[0]) : visible);
         if (InSettingRow) settingLabelDrawn = true;

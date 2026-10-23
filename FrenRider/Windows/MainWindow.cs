@@ -118,7 +118,7 @@ public class MainWindow : Window, IDisposable
         var actionRoot = ImGui.GetID("");
         if (MaterialTheme.Current.IsLcars)
         {
-            using (UiText.Font(UiFontRole.Title)) MaterialLcars.Header("Fren Rider");
+            using (UiText.Font(UiFontRole.Title)) MaterialLcars.Header("FREN RIDER");
         }
         DrawTopBar(config);
         ImGui.Separator();
@@ -191,7 +191,7 @@ public class MainWindow : Window, IDisposable
         var originalIdRoot = ImGui.GetID("");
         using var spacing = new MaterialStyleScope();
         spacing.Style(ImGuiStyleVar.ItemSpacing, new Vector2(ImGui.GetStyle().ItemSpacing.X, UiHelpers.Scale(plugin.Configuration.UiCompact ? 3 : 5)));
-        spacing.Style(ImGuiStyleVar.CellPadding, UiHelpers.Scale(new Vector2(10, plugin.Configuration.UiCompact ? 6 : 8)));
+        spacing.Style(ImGuiStyleVar.CellPadding, UiHelpers.Scale(new Vector2(MaterialTheme.Current.IsLcars ? 20 : 10, plugin.Configuration.UiCompact ? 6 : 8)));
         if (!ImGui.BeginTable("##FrenRiderPanelBounds" + title, 1,
                 ImGuiTableFlags.SizingStretchSame | ImGuiTableFlags.NoSavedSettings | ImGuiTableFlags.PadOuterX)) return;
         try
@@ -204,7 +204,7 @@ public class MainWindow : Window, IDisposable
             {
                 if (MaterialTheme.Current.IsLcars)
                 {
-                    using (UiText.Font(UiFontRole.PluginName)) MaterialLcars.PanelHeading(UiText.T(title), LcarsAccent(title));
+                    using (UiText.Font(UiFontRole.PluginName)) MaterialLcars.PanelHeading(UiText.Current.Culture.TextInfo.ToUpper(UiText.T(title)), LcarsAccent(title));
                 }
                 else if (heading)
                 {
@@ -213,7 +213,7 @@ public class MainWindow : Window, IDisposable
                 draw();
             }
             finally { ImGui.PopID(); }
-            var inset = UiHelpers.Scale(new Vector2(8, plugin.Configuration.UiCompact ? 4 : 6));
+            var inset = UiHelpers.Scale(new Vector2(MaterialTheme.Current.IsLcars ? 16 : 8, plugin.Configuration.UiCompact ? 4 : 6));
             var max = new Vector2(min.X + width, ImGui.GetCursorScreenPos().Y - ImGui.GetStyle().ItemSpacing.Y);
             ImGuiP.TablePushBackgroundChannel();
             try
@@ -267,10 +267,10 @@ public class MainWindow : Window, IDisposable
             plugin.ToggleConfigUi();
 
         NextButton("Account");
-        if (UiGui.Button("Account")) ImGui.OpenPopup("##FrenRiderAccountActions");
+        if (UiGui.Button("Account", icon: MaterialIcon.Person)) ImGui.OpenPopup("##FrenRiderAccountActions");
 
         NextButton("Chocobo");
-        if (UiGui.Button("Chocobo", icon: MaterialIcon.Egg))
+        if (UiGui.Button("Chocobo", icon: MaterialIcon.Chocobo))
             plugin.OpenChocoboSettings();
 
         NextButton("Ko-fi");
@@ -390,6 +390,12 @@ public class MainWindow : Window, IDisposable
             ("Tracking", tracking, fren is null ? UiHelpers.Grey : visible ? UiHelpers.Green : fren.IsFound ? UiHelpers.Yellow : UiHelpers.Red),
             ("Position", visible ? UiText.F("{0:F0} / {1:F0} / {2:F0}", fren!.Position.X, fren.Position.Y, fren.Position.Z) : "—", null),
         };
+        if (MaterialTheme.Current.IsLcars)
+        {
+            var labelWidth = cells.Max(cell => MaterialText.Measure(UiText.T(cell.Label)).X) / Math.Max(.01f, MaterialTheme.Metrics.Scale) + 12;
+            foreach (var cell in cells) UiHelpers.AlignedRow(cell.Label, cell.Value, cell.Color, labelWidth);
+            return;
+        }
         var columns = ImGui.GetContentRegionAvail().X >= UiHelpers.Scale(340) ? 2 : 1;
         if (ImGui.BeginTable("##OperatorFields", columns, ImGuiTableFlags.SizingStretchSame | ImGuiTableFlags.NoSavedSettings))
         {
