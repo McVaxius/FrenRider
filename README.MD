@@ -55,6 +55,8 @@ The native titlebar Colour control and Settings → Window appearance share **Au
 
 The LCARS titlebar includes the existing Krangle privacy toggle. Its globe, monitor and droplet shortcuts, dark outlined buttons, Account and Chocobo icons, blue controls and panel framing follow the approved LCARS design. Selected Settings navigation uses dark text on lilac. Existing titlebar visibility preferences still apply.
 
+Mini and the AutoDuty warning use their own LCARS header rails, framed controls and footer. Mini retains Run, the saved Fren selector, Eureka-only Magia actions and companion purchases. The warning retains its existing disable action and acknowledgement behavior. These remain separate windows; Compact adjusts their spacing.
+
 The mini keeps the enable switch and exact saved fren identity available outside Eureka; its MAGIA Attack, Defense, and Off actions appear only in Eureka. Segoe UI and host-managed CJK/symbol fonts load through Dalamud's managed atlas and are never distributed with the plugin. Font readiness and missing glyphs are reported explicitly. The approved regular and compact layouts still require mcvaxius's in-game screenshot acceptance.
 
 Hindi is enabled only when the local font check passes. Otherwise the selector shows disabled **Hindi (unavailable)** while other languages remain usable. A saved Hindi choice that fails its required-font check shows an English status and **Use English**; that button explicitly saves English. Font failures never change the saved language automatically.

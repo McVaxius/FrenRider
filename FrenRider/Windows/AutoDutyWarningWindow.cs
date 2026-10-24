@@ -35,7 +35,8 @@ public class AutoDutyWarningWindow : Window
         var style = ImGui.GetStyle();
         var titleWidth = MaterialText.Measure(UiText.T("AutoDuty Detected - Action Required")).X
             + ImGui.GetFontSize() * 2 + style.FramePadding.X * 3 + style.ItemInnerSpacing.X;
-        ImGui.SetNextWindowSize(new Vector2(MathF.Ceiling(Math.Max(UiHelpers.Scale(520), titleWidth)), 0));
+        var framePadding = MaterialTheme.Current.IsLcars ? UiHelpers.Scale(40) : 0;
+        ImGui.SetNextWindowSize(new Vector2(MathF.Ceiling(Math.Max(UiHelpers.Scale(520) + framePadding, titleWidth)), 0));
         var viewport = ImGui.GetMainViewport();
         ImGui.SetNextWindowPos(viewport.WorkPos + viewport.WorkSize * .5f, ImGuiCond.Appearing, new Vector2(.5f));
         motion.Prepare(this, reducedMotion: false, roundedCorners: true);
@@ -55,6 +56,24 @@ public class AutoDutyWarningWindow : Window
         using var controls = MaterialControls.Push(MaterialControlContext.Toolbar);
         using var spacing = new MaterialStyleScope();
         spacing.Style(ImGuiStyleVar.ItemSpacing, UiHelpers.Scale(new Vector2(8, plugin.Configuration.UiCompact ? 4 : 6)));
+        if (MaterialTheme.Current.IsLcars)
+        {
+            using (UiText.Font(UiFontRole.Title)) MaterialLcars.Header(UiText.T("Fren Rider"));
+        }
+        UiGui.LcarsPanel("##FrenRiderAutoDutyWarningFrame", DrawWarningContent, 2);
+        if (MaterialTheme.Current.IsLcars) MaterialLcars.Footer(UiText.T("AutoDuty Detected - Action Required"));
+        if (ImGui.IsWindowAppearing())
+        {
+            // A reopened auto-sized window can still carry the previous density's height.
+            var viewport = ImGui.GetMainViewport();
+            var size = motion.GetLogicalSize();
+            size.Y = ImGui.GetItemRectMax().Y - ImGui.GetWindowPos().Y + ImGui.GetStyle().WindowPadding.Y;
+            ImGui.SetWindowPos(viewport.WorkPos + (viewport.WorkSize - size) * .5f);
+        }
+    }
+
+    private void DrawWarningContent()
+    {
         ImGui.PushTextWrapPos(0);
         using (UiText.Font(UiFontRole.BodyStrong))
             UiGui.TextColored(UiHelpers.Yellow, "⚠️ WARNING: AutoDuty Plugin Detected");
@@ -88,14 +107,6 @@ public class AutoDutyWarningWindow : Window
 
         UiGui.TextDisabled("This window will close automatically after disabling AutoDuty.");
         ImGui.PopTextWrapPos();
-        if (ImGui.IsWindowAppearing())
-        {
-            // A reopened auto-sized window can still carry the previous density's height.
-            var viewport = ImGui.GetMainViewport();
-            var size = motion.GetLogicalSize();
-            size.Y = ImGui.GetItemRectMax().Y - ImGui.GetWindowPos().Y + ImGui.GetStyle().WindowPadding.Y;
-            ImGui.SetWindowPos(viewport.WorkPos + (viewport.WorkSize - size) * .5f);
-        }
     }
 
     public override void OnClose()

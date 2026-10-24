@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -206,21 +205,16 @@ internal sealed unsafe class NativePhoenixRecoveryRuntime : IPhoenixRecoveryRunt
                 var service = assembly?.GetType("BossMod.Service");
                 var root = service?.GetProperty("Config", staticMembers)?.GetValue(null)
                     ?? service?.GetField("Config", staticMembers)?.GetValue(null);
-                var nodes = root?.GetType().GetProperty("Nodes", instanceMembers)?.GetValue(root) as IEnumerable;
-                if (instance == null || nodes == null)
+                if (instance == null || assembly == null || root == null)
                     continue;
-                foreach (var node in nodes)
-                {
-                    if (node?.GetType().FullName != "BossMod.AI.AIConfig")
-                        continue;
-                    var field = node.GetType().GetField("ForbidMovement", instanceMembers);
-                    if (field?.GetValue(node) is not bool original || original)
-                        continue;
-                    if (!movementChanges.Any(change => ReferenceEquals(change.Node, node)))
-                        movementChanges.Add((node, field, original));
-                    // In-memory only: do not notify the plugin's persistence event.
-                    field.SetValue(node, true);
-                }
+                var node = BossModExternalAutomationSnapshotProvider.FindConfigNode(root, assembly);
+                var field = node?.GetType().GetField("ForbidMovement", instanceMembers);
+                if (field?.GetValue(node) is not bool original || original)
+                    continue;
+                if (!movementChanges.Any(change => ReferenceEquals(change.Node, node)))
+                    movementChanges.Add((node!, field, original));
+                // In-memory only: do not notify the plugin's persistence event.
+                field.SetValue(node, true);
             }
             catch (Exception ex) { Plugin.Log.Debug($"[Phoenix Down] Movement hold unavailable: {ex.Message}"); }
         }

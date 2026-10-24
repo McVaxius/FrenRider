@@ -1,3 +1,9 @@
+2026-10-23 - LCARS Mini and warning followups (unreleased)
+
+- Give the existing Mini and AutoDuty warning dedicated LCARS header rails, panel frames and footers. Preserve Run, Fren selection, conditional Magia controls, companion purchases and the warning's existing disable/acknowledgement behavior.
+- Reserve space around the frames without changing existing native control IDs or Auto/Picker layouts. Keep regular and compact spacing readable and retain the current release version.
+- Verify the offline Release/x64 build and 16 focused appearance cases, including actual Mini Run edits, captured warning commands and acknowledgement, native action identity, click routing and restored table styling at both densities and 100%/150% scale. Game/GPU acceptance remains unverified.
+
 2026-10-23 - LCARS control fidelity and Krangle (3.0.0.3)
 
 - Restore the existing Krangle privacy toggle in the native titlebars, using the same saved setting and masking paths. Retain existing window actions and append appearance actions without changing their priorities.
@@ -11,6 +17,18 @@
 - Add original optional UI tones, default muted, with one global setting shared by Settings and titlebar mute. Playback and cleanup own only FrenRider's audio output; other plugins' sounds remain independent.
 - Translate the new controls/help across all fifteen supported languages. Keep existing Main, Mini, Settings and auxiliary actions, character/profile storage and native identities.
 - Build against the published LCARS AethertekUI commit before publishing this FrenRider patch. User feedback owns later game visual and audible-output accuracy revisions.
+
+2026-10-23 - Keep BossMod AI off during Dragon's Neck combat
+
+- Suppress BossMod AI activation during Dragon's Neck combat, including settings refreshes, while preserving saved choices and the independent rotation provider. Resume the configured AI behavior after combat through the existing ownership-aware command path; an explicit off choice remains off.
+- ADS owns the eight-second return-to-center movement. No new setting or movement owner is added to FrenRider. The user completed the fight manually; live replay is skipped for this run.
+- Validation: isolated Debug/x64 compilation passed and all 86 focused combat-command cases passed, including exact duty/combat gating, available-provider filtering, settings-refresh suppression and saved-policy restoration. No deployment, live replay or version change.
+
+2026-10-23 - BossMod config access and casting preference IPC (I507)
+
+- Read casting and Phoenix movement settings through the provider's native generic configuration getter, including VBM's type-only node catalog. Keep temporary recovery writes in memory without notifying persistence.
+- Use the existing configuration IPC for permanent casting preferences when its single loaded provider is identifiable. Preserve the existing reflection route for unavailable or ambiguous channels; an attempted IPC rejection, unreadable response or exception cannot trigger a second write. Verify the same live setting after the call.
+- All 274 focused config IPC, catalog, cleanup and Phoenix tests passed with the complete Release/x64 plugin build. Native client acceptance remains unverified; no client, deployment or version action is included.
 
 2026-10-22 - VBM preset-catalog compatibility (I507)
 

@@ -702,7 +702,7 @@ public sealed class BossModExternalAutomationSnapshotProvider : IExternalAutomat
         return false;
     }
 
-    private static object? FindConfigNode(object configRoot, Assembly assembly)
+    internal static object? FindConfigNode(object configRoot, Assembly assembly)
     {
         var aiConfigType = assembly.GetType(AiConfigType);
         if (aiConfigType is null || configRoot.GetType().Assembly != assembly)

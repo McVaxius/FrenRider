@@ -21,6 +21,31 @@ internal static class UiGui
     private static float settingRowX;
     internal static bool SettingsDefaultProfile { get; set; }
     internal static void ResetSettingsAlignment() => sectionLabelWidth = 0;
+    internal static void LcarsPanel(string id, Action draw, int accent = 0)
+    {
+        if (!MaterialTheme.Current.IsLcars) { draw(); return; }
+        var originalIdRoot = ImGui.GetID("");
+        var compact = MaterialTheme.Current.Density == MaterialDensity.Compact;
+        using var spacing = new MaterialStyleScope();
+        spacing.Style(ImGuiStyleVar.CellPadding, UiHelpers.Scale(new Vector2(20, compact ? 7 : 10)));
+        if (!ImGui.BeginTable(id, 1, ImGuiTableFlags.SizingStretchSame | ImGuiTableFlags.NoSavedSettings | ImGuiTableFlags.PadOuterX)) return;
+        try
+        {
+            ImGui.TableNextColumn();
+            var min = ImGui.GetCursorScreenPos();
+            var width = ImGui.GetContentRegionAvail().X;
+            ImGuiP.PushOverrideID(originalIdRoot);
+            try { draw(); }
+            finally { ImGui.PopID(); }
+            var inset = UiHelpers.Scale(new Vector2(16, compact ? 4 : 6));
+            var max = new Vector2(min.X + width, ImGui.GetCursorScreenPos().Y - ImGui.GetStyle().ItemSpacing.Y);
+            ImGuiP.TablePushBackgroundChannel();
+            try { MaterialLcars.PanelFrame(min - inset, max + inset, accent); }
+            finally { ImGuiP.TablePopBackgroundChannel(); }
+        }
+        finally { ImGui.EndTable(); }
+        ImGui.Dummy(UiHelpers.Scale(new Vector2(0, compact ? 4 : 6)));
+    }
     internal static bool ActivationModeControls(CharacterConfig config)
     {
         var changed = false;
@@ -206,7 +231,9 @@ internal static class UiGui
         var width = display.Length == 0 ? Math.Max(ImGui.GetFrameHeight(), MaterialControls.Metrics.Height)
             : MaterialText.Measure(display).X + (icon ? ImGui.GetTextLineHeight() + UiHelpers.Scale(8) : 0)
                 + ImGui.GetStyle().FramePadding.X * 2;
-        var right = ImGui.GetWindowPos().X + ImGui.GetWindowContentRegionMax().X;
+        var right = MaterialTheme.Current.IsLcars
+            ? ImGui.GetCursorScreenPos().X + ImGui.GetContentRegionAvail().X
+            : ImGui.GetWindowPos().X + ImGui.GetWindowContentRegionMax().X;
         if (ImGui.GetItemRectMax().X + ImGui.GetStyle().ItemSpacing.X + width <= right) ImGui.SameLine();
     }
 

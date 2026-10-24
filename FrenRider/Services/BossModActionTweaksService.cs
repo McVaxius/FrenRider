@@ -203,7 +203,7 @@ public sealed class BossModActionTweaksService
 
             var bossModService = assembly.GetType("BossMod.Service");
             var root = bossModService == null ? null : GetStaticMember(bossModService, "Config");
-            var node = root == null ? null : FindConfigNode(root);
+            var node = root == null ? null : FindConfigNode(root, assembly);
             var field = node?.GetType().GetField(SettingField, InstanceMembers);
             if (field?.FieldType != typeof(bool) || field.IsInitOnly)
                 return null;
@@ -239,7 +239,7 @@ public sealed class BossModActionTweaksService
             if (configRoot == null)
                 return new(target.Label, ApplyOutcome.Failed, "BossMod.Service.Config was not available");
 
-            var configNode = FindConfigNode(configRoot);
+            var configNode = FindConfigNode(configRoot, liveAssembly);
             if (configNode == null)
                 return new(target.Label, ApplyOutcome.Failed, $"{CurrentConfigType} or {LegacyConfigType} was not found");
 
@@ -253,11 +253,16 @@ public sealed class BossModActionTweaksService
             if (current == enabled)
                 return new(target.Label, ApplyOutcome.AlreadySet, string.Empty);
 
-            setting.SetValue(configNode, enabled);
+            var ipcApplied = ApplyConfigViaIpc(pluginInterface, target.InternalName, configNode.GetType().Name, enabled);
+            if (ipcApplied == false)
+                return new(target.Label, ApplyOutcome.Failed, "provider configuration IPC rejected the setting");
+            if (ipcApplied == null)
+                setting.SetValue(configNode, enabled);
             if (setting.GetValue(configNode) is not bool readBack || readBack != enabled)
                 return new(target.Label, ApplyOutcome.Failed, $"{SettingField} read-back did not match");
 
-            NotifyModified(configNode);
+            if (ipcApplied == null)
+                NotifyModified(configNode);
             return new(target.Label, ApplyOutcome.Applied, string.Empty);
         }
         catch (Exception ex)
@@ -407,23 +412,42 @@ public sealed class BossModActionTweaksService
         return null;
     }
 
-    private static object? FindConfigNode(object configRoot)
+    internal static bool? ApplyConfigViaIpc(IDalamudPluginInterface ipc, string internalName, string configName, bool enabled)
     {
-        if (GetInstanceMember(configRoot, "Nodes") is not IEnumerable nodes)
+        // Both forks share these channels. Reflection remains the existing path
+        // when the channel cannot be attributed to exactly this provider.
+        var loaded = ipc.InstalledPlugins.Where(p => p.IsLoaded && p.InternalName is "BossMod" or "BossModReborn").ToArray();
+        if (loaded.Length != 1 || loaded[0].InternalName != internalName)
             return null;
-
-        object? legacy = null;
-        foreach (var node in nodes)
+        var args = new List<string> { configName, SettingField, enabled ? "true" : "false" };
+        List<string>? result;
+        if (internalName == "BossMod")
         {
-            var typeName = node?.GetType().FullName;
-            if (string.Equals(typeName, CurrentConfigType, StringComparison.Ordinal))
-                return node;
-
-            if (string.Equals(typeName, LegacyConfigType, StringComparison.Ordinal))
-                legacy = node;
+            var call = ipc.GetIpcSubscriber<IReadOnlyList<string>, bool, List<string>>("BossMod.Configuration");
+            if (!call.HasFunction) return null;
+            result = call.InvokeFunc(args, true);
         }
+        else
+        {
+            var call = ipc.GetIpcSubscriber<List<string>, bool, List<string>>("BossMod.Configuration");
+            if (!call.HasFunction) return null;
+            result = call.InvokeFunc(args, true);
+        }
+        return result is { Count: 0 };
+    }
 
-        return legacy;
+    internal static object? FindConfigNode(object configRoot, Assembly assembly)
+    {
+        if (configRoot.GetType().Assembly != assembly)
+            return null;
+        var type = assembly.GetType(CurrentConfigType) ?? assembly.GetType(LegacyConfigType);
+        if (type is null)
+            return null;
+        var getter = configRoot.GetType().GetMethods(BindingFlags.Instance | BindingFlags.Public)
+            .SingleOrDefault(method => method.Name == "Get" && method.IsGenericMethodDefinition
+                && method.GetGenericArguments().Length == 1 && method.GetParameters().Length == 0);
+        var node = getter?.MakeGenericMethod(type).Invoke(configRoot, null);
+        return node?.GetType() == type ? node : null;
     }
 
     private static void NotifyModified(object configNode)

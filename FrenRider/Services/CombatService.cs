@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Text;
 using Dalamud.Game.ClientState.Conditions;
 using FFXIVClientStructs.FFXIV.Client.System.String;
@@ -43,6 +44,7 @@ public partial class CombatService
     private QuestingRsrAggroOwnership? questingRsrAggro;
     private QuestingRsrStopSelection? questingRsrStopSelection;
     private bool questingVbmHeld;
+    private bool dragonNeckBossModAiHeld;
     private CombatSettingsSnapshot? pendingCombatSettings;
     private CombatSettingsSnapshot? lastAppliedCombatSettings;
     private string lastBossModDefaultSettingsSignature = string.Empty;
@@ -86,6 +88,7 @@ public partial class CombatService
         ReleaseQuestingRsrAggroForDeparture(reason);
         questingRsrStopSelection = null;
         questingVbmHeld = false;
+        dragonNeckBossModAiHeld = false;
         if (mountedRotationSuppressed || wrathAutoActive)
             Plugin.Log.Information($"[FrenRider] Cleared local external automation runtime flags after {reason}.");
 
@@ -257,6 +260,8 @@ public partial class CombatService
             ApplyBossModMovementUnlockOnce(pluginName, GetBossModPresetForPlugin(config, pluginName),
                 "ADS interaction VBM pause release");
         }
+
+        RefreshDragonNeckBossModAiState(config);
 
         if (plugin.AdsIntegrationService.ShouldPauseDutySystems)
         {
@@ -1522,16 +1527,44 @@ public partial class CombatService
         return true;
     }
 
+    private bool IsDragonNeckCombat(CharacterConfig config)
+    {
+        if (!config.Enabled || !Plugin.Condition[ConditionFlag.InCombat] || !IsInDuty())
+            return false;
+        var identity = AdsIntegrationService.ReadLiveDutyIdentity();
+        return ShouldHoldDragonNeckBossModAi(config.Enabled, true, true,
+            identity.TerritoryTypeId, identity.ContentFinderConditionId);
+    }
+
+    internal static bool ShouldHoldDragonNeckBossModAi(bool enabled, bool inDuty, bool inCombat,
+        uint territoryTypeId, uint contentFinderConditionId)
+        => enabled && inDuty && inCombat && territoryTypeId == 142 && contentFinderConditionId == 81;
+
+    private void RefreshDragonNeckBossModAiState(CharacterConfig config)
+    {
+        var held = IsDragonNeckCombat(config);
+        if (held == dragonNeckBossModAiHeld)
+            return;
+        // Consume the edge even when another owner defers or rejects this one apply.
+        dragonNeckBossModAiHeld = held;
+        ApplyConfiguredBossModAiState(config, GetSelectedRotationPluginName(config),
+            held ? "Dragon's Neck combat started" : "Dragon's Neck combat ended");
+    }
+
     private bool ApplyConfiguredBossModAiState(CharacterConfig config, string pluginName, string reason)
     {
-        if (HoldQuestingVbm(config, pluginName) || pluginName == "VBM" && questingVbmHeld
-            && !plugin.AutorotIpcService.CanResumeOwnedVbm())
+        var dragonNeckCombat = IsDragonNeckCombat(config);
+        dragonNeckBossModAiHeld = dragonNeckCombat;
+        if (!dragonNeckCombat && (HoldQuestingVbm(config, pluginName) || pluginName == "VBM" && questingVbmHeld
+            && !plugin.AutorotIpcService.CanResumeOwnedVbm()))
             return false;
-        if (config.BossModAI != 1 && (!config.Enabled || IsRotationDisabled(config)))
+        var bossModAi = dragonNeckCombat ? 1 : config.BossModAI;
+        if (bossModAi != 1 && (!config.Enabled || IsRotationDisabled(config)))
             return true;
 
-        var vbmPaused = config.BossModAI != 1 && IsAdsInteractionVbmPauseActive(pluginName);
-        var commands = BuildBossModAiCommands(config.BossModAI, pluginName, vbmPaused);
+        var vbmPaused = bossModAi != 1 && IsAdsInteractionVbmPauseActive(pluginName);
+        var commands = BuildBossModAiCommands(config.BossModAI, pluginName, vbmPaused, dragonNeckCombat,
+            dragonNeckCombat ? Plugin.CommandManager.Commands.ContainsKey : null);
         if (vbmPaused)
         {
             DeferCombatSettingsRefresh(config);
@@ -1541,20 +1574,26 @@ public partial class CombatService
             return true;
 
         plugin.CaptureExternalAutomationSnapshot("BossMod AI state change");
-        if (config.BossModAI != 1 && GetBossModPresetProvider(pluginName) == "BMR")
+        if (bossModAi != 1 && GetBossModPresetProvider(pluginName) == "BMR")
             plugin.AutorotIpcService.ApplyOwnedPreferredDistance(command => TrySendCommand(command), 1.5);
         foreach (var command in commands)
             SendCommand(command);
 
-        Plugin.Log.Information($"Combat: BossMod AI {DescribeBossModAiSetting(config.BossModAI)} for {pluginName} after {reason}");
+        Plugin.Log.Information($"Combat: BossMod AI {DescribeBossModAiSetting(bossModAi)} for {pluginName} after {reason}");
         return true;
     }
 
     internal static string[] BuildBossModAiCommands(int bossModAI, string pluginName,
-        bool interactionVbmPauseActive = false)
+        bool interactionVbmPauseActive = false, bool dragonNeckCombat = false,
+        Func<string, bool>? commandRegistered = null)
     {
-        if (bossModAI == 1)
-            return new[] { "/bmrai off", "/vbmai off" };
+        if (bossModAI == 1 || dragonNeckCombat)
+        {
+            var commands = new[] { "/bmrai off", "/vbmai off" };
+            return dragonNeckCombat && commandRegistered != null
+                ? commands.Where(command => commandRegistered(command[..command.IndexOf(' ')])).ToArray()
+                : commands;
+        }
 
         if (interactionVbmPauseActive && string.Equals(pluginName, "VBM", StringComparison.OrdinalIgnoreCase))
             return Array.Empty<string>();

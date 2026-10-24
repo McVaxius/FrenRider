@@ -70,6 +70,70 @@ public sealed class CombatServiceBossModAiCommandTests
     }
 
     [Theory]
+    [InlineData(true, true, true, 142u, 81u, true)]
+    [InlineData(false, true, true, 142u, 81u, false)]
+    [InlineData(true, false, true, 142u, 81u, false)]
+    [InlineData(true, true, false, 142u, 81u, false)]
+    [InlineData(true, true, true, 142u, 82u, false)]
+    [InlineData(true, true, true, 143u, 81u, false)]
+    public void DragonNeckAiHoldRequiresExactNativeDutyAndCombat(bool enabled, bool inDuty,
+        bool inCombat, uint territory, uint cfc, bool held)
+        => Assert.Equal(held, CombatService.ShouldHoldDragonNeckBossModAi(enabled, inDuty, inCombat, territory, cfc));
+
+    [Theory]
+    [InlineData("BMR")]
+    [InlineData("VBM")]
+    [InlineData("RSR")]
+    [InlineData("WRATH")]
+    [InlineData("DAEDALUS")]
+    public void DragonNeckCombatSuppressesAiRefreshAndRestoresConfiguredProviderAfterCombat(string provider)
+    {
+        var profile = new CharacterConfig { Enabled = true, BossModAI = 0, RotationPlugin = 2, RotationType = 0 };
+        var before = CombatService.BuildBossModAiCommands(profile.BossModAI, provider);
+        var held = CombatService.ShouldHoldDragonNeckBossModAi(profile.Enabled, true, true, 142, 81);
+        Assert.Equal(new[] { "/bmrai off", "/vbmai off" },
+            CombatService.BuildBossModAiCommands(profile.BossModAI, provider, dragonNeckCombat: held));
+        Assert.Equal(new[] { "/bmrai off", "/vbmai off" },
+            CombatService.BuildBossModAiCommands(profile.BossModAI, provider,
+                interactionVbmPauseActive: true, dragonNeckCombat: held));
+        held = CombatService.ShouldHoldDragonNeckBossModAi(profile.Enabled, true, false, 142, 81);
+        Assert.Equal(before, CombatService.BuildBossModAiCommands(profile.BossModAI, provider, dragonNeckCombat: held));
+        Assert.Equal(0, profile.BossModAI);
+        Assert.Equal(2, profile.RotationPlugin);
+        Assert.Equal(0, profile.RotationType);
+    }
+
+    [Fact]
+    public void DragonNeckDeparturePreservesExplicitAiOffChoice()
+    {
+        var profile = new CharacterConfig { Enabled = true, BossModAI = 1 };
+        var held = CombatService.ShouldHoldDragonNeckBossModAi(profile.Enabled, true, true, 142, 81);
+        Assert.Equal(new[] { "/bmrai off", "/vbmai off" },
+            CombatService.BuildBossModAiCommands(profile.BossModAI, "RSR", dragonNeckCombat: held));
+        held = CombatService.ShouldHoldDragonNeckBossModAi(profile.Enabled, false, false, 0, 0);
+        Assert.Equal(new[] { "/bmrai off", "/vbmai off" },
+            CombatService.BuildBossModAiCommands(profile.BossModAI, "RSR", dragonNeckCombat: held));
+        Assert.Equal(1, profile.BossModAI);
+    }
+
+    [Theory]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    [InlineData(true, true)]
+    [InlineData(false, false)]
+    public void DragonNeckSkipsAbsentAiProvidersWithoutChangingOrdinaryOffCommands(bool bmr, bool vbm)
+    {
+        bool Registered(string command) => command == "/bmrai" ? bmr : command == "/vbmai" && vbm;
+        var expected = new List<string>();
+        if (bmr) expected.Add("/bmrai off");
+        if (vbm) expected.Add("/vbmai off");
+        Assert.Equal(expected, CombatService.BuildBossModAiCommands(0, "RSR",
+            dragonNeckCombat: true, commandRegistered: Registered));
+        Assert.Equal(new[] { "/bmrai off", "/vbmai off" },
+            CombatService.BuildBossModAiCommands(1, "RSR", commandRegistered: Registered));
+    }
+
+    [Theory]
     [InlineData(0, "BMR", new[] { "/bmrai forbidactions off", "/bmrai on" })]
     [InlineData(99, "RSR", new[] { "/bmrai forbidactions off", "/bmrai on" })]
     [InlineData(0, "WRATH", new[] { "/bmrai forbidactions off", "/bmrai on" })]
