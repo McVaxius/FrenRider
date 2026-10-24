@@ -3220,4 +3220,20 @@ An: Die BossMod-Voreinstellungen unten mit jedem Rotationsanbieter verwenden. Ei
   <data name="Audio output is unavailable." xml:space="preserve"><value>Die Audioausgabe ist nicht verfügbar.</value></data>
   <data name="UI sounds muted" xml:space="preserve"><value>Oberflächentöne stumm</value></data>
   <data name="UI sounds on" xml:space="preserve"><value>Oberflächentöne an</value></data>
+  <data name="Glassmorphism" xml:space="preserve"><value>Glassmorphism</value></data>
+  <data name="Spatial" xml:space="preserve"><value>Spatial</value></data>
+  <data name="Cyberpunk" xml:space="preserve"><value>Cyberpunk</value></data>
+  <data name="Animation" xml:space="preserve"><value>Animation</value></data>
+  <data name="Bar colour 1" xml:space="preserve"><value>Balkenfarbe 1</value></data>
+  <data name="Bar colour 2" xml:space="preserve"><value>Balkenfarbe 2</value></data>
+  <data name="Bar colour 3" xml:space="preserve"><value>Balkenfarbe 3</value></data>
+  <data name="Reset" xml:space="preserve"><value>Zurücksetzen</value></data>
+  <data name="Reset colours" xml:space="preserve"><value>Farben zurücksetzen</value></data>
+  <data name="Movement speed (x)" xml:space="preserve"><value>Bewegungsgeschwindigkeit (x)</value></data>
+  <data name="Controls also colour the waves." xml:space="preserve"><value>Die Bedienelementfarbe färbt auch die Wellen.</value></data>
+  <data name="Wave colours" xml:space="preserve"><value>Wellenfarben</value></data>
+  <data name="Wave colour 1" xml:space="preserve"><value>Wellenfarbe 1</value></data>
+  <data name="Wave colour 2" xml:space="preserve"><value>Wellenfarbe 2</value></data>
+  <data name="Wave colour 3" xml:space="preserve"><value>Wellenfarbe 3</value></data>
+  <data name="Reset wave colours" xml:space="preserve"><value>Wellenfarben zurücksetzen</value></data>
 </root>

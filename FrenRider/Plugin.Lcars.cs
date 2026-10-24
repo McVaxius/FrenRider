@@ -14,7 +14,7 @@ public sealed partial class Plugin
 {
     private MaterialUiSoundPlayer? uiSoundPlayer;
     private readonly Dictionary<Window, TitleBarButton> lcarsSoundButtons = new();
-    internal bool LcarsActive => Configuration.UiColors?.Mode == MaterialColorMode.Lcars;
+    internal bool LcarsActive => Configuration.UiStyle == FrenRiderUiStyle.Classic && Configuration.UiColors?.Mode == MaterialColorMode.Lcars;
 
     internal void SetKrangle(bool enabled)
     {
@@ -79,7 +79,7 @@ public sealed partial class Plugin
                 bool preview;
                 try { theme.Feedback = null; preview = UiGui.Button("Preview sound"); }
                 finally { theme.Feedback = feedback; }
-                MaterialLcars.Feedback(preview, MaterialUiSoundCue.Preview);
+                if (preview) PlayLcarsSound(MaterialUiSoundCue.Preview);
             }
             finally { ImGui.EndDisabled(); }
         }

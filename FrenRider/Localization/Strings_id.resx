@@ -3325,4 +3325,20 @@ Aktif: gunakan preset BossMod di bawah dengan penyedia rotasi apa pun. Preset kh
   <data name="Audio output is unavailable." xml:space="preserve"><value>Keluaran audio tidak tersedia.</value></data>
   <data name="UI sounds muted" xml:space="preserve"><value>Suara antarmuka dibisukan</value></data>
   <data name="UI sounds on" xml:space="preserve"><value>Suara antarmuka aktif</value></data>
+  <data name="Glassmorphism" xml:space="preserve"><value>Glassmorphism</value></data>
+  <data name="Spatial" xml:space="preserve"><value>Spatial</value></data>
+  <data name="Cyberpunk" xml:space="preserve"><value>Cyberpunk</value></data>
+  <data name="Animation" xml:space="preserve"><value>Animasi</value></data>
+  <data name="Bar colour 1" xml:space="preserve"><value>Warna bilah 1</value></data>
+  <data name="Bar colour 2" xml:space="preserve"><value>Warna bilah 2</value></data>
+  <data name="Bar colour 3" xml:space="preserve"><value>Warna bilah 3</value></data>
+  <data name="Reset" xml:space="preserve"><value>Atur ulang</value></data>
+  <data name="Reset colours" xml:space="preserve"><value>Atur ulang warna</value></data>
+  <data name="Movement speed (x)" xml:space="preserve"><value>Kecepatan gerak (x)</value></data>
+  <data name="Controls also colour the waves." xml:space="preserve"><value>Warna kontrol juga mewarnai gelombang.</value></data>
+  <data name="Wave colours" xml:space="preserve"><value>Warna gelombang</value></data>
+  <data name="Wave colour 1" xml:space="preserve"><value>Warna gelombang 1</value></data>
+  <data name="Wave colour 2" xml:space="preserve"><value>Warna gelombang 2</value></data>
+  <data name="Wave colour 3" xml:space="preserve"><value>Warna gelombang 3</value></data>
+  <data name="Reset wave colours" xml:space="preserve"><value>Atur ulang warna gelombang</value></data>
 </root>

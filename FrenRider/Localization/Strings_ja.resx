@@ -3220,4 +3220,20 @@
   <data name="Audio output is unavailable." xml:space="preserve"><value>音声出力を利用できません。</value></data>
   <data name="UI sounds muted" xml:space="preserve"><value>操作音はミュート中</value></data>
   <data name="UI sounds on" xml:space="preserve"><value>操作音はオン</value></data>
+  <data name="Glassmorphism" xml:space="preserve"><value>Glassmorphism</value></data>
+  <data name="Spatial" xml:space="preserve"><value>Spatial</value></data>
+  <data name="Cyberpunk" xml:space="preserve"><value>Cyberpunk</value></data>
+  <data name="Animation" xml:space="preserve"><value>アニメーション</value></data>
+  <data name="Bar colour 1" xml:space="preserve"><value>バーの色 1</value></data>
+  <data name="Bar colour 2" xml:space="preserve"><value>バーの色 2</value></data>
+  <data name="Bar colour 3" xml:space="preserve"><value>バーの色 3</value></data>
+  <data name="Reset" xml:space="preserve"><value>リセット</value></data>
+  <data name="Reset colours" xml:space="preserve"><value>色をリセット</value></data>
+  <data name="Movement speed (x)" xml:space="preserve"><value>動きの速さ (x)</value></data>
+  <data name="Controls also colour the waves." xml:space="preserve"><value>コントロールの色は波にも適用されます。</value></data>
+  <data name="Wave colours" xml:space="preserve"><value>波の色</value></data>
+  <data name="Wave colour 1" xml:space="preserve"><value>波の色 1</value></data>
+  <data name="Wave colour 2" xml:space="preserve"><value>波の色 2</value></data>
+  <data name="Wave colour 3" xml:space="preserve"><value>波の色 3</value></data>
+  <data name="Reset wave colours" xml:space="preserve"><value>波の色をリセット</value></data>
 </root>

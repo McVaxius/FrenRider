@@ -63,7 +63,7 @@ public sealed class MagiaMiniWindow : Window, IDisposable
     {
         var compact = plugin.Configuration.UiCompact;
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, UiHelpers.Scale(new Vector2(compact ? 10 : 12)));
-        var framePadding = MaterialTheme.Current.IsLcars ? UiHelpers.Scale(40) : 0;
+        var framePadding = FrenRiderPresentation.IsLcars ? UiHelpers.Scale(40) : 0;
         var width = UiHelpers.Scale(compact ? 400 : 440) + framePadding;
         width = Math.Max(width, UiGui.TitleMinimumWidth(this, UiText.T("Fren Rider Mini"), people: true, brandSize: 32, compactBrand: compact));
         if (IsEurekaTerritory(plugin.ZoneService.TerritoryId))
@@ -93,6 +93,7 @@ public sealed class MagiaMiniWindow : Window, IDisposable
     public override void Draw()
     {
         motion.DrawChrome();
+        FrenRiderPresentation.DrawBackdrop();
         using var fields = new MaterialStyleScope();
         fields.Style(ImGuiStyleVar.FrameBorderSize, 1);
         fields.Color(ImGuiCol.FrameBg, MaterialTheme.Current.Colors.SurfaceContainer);
@@ -119,9 +120,9 @@ public sealed class MagiaMiniWindow : Window, IDisposable
     {
         var config = plugin.ConfigManager.GetActiveConfig();
         var compact = plugin.Configuration.UiCompact;
-        if (MaterialTheme.Current.IsLcars)
+        if (FrenRiderPresentation.IsLcars)
         {
-            using (UiText.Font(UiFontRole.Title)) MaterialLcars.Header("FREN RIDER");
+            using (UiText.Font(UiFontRole.Title)) FrenRiderPresentation.LcarsHeader("FREN RIDER");
         }
         else
         {
@@ -136,9 +137,9 @@ public sealed class MagiaMiniWindow : Window, IDisposable
         UiGui.LcarsPanel("##FrenRiderMiniRunFrame", () => DrawRunControls(config));
         if (IsEurekaTerritory(plugin.ZoneService.TerritoryId))
             UiGui.LcarsPanel("##FrenRiderMiniMagiaFrame", DrawMagiaControls, 2);
-        if (!MaterialTheme.Current.IsLcars) ImGui.Separator();
+        if (!FrenRiderPresentation.IsLcars) ImGui.Separator();
         UiGui.LcarsPanel("##FrenRiderMiniCompanionFrame", () => UiGui.DrawCompanionPurchases(plugin, config, mini: true), 1);
-        if (MaterialTheme.Current.IsLcars) MaterialLcars.Footer(UiText.T("Fren Rider Mini"));
+        if (FrenRiderPresentation.IsLcars) FrenRiderPresentation.LcarsFooter(UiText.T("Fren Rider Mini"));
     }
 
     private void DrawRunControls(CharacterConfig config)
@@ -180,7 +181,7 @@ public sealed class MagiaMiniWindow : Window, IDisposable
     private static void ContinueButton(string label, float minimumWidth)
     {
         var width = Math.Max(minimumWidth, MaterialText.Measure(UiText.T(label)).X + ImGui.GetStyle().FramePadding.X * 2);
-        var right = MaterialTheme.Current.IsLcars
+        var right = FrenRiderPresentation.Decorated
             ? ImGui.GetCursorScreenPos().X + ImGui.GetContentRegionAvail().X
             : ImGui.GetWindowPos().X + ImGui.GetWindowContentRegionMax().X;
         if (ImGui.GetItemRectMax().X + ImGui.GetStyle().ItemSpacing.X + width <= right) ImGui.SameLine();

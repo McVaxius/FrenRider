@@ -3325,4 +3325,20 @@ Açık: aşağıdaki BossMod ön ayarlarını herhangi bir rotasyon sağlayıcı
   <data name="Audio output is unavailable." xml:space="preserve"><value>Ses çıkışı kullanılamıyor.</value></data>
   <data name="UI sounds muted" xml:space="preserve"><value>Arayüz sesleri kapalı</value></data>
   <data name="UI sounds on" xml:space="preserve"><value>Arayüz sesleri açık</value></data>
+  <data name="Glassmorphism" xml:space="preserve"><value>Glassmorphism</value></data>
+  <data name="Spatial" xml:space="preserve"><value>Spatial</value></data>
+  <data name="Cyberpunk" xml:space="preserve"><value>Cyberpunk</value></data>
+  <data name="Animation" xml:space="preserve"><value>Animasyon</value></data>
+  <data name="Bar colour 1" xml:space="preserve"><value>Çubuk rengi 1</value></data>
+  <data name="Bar colour 2" xml:space="preserve"><value>Çubuk rengi 2</value></data>
+  <data name="Bar colour 3" xml:space="preserve"><value>Çubuk rengi 3</value></data>
+  <data name="Reset" xml:space="preserve"><value>Sıfırla</value></data>
+  <data name="Reset colours" xml:space="preserve"><value>Renkleri sıfırla</value></data>
+  <data name="Movement speed (x)" xml:space="preserve"><value>Hareket hızı (x)</value></data>
+  <data name="Controls also colour the waves." xml:space="preserve"><value>Denetim rengi dalgaları da renklendirir.</value></data>
+  <data name="Wave colours" xml:space="preserve"><value>Dalga renkleri</value></data>
+  <data name="Wave colour 1" xml:space="preserve"><value>Dalga rengi 1</value></data>
+  <data name="Wave colour 2" xml:space="preserve"><value>Dalga rengi 2</value></data>
+  <data name="Wave colour 3" xml:space="preserve"><value>Dalga rengi 3</value></data>
+  <data name="Reset wave colours" xml:space="preserve"><value>Dalga renklerini sıfırla</value></data>
 </root>

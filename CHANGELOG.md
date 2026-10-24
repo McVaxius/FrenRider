@@ -1,3 +1,28 @@
+2026-10-24 - Cyberpunk pilot design revision (unreleased)
+
+- Replace the Cyberpunk perimeter rails and nested frames with flat layered graphite plates, solid clipped cyan/pale heading tabs, relative magenta accents and raised controls with accent-colour lower edges. Match the approved rounded switches and radios while preserving native IDs, actions, semantic fills and saved palettes.
+- Wire the styled headings into Main, including Activation, and add read-only table shading. Read wide Automation columns vertically. Keep accepted Glass, Spatial and LCARS appearance and all colour/reset controls intact; retain version 3.0.0.4 for local testing.
+- Validation: 43 focused native interaction, appearance and configuration checks pass. The unchanged Debug/x64 launcher builds with 0 warnings/errors. The user approved Cyberpunk and the independent wave colours before the next planning phase.
+
+2026-10-24 - Independent Glass wave colours (unreleased)
+
+- Add saved Wave colour 1, 2 and 3 pickers in the titlebar Colour popup and Window appearance. Each has a Reset, with a separate Reset wave colours action. Controls now changes only the control accent; palette resets preserve the wave choices.
+- Keep the original base wave hues, smooth geometry and animation, along with the accepted Spatial, LCARS and existing colour-reset behaviour. Keep version 3.0.0.4 for local testing.
+- Validation: 35 focused checks pass, including native wave edits/resets, saved values and independent backdrop colouring. The unchanged Debug/x64 launcher builds with 0 warnings/errors. The first run encountered an existing German translation regex timeout; the unchanged suite passed on rerun. In-game acceptance of the new wave controls remains pending.
+
+2026-10-24 - Glass wave quality, speed and palette resets (unreleased)
+
+- Replace coarse concentric Glass circles with smoothly interpolated curved colour ribbons. Increase the normal motion pace and add a saved 0.1–10x speed control, with its own reset; Animation off retains a static wave background. The Glass Controls colour seeds the wave hues and Background sets their base tint.
+- Add per-colour Reset and current-mode Reset colours in both appearance entry points, including Auto, Picker, all four LCARS roles and the three new styles. Reset only the selected colour/palette; preserve other palettes, motion and unrelated preferences.
+- Validation: 35 focused cases pass, including native reset/save interactions at 320px and both densities, speed persistence, interpolated wave colours and bounded 4K mesh indices. The unchanged Debug/x64 launcher builds with 0 warnings/errors. In-game appearance and frame-time acceptance remains with user testing.
+
+2026-10-24 - Additional UI styles and independent LCARS colours (unreleased)
+
+- Add Glassmorphism, Spatial and Cyberpunk alongside the existing Auto, Picker and LCARS choices, sharing the existing Colour popup and Window appearance save path. Each new style retains its own Background, Controls and Text colours.
+- Draw frosted decorative Glass panels with an animation toggle enabled by default, raised Spatial surfaces and recessed wells, and chamfered Cyberpunk frames and controls. Apply the selected material across the existing Main, Mini, Settings and support windows while retaining native actions and readable density variants.
+- Add independent LCARS Background and three bar colours with automatic text contrast. Preserve legacy appearance values, profile settings, semantic status colours and the default-muted LCARS sound preference. Keep version 3.0.0.4 for local testing.
+- Validation: all 34 focused appearance, native interaction/identity and configuration cases pass. The unchanged local Debug/x64 launcher builds with zero warnings/errors. In-game visual, managed-font and audio acceptance remains with user testing.
+
 2026-10-23 - LCARS Mini and warning followups (unreleased)
 
 - Give the existing Mini and AutoDuty warning dedicated LCARS header rails, panel frames and footers. Preserve Run, Fren selection, conditional Magia controls, companion purchases and the warning's existing disable/acknowledgement behavior.

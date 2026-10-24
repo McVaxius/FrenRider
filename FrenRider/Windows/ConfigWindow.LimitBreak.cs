@@ -39,38 +39,72 @@ public partial class ConfigWindow
         }
         RoleButtons(selected, select, true, damageRoot);
         var title = LimitBreakRoleLabel(selected);
-        Card(title, () =>
+        var originalIdRoot = ImGui.GetID("");
+        void SelectedCard()
         {
-            if (selected == LimitBreakRole.Tank) TankControls(settings.Tank, save, sync);
-            else if (selected == LimitBreakRole.Healer) HealerControls(settings.Healer, save, sync);
-            else DamageControls(settings.Damage(selected)!, selected, save, sync);
-        }, wide && selected is not LimitBreakRole.Tank and not LimitBreakRole.Healer ? "Damage roles" : title);
-        Card("Role overview", () =>
+            ImGuiP.PushOverrideID(originalIdRoot);
+            try
+            {
+                Card(title, () =>
+                {
+                    if (selected == LimitBreakRole.Tank) TankControls(settings.Tank, save, sync);
+                    else if (selected == LimitBreakRole.Healer) HealerControls(settings.Healer, save, sync);
+                    else DamageControls(settings.Damage(selected)!, selected, save, sync);
+                }, wide && selected is not LimitBreakRole.Tank and not LimitBreakRole.Healer ? "Damage roles" : title);
+            }
+            finally { ImGui.PopID(); }
+        }
+        void OverviewCard()
         {
-            using var rows = MaterialTable.PushTightRows();
-            if (ImGui.BeginTable("##LimitBreakRoleOverview", 2,
-                    ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.BordersInnerH | ImGuiTableFlags.NoSavedSettings))
+            ImGuiP.PushOverrideID(originalIdRoot);
+            try
+            {
+                Card("Role overview", () =>
+                {
+                    using var rows = MaterialTable.PushTightRows();
+                    if (ImGui.BeginTable("##LimitBreakRoleOverview", 2,
+                            ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.BordersInnerH | ImGuiTableFlags.NoSavedSettings))
+                    {
+                        try
+                        {
+                            var roleWidth = new[] { LimitBreakRole.Tank, LimitBreakRole.Healer, LimitBreakRole.Melee,
+                                LimitBreakRole.PhysicalRanged, LimitBreakRole.MagicalRanged }
+                                .Max(role => MaterialText.Measure(UiText.T(LimitBreakRoleLabel(role))).X);
+                            ImGui.TableSetupColumn("##Role", ImGuiTableColumnFlags.WidthFixed,
+                                Math.Min(roleWidth, ImGui.GetContentRegionAvail().X * .35f));
+                            ImGui.TableSetupColumn("##Policy", ImGuiTableColumnFlags.WidthStretch);
+                            foreach (var role in new[] { LimitBreakRole.Tank, LimitBreakRole.Healer, LimitBreakRole.Melee,
+                                         LimitBreakRole.PhysicalRanged, LimitBreakRole.MagicalRanged })
+                            {
+                                ImGui.TableNextColumn();
+                                using (UiText.Font(UiFontRole.BodyStrong)) UiGui.TextWrapped(LimitBreakRoleLabel(role));
+                                ImGui.TableNextColumn(); UiGui.TextWrapped(LimitBreakSummary(settings, role));
+                            }
+                        }
+                        finally { ImGui.EndTable(); }
+                    }
+                    UiGui.TextWrapped("Saved policies only. This overview is not live telemetry.");
+                });
+            }
+            finally { ImGui.PopID(); }
+        }
+        if (wide && FrenRiderPresentation.Decorated)
+        {
+            if (ImGui.BeginTable("##LimitBreakCards", 2, ImGuiTableFlags.SizingStretchSame | ImGuiTableFlags.NoSavedSettings))
             {
                 try
                 {
-                    var roleWidth = new[] { LimitBreakRole.Tank, LimitBreakRole.Healer, LimitBreakRole.Melee,
-                        LimitBreakRole.PhysicalRanged, LimitBreakRole.MagicalRanged }
-                        .Max(role => MaterialText.Measure(UiText.T(LimitBreakRoleLabel(role))).X);
-                    ImGui.TableSetupColumn("##Role", ImGuiTableColumnFlags.WidthFixed,
-                        Math.Min(roleWidth, ImGui.GetContentRegionAvail().X * .35f));
-                    ImGui.TableSetupColumn("##Policy", ImGuiTableColumnFlags.WidthStretch);
-                    foreach (var role in new[] { LimitBreakRole.Tank, LimitBreakRole.Healer, LimitBreakRole.Melee,
-                                 LimitBreakRole.PhysicalRanged, LimitBreakRole.MagicalRanged })
-                    {
-                        ImGui.TableNextColumn();
-                        using (UiText.Font(UiFontRole.BodyStrong)) UiGui.TextWrapped(LimitBreakRoleLabel(role));
-                        ImGui.TableNextColumn(); UiGui.TextWrapped(LimitBreakSummary(settings, role));
-                    }
+                    ImGui.TableNextColumn(); SelectedCard();
+                    ImGui.TableNextColumn(); OverviewCard();
                 }
                 finally { ImGui.EndTable(); }
             }
-            UiGui.TextWrapped("Saved policies only. This overview is not live telemetry.");
-        });
+        }
+        else
+        {
+            SelectedCard();
+            OverviewCard();
+        }
     }
 
     private static void RoleButtons(LimitBreakRole selected, Action<LimitBreakRole> select, bool all, uint damageRoot = 0)
@@ -83,8 +117,10 @@ public partial class ConfigWindow
             var label = LimitBreakRoleLabel(role);
             var width = MaterialText.Measure(UiText.T(label)).X + ImGui.GetFrameHeight()
                 + ImGui.GetStyle().ItemInnerSpacing.X;
-            if (!first && ImGui.GetItemRectMax().X + ImGui.GetStyle().ItemSpacing.X + width
-                <= ImGui.GetWindowPos().X + ImGui.GetWindowContentRegionMax().X) ImGui.SameLine();
+            var right = FrenRiderPresentation.Decorated
+                ? ImGui.GetCursorScreenPos().X + ImGui.GetContentRegionAvail().X
+                : ImGui.GetWindowPos().X + ImGui.GetWindowContentRegionMax().X;
+            if (!first && ImGui.GetItemRectMax().X + ImGui.GetStyle().ItemSpacing.X + width <= right) ImGui.SameLine();
             var restoreDamageRoot = damageRoot != 0 && role is not LimitBreakRole.Tank and not LimitBreakRole.Healer;
             if (restoreDamageRoot) ImGuiP.PushOverrideID(damageRoot);
             try { if (UiGui.RadioButton(label, selected == role)) select(role); }
@@ -192,16 +228,33 @@ public partial class ConfigWindow
         try
         {
             using var style = new MaterialStyleScope();
-            style.Style(ImGuiStyleVar.CellPadding, Vector2.Zero);
-            // Keep the old native table seed without its padded background frame.
-            if (!ImGui.BeginTable("##Card", 1, ImGuiTableFlags.NoSavedSettings)) return;
+            var decorated = FrenRiderPresentation.Decorated;
+            var compact = MaterialTheme.Current.Density == MaterialDensity.Compact;
+            style.Style(ImGuiStyleVar.CellPadding, decorated
+                ? UiHelpers.Scale(new Vector2(FrenRiderPresentation.IsLcars ? 20 : 12, compact ? 7 : 10))
+                : Vector2.Zero);
+            var flags = ImGuiTableFlags.NoSavedSettings;
+            if (decorated) flags |= ImGuiTableFlags.PadOuterX;
+            // Keep the original native card table seed and policy control roots.
+            if (!ImGui.BeginTable("##Card", 1, flags)) return;
             try
             {
                 ImGui.TableNextColumn();
+                var min = ImGui.GetCursorScreenPos();
+                var width = ImGui.GetContentRegionAvail().X;
                 UiGui.SettingsSection(title);
                 draw();
+                if (decorated)
+                {
+                    var inset = UiHelpers.Scale(new Vector2(FrenRiderPresentation.IsLcars ? 16 : 8, compact ? 4 : 6));
+                    var max = new Vector2(min.X + width, ImGui.GetCursorScreenPos().Y - ImGui.GetStyle().ItemSpacing.Y);
+                    ImGuiP.TablePushBackgroundChannel();
+                    try { FrenRiderPresentation.DrawPanel(min - inset, max + inset); }
+                    finally { ImGuiP.TablePopBackgroundChannel(); }
+                }
             }
             finally { ImGui.EndTable(); }
+            if (decorated) ImGui.Dummy(UiHelpers.Scale(new Vector2(0, compact ? 4 : 6)));
         }
         finally { ImGui.PopID(); }
     }

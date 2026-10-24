@@ -7,8 +7,40 @@ namespace FrenRider.Windows;
 
 internal enum UiFontRole { Body, BodyStrong, Title, PluginName, Counter, Action }
 
-internal static class FrenRiderPresentation
+internal static partial class FrenRiderPresentation
 {
+    [ThreadStatic] private static Configuration? activeConfiguration;
+    internal static Configuration? ActiveConfiguration => activeConfiguration;
+    internal static FrenRiderUiStyle Style => activeConfiguration?.UiStyle switch
+    {
+        FrenRiderUiStyle.Glassmorphism => FrenRiderUiStyle.Glassmorphism,
+        FrenRiderUiStyle.Spatial => FrenRiderUiStyle.Spatial,
+        FrenRiderUiStyle.Cyberpunk => FrenRiderUiStyle.Cyberpunk,
+        _ => FrenRiderUiStyle.Classic,
+    };
+    internal static bool IsLcars => activeConfiguration is { } config
+        ? Style == FrenRiderUiStyle.Classic && config.UiColors?.Mode == MaterialColorMode.Lcars
+        : MaterialTheme.Current.IsLcars;
+    internal static bool Decorated => Style != FrenRiderUiStyle.Classic || IsLcars;
+    internal static Vector4 LcarsBackground => Rgb(activeConfiguration?.UiLcarsBackgroundRgb ?? Configuration.DefaultLcarsBackgroundRgb);
+    internal static Vector4 LcarsText => ReadableInk(LcarsBackground);
+    internal static Vector4 LcarsBar(int index) => Rgb(index switch
+    {
+        0 => activeConfiguration?.UiLcarsBar1Rgb ?? Configuration.DefaultLcarsBar1Rgb,
+        1 => activeConfiguration?.UiLcarsBar2Rgb ?? Configuration.DefaultLcarsBar2Rgb,
+        _ => activeConfiguration?.UiLcarsBar3Rgb ?? Configuration.DefaultLcarsBar3Rgb,
+    });
+    internal static Vector4 ReadableInk(Vector4 surface) =>
+        MaterialColor.Contrast(surface, Vector4.One) >= MaterialColor.Contrast(surface, new Vector4(0, 0, 0, 1))
+            ? Vector4.One : new(0, 0, 0, 1);
+    internal static AppearanceScope Push(Configuration config) => new(config);
+    internal readonly ref struct AppearanceScope
+    {
+        private readonly Configuration? previous;
+        internal AppearanceScope(Configuration config) { previous = activeConfiguration; activeConfiguration = config; }
+        public void Dispose() => activeConfiguration = previous;
+    }
+
     // Approved regular/compact Main and Mini envelopes; native Main version chrome is retained.
     internal const uint ReferenceAccent = 0x70C677;
     internal static readonly float[] FontSizes = [16, 16, 26, 20, 22, 18];
@@ -26,6 +58,56 @@ internal static class FrenRiderPresentation
             Gap = 8 * s, IconSize = icon * s, Rounding = 4 * s, ItemSpacing = new(10 * s, 4 * s), CellPadding = new(12 * s, 8 * s) };
     }
     internal static MaterialTheme Theme(uint accent) => Theme(accent, new MaterialColorSettings());
+
+    internal static MaterialColorSettings Palette(Configuration config) => config.UiStyle switch
+    {
+        FrenRiderUiStyle.Glassmorphism => config.UiGlassColors ?? Configuration.DefaultPalette(FrenRiderUiStyle.Glassmorphism),
+        FrenRiderUiStyle.Spatial => config.UiSpatialColors ?? Configuration.DefaultPalette(FrenRiderUiStyle.Spatial),
+        FrenRiderUiStyle.Cyberpunk => config.UiCyberpunkColors ?? Configuration.DefaultPalette(FrenRiderUiStyle.Cyberpunk),
+        _ => config.UiColors ?? new(),
+    };
+
+    internal static MaterialTheme Theme(Configuration config)
+    {
+        var style = config.UiStyle;
+        var lcars = style == FrenRiderUiStyle.Classic && config.UiColors?.Mode == MaterialColorMode.Lcars;
+        if (style is not (FrenRiderUiStyle.Glassmorphism or FrenRiderUiStyle.Spatial or FrenRiderUiStyle.Cyberpunk) && !lcars)
+            return Theme(config.UiAccentRgb, config.UiColors ?? new());
+        var selected = Palette(config);
+        var background = Rgb(lcars ? config.UiLcarsBackgroundRgb : selected.BackgroundRgb);
+        var primary = Rgb(lcars ? config.UiLcarsBar1Rgb : selected.ControlsRgb);
+        var text = lcars ? ReadableInk(background) : Rgb(selected.TextRgb);
+        Vector4 Mix(Vector4 a, Vector4 b, float amount) => Vector4.Lerp(a, b, amount) with { W = 1 };
+        Vector4 Rotate(float angle, float chroma = 1)
+        {
+            var lch = MaterialColor.LabToLch(MaterialColor.SrgbToOklab(new(primary.X, primary.Y, primary.Z)));
+            return new(MaterialColor.GamutMap(lch.X, lch.Y * chroma, lch.Z + angle), 1);
+        }
+        var light = ReadableInk(background).X == 0;
+        var surface = lcars ? background : Mix(background, Vector4.One, light ? .55f : .045f);
+        if (style == FrenRiderUiStyle.Cyberpunk) surface = Mix(surface, primary, .045f);
+        var well = lcars ? background : Mix(background, new(0, 0, 0, 1), light ? .045f : .18f);
+        var secondary = lcars ? Rgb(config.UiLcarsBar2Rgb)
+            : style == FrenRiderUiStyle.Cyberpunk ? Rotate(2.35f, 1.5f) : Rotate(1.2f);
+        var tertiary = lcars ? Rgb(config.UiLcarsBar3Rgb)
+            : Rotate(style == FrenRiderUiStyle.Cyberpunk ? 1.2f : 2.35f);
+        var palette = new OklchPaletteGenerator().Generate(new(primary.X, primary.Y, primary.Z));
+        var colors = new MaterialColorScheme(palette)
+        {
+            Background = background, OnBackground = text, Surface = surface, OnSurface = text,
+            SurfaceContainerLowest = well, SurfaceContainerLow = surface,
+            SurfaceContainer = lcars ? background : Mix(surface, text, .025f),
+            SurfaceContainerHigh = Mix(surface, text, .055f), SurfaceContainerHighest = Mix(surface, text, .1f),
+            SurfaceVariant = Mix(surface, text, .16f), OnSurfaceVariant = Mix(text, background, .23f),
+            Outline = Mix(background, primary, .5f), OutlineVariant = Mix(background, primary, .25f),
+            Primary = primary, OnPrimary = ReadableInk(primary), PrimaryContainer = lcars ? background : Mix(surface, primary, .1f),
+            OnPrimaryContainer = text, Secondary = secondary, OnSecondary = ReadableInk(secondary),
+            SecondaryContainer = Mix(surface, primary, .18f), OnSecondaryContainer = text,
+            Tertiary = tertiary, OnTertiary = ReadableInk(tertiary), TertiaryContainer = Mix(surface, tertiary, .12f),
+            OnTertiaryContainer = text, InverseSurface = text, InverseOnSurface = background, InversePrimary = primary,
+        };
+        return new(colors) { SurfaceOpacity = 1 };
+    }
 
     internal static MaterialTheme Theme(uint accent, MaterialColorSettings colorSettings)
     {

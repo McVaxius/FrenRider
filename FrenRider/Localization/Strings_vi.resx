@@ -3325,4 +3325,20 @@ Bật: dùng các preset BossMod bên dưới với mọi nhà cung cấp rotati
   <data name="Audio output is unavailable." xml:space="preserve"><value>Không có đầu ra âm thanh.</value></data>
   <data name="UI sounds muted" xml:space="preserve"><value>Âm thanh giao diện đã tắt</value></data>
   <data name="UI sounds on" xml:space="preserve"><value>Âm thanh giao diện đang bật</value></data>
+  <data name="Glassmorphism" xml:space="preserve"><value>Glassmorphism</value></data>
+  <data name="Spatial" xml:space="preserve"><value>Spatial</value></data>
+  <data name="Cyberpunk" xml:space="preserve"><value>Cyberpunk</value></data>
+  <data name="Animation" xml:space="preserve"><value>Hoạt ảnh</value></data>
+  <data name="Bar colour 1" xml:space="preserve"><value>Màu thanh 1</value></data>
+  <data name="Bar colour 2" xml:space="preserve"><value>Màu thanh 2</value></data>
+  <data name="Bar colour 3" xml:space="preserve"><value>Màu thanh 3</value></data>
+  <data name="Reset" xml:space="preserve"><value>Đặt lại</value></data>
+  <data name="Reset colours" xml:space="preserve"><value>Đặt lại màu</value></data>
+  <data name="Movement speed (x)" xml:space="preserve"><value>Tốc độ chuyển động (x)</value></data>
+  <data name="Controls also colour the waves." xml:space="preserve"><value>Màu điều khiển cũng áp dụng cho các dải sóng.</value></data>
+  <data name="Wave colours" xml:space="preserve"><value>Màu sóng</value></data>
+  <data name="Wave colour 1" xml:space="preserve"><value>Màu sóng 1</value></data>
+  <data name="Wave colour 2" xml:space="preserve"><value>Màu sóng 2</value></data>
+  <data name="Wave colour 3" xml:space="preserve"><value>Màu sóng 3</value></data>
+  <data name="Reset wave colours" xml:space="preserve"><value>Đặt lại màu sóng</value></data>
 </root>

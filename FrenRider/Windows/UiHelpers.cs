@@ -106,8 +106,13 @@ internal static class UiHelpers
         var size = MaterialText.Measure(text, false, Math.Max(1, width - padding.X * 2));
         var height = Math.Max(MaterialControls.Metrics.Height, size.Y + padding.Y * 2);
         var dl = ImGui.GetWindowDrawList();
-        dl.AddRectFilled(origin, origin + new Vector2(width, height), MaterialCanvas.Color(c.SurfaceContainer), Scale(4));
-        dl.AddRect(origin, origin + new Vector2(width, height), MaterialCanvas.Color(c.OutlineVariant), Scale(4));
+        if (FrenRiderPresentation.Decorated)
+            FrenRiderPresentation.DrawPanel(origin, origin + new Vector2(width, height), inset: true);
+        else
+        {
+            dl.AddRectFilled(origin, origin + new Vector2(width, height), MaterialCanvas.Color(c.SurfaceContainer), Scale(4));
+            dl.AddRect(origin, origin + new Vector2(width, height), MaterialCanvas.Color(c.OutlineVariant), Scale(4));
+        }
         MaterialText.AddText(dl,ImGui.GetFont(), ImGui.GetFontSize(), origin + padding, MaterialCanvas.Color(color ?? c.OnSurface), text, Math.Max(1, width - padding.X * 2));
         ImGui.Dummy(new Vector2(width, height));
     }

@@ -3231,4 +3231,20 @@
   <data name="Audio output is unavailable." xml:space="preserve"><value>ऑडियो आउटपुट उपलब्ध नहीं है।</value></data>
   <data name="UI sounds muted" xml:space="preserve"><value>इंटरफ़ेस ध्वनियाँ मूक हैं</value></data>
   <data name="UI sounds on" xml:space="preserve"><value>इंटरफ़ेस ध्वनियाँ चालू हैं</value></data>
+  <data name="Glassmorphism" xml:space="preserve"><value>Glassmorphism</value></data>
+  <data name="Spatial" xml:space="preserve"><value>Spatial</value></data>
+  <data name="Cyberpunk" xml:space="preserve"><value>Cyberpunk</value></data>
+  <data name="Animation" xml:space="preserve"><value>एनीमेशन</value></data>
+  <data name="Bar colour 1" xml:space="preserve"><value>पट्टी का रंग 1</value></data>
+  <data name="Bar colour 2" xml:space="preserve"><value>पट्टी का रंग 2</value></data>
+  <data name="Bar colour 3" xml:space="preserve"><value>पट्टी का रंग 3</value></data>
+  <data name="Reset" xml:space="preserve"><value>रीसेट</value></data>
+  <data name="Reset colours" xml:space="preserve"><value>रंग रीसेट करें</value></data>
+  <data name="Movement speed (x)" xml:space="preserve"><value>गति (x)</value></data>
+  <data name="Controls also colour the waves." xml:space="preserve"><value>कंट्रोल का रंग तरंगों पर भी लागू होता है।</value></data>
+  <data name="Wave colours" xml:space="preserve"><value>तरंगों के रंग</value></data>
+  <data name="Wave colour 1" xml:space="preserve"><value>तरंग का रंग 1</value></data>
+  <data name="Wave colour 2" xml:space="preserve"><value>तरंग का रंग 2</value></data>
+  <data name="Wave colour 3" xml:space="preserve"><value>तरंग का रंग 3</value></data>
+  <data name="Reset wave colours" xml:space="preserve"><value>तरंगों के रंग रीसेट करें</value></data>
 </root>

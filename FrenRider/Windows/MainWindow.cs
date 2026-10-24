@@ -109,6 +109,7 @@ public class MainWindow : Window, IDisposable
     public override void Draw()
     {
         motion.DrawChrome();
+        FrenRiderPresentation.DrawBackdrop();
         using var fields = new MaterialStyleScope();
         fields.Style(ImGuiStyleVar.FrameBorderSize, 1);
         fields.Color(ImGuiCol.FrameBg, MaterialTheme.Current.Colors.SurfaceContainer);
@@ -116,14 +117,17 @@ public class MainWindow : Window, IDisposable
         using var controls = MaterialControls.Push(FrenRiderPresentation.Controls(plugin.Configuration.UiCompact ? 32 : 36));
         var config = plugin.ConfigManager.GetActiveConfig();
         var actionRoot = ImGui.GetID("");
-        if (MaterialTheme.Current.IsLcars)
+        if (FrenRiderPresentation.IsLcars)
         {
-            using (UiText.Font(UiFontRole.Title)) MaterialLcars.Header("FREN RIDER");
+            using (UiText.Font(UiFontRole.Title)) FrenRiderPresentation.LcarsHeader("FREN RIDER");
         }
         DrawTopBar(config);
         ImGui.Separator();
         var footerHeight = ImGui.GetTextLineHeight() + ImGui.GetStyle().ItemSpacing.Y * 3 + 1;
-        if (MaterialTheme.Current.IsLcars) footerHeight += 8 * MaterialTheme.Metrics.Scale;
+        if (FrenRiderPresentation.IsLcars) footerHeight += 8 * MaterialTheme.Metrics.Scale;
+        using var scrollStyle = new MaterialStyleScope();
+        if (FrenRiderPresentation.Style == FrenRiderUiStyle.Glassmorphism)
+            scrollStyle.Color(ImGuiCol.ChildBg, Vector4.Zero);
         var visible = ImGui.BeginChild("##FrenRiderOperatorScroll",
             new Vector2(0, -footerHeight), false);
         try
@@ -178,7 +182,7 @@ public class MainWindow : Window, IDisposable
             }
         }
         finally { ImGui.EndChild(); }
-        if (MaterialTheme.Current.IsLcars) MaterialLcars.Footer("FrenRider " + CurrentVersion + " · LCARS");
+        if (FrenRiderPresentation.IsLcars) FrenRiderPresentation.LcarsFooter("FrenRider " + CurrentVersion + " · LCARS");
         else
         {
             ImGui.Separator();
@@ -191,7 +195,7 @@ public class MainWindow : Window, IDisposable
         var originalIdRoot = ImGui.GetID("");
         using var spacing = new MaterialStyleScope();
         spacing.Style(ImGuiStyleVar.ItemSpacing, new Vector2(ImGui.GetStyle().ItemSpacing.X, UiHelpers.Scale(plugin.Configuration.UiCompact ? 3 : 5)));
-        spacing.Style(ImGuiStyleVar.CellPadding, UiHelpers.Scale(new Vector2(MaterialTheme.Current.IsLcars ? 20 : 10, plugin.Configuration.UiCompact ? 6 : 8)));
+        spacing.Style(ImGuiStyleVar.CellPadding, UiHelpers.Scale(new Vector2(FrenRiderPresentation.IsLcars ? 20 : 10, plugin.Configuration.UiCompact ? 6 : 8)));
         if (!ImGui.BeginTable("##FrenRiderPanelBounds" + title, 1,
                 ImGuiTableFlags.SizingStretchSame | ImGuiTableFlags.NoSavedSettings | ImGuiTableFlags.PadOuterX)) return;
         try
@@ -202,9 +206,9 @@ public class MainWindow : Window, IDisposable
             ImGuiP.PushOverrideID(originalIdRoot);
             try
             {
-                if (MaterialTheme.Current.IsLcars)
+                if (FrenRiderPresentation.IsLcars || FrenRiderPresentation.Style == FrenRiderUiStyle.Cyberpunk)
                 {
-                    using (UiText.Font(UiFontRole.PluginName)) MaterialLcars.PanelHeading(UiText.Current.Culture.TextInfo.ToUpper(UiText.T(title)), LcarsAccent(title));
+                    using (UiText.Font(UiFontRole.PluginName)) FrenRiderPresentation.LcarsHeading(UiText.Current.Culture.TextInfo.ToUpper(UiText.T(title)), LcarsAccent(title));
                 }
                 else if (heading)
                 {
@@ -213,14 +217,14 @@ public class MainWindow : Window, IDisposable
                 draw();
             }
             finally { ImGui.PopID(); }
-            var inset = UiHelpers.Scale(new Vector2(MaterialTheme.Current.IsLcars ? 16 : 8, plugin.Configuration.UiCompact ? 4 : 6));
+            var inset = UiHelpers.Scale(new Vector2(FrenRiderPresentation.IsLcars ? 16 : 8, plugin.Configuration.UiCompact ? 4 : 6));
             var max = new Vector2(min.X + width, ImGui.GetCursorScreenPos().Y - ImGui.GetStyle().ItemSpacing.Y);
             ImGuiP.TablePushBackgroundChannel();
             try
             {
                 var c = MaterialTheme.Current.Colors;
                 var dl = ImGui.GetWindowDrawList();
-                if (MaterialTheme.Current.IsLcars) MaterialLcars.PanelFrame(min - inset, max + inset, LcarsAccent(title));
+                if (FrenRiderPresentation.Decorated) FrenRiderPresentation.DrawPanel(min - inset, max + inset, LcarsAccent(title));
                 else
                 {
                     dl.AddRectFilled(min - inset, max + inset, MaterialCanvas.Color(c.SurfaceContainerLow), UiHelpers.Scale(6));
@@ -253,13 +257,26 @@ public class MainWindow : Window, IDisposable
         var compact = plugin.Configuration.UiCompact;
         var icon = plugin.OriginalIcon;
         var imageMin = ImGui.GetCursorScreenPos();
-        MaterialCanvas.DrawImage(ImGui.GetWindowDrawList(), icon.Handle, icon.Size,
-            imageMin, imageMin + UiHelpers.Scale(new Vector2(compact ? 28 : 32)));
-        ImGui.Dummy(UiHelpers.Scale(new Vector2(compact ? 30 : 36, compact ? 28 : 32)));
-        if (!MaterialTheme.Current.IsLcars)
+        var cyberpunk = FrenRiderPresentation.Style == FrenRiderUiStyle.Cyberpunk;
+        if (cyberpunk)
+        {
+            var markerSize = UiHelpers.Scale(new Vector2(10, compact ? 28 : 32));
+            var cut = UiHelpers.Scale(6);
+            ImGui.GetWindowDrawList().AddQuadFilled(imageMin, imageMin + new Vector2(markerSize.X, cut),
+                imageMin + markerSize, imageMin + new Vector2(0, markerSize.Y - cut),
+                MaterialCanvas.Color(MaterialTheme.Current.Colors.Primary));
+            ImGui.Dummy(UiHelpers.Scale(new Vector2(14, compact ? 28 : 32)));
+        }
+        else
+        {
+            MaterialCanvas.DrawImage(ImGui.GetWindowDrawList(), icon.Handle, icon.Size,
+                imageMin, imageMin + UiHelpers.Scale(new Vector2(compact ? 28 : 32)));
+            ImGui.Dummy(UiHelpers.Scale(new Vector2(compact ? 30 : 36, compact ? 28 : 32)));
+        }
+        if (!FrenRiderPresentation.IsLcars)
         {
             ImGui.SameLine();
-            using (UiText.Font(UiFontRole.Title)) MaterialText.Text("Fren Rider");
+            using (UiText.Font(UiFontRole.Title)) MaterialText.Text(cyberpunk ? "FREN RIDER" : "Fren Rider");
         }
 
         NextButton("Settings");
@@ -390,7 +407,30 @@ public class MainWindow : Window, IDisposable
             ("Tracking", tracking, fren is null ? UiHelpers.Grey : visible ? UiHelpers.Green : fren.IsFound ? UiHelpers.Yellow : UiHelpers.Red),
             ("Position", visible ? UiText.F("{0:F0} / {1:F0} / {2:F0}", fren!.Position.X, fren.Position.Y, fren.Position.Z) : "—", null),
         };
-        if (MaterialTheme.Current.IsLcars)
+        if (FrenRiderPresentation.Style == FrenRiderUiStyle.Cyberpunk)
+        {
+            var c = MaterialTheme.Current.Colors;
+            columnStyle.Color(ImGuiCol.TableRowBg, c.SurfaceContainerLowest);
+            columnStyle.Color(ImGuiCol.TableRowBgAlt, c.SurfaceContainer);
+            var labelWidth = Math.Min(ImGui.GetContentRegionAvail().X * .38f,
+                cells.Max(cell => MaterialText.Measure(UiText.T(cell.Label)).X) + UiHelpers.Scale(12));
+            if (!ImGui.BeginTable("##OperatorFields", 2, ImGuiTableFlags.SizingStretchProp
+                    | ImGuiTableFlags.RowBg | ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.NoSavedSettings)) return;
+            try
+            {
+                ImGui.TableSetupColumn("##operator-label", ImGuiTableColumnFlags.WidthFixed, labelWidth);
+                ImGui.TableSetupColumn("##operator-value", ImGuiTableColumnFlags.WidthStretch);
+                foreach (var cell in cells)
+                {
+                    ImGui.TableNextRow();
+                    ImGui.TableNextColumn(); UiGui.TextDisabled(cell.Label);
+                    ImGui.TableNextColumn(); UiHelpers.SafeWrappedText(cell.Value, cell.Color, localize: false);
+                }
+            }
+            finally { ImGui.EndTable(); }
+            return;
+        }
+        if (FrenRiderPresentation.Decorated)
         {
             var labelWidth = cells.Max(cell => MaterialText.Measure(UiText.T(cell.Label)).X) / Math.Max(.01f, MaterialTheme.Metrics.Scale) + 12;
             foreach (var cell in cells) UiHelpers.AlignedRow(cell.Label, cell.Value, cell.Color, labelWidth);
@@ -453,10 +493,12 @@ public class MainWindow : Window, IDisposable
         using var tableStyle = new MaterialStyleScope();
         tableStyle.Style(ImGuiStyleVar.CellPadding,
             new Vector2(UiHelpers.Scale(compact ? 8 : 7), ImGui.GetStyle().CellPadding.Y));
-        tableStyle.Color(ImGuiCol.TableHeaderBg, Vector4.Zero);
-        tableStyle.Color(ImGuiCol.TableRowBg, Vector4.Zero);
-        tableStyle.Color(ImGuiCol.TableRowBgAlt, Vector4.Zero);
-        tableStyle.Color(ImGuiCol.ChildBg, Vector4.Zero);
+        var cyberpunk = FrenRiderPresentation.Style == FrenRiderUiStyle.Cyberpunk;
+        var c = MaterialTheme.Current.Colors;
+        tableStyle.Color(ImGuiCol.TableHeaderBg, cyberpunk ? c.SurfaceContainerHigh : Vector4.Zero);
+        tableStyle.Color(ImGuiCol.TableRowBg, cyberpunk ? c.SurfaceContainerLowest : Vector4.Zero);
+        tableStyle.Color(ImGuiCol.TableRowBgAlt, cyberpunk ? c.SurfaceContainer : Vector4.Zero);
+        tableStyle.Color(ImGuiCol.ChildBg, cyberpunk ? c.SurfaceContainerLowest : Vector4.Zero);
         using var tightRows = MaterialTable.PushTightRows();
         var available = Math.Max(1, ImGui.GetContentRegionAvail().X - UiHelpers.Scale(compact ? 3 : 6));
         var statusMinimum = Math.Max(MaterialText.Measure(UiText.T("Mounted")).X,
@@ -583,15 +625,25 @@ public class MainWindow : Window, IDisposable
         var labelWidth = rows.Max(row => MaterialText.Measure(UiText.T(row.Label)).X) + UiHelpers.Scale(4);
         var fieldWidth = Math.Max(1, ImGui.GetContentRegionAvail().X);
         var columns = fieldWidth >= Math.Max(UiHelpers.Scale(720), labelWidth * 2 + UiHelpers.Scale(420)) ? 4 : 2;
-        if (!ImGui.BeginTable("##AutomationFields", columns, ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.BordersInnerH,
+        var cyberpunk = FrenRiderPresentation.Style == FrenRiderUiStyle.Cyberpunk;
+        using var tableStyle = new MaterialStyleScope();
+        if (cyberpunk)
+        {
+            tableStyle.Color(ImGuiCol.TableRowBg, MaterialTheme.Current.Colors.SurfaceContainerLowest);
+            tableStyle.Color(ImGuiCol.TableRowBgAlt, MaterialTheme.Current.Colors.SurfaceContainer);
+        }
+        if (!ImGui.BeginTable("##AutomationFields", columns, ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.BordersInnerH
+                | (cyberpunk ? ImGuiTableFlags.RowBg : ImGuiTableFlags.None),
                 new Vector2(fieldWidth, 0))) return;
         try
         {
             for (var i = 0; i < columns; i++)
                 ImGui.TableSetupColumn("##automation" + i, i % 2 == 0 ? ImGuiTableColumnFlags.WidthFixed : ImGuiTableColumnFlags.WidthStretch,
                     i % 2 == 0 ? labelWidth : 1);
-            foreach (var row in rows)
+            for (var index = 0; index < rows.Count; index++)
             {
+                var rowIndex = cyberpunk && columns == 4 ? index / 2 + index % 2 * ((rows.Count + 1) / 2) : index;
+                var row = rows[rowIndex];
                 ImGui.TableNextColumn(); UiGui.TextDisabled(row.Label);
                 ImGui.TableNextColumn(); UiHelpers.SafeWrappedText(row.Value, row.Color);
             }
@@ -642,6 +694,13 @@ public class MainWindow : Window, IDisposable
     private void DrawDutyPanel(CharacterConfig config)
     {
         using var tightRows = MaterialTable.PushTightRows();
+        var cyberpunk = FrenRiderPresentation.Style == FrenRiderUiStyle.Cyberpunk;
+        using var tableStyle = new MaterialStyleScope();
+        if (cyberpunk)
+        {
+            tableStyle.Color(ImGuiCol.TableRowBg, MaterialTheme.Current.Colors.SurfaceContainerLowest);
+            tableStyle.Color(ImGuiCol.TableRowBgAlt, MaterialTheme.Current.Colors.SurfaceContainer);
+        }
         var zone = plugin.ZoneService;
         var zoneExtra = "";
         if (zone.InFate) zoneExtra += UiText.F(", FATE {0}", zone.CurrentFateId);
@@ -664,7 +723,8 @@ public class MainWindow : Window, IDisposable
                     : UiText.T("No automatic exit");
         var labelWidth = new[] { "Zone", "ADS", "Exit method" }.Max(label => MaterialText.Measure(UiText.T(label)).X)
             + UiHelpers.Scale(4);
-        if (!ImGui.BeginTable("##DutyFields", 2, ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.BordersInnerH)) return;
+        if (!ImGui.BeginTable("##DutyFields", 2, ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.BordersInnerH
+                | (cyberpunk ? ImGuiTableFlags.RowBg : ImGuiTableFlags.None))) return;
         try
         {
             ImGui.TableSetupColumn("##duty0", ImGuiTableColumnFlags.WidthFixed, labelWidth);

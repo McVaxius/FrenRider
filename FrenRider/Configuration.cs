@@ -3,10 +3,42 @@ using System;
 
 namespace FrenRider;
 
+public enum FrenRiderUiStyle { Classic, Glassmorphism, Spatial, Cyberpunk }
+
 [Serializable]
 public class Configuration : IPluginConfiguration
 {
     public const int CurrentVersion = ConfigurationMigration.CurrentVersion;
+    internal const uint DefaultGlassWave1Rgb = 0x65C7D2;
+    internal static readonly uint DefaultGlassWave2Rgb = DefaultGlassWaveRgb(1.2f);
+    internal static readonly uint DefaultGlassWave3Rgb = DefaultGlassWaveRgb(2.35f);
+    internal const uint DefaultLcarsBackgroundRgb = 0x07090D;
+    internal const uint DefaultLcarsBar1Rgb = 0xFFAA66;
+    internal const uint DefaultLcarsBar2Rgb = 0xCC99CC;
+    internal const uint DefaultLcarsBar3Rgb = 0x9999FF;
+
+    internal static AethertekUI.MaterialColorSettings DefaultPalette(FrenRiderUiStyle style) => style switch
+    {
+        FrenRiderUiStyle.Glassmorphism => new()
+            { Mode = AethertekUI.MaterialColorMode.Picker, BackgroundRgb = 0x10232D, ControlsRgb = DefaultGlassWave1Rgb, TextRgb = 0xEDF7FA },
+        FrenRiderUiStyle.Spatial => new()
+            { Mode = AethertekUI.MaterialColorMode.Picker, BackgroundRgb = 0xE8EDF4, ControlsRgb = 0x6678A8, TextRgb = 0x1C2538 },
+        FrenRiderUiStyle.Cyberpunk => new()
+            { Mode = AethertekUI.MaterialColorMode.Picker, BackgroundRgb = 0x0B0D13, ControlsRgb = 0x19DCE8, TextRgb = 0xEAF8FF },
+        _ => new(),
+    };
+
+    private static uint DefaultGlassWaveRgb(float angle)
+    {
+        var primary = new System.Numerics.Vector3(((DefaultGlassWave1Rgb >> 16) & 255) / 255f,
+            ((DefaultGlassWave1Rgb >> 8) & 255) / 255f, (DefaultGlassWave1Rgb & 255) / 255f);
+        var lch = AethertekUI.MaterialColor.LabToLch(AethertekUI.MaterialColor.SrgbToOklab(primary));
+        return AethertekUI.MaterialColorSettings.ToRgb(
+            AethertekUI.MaterialColor.GamutMap(lch.X, lch.Y, lch.Z + angle));
+    }
+
+    internal static float NormalizeGlassAnimationSpeed(float value) =>
+        float.IsFinite(value) ? Math.Clamp(value, .1f, 10f) : 1f;
 
     public int Version { get; set; } = CurrentVersion;
 
@@ -14,6 +46,24 @@ public class Configuration : IPluginConfiguration
     public string UiLanguage { get; set; } = "en";
     public uint UiAccentRgb { get; set; } = 0x70C677;
     public AethertekUI.MaterialColorSettings UiColors { get; set; } = new();
+    public FrenRiderUiStyle UiStyle { get; set; }
+    public AethertekUI.MaterialColorSettings UiGlassColors { get; set; } = DefaultPalette(FrenRiderUiStyle.Glassmorphism);
+    public AethertekUI.MaterialColorSettings UiSpatialColors { get; set; } = DefaultPalette(FrenRiderUiStyle.Spatial);
+    public AethertekUI.MaterialColorSettings UiCyberpunkColors { get; set; } = DefaultPalette(FrenRiderUiStyle.Cyberpunk);
+    public uint UiGlassWave1Rgb { get; set; } = DefaultGlassWave1Rgb;
+    public uint UiGlassWave2Rgb { get; set; } = DefaultGlassWave2Rgb;
+    public uint UiGlassWave3Rgb { get; set; } = DefaultGlassWave3Rgb;
+    public uint UiLcarsBackgroundRgb { get; set; } = DefaultLcarsBackgroundRgb;
+    public uint UiLcarsBar1Rgb { get; set; } = DefaultLcarsBar1Rgb;
+    public uint UiLcarsBar2Rgb { get; set; } = DefaultLcarsBar2Rgb;
+    public uint UiLcarsBar3Rgb { get; set; } = DefaultLcarsBar3Rgb;
+    public bool UiGlassAnimation { get; set; } = true;
+    private float uiGlassAnimationSpeed = 1f;
+    public float UiGlassAnimationSpeed
+    {
+        get => uiGlassAnimationSpeed;
+        set => uiGlassAnimationSpeed = NormalizeGlassAnimationSpeed(value);
+    }
     public bool UiLcarsSoundsMuted { get; set; } = true;
     public bool UiCompact { get; set; } = true;
     public bool UiCompactVisibleOnMainWindow { get; set; }

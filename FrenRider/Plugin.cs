@@ -135,6 +135,16 @@ public sealed partial class Plugin : IDalamudPlugin
     private MaterialColorSettings colorDraft = new();
     private MaterialColorSettings? appliedSavedColors;
     private MaterialColorSettings? appliedColors;
+    private MaterialColorSettings? paletteEditorDraft;
+    private MaterialColorSettings? paletteEditorSaved;
+    private int paletteEditorSelection = -1;
+    private uint[]? lcarsEditorDraft;
+    private (uint Background, uint First, uint Second, uint Third)? lcarsEditorSaved;
+    private uint[]? glassWaveEditorDraft;
+    private (uint First, uint Second, uint Third)? glassWaveEditorSaved;
+    private (FrenRiderUiStyle Style, MaterialColorSettings? Glass, MaterialColorSettings? Spatial,
+        MaterialColorSettings? Cyberpunk, uint Background, uint First, uint Second, uint Third) appliedSurface;
+    private bool appliedSurfaceReady;
     private int checkedFontGeneration = -1;
     private int checkedHindiGeneration = -1;
     private bool fontIssueLogged;
@@ -479,24 +489,226 @@ public sealed partial class Plugin : IDalamudPlugin
 
     private bool DrawColourEditor(string id)
     {
-        var changed = MaterialAppearanceSelector.DrawColors(id, ref colorDraft, ref accentDraft,
-            new(UiText.T("Color"), UiText.T("Language"), UiText.T("Teal"), UiText.T("Blue"), UiText.T("Pink"), UiText.T("Custom RGB")),
-            new(UiText.T("Auto"), UiText.T("Picker"), UiText.T("Default"), UiText.T("Background, controls and text follow your theme."),
-                UiText.T("Theme colour"), UiText.T("Choose each colour independently."), UiText.T("Background"), UiText.T("Controls"),
-                UiText.T("Text"), UiText.T("Aa  Preview text"), UiText.T("Control"),
-                UiText.T("Switch to Picker to set each colour yourself."), UiText.T("Switch back to Auto to use the automatic theme."))
-                { Lcars = UiText.T("LCARS"), LcarsHelp = UiText.T("LCARS panels, bars and controls") },
-            Configuration.UiCompact ? 298 : 316);
-        if (!changed) return false;
-        Configuration.UiColors = colorDraft;
-        Configuration.UiAccentRgb = MaterialColorSettings.ToRgb(accentDraft);
-        return true;
+        var changed = false;
+        var selection = Configuration.UiStyle switch
+        {
+            FrenRiderUiStyle.Glassmorphism => 3, FrenRiderUiStyle.Spatial => 4, FrenRiderUiStyle.Cyberpunk => 5,
+            _ => (int)colorDraft.Mode is >= 0 and <= 2 ? (int)colorDraft.Mode : 0,
+        };
+        string[] choices = ["Auto", "Picker", "LCARS", "Glassmorphism", "Spatial", "Cyberpunk"];
+        var right = ImGui.GetCursorScreenPos().X + ImGui.GetContentRegionAvail().X;
+        for (var index = 0; index < choices.Length; index++)
+        {
+            if (index % 3 != 0)
+            {
+                var width = MaterialText.Measure(UiText.T(choices[index])).X + ImGui.GetFrameHeight() + ImGui.GetStyle().ItemInnerSpacing.X;
+                if (ImGui.GetItemRectMax().X + ImGui.GetStyle().ItemSpacing.X + width <= right) ImGui.SameLine();
+            }
+            if (!UiGui.RadioButton(choices[index], selection == index)) continue;
+            if (selection == index) continue;
+            selection = index;
+            Configuration.UiStyle = index switch
+            {
+                3 => FrenRiderUiStyle.Glassmorphism, 4 => FrenRiderUiStyle.Spatial,
+                5 => FrenRiderUiStyle.Cyberpunk, _ => FrenRiderUiStyle.Classic,
+            };
+            if (index < 3) Configuration.UiColors = colorDraft = colorDraft with { Mode = (MaterialColorMode)index };
+            paletteEditorSelection = -1;
+            changed = true;
+        }
+        ImGui.Spacing();
+        if (selection == 0)
+        {
+            if (MaterialAppearanceSelector.DrawPalette(id, ref accentDraft,
+                    new(UiText.T("Color"), UiText.T("Language"), UiText.T("Teal"), UiText.T("Blue"), UiText.T("Pink"), UiText.T("Custom RGB"))))
+            { Configuration.UiAccentRgb = MaterialColorSettings.ToRgb(accentDraft); changed = true; }
+            ImGui.PushID(id);
+            try
+            {
+                if (DrawPaletteReset(MaterialColorSettings.ToRgb(accentDraft) == FrenRiderPresentation.ReferenceAccent))
+                {
+                    accentDraft = MaterialColorSettings.Rgb(FrenRiderPresentation.ReferenceAccent);
+                    if (Configuration.UiAccentRgb != FrenRiderPresentation.ReferenceAccent)
+                    { Configuration.UiAccentRgb = FrenRiderPresentation.ReferenceAccent; changed = true; }
+                }
+            }
+            finally { ImGui.PopID(); }
+            return changed;
+        }
+        ImGui.PushID(id);
+        try
+        {
+            if (selection == 2)
+            {
+                var saved = (Configuration.UiLcarsBackgroundRgb, Configuration.UiLcarsBar1Rgb,
+                    Configuration.UiLcarsBar2Rgb, Configuration.UiLcarsBar3Rgb);
+                if (lcarsEditorDraft is null || lcarsEditorSaved != saved)
+                {
+                    lcarsEditorDraft = [saved.Item1, saved.Item2, saved.Item3, saved.Item4];
+                    lcarsEditorSaved = saved;
+                }
+                string[] labels = ["Background", "Bar colour 1", "Bar colour 2", "Bar colour 3"];
+                uint[] defaults = [FrenRider.Configuration.DefaultLcarsBackgroundRgb, FrenRider.Configuration.DefaultLcarsBar1Rgb,
+                    FrenRider.Configuration.DefaultLcarsBar2Rgb, FrenRider.Configuration.DefaultLcarsBar3Rgb];
+                var completed = false;
+                var labelWidth = labels.Max(label => MaterialText.Measure(UiText.T(label)).X);
+                for (var index = 0; index < labels.Length; index++)
+                    completed |= DrawRgbEditor(labels[index], ref lcarsEditorDraft[index], labelWidth, defaults[index]);
+                if (DrawPaletteReset(lcarsEditorDraft.SequenceEqual(defaults)))
+                { defaults.CopyTo(lcarsEditorDraft, 0); completed = true; }
+                var draft = (lcarsEditorDraft[0], lcarsEditorDraft[1], lcarsEditorDraft[2], lcarsEditorDraft[3]);
+                if (completed && draft != saved)
+                {
+                    Configuration.UiLcarsBackgroundRgb = draft.Item1;
+                    Configuration.UiLcarsBar1Rgb = draft.Item2;
+                    Configuration.UiLcarsBar2Rgb = draft.Item3;
+                    Configuration.UiLcarsBar3Rgb = draft.Item4;
+                    lcarsEditorSaved = draft;
+                    changed = true;
+                }
+            }
+            else
+            {
+                var saved = FrenRiderPresentation.Palette(Configuration);
+                if (paletteEditorDraft is null || paletteEditorSelection != selection || paletteEditorSaved != saved)
+                {
+                    paletteEditorDraft = saved;
+                    paletteEditorSaved = saved;
+                    paletteEditorSelection = selection;
+                }
+                var background = paletteEditorDraft.BackgroundRgb;
+                var controls = paletteEditorDraft.ControlsRgb;
+                var text = paletteEditorDraft.TextRgb;
+                var defaults = FrenRider.Configuration.DefaultPalette(Configuration.UiStyle);
+                var labelWidth = new[] { "Background", "Controls", "Text" }.Max(label => MaterialText.Measure(UiText.T(label)).X);
+                var completed = DrawRgbEditor("Background", ref background, labelWidth, defaults.BackgroundRgb);
+                completed |= DrawRgbEditor("Controls", ref controls, labelWidth, defaults.ControlsRgb);
+                completed |= DrawRgbEditor("Text", ref text, labelWidth, defaults.TextRgb);
+                if (DrawPaletteReset(background == defaults.BackgroundRgb && controls == defaults.ControlsRgb && text == defaults.TextRgb))
+                {
+                    background = defaults.BackgroundRgb;
+                    controls = defaults.ControlsRgb;
+                    text = defaults.TextRgb;
+                    completed = true;
+                }
+                paletteEditorDraft = paletteEditorDraft with { BackgroundRgb = background, ControlsRgb = controls, TextRgb = text };
+                if (completed && paletteEditorDraft != saved)
+                {
+                    if (selection == 1) Configuration.UiColors = colorDraft = paletteEditorDraft;
+                    else if (selection == 3) Configuration.UiGlassColors = paletteEditorDraft;
+                    else if (selection == 4) Configuration.UiSpatialColors = paletteEditorDraft;
+                    else Configuration.UiCyberpunkColors = paletteEditorDraft;
+                    paletteEditorSaved = paletteEditorDraft;
+                    changed = true;
+                }
+                if (selection == 3)
+                {
+                    var animate = Configuration.UiGlassAnimation;
+                    if (UiGui.Checkbox("Animation", ref animate)) { Configuration.UiGlassAnimation = animate; changed = true; }
+                    ImGui.BeginDisabled(!animate);
+                    try
+                    {
+                        var speed = Configuration.UiGlassAnimationSpeed;
+                        var gap = ImGui.GetStyle().ItemSpacing.X;
+                        var minimum = Math.Max(110 * MaterialTheme.Metrics.Scale,
+                            MaterialText.Measure("10.00").X + ImGui.GetStyle().FramePadding.X * 2);
+                        var resetWidth = MaterialText.Measure(UiText.T("Reset")).X + ImGui.GetStyle().FramePadding.X * 2;
+                        UiGui.TextUnformatted("Movement speed (x)");
+                        var inlineReset = ImGui.GetContentRegionAvail().X >= minimum + gap + resetWidth;
+                        var available = ImGui.GetContentRegionAvail().X - (inlineReset ? gap + resetWidth : 0);
+                        ImGui.SetNextItemWidth(Math.Max(minimum, Math.Min(150 * MaterialTheme.Metrics.Scale, available)));
+                        var speedChanged = UiGui.InputFloat("##GlassAnimationSpeed", ref speed, format: "%.2f");
+                        speed = FrenRider.Configuration.NormalizeGlassAnimationSpeed(speed);
+                        if (inlineReset) ImGui.SameLine();
+                        ImGui.BeginDisabled(speed == 1f);
+                        try
+                        {
+                            if (UiGui.SmallButton("Reset##reset-GlassAnimationSpeed"))
+                            { speed = 1f; speedChanged = true; }
+                        }
+                        finally { ImGui.EndDisabled(); }
+                        if (speedChanged && speed != Configuration.UiGlassAnimationSpeed)
+                        { Configuration.UiGlassAnimationSpeed = speed; changed = true; }
+                    }
+                    finally { ImGui.EndDisabled(); }
+                    ImGui.Spacing();
+                    UiGui.TextUnformatted("Wave colours");
+                    var waveSaved = (Configuration.UiGlassWave1Rgb, Configuration.UiGlassWave2Rgb, Configuration.UiGlassWave3Rgb);
+                    if (glassWaveEditorDraft is null || glassWaveEditorSaved != waveSaved)
+                    {
+                        glassWaveEditorDraft = [waveSaved.Item1, waveSaved.Item2, waveSaved.Item3];
+                        glassWaveEditorSaved = waveSaved;
+                    }
+                    string[] waveLabels = ["Wave colour 1", "Wave colour 2", "Wave colour 3"];
+                    uint[] waveDefaults = [FrenRider.Configuration.DefaultGlassWave1Rgb,
+                        FrenRider.Configuration.DefaultGlassWave2Rgb, FrenRider.Configuration.DefaultGlassWave3Rgb];
+                    var waveLabelWidth = waveLabels.Max(label => MaterialText.Measure(UiText.T(label)).X);
+                    var waveCompleted = false;
+                    for (var index = 0; index < waveLabels.Length; index++)
+                        waveCompleted |= DrawRgbEditor(waveLabels[index], ref glassWaveEditorDraft[index], waveLabelWidth, waveDefaults[index]);
+                    ImGui.BeginDisabled(glassWaveEditorDraft.SequenceEqual(waveDefaults));
+                    try
+                    {
+                        if (UiGui.Button("Reset wave colours##reset-wave-colours"))
+                        { waveDefaults.CopyTo(glassWaveEditorDraft, 0); waveCompleted = true; }
+                    }
+                    finally { ImGui.EndDisabled(); }
+                    var waveDraft = (glassWaveEditorDraft[0], glassWaveEditorDraft[1], glassWaveEditorDraft[2]);
+                    if (waveCompleted && waveDraft != waveSaved)
+                    {
+                        Configuration.UiGlassWave1Rgb = waveDraft.Item1;
+                        Configuration.UiGlassWave2Rgb = waveDraft.Item2;
+                        Configuration.UiGlassWave3Rgb = waveDraft.Item3;
+                        glassWaveEditorSaved = waveDraft;
+                        changed = true;
+                    }
+                }
+            }
+            return changed;
+        }
+        finally { ImGui.PopID(); }
+    }
+
+    private static bool DrawPaletteReset(bool atDefault)
+    {
+        ImGui.BeginDisabled(atDefault);
+        try { return UiGui.Button("Reset colours##reset-colours"); }
+        finally { ImGui.EndDisabled(); }
+    }
+
+    private static bool DrawRgbEditor(string label, ref uint rgb, float labelWidth, uint defaultRgb)
+    {
+        var start = ImGui.GetCursorPosX();
+        var available = ImGui.GetContentRegionAvail().X;
+        var gap = ImGui.GetStyle().ItemSpacing.X;
+        var minimum = MaterialText.Measure("#FFFFFF").X + ImGui.GetFrameHeight() + ImGui.GetStyle().ItemInnerSpacing.X * 3;
+        var resetWidth = MaterialText.Measure(UiText.T("Reset")).X + ImGui.GetStyle().FramePadding.X * 2;
+        UiGui.TextUnformatted(label);
+        if (available >= labelWidth + gap + minimum + gap + resetWidth)
+        { ImGui.SameLine(); ImGui.SetCursorPosX(start + labelWidth + gap); }
+        var inlineReset = ImGui.GetContentRegionAvail().X >= minimum + gap + resetWidth;
+        var editorWidth = ImGui.GetContentRegionAvail().X - (inlineReset ? gap + resetWidth : 0);
+        ImGui.SetNextItemWidth(Math.Max(minimum, Math.Min(220 * MaterialTheme.Metrics.Scale, editorWidth)));
+        var value = MaterialColorSettings.Rgb(rgb);
+        if (ImGui.ColorEdit3("##" + label, ref value, ImGuiColorEditFlags.DisplayHex | ImGuiColorEditFlags.NoLabel))
+            rgb = MaterialColorSettings.ToRgb(value);
+        var completed = ImGui.IsItemDeactivatedAfterEdit() || !ImGui.IsAnyItemActive();
+        if (inlineReset) ImGui.SameLine();
+        ImGui.BeginDisabled(rgb == defaultRgb);
+        try
+        {
+            if (UiGui.SmallButton("Reset##reset-" + label))
+            { rgb = defaultRgb; completed = true; }
+        }
+        finally { ImGui.EndDisabled(); }
+        return completed;
     }
 
 
     private void DrawUi()
     {
         ApplyAppearance();
+        using var appearance = FrenRiderPresentation.Push(Configuration);
         if (!MainWindow.IsOpen && !ConfigWindow.IsOpen && !MagiaMiniWindow.IsOpen && !AutoDutyWarningWindow.IsOpen)
             return;
         using var text = uiText.Enter();
@@ -547,15 +759,16 @@ public sealed partial class Plugin : IDalamudPlugin
         geometry.Style(ImGuiStyleVar.ItemSpacing, new Vector2(compact ? 8 : 12, compact ? 6 : 10) * scale);
         geometry.Style(ImGuiStyleVar.FramePadding, new Vector2(compact ? 8 : 12, compact ? 4 : 7) * scale);
         geometry.Style(ImGuiStyleVar.CellPadding, new Vector2(compact ? 8 : 12, compact ? 5 : 8) * scale);
-        geometry.Style(ImGuiStyleVar.FrameRounding, 4 * scale);
-        geometry.Style(ImGuiStyleVar.ChildRounding, 4 * scale);
+        var rounding = Configuration.UiStyle == FrenRiderUiStyle.Cyberpunk ? 0 : Configuration.UiStyle == FrenRiderUiStyle.Spatial ? 10 : 4;
+        geometry.Style(ImGuiStyleVar.FrameRounding, rounding * scale);
+        geometry.Style(ImGuiStyleVar.ChildRounding, rounding * scale);
         using var body = uiFonts.Push(UiFontRole.Body);
         using var chrome = MaterialWindowChrome.Push();
         PrepareAppearanceTitleBars();
         foreach (var actions in appearanceTitleBars.Values)
         {
             actions.RefreshVisibility();
-            actions.SetLcarsIcons(uiTheme.IsLcars);
+            actions.SetLcarsIcons(LcarsActive);
         }
         RefreshLcarsSoundButtons();
         WindowSystem.Draw();
@@ -573,6 +786,7 @@ public sealed partial class Plugin : IDalamudPlugin
             if (visible)
             {
                 fontStatusDecorations.Paint();
+                FrenRiderPresentation.DrawBackdrop();
                 if (appliedLanguage == "hi")
                 {
                     ImGui.TextWrapped(loading ? "Loading Hindi UI fonts..." : "Hindi UI fonts are unavailable. See the plugin log.");
@@ -611,17 +825,24 @@ public sealed partial class Plugin : IDalamudPlugin
             colorDraft = savedColors;
             appliedSavedColors = savedColors;
         }
-        if (uiTheme is null || (Configuration.UiAccentRgb & 0xFFFFFF) != appliedAccent || colorDraft != appliedColors)
+        var surface = (Configuration.UiStyle, Configuration.UiGlassColors, Configuration.UiSpatialColors,
+            Configuration.UiCyberpunkColors, Configuration.UiLcarsBackgroundRgb, Configuration.UiLcarsBar1Rgb,
+            Configuration.UiLcarsBar2Rgb, Configuration.UiLcarsBar3Rgb);
+        if (uiTheme is null || (Configuration.UiAccentRgb & 0xFFFFFF) != appliedAccent || colorDraft != appliedColors
+            || !appliedSurfaceReady || surface != appliedSurface)
         {
-            if (uiTheme is { IsLcars: true } && colorDraft.Mode != MaterialColorMode.Lcars) uiSoundPlayer?.Stop();
+            if (!LcarsActive) uiSoundPlayer?.Stop();
             appliedAccent = Configuration.UiAccentRgb & 0xFFFFFF;
             appliedColors = colorDraft;
-            uiTheme = FrenRiderPresentation.Theme(appliedAccent, colorDraft);
+            appliedSurface = surface;
+            appliedSurfaceReady = true;
+            uiTheme = FrenRiderPresentation.Theme(Configuration);
             uiTheme.Feedback = PlayLcarsSound;
             var color = FrenRiderPresentation.Rgb(appliedAccent);
             accentDraft = new(color.X, color.Y, color.Z);
         }
-        if (uiTheme.IsLcars) uiTheme.Density = Configuration.UiCompact ? MaterialDensity.Compact : MaterialDensity.Standard;
+        if (LcarsActive || Configuration.UiStyle != FrenRiderUiStyle.Classic)
+            uiTheme.Density = Configuration.UiCompact ? MaterialDensity.Compact : MaterialDensity.Standard;
     }
 
     internal void DrawAppearanceSelector()
@@ -1467,7 +1688,7 @@ public sealed partial class Plugin : IDalamudPlugin
             + 5 * ImGui.GetStyle().ItemSpacing.X;
         var minimum = Math.Max(paletteWidth, UiGui.SettingsMinimum("Auto-fade when unfocused", "Unfocused opacity (%)"));
         MaterialAppearanceTab.Draw("##WindowAppearanceGroups", new(UiText.T("Theme & Language"), UiText.T("Main window controls"),
-            UiText.T("Window opacity"), UiText.T("When unfocused")), minimum, () =>
+            UiText.T("Window opacity"), UiText.T("When unfocused")), minimum, () => UiGui.LcarsPanel("##AppearanceThemeFrame", () =>
         {
             changed |= DrawColourEditor("appearance");
             using (UiGui.SettingRow("Language"))
@@ -1479,7 +1700,7 @@ public sealed partial class Plugin : IDalamudPlugin
                 var compact = config.UiCompact;
                 if (UiGui.Checkbox("C", ref compact)) { config.UiCompact = compact; changed = true; }
             }
-        }, () =>
+        }), () => UiGui.LcarsPanel("##AppearanceMainControlsFrame", () =>
         {
             var showStatus = config.UiShowTitlebarStatus;
             using (UiGui.SettingRow("Show titlebar status"))
@@ -1501,7 +1722,7 @@ public sealed partial class Plugin : IDalamudPlugin
             using (UiGui.SettingRow("Language visible on main window"))
                 if (UiGui.Checkbox("Language visible on main window###UiLanguageVisibleOnMainWindowSettings", ref languageVisible))
                 { config.UiLanguageVisibleOnMainWindow = languageVisible; changed = true; }
-        }, () =>
+        }), () => UiGui.LcarsPanel("##AppearanceOpacityFrame", () =>
         {
             var enabled = config.UiTransparencyEnabled;
             using (UiGui.SettingRow("Transparency"))
@@ -1519,7 +1740,7 @@ public sealed partial class Plugin : IDalamudPlugin
                 }
             }
             finally { ImGui.EndDisabled(); }
-        }, () =>
+        }), () => UiGui.LcarsPanel("##AppearanceUnfocusedFrame", () =>
         {
             var autoFade = config.UiAutoFade;
             using (UiGui.SettingRow("Auto-fade when unfocused"))
@@ -1549,9 +1770,9 @@ public sealed partial class Plugin : IDalamudPlugin
                 finally { ImGui.EndDisabled(); }
             }
             finally { ImGui.EndDisabled(); }
-        });
+        }));
         if (changed) config.Save();
-        DrawLcarsSounds();
+        UiGui.LcarsPanel("##AppearanceSoundsFrame", DrawLcarsSounds, 1);
     }
 
     internal void DrawTransparency()

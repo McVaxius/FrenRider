@@ -194,9 +194,10 @@ public partial class ConfigWindow : Window, IDisposable
     public override void Draw()
     {
         motion.DrawChrome();
-        if (MaterialTheme.Current.IsLcars)
+        FrenRiderPresentation.DrawBackdrop();
+        if (FrenRiderPresentation.IsLcars)
         {
-            using (UiText.Font(UiFontRole.Title)) MaterialLcars.Header(UiText.T("Settings"));
+            using (UiText.Font(UiFontRole.Title)) FrenRiderPresentation.LcarsHeader(UiText.T("Settings"));
         }
         var remote = GetEditingRemoteProfile();
 
@@ -222,6 +223,9 @@ public partial class ConfigWindow : Window, IDisposable
         var panelWidth = Math.Clamp(configuration.LeftPanelWidth, UiHelpers.Scale(120), Math.Max(UiHelpers.Scale(120), ImGui.GetContentRegionAvail().X * .45f));
 
         // Retain the original child roots for moved profile fields and page controls.
+        using var childStyle = new MaterialStyleScope();
+        if (FrenRiderPresentation.Style == FrenRiderUiStyle.Glassmorphism)
+            childStyle.Color(ImGuiCol.ChildBg, Vector4.Zero);
         uint profileRoot;
         var navigationVisible = ImGui.BeginChild("LeftPanel", new Vector2(panelWidth, bodyHeight), false);
         try
@@ -317,10 +321,17 @@ public partial class ConfigWindow : Window, IDisposable
     {
         using var style = new MaterialStyleScope();
         style.Style(ImGuiStyleVar.ItemSpacing, UiHelpers.Scale(new Vector2(4, configuration.UiCompact ? 3 : 5)));
-        if (MaterialTheme.Current.IsLcars)
+        if (FrenRiderPresentation.IsLcars)
         {
-            style.Color(ImGuiCol.Header, MaterialLcars.Lilac);
-            style.Color(ImGuiCol.HeaderActive, MaterialLcars.Lilac);
+            style.Color(ImGuiCol.Header, FrenRiderPresentation.LcarsBar(1));
+            style.Color(ImGuiCol.HeaderHovered, FrenRiderPresentation.LcarsBar(1));
+            style.Color(ImGuiCol.HeaderActive, FrenRiderPresentation.LcarsBar(1));
+        }
+        else if (FrenRiderPresentation.Decorated)
+        {
+            style.Color(ImGuiCol.Header, MaterialTheme.Current.Colors.SecondaryContainer);
+            style.Color(ImGuiCol.HeaderHovered, MaterialTheme.Current.Colors.SecondaryContainer);
+            style.Color(ImGuiCol.HeaderActive, MaterialTheme.Current.Colors.SecondaryContainer);
         }
         foreach (var page in SettingsPages)
         {
@@ -333,9 +344,10 @@ public partial class ConfigWindow : Window, IDisposable
             var clicked = ImGui.Selectable("##Page" + page, selected, ImGuiSelectableFlags.None,
                 new Vector2(width, Math.Max(ImGui.GetTextLineHeight(), measured.Y) + inset.Y * 2));
             MaterialText.AddText(ImGui.GetWindowDrawList(), ImGui.GetFont(), ImGui.GetFontSize(), origin + inset,
-                MaterialCanvas.Color(MaterialTheme.Current.IsLcars && (selected || ImGui.IsItemActive())
-                    ? MaterialLcars.Background
-                    : selected ? MaterialTheme.Current.Colors.OnSecondaryContainer : MaterialTheme.Current.Colors.OnSurface),
+                MaterialCanvas.Color(FrenRiderPresentation.IsLcars && (selected || ImGui.IsItemHovered() || ImGui.IsItemActive())
+                    ? FrenRiderPresentation.ReadableInk(FrenRiderPresentation.LcarsBar(1))
+                    : selected || FrenRiderPresentation.Decorated && (ImGui.IsItemHovered() || ImGui.IsItemActive())
+                        ? MaterialTheme.Current.Colors.OnSecondaryContainer : MaterialTheme.Current.Colors.OnSurface),
                 caption, Math.Max(1, width - inset.X * 2));
             if (clicked)
             {
@@ -627,334 +639,346 @@ public partial class ConfigWindow : Window, IDisposable
         using (UiText.Font(UiFontRole.PluginName)) UiGui.Text("Profile");
         MaterialSettings.Columns("##ProfileGroups", UiGui.SettingsMinimum("DAD Profile Acceptance", "Mount-up to chase fren if >"), () =>
         {
-            UiGui.SettingsSection("Fren & Profile", "Fren Name", "DAD Profile Acceptance");
-            if (IsDefaultConfigSelected())
+            UiGui.LcarsPanel("##ProfileSection0", () =>
             {
-                var enabledByDefault = config.Enabled;
-                using (UiGui.SettingRow("Fren Rider enabled by default"))
+                UiGui.SettingsSection("Fren & Profile", "Fren Name", "DAD Profile Acceptance");
+                if (IsDefaultConfigSelected())
                 {
-                    if (UiGui.Checkbox("Fren Rider enabled by default", ref enabledByDefault))
+                    var enabledByDefault = config.Enabled;
+                    using (UiGui.SettingRow("Fren Rider enabled by default"))
                     {
-                        config.Enabled = enabledByDefault;
-                        SaveEditingAccount();
-                    }
-                    HelpMarker("New character profiles inherit this setting. Existing characters change only when you use a sync action.");
-                    DrawDefaultSettingSyncButton("Fren Rider enabled by default");
-                }
-                DrawAllFrenRiderButton(false);
-                DrawAllFrenRiderButton(true);
-                ImGui.Spacing();
-            }
-
-            using (UiText.Font(UiFontRole.BodyStrong)) UiGui.Text("Activation mode");
-            if (UiGui.ActivationModeControls(config)) SaveEditingAccount();
-            DrawDefaultSettingSyncButton("Activation mode", inline: false);
-            UiGui.TextWrapped("New profiles inherit this mode. Sync updates existing profiles.");
-            UiGui.TextWrapped("Existing configurations default to Always on.");
-
-            // Fren Name with party dropdown and capitalization fix
-            using (UiGui.SettingRow("Fren Name"))
-            {
-
-                if (configuration.KrangleEnabled)
-                {
-                    // Krangled: show read-only garbled name
-                    var krangled = Disp(config.FrenName);
-                    ImGui.SetNextItemWidth(300);
-                    UiGui.InputText("##FrenNameKrangled", ref krangled, 64, ImGuiInputTextFlags.ReadOnly);
-                    if (ImGui.IsItemHovered())
-                        UiGui.SetTooltip("Disable Krangle to edit fren name.");
-                }
-                else
-                {
-                    if (frenNameInput != config.FrenName && !frenNameFocused)
-                        frenNameInput = config.FrenName;
-                    ImGui.SetNextItemWidth(300);
-                    UiGui.SettingFieldWidth(ImGui.GetContentRegionAvail().X - MaterialText.Measure(UiText.T("DAD Profile Acceptance")).X - ImGui.GetFrameHeight() - MaterialText.Measure(UiText.T("WL+")).X - MaterialText.Measure("(?)").X - 2 * ImGui.GetStyle().FramePadding.X - 5 * ImGui.GetStyle().ItemSpacing.X);
-                    UiGui.InputText("##FrenName", ref frenNameInput, 64);
-                    frenNameFocused = ImGui.IsItemActive();
-                    if (ImGui.IsItemDeactivatedAfterEdit())
-                    {
-                        config.FrenName = ConfigManager.FixNameCapitalization(frenNameInput);
-                        frenNameInput = config.FrenName;
-                        SaveEditingAccount();
-                    }
-
-                    // Party member quick-select dropdown
-                    ImGui.SameLine();
-                    UiGui.SettingFieldWidth(ImGui.GetFrameHeight());
-                    if (UiGui.BeginCombo("##PartySelect", "", ImGuiComboFlags.NoPreview | ImGuiComboFlags.PopupAlignLeft))
-                    {
-                        var partyCount = Plugin.PartyList.Length;
-                        if (partyCount > 0)
+                        if (UiGui.Checkbox("Fren Rider enabled by default", ref enabledByDefault))
                         {
-                            for (var i = 0; i < partyCount; i++)
+                            config.Enabled = enabledByDefault;
+                            SaveEditingAccount();
+                        }
+                        HelpMarker("New character profiles inherit this setting. Existing characters change only when you use a sync action.");
+                        DrawDefaultSettingSyncButton("Fren Rider enabled by default");
+                    }
+                    DrawAllFrenRiderButton(false);
+                    DrawAllFrenRiderButton(true);
+                    ImGui.Spacing();
+                }
+
+                using (UiText.Font(UiFontRole.BodyStrong)) UiGui.Text("Activation mode");
+                if (UiGui.ActivationModeControls(config)) SaveEditingAccount();
+                DrawDefaultSettingSyncButton("Activation mode", inline: false);
+                UiGui.TextWrapped("New profiles inherit this mode. Sync updates existing profiles.");
+                UiGui.TextWrapped("Existing configurations default to Always on.");
+
+                // Fren Name with party dropdown and capitalization fix
+                using (UiGui.SettingRow("Fren Name"))
+                {
+
+                    if (configuration.KrangleEnabled)
+                    {
+                        // Krangled: show read-only garbled name
+                        var krangled = Disp(config.FrenName);
+                        ImGui.SetNextItemWidth(300);
+                        UiGui.InputText("##FrenNameKrangled", ref krangled, 64, ImGuiInputTextFlags.ReadOnly);
+                        if (ImGui.IsItemHovered())
+                            UiGui.SetTooltip("Disable Krangle to edit fren name.");
+                    }
+                    else
+                    {
+                        if (frenNameInput != config.FrenName && !frenNameFocused)
+                            frenNameInput = config.FrenName;
+                        ImGui.SetNextItemWidth(300);
+                        UiGui.SettingFieldWidth(ImGui.GetContentRegionAvail().X - MaterialText.Measure(UiText.T("DAD Profile Acceptance")).X - ImGui.GetFrameHeight() - MaterialText.Measure(UiText.T("WL+")).X - MaterialText.Measure("(?)").X - 2 * ImGui.GetStyle().FramePadding.X - 5 * ImGui.GetStyle().ItemSpacing.X);
+                        UiGui.InputText("##FrenName", ref frenNameInput, 64);
+                        frenNameFocused = ImGui.IsItemActive();
+                        if (ImGui.IsItemDeactivatedAfterEdit())
+                        {
+                            config.FrenName = ConfigManager.FixNameCapitalization(frenNameInput);
+                            frenNameInput = config.FrenName;
+                            SaveEditingAccount();
+                        }
+
+                        // Party member quick-select dropdown
+                        ImGui.SameLine();
+                        UiGui.SettingFieldWidth(ImGui.GetFrameHeight());
+                        if (UiGui.BeginCombo("##PartySelect", "", ImGuiComboFlags.NoPreview | ImGuiComboFlags.PopupAlignLeft))
+                        {
+                            var partyCount = Plugin.PartyList.Length;
+                            if (partyCount > 0)
                             {
-                                var member = Plugin.PartyList[i];
-                                if (member == null) continue;
-                                var memberName = member.Name.ToString();
-                                var worldName = member.World.Value.Name.ToString();
-                                var display = $"{memberName}@{worldName}";
-                                if (UiGui.Selectable(display))
+                                for (var i = 0; i < partyCount; i++)
                                 {
-                                    config.FrenName = display;
-                                    frenNameInput = display;
-                                    SaveEditingAccount();
+                                    var member = Plugin.PartyList[i];
+                                    if (member == null) continue;
+                                    var memberName = member.Name.ToString();
+                                    var worldName = member.World.Value.Name.ToString();
+                                    var display = $"{memberName}@{worldName}";
+                                    if (UiGui.Selectable(display))
+                                    {
+                                        config.FrenName = display;
+                                        frenNameInput = display;
+                                        SaveEditingAccount();
+                                    }
                                 }
                             }
+                            else
+                            {
+                                UiGui.TextDisabled("Not in a party");
+                            }
+                            UiGui.EndCombo();
                         }
-                        else
+                        if (ImGui.IsItemHovered())
+                            UiGui.SetTooltip("Select from current party members");
+
+                        // Add to Whitelist button
+                        ImGui.SameLine();
+                        var currentFren = config.FrenName;
+                        var frenBase = currentFren.Split('@')[0].Trim();
+                        var canAddWl = !string.IsNullOrEmpty(frenBase) && !config.InviteWhitelist.Contains(frenBase);
+                        if (!canAddWl) ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 0.5f);
+                        if (UiGui.SmallButton("WL+"))
                         {
-                            UiGui.TextDisabled("Not in a party");
+                            if (canAddWl)
+                            {
+                                config.InviteWhitelist.Add(ConfigManager.FixNameCapitalization(frenBase));
+                                SaveEditingAccount();
+                            }
                         }
+                        if (!canAddWl) ImGui.PopStyleVar();
+                        if (ImGui.IsItemHovered())
+                            UiGui.SetTooltip(canAddWl
+                                ? $"Add '{frenBase}' to Invite Whitelist"
+                                : string.IsNullOrEmpty(frenBase) ? "No fren name set" : $"'{frenBase}' already in whitelist");
+                    }
+                    HelpMarker("Name of the party member to follow. Can be partial if unique.\nThe @Server part is cosmetic for display; targeting uses the name before @.\nNames are auto-capitalized. Select from party or type manually.");
+                    DrawDefaultSettingSyncButton("Fren Name");
+                }
+
+
+                if (GetEditingRemoteProfile() == null)
+                {
+                    using (UiGui.SettingRow("DAD Profile Acceptance"))
+                    {
+
+                        var acceptance = (int)config.ProfileAcceptancePolicy;
+                        ImGui.SetNextItemWidth(220f);
+                        if (UiGui.Combo("##DadProfileAcceptance", ref acceptance, "Temporary\0Off\0Permanent\0"))
+                        {
+                            config.ProfileAcceptancePolicy = (FrenRiderProfileAcceptancePolicy)acceptance;
+                            SaveEditingAccount();
+                        }
+                        HelpMarker("Temporary uses an in-memory profile only for the exact DAD proposal. Off opts this local character out. Permanent replaces this local character's profile while keeping this choice.");
+                        DrawDefaultSettingSyncButton("DAD Profile Acceptance");
+
+                    }
+                    if (config.ProfileAcceptancePolicy == FrenRiderProfileAcceptancePolicy.Permanent)
+                        UiGui.TextColored(new Vector4(1f, 0.72f, 0.2f, 1f), "Incoming DAD profiles will replace this character's saved profile.");
+
+                    ImGui.Spacing();
+                }
+            }, 0);
+            UiGui.LcarsPanel("##ProfileSection1", () =>
+            {
+                UiGui.SettingsSection("Travel");
+                var teleportDelay = config.TeleportToFrenDelaySeconds;
+                var clampedTeleportDelay = Math.Clamp(teleportDelay, 5, 300);
+                if (teleportDelay != clampedTeleportDelay)
+                {
+                    teleportDelay = clampedTeleportDelay;
+                    config.TeleportToFrenDelaySeconds = clampedTeleportDelay;
+                    SaveEditingAccount();
+                }
+
+
+                var tryTeleport = config.TryTeleportToFrenWhenOutOfZone;
+                using (UiGui.SettingRow("Try Teleport to Fren When Out of Zone"))
+                {
+                    if (UiGui.Checkbox("Try Teleport to Fren When Out of Zone", ref tryTeleport))
+                    {
+                        config.TryTeleportToFrenWhenOutOfZone = tryTeleport;
+                        SaveEditingAccount();
+                    }
+                    HelpMarker("When enabled, FrenRider waits after your configured fren is still in party but no longer visible, then asks Lifestream to teleport to a random unlocked aetheryte in that zone.");
+
+                    ImGui.SameLine(); UiGui.TextDisabled("after");
+                    ImGui.SetNextItemWidth(120);
+                    if (UiGui.InputInt("Teleport Delay (seconds)", ref teleportDelay))
+                    {
+                        config.TeleportToFrenDelaySeconds = Math.Clamp(teleportDelay, 5, 300);
+                        SaveEditingAccount();
+                    }
+                    ImGui.SameLine(); UiGui.TextDisabled("s");
+                    HelpMarker("Delay before opening the party window and teleporting. Allowed range: 5-300 seconds. Default: 30.");
+
+                    DrawDefaultSettingSyncButton("Teleport Delay");
+
+                    DrawDefaultSettingSyncButton("Try Teleport to Fren When Out of Zone");
+                }
+
+                if (tryTeleport)
+                {
+                    var followLocalNetworks = config.FollowLocalAetheryteNetworks;
+                    using (UiGui.SettingRow("Follow local aetheryte networks"))
+                    {
+                        if (UiGui.Checkbox("Follow local aetheryte networks", ref followLocalNetworks))
+                        {
+                            config.FollowLocalAetheryteNetworks = followLocalNetworks;
+                            SaveEditingAccount();
+                        }
+                        HelpMarker("Immediately follow a fren's aethernet jump through Lifestream when you are at the same origin. Supports connected city, residential, and custom networks, including Bozja and Eureka.");
+                        DrawDefaultSettingSyncButton("Follow local aetheryte networks");
+                    }
+                }
+
+                var nudgeInDutyWithoutFren = config.NudgeInDutyWhenFrenNotNearbyOrInZone;
+                using (UiGui.SettingRow("Nudge in duty when fren not nearby/in-zone"))
+                {
+                    if (UiGui.Checkbox("Nudge in duty when fren not nearby/in-zone", ref nudgeInDutyWithoutFren))
+                    {
+                        config.NudgeInDutyWhenFrenNotNearbyOrInZone = nudgeInDutyWithoutFren;
+                        SaveEditingAccount();
+                    }
+                    HelpMarker("When enabled, FrenRider may issue the fallback forward nudge inside duties even if the configured fren is not visible in your party/object table. Leave disabled for safer duty movement.");
+                    DrawDefaultSettingSyncButton("Nudge in duty when fren not nearby/in-zone");
+                }
+            }, 1);
+            UiGui.LcarsPanel("##ProfileSection2", () =>
+            {
+                UiGui.SettingsSection("Mounting", "Mount Name");
+                // Fly You Fools
+                var flyYouFools = config.FlyYouFools;
+                using (UiGui.SettingRow("Fly You Fools (fly alongside instead of pillion)"))
+                {
+                    if (UiGui.Checkbox("Fly You Fools (fly alongside instead of pillion)", ref flyYouFools))
+                    {
+                        config.FlyYouFools = flyYouFools;
+                        SaveEditingAccount();
+                    }
+                    HelpMarker("If enabled, you will summon your own mount instead of pillion riding.\nUseful for flying zones.\n\n⚠️ IMPORTANT: This feature requires you to be grouped with your fren.\nIt will not work properly if ungrouped (won't jump into air to follow).");
+
+                    DrawDefaultSettingSyncButton("Fly You Fools");
+                }
+
+                var mountUpToChaseFren = config.MountUpToChaseFren;
+                using (UiGui.SettingRow("Mount-up to chase fren if >"))
+                {
+                    if (UiGui.Checkbox("Mount-up to chase fren if >", ref mountUpToChaseFren))
+                    {
+                        config.MountUpToChaseFren = mountUpToChaseFren;
+                        SaveEditingAccount();
+                    }
+
+
+                    var chaseDistance = float.IsFinite(config.MountUpToChaseFrenDistance)
+                        ? Math.Max(1f, config.MountUpToChaseFrenDistance)
+                        : 1f;
+                    if (chaseDistance != config.MountUpToChaseFrenDistance)
+                    {
+                        config.MountUpToChaseFrenDistance = chaseDistance;
+                        SaveEditingAccount();
+                    }
+
+                    ImGui.SetNextItemWidth(100);
+                    if (UiGui.InputFloat("y from fren##MountUpToChaseFrenDistance", ref chaseDistance))
+                    {
+                        config.MountUpToChaseFrenDistance = float.IsFinite(chaseDistance)
+                            ? Math.Max(1f, chaseDistance)
+                            : 1f;
+                        SaveEditingAccount();
+                    }
+
+
+                    ImGui.SameLine(); UiGui.TextDisabled("y");
+                    var chaseDelay = Math.Clamp(config.MountUpToChaseFrenDelaySeconds, 0, 300);
+                    if (chaseDelay != config.MountUpToChaseFrenDelaySeconds)
+                    {
+                        config.MountUpToChaseFrenDelaySeconds = chaseDelay;
+                        SaveEditingAccount();
+                    }
+
+                    ImGui.SetNextItemWidth(100);
+                    if (UiGui.InputInt("seconds##MountUpToChaseFrenDelaySeconds", ref chaseDelay))
+                    {
+                        config.MountUpToChaseFrenDelaySeconds = Math.Clamp(chaseDelay, 0, 300);
+                        SaveEditingAccount();
+                    }
+                    ImGui.SameLine(); UiGui.TextDisabled("s");
+                    HelpMarker("Outside duties, summon your configured own mount and fly toward a visible fren after horizontal XZ distance exceeds this threshold continuously for the configured delay. Existing zone-specific Max Follow Distance still applies. Distance minimum: 1y. Delay range: 0-300 seconds; 0 means immediate. Defaults: 100y and 30 seconds.");
+                    DrawDefaultSettingSyncButton("Mount-up to chase fren");
+                }
+
+                // Mount Name (searchable dropdown from game data)
+                using (UiGui.SettingRow("Mount Name (if flying solo)"))
+                {
+
+
+                    var mountNames = plugin.MountNames;
+                    var currentMount = config.FoolFlier;
+                    ImGui.SetNextItemWidth(300);
+                    if (UiGui.BeginCombo("##MountSelect", string.IsNullOrEmpty(currentMount) ? "(none)" : currentMount))
+                    {
+                        // Search field - fixed at top
+                        ImGui.SetNextItemWidth(-1);
+                        UiGui.InputText("##MountSearch", ref mountSearch, 64);
+                        ImGui.Separator();
+
+                        // Scrollable list area
+                        ImGui.BeginChild("##MountList", new Vector2(0, 200), false);
+                        for (var i = 0; i < mountNames.Length; i++)
+                        {
+                            if (!string.IsNullOrEmpty(mountSearch) &&
+                                !mountNames[i].Contains(mountSearch, StringComparison.OrdinalIgnoreCase))
+                                continue;
+
+                            var isSelected = mountNames[i] == currentMount;
+                            if (UiGui.Selectable(mountNames[i], isSelected))
+                            {
+                                config.FoolFlier = mountNames[i];
+                                SaveEditingAccount();
+                                mountSearch = "";
+                            }
+                            if (isSelected) ImGui.SetItemDefaultFocus();
+                        }
+                        ImGui.EndChild();
                         UiGui.EndCombo();
                     }
-                    if (ImGui.IsItemHovered())
-                        UiGui.SetTooltip("Select from current party members");
-
-                    // Add to Whitelist button
-                    ImGui.SameLine();
-                    var currentFren = config.FrenName;
-                    var frenBase = currentFren.Split('@')[0].Trim();
-                    var canAddWl = !string.IsNullOrEmpty(frenBase) && !config.InviteWhitelist.Contains(frenBase);
-                    if (!canAddWl) ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 0.5f);
-                    if (UiGui.SmallButton("WL+"))
-                    {
-                        if (canAddWl)
-                        {
-                            config.InviteWhitelist.Add(ConfigManager.FixNameCapitalization(frenBase));
-                            SaveEditingAccount();
-                        }
-                    }
-                    if (!canAddWl) ImGui.PopStyleVar();
-                    if (ImGui.IsItemHovered())
-                        UiGui.SetTooltip(canAddWl
-                            ? $"Add '{frenBase}' to Invite Whitelist"
-                            : string.IsNullOrEmpty(frenBase) ? "No fren name set" : $"'{frenBase}' already in whitelist");
+                    HelpMarker("Select the mount to use when flying solo.\n'Mount Roulette' picks a random mount.\nType to search the list.");
+                    DrawDefaultSettingSyncButton("Mount Name");
                 }
-                HelpMarker("Name of the party member to follow. Can be partial if unique.\nThe @Server part is cosmetic for display; targeting uses the name before @.\nNames are auto-capitalized. Select from party or type manually.");
-                DrawDefaultSettingSyncButton("Fren Name");
-            }
-
-
-            if (GetEditingRemoteProfile() == null)
-            {
-                using (UiGui.SettingRow("DAD Profile Acceptance"))
-                {
-
-                    var acceptance = (int)config.ProfileAcceptancePolicy;
-                    ImGui.SetNextItemWidth(220f);
-                    if (UiGui.Combo("##DadProfileAcceptance", ref acceptance, "Temporary\0Off\0Permanent\0"))
-                    {
-                        config.ProfileAcceptancePolicy = (FrenRiderProfileAcceptancePolicy)acceptance;
-                        SaveEditingAccount();
-                    }
-                    HelpMarker("Temporary uses an in-memory profile only for the exact DAD proposal. Off opts this local character out. Permanent replaces this local character's profile while keeping this choice.");
-                    DrawDefaultSettingSyncButton("DAD Profile Acceptance");
-
-                }
-                if (config.ProfileAcceptancePolicy == FrenRiderProfileAcceptancePolicy.Permanent)
-                    UiGui.TextColored(new Vector4(1f, 0.72f, 0.2f, 1f), "Incoming DAD profiles will replace this character's saved profile.");
-
-                ImGui.Spacing();
-            }
-            UiGui.SettingsSection("Travel");
-            var teleportDelay = config.TeleportToFrenDelaySeconds;
-            var clampedTeleportDelay = Math.Clamp(teleportDelay, 5, 300);
-            if (teleportDelay != clampedTeleportDelay)
-            {
-                teleportDelay = clampedTeleportDelay;
-                config.TeleportToFrenDelaySeconds = clampedTeleportDelay;
-                SaveEditingAccount();
-            }
-
-
-            var tryTeleport = config.TryTeleportToFrenWhenOutOfZone;
-            using (UiGui.SettingRow("Try Teleport to Fren When Out of Zone"))
-            {
-                if (UiGui.Checkbox("Try Teleport to Fren When Out of Zone", ref tryTeleport))
-                {
-                    config.TryTeleportToFrenWhenOutOfZone = tryTeleport;
-                    SaveEditingAccount();
-                }
-                HelpMarker("When enabled, FrenRider waits after your configured fren is still in party but no longer visible, then asks Lifestream to teleport to a random unlocked aetheryte in that zone.");
-
-                ImGui.SameLine(); UiGui.TextDisabled("after");
-                ImGui.SetNextItemWidth(120);
-                if (UiGui.InputInt("Teleport Delay (seconds)", ref teleportDelay))
-                {
-                    config.TeleportToFrenDelaySeconds = Math.Clamp(teleportDelay, 5, 300);
-                    SaveEditingAccount();
-                }
-                ImGui.SameLine(); UiGui.TextDisabled("s");
-                HelpMarker("Delay before opening the party window and teleporting. Allowed range: 5-300 seconds. Default: 30.");
-
-                DrawDefaultSettingSyncButton("Teleport Delay");
-
-                DrawDefaultSettingSyncButton("Try Teleport to Fren When Out of Zone");
-            }
-
-            if (tryTeleport)
-            {
-                var followLocalNetworks = config.FollowLocalAetheryteNetworks;
-                using (UiGui.SettingRow("Follow local aetheryte networks"))
-                {
-                    if (UiGui.Checkbox("Follow local aetheryte networks", ref followLocalNetworks))
-                    {
-                        config.FollowLocalAetheryteNetworks = followLocalNetworks;
-                        SaveEditingAccount();
-                    }
-                    HelpMarker("Immediately follow a fren's aethernet jump through Lifestream when you are at the same origin. Supports connected city, residential, and custom networks, including Bozja and Eureka.");
-                    DrawDefaultSettingSyncButton("Follow local aetheryte networks");
-                }
-            }
-
-            var nudgeInDutyWithoutFren = config.NudgeInDutyWhenFrenNotNearbyOrInZone;
-            using (UiGui.SettingRow("Nudge in duty when fren not nearby/in-zone"))
-            {
-                if (UiGui.Checkbox("Nudge in duty when fren not nearby/in-zone", ref nudgeInDutyWithoutFren))
-                {
-                    config.NudgeInDutyWhenFrenNotNearbyOrInZone = nudgeInDutyWithoutFren;
-                    SaveEditingAccount();
-                }
-                HelpMarker("When enabled, FrenRider may issue the fallback forward nudge inside duties even if the configured fren is not visible in your party/object table. Leave disabled for safer duty movement.");
-                DrawDefaultSettingSyncButton("Nudge in duty when fren not nearby/in-zone");
-            }
-            UiGui.SettingsSection("Mounting", "Mount Name");
-            // Fly You Fools
-            var flyYouFools = config.FlyYouFools;
-            using (UiGui.SettingRow("Fly You Fools (fly alongside instead of pillion)"))
-            {
-                if (UiGui.Checkbox("Fly You Fools (fly alongside instead of pillion)", ref flyYouFools))
-                {
-                    config.FlyYouFools = flyYouFools;
-                    SaveEditingAccount();
-                }
-                HelpMarker("If enabled, you will summon your own mount instead of pillion riding.\nUseful for flying zones.\n\n⚠️ IMPORTANT: This feature requires you to be grouped with your fren.\nIt will not work properly if ungrouped (won't jump into air to follow).");
-
-                DrawDefaultSettingSyncButton("Fly You Fools");
-            }
-
-            var mountUpToChaseFren = config.MountUpToChaseFren;
-            using (UiGui.SettingRow("Mount-up to chase fren if >"))
-            {
-                if (UiGui.Checkbox("Mount-up to chase fren if >", ref mountUpToChaseFren))
-                {
-                    config.MountUpToChaseFren = mountUpToChaseFren;
-                    SaveEditingAccount();
-                }
-
-
-                var chaseDistance = float.IsFinite(config.MountUpToChaseFrenDistance)
-                    ? Math.Max(1f, config.MountUpToChaseFrenDistance)
-                    : 1f;
-                if (chaseDistance != config.MountUpToChaseFrenDistance)
-                {
-                    config.MountUpToChaseFrenDistance = chaseDistance;
-                    SaveEditingAccount();
-                }
-
-                ImGui.SetNextItemWidth(100);
-                if (UiGui.InputFloat("y from fren##MountUpToChaseFrenDistance", ref chaseDistance))
-                {
-                    config.MountUpToChaseFrenDistance = float.IsFinite(chaseDistance)
-                        ? Math.Max(1f, chaseDistance)
-                        : 1f;
-                    SaveEditingAccount();
-                }
-
-
-                ImGui.SameLine(); UiGui.TextDisabled("y");
-                var chaseDelay = Math.Clamp(config.MountUpToChaseFrenDelaySeconds, 0, 300);
-                if (chaseDelay != config.MountUpToChaseFrenDelaySeconds)
-                {
-                    config.MountUpToChaseFrenDelaySeconds = chaseDelay;
-                    SaveEditingAccount();
-                }
-
-                ImGui.SetNextItemWidth(100);
-                if (UiGui.InputInt("seconds##MountUpToChaseFrenDelaySeconds", ref chaseDelay))
-                {
-                    config.MountUpToChaseFrenDelaySeconds = Math.Clamp(chaseDelay, 0, 300);
-                    SaveEditingAccount();
-                }
-                ImGui.SameLine(); UiGui.TextDisabled("s");
-                HelpMarker("Outside duties, summon your configured own mount and fly toward a visible fren after horizontal XZ distance exceeds this threshold continuously for the configured delay. Existing zone-specific Max Follow Distance still applies. Distance minimum: 1y. Delay range: 0-300 seconds; 0 means immediate. Defaults: 100y and 30 seconds.");
-                DrawDefaultSettingSyncButton("Mount-up to chase fren");
-            }
-
-            // Mount Name (searchable dropdown from game data)
-            using (UiGui.SettingRow("Mount Name (if flying solo)"))
-            {
-
-
-                var mountNames = plugin.MountNames;
-                var currentMount = config.FoolFlier;
-                ImGui.SetNextItemWidth(300);
-                if (UiGui.BeginCombo("##MountSelect", string.IsNullOrEmpty(currentMount) ? "(none)" : currentMount))
-                {
-                    // Search field - fixed at top
-                    ImGui.SetNextItemWidth(-1);
-                    UiGui.InputText("##MountSearch", ref mountSearch, 64);
-                    ImGui.Separator();
-
-                    // Scrollable list area
-                    ImGui.BeginChild("##MountList", new Vector2(0, 200), false);
-                    for (var i = 0; i < mountNames.Length; i++)
-                    {
-                        if (!string.IsNullOrEmpty(mountSearch) &&
-                            !mountNames[i].Contains(mountSearch, StringComparison.OrdinalIgnoreCase))
-                            continue;
-
-                        var isSelected = mountNames[i] == currentMount;
-                        if (UiGui.Selectable(mountNames[i], isSelected))
-                        {
-                            config.FoolFlier = mountNames[i];
-                            SaveEditingAccount();
-                            mountSearch = "";
-                        }
-                        if (isSelected) ImGui.SetItemDefaultFocus();
-                    }
-                    ImGui.EndChild();
-                    UiGui.EndCombo();
-                }
-                HelpMarker("Select the mount to use when flying solo.\n'Mount Roulette' picks a random mount.\nType to search the list.");
-                DrawDefaultSettingSyncButton("Mount Name");
-            }
+            }, 2);
         }, () =>
         {
-            UiGui.SettingsSection("Maintenance", "Update Interval");
-            // Auto Discard
-            var autoDiscard = config.EnableAutoDiscard;
-            using (UiGui.SettingRow("Auto Discard (/ays discard)"))
+            UiGui.LcarsPanel("##ProfileSection3", () =>
             {
-                if (UiGui.Checkbox("Auto Discard (/ays discard)", ref autoDiscard))
+                UiGui.SettingsSection("Maintenance", "Update Interval");
+                // Auto Discard
+                var autoDiscard = config.EnableAutoDiscard;
+                using (UiGui.SettingRow("Auto Discard (/ays discard)"))
                 {
-                    config.EnableAutoDiscard = autoDiscard;
-                    SaveEditingAccount();
+                    if (UiGui.Checkbox("Auto Discard (/ays discard)", ref autoDiscard))
+                    {
+                        config.EnableAutoDiscard = autoDiscard;
+                        SaveEditingAccount();
+                    }
+                    HelpMarker("Runs /ays discard every 10s only while mounted and in a safe idle window.\nFrenRider defers discard during combat, cutscenes, and area transitions.\nRequires AutoRetainer plugin.");
+                    DrawDefaultSettingSyncButton("Auto Discard");
                 }
-                HelpMarker("Runs /ays discard every 10s only while mounted and in a safe idle window.\nFrenRider defers discard during combat, cutscenes, and area transitions.\nRequires AutoRetainer plugin.");
-                DrawDefaultSettingSyncButton("Auto Discard");
-            }
 
 
-            // Update Interval
-            var updateInterval = config.UpdateInterval;
-            using (UiGui.SettingRow("Update Interval (seconds)"))
-            {
-                ImGui.SetNextItemWidth(200);
-                if (UiGui.InputFloat("Update Interval (seconds)", ref updateInterval, 0.01f, 0.1f, "%.3f"))
+                // Update Interval
+                var updateInterval = config.UpdateInterval;
+                using (UiGui.SettingRow("Update Interval (seconds)"))
                 {
-                    config.UpdateInterval = Math.Max(0.05f, updateInterval);
-                    SaveEditingAccount();
+                    ImGui.SetNextItemWidth(200);
+                    if (UiGui.InputFloat("Update Interval (seconds)", ref updateInterval, 0.01f, 0.1f, "%.3f"))
+                    {
+                        config.UpdateInterval = Math.Max(0.05f, updateInterval);
+                        SaveEditingAccount();
+                    }
+                    HelpMarker("How often the plugin runs its main logic loop.\nLower values = more responsive but higher CPU usage.\nDefault: 0.3s. WARNING: Values below 0.1 may impact performance.");
+                    DrawDefaultSettingSyncButton("Update Interval");
                 }
-                HelpMarker("How often the plugin runs its main logic loop.\nLower values = more responsive but higher CPU usage.\nDefault: 0.3s. WARNING: Values below 0.1 may impact performance.");
-                DrawDefaultSettingSyncButton("Update Interval");
-            }
-            if (updateInterval < 0.1f)
-            {
-                UiGui.TextColored(new Vector4(1, 0.4f, 0.4f, 1), "WARNING: Very low update interval may impact game performance!");
-            }
+                if (updateInterval < 0.1f)
+                {
+                    UiGui.TextColored(new Vector4(1, 0.4f, 0.4f, 1), "WARNING: Very low update interval may impact game performance!");
+                }
+            }, 0);
         });
     }
 
@@ -964,153 +988,168 @@ public partial class ConfigWindow : Window, IDisposable
         MaterialSettings.Columns("##RecoveryGroups", Math.Max(420 * MaterialTheme.Metrics.Scale,
             UiGui.SettingsMinimum("Use Phoenix Downs for recovery", "Give up immediately when")), () =>
         {
-            UiGui.SettingsSection("Phoenix Down");
-            var phoenixRecovery = config.UsePhoenixDownsForRecovery;
-            using (UiGui.SettingRow("Use Phoenix Downs for recovery"))
+            UiGui.LcarsPanel("##RecoverySection0", () =>
             {
-                if (UiGui.Checkbox("Use Phoenix Downs for recovery", ref phoenixRecovery))
+                UiGui.SettingsSection("Phoenix Down");
+                var phoenixRecovery = config.UsePhoenixDownsForRecovery;
+                using (UiGui.SettingRow("Use Phoenix Downs for recovery"))
                 {
-                    config.UsePhoenixDownsForRecovery = phoenixRecovery;
+                    if (UiGui.Checkbox("Use Phoenix Downs for recovery", ref phoenixRecovery))
+                    {
+                        config.UsePhoenixDownsForRecovery = phoenixRecovery;
+                        SaveEditingAccount();
+                    }
+                    HelpMarker("Recover party members in four-player dungeons and outdoors; yield to a party healer within 20 yalms.");
+                    DrawDefaultSettingSyncButton("Use Phoenix Downs for recovery");
+                }
+
+                var reviveAnyone = config.ReviveAnyoneOutdoors;
+                using (UiGui.SettingRow("Revive anyone within range outdoors"))
+                {
+                    if (UiGui.Checkbox("Revive anyone within range outdoors", ref reviveAnyone))
+                    {
+                        config.ReviveAnyoneOutdoors = reviveAnyone;
+                        SaveEditingAccount();
+                    }
+                    HelpMarker("Additionally revive non-party players within 15 yalms outdoors. Party members and healers have priority. Never approach strangers.");
+                    DrawDefaultSettingSyncButton("Revive anyone within range outdoors");
+                }
+
+                var phoenixInCombat = config.AllowPhoenixDownInCombat;
+                using (UiGui.SettingRow("Allow Phoenix Down use during combat"))
+                {
+                    if (UiGui.Checkbox("Allow Phoenix Down use during combat", ref phoenixInCombat))
+                    {
+                        config.AllowPhoenixDownInCombat = phoenixInCombat;
+                        SaveEditingAccount();
+                    }
+                    HelpMarker("Applies in dungeons and outdoors. Off waits for the rescuer to leave combat before approaching or using an item; current combat may finish, but new pulls stay blocked. On still respects native item availability and every other recovery gate.");
+                    DrawDefaultSettingSyncButton("Allow Phoenix Down use during combat");
+                }
+            }, 0);
+
+            UiGui.LcarsPanel("##RecoverySection1", () =>
+            {
+                UiGui.SettingsSection("Recovery limit");
+                RecoveryFlag("Full stickiness", config.PhoenixFullStickiness, value => config.PhoenixFullStickiness = value);
+                UiGui.TextWrapped("Keep trying until revival; a nearby party healer takes priority.");
+                ImGui.BeginDisabled(config.PhoenixFullStickiness);
+                ImGui.Indent(8 * MaterialTheme.Metrics.Scale);
+                var mode = config.PhoenixRecoveryLimit;
+                if (UiGui.RadioButton("Time limit", mode == PhoenixRecoveryLimitMode.Time))
+                {
+                    config.PhoenixRecoveryLimit = PhoenixRecoveryLimitMode.Time;
                     SaveEditingAccount();
                 }
-                HelpMarker("Recover party members in four-player dungeons and outdoors; yield to a party healer within 20 yalms.");
-                DrawDefaultSettingSyncButton("Use Phoenix Downs for recovery");
-            }
-
-            var reviveAnyone = config.ReviveAnyoneOutdoors;
-            using (UiGui.SettingRow("Revive anyone within range outdoors"))
-            {
-                if (UiGui.Checkbox("Revive anyone within range outdoors", ref reviveAnyone))
+                ImGui.SameLine();
+                ImGui.BeginDisabled(mode != PhoenixRecoveryLimitMode.Time);
+                ImGui.SetNextItemWidth(90 * MaterialTheme.Metrics.Scale);
+                var seconds = config.PhoenixRecoverySeconds;
+                if (UiGui.InputInt("##PhoenixRecoverySeconds", ref seconds))
                 {
-                    config.ReviveAnyoneOutdoors = reviveAnyone;
+                    config.PhoenixRecoverySeconds = Math.Max(1, seconds);
                     SaveEditingAccount();
                 }
-                HelpMarker("Additionally revive non-party players within 15 yalms outdoors. Party members and healers have priority. Never approach strangers.");
-                DrawDefaultSettingSyncButton("Revive anyone within range outdoors");
-            }
-
-            var phoenixInCombat = config.AllowPhoenixDownInCombat;
-            using (UiGui.SettingRow("Allow Phoenix Down use during combat"))
-            {
-                if (UiGui.Checkbox("Allow Phoenix Down use during combat", ref phoenixInCombat))
+                ImGui.EndDisabled();
+                ImGui.SameLine(); UiGui.Text("seconds");
+                if (UiGui.RadioButton("Started casts", mode == PhoenixRecoveryLimitMode.StartedCasts))
                 {
-                    config.AllowPhoenixDownInCombat = phoenixInCombat;
+                    config.PhoenixRecoveryLimit = PhoenixRecoveryLimitMode.StartedCasts;
                     SaveEditingAccount();
                 }
-                HelpMarker("Applies in dungeons and outdoors. Off waits for the rescuer to leave combat before approaching or using an item; current combat may finish, but new pulls stay blocked. On still respects native item availability and every other recovery gate.");
-                DrawDefaultSettingSyncButton("Allow Phoenix Down use during combat");
-            }
-
-            UiGui.SettingsSection("Recovery limit");
-            RecoveryFlag("Full stickiness", config.PhoenixFullStickiness, value => config.PhoenixFullStickiness = value);
-            UiGui.TextWrapped("Keep trying until revival; a nearby party healer takes priority.");
-            ImGui.BeginDisabled(config.PhoenixFullStickiness);
-            ImGui.Indent(8 * MaterialTheme.Metrics.Scale);
-            var mode = config.PhoenixRecoveryLimit;
-            if (UiGui.RadioButton("Time limit", mode == PhoenixRecoveryLimitMode.Time))
+                ImGui.SameLine();
+                ImGui.BeginDisabled(mode != PhoenixRecoveryLimitMode.StartedCasts);
+                ImGui.SetNextItemWidth(90 * MaterialTheme.Metrics.Scale);
+                var casts = config.PhoenixRecoveryStartedCasts;
+                if (UiGui.InputInt("##PhoenixRecoveryStartedCasts", ref casts))
+                {
+                    config.PhoenixRecoveryStartedCasts = Math.Max(1, casts);
+                    SaveEditingAccount();
+                }
+                ImGui.EndDisabled();
+                ImGui.SameLine(); UiGui.Text("casts");
+                ImGui.Unindent(8 * MaterialTheme.Metrics.Scale);
+                ImGui.EndDisabled();
+                DrawDefaultSettingSyncButton("Phoenix Down recovery limits");
+                UiGui.TextWrapped("Only actual cast starts count; waiting without a cast can continue indefinitely.");
+            }, 1);
+            UiGui.LcarsPanel("##RecoverySection2", () =>
             {
-                config.PhoenixRecoveryLimit = PhoenixRecoveryLimitMode.Time;
-                SaveEditingAccount();
-            }
-            ImGui.SameLine();
-            ImGui.BeginDisabled(mode != PhoenixRecoveryLimitMode.Time);
-            ImGui.SetNextItemWidth(90 * MaterialTheme.Metrics.Scale);
-            var seconds = config.PhoenixRecoverySeconds;
-            if (UiGui.InputInt("##PhoenixRecoverySeconds", ref seconds))
-            {
-                config.PhoenixRecoverySeconds = Math.Max(1, seconds);
-                SaveEditingAccount();
-            }
-            ImGui.EndDisabled();
-            ImGui.SameLine(); UiGui.Text("seconds");
-            if (UiGui.RadioButton("Started casts", mode == PhoenixRecoveryLimitMode.StartedCasts))
-            {
-                config.PhoenixRecoveryLimit = PhoenixRecoveryLimitMode.StartedCasts;
-                SaveEditingAccount();
-            }
-            ImGui.SameLine();
-            ImGui.BeginDisabled(mode != PhoenixRecoveryLimitMode.StartedCasts);
-            ImGui.SetNextItemWidth(90 * MaterialTheme.Metrics.Scale);
-            var casts = config.PhoenixRecoveryStartedCasts;
-            if (UiGui.InputInt("##PhoenixRecoveryStartedCasts", ref casts))
-            {
-                config.PhoenixRecoveryStartedCasts = Math.Max(1, casts);
-                SaveEditingAccount();
-            }
-            ImGui.EndDisabled();
-            ImGui.SameLine(); UiGui.Text("casts");
-            ImGui.Unindent(8 * MaterialTheme.Metrics.Scale);
-            ImGui.EndDisabled();
-            DrawDefaultSettingSyncButton("Phoenix Down recovery limits");
-            UiGui.TextWrapped("Only actual cast starts count; waiting without a cast can continue indefinitely.");
-            UiGui.SettingsSection("Give up immediately when");
-            RecoveryFlag("No Phoenix Down available", config.PhoenixGiveUpWithoutItem, value => config.PhoenixGiveUpWithoutItem = value);
-            RecoveryFlag("Corpse is unreachable", config.PhoenixGiveUpUnreachable, value => config.PhoenixGiveUpUnreachable = value);
-            RecoveryFlag("ADS recovery support is unavailable", config.PhoenixGiveUpWithoutAds, value => config.PhoenixGiveUpWithoutAds = value);
-            UiGui.TextWrapped("Release recovery holds and ignore these deaths until a new death.");
+                UiGui.SettingsSection("Give up immediately when");
+                RecoveryFlag("No Phoenix Down available", config.PhoenixGiveUpWithoutItem, value => config.PhoenixGiveUpWithoutItem = value);
+                RecoveryFlag("Corpse is unreachable", config.PhoenixGiveUpUnreachable, value => config.PhoenixGiveUpUnreachable = value);
+                RecoveryFlag("ADS recovery support is unavailable", config.PhoenixGiveUpWithoutAds, value => config.PhoenixGiveUpWithoutAds = value);
+                UiGui.TextWrapped("Release recovery holds and ignore these deaths until a new death.");
+            }, 2);
         }, () =>
         {
-            UiGui.SettingsSection("Resurrection");
-            UiGui.TextWrapped("Raise offers are accepted automatically while FrenRider is enabled.");
-            UiGui.SettingsSection("Respawn");
-            var respawnOutsideDuties = config.RespawnOutsideDuties;
-            using (UiGui.SettingRow("Respawn after death outside duties after"))
+            UiGui.LcarsPanel("##RecoverySection3", () =>
             {
-                if (UiGui.Checkbox("Respawn after death outside duties after", ref respawnOutsideDuties))
-                {
-                    config.RespawnOutsideDuties = respawnOutsideDuties;
-                    SaveEditingAccount();
-                }
-
-                var respawnDelay = Math.Max(1, config.RespawnOutsideDutiesDelaySeconds);
-                if (respawnDelay != config.RespawnOutsideDutiesDelaySeconds)
-                {
-                    config.RespawnOutsideDutiesDelaySeconds = respawnDelay;
-                    SaveEditingAccount();
-                }
-
-                ImGui.SameLine();
-                ImGui.SetNextItemWidth(120);
-                if (UiGui.InputInt("seconds##RespawnOutsideDutiesDelay", ref respawnDelay))
-                {
-                    config.RespawnOutsideDutiesDelaySeconds = Math.Max(1, respawnDelay);
-                    SaveEditingAccount();
-                }
-                ImGui.SameLine(); UiGui.TextDisabled("s");
-                HelpMarker("After remaining continuously unconscious outside duties for this delay, open the Return prompt and accept it. Minimum: 1 second. Default: 60.");
-
-                DrawDefaultSettingSyncButton("Respawn after death outside duties");
-            }
-
-            var respawnInsideDuties = config.RespawnInsideDuties;
-            using (UiGui.SettingRow("Respawn after death inside duties after"))
+                UiGui.SettingsSection("Resurrection");
+                UiGui.TextWrapped("Raise offers are accepted automatically while FrenRider is enabled.");
+            }, 0);
+            UiGui.LcarsPanel("##RecoverySection4", () =>
             {
-                if (UiGui.Checkbox("Respawn after death inside duties after", ref respawnInsideDuties))
+                UiGui.SettingsSection("Respawn");
+                var respawnOutsideDuties = config.RespawnOutsideDuties;
+                using (UiGui.SettingRow("Respawn after death outside duties after"))
                 {
-                    config.RespawnInsideDuties = respawnInsideDuties;
-                    SaveEditingAccount();
+                    if (UiGui.Checkbox("Respawn after death outside duties after", ref respawnOutsideDuties))
+                    {
+                        config.RespawnOutsideDuties = respawnOutsideDuties;
+                        SaveEditingAccount();
+                    }
+
+                    var respawnDelay = Math.Max(1, config.RespawnOutsideDutiesDelaySeconds);
+                    if (respawnDelay != config.RespawnOutsideDutiesDelaySeconds)
+                    {
+                        config.RespawnOutsideDutiesDelaySeconds = respawnDelay;
+                        SaveEditingAccount();
+                    }
+
+                    ImGui.SameLine();
+                    ImGui.SetNextItemWidth(120);
+                    if (UiGui.InputInt("seconds##RespawnOutsideDutiesDelay", ref respawnDelay))
+                    {
+                        config.RespawnOutsideDutiesDelaySeconds = Math.Max(1, respawnDelay);
+                        SaveEditingAccount();
+                    }
+                    ImGui.SameLine(); UiGui.TextDisabled("s");
+                    HelpMarker("After remaining continuously unconscious outside duties for this delay, open the Return prompt and accept it. Minimum: 1 second. Default: 60.");
+
+                    DrawDefaultSettingSyncButton("Respawn after death outside duties");
                 }
 
-                var respawnInsideDelay = Math.Max(1, config.RespawnInsideDutiesDelaySeconds);
-                if (respawnInsideDelay != config.RespawnInsideDutiesDelaySeconds)
+                var respawnInsideDuties = config.RespawnInsideDuties;
+                using (UiGui.SettingRow("Respawn after death inside duties after"))
                 {
-                    config.RespawnInsideDutiesDelaySeconds = respawnInsideDelay;
-                    SaveEditingAccount();
-                }
+                    if (UiGui.Checkbox("Respawn after death inside duties after", ref respawnInsideDuties))
+                    {
+                        config.RespawnInsideDuties = respawnInsideDuties;
+                        SaveEditingAccount();
+                    }
 
-                ImGui.SameLine();
-                ImGui.SetNextItemWidth(120);
-                if (UiGui.InputInt("seconds##RespawnInsideDutiesDelay", ref respawnInsideDelay))
-                {
-                    config.RespawnInsideDutiesDelaySeconds = Math.Max(1, respawnInsideDelay);
-                    SaveEditingAccount();
-                }
-                ImGui.SameLine(); UiGui.TextDisabled("s");
-                HelpMarker("Inside-duty timed Return. A confirmed full-party wipe also returns when this option is off.");
+                    var respawnInsideDelay = Math.Max(1, config.RespawnInsideDutiesDelaySeconds);
+                    if (respawnInsideDelay != config.RespawnInsideDutiesDelaySeconds)
+                    {
+                        config.RespawnInsideDutiesDelaySeconds = respawnInsideDelay;
+                        SaveEditingAccount();
+                    }
 
-                DrawDefaultSettingSyncButton("Respawn after death inside duties");
-            }
-            UiGui.TextWrapped("Full-party wipes always return after the inside-duty delay. Raise and active revival take priority.");
+                    ImGui.SameLine();
+                    ImGui.SetNextItemWidth(120);
+                    if (UiGui.InputInt("seconds##RespawnInsideDutiesDelay", ref respawnInsideDelay))
+                    {
+                        config.RespawnInsideDutiesDelaySeconds = Math.Max(1, respawnInsideDelay);
+                        SaveEditingAccount();
+                    }
+                    ImGui.SameLine(); UiGui.TextDisabled("s");
+                    HelpMarker("Inside-duty timed Return. A confirmed full-party wipe also returns when this option is off.");
+
+                    DrawDefaultSettingSyncButton("Respawn after death inside duties");
+                }
+                UiGui.TextWrapped("Full-party wipes always return after the inside-duty delay. Raise and active revival take priority.");
+            }, 1);
         });
     }
 
@@ -1133,233 +1172,251 @@ public partial class ConfigWindow : Window, IDisposable
         using (UiText.Font(UiFontRole.PluginName)) UiGui.Text("Chocobo");
         MaterialSettings.Columns("##ChocoboGroups", Math.Max(UiGui.SettingsMinimum("Automatically allocate Chocobo skills", "Companion Stance"), 520 * MaterialTheme.Metrics.Scale), () =>
         {
-            UiGui.SettingsSection("Manual purchasing");
-            var foodPreview = ChocoboFoodName(config.ChocoboFoodItemId);
-            using (UiGui.SettingRow("Companion food"))
+            UiGui.LcarsPanel("##ChocoboSection0", () =>
             {
-                var foodComboOpen = UiGui.BeginCombo("Companion food", foodPreview);
-                if (!foodComboOpen && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
-                    MaterialText.SetTooltip(ChocoboFoodTooltip(config.ChocoboFoodItemId));
-                if (foodComboOpen)
+                UiGui.SettingsSection("Manual purchasing");
+                var foodPreview = ChocoboFoodName(config.ChocoboFoodItemId);
+                using (UiGui.SettingRow("Companion food"))
                 {
+                    var foodComboOpen = UiGui.BeginCombo("Companion food", foodPreview);
+                    if (!foodComboOpen && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                        MaterialText.SetTooltip(ChocoboFoodTooltip(config.ChocoboFoodItemId));
+                    if (foodComboOpen)
+                    {
+                        try
+                        {
+                            foreach (var food in ChocoboFoods)
+                            {
+                                var selected = config.ChocoboFoodItemId == food.ItemId;
+                                if (UiGui.Selectable($"##ChocoboFood{food.ItemId}", selected, UiText.T(food.Name)))
+                                {
+                                    config.ChocoboFoodItemId = food.ItemId;
+                                    SaveEditingAccount();
+                                }
+                                if (ImGui.IsItemHovered())
+                                    MaterialText.SetTooltip(ChocoboFoodTooltip(food.ItemId));
+                                if (selected) ImGui.SetItemDefaultFocus();
+                            }
+                        }
+                        finally { UiGui.EndCombo(); }
+                    }
+                    DrawDefaultSettingSyncButton("Companion food");
+                }
+
+                var canPurchase = Plugin.ClientState.IsLoggedIn
+                    && configManager.TryGetLocalActiveConfig(out var activePurchaseConfig)
+                    && ReferenceEquals(config, activePurchaseConfig);
+                UiGui.TextDisabled("Buy fills stock once. Active character only.");
+                var shopRoot = ImGui.GetID("");
+                using (MaterialTable.PushControls())
+                using (MaterialTable.PushTightRows())
+                {
+                    if (ImGui.BeginTable("##CompanionSupplyTargets", IsDefaultConfigSelected() ? 5 : 4,
+                        ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.NoSavedSettings))
+                    {
+                        try
+                        {
+                            ImGui.TableSetupColumn("Item", ImGuiTableColumnFlags.WidthStretch);
+                            ImGui.TableSetupColumn("Target", ImGuiTableColumnFlags.WidthFixed, 85 * MaterialTheme.Metrics.Scale);
+                            ImGui.TableSetupColumn("On hand", ImGuiTableColumnFlags.WidthFixed, Math.Max(55 * MaterialTheme.Metrics.Scale, MaterialText.Measure(UiText.T("On hand")).X + 12 * MaterialTheme.Metrics.Scale));
+                            ImGui.TableSetupColumn("Action", ImGuiTableColumnFlags.WidthFixed, Math.Max(MaterialText.Measure(UiText.T("BUY GREENS")).X,
+                                MaterialText.Measure(UiText.T("BUY FOOD")).X) + 2 * ImGui.GetStyle().FramePadding.X + 4 * MaterialTheme.Metrics.Scale);
+                            if (IsDefaultConfigSelected()) ImGui.TableSetupColumn("Sync", ImGuiTableColumnFlags.WidthFixed,
+                                MaterialText.Measure(UiText.T("Sync all")).X + 2 * ImGui.GetStyle().FramePadding.X);
+                            UiGui.TableHeadersRow();
+                            SupplyRow(true);
+                            SupplyRow(false);
+                        }
+                        finally { ImGui.EndTable(); }
+                    }
+                }
+                if (UiGui.Button("Stop companion purchasing")) plugin.StopChocoboPurchasing();
+                if (ImGui.IsItemHovered()) UiGui.SetTooltip("Purchasing status (active character)");
+                UiGui.TextDisabled(plugin.ChocoboPurchaseStatus);
+                UiGui.TextColored(UiHelpers.Yellow, "Vath food requires The Naming of Vath.");
+
+                void SupplyRow(bool greens)
+                {
+                    var itemId = greens ? (int)GameHelpers.GysahlGreensItemId : config.ChocoboFoodItemId;
+                    var stock = canPurchase ? GameHelpers.GetCompanionSupplyStock(itemId) : -1;
+                    var target = greens ? config.ChocoboGreensStockTarget : config.ChocoboFoodStockTarget;
+                    var targetId = greens ? "Gysahl Greens stock target" : "Companion food stock target";
+                    ImGui.TableNextRow();
+                    ImGuiP.PushOverrideID(shopRoot);
                     try
                     {
-                        foreach (var food in ChocoboFoods)
+                        ImGui.TableSetColumnIndex(0);
+                        UiGui.Text(greens ? "Gysahl Greens" : ChocoboFoodName(config.ChocoboFoodItemId));
+                        if (!greens && ImGui.IsItemHovered()) MaterialText.SetTooltip(ChocoboFoodTooltip(config.ChocoboFoodItemId));
+                        ImGui.TableSetColumnIndex(1);
+                        ImGui.SetNextItemWidth(-1);
+                        ImGuiP.PushOverrideID(ImGui.GetID(targetId));
+                        bool changed;
+                        try { changed = ImGui.InputInt("", ref target, 0, 0); }
+                        finally { ImGui.PopID(); }
+                        if (changed)
                         {
-                            var selected = config.ChocoboFoodItemId == food.ItemId;
-                            if (UiGui.Selectable($"##ChocoboFood{food.ItemId}", selected, UiText.T(food.Name)))
+                            if (greens) config.ChocoboGreensStockTarget = Math.Max(0, target);
+                            else config.ChocoboFoodStockTarget = Math.Max(0, target);
+                            SaveEditingAccount();
+                        }
+                        ImGui.TableSetColumnIndex(2); UiGui.Text(stock < 0 ? "-" : stock.ToString());
+                        ImGui.TableSetColumnIndex(3);
+                        ImGui.BeginDisabled(!canPurchase);
+                        try
+                        {
+                            if (UiGui.Button(greens ? "BUY GREENS" : "BUY FOOD"))
                             {
-                                config.ChocoboFoodItemId = food.ItemId;
-                                SaveEditingAccount();
+                                if (greens) plugin.PurchaseChocoboGreensNow();
+                                else plugin.PurchaseChocoboFoodNow();
                             }
-                            if (ImGui.IsItemHovered())
-                                MaterialText.SetTooltip(ChocoboFoodTooltip(food.ItemId));
-                            if (selected) ImGui.SetItemDefaultFocus();
+                        }
+                        finally { ImGui.EndDisabled(); }
+                        if (!greens && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                            MaterialText.SetTooltip(ChocoboFoodTooltip(config.ChocoboFoodItemId));
+                        if (IsDefaultConfigSelected())
+                        {
+                            ImGui.TableSetColumnIndex(4);
+                            DrawDefaultSettingSyncButton(targetId, inline: false);
                         }
                     }
-                    finally { UiGui.EndCombo(); }
-                }
-                DrawDefaultSettingSyncButton("Companion food");
-            }
-
-            var canPurchase = Plugin.ClientState.IsLoggedIn
-                && configManager.TryGetLocalActiveConfig(out var activePurchaseConfig)
-                && ReferenceEquals(config, activePurchaseConfig);
-            UiGui.TextDisabled("Buy fills stock once. Active character only.");
-            var shopRoot = ImGui.GetID("");
-            using (MaterialTable.PushControls())
-            using (MaterialTable.PushTightRows())
-            {
-                if (ImGui.BeginTable("##CompanionSupplyTargets", IsDefaultConfigSelected() ? 5 : 4,
-                    ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.NoSavedSettings))
-                {
-                    try
-                    {
-                        ImGui.TableSetupColumn("Item", ImGuiTableColumnFlags.WidthStretch);
-                        ImGui.TableSetupColumn("Target", ImGuiTableColumnFlags.WidthFixed, 85 * MaterialTheme.Metrics.Scale);
-                        ImGui.TableSetupColumn("On hand", ImGuiTableColumnFlags.WidthFixed, Math.Max(55 * MaterialTheme.Metrics.Scale, MaterialText.Measure(UiText.T("On hand")).X + 12 * MaterialTheme.Metrics.Scale));
-                        ImGui.TableSetupColumn("Action", ImGuiTableColumnFlags.WidthFixed, Math.Max(MaterialText.Measure(UiText.T("BUY GREENS")).X,
-                            MaterialText.Measure(UiText.T("BUY FOOD")).X) + 2 * ImGui.GetStyle().FramePadding.X + 4 * MaterialTheme.Metrics.Scale);
-                        if (IsDefaultConfigSelected()) ImGui.TableSetupColumn("Sync", ImGuiTableColumnFlags.WidthFixed,
-                            MaterialText.Measure(UiText.T("Sync all")).X + 2 * ImGui.GetStyle().FramePadding.X);
-                        UiGui.TableHeadersRow();
-                        SupplyRow(true);
-                        SupplyRow(false);
-                    }
-                    finally { ImGui.EndTable(); }
-                }
-            }
-            if (UiGui.Button("Stop companion purchasing")) plugin.StopChocoboPurchasing();
-            if (ImGui.IsItemHovered()) UiGui.SetTooltip("Purchasing status (active character)");
-            UiGui.TextDisabled(plugin.ChocoboPurchaseStatus);
-            UiGui.TextColored(UiHelpers.Yellow, "Vath food requires The Naming of Vath.");
-
-            void SupplyRow(bool greens)
-            {
-                var itemId = greens ? (int)GameHelpers.GysahlGreensItemId : config.ChocoboFoodItemId;
-                var stock = canPurchase ? GameHelpers.GetCompanionSupplyStock(itemId) : -1;
-                var target = greens ? config.ChocoboGreensStockTarget : config.ChocoboFoodStockTarget;
-                var targetId = greens ? "Gysahl Greens stock target" : "Companion food stock target";
-                ImGui.TableNextRow();
-                ImGuiP.PushOverrideID(shopRoot);
-                try
-                {
-                    ImGui.TableSetColumnIndex(0);
-                    UiGui.Text(greens ? "Gysahl Greens" : ChocoboFoodName(config.ChocoboFoodItemId));
-                    if (!greens && ImGui.IsItemHovered()) MaterialText.SetTooltip(ChocoboFoodTooltip(config.ChocoboFoodItemId));
-                    ImGui.TableSetColumnIndex(1);
-                    ImGui.SetNextItemWidth(-1);
-                    ImGuiP.PushOverrideID(ImGui.GetID(targetId));
-                    bool changed;
-                    try { changed = ImGui.InputInt("", ref target, 0, 0); }
                     finally { ImGui.PopID(); }
-                    if (changed)
+                }
+            }, 0);
+
+            UiGui.LcarsPanel("##ChocoboSection1", () =>
+            {
+                UiGui.SettingsSection("Summon & Stance", "Companion Stance");
+                // Summon Chocobo
+                var forceGysahl = config.ForceGysahl;
+                using (UiGui.SettingRow("Summon Chocobo"))
+                {
+                    if (UiGui.Checkbox("Summon Chocobo", ref forceGysahl))
                     {
-                        if (greens) config.ChocoboGreensStockTarget = Math.Max(0, target);
-                        else config.ChocoboFoodStockTarget = Math.Max(0, target);
+                        config.ForceGysahl = forceGysahl;
                         SaveEditingAccount();
                     }
-                    ImGui.TableSetColumnIndex(2); UiGui.Text(stock < 0 ? "-" : stock.ToString());
-                    ImGui.TableSetColumnIndex(3);
-                    ImGui.BeginDisabled(!canPurchase);
-                    try
+                    HelpMarker("Auto-summon chocobo companion using Gysahl Greens when timer is low.\nWill not summon in sanctuaries or duties.");
+
+                    DrawDefaultSettingSyncButton("Summon Chocobo");
+                }
+
+                // Show greens count when enabled
+                if (config.ForceGysahl)
+                {
+                    var greensCount = GameHelpers.GetInventoryItemCount(GameHelpers.GysahlGreensItemId);
+                    var buddyTime = GameHelpers.GetBuddyTimeRemaining();
+                    var mins = (int)(buddyTime / 60);
+                    var secs = (int)(buddyTime % 60);
+                    var timerText = buddyTime > 0 ? UiText.F("{0}m{1:D2}s", mins, secs) : UiText.T("Not summoned");
+                    var greensColor = greensCount > 0 ? new Vector4(0.3f, 1f, 0.3f, 1) : new Vector4(1f, 0.3f, 0.3f, 1);
+                    UiGui.Text("      ");
+                    ImGui.SameLine();
+                    UiGui.TextColored(greensColor, UiText.F("Gysahl Greens: {0}", greensCount));
+                    ImGui.SameLine();
+                    UiGui.TextColored(new Vector4(0.5f, 0.5f, 0.5f, 1), " | " + UiText.F("Timer: {0}", timerText));
+                }
+
+                // Companion Stance (dropdown)
+                var companionIdx = Array.IndexOf(CompanionStances, config.CompanionStrat);
+                if (companionIdx < 0) companionIdx = 0;
+                using (UiGui.SettingRow("Companion Stance"))
+                {
+                    ImGui.SetNextItemWidth(200);
+                    if (UiGui.Combo("Companion Stance", ref companionIdx, CompanionStances, CompanionStances.Length))
                     {
-                        if (UiGui.Button(greens ? "BUY GREENS" : "BUY FOOD"))
-                        {
-                            if (greens) plugin.PurchaseChocoboGreensNow();
-                            else plugin.PurchaseChocoboFoodNow();
-                        }
+                        config.CompanionStrat = CompanionStances[companionIdx];
+                        SaveEditingAccount();
                     }
-                    finally { ImGui.EndDisabled(); }
-                    if (!greens && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
-                        MaterialText.SetTooltip(ChocoboFoodTooltip(config.ChocoboFoodItemId));
-                    if (IsDefaultConfigSelected())
+                    HelpMarker("Chocobo companion battle stance.\nControls how your companion behaves in combat.");
+
+                    DrawDefaultSettingSyncButton("Companion Stance");
+                }
+            }, 1);
+            UiGui.LcarsPanel("##ChocoboSection2", () =>
+            {
+                UiGui.SettingsSection("Feeding");
+                var autoFeed = config.ChocoboAutoFeed;
+                using (UiGui.SettingRow("Automatically feed Chocobo"))
+                {
+                    if (UiGui.Checkbox("Automatically feed Chocobo", ref autoFeed))
                     {
-                        ImGui.TableSetColumnIndex(4);
-                        DrawDefaultSettingSyncButton(targetId, inline: false);
+                        config.ChocoboAutoFeed = autoFeed;
+                        SaveEditingAccount();
                     }
+                    DrawDefaultSettingSyncButton("Automatically feed Chocobo");
                 }
-                finally { ImGui.PopID(); }
-            }
-
-            UiGui.SettingsSection("Summon & Stance", "Companion Stance");
-            // Summon Chocobo
-            var forceGysahl = config.ForceGysahl;
-            using (UiGui.SettingRow("Summon Chocobo"))
-            {
-                if (UiGui.Checkbox("Summon Chocobo", ref forceGysahl))
-                {
-                    config.ForceGysahl = forceGysahl;
-                    SaveEditingAccount();
-                }
-                HelpMarker("Auto-summon chocobo companion using Gysahl Greens when timer is low.\nWill not summon in sanctuaries or duties.");
-
-                DrawDefaultSettingSyncButton("Summon Chocobo");
-            }
-
-            // Show greens count when enabled
-            if (config.ForceGysahl)
-            {
-                var greensCount = GameHelpers.GetInventoryItemCount(GameHelpers.GysahlGreensItemId);
-                var buddyTime = GameHelpers.GetBuddyTimeRemaining();
-                var mins = (int)(buddyTime / 60);
-                var secs = (int)(buddyTime % 60);
-                var timerText = buddyTime > 0 ? UiText.F("{0}m{1:D2}s", mins, secs) : UiText.T("Not summoned");
-                var greensColor = greensCount > 0 ? new Vector4(0.3f, 1f, 0.3f, 1) : new Vector4(1f, 0.3f, 0.3f, 1);
-                UiGui.Text("      ");
+                HelpMarker("These settings belong to the profile being edited. Feed and Stop use the active character's runtime profile.");
+                ImGui.BeginDisabled(!Plugin.ClientState.IsLoggedIn || !configManager.TryGetLocalActiveConfig(out _));
+                if (UiGui.Button("Feed companion now")) plugin.FeedChocoboNow();
+                if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)
+                    && configManager.TryGetActiveConfig(out var feedingConfig) && feedingConfig != null)
+                    MaterialText.SetTooltip(ChocoboFoodTooltip(feedingConfig.ChocoboFoodItemId));
+                ImGui.EndDisabled();
                 ImGui.SameLine();
-                UiGui.TextColored(greensColor, UiText.F("Gysahl Greens: {0}", greensCount));
-                ImGui.SameLine();
-                UiGui.TextColored(new Vector4(0.5f, 0.5f, 0.5f, 1), " | " + UiText.F("Timer: {0}", timerText));
-            }
-
-            // Companion Stance (dropdown)
-            var companionIdx = Array.IndexOf(CompanionStances, config.CompanionStrat);
-            if (companionIdx < 0) companionIdx = 0;
-            using (UiGui.SettingRow("Companion Stance"))
-            {
-                ImGui.SetNextItemWidth(200);
-                if (UiGui.Combo("Companion Stance", ref companionIdx, CompanionStances, CompanionStances.Length))
-                {
-                    config.CompanionStrat = CompanionStances[companionIdx];
-                    SaveEditingAccount();
-                }
-                HelpMarker("Chocobo companion battle stance.\nControls how your companion behaves in combat.");
-
-                DrawDefaultSettingSyncButton("Companion Stance");
-            }
-            UiGui.SettingsSection("Feeding");
-            var autoFeed = config.ChocoboAutoFeed;
-            using (UiGui.SettingRow("Automatically feed Chocobo"))
-            {
-                if (UiGui.Checkbox("Automatically feed Chocobo", ref autoFeed))
-                {
-                    config.ChocoboAutoFeed = autoFeed;
-                    SaveEditingAccount();
-                }
-                DrawDefaultSettingSyncButton("Automatically feed Chocobo");
-            }
-            HelpMarker("These settings belong to the profile being edited. Feed and Stop use the active character's runtime profile.");
-            ImGui.BeginDisabled(!Plugin.ClientState.IsLoggedIn || !configManager.TryGetLocalActiveConfig(out _));
-            if (UiGui.Button("Feed companion now")) plugin.FeedChocoboNow();
-            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)
-                && configManager.TryGetActiveConfig(out var feedingConfig) && feedingConfig != null)
-                MaterialText.SetTooltip(ChocoboFoodTooltip(feedingConfig.ChocoboFoodItemId));
-            ImGui.EndDisabled();
-            ImGui.SameLine();
-            if (UiGui.Button("Stop companion feeding")) plugin.StopChocoboFeeding();
-            UiGui.Text("Feeding status (active character)");
-            UiGui.TextDisabled(plugin.ChocoboFoodStatus);
+                if (UiGui.Button("Stop companion feeding")) plugin.StopChocoboFeeding();
+                UiGui.Text("Feeding status (active character)");
+                UiGui.TextDisabled(plugin.ChocoboFoodStatus);
+            }, 2);
         }, () =>
         {
-            UiGui.SettingsSection("Skill allocation", "First tree", "Second tree", "Third tree");
-            var autoAllocateSkills = config.ChocoboAutoAllocateSkills;
-            using (UiGui.SettingRow("Automatically allocate Chocobo skills"))
+            UiGui.LcarsPanel("##ChocoboSection3", () =>
             {
-                if (UiGui.Checkbox("Automatically allocate Chocobo skills", ref autoAllocateSkills))
+                UiGui.SettingsSection("Skill allocation", "First tree", "Second tree", "Third tree");
+                var autoAllocateSkills = config.ChocoboAutoAllocateSkills;
+                using (UiGui.SettingRow("Automatically allocate Chocobo skills"))
                 {
-                    config.ChocoboAutoAllocateSkills = autoAllocateSkills;
-                    SaveEditingAccount();
+                    if (UiGui.Checkbox("Automatically allocate Chocobo skills", ref autoAllocateSkills))
+                    {
+                        config.ChocoboAutoAllocateSkills = autoAllocateSkills;
+                        SaveEditingAccount();
+                    }
+                    HelpMarker("Completes the first chosen tree before the next. Waits when the next skill costs more points than are available.");
+                    DrawDefaultSettingSyncButton("Automatically allocate Chocobo skills");
                 }
-                HelpMarker("Completes the first chosen tree before the next. Waits when the next skill costs more points than are available.");
-                DrawDefaultSettingSyncButton("Automatically allocate Chocobo skills");
-            }
-            DrawChocoboSkillPriority(config);
-            HelpMarker("These settings belong to the profile being edited. Allocate and Stop use the active character's runtime profile.");
-            ImGui.BeginDisabled(!Plugin.ClientState.IsLoggedIn || !configManager.TryGetLocalActiveConfig(out _));
-            if (UiGui.Button("Allocate skills now")) plugin.AllocateChocoboSkills();
-            ImGui.EndDisabled();
-            ImGui.SameLine();
-            if (UiGui.Button("Stop skill allocation")) plugin.StopChocoboSkills();
-            UiGui.TextDisabled(plugin.ChocoboSkillStatus);
-            UiGui.SettingsSection("Current companion");
-            HelpMarker("These values describe the active character, regardless of the profile being edited.");
-            if (GameHelpers.TryReadCompanion(out var companion))
+                DrawChocoboSkillPriority(config);
+                HelpMarker("These settings belong to the profile being edited. Allocate and Stop use the active character's runtime profile.");
+                ImGui.BeginDisabled(!Plugin.ClientState.IsLoggedIn || !configManager.TryGetLocalActiveConfig(out _));
+                if (UiGui.Button("Allocate skills now")) plugin.AllocateChocoboSkills();
+                ImGui.EndDisabled();
+                ImGui.SameLine();
+                if (UiGui.Button("Stop skill allocation")) plugin.StopChocoboSkills();
+                UiGui.TextDisabled(plugin.ChocoboSkillStatus);
+            }, 0);
+            UiGui.LcarsPanel("##ChocoboSection4", () =>
             {
-                UiGui.Text(UiText.F("Rank: {0} | Stars: {1}", companion.Rank, companion.Stars));
-                UiGui.Text(UiText.F("Experience: {0}", companion.CurrentXp) + " · " + UiText.F("Unused skill points: {0}", companion.SkillPoints));
-                UiGui.TextWrapped(UiText.F("Defender level: {0}", companion.DefenderLevel) + " · "
-                    + UiText.F("Attacker level: {0}", companion.AttackerLevel) + " · " + UiText.F("Healer level: {0}", companion.HealerLevel));
-            }
-            else
-                UiGui.TextDisabled("No companion data available. Log in to inspect it.");
-            ImGui.BeginDisabled(Plugin.ObjectTable.LocalPlayer is null);
-            if (UiGui.Button("Open game Companion window"))
-                companionWindowStatus = GameHelpers.TryOpenCompanionWindow()
-                    ? "Companion window requested." : "Companion window is unavailable.";
-            ImGui.EndDisabled();
-            if (companionWindowStatus.Length > 0) UiGui.TextWrapped(companionWindowStatus);
-            UiGui.SettingsSection("Reload testing");
-            var probeAfterReload = configuration.ChocoboProbeAfterReload;
-            using (UiGui.SettingRow("Run Companion discovery after reload"))
+                UiGui.SettingsSection("Current companion");
+                HelpMarker("These values describe the active character, regardless of the profile being edited.");
+                if (GameHelpers.TryReadCompanion(out var companion))
+                {
+                    UiGui.Text(UiText.F("Rank: {0} | Stars: {1}", companion.Rank, companion.Stars));
+                    UiGui.Text(UiText.F("Experience: {0}", companion.CurrentXp) + " · " + UiText.F("Unused skill points: {0}", companion.SkillPoints));
+                    UiGui.TextWrapped(UiText.F("Defender level: {0}", companion.DefenderLevel) + " · "
+                        + UiText.F("Attacker level: {0}", companion.AttackerLevel) + " · " + UiText.F("Healer level: {0}", companion.HealerLevel));
+                }
+                else
+                    UiGui.TextDisabled("No companion data available. Log in to inspect it.");
+                ImGui.BeginDisabled(Plugin.ObjectTable.LocalPlayer is null);
+                if (UiGui.Button("Open game Companion window"))
+                    companionWindowStatus = GameHelpers.TryOpenCompanionWindow()
+                        ? "Companion window requested." : "Companion window is unavailable.";
+                ImGui.EndDisabled();
+                if (companionWindowStatus.Length > 0) UiGui.TextWrapped(companionWindowStatus);
+            }, 1);
+            UiGui.LcarsPanel("##ChocoboSection5", () =>
             {
-                if (UiGui.Checkbox("Run Companion discovery after reload", ref probeAfterReload))
-                    plugin.SetChocoboProbeAfterReload(probeAfterReload);
-            }
-            HelpMarker("Runs one read-only Companion probe per plugin load. Changing this switch takes effect on the next reload.");
-            if (UiGui.Button("Run Companion discovery now")) plugin.RunChocoboProbe();
-            if (UiGui.Button("Stop Companion discovery")) plugin.StopChocoboProbe();
-            UiGui.TextDisabled(plugin.ChocoboProbeStatus);
+                UiGui.SettingsSection("Reload testing");
+                var probeAfterReload = configuration.ChocoboProbeAfterReload;
+                using (UiGui.SettingRow("Run Companion discovery after reload"))
+                {
+                    if (UiGui.Checkbox("Run Companion discovery after reload", ref probeAfterReload))
+                        plugin.SetChocoboProbeAfterReload(probeAfterReload);
+                }
+                HelpMarker("Runs one read-only Companion probe per plugin load. Changing this switch takes effect on the next reload.");
+                if (UiGui.Button("Run Companion discovery now")) plugin.RunChocoboProbe();
+                if (UiGui.Button("Stop Companion discovery")) plugin.StopChocoboProbe();
+                UiGui.TextDisabled(plugin.ChocoboProbeStatus);
+            }, 2);
         });
     }
 
@@ -1418,240 +1475,258 @@ public partial class ConfigWindow : Window, IDisposable
         using (UiText.Font(UiFontRole.PluginName)) UiGui.Text("Follow");
         MaterialSettings.Columns("##FollowGroups", UiGui.SettingsMinimum("Cling Type (Duty)", "Max Follow Distance (Foray)"), () =>
         {
-            UiGui.SettingsSection("Navigation", "Cling Distance", "Cling Type", "Cling Type (Duty)");
-            var cling = config.Cling;
-            using (UiGui.SettingRow("Cling Distance"))
+            UiGui.LcarsPanel("##FollowSection0", () =>
             {
-                ImGui.SetNextItemWidth(200);
-                if (UiGui.InputFloat("Cling Distance", ref cling, 0.5f, 1.0f, "%.3f"))
+                UiGui.SettingsSection("Navigation", "Cling Distance", "Cling Type", "Cling Type (Duty)");
+                var cling = config.Cling;
+                using (UiGui.SettingRow("Cling Distance"))
                 {
-                    config.Cling = cling;
-                    SaveEditingAccount();
+                    ImGui.SetNextItemWidth(200);
+                    if (UiGui.InputFloat("Cling Distance", ref cling, 0.5f, 1.0f, "%.3f"))
+                    {
+                        config.Cling = cling;
+                        SaveEditingAccount();
+                    }
+                    HelpMarker("Distance threshold (yalms) to start following fren.\nWhen you are farther than this from fren, navigation begins.");
+                    DrawDefaultSettingSyncButton("Cling Distance");
                 }
-                HelpMarker("Distance threshold (yalms) to start following fren.\nWhen you are farther than this from fren, navigation begins.");
-                DrawDefaultSettingSyncButton("Cling Distance");
-            }
 
-            // Cling Type (no CBT)
-            var clingType = config.ClingType;
-            using (UiGui.SettingRow("Cling Type"))
+                // Cling Type (no CBT)
+                var clingType = config.ClingType;
+                using (UiGui.SettingRow("Cling Type"))
+                {
+                    ImGui.SetNextItemWidth(200);
+                    if (UiGui.Combo("Cling Type", ref clingType, ClingTypes, ClingTypes.Length))
+                    {
+                        config.ClingType = clingType;
+                        SaveEditingAccount();
+                    }
+                    HelpMarker("Navigation method to reach fren.\nNavMesh: VNavmesh plugin pathfinding (recommended)\nVisland: Alternative navigation\nBossMod Follow: Uses BossMod's follow leader\nVanilla Follow: Game's built-in /follow");
+                    DrawDefaultSettingSyncButton("Cling Type");
+                }
+
+                var clingTypeDuty = config.ClingTypeDuty;
+                using (UiGui.SettingRow("Cling Type (Duty)"))
+                {
+                    ImGui.SetNextItemWidth(200);
+                    if (UiGui.Combo("Cling Type (Duty)", ref clingTypeDuty, ClingTypes, ClingTypes.Length))
+                    {
+                        config.ClingTypeDuty = clingTypeDuty;
+                        SaveEditingAccount();
+                    }
+                    HelpMarker("Navigation method to use inside duties.\nMay need a different method than overworld.");
+                    DrawDefaultSettingSyncButton("Cling Type (Duty)");
+                }
+            }, 0);
+            UiGui.LcarsPanel("##FollowSection1", () =>
             {
-                ImGui.SetNextItemWidth(200);
-                if (UiGui.Combo("Cling Type", ref clingType, ClingTypes, ClingTypes.Length))
+                UiGui.SettingsSection("Personal space", "Social Distance", "Social Distance Indoors", "Wiggle");
+                var sd = config.SocialDistancing;
+                using (UiGui.SettingRow("Social Distance (yalms)"))
                 {
-                    config.ClingType = clingType;
-                    SaveEditingAccount();
+                    ImGui.SetNextItemWidth(200);
+                    if (UiGui.InputFloat("Social Distance (yalms)", ref sd, 0.5f, 1.0f, "%.3f"))
+                    {
+                        config.SocialDistancing = sd;
+                        SaveEditingAccount();
+                    }
+                    HelpMarker("Minimum distance to maintain from fren in outdoor/foray zones.\nPrevents characters from stacking on top of each other (less bot-like).\nSet to 0 to disable.");
+                    DrawDefaultSettingSyncButton("Social Distance");
                 }
-                HelpMarker("Navigation method to reach fren.\nNavMesh: VNavmesh plugin pathfinding (recommended)\nVisland: Alternative navigation\nBossMod Follow: Uses BossMod's follow leader\nVanilla Follow: Game's built-in /follow");
-                DrawDefaultSettingSyncButton("Cling Type");
-            }
 
-            var clingTypeDuty = config.ClingTypeDuty;
-            using (UiGui.SettingRow("Cling Type (Duty)"))
+                var sdIndoors = config.SocialDistancingIndoors;
+                using (UiGui.SettingRow("Social Distance Indoors"))
+                {
+                    ImGui.SetNextItemWidth(200);
+                    if (UiGui.Combo("Social Distance Indoors", ref sdIndoors, OnOff, OnOff.Length))
+                    {
+                        config.SocialDistancingIndoors = sdIndoors;
+                        SaveEditingAccount();
+                    }
+                    HelpMarker("Enable social distancing indoors too.\nOff by default. Turn on if you want spacing in dungeons.");
+                    DrawDefaultSettingSyncButton("Social Distance Indoors");
+                }
+
+                var xw = config.SocialDistanceXWiggle;
+                using (UiGui.SettingRow("Wiggle"))
+                {
+                    UiGui.SettingLabel();
+                    ImGui.SameLine(); UiGui.Text("X");
+
+                    UiGui.SettingFieldWidth(100 * MaterialTheme.Metrics.Scale);
+                    if (UiGui.InputFloat("X Wiggle (+/- yalms)", ref xw, 0.1f, 0.5f, "%.3f"))
+                    {
+                        config.SocialDistanceXWiggle = xw;
+                        SaveEditingAccount();
+                    }
+                    ImGui.SameLine(); UiGui.TextDisabled("y");
+                    var zw = config.SocialDistanceZWiggle;
+                    ImGui.SameLine(); UiGui.Text("Z");
+
+                    UiGui.SettingFieldWidth(100 * MaterialTheme.Metrics.Scale);
+                    if (UiGui.InputFloat("Z Wiggle (+/- yalms)", ref zw, 0.1f, 0.5f, "%.3f"))
+                    {
+                        config.SocialDistanceZWiggle = zw;
+                        SaveEditingAccount();
+                    }
+                    ImGui.SameLine(); UiGui.TextDisabled("y");
+                    HelpMarker("Random variance on X axis during social distancing.\nAdds natural-looking movement variance.");
+                    HelpMarker("Random variance on Z axis during social distancing.");
+                    DrawDefaultSettingSyncButton("X Wiggle");
+                    DrawDefaultSettingSyncButton("Z Wiggle");
+                }
+            }, 1);
+
+            UiGui.LcarsPanel("##FollowSection2", () =>
             {
-                ImGui.SetNextItemWidth(200);
-                if (UiGui.Combo("Cling Type (Duty)", ref clingTypeDuty, ClingTypes, ClingTypes.Length))
+                UiGui.SettingsSection("Distance limits", "Max Follow Distance", "Max Follow Distance (Foray)", "Extra distance");
+                var maxB = config.MaxBistance;
+                using (UiGui.SettingRow("Max Follow Distance"))
                 {
-                    config.ClingTypeDuty = clingTypeDuty;
-                    SaveEditingAccount();
+                    ImGui.SetNextItemWidth(200);
+                    if (UiGui.InputFloat("Max Follow Distance", ref maxB))
+                    {
+                        config.MaxBistance = maxB;
+                        SaveEditingAccount();
+                    }
+                    HelpMarker("Maximum distance (yalms) to chase fren.\nBeyond this, stop following to avoid zone-hopping.");
+                    DrawDefaultSettingSyncButton("Max Follow Distance");
                 }
-                HelpMarker("Navigation method to use inside duties.\nMay need a different method than overworld.");
-                DrawDefaultSettingSyncButton("Cling Type (Duty)");
-            }
-            UiGui.SettingsSection("Personal space", "Social Distance", "Social Distance Indoors", "Wiggle");
-            var sd = config.SocialDistancing;
-            using (UiGui.SettingRow("Social Distance (yalms)"))
-            {
-                ImGui.SetNextItemWidth(200);
-                if (UiGui.InputFloat("Social Distance (yalms)", ref sd, 0.5f, 1.0f, "%.3f"))
+
+                var maxBf = config.MaxBistanceForay;
+                using (UiGui.SettingRow("Max Follow Distance (Foray)"))
                 {
-                    config.SocialDistancing = sd;
-                    SaveEditingAccount();
+                    ImGui.SetNextItemWidth(200);
+                    if (UiGui.InputFloat("Max Follow Distance (Foray)", ref maxBf))
+                    {
+                        config.MaxBistanceForay = maxBf;
+                        SaveEditingAccount();
+                    }
+                    HelpMarker("Max follow distance in forays (Eureka/Bozja).\nLower value to avoid mini-aetheryte transition issues.");
+                    DrawDefaultSettingSyncButton("Max Follow Distance (Foray)");
                 }
-                HelpMarker("Minimum distance to maintain from fren in outdoor/foray zones.\nPrevents characters from stacking on top of each other (less bot-like).\nSet to 0 to disable.");
-                DrawDefaultSettingSyncButton("Social Distance");
-            }
 
-            var sdIndoors = config.SocialDistancingIndoors;
-            using (UiGui.SettingRow("Social Distance Indoors"))
-            {
-                ImGui.SetNextItemWidth(200);
-                if (UiGui.Combo("Social Distance Indoors", ref sdIndoors, OnOff, OnOff.Length))
+                var dd = config.DDDistance;
+                using (UiGui.SettingRow("Extra distance"))
                 {
-                    config.SocialDistancingIndoors = sdIndoors;
-                    SaveEditingAccount();
+                    UiGui.SettingLabel();
+                    ImGui.SameLine(); UiGui.Text("DD");
+
+                    UiGui.SettingFieldWidth(100 * MaterialTheme.Metrics.Scale);
+                    if (UiGui.InputFloat("DD Extra Distance", ref dd))
+                    {
+                        config.DDDistance = dd;
+                        SaveEditingAccount();
+                    }
+                    ImGui.SameLine(); UiGui.TextDisabled("y");
+                    var fd = config.FDistance;
+                    ImGui.SameLine(); UiGui.Text("FATE");
+
+                    UiGui.SettingFieldWidth(100 * MaterialTheme.Metrics.Scale);
+                    if (UiGui.InputFloat("FATE Extra Distance", ref fd))
+                    {
+                        config.FDistance = fd;
+                        SaveEditingAccount();
+                    }
+                    ImGui.SameLine(); UiGui.TextDisabled("y");
+                    HelpMarker("Extra distance added to cling in Deep Dungeons.\nPrevents constant chasing in PotD/HoH.");
+                    HelpMarker("Reserved for future autosync FATE behavior.\nCurrent follow distance does not change on FATE join or leave.");
+                    DrawDefaultSettingSyncButton("DD Extra Distance");
+                    DrawDefaultSettingSyncButton("FATE Extra Distance");
                 }
-                HelpMarker("Enable social distancing indoors too.\nOff by default. Turn on if you want spacing in dungeons.");
-                DrawDefaultSettingSyncButton("Social Distance Indoors");
-            }
-
-            var xw = config.SocialDistanceXWiggle;
-            using (UiGui.SettingRow("Wiggle"))
-            {
-                UiGui.SettingLabel();
-                ImGui.SameLine(); UiGui.Text("X");
-
-                UiGui.SettingFieldWidth(100 * MaterialTheme.Metrics.Scale);
-                if (UiGui.InputFloat("X Wiggle (+/- yalms)", ref xw, 0.1f, 0.5f, "%.3f"))
-                {
-                    config.SocialDistanceXWiggle = xw;
-                    SaveEditingAccount();
-                }
-                ImGui.SameLine(); UiGui.TextDisabled("y");
-                var zw = config.SocialDistanceZWiggle;
-                ImGui.SameLine(); UiGui.Text("Z");
-
-                UiGui.SettingFieldWidth(100 * MaterialTheme.Metrics.Scale);
-                if (UiGui.InputFloat("Z Wiggle (+/- yalms)", ref zw, 0.1f, 0.5f, "%.3f"))
-                {
-                    config.SocialDistanceZWiggle = zw;
-                    SaveEditingAccount();
-                }
-                ImGui.SameLine(); UiGui.TextDisabled("y");
-                HelpMarker("Random variance on X axis during social distancing.\nAdds natural-looking movement variance.");
-                HelpMarker("Random variance on Z axis during social distancing.");
-                DrawDefaultSettingSyncButton("X Wiggle");
-                DrawDefaultSettingSyncButton("Z Wiggle");
-            }
-
-            UiGui.SettingsSection("Distance limits", "Max Follow Distance", "Max Follow Distance (Foray)", "Extra distance");
-            var maxB = config.MaxBistance;
-            using (UiGui.SettingRow("Max Follow Distance"))
-            {
-                ImGui.SetNextItemWidth(200);
-                if (UiGui.InputFloat("Max Follow Distance", ref maxB))
-                {
-                    config.MaxBistance = maxB;
-                    SaveEditingAccount();
-                }
-                HelpMarker("Maximum distance (yalms) to chase fren.\nBeyond this, stop following to avoid zone-hopping.");
-                DrawDefaultSettingSyncButton("Max Follow Distance");
-            }
-
-            var maxBf = config.MaxBistanceForay;
-            using (UiGui.SettingRow("Max Follow Distance (Foray)"))
-            {
-                ImGui.SetNextItemWidth(200);
-                if (UiGui.InputFloat("Max Follow Distance (Foray)", ref maxBf))
-                {
-                    config.MaxBistanceForay = maxBf;
-                    SaveEditingAccount();
-                }
-                HelpMarker("Max follow distance in forays (Eureka/Bozja).\nLower value to avoid mini-aetheryte transition issues.");
-                DrawDefaultSettingSyncButton("Max Follow Distance (Foray)");
-            }
-
-            var dd = config.DDDistance;
-            using (UiGui.SettingRow("Extra distance"))
-            {
-                UiGui.SettingLabel();
-                ImGui.SameLine(); UiGui.Text("DD");
-
-                UiGui.SettingFieldWidth(100 * MaterialTheme.Metrics.Scale);
-                if (UiGui.InputFloat("DD Extra Distance", ref dd))
-                {
-                    config.DDDistance = dd;
-                    SaveEditingAccount();
-                }
-                ImGui.SameLine(); UiGui.TextDisabled("y");
-                var fd = config.FDistance;
-                ImGui.SameLine(); UiGui.Text("FATE");
-
-                UiGui.SettingFieldWidth(100 * MaterialTheme.Metrics.Scale);
-                if (UiGui.InputFloat("FATE Extra Distance", ref fd))
-                {
-                    config.FDistance = fd;
-                    SaveEditingAccount();
-                }
-                ImGui.SameLine(); UiGui.TextDisabled("y");
-                HelpMarker("Extra distance added to cling in Deep Dungeons.\nPrevents constant chasing in PotD/HoH.");
-                HelpMarker("Reserved for future autosync FATE behavior.\nCurrent follow distance does not change on FATE join or leave.");
-                DrawDefaultSettingSyncButton("DD Extra Distance");
-                DrawDefaultSettingSyncButton("FATE Extra Distance");
-            }
+            }, 2);
         }, () =>
         {
-            UiGui.SettingsSection("FATE behavior");
-            var autoSyncFate = config.AutoSyncFate;
-            using (UiGui.SettingRow("Auto Sync FATE"))
+            UiGui.LcarsPanel("##FollowSection3", () =>
             {
-                if (UiGui.Checkbox("Auto Sync FATE", ref autoSyncFate))
+                UiGui.SettingsSection("FATE behavior");
+                var autoSyncFate = config.AutoSyncFate;
+                using (UiGui.SettingRow("Auto Sync FATE"))
                 {
-                    config.AutoSyncFate = autoSyncFate;
-                    SaveEditingAccount();
+                    if (UiGui.Checkbox("Auto Sync FATE", ref autoSyncFate))
+                    {
+                        config.AutoSyncFate = autoSyncFate;
+                        SaveEditingAccount();
+                    }
+                    ImGui.SameLine();
+                    if (UiGui.SmallButton("DISABLE PANDORA's BOX"))
+                    {
+                        GameHelpers.SendChatCommand("/xldisableplugin Pandora's Box", "[FR][FATE-SYNC]");
+                    }
+                    HelpMarker("Runs /levelsync on after joining a FATE.\nDefers while mounted or riding pillion.");
+                    DrawDefaultSettingSyncButton("Auto Sync FATE");
                 }
-                ImGui.SameLine();
-                if (UiGui.SmallButton("DISABLE PANDORA's BOX"))
-                {
-                    GameHelpers.SendChatCommand("/xldisableplugin Pandora's Box", "[FR][FATE-SYNC]");
-                }
-                HelpMarker("Runs /levelsync on after joining a FATE.\nDefers while mounted or riding pillion.");
-                DrawDefaultSettingSyncButton("Auto Sync FATE");
-            }
 
-            var pauseClingForFate = config.PauseClingForFate;
-            using (UiGui.SettingRow("Pause cling for FATE"))
-            {
-                if (UiGui.Checkbox("Pause cling for FATE", ref pauseClingForFate))
+                var pauseClingForFate = config.PauseClingForFate;
+                using (UiGui.SettingRow("Pause cling for FATE"))
                 {
-                    config.PauseClingForFate = pauseClingForFate;
-                    SaveEditingAccount();
+                    if (UiGui.Checkbox("Pause cling for FATE", ref pauseClingForFate))
+                    {
+                        config.PauseClingForFate = pauseClingForFate;
+                        SaveEditingAccount();
+                    }
+                    HelpMarker("While driving your own mount with Fly You Fools, safely land and dismount, then pause cling until the FATE and combat end. Pillion passengers are never dismounted.");
+                    DrawDefaultSettingSyncButton("Pause cling for FATE");
                 }
-                HelpMarker("While driving your own mount with Fly You Fools, safely land and dismount, then pause cling until the FATE and combat end. Pillion passengers are never dismounted.");
-                DrawDefaultSettingSyncButton("Pause cling for FATE");
-            }
 
-            var ignoreFates = config.IgnoreFates;
-            using (UiGui.SettingRow("Ignore FATEs"))
-            {
-                if (UiGui.Checkbox("Ignore FATEs", ref ignoreFates))
+                var ignoreFates = config.IgnoreFates;
+                using (UiGui.SettingRow("Ignore FATEs"))
                 {
-                    config.IgnoreFates = ignoreFates;
-                    SaveEditingAccount();
+                    if (UiGui.Checkbox("Ignore FATEs", ref ignoreFates))
+                    {
+                        config.IgnoreFates = ignoreFates;
+                        SaveEditingAccount();
+                    }
+                    HelpMarker("Skip automatic FATE sync and FATE preset overrides, and ignore Pause cling for FATE. Ordinary travel and self-defence continue.");
+                    DrawDefaultSettingSyncButton("Ignore FATEs");
                 }
-                HelpMarker("Skip automatic FATE sync and FATE preset overrides, and ignore Pause cling for FATE. Ordinary travel and self-defence continue.");
-                DrawDefaultSettingSyncButton("Ignore FATEs");
-            }
-            UiGui.SettingsSection("Formation & Combat", "Follow in Combat", "Harmonized reset");
-            var formation = config.Formation;
-            using (UiGui.SettingRow("Formation Following"))
+            }, 0);
+            UiGui.LcarsPanel("##FollowSection4", () =>
             {
-                if (UiGui.Checkbox("Formation Following", ref formation))
+                UiGui.SettingsSection("Formation & Combat", "Follow in Combat", "Harmonized reset");
+                var formation = config.Formation;
+                using (UiGui.SettingRow("Formation Following"))
                 {
-                    config.Formation = formation;
-                    SaveEditingAccount();
+                    if (UiGui.Checkbox("Formation Following", ref formation))
+                    {
+                        config.Formation = formation;
+                        SaveEditingAccount();
+                    }
+                    HelpMarker("Follow in a formation pattern (8-person grid).\nPositions based on party slot number.\nDisabled during mounting.");
+                    DrawDefaultSettingSyncButton("Formation Following");
                 }
-                HelpMarker("Follow in a formation pattern (8-person grid).\nPositions based on party slot number.\nDisabled during mounting.");
-                DrawDefaultSettingSyncButton("Formation Following");
-            }
 
-            var fic = config.FollowInCombat;
-            using (UiGui.SettingRow("Follow in Combat"))
-            {
-                ImGui.SetNextItemWidth(200);
-                if (UiGui.Combo("Follow in Combat", ref fic, FollowInCombatOptions, FollowInCombatOptions.Length))
+                var fic = config.FollowInCombat;
+                using (UiGui.SettingRow("Follow in Combat"))
                 {
-                    config.FollowInCombat = fic;
-                    SaveEditingAccount();
+                    ImGui.SetNextItemWidth(200);
+                    if (UiGui.Combo("Follow in Combat", ref fic, FollowInCombatOptions, FollowInCombatOptions.Length))
+                    {
+                        config.FollowInCombat = fic;
+                        SaveEditingAccount();
+                    }
+                    HelpMarker("Whether to follow fren during combat.\nAuto: Let the plugin decide based on your job/role.");
+                    DrawDefaultSettingSyncButton("Follow in Combat");
                 }
-                HelpMarker("Whether to follow fren during combat.\nAuto: Let the plugin decide based on your job/role.");
-                DrawDefaultSettingSyncButton("Follow in Combat");
-            }
 
-            var hcr = config.HClingReset;
-            using (UiGui.SettingRow("Harmonized Cling Reset Ticks"))
-            {
-                ImGui.SetNextItemWidth(200);
-                if (UiGui.InputInt("Harmonized Cling Reset Ticks", ref hcr))
+                var hcr = config.HClingReset;
+                using (UiGui.SettingRow("Harmonized Cling Reset Ticks"))
                 {
-                    config.HClingReset = hcr;
-                    SaveEditingAccount();
+                    ImGui.SetNextItemWidth(200);
+                    if (UiGui.InputInt("Harmonized Cling Reset Ticks", ref hcr))
+                    {
+                        config.HClingReset = hcr;
+                        SaveEditingAccount();
+                    }
+                    HelpMarker("Number of ticks before harmonized cling resets to 0.\nHandles special logic like DD/FATE force cling.");
+                    DrawDefaultSettingSyncButton("Harmonized Cling Reset Ticks");
                 }
-                HelpMarker("Number of ticks before harmonized cling resets to 0.\nHandles special logic like DD/FATE force cling.");
-                DrawDefaultSettingSyncButton("Harmonized Cling Reset Ticks");
-            }
-            UiGui.SettingsSection("Cling exclusions");
-            DrawClingExclusions(config);
+            }, 1);
+            UiGui.LcarsPanel("##FollowSection5", () =>
+            {
+                UiGui.SettingsSection("Cling exclusions");
+                DrawClingExclusions(config);
+            }, 2);
         });
     }
 
@@ -1785,296 +1860,317 @@ public partial class ConfigWindow : Window, IDisposable
     private void DrawCombatTab(CharacterConfig config)
     {
         using (UiText.Font(UiFontRole.PluginName)) UiGui.Text("Combat");
-        if (configManager.TryGetActiveConfig(out var activeConfig) && activeConfig != null)
+        UiGui.LcarsPanel("##CombatEffectiveRotation", () =>
         {
-            UiGui.Text(UiText.F("Effective rotation: {0} ({1})",
-                plugin.CombatService.GetConfiguredRotationProvider(activeConfig),
-                UiText.T(plugin.ZoneService.CurrentZone == ZoneType.Foray ? "Foray" : "Normal")));
-        }
-        if (IsDefaultConfigSelected())
-            UiGui.TextWrapped("DEFAULT CONFIG is a template. Combat uses the active character profile.");
-        else if (editingAccountId == configManager.CurrentAccountId && configManager.HasTemporaryProfile &&
-                 string.Equals(editingCharacterKey, configManager.ActiveCharacterKey, StringComparison.Ordinal) &&
-                 GetEditingRemoteProfile() == null)
-            UiGui.TextWrapped("Temporary DAD profile supplies the effective rotation; the controls below edit the saved profile.");
+            if (configManager.TryGetActiveConfig(out var activeConfig) && activeConfig != null)
+            {
+                UiGui.Text(UiText.F("Effective rotation: {0} ({1})",
+                    plugin.CombatService.GetConfiguredRotationProvider(activeConfig),
+                    UiText.T(plugin.ZoneService.CurrentZone == ZoneType.Foray ? "Foray" : "Normal")));
+            }
+            if (IsDefaultConfigSelected())
+                UiGui.TextWrapped("DEFAULT CONFIG is a template. Combat uses the active character profile.");
+            else if (editingAccountId == configManager.CurrentAccountId && configManager.HasTemporaryProfile &&
+                     string.Equals(editingCharacterKey, configManager.ActiveCharacterKey, StringComparison.Ordinal) &&
+                     GetEditingRemoteProfile() == null)
+                UiGui.TextWrapped("Temporary DAD profile supplies the effective rotation; the controls below edit the saved profile.");
+        }, 2);
         MaterialSettings.Columns("##CombatGroups", UiGui.SettingsMinimum("Rotation Plugin (Foray)", "RSR Operating Mode", "Configure rotation preset manually"), () =>
         {
-            UiGui.SettingsSection("Rotation", "Rotation Plugin", "Rotation Plugin (Foray)", "Cleanup Mode", "Daedalus Engage Mode");
-            // Rotation Plugin (dropdown)
-            var rotPlugin = Array.IndexOf(RotationPluginIds, config.RotationPlugin);
-            using (UiGui.SettingRow("Rotation Plugin"))
+            UiGui.LcarsPanel("##CombatSection0", () =>
             {
-                ImGui.SetNextItemWidth(200);
-                if (UiGui.Combo("Rotation Plugin", ref rotPlugin, RotationPlugins, RotationPlugins.Length))
-                {
-                    config.RotationPlugin = RotationPluginIds[rotPlugin];
-                    SaveEditingAccount();
-                }
-                HelpMarker("Which rotation automation plugin to use.\nBMR: BossModReborn\nVBM: VanillaBossMod\nRSR: RotationSolver Reborn\nWRATH: Wrath\nDAEDALUS: Daedalus");
-                DrawDefaultSettingSyncButton("Rotation Plugin");
-            }
-
-            // Rotation Plugin Foray (dropdown)
-            var rotPluginForay = Array.IndexOf(RotationPluginIds, config.RotationPluginForay);
-            using (UiGui.SettingRow("Rotation Plugin (Foray)"))
-            {
-                ImGui.SetNextItemWidth(200);
-                if (UiGui.Combo("Rotation Plugin (Foray)", ref rotPluginForay, RotationPlugins, RotationPlugins.Length))
-                {
-                    config.RotationPluginForay = RotationPluginIds[rotPluginForay];
-                    SaveEditingAccount();
-                }
-                HelpMarker("Rotation plugin for foray content (Eureka/Bozja).\nWRATH recommended for phantom job support.");
-                DrawDefaultSettingSyncButton("Rotation Plugin (Foray)");
-            }
-
-            var isForayContext = plugin.ZoneService.CurrentZone == ZoneType.Foray;
-            if (DaedalusTargetModeService.IsEffectiveRotation(
-                    config.RotationPlugin,
-                    config.RotationPluginForay,
-                    isForayContext))
-            {
-                var daedalusTargetMode = (int)config.DaedalusTargetMode;
-                using (UiGui.SettingRow("Daedalus Engage Mode"))
+                UiGui.SettingsSection("Rotation", "Rotation Plugin", "Rotation Plugin (Foray)", "Cleanup Mode", "Daedalus Engage Mode");
+                // Rotation Plugin (dropdown)
+                var rotPlugin = Array.IndexOf(RotationPluginIds, config.RotationPlugin);
+                using (UiGui.SettingRow("Rotation Plugin"))
                 {
                     ImGui.SetNextItemWidth(200);
-                    if (UiGui.Combo(
-                            "Daedalus Engage Mode",
-                            ref daedalusTargetMode,
-                            DaedalusTargetModes,
-                            DaedalusTargetModes.Length))
+                    if (UiGui.Combo("Rotation Plugin", ref rotPlugin, RotationPlugins, RotationPlugins.Length))
                     {
-                        config.DaedalusTargetMode = Enum.IsDefined(typeof(DaedalusTargetMode), daedalusTargetMode)
-                            ? (DaedalusTargetMode)daedalusTargetMode
-                            : DaedalusTargetMode.None;
+                        config.RotationPlugin = RotationPluginIds[rotPlugin];
                         SaveEditingAccount();
-                        if (ReferenceEquals(config, configManager.GetActiveConfig()))
-                            plugin.DaedalusTargetModeService.Apply(config.DaedalusTargetMode, notifyUser: true);
                     }
-                    HelpMarker("Party engage mode sent through Daedalus LAN coordination.\nFocus requires a living enemy hard target.\nNone, Split, and Kill Adds preserve Daedalus's current focus and off-tank assignments.");
-                    DrawDefaultSettingSyncButton("Daedalus Engage Mode");
+                    HelpMarker("Which rotation automation plugin to use.\nBMR: BossModReborn\nVBM: VanillaBossMod\nRSR: RotationSolver Reborn\nWRATH: Wrath\nDAEDALUS: Daedalus");
+                    DrawDefaultSettingSyncButton("Rotation Plugin");
                 }
-            }
+
+                // Rotation Plugin Foray (dropdown)
+                var rotPluginForay = Array.IndexOf(RotationPluginIds, config.RotationPluginForay);
+                using (UiGui.SettingRow("Rotation Plugin (Foray)"))
+                {
+                    ImGui.SetNextItemWidth(200);
+                    if (UiGui.Combo("Rotation Plugin (Foray)", ref rotPluginForay, RotationPlugins, RotationPlugins.Length))
+                    {
+                        config.RotationPluginForay = RotationPluginIds[rotPluginForay];
+                        SaveEditingAccount();
+                    }
+                    HelpMarker("Rotation plugin for foray content (Eureka/Bozja).\nWRATH recommended for phantom job support.");
+                    DrawDefaultSettingSyncButton("Rotation Plugin (Foray)");
+                }
+
+                var isForayContext = plugin.ZoneService.CurrentZone == ZoneType.Foray;
+                if (DaedalusTargetModeService.IsEffectiveRotation(
+                        config.RotationPlugin,
+                        config.RotationPluginForay,
+                        isForayContext))
+                {
+                    var daedalusTargetMode = (int)config.DaedalusTargetMode;
+                    using (UiGui.SettingRow("Daedalus Engage Mode"))
+                    {
+                        ImGui.SetNextItemWidth(200);
+                        if (UiGui.Combo(
+                                "Daedalus Engage Mode",
+                                ref daedalusTargetMode,
+                                DaedalusTargetModes,
+                                DaedalusTargetModes.Length))
+                        {
+                            config.DaedalusTargetMode = Enum.IsDefined(typeof(DaedalusTargetMode), daedalusTargetMode)
+                                ? (DaedalusTargetMode)daedalusTargetMode
+                                : DaedalusTargetMode.None;
+                            SaveEditingAccount();
+                            if (ReferenceEquals(config, configManager.GetActiveConfig()))
+                                plugin.DaedalusTargetModeService.Apply(config.DaedalusTargetMode, notifyUser: true);
+                        }
+                        HelpMarker("Party engage mode sent through Daedalus LAN coordination.\nFocus requires a living enemy hard target.\nNone, Split, and Kill Adds preserve Daedalus's current focus and off-tank assignments.");
+                        DrawDefaultSettingSyncButton("Daedalus Engage Mode");
+                    }
+                }
 
 
-            var cleanupMode = config.CleanupMode == FrenRiderCleanupMode.TurnEverythingOff ? 1 : 0;
-            using (UiGui.SettingRow("Cleanup Mode"))
-            {
-                ImGui.SetNextItemWidth(200);
-                if (UiGui.Combo("Cleanup Mode", ref cleanupMode, CleanupModes, CleanupModes.Length))
+                var cleanupMode = config.CleanupMode == FrenRiderCleanupMode.TurnEverythingOff ? 1 : 0;
+                using (UiGui.SettingRow("Cleanup Mode"))
                 {
-                    config.CleanupMode = cleanupMode == 1
-                        ? FrenRiderCleanupMode.TurnEverythingOff
-                        : FrenRiderCleanupMode.RestoreSnapshot;
-                    SaveEditingAccount();
+                    ImGui.SetNextItemWidth(200);
+                    if (UiGui.Combo("Cleanup Mode", ref cleanupMode, CleanupModes, CleanupModes.Length))
+                    {
+                        config.CleanupMode = cleanupMode == 1
+                            ? FrenRiderCleanupMode.TurnEverythingOff
+                            : FrenRiderCleanupMode.RestoreSnapshot;
+                        SaveEditingAccount();
+                    }
+                    HelpMarker("Restore snapshot: put captured BMR/VBM AI on/off, follow, movement, CBT fields, and Daedalus enabled state back on /fr off.\nTurn everything off: disable BMR/VBM AI, CBT AutoFollow, RotationSolverReborn, Daedalus, and Wrath auto if FrenRider started it.");
+                    DrawDefaultSettingSyncButton("Cleanup Mode");
                 }
-                HelpMarker("Restore snapshot: put captured BMR/VBM AI on/off, follow, movement, CBT fields, and Daedalus enabled state back on /fr off.\nTurn everything off: disable BMR/VBM AI, CBT AutoFollow, RotationSolverReborn, Daedalus, and Wrath auto if FrenRider started it.");
-                DrawDefaultSettingSyncButton("Cleanup Mode");
-            }
-            UiGui.SettingsSection("RSR options", "RSR Operating Mode", "RSR Aggro Type");
-            // RSR Operating Mode (dropdown)
-            var rotType = config.RotationType;
-            using (UiGui.SettingRow("RSR Operating Mode"))
+            }, 0);
+            UiGui.LcarsPanel("##CombatSection1", () =>
             {
-                ImGui.SetNextItemWidth(200);
-                if (UiGui.Combo("RSR Operating Mode", ref rotType, RsrOperatingModes, RsrOperatingModes.Length))
+                UiGui.SettingsSection("RSR options", "RSR Operating Mode", "RSR Aggro Type");
+                // RSR Operating Mode (dropdown)
+                var rotType = config.RotationType;
+                using (UiGui.SettingRow("RSR Operating Mode"))
                 {
-                    config.RotationType = rotType;
-                    SaveEditingAccount();
+                    ImGui.SetNextItemWidth(200);
+                    if (UiGui.Combo("RSR Operating Mode", ref rotType, RsrOperatingModes, RsrOperatingModes.Length))
+                    {
+                        config.RotationType = rotType;
+                        SaveEditingAccount();
+                    }
+                    HelpMarker("RSR operating mode when RSR is the selected rotation plugin.\nAuto: Full auto.\nManual: Manual targeting mode.\nNone: Don't let FrenRider change the current rotation state.\nSupport: Uses RSR's plugin-managed support mode.");
+                    DrawDefaultSettingSyncButton("RSR Operating Mode");
                 }
-                HelpMarker("RSR operating mode when RSR is the selected rotation plugin.\nAuto: Full auto.\nManual: Manual targeting mode.\nNone: Don't let FrenRider change the current rotation state.\nSupport: Uses RSR's plugin-managed support mode.");
-                DrawDefaultSettingSyncButton("RSR Operating Mode");
-            }
 
-            var rsrAggroType = config.RsrAggroType;
-            using (UiGui.SettingRow("RSR Aggro Type"))
-            {
-                ImGui.SetNextItemWidth(200);
-                if (UiGui.Combo("RSR Aggro Type", ref rsrAggroType, RsrAggroTypes, RsrAggroTypes.Length))
+                var rsrAggroType = config.RsrAggroType;
+                using (UiGui.SettingRow("RSR Aggro Type"))
                 {
-                    config.RsrAggroType = rsrAggroType;
-                    SaveEditingAccount();
+                    ImGui.SetNextItemWidth(200);
+                    if (UiGui.Combo("RSR Aggro Type", ref rsrAggroType, RsrAggroTypes, RsrAggroTypes.Length))
+                    {
+                        config.RsrAggroType = rsrAggroType;
+                        SaveEditingAccount();
+                    }
+                    HelpMarker("Hostile target selection sent to RotationSolver Reborn through its typed settings IPC.");
+                    DrawDefaultSettingSyncButton("RSR Aggro Type");
                 }
-                HelpMarker("Hostile target selection sent to RotationSolver Reborn through its typed settings IPC.");
-                DrawDefaultSettingSyncButton("RSR Aggro Type");
-            }
-            UiGui.SettingsSection("Movement & Targeting", "BossMod AI", "Positional", "Max AI Distance", "LB Threshold %");
-            // BossMod AI (dropdown)
-            var bossModAI = config.BossModAI;
-            using (UiGui.SettingRow("BossMod AI"))
+            }, 1);
+            UiGui.LcarsPanel("##CombatSection2", () =>
             {
-                ImGui.SetNextItemWidth(200);
-                if (UiGui.Combo("BossMod AI", ref bossModAI, BossModAIOptions, BossModAIOptions.Length))
+                UiGui.SettingsSection("Movement & Targeting", "BossMod AI", "Positional", "Max AI Distance", "LB Threshold %");
+                // BossMod AI (dropdown)
+                var bossModAI = config.BossModAI;
+                using (UiGui.SettingRow("BossMod AI"))
                 {
-                    config.BossModAI = bossModAI;
-                    SaveEditingAccount();
+                    ImGui.SetNextItemWidth(200);
+                    if (UiGui.Combo("BossMod AI", ref bossModAI, BossModAIOptions, BossModAIOptions.Length))
+                    {
+                        config.BossModAI = bossModAI;
+                        SaveEditingAccount();
+                    }
+                    HelpMarker("On: enable the selected BossMod AI implementation for combat.\nOff: send BMR and VBM AI off commands while preserving the rest of FrenRider's combat setup.");
+                    DrawDefaultSettingSyncButton("BossMod AI");
                 }
-                HelpMarker("On: enable the selected BossMod AI implementation for combat.\nOff: send BMR and VBM AI off commands while preserving the rest of FrenRider's combat setup.");
-                DrawDefaultSettingSyncButton("BossMod AI");
-            }
 
-            var dontMoveWhileCasting = configuration.DontMoveWhileCasting;
-            using (UiGui.SettingRow("Don't move while casting"))
-            {
-                if (UiGui.Checkbox("Don't move while casting", ref dontMoveWhileCasting))
+                var dontMoveWhileCasting = configuration.DontMoveWhileCasting;
+                using (UiGui.SettingRow("Don't move while casting"))
                 {
-                    configuration.DontMoveWhileCasting = dontMoveWhileCasting;
-                    configuration.Save();
-                    plugin.BossModActionTweaksService.ApplyDontMoveWhileCasting(dontMoveWhileCasting);
+                    if (UiGui.Checkbox("Don't move while casting", ref dontMoveWhileCasting))
+                    {
+                        configuration.DontMoveWhileCasting = dontMoveWhileCasting;
+                        configuration.Save();
+                        plugin.BossModActionTweaksService.ApplyDontMoveWhileCasting(dontMoveWhileCasting);
+                    }
+                    HelpMarker("Global setting. On plugin load and whenever it changes, applies casting movement lock to currently loaded BMR, VBM, and RSR plugins.");
+
                 }
-                HelpMarker("Global setting. On plugin load and whenever it changes, applies casting movement lock to currently loaded BMR, VBM, and RSR plugins.");
-
-            }
-            var actionTweaks = plugin.BossModActionTweaksService;
-            if (actionTweaks.HasResult)
-            {
-                var statusColor = actionTweaks.HasFailures
-                    ? UiHelpers.Red
-                    : actionTweaks.HasNotLoadedTargets
-                        ? UiHelpers.Yellow
-                        : UiHelpers.Green;
-                UiGui.TextColored(statusColor, actionTweaks.StatusText);
-            }
-
-            // Positional (dropdown)
-            var positional = config.PositionalInCombat;
-            using (UiGui.SettingRow("Positional"))
-            {
-                ImGui.SetNextItemWidth(200);
-                if (UiGui.Combo("Positional", ref positional, Positionals, Positionals.Length))
+                var actionTweaks = plugin.BossModActionTweaksService;
+                if (actionTweaks.HasResult)
                 {
-                    config.PositionalInCombat = positional;
-                    SaveEditingAccount();
+                    var statusColor = actionTweaks.HasFailures
+                        ? UiHelpers.Red
+                        : actionTweaks.HasNotLoadedTargets
+                            ? UiHelpers.Yellow
+                            : UiHelpers.Green;
+                    UiGui.TextColored(statusColor, actionTweaks.StatusText);
                 }
-                HelpMarker("Combat positional preference.\nFront: Stay in front of target\nRear: Stay behind target\nAny: No preference\nAuto: Let plugin decide based on job");
-                DrawDefaultSettingSyncButton("Positional");
-            }
 
-            var maxAIDist = config.MaxAIDistance;
-            using (UiGui.SettingRow("Max AI Distance"))
-            {
-                ImGui.SetNextItemWidth(200);
-                if (UiGui.InputFloat("Max AI Distance", ref maxAIDist))
+                // Positional (dropdown)
+                var positional = config.PositionalInCombat;
+                using (UiGui.SettingRow("Positional"))
                 {
-                    config.MaxAIDistance = maxAIDist;
-                    SaveEditingAccount();
+                    ImGui.SetNextItemWidth(200);
+                    if (UiGui.Combo("Positional", ref positional, Positionals, Positionals.Length))
+                    {
+                        config.PositionalInCombat = positional;
+                        SaveEditingAccount();
+                    }
+                    HelpMarker("Combat positional preference.\nFront: Stay in front of target\nRear: Stay behind target\nAny: No preference\nAuto: Let plugin decide based on job");
+                    DrawDefaultSettingSyncButton("Positional");
                 }
-                HelpMarker("Max distance to targets for combat AI.\n424242 = Auto (plugin decides based on job: melee 2.6, caster 10).");
-                DrawDefaultSettingSyncButton("Max AI Distance");
-            }
+
+                var maxAIDist = config.MaxAIDistance;
+                using (UiGui.SettingRow("Max AI Distance"))
+                {
+                    ImGui.SetNextItemWidth(200);
+                    if (UiGui.InputFloat("Max AI Distance", ref maxAIDist))
+                    {
+                        config.MaxAIDistance = maxAIDist;
+                        SaveEditingAccount();
+                    }
+                    HelpMarker("Max distance to targets for combat AI.\n424242 = Auto (plugin decides based on job: melee 2.6, caster 10).");
+                    DrawDefaultSettingSyncButton("Max AI Distance");
+                }
+            }, 2);
 
         }, () =>
         {
-            UiGui.SettingsSection("BossMod presets", "BM Rotation Preset", "BM Rotation Preset (DD)", "BM Rotation Preset (FATE)");
-            var manualPresetConfig = config.ConfigureRotationPresetManually;
-            using (UiGui.SettingRow("Configure rotation preset manually"))
+            UiGui.LcarsPanel("##CombatSection3", () =>
             {
-                if (UiGui.Checkbox("Configure rotation preset manually", ref manualPresetConfig))
+                UiGui.SettingsSection("BossMod presets", "BM Rotation Preset", "BM Rotation Preset (DD)", "BM Rotation Preset (FATE)");
+                var manualPresetConfig = config.ConfigureRotationPresetManually;
+                using (UiGui.SettingRow("Configure rotation preset manually"))
                 {
-                    config.ConfigureRotationPresetManually = manualPresetConfig;
-                    SaveEditingAccount();
+                    if (UiGui.Checkbox("Configure rotation preset manually", ref manualPresetConfig))
+                    {
+                        config.ConfigureRotationPresetManually = manualPresetConfig;
+                        SaveEditingAccount();
+                    }
+                    HelpMarker("Off: FrenRider chooses BossMod presets from your job and rotation provider.\nOn: use the BossMod presets below with any rotation provider. A custom preset may run actions alongside RSR, WRATH or DAEDALUS.");
+                    DrawDefaultSettingSyncButton("Configure rotation preset manually");
                 }
-                HelpMarker("Off: FrenRider chooses BossMod presets from your job and rotation provider.\nOn: use the BossMod presets below with any rotation provider. A custom preset may run actions alongside RSR, WRATH or DAEDALUS.");
-                DrawDefaultSettingSyncButton("Configure rotation preset manually");
-            }
 
-            if (config.ConfigureRotationPresetManually)
-            {
-                var catalog = plugin.AutorotIpcService.ReadPresetCatalog(plugin.CombatService.GetConfiguredRotationProvider(config));
-                DrawBossModPresetSelector("BM Rotation Preset", config, 0, catalog);
-                DrawBossModPresetSelector("BM Rotation Preset (DD)", config, 1, catalog);
-                DrawBossModPresetSelector("BM Rotation Preset (FATE)", config, 2, catalog);
-                if (!catalog.Readable || catalog.DisplayedNames.Count == 0)
-                    UiGui.TextDisabled("BossMod preset catalog unavailable or empty; saved selections are retained.");
-            }
-            else
-            {
-                UiGui.TextDisabled("Managed presets: BMR/VBM use FRENRIDER role presets; RSR/WRATH/DAEDALUS use passive role presets.");
-            }
-            UiGui.SettingsSection("Beastmaster Capture", "Capture HP: >5 levels below", "Capture HP: within 5 levels");
-            var catchBeasts = config.TryToCatchBeasts;
-            using (UiGui.SettingRow("Try to catch beasts"))
-            {
-                if (UiGui.Checkbox("Try to catch beasts", ref catchBeasts))
+                if (config.ConfigureRotationPresetManually)
                 {
-                    config.TryToCatchBeasts = catchBeasts;
-                    SaveEditingAccount();
-                }
-                HelpMarker("While FrenRider is enabled on Beastmaster, try Capture on eligible living beasts closer than 10 yalms, including passive beasts outside combat.\nPrefers an eligible current target; otherwise automatically targets the nearest eligible beast when Capture is ready.\nSkips owned beasts and enemies above your effective level, and respects both HP thresholds.\nRetries on later cooldowns, including already marked beasts.");
-                DrawDefaultSettingSyncButton("Try to catch beasts");
-            }
-
-            var farHp = config.CaptureHpFarBelow;
-            using (UiGui.SettingRow("Capture HP: more than 5 levels below you"))
-            {
-                ImGui.SetNextItemWidth(120);
-                if (UiGui.InputInt("Capture HP: more than 5 levels below you", ref farHp))
-                {
-                    config.CaptureHpFarBelow = farHp;
-                    SaveEditingAccount();
-                }
-                DrawDefaultSettingSyncButton("Capture HP: more than 5 levels below you");
-            }
-
-            var nearHp = config.CaptureHpNearOrEqual;
-            using (UiGui.SettingRow("Capture HP: within 5 levels below you or equal"))
-            {
-                ImGui.SetNextItemWidth(120);
-                if (UiGui.InputInt("Capture HP: within 5 levels below you or equal", ref nearHp))
-                {
-                    config.CaptureHpNearOrEqual = nearHp;
-                    SaveEditingAccount();
-                }
-                HelpMarker("Both HP thresholds accept 1–100%. Exactly five levels below uses this second threshold.\n100% permits Capture on a full-health beast and may initiate combat.");
-                DrawDefaultSettingSyncButton("Capture HP: within 5 levels below you or equal");
-            }
-
-            if (UiGui.CollapsingHeader("Saved beasts"))
-            {
-                var account = configManager.GetCurrentAccount(editingAccountId);
-                if (!string.IsNullOrEmpty(editingRemoteRowId) || string.IsNullOrEmpty(editingCharacterKey) || account == null)
-                {
-                    UiGui.TextWrapped("Select a local character to browse their saved beasts.");
+                    var catalog = plugin.AutorotIpcService.ReadPresetCatalog(plugin.CombatService.GetConfiguredRotationProvider(config));
+                    DrawBossModPresetSelector("BM Rotation Preset", config, 0, catalog);
+                    DrawBossModPresetSelector("BM Rotation Preset (DD)", config, 1, catalog);
+                    DrawBossModPresetSelector("BM Rotation Preset (FATE)", config, 2, catalog);
+                    if (!catalog.Readable || catalog.DisplayedNames.Count == 0)
+                        UiGui.TextDisabled("BossMod preset catalog unavailable or empty; saved selections are retained.");
                 }
                 else
                 {
-                    account.UnlockedBeasts.TryGetValue(editingCharacterKey, out var owned);
-                    UiGui.TextWrapped(owned == null
-                        ? "No confirmed list saved yet. This character's list refreshes while on Beastmaster."
-                        : "Saved ownership refreshes while on Beastmaster, including when automatic Capture is off.");
-                    using var tightRows = plugin.Configuration.UiCompact ? MaterialTable.PushTightRows() : default;
-                    if (ImGui.BeginTable("SavedBeasts", 2, ImGuiTableFlags.ScrollY | ImGuiTableFlags.RowBg,
-                            new Vector2(0, 220)))
+                    UiGui.TextDisabled("Managed presets: BMR/VBM use FRENRIDER role presets; RSR/WRATH/DAEDALUS use passive role presets.");
+                }
+            }, 0);
+            UiGui.LcarsPanel("##CombatSection4", () =>
+            {
+                UiGui.SettingsSection("Beastmaster Capture", "Capture HP: >5 levels below", "Capture HP: within 5 levels");
+                var catchBeasts = config.TryToCatchBeasts;
+                using (UiGui.SettingRow("Try to catch beasts"))
+                {
+                    if (UiGui.Checkbox("Try to catch beasts", ref catchBeasts))
                     {
-                        ImGui.TableSetupColumn("Beast");
-                        ImGui.TableSetupColumn("Saved ownership");
-                        UiGui.TableHeadersRow();
-                        foreach (var entry in plugin.BeastCaptureService.Roster)
+                        config.TryToCatchBeasts = catchBeasts;
+                        SaveEditingAccount();
+                    }
+                    HelpMarker("While FrenRider is enabled on Beastmaster, try Capture on eligible living beasts closer than 10 yalms, including passive beasts outside combat.\nPrefers an eligible current target; otherwise automatically targets the nearest eligible beast when Capture is ready.\nSkips owned beasts and enemies above your effective level, and respects both HP thresholds.\nRetries on later cooldowns, including already marked beasts.");
+                    DrawDefaultSettingSyncButton("Try to catch beasts");
+                }
+
+                var farHp = config.CaptureHpFarBelow;
+                using (UiGui.SettingRow("Capture HP: more than 5 levels below you"))
+                {
+                    ImGui.SetNextItemWidth(120);
+                    if (UiGui.InputInt("Capture HP: more than 5 levels below you", ref farHp))
+                    {
+                        config.CaptureHpFarBelow = farHp;
+                        SaveEditingAccount();
+                    }
+                    DrawDefaultSettingSyncButton("Capture HP: more than 5 levels below you");
+                }
+
+                var nearHp = config.CaptureHpNearOrEqual;
+                using (UiGui.SettingRow("Capture HP: within 5 levels below you or equal"))
+                {
+                    ImGui.SetNextItemWidth(120);
+                    if (UiGui.InputInt("Capture HP: within 5 levels below you or equal", ref nearHp))
+                    {
+                        config.CaptureHpNearOrEqual = nearHp;
+                        SaveEditingAccount();
+                    }
+                    HelpMarker("Both HP thresholds accept 1–100%. Exactly five levels below uses this second threshold.\n100% permits Capture on a full-health beast and may initiate combat.");
+                    DrawDefaultSettingSyncButton("Capture HP: within 5 levels below you or equal");
+                }
+
+                if (UiGui.CollapsingHeader("Saved beasts"))
+                {
+                    var account = configManager.GetCurrentAccount(editingAccountId);
+                    if (!string.IsNullOrEmpty(editingRemoteRowId) || string.IsNullOrEmpty(editingCharacterKey) || account == null)
+                    {
+                        UiGui.TextWrapped("Select a local character to browse their saved beasts.");
+                    }
+                    else
+                    {
+                        account.UnlockedBeasts.TryGetValue(editingCharacterKey, out var owned);
+                        UiGui.TextWrapped(owned == null
+                            ? "No confirmed list saved yet. This character's list refreshes while on Beastmaster."
+                            : "Saved ownership refreshes while on Beastmaster, including when automatic Capture is off.");
+                        using var tightRows = plugin.Configuration.UiCompact ? MaterialTable.PushTightRows() : default;
+                        if (ImGui.BeginTable("SavedBeasts", 2, ImGuiTableFlags.ScrollY | ImGuiTableFlags.RowBg,
+                                new Vector2(0, 220)))
                         {
-                            ImGui.TableNextRow();
-                            ImGui.TableNextColumn();
-                            MaterialText.Text(entry.Name);
-                            ImGui.TableNextColumn();
-                            UiGui.TextUnformatted(owned == null ? "Unknown" : owned.Contains(entry.Id) ? "Owned" : "Missing");
+                            ImGui.TableSetupColumn("Beast");
+                            ImGui.TableSetupColumn("Saved ownership");
+                            UiGui.TableHeadersRow();
+                            foreach (var entry in plugin.BeastCaptureService.Roster)
+                            {
+                                ImGui.TableNextRow();
+                                ImGui.TableNextColumn();
+                                MaterialText.Text(entry.Name);
+                                ImGui.TableNextColumn();
+                                UiGui.TextUnformatted(owned == null ? "Unknown" : owned.Contains(entry.Id) ? "Owned" : "Missing");
+                            }
+                            ImGui.EndTable();
                         }
-                        ImGui.EndTable();
                     }
                 }
-            }
-            UiGui.SettingsSection("Advanced / BMR");
-            var obstacleMapsOn = config.ObstacleMapsOn;
-            using (UiGui.SettingRow("Obstacle maps on"))
+            }, 1);
+            UiGui.LcarsPanel("##CombatSection5", () =>
             {
-                if (UiGui.Checkbox("Obstacle maps on", ref obstacleMapsOn))
+                UiGui.SettingsSection("Advanced / BMR");
+                var obstacleMapsOn = config.ObstacleMapsOn;
+                using (UiGui.SettingRow("Obstacle maps on"))
                 {
-                    config.ObstacleMapsOn = obstacleMapsOn;
-                    SaveEditingAccount();
+                    if (UiGui.Checkbox("Obstacle maps on", ref obstacleMapsOn))
+                    {
+                        config.ObstacleMapsOn = obstacleMapsOn;
+                        SaveEditingAccount();
+                    }
+                    HelpMarker("Controls BossMod Reborn only. Default: off. Applies when FrenRider is enabled, regardless of combat provider.");
+                    DrawDefaultSettingSyncButton("Obstacle maps on");
                 }
-                HelpMarker("Controls BossMod Reborn only. Default: off. Applies when FrenRider is enabled, regardless of combat provider.");
-                DrawDefaultSettingSyncButton("Obstacle maps on");
-            }
 
-            DrawHacksSection(config);
+                DrawHacksSection(config);
+            }, 2);
         });
     }
 
@@ -2277,15 +2373,24 @@ public partial class ConfigWindow : Window, IDisposable
             + AdsMaturityOptions.Max(option => MaterialText.Measure(UiText.T(option)).X)
             + 240 * MaterialTheme.Metrics.Scale + (IsDefaultConfigSelected() ? 100 * MaterialTheme.Metrics.Scale : 0)), () =>
         {
-            UiGui.SettingsSection("ADS Handoff");
-            DrawAdsTab(config);
+            UiGui.LcarsPanel("##DutySection0", () =>
+            {
+                UiGui.SettingsSection("ADS Handoff");
+                DrawAdsTab(config);
+            }, 0);
         }, () =>
         {
-            UiGui.SettingsSection("Dialogs & Invites");
-            DrawAutoYesSection(config);
-            DrawInviteWhitelistSection(config);
-            UiGui.SettingsSection("Exit Behavior");
-            DrawExitBehaviourSection(config);
+            UiGui.LcarsPanel("##DutySection1", () =>
+            {
+                UiGui.SettingsSection("Dialogs & Invites");
+                DrawAutoYesSection(config);
+                DrawInviteWhitelistSection(config);
+            }, 1);
+            UiGui.LcarsPanel("##DutySection2", () =>
+            {
+                UiGui.SettingsSection("Exit Behavior");
+                DrawExitBehaviourSection(config);
+            }, 2);
         });
     }
 
@@ -2294,24 +2399,45 @@ public partial class ConfigWindow : Window, IDisposable
         using (UiText.Font(UiFontRole.PluginName)) UiGui.Text("Automation");
         MaterialSettings.Columns("##AutomationGroups", UiGui.SettingsMinimum("Equip job stone for current class", "Idle Ticks Before Action"), () =>
         {
-            UiGui.SettingsSection("Loot & Equipment", "Loot Type");
-            DrawLootSection(config);
-            DrawEquipmentSection(config);
-            UiGui.SettingsSection("Food", "Food");
-            DrawFoodSection(config);
-            UiGui.SettingsSection("Repair", "Repair Mode", "Repair At");
-            DrawRepairSection(config);
-            UiGui.SettingsSection("Desynthesis");
-            DrawDesynthesisSection(config);
+            UiGui.LcarsPanel("##AutomationSection0", () =>
+            {
+                UiGui.SettingsSection("Loot & Equipment", "Loot Type");
+                DrawLootSection(config);
+                DrawEquipmentSection(config);
+            }, 0);
+            UiGui.LcarsPanel("##AutomationSection1", () =>
+            {
+                UiGui.SettingsSection("Food", "Food");
+                DrawFoodSection(config);
+            }, 1);
+            UiGui.LcarsPanel("##AutomationSection2", () =>
+            {
+                UiGui.SettingsSection("Repair", "Repair Mode", "Repair At");
+                DrawRepairSection(config);
+            }, 2);
+            UiGui.LcarsPanel("##AutomationSection3", () =>
+            {
+                UiGui.SettingsSection("Desynthesis");
+                DrawDesynthesisSection(config);
+            }, 0);
         }, () =>
         {
-            UiGui.SettingsSection("Idle Behavior", "Idle Mode", "List Source", "Idle Ticks Before Action");
-            DrawIdleBehaviorSection(config);
-            UiGui.SettingsSection("Maintenance", "Update Interval");
-            DrawAutoDiscardSection(config);
-            DrawAutorotSection(config);
-            UiGui.SettingsSection("Debug", "Echo Messages");
-            DrawDebugLoggingSection(config);
+            UiGui.LcarsPanel("##AutomationSection4", () =>
+            {
+                UiGui.SettingsSection("Idle Behavior", "Idle Mode", "List Source", "Idle Ticks Before Action");
+                DrawIdleBehaviorSection(config);
+            }, 1);
+            UiGui.LcarsPanel("##AutomationSection5", () =>
+            {
+                UiGui.SettingsSection("Maintenance", "Update Interval");
+                DrawAutoDiscardSection(config);
+                DrawAutorotSection(config);
+            }, 2);
+            UiGui.LcarsPanel("##AutomationSection6", () =>
+            {
+                UiGui.SettingsSection("Debug", "Echo Messages");
+                DrawDebugLoggingSection(config);
+            }, 0);
         });
     }
 
@@ -2337,14 +2463,20 @@ public partial class ConfigWindow : Window, IDisposable
         MaterialSettings.Columns("##UiAboutGroups", UiGui.SettingsMinimum("Open XA Slave log tools", "Movable Config Window"), () =>
         {
             DrawUiSettingsSection();
-            UiGui.SettingsSection("Support & Logs");
-            supportLog.Draw(Plugin.PluginInterface, key => UiText.T(key),
-                path => System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo { FileName = path, UseShellExecute = true }), ex => Plugin.Log.Error(ex, "Dalamud log export failed."), Plugin.CommandManager);
-            ImGui.Spacing();
+            UiGui.LcarsPanel("##UiAboutSection0", () =>
+            {
+                UiGui.SettingsSection("Support & Logs");
+                supportLog.Draw(Plugin.PluginInterface, key => UiText.T(key),
+                    path => System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo { FileName = path, UseShellExecute = true }), ex => Plugin.Log.Error(ex, "Dalamud log export failed."), Plugin.CommandManager);
+                ImGui.Spacing();
+            }, 0);
         }, () =>
         {
-            UiGui.SettingsSection("About");
-            DrawAboutTab();
+            UiGui.LcarsPanel("##UiAboutSection1", () =>
+            {
+                UiGui.SettingsSection("About");
+                DrawAboutTab();
+            }, 1);
         });
     }
 
@@ -2884,83 +3016,89 @@ public partial class ConfigWindow : Window, IDisposable
 
     private void DrawUiSettingsSection()
     {
-        UiGui.SettingsSection("Interface");
-
-        var videoNotificationsEnabled = configuration.VideoNotificationsEnabled;
-        if (UiGui.Checkbox("Video Notifications", ref videoNotificationsEnabled))
+        UiGui.LcarsPanel("##UiSettingsSection0", () =>
         {
-            configuration.VideoNotificationsEnabled = videoNotificationsEnabled;
-            configuration.Save();
-        }
-        ImGui.SameLine();
-        HelpMarker("Play videos when Fren Rider is enabled or disabled.\nRequires VLC media player.");
+            UiGui.SettingsSection("Interface");
 
-        if (!plugin.VideoPlaybackService.IsVLCAvailable())
-        {
-            UiGui.TextColored(new Vector4(1.0f, 0.4f, 0.4f, 1.0f), "VLC not found");
-            ImGui.SameLine();
-            if (UiGui.SmallButton("Download VLC"))
+            var videoNotificationsEnabled = configuration.VideoNotificationsEnabled;
+            if (UiGui.Checkbox("Video Notifications", ref videoNotificationsEnabled))
             {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = "https://www.videolan.org/vlc/",
-                    UseShellExecute = true
-                });
+                configuration.VideoNotificationsEnabled = videoNotificationsEnabled;
+                configuration.Save();
             }
-        }
+            ImGui.SameLine();
+            HelpMarker("Play videos when Fren Rider is enabled or disabled.\nRequires VLC media player.");
 
-        var movable = configuration.IsConfigWindowMovable;
-        if (UiGui.Checkbox("Movable Config Window", ref movable))
-        {
-            configuration.IsConfigWindowMovable = movable;
-            configuration.Save();
-        }
-
-        UiGui.SettingsSection("DTR Bar", "DTR Bar Mode", "Enabled Icon", "Disabled Icon");
-        var dtrEnabled = configuration.DtrBarEnabled;
-        if (UiGui.Checkbox("DTR Bar Enabled", ref dtrEnabled))
-        {
-            configuration.DtrBarEnabled = dtrEnabled;
-            configuration.Save();
-        }
-        ImGui.SameLine();
-        HelpMarker("Show or hide the DTR bar entry.");
-
-        var dtrMode = configuration.DtrBarMode;
-        var dtrModes = new[] { "Text Only", "Icon+Text", "Icon Only" };
-        using (UiGui.SettingRow("DTR Bar Mode"))
-        {
-            ImGui.SetNextItemWidth(150);
-            if (UiGui.Combo("DTR Bar Mode", ref dtrMode, dtrModes, dtrModes.Length))
+            if (!plugin.VideoPlaybackService.IsVLCAvailable())
             {
-                configuration.DtrBarMode = dtrMode;
+                UiGui.TextColored(new Vector4(1.0f, 0.4f, 0.4f, 1.0f), "VLC not found");
+                ImGui.SameLine();
+                if (UiGui.SmallButton("Download VLC"))
+                {
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = "https://www.videolan.org/vlc/",
+                        UseShellExecute = true
+                    });
+                }
+            }
+
+            var movable = configuration.IsConfigWindowMovable;
+            if (UiGui.Checkbox("Movable Config Window", ref movable))
+            {
+                configuration.IsConfigWindowMovable = movable;
+                configuration.Save();
+            }
+        }, 0);
+
+        UiGui.LcarsPanel("##UiSettingsSection1", () =>
+        {
+            UiGui.SettingsSection("DTR Bar", "DTR Bar Mode", "Enabled Icon", "Disabled Icon");
+            var dtrEnabled = configuration.DtrBarEnabled;
+            if (UiGui.Checkbox("DTR Bar Enabled", ref dtrEnabled))
+            {
+                configuration.DtrBarEnabled = dtrEnabled;
+                configuration.Save();
+            }
+            ImGui.SameLine();
+            HelpMarker("Show or hide the DTR bar entry.");
+
+            var dtrMode = configuration.DtrBarMode;
+            var dtrModes = new[] { "Text Only", "Icon+Text", "Icon Only" };
+            using (UiGui.SettingRow("DTR Bar Mode"))
+            {
+                ImGui.SetNextItemWidth(150);
+                if (UiGui.Combo("DTR Bar Mode", ref dtrMode, dtrModes, dtrModes.Length))
+                {
+                    configuration.DtrBarMode = dtrMode;
+                    configuration.Save();
+                }
+
+            }
+
+            ImGui.Spacing();
+            UiGui.Text("DTR Icons (max 3 characters)");
+            ImGui.SameLine();
+            if (UiGui.SmallButton("Copy Icon Guide Link"))
+            {
+                ImGui.SetClipboardText(IconGuideUrl);
+                Plugin.Log.Info("Copied icon guide link to clipboard");
+            }
+
+            var enabledIcon = configuration.DtrIconEnabled;
+            if (DrawIconInputs("Enabled", ref enabledIcon, "\uE03C"))
+            {
+                configuration.DtrIconEnabled = enabledIcon;
                 configuration.Save();
             }
 
-        }
-
-        ImGui.Spacing();
-        UiGui.Text("DTR Icons (max 3 characters)");
-        ImGui.SameLine();
-        if (UiGui.SmallButton("Copy Icon Guide Link"))
-        {
-            ImGui.SetClipboardText(IconGuideUrl);
-            Plugin.Log.Info("Copied icon guide link to clipboard");
-        }
-
-        var enabledIcon = configuration.DtrIconEnabled;
-        if (DrawIconInputs("Enabled", ref enabledIcon, "\uE03C"))
-        {
-            configuration.DtrIconEnabled = enabledIcon;
-            configuration.Save();
-        }
-
-        var disabledIcon = configuration.DtrIconDisabled;
-        if (DrawIconInputs("Disabled", ref disabledIcon, "\uE03D"))
-        {
-            configuration.DtrIconDisabled = disabledIcon;
-            configuration.Save();
-        }
+            var disabledIcon = configuration.DtrIconDisabled;
+            if (DrawIconInputs("Disabled", ref disabledIcon, "\uE03D"))
+            {
+                configuration.DtrIconDisabled = disabledIcon;
+                configuration.Save();
+            }
+        }, 1);
     }
 
     private void AddWhitelistEntry(CharacterConfig config)

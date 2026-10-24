@@ -3220,4 +3220,20 @@ Attivato: usa i preset BossMod sottostanti con qualsiasi provider di rotazione. 
   <data name="Audio output is unavailable." xml:space="preserve"><value>L’uscita audio non è disponibile.</value></data>
   <data name="UI sounds muted" xml:space="preserve"><value>Suoni dell’interfaccia disattivati</value></data>
   <data name="UI sounds on" xml:space="preserve"><value>Suoni dell’interfaccia attivi</value></data>
+  <data name="Glassmorphism" xml:space="preserve"><value>Glassmorphism</value></data>
+  <data name="Spatial" xml:space="preserve"><value>Spatial</value></data>
+  <data name="Cyberpunk" xml:space="preserve"><value>Cyberpunk</value></data>
+  <data name="Animation" xml:space="preserve"><value>Animazione</value></data>
+  <data name="Bar colour 1" xml:space="preserve"><value>Colore barra 1</value></data>
+  <data name="Bar colour 2" xml:space="preserve"><value>Colore barra 2</value></data>
+  <data name="Bar colour 3" xml:space="preserve"><value>Colore barra 3</value></data>
+  <data name="Reset" xml:space="preserve"><value>Ripristina</value></data>
+  <data name="Reset colours" xml:space="preserve"><value>Ripristina colori</value></data>
+  <data name="Movement speed (x)" xml:space="preserve"><value>Velocità movimento (x)</value></data>
+  <data name="Controls also colour the waves." xml:space="preserve"><value>Il colore dei controlli si applica anche alle onde.</value></data>
+  <data name="Wave colours" xml:space="preserve"><value>Colori delle onde</value></data>
+  <data name="Wave colour 1" xml:space="preserve"><value>Colore dell&apos;onda 1</value></data>
+  <data name="Wave colour 2" xml:space="preserve"><value>Colore dell&apos;onda 2</value></data>
+  <data name="Wave colour 3" xml:space="preserve"><value>Colore dell&apos;onda 3</value></data>
+  <data name="Reset wave colours" xml:space="preserve"><value>Ripristina colori delle onde</value></data>
 </root>

@@ -3319,4 +3319,20 @@ On: use the BossMod presets below with any rotation provider. A custom preset ma
   <data name="Audio output is unavailable." xml:space="preserve"><value>Audio output is unavailable.</value></data>
   <data name="UI sounds muted" xml:space="preserve"><value>UI sounds muted</value></data>
   <data name="UI sounds on" xml:space="preserve"><value>UI sounds on</value></data>
+  <data name="Glassmorphism" xml:space="preserve"><value>Glassmorphism</value></data>
+  <data name="Spatial" xml:space="preserve"><value>Spatial</value></data>
+  <data name="Cyberpunk" xml:space="preserve"><value>Cyberpunk</value></data>
+  <data name="Animation" xml:space="preserve"><value>Animation</value></data>
+  <data name="Bar colour 1" xml:space="preserve"><value>Bar colour 1</value></data>
+  <data name="Bar colour 2" xml:space="preserve"><value>Bar colour 2</value></data>
+  <data name="Bar colour 3" xml:space="preserve"><value>Bar colour 3</value></data>
+  <data name="Reset" xml:space="preserve"><value>Reset</value></data>
+  <data name="Reset colours" xml:space="preserve"><value>Reset colours</value></data>
+  <data name="Movement speed (x)" xml:space="preserve"><value>Movement speed (x)</value></data>
+  <data name="Controls also colour the waves." xml:space="preserve"><value>Controls also colour the waves.</value></data>
+  <data name="Wave colours" xml:space="preserve"><value>Wave colours</value></data>
+  <data name="Wave colour 1" xml:space="preserve"><value>Wave colour 1</value></data>
+  <data name="Wave colour 2" xml:space="preserve"><value>Wave colour 2</value></data>
+  <data name="Wave colour 3" xml:space="preserve"><value>Wave colour 3</value></data>
+  <data name="Reset wave colours" xml:space="preserve"><value>Reset wave colours</value></data>
 </root>

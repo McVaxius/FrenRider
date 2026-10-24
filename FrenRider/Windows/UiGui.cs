@@ -23,11 +23,11 @@ internal static class UiGui
     internal static void ResetSettingsAlignment() => sectionLabelWidth = 0;
     internal static void LcarsPanel(string id, Action draw, int accent = 0)
     {
-        if (!MaterialTheme.Current.IsLcars) { draw(); return; }
+        if (!FrenRiderPresentation.Decorated) { draw(); return; }
         var originalIdRoot = ImGui.GetID("");
         var compact = MaterialTheme.Current.Density == MaterialDensity.Compact;
         using var spacing = new MaterialStyleScope();
-        spacing.Style(ImGuiStyleVar.CellPadding, UiHelpers.Scale(new Vector2(20, compact ? 7 : 10)));
+        spacing.Style(ImGuiStyleVar.CellPadding, UiHelpers.Scale(new Vector2(FrenRiderPresentation.IsLcars ? 20 : 12, compact ? 7 : 10)));
         if (!ImGui.BeginTable(id, 1, ImGuiTableFlags.SizingStretchSame | ImGuiTableFlags.NoSavedSettings | ImGuiTableFlags.PadOuterX)) return;
         try
         {
@@ -37,10 +37,10 @@ internal static class UiGui
             ImGuiP.PushOverrideID(originalIdRoot);
             try { draw(); }
             finally { ImGui.PopID(); }
-            var inset = UiHelpers.Scale(new Vector2(16, compact ? 4 : 6));
+            var inset = UiHelpers.Scale(new Vector2(FrenRiderPresentation.IsLcars ? 16 : 8, compact ? 4 : 6));
             var max = new Vector2(min.X + width, ImGui.GetCursorScreenPos().Y - ImGui.GetStyle().ItemSpacing.Y);
             ImGuiP.TablePushBackgroundChannel();
-            try { MaterialLcars.PanelFrame(min - inset, max + inset, accent); }
+            try { FrenRiderPresentation.DrawPanel(min - inset, max + inset, accent); }
             finally { ImGuiP.TablePopBackgroundChannel(); }
         }
         finally { ImGui.EndTable(); }
@@ -72,23 +72,23 @@ internal static class UiGui
     }
     private static bool Feedback(bool activated, MaterialUiSoundCue cue = MaterialUiSoundCue.Click)
     {
-        MaterialLcars.Feedback(activated, cue);
+        if (activated && FrenRiderPresentation.IsLcars) MaterialTheme.Current.Feedback?.Invoke(cue);
         return activated;
     }
     private static Vector4 ButtonAccent(string label) => label.Split("##", 2)[0] switch
     {
-        "Account" or "BUY FOOD" => MaterialLcars.Periwinkle,
-        "Chocobo" or "Ko-fi" => MaterialLcars.Amber,
-        "BUY GREENS" => UiHelpers.Green,
-        _ => MaterialLcars.Lilac,
+        "Account" or "BUY FOOD" => FrenRiderPresentation.IsLcars ? FrenRiderPresentation.LcarsBar(2) : MaterialTheme.Current.Colors.Primary,
+        "Chocobo" or "Ko-fi" => FrenRiderPresentation.IsLcars ? FrenRiderPresentation.LcarsBar(0) : MaterialTheme.Current.Colors.Primary,
+        "BUY GREENS" => FrenRiderPresentation.IsLcars ? FrenRiderPresentation.LcarsBar(0) : MaterialTheme.Current.Colors.Primary,
+        _ => FrenRiderPresentation.IsLcars ? FrenRiderPresentation.LcarsBar(1) : MaterialTheme.Current.Colors.Primary,
     };
 
     private static Vector4 ButtonIconColour(MaterialIcon icon, Vector4 foreground)
     {
-        if (!MaterialTheme.Current.IsLcars) return foreground;
+        if (!FrenRiderPresentation.IsLcars) return foreground;
         var colour = icon switch
         {
-            MaterialIcon.Chocobo => MaterialLcars.Amber,
+            MaterialIcon.Chocobo => FrenRiderPresentation.LcarsBar(0),
             MaterialIcon.Heart => new(1, .35f, .4f, foreground.W),
             _ => foreground,
         };
@@ -117,7 +117,9 @@ internal static class UiGui
     {
         sectionLabelWidth = fieldLabels.Select(field => MaterialText.Measure(UiText.T(ShortLabel(field))).X).DefaultIfEmpty(0).Max();
         var caption = UiText.T(label);
-        MaterialSettings.Section(MaterialTheme.Current.IsLcars ? UiText.Current.Culture.TextInfo.ToUpper(caption) : caption);
+        if (FrenRiderPresentation.Decorated)
+            FrenRiderPresentation.LcarsHeading(FrenRiderPresentation.IsLcars ? UiText.Current.Culture.TextInfo.ToUpper(caption) : caption);
+        else MaterialSettings.Section(caption);
     }
     internal static float SettingsMinimum(params string[] labels)
         => Math.Max(390 * MaterialTheme.Metrics.Scale, labels.Select(label => MaterialText.Measure(UiText.T(ShortLabel(label))).X)
@@ -231,7 +233,7 @@ internal static class UiGui
         var width = display.Length == 0 ? Math.Max(ImGui.GetFrameHeight(), MaterialControls.Metrics.Height)
             : MaterialText.Measure(display).X + (icon ? ImGui.GetTextLineHeight() + UiHelpers.Scale(8) : 0)
                 + ImGui.GetStyle().FramePadding.X * 2;
-        var right = MaterialTheme.Current.IsLcars
+        var right = FrenRiderPresentation.Decorated
             ? ImGui.GetCursorScreenPos().X + ImGui.GetContentRegionAvail().X
             : ImGui.GetWindowPos().X + ImGui.GetWindowContentRegionMax().X;
         if (ImGui.GetItemRectMax().X + ImGui.GetStyle().ItemSpacing.X + width <= right) ImGui.SameLine();
@@ -254,6 +256,7 @@ internal static class UiGui
         BeginField(label);
         try
         {
+            using var field = FrenRiderPresentation.NativeFieldStyle();
             var open = MaterialText.BeginCombo("", literalPreview ? preview : UiText.T(preview), flags);
             if (!open) ImGui.PopID();
             return open;
@@ -295,10 +298,12 @@ internal static class UiGui
         using var height = MaterialText.PushLineHeight(display);
         var gap = ImGui.GetStyle().ItemInnerSpacing;
         var foreground = ImGui.GetStyle().Colors[(int)ImGuiCol.Text];
+        using var choice = NativeChoiceStyle();
         ImGui.PushStyleVar(ImGuiStyleVar.ItemInnerSpacing, new Vector2(gap.X + Math.Max(0, MaterialText.Measure(display).X - MaterialText.Measure(label).X), gap.Y));
         ImGui.PushStyleColor(ImGuiCol.Text, Vector4.Zero);
         var clicked = ImGui.RadioButton(label, active);
         ImGui.PopStyleColor(); ImGui.PopStyleVar();
+        FrenRiderPresentation.PaintChoice(ImGui.GetItemRectMin(), ImGui.GetFrameHeight(), active, radio: true);
         foreground.W *= ImGui.GetStyle().Alpha;
         MaterialText.AddText(ImGui.GetWindowDrawList(),ImGui.GetItemRectMin() + new Vector2(ImGui.GetFrameHeight() + gap.X, ImGui.GetStyle().FramePadding.Y), ImGui.ColorConvertFloat4ToU32(foreground), display);
         return Feedback(clicked);
@@ -308,7 +313,7 @@ internal static class UiGui
         var translated = UiText.T(label.Split("##", 2)[0]);
         using var controls = ImGui.GetStyle().FramePadding.Y == 0 || MaterialControls.Context == MaterialControlContext.Dense
             ? default(MaterialControls.ControlScope) : MaterialControls.Push(MaterialControlContext.Toolbar);
-        using var lcars = MaterialLcars.NativeButtonStyle(ButtonAccent(label));
+        using var skin = FrenRiderPresentation.NativeButtonStyle(ButtonAccent(label));
         var paddingY = ImGui.GetStyle().FramePadding.Y;
         using var height = MaterialText.PushLineHeight(translated);
         size.Y = Math.Max(size.Y, Math.Max(ImGui.GetTextLineHeight(), MaterialText.Measure(translated).Y) + 2 * paddingY);
@@ -317,20 +322,23 @@ internal static class UiGui
         var iconWidth = icon.HasValue ? iconSize + 8 * MaterialTheme.Metrics.Scale : 0;
         size.X = MaterialLayout.FitNextItemWidth(size.X, MaterialText.Measure(translated).X + iconWidth + ImGui.GetStyle().FramePadding.X * 2);
         ImGui.PushStyleColor(ImGuiCol.Text, Vector4.Zero);
-        var clicked = ImGui.Button(label, size);
+        bool clicked;
+        using (FrenRiderPresentation.TransparentButtonFace()) clicked = ImGui.Button(label, size);
         ImGui.PopStyleColor();
         var min = ImGui.GetItemRectMin(); var max = ImGui.GetItemRectMax();
         var dl = ImGui.GetWindowDrawList();
+        FrenRiderPresentation.PaintButton(min, max);
         dl.PushClipRect(min, max, true);
         try
         {
-        if (gradientBottom.HasValue)
+        if (gradientBottom.HasValue && !FrenRiderPresentation.Decorated)
         {
             var fill = ImGui.GetStyle().Colors[(int)(ImGui.IsItemActive() ? ImGuiCol.ButtonActive : ImGui.IsItemHovered() ? ImGuiCol.ButtonHovered : ImGuiCol.Button)];
             MaterialCanvas.Surface(min, max, fill, gradientBottom.Value, ImGui.GetStyle().FrameRounding);
             dl.AddRect(min, max, MaterialCanvas.Color(MaterialColor.Layer(fill, Vector4.One, .16f)), ImGui.GetStyle().FrameRounding);
             if (ImGui.IsItemFocused() && ImGui.GetIO().NavVisible) dl.AddRect(min + Vector2.One, max - Vector2.One, MaterialCanvas.Color(MaterialTheme.Current.Colors.Primary), ImGui.GetStyle().FrameRounding, ImDrawFlags.None, 2);
         }
+        if (FrenRiderPresentation.Decorated) foreground = FrenRiderPresentation.ButtonForeground();
         foreground.W *= ImGui.GetStyle().Alpha;
         var textSize = MaterialText.Measure(translated);
         var position = min + (max - min - new Vector2(textSize.X + iconWidth, Math.Max(textSize.Y, iconSize))) * .5f;
@@ -365,15 +373,19 @@ internal static class UiGui
         ImGui.PopStyleVar(3);
         var min = ImGui.GetItemRectMin();
         var track = min + new Vector2(width - size.X * s, Math.Max(0, (height - size.Y * s) * .5f));
-        var fill = MaterialTheme.Current.IsLcars
-            ? value ? MaterialLcars.ControlBlue : c.SurfaceContainerHighest
+        var fill = FrenRiderPresentation.IsLcars
+            ? value ? FrenRiderPresentation.LcarsBar(2) : c.SurfaceContainerHighest
             : value ? c.Primary : c.Outline;
         if (ImGui.IsItemHovered()) fill = MaterialColor.Layer(fill, c.OnSurface, .08f);
         if (ImGui.IsItemActive()) fill = MaterialColor.Layer(fill, c.OnSurface, .12f);
         var foreground = c.OnSurface;
         var dl = ImGui.GetWindowDrawList();
-        dl.AddRectFilled(track, track + size * s, MaterialCanvas.Color(fill), radius * s);
-        dl.AddCircleFilled(track + new Vector2(value ? size.X - radius : radius, radius) * s, (radius - 3) * s, MaterialCanvas.Color(foreground), 24);
+        if (FrenRiderPresentation.Decorated) FrenRiderPresentation.PaintToggle(track, size * s, value, fill);
+        else
+        {
+            dl.AddRectFilled(track, track + size * s, MaterialCanvas.Color(fill), radius * s);
+            dl.AddCircleFilled(track + new Vector2(value ? size.X - radius : radius, radius) * s, (radius - 3) * s, MaterialCanvas.Color(foreground), 24);
+        }
         if (ImGui.IsItemFocused() && ImGui.GetIO().NavVisible) dl.AddRect(min, min + new Vector2(width, height), MaterialCanvas.Color(c.Primary), 4 * s);
         MaterialText.AddText(dl,min + new Vector2(0, Math.Max(0, (height - textSize.Y) * .5f)), MaterialCanvas.Color(foreground), text);
         return Feedback(changed, MaterialUiSoundCue.Toggle);
@@ -382,19 +394,38 @@ internal static class UiGui
     internal static bool SliderFloat(string label, ref float value, float min, float max, string format)
     {
         BeginField(label);
-        try { return ImGui.SliderFloat("", ref value, min, max, format); }
+        try { using var field = FrenRiderPresentation.NativeFieldStyle(); return ImGui.SliderFloat("", ref value, min, max, format); }
         finally { ImGui.PopID(); }
     }
     internal static bool CollapsingHeader(string label, ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags.None)
     {
         using var height = MaterialText.PushLineHeight(UiText.T(label.Split("##", 2)[0]));
         var position = ImGui.GetCursorScreenPos();
+        using var skin = FrenRiderPresentation.NativeButtonStyle();
+        using var face = new MaterialStyleScope();
+        if (FrenRiderPresentation.Decorated)
+        {
+            face.Color(ImGuiCol.Button, ImGui.GetStyle().Colors[(int)ImGuiCol.Header]);
+            face.Color(ImGuiCol.ButtonHovered, ImGui.GetStyle().Colors[(int)ImGuiCol.HeaderHovered]);
+            face.Color(ImGuiCol.ButtonActive, ImGui.GetStyle().Colors[(int)ImGuiCol.HeaderActive]);
+        }
         ImGui.PushStyleColor(ImGuiCol.Text, Vector4.Zero);
-        var open = ImGui.CollapsingHeader(label, flags);
+        bool open;
+        using (var nativeFace = new MaterialStyleScope())
+        {
+            if (FrenRiderPresentation.Decorated)
+            {
+                nativeFace.Color(ImGuiCol.Header, Vector4.Zero);
+                nativeFace.Color(ImGuiCol.HeaderHovered, Vector4.Zero);
+                nativeFace.Color(ImGuiCol.HeaderActive, Vector4.Zero);
+            }
+            open = ImGui.CollapsingHeader(label, flags);
+        }
         ImGui.PopStyleColor();
         var c = MaterialTheme.Current.Colors;
-        var foreground = c.OnSurface;
+        var foreground = FrenRiderPresentation.Decorated ? FrenRiderPresentation.ButtonForeground() : c.OnSurface;
         var dl = ImGui.GetWindowDrawList();
+        FrenRiderPresentation.PaintButton(ImGui.GetItemRectMin(), ImGui.GetItemRectMax());
         dl.PushClipRect(ImGui.GetItemRectMin(), ImGui.GetItemRectMax(), true);
         try
         {
@@ -409,20 +440,23 @@ internal static class UiGui
         var translated=display ?? UiText.T(label.Split("##",2)[0]);
         using var controls = ImGui.GetStyle().FramePadding.Y == 0 || MaterialControls.Context == MaterialControlContext.Dense
             ? default(MaterialControls.ControlScope) : MaterialControls.Push(MaterialControlContext.Toolbar);
-        using var lcars = MaterialLcars.NativeButtonStyle(ButtonAccent(label));
+        using var skin = FrenRiderPresentation.NativeButtonStyle(ButtonAccent(label));
         using var height = MaterialText.PushLineHeight(translated);
         var iconSize=ImGui.GetTextLineHeight();
         var iconWidth=icon.HasValue?iconSize+8*MaterialTheme.Metrics.Scale:0;
         var width=MaterialLayout.FitNextItemWidth(0,MaterialText.Measure(translated).X+iconWidth+2*ImGui.GetStyle().FramePadding.X);
         var foreground=ImGui.GetStyle().Colors[(int)ImGuiCol.Text];
         ImGui.PushStyleColor(ImGuiCol.Text,Vector4.Zero);
-        var clicked=ImGui.Button(label,new Vector2(width,0));
+        bool clicked;
+        using (FrenRiderPresentation.TransparentButtonFace()) clicked=ImGui.Button(label,new Vector2(width,0));
         ImGui.PopStyleColor();
         var min=ImGui.GetItemRectMin(); var max=ImGui.GetItemRectMax();
-        foreground.W*=ImGui.GetStyle().Alpha;
+        FrenRiderPresentation.PaintButton(min,max);
         ImGui.GetWindowDrawList().PushClipRect(min,max,true);
         try
         {
+        if (FrenRiderPresentation.Decorated) foreground = FrenRiderPresentation.ButtonForeground();
+        foreground.W*=ImGui.GetStyle().Alpha;
         var textSize=MaterialText.Measure(translated);
         var position=min+(max-min-new Vector2(textSize.X+iconWidth,Math.Max(textSize.Y,iconSize)))*.5f;
         if(icon.HasValue) MaterialIcons.Draw(icon.Value,position,iconSize,ButtonIconColour(icon.Value, foreground),1);
@@ -440,27 +474,22 @@ internal static class UiGui
     }
     internal static bool IconButton(string original, MaterialIcon icon)
     {
-        using var lcars = MaterialLcars.NativeButtonStyle();
+        using var skin = FrenRiderPresentation.NativeButtonStyle();
         var size = Math.Max(ImGui.GetFrameHeight(), MaterialControls.Metrics.Height);
         ImGui.PushStyleColor(ImGuiCol.Text, Vector4.Zero);
-        var clicked = ImGui.Button(original, new Vector2(size));
+        bool clicked;
+        using (FrenRiderPresentation.TransparentButtonFace()) clicked = ImGui.Button(original, new Vector2(size));
         ImGui.PopStyleColor();
         var min = ImGui.GetItemRectMin();
+        FrenRiderPresentation.PaintButton(min, ImGui.GetItemRectMax());
         MaterialIcons.Draw(icon, min + new Vector2(size * .2f), size * .6f,
-            MaterialTheme.Current.IsLcars ? ImGui.GetStyle().Colors[(int)ImGuiCol.Text] : MaterialTheme.Current.Colors.OnSurface);
+            FrenRiderPresentation.Decorated ? FrenRiderPresentation.ButtonForeground() : MaterialTheme.Current.Colors.OnSurface);
         if (ImGui.IsItemHovered()) SetTooltip(original);
         return Feedback(clicked);
     }
     internal static bool Checkbox(string label,ref bool value)
     {
-        using var lcarsCheck = new MaterialStyleScope();
-        if (MaterialTheme.Current.IsLcars && value)
-        {
-            lcarsCheck.Color(ImGuiCol.FrameBg, MaterialLcars.ControlBlue);
-            lcarsCheck.Color(ImGuiCol.FrameBgHovered, MaterialColor.Layer(MaterialLcars.ControlBlue, MaterialLcars.Text, .12f));
-            lcarsCheck.Color(ImGuiCol.FrameBgActive, MaterialColor.Layer(MaterialLcars.ControlBlue, MaterialLcars.Text, .2f));
-            lcarsCheck.Color(ImGuiCol.CheckMark, MaterialLcars.Background);
-        }
+        using var choice = NativeChoiceStyle();
         var visible=label.Split("##",2)[0];
         var translated=UiText.T(InSettingRow ? ShortLabel(settingLabel.Split("##",2)[0]) : visible);
         if (InSettingRow) settingLabelDrawn = true;
@@ -476,10 +505,24 @@ internal static class UiGui
         var changed=ImGui.Checkbox(label,ref value);
         ImGui.PopStyleColor();
         ImGui.PopStyleVar();
+        FrenRiderPresentation.PaintChoice(ImGui.GetItemRectMin(), ImGui.GetFrameHeight(), value, radio: false);
         var p=ImGui.GetItemRectMin()+new Vector2(ImGui.GetFrameHeight()+gap.X,ImGui.GetStyle().FramePadding.Y);
         foreground.W*=ImGui.GetStyle().Alpha;
         MaterialText.AddText(ImGui.GetWindowDrawList(),p,ImGui.ColorConvertFloat4ToU32(foreground),translated);
         return Feedback(changed, MaterialUiSoundCue.Toggle);
+    }
+    private static MaterialStyleScope NativeChoiceStyle()
+    {
+        var scope = new MaterialStyleScope();
+        if (!FrenRiderPresentation.Decorated) return scope;
+        scope.Color(ImGuiCol.FrameBg, Vector4.Zero);
+        scope.Color(ImGuiCol.FrameBgHovered, Vector4.Zero);
+        scope.Color(ImGuiCol.FrameBgActive, Vector4.Zero);
+        scope.Color(ImGuiCol.CheckMark, Vector4.Zero);
+        scope.Color(ImGuiCol.Border, Vector4.Zero);
+        scope.Color(ImGuiCol.BorderShadow, Vector4.Zero);
+        scope.Style(ImGuiStyleVar.FrameBorderSize, 0);
+        return scope;
     }
     internal static bool Selectable(string original,bool selected = false,string? display=null)
     {
@@ -534,11 +577,11 @@ internal static class UiGui
         ImGuiP.PushOverrideID(ImGui.GetID(label));
     }
     internal static bool InputText(string label,ref string value,int length, ImGuiInputTextFlags flags = ImGuiInputTextFlags.None)
-    { BeginField(label); try { using var height=MaterialText.PushLineHeight(value); return MaterialShapedInput.SingleLine("","",ref value,length,flags); } finally { ImGui.PopID(); } }
+    { BeginField(label); try { using var height=MaterialText.PushLineHeight(value); using var field=FrenRiderPresentation.NativeFieldStyle(); return MaterialShapedInput.SingleLine("","",ref value,length,flags); } finally { ImGui.PopID(); } }
     internal static bool InputInt(string label,ref int value, int step = 0, int fastStep = 0)
-    { BeginField(label,step>0); try { return ImGui.InputInt("",ref value,step,fastStep); } finally { ImGui.PopID(); } }
+    { BeginField(label,step>0); try { using var field=FrenRiderPresentation.NativeFieldStyle(); return ImGui.InputInt("",ref value,step,fastStep); } finally { ImGui.PopID(); } }
     internal static bool InputFloat(string label,ref float value, float step = 0, float fastStep = 0, string format = "%.3f", ImGuiInputTextFlags flags = ImGuiInputTextFlags.None)
-    { BeginField(label,step>0); try { return ImGui.InputFloat("",ref value,step,fastStep,format,flags); } finally { ImGui.PopID(); } }
+    { BeginField(label,step>0); try { using var field=FrenRiderPresentation.NativeFieldStyle(); return ImGui.InputFloat("",ref value,step,fastStep,format,flags); } finally { ImGui.PopID(); } }
     internal static bool Combo(string label,ref int value,string[] options,int count)
     {
         var changed=false;
@@ -567,12 +610,17 @@ internal static class UiGui
         if (InSettingRow)
         {
             BeginField(label);
-            try { return ImGui.SliderInt("", ref value, min, max, format, flags); }
+            try { using var field = FrenRiderPresentation.NativeFieldStyle(); return ImGui.SliderInt("", ref value, min, max, format, flags); }
             finally { ImGui.PopID(); }
         }
         var nativeLabel = UiText.T(label.Split("##", 2)[0]) + label[label.Split("##", 2)[0].Length..];
-        if (!MaterialText.RequiresShaping(nativeLabel)) return ImGui.SliderInt(nativeLabel, ref value, min, max, format, flags);
+        if (!MaterialText.RequiresShaping(nativeLabel))
+        {
+            using var field = FrenRiderPresentation.NativeFieldStyle();
+            return ImGui.SliderInt(nativeLabel, ref value, min, max, format, flags);
+        }
         using var height = MaterialText.PushLineHeight(UiText.T(label.Split("##", 2)[0]));
+        using var shapedField = FrenRiderPresentation.NativeFieldStyle();
         var origin = ImGui.GetCursorScreenPos(); var width = ImGui.CalcItemWidth();
         var drawing = ImGui.GetWindowDrawList(); var parent = ImGuiP.GetCurrentWindow(); var previousMax = parent.DC.CursorMaxPos;
         drawing.PushClipRect(new Vector2(origin.X, parent.Pos.Y), new Vector2(origin.X + width, parent.Pos.Y + parent.Size.Y), true);
@@ -587,12 +635,17 @@ internal static class UiGui
         if (InSettingRow)
         {
             BeginField(label);
-            try { return ImGui.InputFloat("", ref value); }
+            try { using var field = FrenRiderPresentation.NativeFieldStyle(); return ImGui.InputFloat("", ref value); }
             finally { ImGui.PopID(); }
         }
         var visible = label.Split("##", 2)[0]; var nativeLabel = UiText.T(visible) + label[visible.Length..];
-        if (!MaterialText.RequiresShaping(nativeLabel)) return ImGui.InputFloat(nativeLabel, ref value);
+        if (!MaterialText.RequiresShaping(nativeLabel))
+        {
+            using var field = FrenRiderPresentation.NativeFieldStyle();
+            return ImGui.InputFloat(nativeLabel, ref value);
+        }
         using var height = MaterialText.PushLineHeight(UiText.T(visible));
+        using var shapedField = FrenRiderPresentation.NativeFieldStyle();
         var origin = ImGui.GetCursorScreenPos(); var width = ImGui.CalcItemWidth();
         var drawing = ImGui.GetWindowDrawList(); var parent = ImGuiP.GetCurrentWindow(); var previousMax = parent.DC.CursorMaxPos;
         drawing.PushClipRect(new Vector2(origin.X, parent.Pos.Y), new Vector2(origin.X + width, parent.Pos.Y + parent.Size.Y), true);

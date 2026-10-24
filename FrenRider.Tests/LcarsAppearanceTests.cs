@@ -138,13 +138,19 @@ public sealed class LcarsAppearanceTests
     }
 
     [Theory]
-    [InlineData(false, 1f, true)]
-    [InlineData(true, 1f, true)]
-    [InlineData(false, 1.5f, true)]
-    [InlineData(true, 1.5f, true)]
-    [InlineData(false, 1.5f, false)]
-    [InlineData(true, 1f, false)]
-    public unsafe void MiniAndWarningFramingKeepsNativeActionsClickableWithoutChangingTheirIds(bool compact, float scale, bool lcars)
+    [InlineData(false, 1f, true, FrenRiderUiStyle.Classic)]
+    [InlineData(true, 1f, true, FrenRiderUiStyle.Classic)]
+    [InlineData(false, 1.5f, true, FrenRiderUiStyle.Classic)]
+    [InlineData(true, 1.5f, true, FrenRiderUiStyle.Classic)]
+    [InlineData(false, 1.5f, false, FrenRiderUiStyle.Classic)]
+    [InlineData(true, 1f, false, FrenRiderUiStyle.Classic)]
+    [InlineData(false, 1f, false, FrenRiderUiStyle.Glassmorphism)]
+    [InlineData(true, 1.5f, false, FrenRiderUiStyle.Glassmorphism)]
+    [InlineData(false, 1.5f, false, FrenRiderUiStyle.Spatial)]
+    [InlineData(true, 1f, false, FrenRiderUiStyle.Spatial)]
+    [InlineData(false, 1f, false, FrenRiderUiStyle.Cyberpunk)]
+    [InlineData(true, 1.5f, false, FrenRiderUiStyle.Cyberpunk)]
+    public unsafe void MiniAndWarningFramingKeepsNativeActionsClickableWithoutChangingTheirIds(bool compact, float scale, bool lcars, FrenRiderUiStyle surface = FrenRiderUiStyle.Classic)
     {
         var previous = ImGui.GetCurrentContext();
         var context = ImGui.CreateContext();
@@ -152,8 +158,9 @@ public sealed class LcarsAppearanceTests
         {
             using var text = new UiText("en", _ => new NoFont());
             using var textScope = text.Enter();
-            var theme = FrenRiderPresentation.Theme(FrenRiderPresentation.ReferenceAccent,
-                new() { Mode = lcars ? MaterialColorMode.Lcars : MaterialColorMode.Auto });
+            var config = new Configuration { UiStyle = surface, UiColors = new() { Mode = lcars ? MaterialColorMode.Lcars : MaterialColorMode.Auto } };
+            var theme = FrenRiderPresentation.Theme(config);
+            using var appearance = FrenRiderPresentation.Push(config);
             theme.Density = compact ? MaterialDensity.Compact : MaterialDensity.Standard;
             var io = ImGui.GetIO();
             io.IniFilename = null; io.LogFilename = null;
@@ -185,7 +192,7 @@ public sealed class LcarsAppearanceTests
                     });
                     Assert.Equal(originalPadding, ImGui.GetStyle().CellPadding);
                     Assert.Equal(originalId, ImGui.GetID("Run fixture"));
-                    if (lcars) Assert.True(ImGui.GetWindowDrawList().VtxBuffer.Size > afterBody);
+                    if (lcars || surface != FrenRiderUiStyle.Classic) Assert.True(ImGui.GetWindowDrawList().VtxBuffer.Size > afterBody);
                     ImGui.End();
                 }
                 ImGui.Render();
@@ -195,6 +202,187 @@ public sealed class LcarsAppearanceTests
             io.AddMouseButtonEvent(0, true); Frame();
             io.AddMouseButtonEvent(0, false); Frame();
             Assert.Equal(1, clicks);
+        }
+        finally { ImGui.DestroyContext(context); ImGui.SetCurrentContext(previous); }
+    }
+
+    [Theory]
+    [InlineData(false, 1f, 580, false)]
+    [InlineData(true, 1f, 580, false)]
+    [InlineData(false, 1.5f, 580, false)]
+    [InlineData(true, 1.5f, 580, false)]
+    [InlineData(false, 1f, 280, true)]
+    [InlineData(true, 1f, 280, true)]
+    [InlineData(false, 1.5f, 280, true)]
+    [InlineData(true, 1.5f, 280, true)]
+    public unsafe void CyberpunkTabsAndRaisedActionsRetainTheirNativeBoundsSemanticsAndStyleScopes(bool compact, float scale, int logicalWidth, bool custom)
+    {
+        var previous = ImGui.GetCurrentContext();
+        var context = ImGui.CreateContext();
+        try
+        {
+            using var text = new UiText("en", _ => new NoFont());
+            using var textScope = text.Enter();
+            var config = new Configuration { UiStyle = FrenRiderUiStyle.Cyberpunk, UiCompact = compact };
+            if (custom) config.UiCyberpunkColors = config.UiCyberpunkColors with { BackgroundRgb = 0x141A26, ControlsRgb = 0xF1B25B, TextRgb = 0xDBF0DF };
+            var theme = FrenRiderPresentation.Theme(config);
+            theme.Density = compact ? MaterialDensity.Compact : MaterialDensity.Standard;
+            var io = ImGui.GetIO();
+            io.IniFilename = null; io.LogFilename = null;
+            io.DisplaySize = new(2200, 2200); io.DeltaTime = 1f / 60; io.FontGlobalScale = scale;
+            io.Fonts.AddFontDefault();
+            byte* pixels = null; int width = 0, height = 0;
+            io.Fonts.GetTexDataAsRGBA32(0, &pixels, &width, &height);
+            io.Fonts.SetTexID(0, new ImTextureID((nint)1));
+            var centers = new Dictionary<string, Vector2>();
+            var clicks = 0; var radioClicks = 0; var disabledClicks = 0;
+            var selected = false; var checkedValue = false;
+            var semantic = new Vector4(.55f, .12f, .16f, 1);
+            var status = new Vector4(.18f, .84f, .52f, 1);
+            var plugin = (Plugin)RuntimeHelpers.GetUninitializedObject(typeof(Plugin));
+            typeof(Plugin).GetProperty(nameof(Plugin.Configuration))!.SetValue(plugin, config);
+            using var main = new MainWindow(plugin);
+            var panel = typeof(MainWindow).GetMethod("Panel", BindingFlags.Instance | BindingFlags.NonPublic)!;
+
+            void CaptionWithin(ImDrawListPtr list, int first, string caption, Vector2 min, Vector2 max, uint? color = null)
+            {
+                var ink = caption.Replace(" ", "");
+                for (var vertex = first; vertex + ink.Length * 4 <= list.VtxBuffer.Size; vertex++)
+                {
+                    var matches = true;
+                    for (var character = 0; character < ink.Length; character++)
+                    {
+                        var glyph = ImGui.FindGlyphNoFallback(ImGui.GetFont(), ink[character]);
+                        if (list.VtxBuffer[vertex + character * 4].Uv != new Vector2(glyph.Handle->U0, glyph.Handle->V0)
+                            || list.VtxBuffer[vertex + character * 4 + 2].Uv != new Vector2(glyph.Handle->U1, glyph.Handle->V1))
+                        { matches = false; break; }
+                    }
+                    if (!matches) continue;
+                    for (var offset = 0; offset < ink.Length * 4; offset++)
+                    {
+                        var glyphVertex = list.VtxBuffer[vertex + offset];
+                        Assert.InRange(glyphVertex.Pos.X, min.X, max.X);
+                        Assert.InRange(glyphVertex.Pos.Y, min.Y, max.Y);
+                        Assert.True((glyphVertex.Col >> 24) > 0);
+                        if (color.HasValue) Assert.Equal(color.Value, glyphVertex.Col);
+                    }
+                    return;
+                }
+                Assert.Fail("The actual mesh did not retain the complete caption: " + caption);
+            }
+            bool SolidTriangle(ImDrawListPtr list, int firstIndex, uint color, float minimumArea, int firstVertex = 0)
+            {
+                for (var index = firstIndex; index + 2 < list.IdxBuffer.Size; index += 3)
+                {
+                    if (list.IdxBuffer[index] < firstVertex || list.IdxBuffer[index + 1] < firstVertex || list.IdxBuffer[index + 2] < firstVertex) continue;
+                    var a = list.VtxBuffer[list.IdxBuffer[index]];
+                    var b = list.VtxBuffer[list.IdxBuffer[index + 1]];
+                    var c = list.VtxBuffer[list.IdxBuffer[index + 2]];
+                    if (a.Col != color || b.Col != color || c.Col != color) continue;
+                    var ab = b.Pos - a.Pos; var ac = c.Pos - a.Pos;
+                    if (MathF.Abs(ab.X * ac.Y - ab.Y * ac.X) * .5f >= minimumArea * scale * scale) return true;
+                }
+                return false;
+            }
+            void Remember(string name) => centers[name] = (ImGui.GetItemRectMin() + ImGui.GetItemRectMax()) * .5f;
+            void Frame()
+            {
+                ImGui.NewFrame();
+                using (FrenRiderPresentation.Push(config))
+                using (MaterialTheme.Push(theme, scale, MaterialStyleMode.ColorsOnly))
+                {
+                    ImGui.SetNextWindowPos(new(20, 20)); ImGui.SetNextWindowSize(new(logicalWidth * scale, 1100 * scale));
+                    ImGui.Begin("Cyberpunk native appearance", ImGuiWindowFlags.NoSavedSettings);
+                    var list = ImGui.GetWindowDrawList();
+                    var style = ImGui.GetStyle();
+                    var originalColors = Enumerable.Range(0, (int)ImGuiCol.Count).Select(index => style.Colors[index]).ToArray();
+                    var originalMetrics = (style.FramePadding, style.CellPadding, style.ItemInnerSpacing, style.ItemSpacing, style.FrameRounding, style.FrameBorderSize);
+                    var originalId = ImGui.GetID("Run fixture");
+                    UiGui.LcarsPanel("##cyberpunk-regression", () =>
+                    {
+                        Assert.Equal(originalId, ImGui.GetID("Run fixture"));
+                        var plate = ImGui.GetCursorScreenPos();
+                        var plateSize = new Vector2(ImGui.GetContentRegionAvail().X, 36 * scale);
+                        var plateIndex = list.IdxBuffer.Size;
+                        FrenRiderPresentation.DrawPanel(plate, plate + plateSize);
+                        Assert.True(SolidTriangle(list, plateIndex, MaterialCanvas.Color(theme.Colors.SurfaceContainerLow), 64), "Panel lost its flat opaque plate.");
+                        ImGui.Dummy(plateSize);
+                        foreach (var (title, accent) in new[] { ("Activation mode", 0), ("Operator", 1), ("Duty / ADS / Exit", 2), ("Party", 0), ("Automation", 1) })
+                        {
+                            var first = list.VtxBuffer.Size;
+                            panel.Invoke(main, [title, MaterialIcon.Table, (Action)(() =>
+                            {
+                                Assert.Equal(originalId, ImGui.GetID("Run fixture"));
+                                var min = ImGui.GetItemRectMin(); var max = ImGui.GetItemRectMax();
+                                var available = ImGui.GetContentRegionAvail().X;
+                                Assert.InRange(max.X - min.X, available - .1f, available + .1f);
+                                var tabColor = accent == 0 ? theme.Colors.Primary : Vector4.Lerp(theme.Colors.OnSurface, theme.Colors.Primary, .10f);
+                                CaptionWithin(list, first, title.ToUpperInvariant(), min, max, MaterialCanvas.Color(FrenRiderPresentation.ReadableInk(tabColor)));
+                                // A nested native table has its own index channel; restrict this scan to this Panel's vertices.
+                                Assert.True(SolidTriangle(list, 0, MaterialCanvas.Color(tabColor), 64, first), "Main Panel bypassed its solid primary or pale heading tab.");
+                                if (accent != 0) Assert.True(SolidTriangle(list, 0, MaterialCanvas.Color(theme.Colors.Secondary), 12, first), "Main Panel lost its secondary heading wedge.");
+                                UiHelpers.ReadOnlyField("Panel fixture", status, localize: false);
+                            }), title != "Activation mode"]);
+                            Assert.Equal(originalId, ImGui.GetID("Run fixture"));
+                        }
+                        const string wrappedCaption = "AUTOMATION AND COMPANION PURCHASING STATUS";
+                        var wrappedFirst = list.VtxBuffer.Size;
+                        var wrappedOrigin = ImGui.GetCursorScreenPos();
+                        var wrappedWidth = ImGui.GetContentRegionAvail().X;
+                        FrenRiderPresentation.LcarsHeading(wrappedCaption, 1);
+                        Assert.Equal(wrappedOrigin, ImGui.GetItemRectMin());
+                        Assert.InRange(ImGui.GetItemRectMax().X - wrappedOrigin.X, wrappedWidth - .1f, wrappedWidth + .1f);
+                        CaptionWithin(list, wrappedFirst, wrappedCaption, wrappedOrigin, ImGui.GetItemRectMax());
+                        if (logicalWidth == 280) Assert.True(ImGui.GetItemRectMax().Y - wrappedOrigin.Y > ImGui.GetTextLineHeight() * 2);
+                        var buttonFirst = list.VtxBuffer.Size;
+                        using (var semanticStyle = new MaterialStyleScope())
+                        {
+                            semanticStyle.Color(ImGuiCol.Button, semantic);
+                            semanticStyle.Color(ImGuiCol.ButtonHovered, semantic);
+                            semanticStyle.Color(ImGuiCol.ButtonActive, semantic);
+                            if (UiGui.Button("Run fixture", new Vector2(-1, 0))) clicks++;
+                            Remember("Run");
+                            var bottom = ImGui.GetItemRectMax().Y;
+                            var edges = Enumerable.Range(buttonFirst, list.VtxBuffer.Size - buttonFirst)
+                                .Where(index => list.VtxBuffer[index].Col == MaterialCanvas.Color(theme.Colors.Primary) && list.VtxBuffer[index].Pos.Y >= bottom - 3 * scale)
+                                .Select(index => list.VtxBuffer[index].Pos.X).ToArray();
+                            Assert.NotEmpty(edges);
+                            Assert.True(edges.Max() - edges.Min() > (ImGui.GetItemRectMax().X - ImGui.GetItemRectMin().X) * .5f);
+                            Assert.Contains(Enumerable.Range(buttonFirst, list.VtxBuffer.Size - buttonFirst), index => list.VtxBuffer[index].Col == MaterialCanvas.Color(semantic));
+                            Assert.Equal(semantic, style.Colors[(int)ImGuiCol.Button]);
+                        }
+                        if (UiGui.RadioButton("Always on fixture", selected)) { selected = true; radioClicks++; }
+                        Remember("Radio");
+                        UiGui.Checkbox("Check fixture", ref checkedValue);
+                        Remember("Check");
+                        ImGui.BeginDisabled();
+                        if (UiGui.Button("Disabled fixture")) disabledClicks++;
+                        Remember("Disabled");
+                        ImGui.EndDisabled();
+                        var readOnlyFirst = list.VtxBuffer.Size;
+                        UiHelpers.ReadOnlyField("Ready fixture", status, localize: false);
+                        Remember("ReadOnly");
+                        CaptionWithin(list, readOnlyFirst, "Ready fixture", ImGui.GetItemRectMin(), ImGui.GetItemRectMax(), MaterialCanvas.Color(status));
+                    });
+                    Assert.Equal(originalId, ImGui.GetID("Run fixture"));
+                    Assert.Equal(originalMetrics, (style.FramePadding, style.CellPadding, style.ItemInnerSpacing, style.ItemSpacing, style.FrameRounding, style.FrameBorderSize));
+                    Assert.Equal(originalColors, Enumerable.Range(0, (int)ImGuiCol.Count).Select(index => style.Colors[index]).ToArray());
+                    ImGui.End();
+                }
+                ImGui.Render();
+            }
+            void Click(string name)
+            {
+                var center = centers[name];
+                io.AddMousePosEvent(center.X, center.Y); Frame();
+                io.AddMouseButtonEvent(0, true); Frame();
+                io.AddMouseButtonEvent(0, false); Frame();
+            }
+            Frame(); Frame();
+            Click("Run"); Click("Radio"); Click("Check"); Click("Disabled"); Click("ReadOnly");
+            Assert.Equal(1, clicks); Assert.Equal(1, radioClicks); Assert.Equal(0, disabledClicks);
+            Assert.True(selected); Assert.True(checkedValue);
+            Assert.False(ImGui.IsAnyItemActive());
         }
         finally { ImGui.DestroyContext(context); ImGui.SetCurrentContext(previous); }
     }
