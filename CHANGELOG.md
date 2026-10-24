@@ -1,3 +1,8 @@
+2026-10-24 - Restore the Glass edge glow (unreleased)
+
+- Add the missing soft Controls-colour halo and tinted edge to Glass panels, fields and buttons. Retain existing native controls, wave colours, animation, palettes and the current version.
+- Validation: 36 focused appearance/native interaction checks pass. The unchanged Debug/x64 launcher builds with zero warnings or errors; game visual acceptance of the glow remains pending.
+
 2026-10-24 - Cyberpunk pilot design revision (unreleased)
 
 - Replace the Cyberpunk perimeter rails and nested frames with flat layered graphite plates, solid clipped cyan/pale heading tabs, relative magenta accents and raised controls with accent-colour lower edges. Match the approved rounded switches and radios while preserving native IDs, actions, semantic fills and saved palettes.

@@ -115,8 +115,9 @@ internal static partial class FrenRiderPresentation
         if (Style == FrenRiderUiStyle.Glassmorphism)
         {
             dl.AddRectFilled(min + new Vector2(0, 3 * s), max + new Vector2(0, 3 * s), Ink(new Vector4(0, 0, 0, .15f)), 10 * s);
+            GlassGlow(dl, min, max, 10 * s, inset ? .55f : 1);
             dl.AddRectFilled(min, max, Ink(inset ? c.SurfaceContainerLowest : c.SurfaceContainerLow, inset ? .68f : .42f), 10 * s);
-            dl.AddRect(min, max, Ink(c.OnSurface, inset ? .22f : .6f), 10 * s);
+            dl.AddRect(min, max, Ink(Vector4.Lerp(c.Primary, c.OnSurface, .35f), inset ? .5f : .8f), 10 * s);
             dl.AddLine(min + new Vector2(10, 1) * s, new Vector2(max.X - 10 * s, min.Y + s), Ink(c.OnSurface, .36f), s);
         }
         else if (Style == FrenRiderUiStyle.Spatial)
@@ -142,6 +143,18 @@ internal static partial class FrenRiderPresentation
                 dl.AddRectFilled(min + new Vector2(0, 3 * s), max + new Vector2(0, 3 * s), Ink(new Vector4(0, 0, 0, .22f)), 3 * s);
             dl.AddRectFilled(min, max, Ink(inset ? c.SurfaceContainerLowest : c.SurfaceContainerLow), 3 * s);
             dl.AddLine(min + new Vector2(3, 1) * s, new Vector2(max.X - 3 * s, min.Y + s), Ink(c.OnSurface, .06f), s);
+        }
+    }
+
+    private static void GlassGlow(ImDrawListPtr dl, Vector2 min, Vector2 max, float radius, float opacity)
+    {
+        var s = SkinScale;
+        var accent = MaterialTheme.Current.Colors.Primary;
+        for (var layer = 4; layer > 0; layer--)
+        {
+            var spread = new Vector2(layer * .75f * s);
+            dl.AddRect(min - spread, max + spread, Ink(accent, opacity * (5 - layer) * .035f),
+                radius + spread.X, ImDrawFlags.None, 2 * s);
         }
     }
 
@@ -331,8 +344,9 @@ internal static partial class FrenRiderPresentation
         }
         else if (Style == FrenRiderUiStyle.Glassmorphism)
         {
+            GlassGlow(dl, min, max, 6 * s, active ? 1 : hovered ? .9f : .7f);
             dl.AddRectFilled(min, max, Ink(fill, .68f), 6 * s);
-            dl.AddRect(min, max, Ink(c.OnSurface, active ? .85f : hovered ? .7f : .34f), 6 * s);
+            dl.AddRect(min, max, Ink(Vector4.Lerp(c.Primary, c.OnSurface, .35f), active ? .95f : hovered ? .85f : .65f), 6 * s);
             dl.AddLine(min + new Vector2(6, 1) * s, new Vector2(max.X - 6 * s, min.Y + s), Ink(c.OnSurface, .25f), s);
         }
         else if (Style == FrenRiderUiStyle.Spatial)
