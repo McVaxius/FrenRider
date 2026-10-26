@@ -1,3 +1,7 @@
+2026-10-25 - 4.0.0.2 - Nearby NPC repair admission (I650/I654/I657/I658)
+
+- Let ADS decide whether NPC no-inn repair can use a nearby mender or travel from the current location. Preserve manual/automatic repair gates, thresholds, modes and request ownership.
+
 2026-10-24 - Restore the Glass edge glow (unreleased)
 
 - Add the missing soft Controls-colour halo and tinted edge to Glass panels, fields and buttons. Retain existing native controls, wave colours, animation, palettes and the current version.

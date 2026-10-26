@@ -84,6 +84,37 @@ public sealed unsafe class AutomaticRepairTests
     }
 
     [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void NpcNoInnRepairDelegatesLocationAdmissionToAds(bool manual)
+        => WithScenario(FrenRiderActivationMode.AlwaysOn, 2, scenario =>
+        {
+            var priorInstance = ActionManager.Addresses.Instance.Value;
+            var priorStatus = ActionManager.Addresses.GetActionStatus.Value;
+            var manager = new ActionManager();
+            try
+            {
+                ActionManager.Addresses.Instance.Value = (nint)(&manager);
+                ActionManager.Addresses.GetActionStatus.Value =
+                    (nint)(delegate* unmanaged<ActionManager*, ActionType, uint, ulong, byte, byte, uint*, uint>)&MountAvailable;
+                Assert.Equal(0u, ActionManager.Instance()->GetActionStatus(ActionType.GeneralAction, 9));
+                Assert.False(GameHelpers.IsInSanctuary()); // Real mount-available native result; no nearby crystal.
+                if (manual) scenario.Service.TriggerRepair(scenario.Config);
+                else scenario.Tick();
+                Assert.Equal(new[] { "npc-no-inn" }, scenario.Requests);
+            }
+            finally
+            {
+                ActionManager.Addresses.Instance.Value = priorInstance;
+                ActionManager.Addresses.GetActionStatus.Value = priorStatus;
+            }
+        });
+
+    [UnmanagedCallersOnly]
+    private static uint MountAvailable(ActionManager* manager, ActionType type, uint id, ulong target,
+        byte recast, byte casting, uint* extra) => 0;
+
+    [Theory]
     [InlineData(FrenRiderActivationMode.AlwaysOn)]
     [InlineData(FrenRiderActivationMode.DutyOnly)]
     public void DisabledModeAndMasterOffNeverRequestRepair(FrenRiderActivationMode activation)

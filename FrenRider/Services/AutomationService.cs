@@ -1320,12 +1320,7 @@ public class AutomationService : IDisposable
             return false;
         }
 
-        if (repairMode == "npc-no-inn" && !GameHelpers.IsInSanctuary())
-        {
-            reason = "outside sanctuary";
-            return false;
-        }
-
+        // ADS admits nearby repair NPCs and owns any travel-location restrictions.
         reason = "ready";
         return true;
     }
