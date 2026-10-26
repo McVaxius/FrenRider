@@ -1,3 +1,9 @@
+2026-10-26 - 4.0.0.3 - Honor ADS treasure-coffer selection (I664/I665)
+
+- Read the existing ADS coffer setting through its status poll. Suppress recognized coffer/chest work when disabled or unreadable, including custom keyword matches, while preserving Treasure-kind progression objects.
+- Stop only owned coffer paths before follow updates, target disappearance or duty-interaction reset. Release coffer navigation before an actual follow command replaces it, preserving the replacement path and unrelated progression/navigation.
+- Debug/x64 compilation and all 230 focused ADS ownership/readiness/exit, follow and mount regressions passed. In-game acceptance remains user-controlled.
+
 2026-10-25 - 4.0.0.2 - Nearby NPC repair admission (I650/I654/I657/I658)
 
 - Let ADS decide whether NPC no-inn repair can use a nearby mender or travel from the current location. Preserve manual/automatic repair gates, thresholds, modes and request ownership.

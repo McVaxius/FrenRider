@@ -99,6 +99,8 @@ public sealed class AdsDutyIpcService : IDisposable
     }
 
     public AdsDutyOwnershipSnapshot Current { get; private set; } = AdsDutyOwnershipSnapshot.Empty;
+    // Unknown status never grants coffer authority; only an explicit ADS true permits it.
+    public bool? ConsiderTreasureCoffers { get; private set; }
     public AdsCurrentDutySnapshot? CurrentDuty { get; private set; }
     public string CurrentDutyDetail { get; private set; } = "No validated ADS current-duty snapshot.";
     public bool IsInteractionVbmPauseActive
@@ -122,6 +124,7 @@ public sealed class AdsDutyIpcService : IDisposable
             return Current;
 
         lastPollUtc = now;
+        ConsiderTreasureCoffers = null;
         if (!isAdsLoaded())
         {
             lastKnownOwnedUtc = DateTime.MinValue;
@@ -154,6 +157,7 @@ public sealed class AdsDutyIpcService : IDisposable
         try
         {
             statusJson = queryStatusJson();
+            ConsiderTreasureCoffers = ReadConsiderTreasureCoffers(statusJson);
             RefreshCurrentDuty(statusJson, now, inInstancedDuty, territoryTypeId, contentFinderConditionId);
         }
         catch (Exception ex)
@@ -269,6 +273,27 @@ public sealed class AdsDutyIpcService : IDisposable
            || ownershipMode.Equals("OwnedStartInside", StringComparison.OrdinalIgnoreCase)
            || ownershipMode.Equals("OwnedResumeInside", StringComparison.OrdinalIgnoreCase)
            || ownershipMode.Equals("Leaving", StringComparison.OrdinalIgnoreCase);
+
+    private static bool? ReadConsiderTreasureCoffers(string? statusJson)
+    {
+        if (string.IsNullOrWhiteSpace(statusJson))
+            return null;
+
+        try
+        {
+            using var document = JsonDocument.Parse(statusJson);
+            var root = document.RootElement;
+            return root.ValueKind == JsonValueKind.Object
+                   && root.TryGetProperty("considerTreasureCoffers", out var property)
+                   && property.ValueKind is JsonValueKind.True or JsonValueKind.False
+                ? property.GetBoolean()
+                : null;
+        }
+        catch (JsonException)
+        {
+            return null;
+        }
+    }
 
     private AdsDutyOwnershipSnapshot ApplySuccessful(
         DateTime now,

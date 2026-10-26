@@ -1,10 +1,308 @@
+using System.Numerics;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using Dalamud.Game.ClientState.Objects.Enums;
+using Dalamud.Game.ClientState.Objects.SubKinds;
+using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Game.Text.SeStringHandling;
+using Dalamud.Plugin.Services;
 using FrenRider.Models;
 using FrenRider.Services;
 
 namespace FrenRider.Tests;
 
+[Collection("Activation mode static services")]
 public sealed class AdsDutyOwnershipTests
 {
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void CofferSettingDoesNotRequireDutyOwnershipOrCatalogMetadata(bool enabled)
+    {
+        using var service = CreateService(
+            () => true, () => false,
+            () => $$"""{"considerTreasureCoffers":{{enabled.ToString().ToLowerInvariant()}}}""",
+            () => DateTime.UtcNow);
+
+        service.Refresh(true, 4242, 88, force: true);
+
+        Assert.Equal(enabled, service.ConsiderTreasureCoffers);
+        Assert.False(service.Current.IsOwned);
+        Assert.Null(service.CurrentDuty);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("{")]
+    [InlineData("[]")]
+    [InlineData("null")]
+    [InlineData("{}")]
+    [InlineData("""{"considerTreasureCoffers":null}""")]
+    [InlineData("""{"considerTreasureCoffers":"true"}""")]
+    [InlineData("""{"considerTreasureCoffers":1}""")]
+    public void UnreadableCofferSettingCannotRetainEnabledAuthority(string unreadable)
+    {
+        var json = """{"considerTreasureCoffers":true}""";
+        using var service = CreateService(() => true, () => true, () => json, () => DateTime.UtcNow);
+        service.Refresh(true, 4242, 88, force: true);
+        Assert.True(service.ConsiderTreasureCoffers);
+
+        json = unreadable;
+        service.Refresh(true, 4242, 88, force: true);
+
+        Assert.Null(service.ConsiderTreasureCoffers);
+        Assert.True(service.Current.IsOwned);
+    }
+
+    [Fact]
+    public void JsonFailureRetainsCurrentDutyWithoutRetainingCofferAuthority()
+    {
+        var unavailable = false;
+        using var service = CreateService(() => true, () => false,
+            () => unavailable ? throw new InvalidOperationException("fabricated IPC failure")
+                : """{"considerTreasureCoffers":true,"inInstancedDuty":true,"hasCatalogMetadata":true,"duty":"Fabricated Duty","territoryTypeId":4242,"contentFinderConditionId":88,"dutyCategory":"FourMan","supportLevel":"PassiveOnly","clearanceStatus":"FourPlayerSyncCleared"}""",
+            () => DateTime.UtcNow);
+        service.Refresh(true, 4242, 88, force: true);
+        var duty = service.CurrentDuty;
+        Assert.NotNull(duty);
+        Assert.True(service.ConsiderTreasureCoffers);
+
+        unavailable = true;
+        service.Refresh(true, 4242, 88, force: true);
+
+        Assert.Same(duty, service.CurrentDuty);
+        Assert.Null(service.ConsiderTreasureCoffers);
+    }
+
+    [Fact]
+    public void CofferSettingUsesExistingPollCadenceAndClearsOnUnload()
+    {
+        var now = new DateTime(2026, 10, 26, 12, 0, 0, DateTimeKind.Utc);
+        var enabled = true;
+        var loaded = true;
+        var queries = 0;
+        using var service = CreateService(() => loaded, () => false,
+            () => { queries++; return $$"""{"considerTreasureCoffers":{{enabled.ToString().ToLowerInvariant()}}}"""; },
+            () => now);
+        service.Refresh(true, 4242, 88);
+        enabled = false;
+        now = now.AddMilliseconds(249);
+        service.Refresh(true, 4242, 88);
+        Assert.True(service.ConsiderTreasureCoffers);
+        Assert.Equal(1, queries);
+
+        now = now.AddMilliseconds(1);
+        service.Refresh(true, 4242, 88);
+        Assert.False(service.ConsiderTreasureCoffers);
+        Assert.Equal(2, queries);
+
+        loaded = false;
+        now += AdsDutyIpcService.PollInterval;
+        service.Refresh(true, 4242, 88);
+        Assert.Null(service.ConsiderTreasureCoffers);
+        Assert.Equal(2, queries);
+    }
+
+    [Theory]
+    [InlineData(ObjectKind.EventObj, "Treasure Coffer")]
+    [InlineData(ObjectKind.EventObj, "Ornate Coffer")]
+    [InlineData(ObjectKind.EventObj, "Staging Coffer: Gilded Strongbox")]
+    [InlineData(ObjectKind.EventObj, "Treasure Chest")]
+    [InlineData(ObjectKind.EventObj, "Wooden Chest")]
+    [InlineData(ObjectKind.EventObj, "Chest")]
+    [InlineData(ObjectKind.Treasure, "Treasure Coffer")]
+    [InlineData(ObjectKind.Treasure, "Ornate Coffer")]
+    [InlineData(ObjectKind.Treasure, "Treasure Chest")]
+    public void OffFiltersLootBeforeCustomKeywordsAndRepeatInteractions(ObjectKind kind, string name)
+    {
+        using var fixture = new CofferInteractionFixture();
+        var coffer = fixture.Add(name, kind, 1);
+        fixture.SetField("interactableKeywords", new List<string> { name });
+        fixture.SetField("lastInteractedEntityId", (uint)coffer.GameObjectId);
+        fixture.SetCoffers(true);
+        Assert.Same(coffer, fixture.FindNearest());
+
+        fixture.SetCoffers(false);
+        Assert.Null(fixture.FindNearest());
+        fixture.SetCoffers(null);
+        Assert.Null(fixture.FindNearest());
+    }
+
+    [Theory]
+    [InlineData(ObjectKind.EventObj, "Vault Door", "door")]
+    [InlineData(ObjectKind.Treasure, "Vault Door", "door")]
+    [InlineData(ObjectKind.Treasure, "Sluice Gate", "gate")]
+    [InlineData(ObjectKind.Treasure, "Elaborate Gate", "gate")]
+    [InlineData(ObjectKind.Treasure, "Stage Door", "door")]
+    [InlineData(ObjectKind.Treasure, "Arcane Sphere", "sphere")]
+    [InlineData(ObjectKind.Treasure, "Hypnoslot Machine", "hypnoslot")]
+    [InlineData(ObjectKind.EventObj, "Magitek Console", "console")]
+    [InlineData(ObjectKind.Treasure, "Treasure Portal", "portal")]
+    [InlineData(ObjectKind.EventObj, "Ancient Mechanism", "mechanism")]
+    [InlineData(ObjectKind.EventObj, "Treasure Beacon", "beacon")]
+    [InlineData(ObjectKind.Treasure, "Treasure Beacon", "beacon")]
+    [InlineData(ObjectKind.Treasure, "Ancient Mechanism", "mechanism")]
+    [InlineData(ObjectKind.Treasure, "Mysterious Cache", "cache")]
+    [InlineData(ObjectKind.Treasure, "Treasure Console", "console")]
+    [InlineData(ObjectKind.EventObj, "Chestnut Door", "door")]
+    public void OffPreservesProgressionAndCustomNonLootMatches(ObjectKind kind, string name, string keyword)
+    {
+        using var fixture = new CofferInteractionFixture();
+        fixture.Add("Treasure Coffer", ObjectKind.EventObj, 1);
+        var progression = fixture.Add(name, kind, 2);
+        fixture.SetField("interactableKeywords", new List<string> { "coffer", keyword });
+        fixture.SetCoffers(false);
+
+        Assert.Same(progression, fixture.FindNearest());
+    }
+
+    [Fact]
+    public void OffStopsAnOwnedCofferApproachOnce()
+    {
+        using var fixture = new CofferInteractionFixture();
+        var coffer = fixture.Add("Treasure Coffer", ObjectKind.Treasure, 12);
+        fixture.SetCoffers(true);
+        fixture.Call("NavigateToInteractable", coffer, Vector3.Zero, 12f, DateTime.UtcNow);
+        Assert.StartsWith("/vnav moveto ", Assert.Single(fixture.Commands));
+        fixture.Commands.Clear();
+
+        fixture.SetCoffers(false);
+        fixture.Call("ApplyCofferPolicy");
+        fixture.Call("ApplyCofferPolicy");
+
+        Assert.Equal(new[] { "/vnavmesh stop" }, fixture.Commands);
+        Assert.Null(fixture.FindNearest());
+        Assert.False((bool)fixture.Field("isNavigatingToInteractable")!);
+    }
+
+    [Theory]
+    [InlineData("Vault Door", ObjectKind.Treasure)]
+    [InlineData("Magitek Console", ObjectKind.EventObj)]
+    public void OffDoesNotStopOwnedProgressionNavigation(string name, ObjectKind kind)
+    {
+        using var fixture = new CofferInteractionFixture();
+        var progression = fixture.Add(name, kind, 12);
+        fixture.SetCoffers(true);
+        fixture.Call("NavigateToInteractable", progression, Vector3.Zero, 12f, DateTime.UtcNow);
+        fixture.Commands.Clear();
+
+        fixture.SetCoffers(false);
+        fixture.Call("ApplyCofferPolicy");
+
+        Assert.Empty(fixture.Commands);
+        Assert.True((bool)fixture.Field("isNavigatingToInteractable")!);
+    }
+
+    [Fact]
+    public void OffDoesNotStopForwardNudgeOrOrdinaryFollow()
+    {
+        using var fixture = new CofferInteractionFixture();
+        fixture.SetCoffers(false);
+        fixture.Call("NudgeForward");
+        fixture.Commands.Clear();
+        fixture.Call("ApplyCofferPolicy");
+        Assert.Empty(fixture.Commands);
+
+        fixture.SetField("isNavigatingToInteractable", false);
+        fixture.Follow.GetType().GetProperty(nameof(FollowService.State))!.SetValue(fixture.Follow, FollowState.Following);
+        fixture.Call("ApplyCofferPolicy");
+        Assert.Empty(fixture.Commands);
+    }
+
+    [Fact]
+    public void FollowingStateCannotHideAnOwnedCofferPathBeforeFollowReacquiresMovement()
+    {
+        using var fixture = new CofferInteractionFixture();
+        var coffer = fixture.Add("Treasure Coffer", ObjectKind.Treasure, 12);
+        fixture.SetCoffers(true);
+        fixture.Call("NavigateToInteractable", coffer, Vector3.Zero, 12f, DateTime.UtcNow);
+        fixture.Commands.Clear();
+        fixture.Follow.GetType().GetProperty(nameof(FollowService.State))!.SetValue(fixture.Follow, FollowState.Following);
+        fixture.SetCoffers(false);
+        fixture.Call("ApplyCofferPolicy");
+
+        Assert.Equal(new[] { "/vnavmesh stop" }, fixture.Commands);
+        Assert.False((bool)fixture.Field("isNavigatingToInteractable")!);
+    }
+
+    [Fact]
+    public void DisappearingCofferStopsItsPathBeforeOwnershipIsCleared()
+    {
+        using var fixture = new CofferInteractionFixture();
+        var coffer = fixture.Add("Treasure Coffer", ObjectKind.Treasure, 12);
+        fixture.SetCoffers(true);
+        fixture.Call("NavigateToInteractable", coffer, Vector3.Zero, 12f, DateTime.UtcNow);
+        fixture.Commands.Clear();
+        fixture.ClearObjects();
+        Assert.Null(fixture.FindNearest());
+
+        fixture.Call("ClearUnavailableInteractable");
+        fixture.SetCoffers(false);
+        fixture.Call("ApplyCofferPolicy");
+
+        Assert.Equal(new[] { "/vnavmesh stop" }, fixture.Commands);
+        Assert.False((bool)fixture.Field("isNavigatingToInteractable")!);
+        Assert.False((bool)fixture.Field("navigatingToTreasureCoffer")!);
+    }
+
+    [Fact]
+    public void ResetBeforeOffStopsCofferPathBeforeOwnershipIsCleared()
+    {
+        using var fixture = new CofferInteractionFixture();
+        var coffer = fixture.Add("Treasure Coffer", ObjectKind.Treasure, 12);
+        fixture.SetCoffers(true);
+        fixture.Call("NavigateToInteractable", coffer, Vector3.Zero, 12f, DateTime.UtcNow);
+        fixture.Commands.Clear();
+
+        fixture.Call("Reset");
+        fixture.SetCoffers(false);
+        fixture.Call("ApplyCofferPolicy");
+
+        Assert.Equal(new[] { "/vnavmesh stop" }, fixture.Commands);
+        Assert.False((bool)fixture.Field("isNavigatingToInteractable")!);
+    }
+
+    [Theory]
+    [InlineData("Reset")]
+    [InlineData("ClearUnavailableInteractable")]
+    [InlineData("ReleaseCofferNavigationForFollow")]
+    public void CofferCleanupDoesNotStopProgressionNavigation(string cleanup)
+    {
+        using var fixture = new CofferInteractionFixture();
+        var progression = fixture.Add("Treasure Beacon", ObjectKind.Treasure, 12);
+        fixture.SetCoffers(true);
+        fixture.Call("NavigateToInteractable", progression, Vector3.Zero, 12f, DateTime.UtcNow);
+        fixture.Commands.Clear();
+
+        fixture.Call(cleanup);
+        fixture.SetCoffers(false);
+        fixture.Call("ApplyCofferPolicy");
+
+        Assert.Empty(fixture.Commands);
+    }
+
+    [Fact]
+    public void FollowReleasesOnlyOwnedCofferBeforeReplacementNavigation()
+    {
+        using var fixture = new CofferInteractionFixture();
+        var coffer = fixture.Add("Treasure Coffer", ObjectKind.Treasure, 12);
+        fixture.SetCoffers(true);
+        fixture.Call("NavigateToInteractable", coffer, Vector3.Zero, 12f, DateTime.UtcNow);
+        fixture.Commands.Clear();
+
+        fixture.CallFollow("IssueNavCommand", new CharacterConfig { ClingType = 0 },
+            new Vector3(20, 0, 0), false, "fabricated follow replacement", true);
+        Assert.Equal(2, fixture.Commands.Count);
+        Assert.Equal("/vnavmesh stop", fixture.Commands[0]);
+        Assert.StartsWith("/vnav moveto ", fixture.Commands[1]);
+        fixture.Commands.Clear();
+        fixture.Call("Reset");
+        fixture.SetCoffers(false);
+        fixture.Call("ApplyCofferPolicy");
+
+        Assert.Empty(fixture.Commands);
+    }
+
     [Fact]
     public void TypedOwnershipIsAuthoritative()
     {
@@ -515,6 +813,107 @@ public sealed class AdsDutyOwnershipTests
         IsBetweenAreas: false,
         IsWatchingCutscene: false,
         IsOccupiedInCutSceneEvent: false);
+
+    private sealed class CofferInteractionFixture : IDisposable
+    {
+        private readonly Dictionary<PropertyInfo, object?> savedStatics = new();
+        private readonly List<IGameObject> objects = new();
+        private string statusJson = "{}";
+        private readonly AdsDutyIpcService ads;
+        private readonly DutyInteractService interaction;
+        internal readonly FollowService Follow = (FollowService)RuntimeHelpers.GetUninitializedObject(typeof(FollowService));
+        internal readonly List<string> Commands = new();
+
+        internal CofferInteractionFixture()
+        {
+            ads = CreateService(() => true, () => false, () => statusJson, () => DateTime.UtcNow);
+            var plugin = (Plugin)RuntimeHelpers.GetUninitializedObject(typeof(Plugin));
+            typeof(Plugin).GetProperty(nameof(Plugin.AdsDutyIpcService))!.SetValue(plugin, ads);
+            typeof(Plugin).GetProperty(nameof(Plugin.FollowService))!.SetValue(plugin, Follow);
+            interaction = (DutyInteractService)RuntimeHelpers.GetUninitializedObject(typeof(DutyInteractService));
+            typeof(Plugin).GetProperty(nameof(Plugin.DutyInteractService))!.SetValue(plugin, interaction);
+            typeof(FollowService).GetField("plugin", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(Follow, plugin);
+            typeof(FollowService).GetField("zoneService", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(Follow, new ZoneService());
+            SetField("plugin", plugin);
+            SetField("interactableKeywords", new List<string>());
+            typeof(DutyInteractService).GetProperty(nameof(DutyInteractService.IsActive))!.SetValue(interaction, true);
+
+            var player = Proxy<IPlayerCharacter>((method, _) => method.Name switch
+            {
+                "get_Position" => Vector3.Zero,
+                "get_Rotation" => 0f,
+                _ => Default(method.ReturnType),
+            });
+            ReplaceStatic("ObjectTable", Proxy<IObjectTable>((method, _) => method.Name switch
+            {
+                "get_LocalPlayer" => player,
+                "GetEnumerator" => objects.GetEnumerator(),
+                _ => Default(method.ReturnType),
+            }));
+            ReplaceStatic("Log", Proxy<IPluginLog>((_, _) => null));
+            ReplaceStatic("CommandManager", Proxy<ICommandManager>((method, args) =>
+            {
+                if (method.Name != "ProcessCommand") return Default(method.ReturnType);
+                Commands.Add((string)args![0]!);
+                return true;
+            }));
+        }
+
+        internal IGameObject Add(string name, ObjectKind kind, float distance)
+        {
+            var gameObject = Proxy<IGameObject>((method, _) => method.Name switch
+            {
+                "get_Name" => new SeStringBuilder().AddText(name).Build(),
+                "get_ObjectKind" => kind,
+                "get_IsTargetable" => true,
+                "get_GameObjectId" => (ulong)distance,
+                "get_Position" => new Vector3(distance, 0, 0),
+                _ => Default(method.ReturnType),
+            });
+            objects.Add(gameObject);
+            return gameObject;
+        }
+
+        internal void SetCoffers(bool? enabled)
+        {
+            statusJson = enabled.HasValue
+                ? $$"""{"considerTreasureCoffers":{{enabled.Value.ToString().ToLowerInvariant()}}}"""
+                : "{}";
+            ads.Refresh(true, 4242, 88, force: true);
+        }
+
+        internal IGameObject? FindNearest() => (IGameObject?)Call("FindNearestInteractable");
+        internal void ClearObjects() => objects.Clear();
+        internal object? Call(string method, params object?[] args)
+            => typeof(DutyInteractService).GetMethod(method, BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(interaction, args);
+        internal object? CallFollow(string method, params object?[] args)
+            => typeof(FollowService).GetMethod(method, BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(Follow, args);
+        internal object? Field(string name)
+            => typeof(DutyInteractService).GetField(name, BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(interaction);
+        internal void SetField(string name, object value)
+            => typeof(DutyInteractService).GetField(name, BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(interaction, value);
+        private void ReplaceStatic(string name, object value)
+        {
+            var property = typeof(Plugin).GetProperty(name, BindingFlags.Static | BindingFlags.NonPublic)!;
+            savedStatics[property] = property.GetValue(null);
+            property.SetValue(null, value);
+        }
+
+        private static T Proxy<T>(Func<MethodInfo, object?[]?, object?> handler) where T : class
+        {
+            var proxy = DispatchProxy.Create<T, QuestionableTestProxy>();
+            ((QuestionableTestProxy)(object)proxy).Handler = handler;
+            return proxy;
+        }
+
+        private static object? Default(Type type)
+            => type == typeof(void) || !type.IsValueType ? null : Activator.CreateInstance(type);
+        public void Dispose()
+        {
+            foreach (var (property, value) in savedStatics) property.SetValue(null, value);
+            ads.Dispose();
+        }
+    }
 
     private static AdsDutyIpcService CreateService(
         Func<bool> loaded,

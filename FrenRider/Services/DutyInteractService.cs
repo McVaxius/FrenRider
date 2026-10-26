@@ -50,6 +50,7 @@ public class DutyInteractService
     private ulong? navigatingInteractableGameObjectId;
     private Vector3 interactableRepathCheckPosition;
     private bool isNavigatingToInteractable;
+    private bool navigatingToTreasureCoffer;
 
     public string StateDetail { get; private set; } = "";
     public bool IsActive { get; private set; }
@@ -68,6 +69,7 @@ public class DutyInteractService
 
     public void Update()
     {
+        ApplyCofferPolicy();
         var config = plugin.ConfigManager.GetActiveConfig();
         if (!config.Enabled)
         {
@@ -208,7 +210,7 @@ public class DutyInteractService
         }
         else
         {
-            isNavigatingToInteractable = false;
+            ClearUnavailableInteractable();
             StateDetail = "Scanning for interactables...";
             var boundByDuty = Plugin.Condition[ConditionFlag.BoundByDuty]
                               || Plugin.Condition[ConditionFlag.BoundByDuty56];
@@ -269,6 +271,8 @@ public class DutyInteractService
             if (obj.ObjectKind != ObjectKind.EventObj && obj.ObjectKind != ObjectKind.Treasure) continue;
 
             var name = obj.Name.TextValue;
+            if (plugin.AdsDutyIpcService.ConsiderTreasureCoffers != true
+                && IsTreasureCoffer(name)) continue;
             if (obj.ObjectKind != ObjectKind.Treasure && !MatchesInteractableKeyword(name)) continue;
 
             var dist = Vector3.Distance(localPlayer.Position, obj.Position);
@@ -282,6 +286,34 @@ public class DutyInteractService
         }
 
         return nearest;
+    }
+
+    private static bool IsTreasureCoffer(string name)
+    {
+        var normalized = name.Trim();
+        // Treasure kind and the editable keyword list do not establish loot identity.
+        return normalized.Contains("coffer", StringComparison.OrdinalIgnoreCase)
+               || normalized.Contains("treasure chest", StringComparison.OrdinalIgnoreCase)
+               || normalized.Equals("chest", StringComparison.OrdinalIgnoreCase)
+               || normalized.EndsWith(" chest", StringComparison.OrdinalIgnoreCase);
+    }
+
+    internal void ApplyCofferPolicy()
+    {
+        if (plugin.AdsDutyIpcService.ConsiderTreasureCoffers == true
+            || !isNavigatingToInteractable
+            || !navigatingToTreasureCoffer)
+        {
+            return;
+        }
+
+        StopInteractableNavigation("ADS treasure coffers disabled or unreadable");
+    }
+
+    internal void ReleaseCofferNavigationForFollow()
+    {
+        if (navigatingToTreasureCoffer)
+            StopInteractableNavigation("follow taking navigation");
     }
 
     private bool MatchesInteractableKeyword(string name)
@@ -330,6 +362,7 @@ public class DutyInteractService
         if (!isNavigatingToInteractable)
         {
             isNavigatingToInteractable = true;
+            navigatingToTreasureCoffer = IsTreasureCoffer(interactable.Name.TextValue);
             navigatingInteractableGameObjectId = gameObjectId;
             interactableRepathCheckPosition = localPosition;
             lastInteractableRepathCheckTime = now;
@@ -346,6 +379,7 @@ public class DutyInteractService
             var reason = $"stuck repath (moved {moved:F1}y < {InteractableStuckDistance:F1}y in {InteractableRepathCheckSeconds:F0}s)";
             StopInteractableNavigation(reason);
             isNavigatingToInteractable = true;
+            navigatingToTreasureCoffer = IsTreasureCoffer(interactable.Name.TextValue);
             navigatingInteractableGameObjectId = gameObjectId;
             interactableRepathCheckPosition = localPosition;
             lastInteractableRepathCheckTime = now;
@@ -375,6 +409,16 @@ public class DutyInteractService
         SendCommand("/vnavmesh stop");
         isNavigatingToInteractable = false;
         navigatingInteractableGameObjectId = null;
+        navigatingToTreasureCoffer = false;
+    }
+
+    private void ClearUnavailableInteractable()
+    {
+        if (navigatingToTreasureCoffer)
+            StopInteractableNavigation("coffer target no longer available");
+        isNavigatingToInteractable = false;
+        navigatingInteractableGameObjectId = null;
+        navigatingToTreasureCoffer = false;
     }
 
     private static string GetMountCommand(string mountName)
@@ -405,6 +449,7 @@ public class DutyInteractService
         var coords = FormatVector(target);
         isNavigatingToInteractable = true;
         navigatingInteractableGameObjectId = null;
+        navigatingToTreasureCoffer = false;
         SendCommand($"/vnav moveto {coords}");
         StateDetail = "No interactables found, nudging forward...";
         Plugin.Log.Information($"[DutyInteract] Nudging forward to {coords}");
@@ -412,10 +457,13 @@ public class DutyInteractService
 
     private void Reset()
     {
+        if (navigatingToTreasureCoffer)
+            StopInteractableNavigation("duty interaction reset");
         if (IsActive)
         {
             isNavigatingToInteractable = false;
             navigatingInteractableGameObjectId = null;
+            navigatingToTreasureCoffer = false;
             lastInteractedEntityId = null;
         }
         IsActive = false;

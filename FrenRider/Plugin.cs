@@ -1501,6 +1501,7 @@ public sealed partial class Plugin : IDalamudPlugin
             if (PhoenixDownRecoveryService.HoldMovement)
                 return;
             Measure("fate-sync", FateSyncService.Update);
+            Measure("duty-coffer-policy", DutyInteractService.ApplyCofferPolicy);
             Measure("follow", FollowService.Update);
             Measure("mount", MountService.Update);
             Measure("automation", AutomationService.Update);

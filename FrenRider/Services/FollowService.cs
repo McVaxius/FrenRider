@@ -961,6 +961,7 @@ public class FollowService
 
     private void IssueNavCommand(CharacterConfig config, Vector3 target, bool selfFlying, string reason, bool isFrenFollowTarget)
     {
+        plugin.DutyInteractService?.ReleaseCofferNavigationForFollow();
         var previousTarget = lastNavTarget;
         lastNavTarget = target;
         isNavigating = true;
@@ -1350,6 +1351,7 @@ public class FollowService
         if (isNavigating)
             StopNavigation(config, "switching to BossMod follow");
 
+        plugin.DutyInteractService?.ReleaseCofferNavigationForFollow();
         plugin.CaptureExternalAutomationSnapshot("BossMod follow start");
         SendCommand($"/bmrai follow {targetName}");
         SendCommand("/bmrai followoutofcombat on");
