@@ -754,12 +754,16 @@ public sealed partial class Plugin : IDalamudPlugin
         ApplyAppearance();
         using var appearance = FrenRiderPresentation.Push(Configuration);
         if (!MainWindow.IsOpen && !ConfigWindow.IsOpen && !MagiaMiniWindow.IsOpen && !AutoDutyWarningWindow.IsOpen)
+        {
+            backgroundGlass?.EndFrame(false);
             return;
+        }
         using var text = uiText.Enter();
         shapedText ??= new(TextureProvider);
         using var shaped = shapedText.Push();
         if (!uiFonts.Ready)
         {
+            backgroundGlass?.EndFrame(false);
             if (!fontIssueLogged && uiFonts.LoadException is { } error)
             {
                 Log.Error(error, "[FrenRider] Required UI fonts failed to load.");
@@ -790,6 +794,7 @@ public sealed partial class Plugin : IDalamudPlugin
             }
             catch (Exception ex)
             {
+                backgroundGlass?.EndFrame(false);
                 if (!fontIssueLogged) { Log.Error(ex, "[FrenRider] Required UI glyph coverage failed."); fontIssueLogged = true; }
                 DrawFontStatus(false);
                 return;
@@ -826,7 +831,13 @@ public sealed partial class Plugin : IDalamudPlugin
         }
         RefreshLcarsSoundButtons();
         foreach (var window in WindowSystem.Windows) window.AllowBackgroundBlur = false;
-        DrawAppearanceWindows(WindowSystem, useGlass, WindowSystem.Draw);
+        var completed = false;
+        try
+        {
+            DrawAppearanceWindows(WindowSystem, useGlass, WindowSystem.Draw);
+            completed = true;
+        }
+        finally { backgroundGlass?.EndFrame(useGlass && completed); }
     }
 
     internal static void DrawAppearanceWindows(WindowSystem windows, bool useGlass, Action draw)
@@ -834,19 +845,13 @@ public sealed partial class Plugin : IDalamudPlugin
         var restoreBackground = useGlass
             ? windows.Windows.Where(window => (window.Flags & ImGuiWindowFlags.NoBackground) == 0).ToArray()
             : Array.Empty<Window>();
-        var restoreViewport = useGlass
-            ? windows.Windows.Where(window => !window.ForceMainWindow).ToArray()
-            : Array.Empty<Window>();
         try
         {
             foreach (var window in restoreBackground) window.Flags |= ImGuiWindowFlags.NoBackground;
-            // Glasswork captures the game target; detached viewport targets have no game pixels.
-            foreach (var window in restoreViewport) window.ForceMainWindow = true;
             draw();
         }
         finally
         {
-            foreach (var window in restoreViewport) window.ForceMainWindow = false;
             foreach (var window in restoreBackground) window.Flags &= ~ImGuiWindowFlags.NoBackground;
         }
     }

@@ -15,7 +15,7 @@ namespace FrenRider.Tests;
 public sealed unsafe class ColorAppearanceTests
 {
     [Fact]
-    public void BackgroundGlassWindowScopeForcesGameViewportAndRestoresOriginalFlagsAfterDrawFailure()
+    public void BackgroundGlassWindowScopePreservesDetachedPlacementAndRestoresOriginalFlagsAfterDrawFailure()
     {
         var windows = new WindowSystem("Glasswork viewport scope fixture");
         var ordinary = new BackgroundProbeWindow("Ordinary###glasswork-scope-ordinary")
@@ -39,7 +39,7 @@ public sealed unsafe class ColorAppearanceTests
             Plugin.DrawAppearanceWindows(windows, true, () =>
             {
                 draws++;
-                Assert.True(ordinary.ForceMainWindow);
+                Assert.False(ordinary.ForceMainWindow);
                 Assert.True(alreadyForced.ForceMainWindow);
                 Assert.Equal(ordinaryFlags | ImGuiWindowFlags.NoBackground, ordinary.Flags);
                 Assert.Equal(forcedFlags, alreadyForced.Flags);
@@ -139,7 +139,8 @@ public sealed unsafe class ColorAppearanceTests
             io.Fonts.GetTexDataAsRGBA32(0, &pixels, &width, &height);
             io.Fonts.SetTexID(0, new ImTextureID((nint)1));
 
-            ((Vector2 Position, uint Colour)[] Foreground, uint[] PanelColours, int ForegroundSubmissions, float Alpha) Frame()
+            ((Vector2 Position, uint Colour)[] Foreground, uint[] PanelColours, int ForegroundSubmissions,
+                float Alpha, Vector4 Header, Vector4 Fill, Vector4 Field) Frame()
             {
                 submissions.Clear();
                 ImGui.NewFrame();
@@ -148,6 +149,7 @@ public sealed unsafe class ColorAppearanceTests
                 ImGui.SetNextWindowPos(new(20, 20)); ImGui.SetNextWindowSize(new(800, 600));
                 ImGui.Begin("Glasswork background contract", ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoBackground);
                 FrenRiderPresentation.DrawBackdrop();
+                using var backgrounds = FrenRiderPresentation.GlassBackgroundStyle();
                 var list = ImGui.GetWindowDrawList();
                 var first = list.VtxBuffer.Size;
                 FrenRiderPresentation.DrawPanel(new(50, 90), new(330, 230), background: true);
@@ -163,8 +165,11 @@ public sealed unsafe class ColorAppearanceTests
                     .Select(index => (list.VtxBuffer[index].Pos, list.VtxBuffer[index].Col)).ToArray();
                 var foregroundSubmissions = submissions.Count - beforeForeground;
                 var alpha = ImGui.GetStyle().Alpha;
+                var header = ImGui.GetStyle().Colors[(int)ImGuiCol.TableHeaderBg];
+                var fill = FrenRiderPresentation.BackgroundFill(MaterialTheme.Current.Colors.SurfaceContainerLow);
+                var field = ImGui.GetStyle().Colors[(int)ImGuiCol.FrameBg];
                 ImGui.End(); ImGui.Render();
-                return (foreground, panelColours, foregroundSubmissions, alpha);
+                return (foreground, panelColours, foregroundSubmissions, alpha, header, fill, field);
             }
 
             Frame(); Frame();
@@ -172,6 +177,9 @@ public sealed unsafe class ColorAppearanceTests
             Assert.Equal(new[] { (true, .75f), (false, .75f) }, submissions.Select(value => (value.Window, value.Frost)));
             Assert.Equal(0, frosted.ForegroundSubmissions);
             Assert.Equal(1, frosted.Alpha);
+            Assert.Equal(Vector4.Zero, frosted.Header);
+            Assert.Equal(Vector4.Zero, frosted.Fill);
+            Assert.NotEqual(Vector4.Zero, frosted.Field);
             var tint = submissions.Select(value => value.Tint).ToArray();
             var solidPanel = MaterialCanvas.Color(FrenRiderPresentation.Theme(config).Colors.SurfaceContainerLow);
             Assert.DoesNotContain(solidPanel, frosted.PanelColours);
@@ -182,6 +190,12 @@ public sealed unsafe class ColorAppearanceTests
             Assert.Equal(tint, submissions.Select(value => value.Tint));
             Assert.True(frosted.Foreground.SequenceEqual(lessFrost.Foreground));
             Assert.Equal(0, lessFrost.ForegroundSubmissions);
+            var originalPalette = config.UiCyberpunkColors;
+            config.UiCyberpunkColors = originalPalette with { BackgroundRgb = 0xD02080 };
+            Frame();
+            Assert.All(submissions, value => Assert.Equal(
+                FrenRiderPresentation.Rgb(0xD02080) with { W = .42f }, value.Tint));
+            config.UiCyberpunkColors = originalPalette;
             config.UiColors = config.UiColors with { BackgroundBlurPercent = 0 };
             Frame();
             Assert.True(FrenRiderPresentation.BackgroundBlurEnabled(config));
@@ -192,13 +206,109 @@ public sealed unsafe class ColorAppearanceTests
             var disabled = Frame();
             Assert.Empty(submissions);
             Assert.Contains(solidPanel, disabled.PanelColours);
+            Assert.NotEqual(Vector4.Zero, disabled.Header);
+            Assert.NotEqual(Vector4.Zero, disabled.Fill);
+            Assert.Equal(frosted.Field, disabled.Field);
             Assert.True(frosted.Foreground.SequenceEqual(disabled.Foreground));
             available = false;
             config.UiColors = config.UiColors.WithBackgroundBlur(MaterialColorMode.Cyberpunk, true);
             var unavailable = Frame();
             Assert.Equal(2, submissions.Count);
             Assert.Equal(disabled.PanelColours, unavailable.PanelColours);
+            Assert.Equal(disabled.Header, unavailable.Header);
+            Assert.Equal(disabled.Fill, unavailable.Fill);
             Assert.True(disabled.Foreground.SequenceEqual(unavailable.Foreground));
+        }
+        finally { ImGui.DestroyContext(context); ImGui.SetCurrentContext(previous); }
+    }
+
+    [Fact]
+    public void SuccessfulGlassmorphismGlassRetainsTranslucentWaveMeshesAnimationAndForeground()
+    {
+        var previous = ImGui.GetCurrentContext();
+        var context = ImGui.CreateContext();
+        try
+        {
+            var config = new Configuration { UiStyle = FrenRiderUiStyle.Glassmorphism, UiGlassAnimation = false };
+            var submissions = new List<(bool Window, float Frost)>();
+            using var renderer = new FrenRiderGlass((_, _, _, _, _, frost, window) =>
+            {
+                submissions.Add((window, frost));
+                return true;
+            });
+            var io = ImGui.GetIO();
+            io.IniFilename = null; io.LogFilename = null; io.DisplaySize = new(1000, 800); io.DeltaTime = .1f;
+            io.Fonts.AddFontDefault();
+            byte* pixels = null; int width = 0, height = 0;
+            io.Fonts.GetTexDataAsRGBA32(0, &pixels, &width, &height);
+            io.Fonts.SetTexID(0, new ImTextureID((nint)1));
+
+            ((Vector2 Position, uint Colour)[] Waves, int[] Indices, (Vector2 Position, uint Colour)[] Foreground) Frame(float frost = .75f)
+            {
+                submissions.Clear();
+                ImGui.NewFrame();
+                using var appearance = FrenRiderPresentation.Push(config, renderer);
+                using var theme = MaterialTheme.Push(FrenRiderPresentation.Theme(config), 1, MaterialStyleMode.ColorsOnly);
+                ImGui.SetNextWindowPos(new(20, 20)); ImGui.SetNextWindowSize(new(800, 600));
+                ImGui.Begin("Glasswork waves contract", ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoBackground);
+                var list = ImGui.GetWindowDrawList();
+                var first = list.VtxBuffer.Size;
+                var firstIndex = list.IdxBuffer.Size;
+                FrenRiderPresentation.DrawBackdrop();
+                var waves = Enumerable.Range(first, list.VtxBuffer.Size - first)
+                    .Select(index => (list.VtxBuffer[index].Pos, list.VtxBuffer[index].Col)).ToArray();
+                var indices = Enumerable.Range(firstIndex, list.IdxBuffer.Size - firstIndex)
+                    .Select(index => (int)list.IdxBuffer[index] - first).ToArray();
+                first = list.VtxBuffer.Size;
+                ImGui.SetCursorScreenPos(new(80, 100));
+                using (FrenRiderPresentation.NativeFieldStyle()) ImGui.Button("Foreground control", new(180, 32));
+                FrenRiderPresentation.PaintToggle(new(300, 100), new(46, 24), true, MaterialTheme.Current.Colors.Primary);
+                FrenRiderPresentation.PaintChoice(new(370, 100), 24, true, false);
+                var foreground = Enumerable.Range(first, list.VtxBuffer.Size - first)
+                    .Select(index => (list.VtxBuffer[index].Pos, list.VtxBuffer[index].Col)).ToArray();
+                ImGui.End(); ImGui.Render();
+                Assert.Equal(new[] { (true, frost) }, submissions);
+                return (waves, indices, foreground);
+            }
+
+            Frame(); Frame();
+            var still = Frame();
+            var repeated = Frame();
+            Assert.NotEmpty(still.Waves);
+            Assert.NotEmpty(still.Foreground);
+            Assert.Equal(still.Waves, repeated.Waves);
+            Assert.Equal(still.Indices, repeated.Indices);
+            Assert.All(still.Indices, index => Assert.InRange(index, 0, still.Waves.Length - 1));
+            Assert.Contains(Enumerable.Range(0, still.Indices.Length / 3), triangle =>
+                (still.Waves[still.Indices[triangle * 3]].Colour & 0xFFFFFF) !=
+                    (still.Waves[still.Indices[triangle * 3 + 1]].Colour & 0xFFFFFF)
+                || (still.Waves[still.Indices[triangle * 3]].Colour & 0xFFFFFF) !=
+                    (still.Waves[still.Indices[triangle * 3 + 2]].Colour & 0xFFFFFF));
+            Assert.Contains(still.Waves, vertex => (vertex.Colour >> 24) > 0);
+            Assert.DoesNotContain(still.Waves, vertex => (vertex.Colour >> 24) == 255);
+
+            config.UiGlassWave1Rgb = 0xE34A62;
+            var recoloured = Frame();
+            Assert.Equal(still.Waves.Select(vertex => vertex.Position), recoloured.Waves.Select(vertex => vertex.Position));
+            Assert.Equal(still.Indices, recoloured.Indices);
+            Assert.False(still.Waves.Select(vertex => vertex.Colour).SequenceEqual(recoloured.Waves.Select(vertex => vertex.Colour)));
+            Assert.Equal(still.Foreground, recoloured.Foreground);
+            config.UiGlassAnimation = true;
+            var moving = Frame();
+            var later = Frame();
+            Assert.False(moving.Waves.SequenceEqual(later.Waves));
+            Assert.Equal(recoloured.Foreground, moving.Foreground);
+            Assert.Equal(moving.Foreground, later.Foreground);
+            config.UiGlassAnimation = false;
+            Assert.Equal(recoloured.Waves, Frame().Waves);
+
+            config.UiColors = config.UiColors with { BackgroundBlurPercent = 0 };
+            // Clear glass must still be submitted, without replacing it with an opaque painted backdrop.
+            var clear = Frame(0);
+            Assert.Equal(recoloured.Waves, clear.Waves);
+            Assert.Equal(recoloured.Indices, clear.Indices);
+            Assert.DoesNotContain(clear.Waves, vertex => (vertex.Colour >> 24) == 255);
+            Assert.Equal(recoloured.Foreground, clear.Foreground);
         }
         finally { ImGui.DestroyContext(context); ImGui.SetCurrentContext(previous); }
     }

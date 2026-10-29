@@ -16,7 +16,7 @@ internal static partial class FrenRiderPresentation
     {
         if (activeConfiguration is not { } config || !BackgroundBlurEnabled(config) || activeGlass == null)
             return false;
-        tint.W = .18f * ImGui.GetStyle().Alpha;
+        tint.W = .42f * ImGui.GetStyle().Alpha;
         return activeGlass.DrawBackground(dl, min, max, rounding, tint, BackgroundFrost(config), windowBackground);
     }
 
@@ -31,8 +31,10 @@ internal static partial class FrenRiderPresentation
         var max = min + ImGui.GetWindowSize();
         var dl = ImGui.GetWindowDrawList();
         var c = MaterialTheme.Current.Colors;
-        if (DrawGlassBackground(dl, min, max, ImGui.GetStyle().WindowRounding,
-                IsLcars ? LcarsBackground : c.Background, windowBackground: true)) return;
+        var glass = DrawGlassBackground(dl, min, max, ImGui.GetStyle().WindowRounding,
+            IsLcars ? LcarsBackground : c.Background, windowBackground: true);
+        activeGlassRoot = glass ? ImGuiP.GetCurrentWindowRead().RootWindow.ID : 0;
+        if (glass && (IsLcars || Style != FrenRiderUiStyle.Glassmorphism)) return;
         if (!Decorated)
         {
             var bodyMin = min + new Vector2(0, ImGuiP.TitleBarHeight(ImGuiP.GetCurrentWindow()));
@@ -43,7 +45,7 @@ internal static partial class FrenRiderPresentation
         dl.PushClipRect(min, max, true);
         try
         {
-            dl.AddRectFilled(min, max, Ink(IsLcars ? LcarsBackground : c.Background));
+            if (!glass) dl.AddRectFilled(min, max, Ink(IsLcars ? LcarsBackground : c.Background));
             if (IsLcars) return;
             if (Style == FrenRiderUiStyle.Glassmorphism)
             {
@@ -85,11 +87,12 @@ internal static partial class FrenRiderPresentation
                         color = Vector4.Lerp(color, wave2, secondaryBand * .50f);
                         color = Vector4.Lerp(color, wave3, crossingBand * .50f);
                         var crest = MathF.Max(primaryBand, MathF.Max(secondaryBand, crossingBand));
+                        var waveOpacity = glass ? crest * .58f : 1;
                         crest *= crest;
                         crest *= crest;
                         crest *= crest;
                         color = Vector4.Lerp(color, c.OnSurface, crest * .10f);
-                        color.W = 1;
+                        color.W = waveOpacity;
                         currentColors[column] = Ink(color);
                     }
                     if (row > 0)
@@ -141,7 +144,7 @@ internal static partial class FrenRiderPresentation
                 dl.AddRectFilled(min + new Vector2(0, 3 * s), max + new Vector2(0, 3 * s), Ink(new Vector4(0, 0, 0, .22f)), 3 * s);
         }
         var glass = background && DrawGlassBackground(dl, min, max, rounding * s,
-            IsLcars ? LcarsBackground : inset ? c.SurfaceContainerLowest : c.SurfaceContainerLow);
+            IsLcars ? LcarsBackground : c.Background);
         if (!Decorated)
         {
             if (!glass) dl.AddRectFilled(min, max, Ink(c.SurfaceContainerLow), 6 * s);
@@ -187,6 +190,24 @@ internal static partial class FrenRiderPresentation
             if (!glass) dl.AddRectFilled(min, max, Ink(inset ? c.SurfaceContainerLowest : c.SurfaceContainerLow), 3 * s);
             dl.AddLine(min + new Vector2(3, 1) * s, new Vector2(max.X - 3 * s, min.Y + s), Ink(c.OnSurface, .06f), s);
         }
+    }
+
+    internal static Vector4 BackgroundFill(Vector4 color)
+    {
+        if (activeGlassRoot == 0) return color;
+        var window = ImGuiP.GetCurrentWindowRead();
+        return !window.IsNull && window.RootWindow.ID == activeGlassRoot ? Vector4.Zero : color;
+    }
+
+    internal static MaterialStyleScope GlassBackgroundStyle()
+    {
+        var scope = new MaterialStyleScope();
+        if (BackgroundFill(Vector4.One) != Vector4.Zero) return scope;
+        scope.Color(ImGuiCol.ChildBg, Vector4.Zero);
+        scope.Color(ImGuiCol.TableHeaderBg, Vector4.Zero);
+        scope.Color(ImGuiCol.TableRowBg, Vector4.Zero);
+        scope.Color(ImGuiCol.TableRowBgAlt, Vector4.Zero);
+        return scope;
     }
 
     private static void GlassGlow(ImDrawListPtr dl, Vector2 min, Vector2 max, float radius, float opacity)

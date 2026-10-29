@@ -97,6 +97,7 @@ public sealed class MagiaMiniWindow : Window, IDisposable
     {
         motion.DrawChrome();
         FrenRiderPresentation.DrawBackdrop(windowOpacity.CurrentOpacity);
+        using var glassBackgrounds = FrenRiderPresentation.GlassBackgroundStyle();
         using var fields = new MaterialStyleScope();
         fields.Style(ImGuiStyleVar.FrameBorderSize, 1);
         fields.Color(ImGuiCol.FrameBg, MaterialTheme.Current.Colors.SurfaceContainer);

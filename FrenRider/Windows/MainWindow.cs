@@ -113,6 +113,7 @@ public class MainWindow : Window, IDisposable
     {
         motion.DrawChrome();
         FrenRiderPresentation.DrawBackdrop(windowOpacity.CurrentOpacity);
+        using var glassBackgrounds = FrenRiderPresentation.GlassBackgroundStyle();
         using var fields = new MaterialStyleScope();
         fields.Style(ImGuiStyleVar.FrameBorderSize, 1);
         fields.Color(ImGuiCol.FrameBg, MaterialTheme.Current.Colors.SurfaceContainer);
@@ -415,8 +416,8 @@ public class MainWindow : Window, IDisposable
         if (FrenRiderPresentation.Style == FrenRiderUiStyle.Cyberpunk)
         {
             var c = MaterialTheme.Current.Colors;
-            columnStyle.Color(ImGuiCol.TableRowBg, c.SurfaceContainerLowest);
-            columnStyle.Color(ImGuiCol.TableRowBgAlt, c.SurfaceContainer);
+            columnStyle.Color(ImGuiCol.TableRowBg, FrenRiderPresentation.BackgroundFill(c.SurfaceContainerLowest));
+            columnStyle.Color(ImGuiCol.TableRowBgAlt, FrenRiderPresentation.BackgroundFill(c.SurfaceContainer));
             var labelWidth = Math.Min(ImGui.GetContentRegionAvail().X * .38f,
                 cells.Max(cell => MaterialText.Measure(UiText.T(cell.Label)).X) + UiHelpers.Scale(12));
             if (!ImGui.BeginTable("##OperatorFields", 2, ImGuiTableFlags.SizingStretchProp
@@ -500,10 +501,10 @@ public class MainWindow : Window, IDisposable
             new Vector2(UiHelpers.Scale(compact ? 8 : 7), ImGui.GetStyle().CellPadding.Y));
         var cyberpunk = FrenRiderPresentation.Style == FrenRiderUiStyle.Cyberpunk;
         var c = MaterialTheme.Current.Colors;
-        tableStyle.Color(ImGuiCol.TableHeaderBg, cyberpunk ? c.SurfaceContainerHigh : Vector4.Zero);
-        tableStyle.Color(ImGuiCol.TableRowBg, cyberpunk ? c.SurfaceContainerLowest : Vector4.Zero);
-        tableStyle.Color(ImGuiCol.TableRowBgAlt, cyberpunk ? c.SurfaceContainer : Vector4.Zero);
-        tableStyle.Color(ImGuiCol.ChildBg, cyberpunk ? c.SurfaceContainerLowest : Vector4.Zero);
+        tableStyle.Color(ImGuiCol.TableHeaderBg, FrenRiderPresentation.BackgroundFill(cyberpunk ? c.SurfaceContainerHigh : Vector4.Zero));
+        tableStyle.Color(ImGuiCol.TableRowBg, FrenRiderPresentation.BackgroundFill(cyberpunk ? c.SurfaceContainerLowest : Vector4.Zero));
+        tableStyle.Color(ImGuiCol.TableRowBgAlt, FrenRiderPresentation.BackgroundFill(cyberpunk ? c.SurfaceContainer : Vector4.Zero));
+        tableStyle.Color(ImGuiCol.ChildBg, FrenRiderPresentation.BackgroundFill(cyberpunk ? c.SurfaceContainerLowest : Vector4.Zero));
         using var tightRows = MaterialTable.PushTightRows();
         var available = Math.Max(1, ImGui.GetContentRegionAvail().X - UiHelpers.Scale(compact ? 3 : 6));
         var statusMinimum = Math.Max(MaterialText.Measure(UiText.T("Mounted")).X,
@@ -634,8 +635,8 @@ public class MainWindow : Window, IDisposable
         using var tableStyle = new MaterialStyleScope();
         if (cyberpunk)
         {
-            tableStyle.Color(ImGuiCol.TableRowBg, MaterialTheme.Current.Colors.SurfaceContainerLowest);
-            tableStyle.Color(ImGuiCol.TableRowBgAlt, MaterialTheme.Current.Colors.SurfaceContainer);
+            tableStyle.Color(ImGuiCol.TableRowBg, FrenRiderPresentation.BackgroundFill(MaterialTheme.Current.Colors.SurfaceContainerLowest));
+            tableStyle.Color(ImGuiCol.TableRowBgAlt, FrenRiderPresentation.BackgroundFill(MaterialTheme.Current.Colors.SurfaceContainer));
         }
         if (!ImGui.BeginTable("##AutomationFields", columns, ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.BordersInnerH
                 | (cyberpunk ? ImGuiTableFlags.RowBg : ImGuiTableFlags.None),
@@ -703,8 +704,8 @@ public class MainWindow : Window, IDisposable
         using var tableStyle = new MaterialStyleScope();
         if (cyberpunk)
         {
-            tableStyle.Color(ImGuiCol.TableRowBg, MaterialTheme.Current.Colors.SurfaceContainerLowest);
-            tableStyle.Color(ImGuiCol.TableRowBgAlt, MaterialTheme.Current.Colors.SurfaceContainer);
+            tableStyle.Color(ImGuiCol.TableRowBg, FrenRiderPresentation.BackgroundFill(MaterialTheme.Current.Colors.SurfaceContainerLowest));
+            tableStyle.Color(ImGuiCol.TableRowBgAlt, FrenRiderPresentation.BackgroundFill(MaterialTheme.Current.Colors.SurfaceContainer));
         }
         var zone = plugin.ZoneService;
         var zoneExtra = "";

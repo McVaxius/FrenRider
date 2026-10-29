@@ -11,6 +11,7 @@ internal static partial class FrenRiderPresentation
 {
     [ThreadStatic] private static Configuration? activeConfiguration;
     [ThreadStatic] private static FrenRiderGlass? activeGlass;
+    [ThreadStatic] private static uint activeGlassRoot;
     internal static Configuration? ActiveConfiguration => activeConfiguration;
     internal static MaterialColorMode ColorMode(Configuration config) => config.UiStyle switch
     {
@@ -50,17 +51,21 @@ internal static partial class FrenRiderPresentation
     {
         private readonly Configuration? previous;
         private readonly FrenRiderGlass? previousGlass;
+        private readonly uint previousGlassRoot;
         internal AppearanceScope(Configuration config, FrenRiderGlass? renderer)
         {
             previous = activeConfiguration;
             previousGlass = activeGlass;
+            previousGlassRoot = activeGlassRoot;
             activeConfiguration = config;
             activeGlass = renderer;
+            activeGlassRoot = 0;
         }
         public void Dispose()
         {
             activeConfiguration = previous;
             activeGlass = previousGlass;
+            activeGlassRoot = previousGlassRoot;
         }
     }
 

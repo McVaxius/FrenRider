@@ -57,6 +57,7 @@ public class AutoDutyWarningWindow : Window
     {
         motion.DrawChrome();
         FrenRiderPresentation.DrawBackdrop(windowOpacity.CurrentOpacity);
+        using var glassBackgrounds = FrenRiderPresentation.GlassBackgroundStyle();
         using var controls = MaterialControls.Push(MaterialControlContext.Toolbar);
         using var spacing = new MaterialStyleScope();
         spacing.Style(ImGuiStyleVar.ItemSpacing, UiHelpers.Scale(new Vector2(8, plugin.Configuration.UiCompact ? 4 : 6)));

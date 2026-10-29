@@ -198,6 +198,7 @@ public partial class ConfigWindow : Window, IDisposable
     {
         motion.DrawChrome();
         FrenRiderPresentation.DrawBackdrop(windowOpacity.CurrentOpacity);
+        using var glassBackgrounds = FrenRiderPresentation.GlassBackgroundStyle();
         if (FrenRiderPresentation.IsLcars)
         {
             using (UiText.Font(UiFontRole.Title)) FrenRiderPresentation.LcarsHeader(UiText.T("Settings"));
@@ -3556,7 +3557,7 @@ public partial class ConfigWindow : Window, IDisposable
     private void DrawRemoteProfileBanner(RemoteProfileRow remote)
     {
         using var style = new MaterialStyleScope();
-        style.Color(ImGuiCol.ChildBg, new Vector4(0.18f, 0.08f, 0.24f, 0.75f));
+        style.Color(ImGuiCol.ChildBg, FrenRiderPresentation.BackgroundFill(new Vector4(0.18f, 0.08f, 0.24f, 0.75f)));
         var padding = ImGui.GetStyle().WindowPadding;
         var contentWidth = Math.Max(1, ImGui.GetContentRegionAvail().X - padding.X * 2);
         var textRows = new[] { UiText.T("REMOTE DAD PROFILE"),
