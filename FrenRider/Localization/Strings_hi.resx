@@ -3249,6 +3249,7 @@
   <data name="Reset wave colours" xml:space="preserve"><value>तरंगों के रंग रीसेट करें</value></data>
   <data name="Background blur" xml:space="preserve"><value>पृष्ठभूमि धुंधलापन</value></data>
   <data name="Blur (%)" xml:space="preserve"><value>धुंधलापन (%)</value></data>
+  <data name="Pause backdrop for screenshots" xml:space="preserve"><value>स्क्रीनशॉट के लिए पृष्ठभूमि रोकें</value></data>
   <data name="Glass transparency (%)" xml:space="preserve"><value>काँच की पारदर्शिता (%)</value></data>
   <data name="Glass transparency reveals the backdrop. Blur uses the host preference and window strength in the main game viewport." xml:space="preserve"><value>काँच की पारदर्शिता से पीछे की पृष्ठभूमि दिखती है। गेम के मुख्य दृश्य क्षेत्र में धुंधलापन होस्ट की प्राथमिकता और विंडो की तीव्रता सेटिंग का उपयोग करता है।</value></data>
   <data name="UI styling" xml:space="preserve"><value>UI शैली</value></data>

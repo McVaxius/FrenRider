@@ -3343,6 +3343,7 @@ Włączone: używaj poniższych presetów BossMod z dowolnym dostawcą rotacji. 
   <data name="Reset wave colours" xml:space="preserve"><value>Resetuj kolory fal</value></data>
   <data name="Background blur" xml:space="preserve"><value>Rozmycie tła</value></data>
   <data name="Blur (%)" xml:space="preserve"><value>Rozmycie (%)</value></data>
+  <data name="Pause backdrop for screenshots" xml:space="preserve"><value>Wstrzymaj tło na czas zrzutów ekranu</value></data>
   <data name="Glass transparency (%)" xml:space="preserve"><value>Przezroczystość szkła (%)</value></data>
   <data name="Glass transparency reveals the backdrop. Blur uses the host preference and window strength in the main game viewport." xml:space="preserve"><value>Przezroczystość szkła odsłania tło. Rozmycie korzysta z ustawień aplikacji nadrzędnej i siły efektu okna w głównym obszarze wyświetlania gry.</value></data>
   <data name="UI styling" xml:space="preserve"><value>Styl interfejsu</value></data>

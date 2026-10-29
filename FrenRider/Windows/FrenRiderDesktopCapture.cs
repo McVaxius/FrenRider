@@ -58,6 +58,9 @@ internal sealed unsafe class FrenRiderDesktopCapture : IDisposable
     private bool pipelineFailed;
     private bool disposed;
     private string? lastFailure;
+    internal bool IsPaused { get; private set; }
+    internal bool HasRetainedImages => !disposed && synchronizedTimestamp >= 0 &&
+        outputs.Exists(output => output.HasImage && output.PresentTimestamp > output.MinimumPresentTimestamp);
 #if DEBUG
     private uint tracedStages;
 #endif
@@ -78,6 +81,7 @@ internal sealed unsafe class FrenRiderDesktopCapture : IDisposable
         if (disposed) return;
         frame++;
         atlasFrame = -1;
+        if (IsPaused) return;
         if (factory != null && !factory->IsCurrent())
         {
             ReleaseOutputs();
@@ -138,7 +142,7 @@ internal sealed unsafe class FrenRiderDesktopCapture : IDisposable
     internal void UpdateExclusionBoundary(IReadOnlyCollection<nint> usedOwnedHwnds,
         IReadOnlyCollection<nint> affinityChangedHwnds, long globalTimestamp)
     {
-        if (disposed) return;
+        if (disposed || IsPaused) return;
         try
         {
             if (topologyNeeded) EnumerateOutputs();
@@ -183,7 +187,7 @@ internal sealed unsafe class FrenRiderDesktopCapture : IDisposable
         bool exclusionReady, long minimumFrameTimestamp, out nint texture)
     {
         texture = 0;
-        if (disposed || !exclusionReady || minimumFrameTimestamp != synchronizedTimestamp || hwnd == 0 || gameContext == null ||
+        if (disposed || (!exclusionReady && !IsPaused) || minimumFrameTimestamp != synchronizedTimestamp || hwnd == 0 || gameContext == null ||
             !float.IsFinite(savedViewportOrigin.X) || !float.IsFinite(savedViewportOrigin.Y) ||
             targetWidth == 0 || targetHeight == 0 || targetWidth > 16384 || targetHeight > 16384)
         {
@@ -512,6 +516,8 @@ internal sealed unsafe class FrenRiderDesktopCapture : IDisposable
 
     private bool CaptureOutput(OutputCapture output)
     {
+        // Screenshot pause keeps the already-owned clean image; never acquire our now-visible windows.
+        if (IsPaused) return output.HasImage;
         if (output.CapturedFrame == frame) return output.HasImage;
         output.CapturedFrame = frame;
         if (output.Failed) return false;
@@ -911,6 +917,7 @@ internal sealed unsafe class FrenRiderDesktopCapture : IDisposable
     internal void ReleaseResources()
     {
         if (disposed) return;
+        IsPaused = false;
         ReleaseOutputs();
         ReleaseWindowComposition();
         Release(ref atlasView); Release(ref atlas);
@@ -920,6 +927,17 @@ internal sealed unsafe class FrenRiderDesktopCapture : IDisposable
         synchronizedTimestamp = -1;
         topologyNeeded = true;
         pipelineFailed = false;
+    }
+
+    internal bool TrySetPaused(bool paused)
+    {
+        if (disposed) return false;
+        if (paused == IsPaused) return true;
+        if (paused && !HasRetainedImages) return false;
+        IsPaused = paused;
+        atlasFrame = -1;
+        if (!paused) synchronizedTimestamp = -1;
+        return true;
     }
 
     public void Dispose()

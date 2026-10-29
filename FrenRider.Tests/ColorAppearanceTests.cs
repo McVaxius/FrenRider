@@ -360,7 +360,7 @@ public sealed unsafe class ColorAppearanceTests
             "Turn on UI sounds to preview.", "Audio output is unavailable.", "UI sounds muted", "UI sounds on",
             "Glassmorphism", "Spatial", "Cyberpunk", "Animation", "Bar colour 1", "Bar colour 2", "Bar colour 3",
             "Reset", "Reset colours", "Movement speed (x)", "Wave colour 1", "Wave colour 2", "Wave colour 3",
-            "Reset wave colours", "Background blur", "Blur (%)", "UI styling",
+            "Reset wave colours", "Background blur", "Blur (%)", "Pause backdrop for screenshots", "UI styling",
             "Lock window movement and resizing", "Use native UI", "Use styled UI", "Lock windows", "Unlock windows"];
         foreach (var language in UiText.Languages)
         {
@@ -462,7 +462,9 @@ public sealed unsafe class ColorAppearanceTests
                 }
                 throw new InvalidOperationException("Real colour callback did not show " + caption);
             }
-            Frame(); Frame(); Click("Picker");
+            Frame(); Frame(); Click("Pause backdrop for screenshots");
+            Assert.Empty(saves);
+            Click("Picker");
             Assert.Single(saves);
             var restored = JsonConvert.DeserializeObject<Configuration>(saves[0])!;
             Assert.Equal(MaterialColorMode.Picker, restored.UiColors.Mode);

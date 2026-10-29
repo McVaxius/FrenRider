@@ -3343,6 +3343,7 @@ Ativado: use as predefinições do BossMod abaixo com qualquer provedor de rota�
   <data name="Reset wave colours" xml:space="preserve"><value>Redefinir cores das ondas</value></data>
   <data name="Background blur" xml:space="preserve"><value>Desfoque do fundo</value></data>
   <data name="Blur (%)" xml:space="preserve"><value>Desfoque (%)</value></data>
+  <data name="Pause backdrop for screenshots" xml:space="preserve"><value>Pausar o fundo para capturas de tela</value></data>
   <data name="Glass transparency (%)" xml:space="preserve"><value>Transparência do vidro (%)</value></data>
   <data name="Glass transparency reveals the backdrop. Blur uses the host preference and window strength in the main game viewport." xml:space="preserve"><value>A transparência do vidro revela o fundo. O desfoque usa a preferência do aplicativo hospedeiro e a intensidade da janela na área de exibição principal do jogo.</value></data>
   <data name="UI styling" xml:space="preserve"><value>Estilo da interface</value></data>

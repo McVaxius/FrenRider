@@ -85,6 +85,45 @@ internal sealed class FrenRiderCaptureExclusion : IDisposable
         return restored;
     }
 
+    // Capture is already paused. Keep ownership so resume can re-exclude and cleanup can restore the real original.
+    internal bool AllowCapture(IReadOnlyCollection<nint> ownedDetachedWindows)
+    {
+        ArgumentNullException.ThrowIfNull(ownedDetachedWindows);
+        Ready = false;
+        UnavailableReason = null;
+        BoundaryChangedWindows = Array.Empty<nint>();
+        if (disposed) return Fail("Capture exclusion is disposed.");
+        foreach (var window in ownedDetachedWindows)
+        {
+            if (!CanModify(window)) return Fail("Screenshot visibility requires owned detached windows.");
+            if (!entries.TryGetValue(window, out var entry))
+            {
+                if (!EnsureExcluded(window)) return false;
+                entry = entries[window];
+            }
+            if (entry.Yielded || native.GetMarker(window) != cookie)
+                return Fail("A detached window's capture-affinity ownership changed before screenshot visibility.");
+            var current = native.GetAffinity(window);
+            if (!current.Success) return Fail("Screenshot capture affinity could not be read.");
+            var expected = entry.ScreenshotVisible ? 0u : ExcludeFromCapture;
+            if (current.Affinity != expected)
+            {
+                entry.Yielded = true;
+                RemoveOwnedMarker(window);
+                return Fail("Another owner changed a detached window's capture affinity before screenshot visibility.");
+            }
+            if (entry.ScreenshotVisible) continue;
+            if (!native.SetAffinity(window, 0)) return Fail("Windows rejected screenshot visibility for a detached window.");
+            entry.Applied = true;
+            entry.ScreenshotVisible = true;
+            MarkBoundary(window);
+            var visible = native.GetAffinity(window);
+            if (!visible.Success) return Fail("Screenshot visibility could not be verified.");
+            if (visible.Affinity != 0) return Fail("Windows did not retain WDA_NONE screenshot visibility.");
+        }
+        return ownedDetachedWindows.Count > 0 || Fail("No detached windows are available for screenshot visibility.");
+    }
+
     private bool EnsureExcluded(nint window)
     {
         if (entries.TryGetValue(window, out var existing))
@@ -98,7 +137,18 @@ internal sealed class FrenRiderCaptureExclusion : IDisposable
             }
             var current = native.GetAffinity(window);
             if (!current.Success) return Fail("A detached window's capture affinity could not be verified.");
-            if (current.Affinity == ExcludeFromCapture) return true;
+            if (current.Affinity == ExcludeFromCapture && !existing.ScreenshotVisible) return true;
+            if (current.Affinity == 0 && existing.ScreenshotVisible)
+            {
+                if (!native.SetAffinity(window, ExcludeFromCapture))
+                    return Fail("Windows rejected capture exclusion while resuming live blur.");
+                existing.ScreenshotVisible = false;
+                existing.Applied = true;
+                MarkBoundary(window);
+                var resumed = native.GetAffinity(window);
+                return resumed.Success && resumed.Affinity == ExcludeFromCapture ||
+                    Fail("Live blur capture exclusion could not be verified after screenshot pause.");
+            }
             existing.Yielded = true;
             MarkBoundary(window);
             RemoveOwnedMarker(window);
@@ -167,7 +217,8 @@ internal sealed class FrenRiderCaptureExclusion : IDisposable
         {
             var current = native.GetAffinity(window);
             if (!current.Success) return Fail("A detached window's capture affinity could not be read for restoration.");
-            if (current.Affinity == ExcludeFromCapture && entry.OriginalAffinity != ExcludeFromCapture)
+            var ownedAffinity = entry.ScreenshotVisible ? 0u : ExcludeFromCapture;
+            if (current.Affinity == ownedAffinity && entry.OriginalAffinity != ownedAffinity)
             {
                 if (!native.SetAffinity(window, entry.OriginalAffinity))
                     return Fail("Windows rejected restoration of a detached window's original capture affinity.");
@@ -232,6 +283,7 @@ internal sealed class FrenRiderCaptureExclusion : IDisposable
     {
         internal uint OriginalAffinity { get; } = originalAffinity;
         internal bool Applied { get; set; }
+        internal bool ScreenshotVisible { get; set; }
         internal bool Yielded { get; set; }
     }
 

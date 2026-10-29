@@ -88,6 +88,20 @@ internal sealed unsafe class FrenRiderDetachedGlass : IDisposable
     private bool enabled;
     private bool faulted;
     private bool disposed;
+    private bool? pendingScreenshotsPaused;
+    internal bool ScreenshotsPaused => capture?.IsPaused == true;
+    internal bool CanPauseForScreenshots
+    {
+        get
+        {
+            if (disposed || faulted || !enabled || exclusion?.Ready != true ||
+                capture?.HasRetainedImages != true || usedWindows.Count == 0) return false;
+            foreach (var window in usedWindows)
+                if (!readyWindows.TryGetValue(window, out var boundary) ||
+                    boundary != exclusion.MinimumFrameTimestamp) return false;
+            return true;
+        }
+    }
 #if DEBUG
     private uint tracedStages;
 #endif
@@ -126,6 +140,12 @@ internal sealed unsafe class FrenRiderDetachedGlass : IDisposable
     internal void BeginFrame()
     {
         if (disposed) return;
+        // Commit UI requests before recording this frame, after all previous native callbacks finished.
+        if (pendingScreenshotsPaused is { } paused)
+        {
+            pendingScreenshotsPaused = null;
+            _ = SetScreenshotsPaused(paused);
+        }
         // The host finishes every platform render before opening its next draw phase.
         ClearRequests(callbacks);
         usedWindows.Clear();
@@ -164,7 +184,7 @@ internal sealed unsafe class FrenRiderDetachedGlass : IDisposable
         var drawMaterial = material;
         ApplyPointerLight(in shape, ref drawMaterial);
         var boundary = exclusion.MinimumFrameTimestamp;
-        var composite = enabled && exclusion.Ready && readyWindows.TryGetValue(hwnd, out var readyBoundary) &&
+        var composite = enabled && (exclusion.Ready || ScreenshotsPaused) && readyWindows.TryGetValue(hwnd, out var readyBoundary) &&
             readyBoundary == boundary;
         var request = (DrawRequest*)NativeMemory.AllocZeroed((nuint)sizeof(DrawRequest));
         request->State = callbacks;
@@ -202,6 +222,13 @@ internal sealed unsafe class FrenRiderDetachedGlass : IDisposable
             return;
         }
         this.enabled = true;
+        if (ScreenshotsPaused)
+        {
+            if (exclusion?.AllowCapture(usedWindows) == true) return;
+            ReportUnavailable(exclusion?.UnavailableReason ?? "Screenshot visibility could not be verified.");
+            _ = capture?.TrySetPaused(false);
+            readyWindows.Clear();
+        }
         if (exclusion == null || !exclusion.Synchronize(usedWindows, gameWindow, true))
         {
             readyWindows.Clear();
@@ -214,6 +241,39 @@ internal sealed unsafe class FrenRiderDetachedGlass : IDisposable
             exclusion.MinimumFrameTimestamp);
     }
 
+    internal bool TrySetScreenshotsPaused(bool paused)
+    {
+        if (disposed || capture == null || exclusion == null || (paused && !ScreenshotsPaused && !CanPauseForScreenshots))
+            return false;
+        pendingScreenshotsPaused = paused;
+        log.Debug("[FrenRider] Screenshot pause requested: {Paused}", paused);
+        return true;
+    }
+
+    private bool SetScreenshotsPaused(bool paused)
+    {
+        if (disposed || capture == null || exclusion == null) return false;
+        if (paused == ScreenshotsPaused) return true;
+        if (!paused)
+        {
+            readyWindows.Clear();
+            var resumed = capture.TrySetPaused(false);
+            if (resumed) log.Information("[FrenRider] Screenshot pause ended; live blur is waiting for a fresh excluded backdrop.");
+            return resumed;
+        }
+        if (!CanPauseForScreenshots || !capture.TrySetPaused(true)) return false;
+        // Stop acquisition before making the HWNDs visible to screenshot tools. The owned monitor images survive.
+        if (exclusion.AllowCapture(usedWindows))
+        {
+            log.Information("[FrenRider] Screenshot pause active: WDA_NONE verified for {Count} detached windows; desktop acquisition stopped.", usedWindows.Count);
+            return true;
+        }
+        ReportUnavailable(exclusion.UnavailableReason ?? "Screenshot visibility could not be restored.");
+        readyWindows.Clear();
+        _ = capture.TrySetPaused(false);
+        return false;
+    }
+
     internal void ReleaseResources()
     {
         if (disposed) return;
@@ -223,6 +283,7 @@ internal sealed unsafe class FrenRiderDetachedGlass : IDisposable
 
     private void Suspend()
     {
+        pendingScreenshotsPaused = null;
         enabled = false;
         readyWindows.Clear();
         usedWindows.Clear();
@@ -266,7 +327,7 @@ internal sealed unsafe class FrenRiderDetachedGlass : IDisposable
             Trace(128, "callback viewport/native window mismatch");
             return;
         }
-        if (!exclusion.Ready)
+        if (!exclusion.Ready && !ScreenshotsPaused)
         {
             readyWindows.Remove(request->Hwnd);
             Trace(256, "callback capture exclusion is not ready");

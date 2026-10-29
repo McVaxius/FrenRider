@@ -3238,6 +3238,7 @@
   <data name="Reset wave colours" xml:space="preserve"><value>Сбросить цвета волн</value></data>
   <data name="Background blur" xml:space="preserve"><value>Размытие фона</value></data>
   <data name="Blur (%)" xml:space="preserve"><value>Размытие (%)</value></data>
+  <data name="Pause backdrop for screenshots" xml:space="preserve"><value>Приостановить обновление фона для снимков экрана</value></data>
   <data name="Glass transparency (%)" xml:space="preserve"><value>Прозрачность стекла (%)</value></data>
   <data name="Glass transparency reveals the backdrop. Blur uses the host preference and window strength in the main game viewport." xml:space="preserve"><value>Прозрачность стекла позволяет видеть фон. Размытие в основной области просмотра игры использует настройки приложения-хоста и интенсивность эффекта для окна.</value></data>
   <data name="UI styling" xml:space="preserve"><value>Оформление интерфейса</value></data>

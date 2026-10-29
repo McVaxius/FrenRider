@@ -3238,6 +3238,7 @@ Activé : utilisez les préréglages BossMod ci-dessous avec tout fournisseur de
   <data name="Reset wave colours" xml:space="preserve"><value>Réinitialiser les couleurs des vagues</value></data>
   <data name="Background blur" xml:space="preserve"><value>Flou d’arrière-plan</value></data>
   <data name="Blur (%)" xml:space="preserve"><value>Flou (%)</value></data>
+  <data name="Pause backdrop for screenshots" xml:space="preserve"><value>Figer l’arrière-plan pour les captures d’écran</value></data>
   <data name="Glass transparency (%)" xml:space="preserve"><value>Transparence du verre (%)</value></data>
   <data name="Glass transparency reveals the backdrop. Blur uses the host preference and window strength in the main game viewport." xml:space="preserve"><value>La transparence du verre laisse voir l’arrière-plan. Dans la vue principale du jeu, le flou suit le réglage de l’hôte et l’intensité définie pour la fenêtre.</value></data>
   <data name="UI styling" xml:space="preserve"><value>Style de l’interface</value></data>

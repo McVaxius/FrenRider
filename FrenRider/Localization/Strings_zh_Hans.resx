@@ -3238,6 +3238,7 @@
   <data name="Reset wave colours" xml:space="preserve"><value>重置波浪颜色</value></data>
   <data name="Background blur" xml:space="preserve"><value>背景模糊</value></data>
   <data name="Blur (%)" xml:space="preserve"><value>模糊（%）</value></data>
+  <data name="Pause backdrop for screenshots" xml:space="preserve"><value>暂停背景以便截图</value></data>
   <data name="Glass transparency (%)" xml:space="preserve"><value>玻璃透明度（%）</value></data>
   <data name="Glass transparency reveals the backdrop. Blur uses the host preference and window strength in the main game viewport." xml:space="preserve"><value>玻璃透明度可让后方背景透出。模糊效果在游戏主视口中遵循宿主偏好设置和窗口强度设置。</value></data>
   <data name="UI styling" xml:space="preserve"><value>界面样式</value></data>

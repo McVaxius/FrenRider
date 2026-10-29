@@ -3238,6 +3238,7 @@
   <data name="Reset wave colours" xml:space="preserve"><value>물결 색상 초기화</value></data>
   <data name="Background blur" xml:space="preserve"><value>배경 흐림</value></data>
   <data name="Blur (%)" xml:space="preserve"><value>흐림 (%)</value></data>
+  <data name="Pause backdrop for screenshots" xml:space="preserve"><value>스크린샷 촬영을 위해 배경 일시 정지</value></data>
   <data name="Glass transparency (%)" xml:space="preserve"><value>유리 투명도 (%)</value></data>
   <data name="Glass transparency reveals the backdrop. Blur uses the host preference and window strength in the main game viewport." xml:space="preserve"><value>유리 투명도는 뒤쪽 배경을 드러냅니다. 흐림 효과는 게임의 기본 뷰포트에서 호스트 설정과 창별 강도를 따릅니다.</value></data>
   <data name="UI styling" xml:space="preserve"><value>UI 스타일</value></data>

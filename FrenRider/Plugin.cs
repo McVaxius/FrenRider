@@ -524,6 +524,16 @@ public sealed partial class Plugin : IDalamudPlugin
                 }
             }
             finally { ImGui.EndDisabled(); }
+            var glass = backgroundGlass;
+            var paused = glass?.ScreenshotsPaused == true;
+            ImGui.BeginDisabled(!paused && glass?.CanPauseForScreenshots != true);
+            try
+            {
+                using (UiGui.SettingRow("Pause backdrop for screenshots"))
+                    if (UiGui.Checkbox("Pause backdrop for screenshots###UiBackgroundScreenshotPause", ref paused))
+                        glass?.TrySetScreenshotsPaused(paused);
+            }
+            finally { ImGui.EndDisabled(); }
         }
         finally { ImGui.PopID(); }
         return changed;

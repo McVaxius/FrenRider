@@ -3343,6 +3343,7 @@ Bật: dùng các preset BossMod bên dưới với mọi nhà cung cấp rotati
   <data name="Reset wave colours" xml:space="preserve"><value>Đặt lại màu sóng</value></data>
   <data name="Background blur" xml:space="preserve"><value>Làm mờ nền</value></data>
   <data name="Blur (%)" xml:space="preserve"><value>Làm mờ (%)</value></data>
+  <data name="Pause backdrop for screenshots" xml:space="preserve"><value>Tạm dừng nền để chụp ảnh màn hình</value></data>
   <data name="Glass transparency (%)" xml:space="preserve"><value>Độ trong suốt của kính (%)</value></data>
   <data name="Glass transparency reveals the backdrop. Blur uses the host preference and window strength in the main game viewport." xml:space="preserve"><value>Độ trong suốt của kính cho phép nhìn thấy nền phía sau. Hiệu ứng làm mờ sử dụng tùy chọn của ứng dụng chủ và cường độ của cửa sổ trong vùng hiển thị chính của trò chơi.</value></data>
   <data name="UI styling" xml:space="preserve"><value>Kiểu giao diện</value></data>

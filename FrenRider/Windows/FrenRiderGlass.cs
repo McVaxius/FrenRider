@@ -25,6 +25,9 @@ internal sealed class FrenRiderGlass : IDisposable
 #endif
 
     internal float Opacity { get; set; } = 1;
+    internal bool ScreenshotsPaused => detached?.ScreenshotsPaused == true;
+    internal bool CanPauseForScreenshots => detached?.CanPauseForScreenshots == true;
+    internal bool TrySetScreenshotsPaused(bool paused) => detached?.TrySetScreenshotsPaused(paused) == true;
 
     internal FrenRiderGlass(IDalamudPluginInterface pluginInterface, IPluginLog pluginLog)
     {

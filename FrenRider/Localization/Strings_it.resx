@@ -3238,6 +3238,7 @@ Attivato: usa i preset BossMod sottostanti con qualsiasi provider di rotazione. 
   <data name="Reset wave colours" xml:space="preserve"><value>Ripristina colori delle onde</value></data>
   <data name="Background blur" xml:space="preserve"><value>Sfocatura dello sfondo</value></data>
   <data name="Blur (%)" xml:space="preserve"><value>Sfocatura (%)</value></data>
+  <data name="Pause backdrop for screenshots" xml:space="preserve"><value>Metti in pausa lo sfondo per gli screenshot</value></data>
   <data name="Glass transparency (%)" xml:space="preserve"><value>Trasparenza del vetro (%)</value></data>
   <data name="Glass transparency reveals the backdrop. Blur uses the host preference and window strength in the main game viewport." xml:space="preserve"><value>La trasparenza del vetro lascia vedere lo sfondo. La sfocatura usa la preferenza dell’applicazione ospitante e l’intensità della finestra nell’area di visualizzazione principale del gioco.</value></data>
   <data name="UI styling" xml:space="preserve"><value>Stile dell’interfaccia</value></data>

@@ -3343,6 +3343,7 @@ Açık: aşağıdaki BossMod ön ayarlarını herhangi bir rotasyon sağlayıcı
   <data name="Reset wave colours" xml:space="preserve"><value>Dalga renklerini sıfırla</value></data>
   <data name="Background blur" xml:space="preserve"><value>Arka plan bulanıklığı</value></data>
   <data name="Blur (%)" xml:space="preserve"><value>Bulanıklık (%)</value></data>
+  <data name="Pause backdrop for screenshots" xml:space="preserve"><value>Ekran görüntüleri için arka planı duraklat</value></data>
   <data name="Glass transparency (%)" xml:space="preserve"><value>Cam saydamlığı (%)</value></data>
   <data name="Glass transparency reveals the backdrop. Blur uses the host preference and window strength in the main game viewport." xml:space="preserve"><value>Cam saydamlığı arkadaki görüntüyü ortaya çıkarır. Bulanıklık, oyunun ana görüntü alanında ana uygulamanın tercihini ve pencerenin yoğunluk ayarını kullanır.</value></data>
   <data name="UI styling" xml:space="preserve"><value>Arayüz stili</value></data>

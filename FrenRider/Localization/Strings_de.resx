@@ -3238,6 +3238,7 @@ An: Die BossMod-Voreinstellungen unten mit jedem Rotationsanbieter verwenden. Ei
   <data name="Reset wave colours" xml:space="preserve"><value>Wellenfarben zurücksetzen</value></data>
   <data name="Background blur" xml:space="preserve"><value>Hintergrundunschärfe</value></data>
   <data name="Blur (%)" xml:space="preserve"><value>Unschärfe (%)</value></data>
+  <data name="Pause backdrop for screenshots" xml:space="preserve"><value>Hintergrund für Screenshots anhalten</value></data>
   <data name="Glass transparency (%)" xml:space="preserve"><value>Glastransparenz (%)</value></data>
   <data name="Glass transparency reveals the backdrop. Blur uses the host preference and window strength in the main game viewport." xml:space="preserve"><value>Glastransparenz macht den Hintergrund sichtbar. Die Unschärfe richtet sich im Hauptansichtsbereich des Spiels nach der Host-Einstellung und der fensterspezifischen Stärke.</value></data>
   <data name="UI styling" xml:space="preserve"><value>UI-Gestaltung</value></data>

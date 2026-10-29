@@ -3238,6 +3238,7 @@ Activado: usa los ajustes de BossMod de abajo con cualquier proveedor de rotaci√
   <data name="Reset wave colours" xml:space="preserve"><value>Restablecer colores de las ondas</value></data>
   <data name="Background blur" xml:space="preserve"><value>Desenfoque del fondo</value></data>
   <data name="Blur (%)" xml:space="preserve"><value>Desenfoque (%)</value></data>
+  <data name="Pause backdrop for screenshots" xml:space="preserve"><value>Pausar el fondo para capturas de pantalla</value></data>
   <data name="Glass transparency (%)" xml:space="preserve"><value>Transparencia del cristal (%)</value></data>
   <data name="Glass transparency reveals the backdrop. Blur uses the host preference and window strength in the main game viewport." xml:space="preserve"><value>La transparencia del cristal deja ver el fondo. El desenfoque usa la preferencia de la aplicaci√≥n anfitriona y la intensidad de la ventana en la vista principal del juego.</value></data>
   <data name="UI styling" xml:space="preserve"><value>Estilo de la interfaz</value></data>

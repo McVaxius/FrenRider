@@ -3337,6 +3337,7 @@ On: use the BossMod presets below with any rotation provider. A custom preset ma
   <data name="Reset wave colours" xml:space="preserve"><value>Reset wave colours</value></data>
   <data name="Background blur" xml:space="preserve"><value>Background blur</value></data>
   <data name="Blur (%)" xml:space="preserve"><value>Blur (%)</value></data>
+  <data name="Pause backdrop for screenshots" xml:space="preserve"><value>Pause backdrop for screenshots</value></data>
   <data name="Glass transparency (%)" xml:space="preserve"><value>Glass transparency (%)</value></data>
   <data name="Glass transparency reveals the backdrop. Blur uses the host preference and window strength in the main game viewport." xml:space="preserve"><value>Glass transparency reveals the backdrop. Blur uses the host preference and window strength in the main game viewport.</value></data>
   <data name="UI styling" xml:space="preserve"><value>UI styling</value></data>

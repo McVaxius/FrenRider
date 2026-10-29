@@ -87,6 +87,8 @@ public sealed class DesktopGlassTests
         internal void** Vtable;
         internal ID3D11Texture2D* Image;
         internal int FrameReleases;
+        internal int Acquires;
+        internal long PresentTimestamp;
     }
 
     [UnmanagedCallersOnly]
@@ -94,7 +96,8 @@ public sealed class DesktopGlassTests
         DXGI_OUTDUPL_FRAME_INFO* info, IDXGIResource** resource)
     {
         *info = default;
-        info->LastPresentTime.QuadPart = 42;
+        self->Acquires++;
+        info->LastPresentTime.QuadPart = self->PresentTimestamp == 0 ? 42 : self->PresentTimestamp;
         info->ProtectedContentMaskedOut = true;
         self->Image->AddRef();
         *resource = (IDXGIResource*)self->Image;
@@ -110,6 +113,24 @@ public sealed class DesktopGlassTests
 
     [UnmanagedCallersOnly]
     private static unsafe uint ReleaseMaskedDuplication(MaskedDuplication* self) => 1;
+
+    private unsafe struct RetainedOutput
+    {
+        internal void** Vtable;
+        internal DXGI_OUTPUT_DESC Description;
+        internal int DescriptionReads;
+    }
+
+    [UnmanagedCallersOnly]
+    private static unsafe int ReadRetainedOutput(RetainedOutput* self, DXGI_OUTPUT_DESC* description)
+    {
+        self->DescriptionReads++;
+        *description = self->Description;
+        return 0;
+    }
+
+    [UnmanagedCallersOnly]
+    private static unsafe uint ReleaseRetainedOutput(RetainedOutput* self) => 1;
 
     [Fact]
     public unsafe void WindowsMaskedFramesRemainUsableAndKeepTheirMaskedPixels()
@@ -306,6 +327,103 @@ public sealed class DesktopGlassTests
             if (device != null) device->Release();
             ImGui.DestroyContext(uiContext);
             ImGui.SetCurrentContext(previousContext);
+        }
+    }
+
+    [Theory]
+    [InlineData(0u)]
+    [InlineData(1u)]
+    [InlineData(17u)]
+    public unsafe void ScreenshotPauseKeepsRealGlassPixelsVisibleWithoutAcquiringAndRequiresFreshResume(uint originalAffinity)
+    {
+        using (var scene = new ScreenshotPauseScene(originalAffinity))
+        {
+            Assert.False(scene.Capture.HasRetainedImages);
+            Assert.False(scene.Capture.TrySetPaused(true));
+            Assert.False(scene.Glass.CanPauseForScreenshots);
+            Assert.False(scene.Glass.TrySetScreenshotsPaused(true));
+
+            scene.Duplication->PresentTimestamp = scene.Exclusion.MinimumFrameTimestamp + 1;
+            Assert.All(scene.Render(composite: false), pixel => Assert.Equal(0u, pixel));
+            var live = scene.Render(composite: true);
+            scene.AssertNonFlatGlass(live);
+            Assert.True(scene.Glass.CanPauseForScreenshots);
+            Assert.Equal(FrenRiderCaptureExclusion.ExcludeFromCapture, scene.ReadAffinity());
+            var acquisitions = scene.Duplication->Acquires;
+            var descriptorReads = scene.Output->DescriptionReads;
+
+            Assert.True(scene.Glass.TrySetScreenshotsPaused(true));
+            Assert.False(scene.Glass.ScreenshotsPaused); // UI requests commit before the next frame's recording.
+            scene.CheckPauseRestoreOrder = true;
+            scene.AdvanceFrame();
+            scene.CheckPauseRestoreOrder = false;
+            Assert.True(scene.Glass.ScreenshotsPaused);
+            Assert.True(scene.Capture.IsPaused);
+            Assert.Equal(0u, scene.ReadAffinity());
+            Assert.False(scene.Exclusion.Ready);
+
+            scene.ChangeFutureInput();
+            for (var index = 0; index < 2; index++)
+            {
+                scene.AdvanceFrame();
+                var frozen = scene.Render(composite: true);
+                scene.AssertNonFlatGlass(frozen);
+                Assert.Equal(live, frozen);
+                Assert.Equal(acquisitions, scene.Duplication->Acquires);
+                Assert.Equal(descriptorReads, scene.Output->DescriptionReads);
+                Assert.Equal(0u, scene.ReadAffinity());
+            }
+
+            var oldBoundary = scene.Exclusion.MinimumFrameTimestamp;
+            Assert.True(scene.Glass.TrySetScreenshotsPaused(false));
+            Assert.True(scene.Glass.ScreenshotsPaused);
+            scene.AdvanceFrame();
+            Assert.False(scene.Glass.ScreenshotsPaused);
+            Assert.False(scene.Capture.IsPaused);
+            Assert.False(scene.Glass.CanPauseForScreenshots);
+            Assert.Equal(FrenRiderCaptureExclusion.ExcludeFromCapture, scene.ReadAffinity());
+            Assert.True(scene.Exclusion.MinimumFrameTimestamp > oldBoundary);
+            Assert.False(scene.Capture.TryGetViewportTexture(scene.Window, scene.Origin, 128, 128,
+                scene.Exclusion.Ready, scene.Exclusion.MinimumFrameTimestamp, out var stale));
+            Assert.Equal(0, stale);
+            Assert.All(scene.Render(composite: true), pixel => Assert.Equal(0u, pixel));
+            Assert.False(scene.Ready.ContainsKey(scene.Window));
+
+            scene.Duplication->PresentTimestamp = scene.Exclusion.MinimumFrameTimestamp + 1;
+            scene.AdvanceFrame();
+            Assert.All(scene.Render(composite: false), pixel => Assert.Equal(0u, pixel));
+            Assert.Equal(scene.Exclusion.MinimumFrameTimestamp, scene.Ready[scene.Window]);
+            Assert.Contains(scene.Render(composite: true).Zip(live), pair => pair.First != pair.Second);
+            Assert.True(scene.Glass.CanPauseForScreenshots);
+
+            Assert.True(scene.Glass.TrySetScreenshotsPaused(true));
+            scene.AdvanceFrame();
+            Assert.True(scene.Glass.ScreenshotsPaused);
+            scene.Glass.EndFrame(1, false);
+            Assert.False(scene.Glass.ScreenshotsPaused);
+            Assert.False(scene.Capture.IsPaused);
+            Assert.False(scene.Capture.HasRetainedImages);
+            Assert.Equal(scene.OriginalAffinity, scene.ReadAffinity());
+            Assert.Empty(scene.Ready);
+            Assert.False(scene.Glass.TrySetScreenshotsPaused(true));
+            Assert.Empty(scene.Warnings);
+        }
+
+        using (var scene = new ScreenshotPauseScene(originalAffinity))
+        {
+            scene.Duplication->PresentTimestamp = scene.Exclusion.MinimumFrameTimestamp + 1;
+            _ = scene.Render(composite: false);
+            _ = scene.Render(composite: true);
+            Assert.True(scene.Glass.TrySetScreenshotsPaused(true));
+            scene.AdvanceFrame();
+            Assert.True(scene.Glass.ScreenshotsPaused);
+            scene.Glass.Dispose();
+            Assert.False(scene.Glass.ScreenshotsPaused);
+            Assert.False(scene.Capture.IsPaused);
+            Assert.False(scene.Capture.HasRetainedImages);
+            Assert.Equal(scene.OriginalAffinity, scene.ReadAffinity());
+            Assert.False(scene.Glass.TrySetScreenshotsPaused(true));
+            Assert.Empty(scene.Warnings);
         }
     }
 
@@ -725,6 +843,236 @@ public sealed class DesktopGlassTests
         if (failure == "marker") Assert.Empty(scene.Writes);
         if (failure == "write") Assert.Single(scene.Writes);
         if (failure == "changed readback") Assert.Single(scene.Writes);
+    }
+
+    private sealed unsafe class ScreenshotPauseScene : IDisposable
+    {
+        private const BindingFlags Fields = BindingFlags.Instance | BindingFlags.NonPublic;
+        private readonly ImGuiContextPtr previousContext = ImGui.GetCurrentContext();
+        private ImGuiContextPtr uiContext;
+        private DPI_AWARENESS_CONTEXT previousDpi;
+        private ID3D11Device* device;
+        private ID3D11DeviceContext* context;
+        private ID3D11Texture2D* source;
+        private ID3D11Texture2D* target;
+        private ID3D11Texture2D* readback;
+        private ID3D11RenderTargetView* targetView;
+        private bool disposed;
+        internal readonly Vector2 Origin = new(-32000);
+        internal readonly List<string> Warnings = [];
+        internal MaskedDuplication* Duplication;
+        internal RetainedOutput* Output;
+        internal FrenRiderDetachedGlass Glass = null!;
+        internal FrenRiderDesktopCapture Capture = null!;
+        internal FrenRiderCaptureExclusion Exclusion = null!;
+        internal nint Window;
+        internal uint OriginalAffinity;
+        internal bool CheckPauseRestoreOrder;
+        internal Dictionary<nint, long> Ready => (Dictionary<nint, long>)Get(Glass, "readyWindows");
+        private HashSet<nint> Used => (HashSet<nint>)Get(Glass, "usedWindows");
+
+        internal ScreenshotPauseScene(uint initialAffinity = 0)
+        {
+            if (!OperatingSystem.IsWindowsVersionAtLeast(10, 0, 19041))
+                throw new PlatformNotSupportedException("Screenshot capture affinity requires Windows 10 version 2004 or later.");
+            try
+            {
+                previousDpi = Win32.SetThreadDpiAwarenessContext((DPI_AWARENESS_CONTEXT)(nint)(-4));
+                Assert.NotEqual(0, (nint)previousDpi);
+                uiContext = ImGui.CreateContext();
+                ID3D11Device* createdDevice = null;
+                ID3D11DeviceContext* createdContext = null;
+                Assert.True(DirectX.D3D11CreateDevice(null, D3D_DRIVER_TYPE.D3D_DRIVER_TYPE_WARP,
+                    default, 0, null, 0, 7, &createdDevice, null, &createdContext).SUCCEEDED);
+                device = createdDevice; context = createdContext;
+                fixed (char* className = "STATIC")
+                    Window = (nint)Win32.CreateWindowExW(0x08200080, className, null, 0x80000000,
+                        -32000, -32000, 128, 128, default, default, default, null);
+                Assert.NotEqual(0, Window);
+                Assert.True(Win32.SetWindowDisplayAffinity((HWND)Window, initialAffinity).Value != 0);
+                OriginalAffinity = ReadAffinity();
+                var viewport = ImGui.GetMainViewport();
+                viewport.Pos = Origin;
+                viewport.Size = new Vector2(128);
+                viewport.PlatformHandleRaw = (void*)Window;
+                ImGui.GetIO().DeltaTime = 1f / 60;
+
+                var description = new D3D11_TEXTURE2D_DESC
+                {
+                    Width = 128, Height = 128, MipLevels = 1, ArraySize = 1,
+                    Format = DXGI_FORMAT.DXGI_FORMAT_B8G8R8A8_UNORM,
+                    SampleDesc = new DXGI_SAMPLE_DESC { Count = 1 },
+                    Usage = D3D11_USAGE.D3D11_USAGE_DEFAULT, BindFlags = 0x20,
+                };
+                ID3D11Texture2D* createdTexture = null;
+                Assert.True(device->CreateTexture2D(&description, null, &createdTexture).SUCCEEDED);
+                target = createdTexture;
+                ID3D11RenderTargetView* createdView = null;
+                Assert.True(device->CreateRenderTargetView((ID3D11Resource*)target, null, &createdView).SUCCEEDED);
+                targetView = createdView;
+                description.Usage = D3D11_USAGE.D3D11_USAGE_STAGING;
+                description.BindFlags = 0; description.CPUAccessFlags = 0x20000;
+                createdTexture = null;
+                Assert.True(device->CreateTexture2D(&description, null, &createdTexture).SUCCEEDED);
+                readback = createdTexture;
+                var pixels = new uint[128 * 128];
+                for (var y = 0; y < 128; y++)
+                    for (var x = 0; x < 128; x++)
+                    {
+                        var shade = (uint)(((x / 2 + y / 2) & 1) * 24);
+                        pixels[y * 128 + x] = (x < 64 ? 0xFF204080u : 0xFF804020u) + shade * 0x010101u;
+                    }
+                source = CreateTestTexture(device, pixels, 128);
+                var log = ActivationModeTests.Proxy<IPluginLog>((method, args) =>
+                {
+                    if (method.Name == "Warning" && args != null)
+                        Warnings.Add(string.Join(" ", args.Select(value => value is object[] values ? string.Join(" ", values) : value)));
+                    return null;
+                });
+                Glass = new FrenRiderDetachedGlass((nint)device, log);
+                Capture = (FrenRiderDesktopCapture)Get(Glass, "capture");
+                ((FrenRiderCaptureExclusion)Get(Glass, "exclusion")).Dispose();
+                var native = (FrenRiderCaptureExclusion.Native)typeof(FrenRiderCaptureExclusion)
+                    .GetMethod("CreateNative", BindingFlags.Static | BindingFlags.NonPublic)!.Invoke(null, null)!;
+                Exclusion = new FrenRiderCaptureExclusion(native with
+                {
+                    SetAffinity = (window, affinity) =>
+                    {
+                        if (CheckPauseRestoreOrder && window == Window && affinity == 0)
+                            Assert.True(Capture.IsPaused, "Affinity was restored before live acquisition stopped.");
+                        return native.SetAffinity(window, affinity);
+                    },
+                });
+                Set(Glass, "exclusion", Exclusion);
+
+                Duplication = (MaskedDuplication*)NativeMemory.AllocZeroed((nuint)sizeof(MaskedDuplication));
+                Duplication->Vtable = (void**)NativeMemory.AllocZeroed((nuint)(15 * sizeof(void*)));
+                Duplication->Image = source;
+                Duplication->Vtable[2] = (void*)(delegate* unmanaged<MaskedDuplication*, uint>)&ReleaseMaskedDuplication;
+                Duplication->Vtable[8] = (void*)(delegate* unmanaged<MaskedDuplication*, uint,
+                    DXGI_OUTDUPL_FRAME_INFO*, IDXGIResource**, int>)&AcquireMaskedFrame;
+                Duplication->Vtable[14] = (void*)(delegate* unmanaged<MaskedDuplication*, int>)&ReleaseMaskedFrame;
+                Output = (RetainedOutput*)NativeMemory.AllocZeroed((nuint)sizeof(RetainedOutput));
+                Output->Vtable = (void**)NativeMemory.AllocZeroed((nuint)(8 * sizeof(void*)));
+                Output->Vtable[2] = (void*)(delegate* unmanaged<RetainedOutput*, uint>)&ReleaseRetainedOutput;
+                Output->Vtable[7] = (void*)(delegate* unmanaged<RetainedOutput*, DXGI_OUTPUT_DESC*, int>)&ReadRetainedOutput;
+                Output->Description = new DXGI_OUTPUT_DESC
+                {
+                    DesktopCoordinates = Rect(-32000, -32000, -31872, -31872), AttachedToDesktop = true,
+                    Rotation = DXGI_MODE_ROTATION.DXGI_MODE_ROTATION_IDENTITY, Monitor = (HMONITOR)(nint)7,
+                };
+                var adapterType = typeof(FrenRiderDesktopCapture).GetNestedType("AdapterCapture", BindingFlags.NonPublic)!;
+                var outputType = typeof(FrenRiderDesktopCapture).GetNestedType("OutputCapture", BindingFlags.NonPublic)!;
+                var adapter = Activator.CreateInstance(adapterType, true)!;
+                var output = Activator.CreateInstance(outputType, true)!;
+                device->AddRef(); context->AddRef();
+                SetPointer(adapter, "Device", device);
+                SetPointer(adapter, "Context", context);
+                Set(output, "Adapter", adapter);
+                Set(output, "Description", Output->Description);
+                SetPointer(output, "Output", Output);
+                SetPointer(output, "Duplication", Duplication);
+                ((System.Collections.IList)Get(Capture, "adapters")).Add(adapter);
+                ((System.Collections.IList)Get(Capture, "outputs")).Add(output);
+                Set(Capture, "topologyNeeded", false); // This fixture supplies its monitor; never enumerate the real desktop.
+                Used.Add(Window);
+                Glass.EndFrame(1, true);
+                Assert.True(Exclusion.Ready, Exclusion.UnavailableReason);
+            }
+            catch { Dispose(); throw; }
+        }
+
+        internal void AdvanceFrame()
+        {
+            Set(Capture, "topologyNeeded", true); // Avoid probing an adapter owned by this synthetic output.
+            Glass.BeginFrame();
+            Set(Capture, "topologyNeeded", false);
+            Used.Add(Window);
+            Glass.EndFrame(1, true);
+        }
+
+        internal uint ReadAffinity()
+        {
+            uint affinity = 0;
+            Assert.True(Win32.GetWindowDisplayAffinity((HWND)Window, &affinity).Value != 0);
+            return affinity;
+        }
+
+        internal uint[] Render(bool composite)
+        {
+            float* clear = stackalloc float[4] { 0, 0, 0, 0 };
+            context->ClearRenderTargetView(targetView, clear);
+            var view = targetView;
+            context->OMSetRenderTargets(1, &view, null);
+            var request = new FrenRiderDetachedGlass.DrawRequest
+            {
+                Hwnd = Window, ViewportId = ImGui.GetMainViewport().ID,
+                Frame = (int)Get(Glass, "frame"), ViewportOrigin = Origin,
+                Shape = GlassShape.FromRect(Origin + new Vector2(8), new Vector2(112), 12),
+                Clip = new Vector4(Origin.X, Origin.Y, Origin.X + 128, Origin.Y + 128),
+                Material = FrenRiderGlass.CreateMaterial(new Vector4(.2f, .3f, .4f, .42f), 1, 1, 1),
+                CaptureBoundary = Exclusion.MinimumFrameTimestamp, Composite = composite, WindowBackground = true,
+            };
+            Glass.Render(&request);
+            context->CopyResource((ID3D11Resource*)readback, (ID3D11Resource*)target);
+            D3D11_MAPPED_SUBRESOURCE mapped;
+            Assert.True(context->Map((ID3D11Resource*)readback, 0, D3D11_MAP.D3D11_MAP_READ, 0, &mapped).SUCCEEDED);
+            try
+            {
+                var pixels = new uint[128 * 128];
+                for (var y = 0; y < 128; y++)
+                    new ReadOnlySpan<uint>((byte*)mapped.pData + y * mapped.RowPitch, 128).CopyTo(pixels.AsSpan(y * 128));
+                return pixels;
+            }
+            finally { context->Unmap((ID3D11Resource*)readback, 0); }
+        }
+
+        internal void AssertNonFlatGlass(uint[] pixels)
+        {
+            var left = pixels[64 * 128 + 40];
+            var right = pixels[64 * 128 + 88];
+            Assert.Equal(255u, left >> 24);
+            Assert.Equal(255u, right >> 24);
+            Assert.True(Enumerable.Range(0, 3).Any(channel =>
+                Math.Abs((int)((left >> (channel * 8)) & 255) - (int)((right >> (channel * 8)) & 255)) > 10),
+                "The actual Glasswork target lost the retained backdrop's spatial detail.");
+        }
+
+        internal void ChangeFutureInput()
+        {
+            var pixels = Enumerable.Repeat(0xFF30D060u, 128 * 128).ToArray();
+            fixed (uint* data = pixels)
+                context->UpdateSubresource((ID3D11Resource*)source, 0, null, data, 128 * 4, 0);
+        }
+
+        private static object Get(object owner, string name) => owner.GetType().GetField(name, Fields)!.GetValue(owner)!;
+        private static void Set(object owner, string name, object value) => owner.GetType().GetField(name, Fields)!.SetValue(owner, value);
+        private static void SetPointer(object owner, string name, void* value)
+        {
+            var field = owner.GetType().GetField(name, Fields)!;
+            field.SetValue(owner, Pointer.Box(value, field.FieldType));
+        }
+
+        public void Dispose()
+        {
+            if (disposed) return;
+            disposed = true;
+            Glass?.Dispose();
+            if (context != null) context->ClearState();
+            if (targetView != null) targetView->Release();
+            if (readback != null) readback->Release();
+            if (target != null) target->Release();
+            if (source != null) source->Release();
+            if (context != null) context->Release();
+            if (device != null) device->Release();
+            if (Duplication != null) { NativeMemory.Free(Duplication->Vtable); NativeMemory.Free(Duplication); }
+            if (Output != null) { NativeMemory.Free(Output->Vtable); NativeMemory.Free(Output); }
+            if (Window != 0) _ = Win32.DestroyWindow((HWND)Window);
+            if (!uiContext.IsNull) ImGui.DestroyContext(uiContext);
+            ImGui.SetCurrentContext(previousContext);
+            if (OperatingSystem.IsWindowsVersionAtLeast(10, 0, 14393) && (nint)previousDpi != 0)
+                _ = Win32.SetThreadDpiAwarenessContext(previousDpi);
+        }
     }
 
     private sealed class ExclusionScene : IDisposable
