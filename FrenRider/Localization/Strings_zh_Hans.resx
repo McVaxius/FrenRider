@@ -3236,4 +3236,14 @@
   <data name="Wave colour 2" xml:space="preserve"><value>波浪颜色 2</value></data>
   <data name="Wave colour 3" xml:space="preserve"><value>波浪颜色 3</value></data>
   <data name="Reset wave colours" xml:space="preserve"><value>重置波浪颜色</value></data>
+  <data name="Background blur" xml:space="preserve"><value>背景模糊</value></data>
+  <data name="Blur (%)" xml:space="preserve"><value>模糊（%）</value></data>
+  <data name="Glass transparency (%)" xml:space="preserve"><value>玻璃透明度（%）</value></data>
+  <data name="Glass transparency reveals the backdrop. Blur uses the host preference and window strength in the main game viewport." xml:space="preserve"><value>玻璃透明度可让后方背景透出。模糊效果在游戏主视口中遵循宿主偏好设置和窗口强度设置。</value></data>
+  <data name="UI styling" xml:space="preserve"><value>界面样式</value></data>
+  <data name="Lock window movement and resizing" xml:space="preserve"><value>锁定窗口移动和调整大小</value></data>
+  <data name="Use native UI" xml:space="preserve"><value>使用原生界面</value></data>
+  <data name="Use styled UI" xml:space="preserve"><value>使用带样式的界面</value></data>
+  <data name="Lock windows" xml:space="preserve"><value>锁定窗口</value></data>
+  <data name="Unlock windows" xml:space="preserve"><value>解锁窗口</value></data>
 </root>

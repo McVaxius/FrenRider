@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using AethertekUI;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
 using FrenRider.Windows;
 using Newtonsoft.Json;
@@ -13,6 +14,195 @@ namespace FrenRider.Tests;
 [Collection("Activation mode static services")]
 public sealed unsafe class ColorAppearanceTests
 {
+    [Fact]
+    public void BackgroundGlassWindowScopeForcesGameViewportAndRestoresOriginalFlagsAfterDrawFailure()
+    {
+        var windows = new WindowSystem("Glasswork viewport scope fixture");
+        var ordinary = new BackgroundProbeWindow("Ordinary###glasswork-scope-ordinary")
+        {
+            Flags = ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoCollapse,
+            ForceMainWindow = false,
+        };
+        var alreadyForced = new BackgroundProbeWindow("Forced###glasswork-scope-forced")
+        {
+            Flags = ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoScrollbar,
+            ForceMainWindow = true,
+        };
+        windows.AddWindow(ordinary);
+        windows.AddWindow(alreadyForced);
+        var ordinaryFlags = ordinary.Flags;
+        var forcedFlags = alreadyForced.Flags;
+        var failure = new InvalidOperationException("Synthetic window draw failure.");
+        var draws = 0;
+
+        Assert.Same(failure, Assert.Throws<InvalidOperationException>(() =>
+            Plugin.DrawAppearanceWindows(windows, true, () =>
+            {
+                draws++;
+                Assert.True(ordinary.ForceMainWindow);
+                Assert.True(alreadyForced.ForceMainWindow);
+                Assert.Equal(ordinaryFlags | ImGuiWindowFlags.NoBackground, ordinary.Flags);
+                Assert.Equal(forcedFlags, alreadyForced.Flags);
+                throw failure;
+            })));
+        Assert.Equal(1, draws);
+        Assert.False(ordinary.ForceMainWindow);
+        Assert.True(alreadyForced.ForceMainWindow);
+        Assert.Equal(ordinaryFlags, ordinary.Flags);
+        Assert.Equal(forcedFlags, alreadyForced.Flags);
+
+        Plugin.DrawAppearanceWindows(windows, false, () =>
+        {
+            draws++;
+            Assert.False(ordinary.ForceMainWindow);
+            Assert.True(alreadyForced.ForceMainWindow);
+            Assert.Equal(ordinaryFlags, ordinary.Flags);
+            Assert.Equal(forcedFlags, alreadyForced.Flags);
+        });
+        Assert.Equal(2, draws);
+        Assert.False(ordinary.ForceMainWindow);
+        Assert.True(alreadyForced.ForceMainWindow);
+        Assert.Equal(ordinaryFlags, ordinary.Flags);
+        Assert.Equal(forcedFlags, alreadyForced.Flags);
+    }
+
+    [Fact]
+    public void WindowCommandsChangeOnlyTheirIndependentGlobalPreferenceAndKeepStoredStyle()
+    {
+        var config = new Configuration { UiStyle = FrenRiderUiStyle.Glassmorphism, UiAccentRgb = 0x123456 };
+        Assert.True(Plugin.TryApplyWindowCommand(config, " lock "));
+        Assert.True(config.UiWindowsLocked);
+        Assert.True(Plugin.TryApplyWindowCommand(config, "LOCK"));
+        Assert.True(config.UiWindowsLocked);
+        Assert.True(Plugin.TryApplyWindowCommand(config, "ui off"));
+        Assert.False(config.UiStylingEnabled);
+        Assert.Equal(FrenRiderUiStyle.Glassmorphism, config.UiStyle);
+        Assert.True(config.UiWindowsLocked);
+        Assert.False(Plugin.TryApplyWindowCommand(config, "off"));
+        Assert.True(Plugin.TryApplyWindowCommand(config, "unlock"));
+        Assert.False(config.UiWindowsLocked);
+        Assert.False(config.UiStylingEnabled);
+        Assert.True(Plugin.TryApplyWindowCommand(config, "ui on"));
+        Assert.True(config.UiStylingEnabled);
+        Assert.Equal(0x123456u, config.UiAccentRgb);
+    }
+
+    [Fact]
+    public void GlassworkFrostRetainsPerStyleChoicesAndUsesTheExistingGlobalConfiguration()
+    {
+        var config = JsonConvert.DeserializeObject<Configuration>("""{"UiStyle":1}""")!;
+        Assert.True(config.UiStylingEnabled);
+        Assert.False(config.UiWindowsLocked);
+        Assert.Equal(75, config.UiColors.BackgroundBlurPercent);
+        Assert.True(FrenRiderPresentation.BackgroundBlurEnabled(config));
+        Assert.Equal(.75f, FrenRiderPresentation.BackgroundFrost(config));
+        config.UiStyle = FrenRiderUiStyle.Spatial;
+        Assert.False(FrenRiderPresentation.BackgroundBlurEnabled(config));
+        Assert.Equal(0, FrenRiderPresentation.BackgroundFrost(config));
+        config.UiColors = config.UiColors.WithBackgroundBlur(MaterialColorMode.Spatial, true)
+            .WithBackgroundBlur(MaterialColorMode.Glassmorphism, false) with { BackgroundBlurPercent = 60 };
+        var restored = JsonConvert.DeserializeObject<Configuration>(JsonConvert.SerializeObject(config))!;
+        Assert.True(FrenRiderPresentation.BackgroundBlurEnabled(restored));
+        Assert.Equal(.6f, FrenRiderPresentation.BackgroundFrost(restored), .001f);
+        restored.UiStyle = FrenRiderUiStyle.Glassmorphism;
+        Assert.False(FrenRiderPresentation.BackgroundBlurEnabled(restored));
+        Assert.Equal(0, FrenRiderPresentation.BackgroundFrost(restored));
+        restored.UiStyle = FrenRiderUiStyle.Spatial;
+        restored.UiStylingEnabled = false;
+        Assert.False(FrenRiderPresentation.BackgroundBlurEnabled(restored));
+        Assert.Equal(0, FrenRiderPresentation.BackgroundFrost(restored));
+        using var scope = FrenRiderPresentation.Push(restored);
+        Assert.False(FrenRiderPresentation.Decorated);
+        Assert.False(FrenRiderPresentation.IsLcars);
+    }
+
+    [Fact]
+    public void GlassworkSubmitsOnlyFlaggedBackgroundsWithFrostAndRetainsForegroundAndUnavailablePaint()
+    {
+        var previous = ImGui.GetCurrentContext();
+        var context = ImGui.CreateContext();
+        try
+        {
+            var config = new Configuration { UiStyle = FrenRiderUiStyle.Cyberpunk };
+            config.UiColors = config.UiColors.WithBackgroundBlur(MaterialColorMode.Cyberpunk, true);
+            var submissions = new List<(bool Window, float Frost, Vector4 Tint)>();
+            var available = true;
+            using var renderer = new FrenRiderGlass((list, min, max, rounding, tint, frost, window) =>
+            {
+                submissions.Add((window, frost, tint));
+                return available;
+            });
+            var io = ImGui.GetIO();
+            io.IniFilename = null; io.LogFilename = null; io.DisplaySize = new(1000, 800); io.DeltaTime = 1f / 60;
+            io.Fonts.AddFontDefault();
+            byte* pixels = null; int width = 0, height = 0;
+            io.Fonts.GetTexDataAsRGBA32(0, &pixels, &width, &height);
+            io.Fonts.SetTexID(0, new ImTextureID((nint)1));
+
+            ((Vector2 Position, uint Colour)[] Foreground, uint[] PanelColours, int ForegroundSubmissions, float Alpha) Frame()
+            {
+                submissions.Clear();
+                ImGui.NewFrame();
+                using var appearance = FrenRiderPresentation.Push(config, renderer);
+                using var theme = MaterialTheme.Push(FrenRiderPresentation.Theme(config), 1, MaterialStyleMode.ColorsOnly);
+                ImGui.SetNextWindowPos(new(20, 20)); ImGui.SetNextWindowSize(new(800, 600));
+                ImGui.Begin("Glasswork background contract", ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoBackground);
+                FrenRiderPresentation.DrawBackdrop();
+                var list = ImGui.GetWindowDrawList();
+                var first = list.VtxBuffer.Size;
+                FrenRiderPresentation.DrawPanel(new(50, 90), new(330, 230), background: true);
+                var panelColours = Enumerable.Range(first, list.VtxBuffer.Size - first)
+                    .Select(index => list.VtxBuffer[index].Col).ToArray();
+                var beforeForeground = submissions.Count;
+                first = list.VtxBuffer.Size;
+                FrenRiderPresentation.DrawPanel(new(370, 90), new(580, 135), inset: true);
+                using (FrenRiderPresentation.NativeFieldStyle()) ImGui.Button("Foreground control");
+                FrenRiderPresentation.PaintToggle(new(370, 155), new(46, 24), true, MaterialTheme.Current.Colors.Primary);
+                FrenRiderPresentation.PaintChoice(new(440, 155), 24, true, false);
+                var foreground = Enumerable.Range(first, list.VtxBuffer.Size - first)
+                    .Select(index => (list.VtxBuffer[index].Pos, list.VtxBuffer[index].Col)).ToArray();
+                var foregroundSubmissions = submissions.Count - beforeForeground;
+                var alpha = ImGui.GetStyle().Alpha;
+                ImGui.End(); ImGui.Render();
+                return (foreground, panelColours, foregroundSubmissions, alpha);
+            }
+
+            Frame(); Frame();
+            var frosted = Frame();
+            Assert.Equal(new[] { (true, .75f), (false, .75f) }, submissions.Select(value => (value.Window, value.Frost)));
+            Assert.Equal(0, frosted.ForegroundSubmissions);
+            Assert.Equal(1, frosted.Alpha);
+            var tint = submissions.Select(value => value.Tint).ToArray();
+            var solidPanel = MaterialCanvas.Color(FrenRiderPresentation.Theme(config).Colors.SurfaceContainerLow);
+            Assert.DoesNotContain(solidPanel, frosted.PanelColours);
+
+            config.UiColors = config.UiColors with { BackgroundBlurPercent = 25 };
+            var lessFrost = Frame();
+            Assert.All(submissions, value => Assert.Equal(.25f, value.Frost));
+            Assert.Equal(tint, submissions.Select(value => value.Tint));
+            Assert.True(frosted.Foreground.SequenceEqual(lessFrost.Foreground));
+            Assert.Equal(0, lessFrost.ForegroundSubmissions);
+            config.UiColors = config.UiColors with { BackgroundBlurPercent = 0 };
+            Frame();
+            Assert.True(FrenRiderPresentation.BackgroundBlurEnabled(config));
+            Assert.Equal(2, submissions.Count);
+            Assert.All(submissions, value => Assert.Equal(0, value.Frost));
+
+            config.UiColors = config.UiColors.WithBackgroundBlur(MaterialColorMode.Cyberpunk, false);
+            var disabled = Frame();
+            Assert.Empty(submissions);
+            Assert.Contains(solidPanel, disabled.PanelColours);
+            Assert.True(frosted.Foreground.SequenceEqual(disabled.Foreground));
+            available = false;
+            config.UiColors = config.UiColors.WithBackgroundBlur(MaterialColorMode.Cyberpunk, true);
+            var unavailable = Frame();
+            Assert.Equal(2, submissions.Count);
+            Assert.Equal(disabled.PanelColours, unavailable.PanelColours);
+            Assert.True(disabled.Foreground.SequenceEqual(unavailable.Foreground));
+        }
+        finally { ImGui.DestroyContext(context); ImGui.SetCurrentContext(previous); }
+    }
+
     [Fact]
     public void LegacyAppearanceRemainsAutomaticAndManualChoicesRoundTripThroughTheExistingGlobalConfiguration()
     {
@@ -60,7 +250,8 @@ public sealed unsafe class ColorAppearanceTests
             "Turn on UI sounds to preview.", "Audio output is unavailable.", "UI sounds muted", "UI sounds on",
             "Glassmorphism", "Spatial", "Cyberpunk", "Animation", "Bar colour 1", "Bar colour 2", "Bar colour 3",
             "Reset", "Reset colours", "Movement speed (x)", "Wave colour 1", "Wave colour 2", "Wave colour 3",
-            "Reset wave colours"];
+            "Reset wave colours", "Background blur", "Blur (%)", "UI styling",
+            "Lock window movement and resizing", "Use native UI", "Use styled UI", "Lock windows", "Unlock windows"];
         foreach (var language in UiText.Languages)
         {
             using var text = new UiText(language.Code, _ => new NoFont());
@@ -602,6 +793,11 @@ public sealed unsafe class ColorAppearanceTests
             Assert.All(indices, index => Assert.InRange(index, 0, large.Length - 1));
         }
         finally { ImGui.DestroyContext(context); ImGui.SetCurrentContext(previous); }
+    }
+
+    private sealed class BackgroundProbeWindow(string name) : Window(name)
+    {
+        public override void Draw() { }
     }
 
     private sealed class NoFont : IDisposable { public void Dispose() { } }

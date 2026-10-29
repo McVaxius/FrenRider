@@ -74,6 +74,7 @@ public class AutorotIpcService : IDisposable
     };
 
     public string LastStatus { get; private set; } = "";
+    internal bool PackagedPresetRefreshPending { get; private set; } = true;
 
     public AutorotIpcService(IDalamudPluginInterface pluginInterface, IPluginLog log)
     {
@@ -662,73 +663,105 @@ public class AutorotIpcService : IDisposable
     /// Push the packaged autorot presets into BossMod-compatible rotation plugins.
     /// Tries the current BossMod IPC contract first, then legacy aliases if needed.
     /// </summary>
-    public void CreatePresets(bool force = false, string rotationProvider = "BMR")
+    internal bool RefreshPackagedPresetsOnLoad()
+    {
+        if (!PackagedPresetRefreshPending)
+            return true;
+        if (TryGetLiveBossMod("BMR", out _, out _, out var detail))
+            return CreatePresets(force: true, rotationProvider: "BMR");
+        if (TryGetLiveBossMod("VBM", out _, out _, out detail))
+            return CreatePresets(force: true, rotationProvider: "VBM");
+        LastStatus = $"Bundled preset refresh pending: {detail}";
+        return false;
+    }
+
+    public bool CreatePresets(bool force = false, string rotationProvider = "BMR")
     {
         log.Information($"Starting autorot preset push (force={force})");
-        if (!TryGetLiveBossMod(GetBossModProvider(rotationProvider), out _, out _, out var detail))
+        var provider = GetBossModProvider(rotationProvider);
+        if (!TryGetLiveBossMod(provider, out var live, out var assembly, out var detail))
         {
             LastStatus = detail;
-            return;
+            return false;
         }
 
-        var before = BossModSettingsSnapshot.Unavailable;
-        if (ownedSettings is not null && (!TryReadOwnedBossModSettings(out before) || before.Runtime is null
-            || before.Runtime.Names.Any(name => !IsExactRuntimePreset(name))))
+        var before = ReadBossModSettings(provider, assembly!);
+        if ((ownedSettings is not null && !TryReadOwnedBossModSettings(out before))
+            || before.Runtime is null || before.Runtime.Names.Any(name => !IsExactRuntimePreset(name)))
         {
             LastStatus = "Packaged presets retained: the current runtime selection has no verified restoration path.";
-            return;
+            return false;
         }
-        var runtimeWasOwned = ownedSettings?.CanChangeRuntime(before) == true;
+        var ownership = ownedSettings;
+        var runtimeWasOwned = ownership?.CanChangeRuntime(before) == true;
 
         var presets = LoadPresetFiles();
         if (presets.Count == 0)
         {
             LastStatus = "No packaged presets found";
             log.Warning("Failed to create autorot presets - no packaged presets found");
-            return;
+            return false;
         }
 
         var created = 0;
+        var usedLegacy = false;
         foreach (var preset in presets)
         {
-            if (TryCreatePreset(preset.Name, preset.Json, forceRecreate: true))
+            if (TryCreatePreset(preset.Name, preset.Json, out var legacy))
                 created++;
+            usedLegacy |= legacy;
         }
 
-        if (before.Runtime is { } previous && TryReadOwnedBossModSettings(out var after)
-            && !BossModRuntimePresetState.Matches(previous, after.Runtime))
+        if (!TryGetLiveBossMod(provider, out var current, out _, out _)
+            || !ReferenceEquals(live, current) || !ReferenceEquals(ownership, ownedSettings))
         {
-            // Native deletion can remove an active packaged preset. Preserve the complete
-            // pre-recreation order rather than relying on GetActive's single-name view.
-            if (runtimeWasOwned && after.Runtime is { ForceDisabled: false } changed
-                && changed.Names.SequenceEqual(previous.Names.Where(name => !presets.Any(p => p.Name == name)), StringComparer.Ordinal))
-                ownedSettings!.OwnRuntime(changed);
-            _ = WriteRuntimePreset(ownedIdentity.Provider, previous);
-            if (!TryReadOwnedBossModSettings(out var restored) || !BossModRuntimePresetState.Matches(restored.Runtime, previous))
+            LastStatus = "Preset refresh unconfirmed: the BossMod provider or ownership changed during the push.";
+            return false;
+        }
+        var previous = before.Runtime!;
+        var after = ReadBossModSettings(provider, assembly!);
+        if (!BossModRuntimePresetState.Matches(previous, after.Runtime))
+        {
+            // Modern overwrite preserves native references. Only the legacy path can need
+            // removal repair; retain another owner's selection, including an explicit clear.
+            if (!usedLegacy || previous.ForceDisabled || after.Runtime is not { ForceDisabled: false } changed
+                || !changed.Names.SequenceEqual(previous.Names.Where(name => !presets.Any(p => p.Name == name)), StringComparer.Ordinal))
+            {
+                LastStatus = "Preset refresh unconfirmed: the runtime selection changed during the push.";
+                return false;
+            }
+            if (runtimeWasOwned)
+                ownership!.OwnRuntime(changed);
+            _ = WriteRuntimePreset(provider, previous);
+            var restored = ReadBossModSettings(provider, assembly!);
+            if (!ReferenceEquals(ownership, ownedSettings) || !BossModRuntimePresetState.Matches(restored.Runtime, previous))
             {
                 LastStatus = "Packaged presets were refreshed, but the prior runtime selection could not be confirmed.";
                 log.Warning(LastStatus);
-                return;
+                return false;
             }
             if (runtimeWasOwned)
-                ownedSettings!.OwnRuntime(previous);
+                ownership!.OwnRuntime(previous);
         }
 
         if (created == PresetFileNames.Length)
         {
-            LastStatus = "Six BossMod presets pushed";
-            log.Information("All packaged autorot presets created successfully");
+            LastStatus = "Six BossMod preset writes acknowledged; runtime selection preserved";
+            log.Information(LastStatus);
+            PackagedPresetRefreshPending = false;
+            return true;
         }
         else if (created > 0)
         {
-            LastStatus = $"Preset push partially succeeded ({created}/{PresetFileNames.Length})";
-            log.Warning($"Autorot preset push partially succeeded ({created}/{PresetFileNames.Length})");
+            LastStatus = $"Preset writes partially confirmed ({created}/{PresetFileNames.Length})";
+            log.Warning(LastStatus);
         }
         else
         {
-            LastStatus = "No compatible BossMod preset IPC responded";
-            log.Warning("Failed to create autorot presets - no rotation plugin IPC available");
+            LastStatus = "No BossMod preset writes were confirmed";
+            log.Warning(LastStatus);
         }
+        return false;
     }
 
     /// <summary>
@@ -1190,28 +1223,11 @@ public class AutorotIpcService : IDisposable
             : null;
     }
 
-    private bool TryCreatePreset(string name, string json, bool forceRecreate)
+    private bool TryCreatePreset(string name, string json, out bool usedLegacy)
     {
-        string? previouslyActivePreset = null;
-
-        if (forceRecreate)
-        {
-            var existingPreset = TryStringIpc("BossMod.Presets.Get", name);
-            if (existingPreset != null)
-            {
-                previouslyActivePreset = TryStringIpc("BossMod.Presets.GetActive");
-
-                var deleteResult = TryBoolIpc("BossMod.Presets.Delete", name);
-                if (deleteResult.HasValue)
-                {
-                    if (deleteResult.Value)
-                        log.Information($"Preset '{name}' deleted before recreate via BossMod-compatible IPC");
-                    else
-                        log.Warning($"BossMod.Presets.Delete returned false for preset '{name}' before recreate");
-                }
-            }
-        }
-
+        usedLegacy = false;
+        // Native overwrite updates the active preset reference too. Deleting first would
+        // discard the existing definition and selection when creation is rejected.
         var result = TryBoolIpc("BossMod.Presets.Create", json, true);
         if (result.HasValue)
         {
@@ -1219,17 +1235,7 @@ public class AutorotIpcService : IDisposable
             {
                 log.Information($"Preset '{name}' created via BossMod-compatible IPC");
 
-                if (!string.IsNullOrEmpty(previouslyActivePreset) &&
-                    string.Equals(previouslyActivePreset, name, StringComparison.OrdinalIgnoreCase))
-                {
-                    var reactivateResult = TryBoolIpc("BossMod.Presets.SetActive", name);
-                    if (reactivateResult == true)
-                        log.Information($"Preset '{name}' restored as active after recreate");
-                    else if (reactivateResult == false)
-                        log.Warning($"BossMod.Presets.SetActive returned false while restoring preset '{name}' after recreate");
-                }
-
-                return true;
+                return IsExactRuntimePreset(name);
             }
 
             log.Warning($"BossMod.Presets.Create returned false for preset '{name}'");
@@ -1239,15 +1245,17 @@ public class AutorotIpcService : IDisposable
         var legacyResult = TryStringIpc("BossMod.Presets.Create", json);
         if (legacyResult != null)
         {
+            usedLegacy = legacyResult.Length == 0;
             LogLegacyPresetResult("BossMod.Presets.Create", name, legacyResult);
-            return true;
+            return legacyResult.Length == 0 && IsExactRuntimePreset(name);
         }
 
         legacyResult = TryStringIpc("BossModReborn.Presets.Create", json);
         if (legacyResult != null)
         {
+            usedLegacy = legacyResult.Length == 0;
             LogLegacyPresetResult("BossModReborn.Presets.Create", name, legacyResult);
-            return true;
+            return legacyResult.Length == 0 && IsExactRuntimePreset(name);
         }
 
         return false;

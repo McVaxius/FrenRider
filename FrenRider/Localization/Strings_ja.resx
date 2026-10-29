@@ -3236,4 +3236,14 @@
   <data name="Wave colour 2" xml:space="preserve"><value>波の色 2</value></data>
   <data name="Wave colour 3" xml:space="preserve"><value>波の色 3</value></data>
   <data name="Reset wave colours" xml:space="preserve"><value>波の色をリセット</value></data>
+  <data name="Background blur" xml:space="preserve"><value>背景のぼかし</value></data>
+  <data name="Blur (%)" xml:space="preserve"><value>ぼかし（%）</value></data>
+  <data name="Glass transparency (%)" xml:space="preserve"><value>ガラスの透明度（%）</value></data>
+  <data name="Glass transparency reveals the backdrop. Blur uses the host preference and window strength in the main game viewport." xml:space="preserve"><value>ガラスの透明度を上げると背後が見えるようになります。ぼかしはゲームのメインビューポートで、ホスト側の設定とウィンドウごとの強度に従います。</value></data>
+  <data name="UI styling" xml:space="preserve"><value>UIのスタイル</value></data>
+  <data name="Lock window movement and resizing" xml:space="preserve"><value>ウィンドウの移動とサイズ変更をロック</value></data>
+  <data name="Use native UI" xml:space="preserve"><value>標準UIを使用</value></data>
+  <data name="Use styled UI" xml:space="preserve"><value>スタイル付きUIを使用</value></data>
+  <data name="Lock windows" xml:space="preserve"><value>ウィンドウをロック</value></data>
+  <data name="Unlock windows" xml:space="preserve"><value>ウィンドウのロックを解除</value></data>
 </root>

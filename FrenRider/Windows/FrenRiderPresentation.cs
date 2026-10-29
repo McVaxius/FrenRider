@@ -10,8 +10,20 @@ internal enum UiFontRole { Body, BodyStrong, Title, PluginName, Counter, Action 
 internal static partial class FrenRiderPresentation
 {
     [ThreadStatic] private static Configuration? activeConfiguration;
+    [ThreadStatic] private static FrenRiderGlass? activeGlass;
     internal static Configuration? ActiveConfiguration => activeConfiguration;
-    internal static FrenRiderUiStyle Style => activeConfiguration?.UiStyle switch
+    internal static MaterialColorMode ColorMode(Configuration config) => config.UiStyle switch
+    {
+        FrenRiderUiStyle.Glassmorphism => MaterialColorMode.Glassmorphism,
+        FrenRiderUiStyle.Spatial => MaterialColorMode.Spatial,
+        FrenRiderUiStyle.Cyberpunk => MaterialColorMode.Cyberpunk,
+        _ => config.UiColors?.Mode ?? MaterialColorMode.Auto,
+    };
+    internal static bool BackgroundBlurEnabled(Configuration config)
+        => config.UiStylingEnabled && config.UiColors is { } settings && settings.HasBackgroundBlur(ColorMode(config));
+    internal static float BackgroundFrost(Configuration config)
+        => BackgroundBlurEnabled(config) ? config.UiColors.BackgroundBlurPercent / 100f : 0;
+    internal static FrenRiderUiStyle Style => activeConfiguration?.UiStylingEnabled == false ? FrenRiderUiStyle.Classic : activeConfiguration?.UiStyle switch
     {
         FrenRiderUiStyle.Glassmorphism => FrenRiderUiStyle.Glassmorphism,
         FrenRiderUiStyle.Spatial => FrenRiderUiStyle.Spatial,
@@ -19,9 +31,9 @@ internal static partial class FrenRiderPresentation
         _ => FrenRiderUiStyle.Classic,
     };
     internal static bool IsLcars => activeConfiguration is { } config
-        ? Style == FrenRiderUiStyle.Classic && config.UiColors?.Mode == MaterialColorMode.Lcars
+        ? config.UiStylingEnabled && Style == FrenRiderUiStyle.Classic && config.UiColors?.Mode == MaterialColorMode.Lcars
         : MaterialTheme.Current.IsLcars;
-    internal static bool Decorated => Style != FrenRiderUiStyle.Classic || IsLcars;
+    internal static bool Decorated => activeConfiguration?.UiStylingEnabled != false && (Style != FrenRiderUiStyle.Classic || IsLcars);
     internal static Vector4 LcarsBackground => Rgb(activeConfiguration?.UiLcarsBackgroundRgb ?? Configuration.DefaultLcarsBackgroundRgb);
     internal static Vector4 LcarsText => ReadableInk(LcarsBackground);
     internal static Vector4 LcarsBar(int index) => Rgb(index switch
@@ -33,12 +45,23 @@ internal static partial class FrenRiderPresentation
     internal static Vector4 ReadableInk(Vector4 surface) =>
         MaterialColor.Contrast(surface, Vector4.One) >= MaterialColor.Contrast(surface, new Vector4(0, 0, 0, 1))
             ? Vector4.One : new(0, 0, 0, 1);
-    internal static AppearanceScope Push(Configuration config) => new(config);
+    internal static AppearanceScope Push(Configuration config, FrenRiderGlass? renderer = null) => new(config, renderer);
     internal readonly ref struct AppearanceScope
     {
         private readonly Configuration? previous;
-        internal AppearanceScope(Configuration config) { previous = activeConfiguration; activeConfiguration = config; }
-        public void Dispose() => activeConfiguration = previous;
+        private readonly FrenRiderGlass? previousGlass;
+        internal AppearanceScope(Configuration config, FrenRiderGlass? renderer)
+        {
+            previous = activeConfiguration;
+            previousGlass = activeGlass;
+            activeConfiguration = config;
+            activeGlass = renderer;
+        }
+        public void Dispose()
+        {
+            activeConfiguration = previous;
+            activeGlass = previousGlass;
+        }
     }
 
     // Approved regular/compact Main and Mini envelopes; native Main version chrome is retained.

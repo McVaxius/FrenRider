@@ -107,7 +107,7 @@ internal static class UiHelpers
         var height = Math.Max(MaterialControls.Metrics.Height, size.Y + padding.Y * 2);
         var dl = ImGui.GetWindowDrawList();
         if (FrenRiderPresentation.Decorated)
-            FrenRiderPresentation.DrawPanel(origin, origin + new Vector2(width, height), inset: true);
+            FrenRiderPresentation.DrawPanel(origin, origin + new Vector2(width, height), inset: true, background: false);
         else
         {
             dl.AddRectFilled(origin, origin + new Vector2(width, height), MaterialCanvas.Color(c.SurfaceContainer), Scale(4));

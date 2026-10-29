@@ -3341,4 +3341,14 @@ Aktif: gunakan preset BossMod di bawah dengan penyedia rotasi apa pun. Preset kh
   <data name="Wave colour 2" xml:space="preserve"><value>Warna gelombang 2</value></data>
   <data name="Wave colour 3" xml:space="preserve"><value>Warna gelombang 3</value></data>
   <data name="Reset wave colours" xml:space="preserve"><value>Atur ulang warna gelombang</value></data>
+  <data name="Background blur" xml:space="preserve"><value>Keburaman latar belakang</value></data>
+  <data name="Blur (%)" xml:space="preserve"><value>Keburaman (%)</value></data>
+  <data name="Glass transparency (%)" xml:space="preserve"><value>Transparansi kaca (%)</value></data>
+  <data name="Glass transparency reveals the backdrop. Blur uses the host preference and window strength in the main game viewport." xml:space="preserve"><value>Transparansi kaca menampilkan latar di belakangnya. Efek buram mengikuti preferensi host dan intensitas jendela pada area tampilan utama game.</value></data>
+  <data name="UI styling" xml:space="preserve"><value>Gaya UI</value></data>
+  <data name="Lock window movement and resizing" xml:space="preserve"><value>Kunci pergerakan dan perubahan ukuran jendela</value></data>
+  <data name="Use native UI" xml:space="preserve"><value>Gunakan UI bawaan</value></data>
+  <data name="Use styled UI" xml:space="preserve"><value>Gunakan UI bergaya</value></data>
+  <data name="Lock windows" xml:space="preserve"><value>Kunci jendela</value></data>
+  <data name="Unlock windows" xml:space="preserve"><value>Buka kunci jendela</value></data>
 </root>

@@ -29,6 +29,8 @@ public partial class CombatService
     private readonly FrenTracker tracker;
     private readonly ZoneService zoneService;
     private readonly QuestionableIpcService questionableIpcService;
+    private readonly Func<string, bool>? commandSender;
+    private long nextPackagedPresetRefreshMs;
     private readonly DutyCombatAuthorityPolicy dutyCombatAuthorityPolicy = new();
 
     private bool wasInCombat;
@@ -75,12 +77,28 @@ public partial class CombatService
         Plugin plugin,
         FrenTracker tracker,
         ZoneService zoneService,
-        QuestionableIpcService questionableIpcService)
+        QuestionableIpcService questionableIpcService,
+        Func<string, bool>? commandSender = null)
     {
         this.plugin = plugin;
         this.tracker = tracker;
         this.zoneService = zoneService;
         this.questionableIpcService = questionableIpcService;
+        this.commandSender = commandSender;
+    }
+
+    public void RefreshPackagedPresetsOnLoad()
+    {
+        if (!plugin.AutorotIpcService.PackagedPresetRefreshPending
+            || Environment.TickCount64 < nextPackagedPresetRefreshMs || IsCombatSetupHeld(IsInDuty()))
+            return;
+        var config = plugin.ConfigManager.GetActiveConfig();
+        questionableIpcService.Refresh();
+        if (ShouldHoldQuestingVbm(config.Enabled, GetSelectedRotationPluginName(config),
+            questionableIpcService.QuestAutomationActive, IsInDuty(), Plugin.Condition[ConditionFlag.InCombat]))
+            return;
+        nextPackagedPresetRefreshMs = Environment.TickCount64 + CombatSettingsRefreshDebounceMs;
+        _ = plugin.AutorotIpcService.RefreshPackagedPresetsOnLoad();
     }
 
     public void ClearExternalAutomationRuntimeState(string reason)
@@ -161,6 +179,7 @@ public partial class CombatService
             //debug/code review this is called every frame and could be an issue
             State = CombatState.OutOfCombat;
             StateDetail = "Disabled";
+            RefreshPackagedPresetsOnLoad();
             return;
         }
 
@@ -176,6 +195,8 @@ public partial class CombatService
                 && (IsRotationDisabled(config)
                     || !inDuty
                     || !IsAdsInteractionVbmPauseActive(GetSelectedRotationPluginName(config))));
+
+        RefreshPackagedPresetsOnLoad();
 
         // if (authorityDecision.ShouldForceCombatOff)
         //     ForceDutyCombatOff("QuestionableSolo duty authority");
@@ -1418,7 +1439,7 @@ public partial class CombatService
 
         ApplyBossModDefaultSettingsOnce(pluginName, selectedPreset, reason);
         ApplyBossModMovementUnlockOnce(pluginName, selectedPreset, reason);
-        if (!ApplyBossModPreset(pluginName, selectedPreset, reason))
+        if (!ApplyBossModPreset(pluginName, selectedPreset, reason) && (pluginName is "BMR" or "VBM"))
             return false;
 
         switch (pluginName)
@@ -1513,8 +1534,6 @@ public partial class CombatService
             return false;
         if (config.Enabled)
             plugin.CaptureExternalAutomationSnapshot($"preset selection after {reason}");
-        if (installPresets)
-            plugin.AutorotIpcService.CreatePresets(force: true, rotationProvider: pluginName);
         var applied = config.Enabled ? plugin.AutorotIpcService.ApplyOwnedBossModPreset(presetName)
             : plugin.AutorotIpcService.ApplyUnownedBossModPreset(pluginName, presetName);
         if (applied)
@@ -1524,7 +1543,7 @@ public partial class CombatService
             ActivePreset = string.Empty;
             Plugin.Log.Warning($"Combat: BossMod preset retained after {reason}: {plugin.AutorotIpcService.LastStatus}");
         }
-        return true;
+        return applied;
     }
 
     private bool IsDragonNeckCombat(CharacterConfig config)
@@ -1850,6 +1869,8 @@ public partial class CombatService
     {
         if (ShouldSuppressFrenRiderCombatCommands && !allowWhileSuppressed)
             return false;
+        if (commandSender is not null)
+            return commandSender(command);
 
         try
         {

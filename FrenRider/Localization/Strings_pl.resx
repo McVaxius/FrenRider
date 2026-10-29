@@ -3341,4 +3341,14 @@ Włączone: używaj poniższych presetów BossMod z dowolnym dostawcą rotacji. 
   <data name="Wave colour 2" xml:space="preserve"><value>Kolor fali 2</value></data>
   <data name="Wave colour 3" xml:space="preserve"><value>Kolor fali 3</value></data>
   <data name="Reset wave colours" xml:space="preserve"><value>Resetuj kolory fal</value></data>
+  <data name="Background blur" xml:space="preserve"><value>Rozmycie tła</value></data>
+  <data name="Blur (%)" xml:space="preserve"><value>Rozmycie (%)</value></data>
+  <data name="Glass transparency (%)" xml:space="preserve"><value>Przezroczystość szkła (%)</value></data>
+  <data name="Glass transparency reveals the backdrop. Blur uses the host preference and window strength in the main game viewport." xml:space="preserve"><value>Przezroczystość szkła odsłania tło. Rozmycie korzysta z ustawień aplikacji nadrzędnej i siły efektu okna w głównym obszarze wyświetlania gry.</value></data>
+  <data name="UI styling" xml:space="preserve"><value>Styl interfejsu</value></data>
+  <data name="Lock window movement and resizing" xml:space="preserve"><value>Zablokuj przesuwanie i zmianę rozmiaru okien</value></data>
+  <data name="Use native UI" xml:space="preserve"><value>Użyj natywnego interfejsu</value></data>
+  <data name="Use styled UI" xml:space="preserve"><value>Użyj stylizowanego interfejsu</value></data>
+  <data name="Lock windows" xml:space="preserve"><value>Zablokuj okna</value></data>
+  <data name="Unlock windows" xml:space="preserve"><value>Odblokuj okna</value></data>
 </root>

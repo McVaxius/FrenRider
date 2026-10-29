@@ -249,7 +249,7 @@ public partial class ConfigWindow
                     var inset = UiHelpers.Scale(new Vector2(FrenRiderPresentation.IsLcars ? 16 : 8, compact ? 4 : 6));
                     var max = new Vector2(min.X + width, ImGui.GetCursorScreenPos().Y - ImGui.GetStyle().ItemSpacing.Y);
                     ImGuiP.TablePushBackgroundChannel();
-                    try { FrenRiderPresentation.DrawPanel(min - inset, max + inset); }
+                    try { FrenRiderPresentation.DrawPanel(min - inset, max + inset, background: true); }
                     finally { ImGuiP.TablePopBackgroundChannel(); }
                 }
             }

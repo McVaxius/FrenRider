@@ -3236,4 +3236,14 @@ An: Die BossMod-Voreinstellungen unten mit jedem Rotationsanbieter verwenden. Ei
   <data name="Wave colour 2" xml:space="preserve"><value>Wellenfarbe 2</value></data>
   <data name="Wave colour 3" xml:space="preserve"><value>Wellenfarbe 3</value></data>
   <data name="Reset wave colours" xml:space="preserve"><value>Wellenfarben zurücksetzen</value></data>
+  <data name="Background blur" xml:space="preserve"><value>Hintergrundunschärfe</value></data>
+  <data name="Blur (%)" xml:space="preserve"><value>Unschärfe (%)</value></data>
+  <data name="Glass transparency (%)" xml:space="preserve"><value>Glastransparenz (%)</value></data>
+  <data name="Glass transparency reveals the backdrop. Blur uses the host preference and window strength in the main game viewport." xml:space="preserve"><value>Glastransparenz macht den Hintergrund sichtbar. Die Unschärfe richtet sich im Hauptansichtsbereich des Spiels nach der Host-Einstellung und der fensterspezifischen Stärke.</value></data>
+  <data name="UI styling" xml:space="preserve"><value>UI-Gestaltung</value></data>
+  <data name="Lock window movement and resizing" xml:space="preserve"><value>Verschieben und Größenänderung der Fenster sperren</value></data>
+  <data name="Use native UI" xml:space="preserve"><value>Native Benutzeroberfläche verwenden</value></data>
+  <data name="Use styled UI" xml:space="preserve"><value>Gestaltete Benutzeroberfläche verwenden</value></data>
+  <data name="Lock windows" xml:space="preserve"><value>Fenster sperren</value></data>
+  <data name="Unlock windows" xml:space="preserve"><value>Fenster entsperren</value></data>
 </root>

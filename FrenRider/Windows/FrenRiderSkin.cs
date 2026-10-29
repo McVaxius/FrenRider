@@ -11,13 +11,35 @@ internal static partial class FrenRiderPresentation
     private static uint Ink(Vector4 color, float opacity = 1) => MaterialCanvas.Color(Alpha(color, opacity));
     private static float SkinScale => MaterialTheme.Metrics.Scale;
 
-    internal static void DrawBackdrop()
+    private static bool DrawGlassBackground(ImDrawListPtr dl, Vector2 min, Vector2 max, float rounding,
+        Vector4 tint, bool windowBackground = false)
     {
-        if (!Decorated) return;
+        if (activeConfiguration is not { } config || !BackgroundBlurEnabled(config) || activeGlass == null)
+            return false;
+        tint.W = .18f * ImGui.GetStyle().Alpha;
+        return activeGlass.DrawBackground(dl, min, max, rounding, tint, BackgroundFrost(config), windowBackground);
+    }
+
+    internal static void DrawBackdrop(float opacity = 1)
+    {
+        if (activeGlass != null)
+            activeGlass.Opacity = activeConfiguration?.UiTransparencyEnabled == true
+                ? ImGui.IsWindowAppearing() ? Math.Clamp(activeConfiguration.UiWindowOpacityPercent, 10, 100) / 100f : opacity
+                : 1;
+        if (!Decorated && (activeConfiguration is not { } config || !BackgroundBlurEnabled(config))) return;
         var min = ImGui.GetWindowPos();
         var max = min + ImGui.GetWindowSize();
         var dl = ImGui.GetWindowDrawList();
         var c = MaterialTheme.Current.Colors;
+        if (DrawGlassBackground(dl, min, max, ImGui.GetStyle().WindowRounding,
+                IsLcars ? LcarsBackground : c.Background, windowBackground: true)) return;
+        if (!Decorated)
+        {
+            var bodyMin = min + new Vector2(0, ImGuiP.TitleBarHeight(ImGuiP.GetCurrentWindow()));
+            dl.AddRectFilled(bodyMin, max, Ink(c.Background), ImGui.GetStyle().WindowRounding,
+                ImDrawFlags.RoundCornersBottom);
+            return;
+        }
         dl.PushClipRect(min, max, true);
         try
         {
@@ -95,28 +117,52 @@ internal static partial class FrenRiderPresentation
         finally { dl.PopClipRect(); }
     }
 
-    internal static void DrawPanel(Vector2 min, Vector2 max, int accent = 0, bool inset = false)
+    internal static void DrawPanel(Vector2 min, Vector2 max, int accent = 0, bool inset = false, bool background = false)
     {
-        if (!Decorated || max.X <= min.X || max.Y <= min.Y) return;
+        if ((!Decorated && (activeConfiguration is not { } config || !BackgroundBlurEnabled(config)))
+            || max.X <= min.X || max.Y <= min.Y) return;
         var dl = ImGui.GetWindowDrawList();
         var c = MaterialTheme.Current.Colors;
         var s = SkinScale;
+        var rounding = IsLcars ? 9 : Style switch
+        {
+            FrenRiderUiStyle.Glassmorphism => 10,
+            FrenRiderUiStyle.Spatial => inset ? 6 : 11,
+            FrenRiderUiStyle.Cyberpunk => 3,
+            _ => 6,
+        };
+        if (!IsLcars)
+        {
+            if (Style == FrenRiderUiStyle.Glassmorphism)
+                dl.AddRectFilled(min + new Vector2(0, 3 * s), max + new Vector2(0, 3 * s), Ink(new Vector4(0, 0, 0, .15f)), 10 * s);
+            else if (Style == FrenRiderUiStyle.Spatial && !inset)
+                ContactShadow(dl, min, max, 11 * s);
+            else if (Style == FrenRiderUiStyle.Cyberpunk && !inset)
+                dl.AddRectFilled(min + new Vector2(0, 3 * s), max + new Vector2(0, 3 * s), Ink(new Vector4(0, 0, 0, .22f)), 3 * s);
+        }
+        var glass = background && DrawGlassBackground(dl, min, max, rounding * s,
+            IsLcars ? LcarsBackground : inset ? c.SurfaceContainerLowest : c.SurfaceContainerLow);
+        if (!Decorated)
+        {
+            if (!glass) dl.AddRectFilled(min, max, Ink(c.SurfaceContainerLow), 6 * s);
+            dl.AddRect(min, max, Ink(c.OutlineVariant), 6 * s);
+            return;
+        }
         if (IsLcars)
         {
             var bar = LcarsBar(accent);
-            dl.AddRectFilled(min, max, Ink(LcarsBackground), 9 * s);
+            if (!glass) dl.AddRectFilled(min, max, Ink(LcarsBackground), 9 * s);
             dl.AddRect(min, max, Ink(bar, .35f), 9 * s);
             if (inset) return;
             var band = Math.Min(8 * s, (max.X - min.X) * .08f);
             dl.AddRectFilled(min, new Vector2(min.X + band, max.Y), Ink(bar), 5 * s);
-            dl.AddRectFilled(min + new Vector2(band, 0), new Vector2(min.X + band + 5 * s, max.Y), Ink(LcarsBackground));
+            if (!glass) dl.AddRectFilled(min + new Vector2(band, 0), new Vector2(min.X + band + 5 * s, max.Y), Ink(LcarsBackground));
             return;
         }
         if (Style == FrenRiderUiStyle.Glassmorphism)
         {
-            dl.AddRectFilled(min + new Vector2(0, 3 * s), max + new Vector2(0, 3 * s), Ink(new Vector4(0, 0, 0, .15f)), 10 * s);
             GlassGlow(dl, min, max, 10 * s, inset ? .55f : 1);
-            dl.AddRectFilled(min, max, Ink(inset ? c.SurfaceContainerLowest : c.SurfaceContainerLow, inset ? .68f : .42f), 10 * s);
+            if (!glass) dl.AddRectFilled(min, max, Ink(inset ? c.SurfaceContainerLowest : c.SurfaceContainerLow, inset ? .68f : .42f), 10 * s);
             dl.AddRect(min, max, Ink(Vector4.Lerp(c.Primary, c.OnSurface, .35f), inset ? .5f : .8f), 10 * s);
             dl.AddLine(min + new Vector2(10, 1) * s, new Vector2(max.X - 10 * s, min.Y + s), Ink(c.OnSurface, .36f), s);
         }
@@ -124,24 +170,21 @@ internal static partial class FrenRiderPresentation
         {
             if (inset)
             {
-                dl.AddRectFilled(min, max, Ink(c.SurfaceContainer), 6 * s);
+                if (!glass) dl.AddRectFilled(min, max, Ink(c.SurfaceContainer), 6 * s);
                 dl.AddRect(min, max, Ink(c.Outline, .25f), 6 * s);
                 dl.AddLine(min + new Vector2(6, 1) * s, new Vector2(max.X - 6 * s, min.Y + s), Ink(c.Outline, .3f), 2 * s);
                 dl.AddLine(new Vector2(min.X + 6 * s, max.Y - s), max - new Vector2(6, 1) * s, Ink(Vector4.One, .8f), s);
             }
             else
             {
-                ContactShadow(dl, min, max, 11 * s);
-                dl.AddRectFilled(min, max, Ink(c.SurfaceContainerLow), 11 * s);
+                if (!glass) dl.AddRectFilled(min, max, Ink(c.SurfaceContainerLow), 11 * s);
                 dl.AddRect(min, max, Ink(c.Outline, .22f), 11 * s);
                 dl.AddLine(min + new Vector2(11, 1) * s, new Vector2(max.X - 11 * s, min.Y + s), Ink(Vector4.One, .95f), s);
             }
         }
         else if (Style == FrenRiderUiStyle.Cyberpunk)
         {
-            if (!inset)
-                dl.AddRectFilled(min + new Vector2(0, 3 * s), max + new Vector2(0, 3 * s), Ink(new Vector4(0, 0, 0, .22f)), 3 * s);
-            dl.AddRectFilled(min, max, Ink(inset ? c.SurfaceContainerLowest : c.SurfaceContainerLow), 3 * s);
+            if (!glass) dl.AddRectFilled(min, max, Ink(inset ? c.SurfaceContainerLowest : c.SurfaceContainerLow), 3 * s);
             dl.AddLine(min + new Vector2(3, 1) * s, new Vector2(max.X - 3 * s, min.Y + s), Ink(c.OnSurface, .06f), s);
         }
     }
@@ -383,7 +426,7 @@ internal static partial class FrenRiderPresentation
         if (!Decorated || IsLcars) return scope;
         var min = ImGui.GetCursorScreenPos();
         var max = min + new Vector2(ImGui.CalcItemWidth(), ImGui.GetFrameHeight());
-        DrawPanel(min, max, inset: true);
+        DrawPanel(min, max, inset: true, background: false);
         scope.Color(ImGuiCol.FrameBg, Vector4.Zero);
         scope.Color(ImGuiCol.FrameBgHovered, Alpha(MaterialTheme.Current.Colors.OnSurface, .06f));
         scope.Color(ImGuiCol.FrameBgActive, Alpha(MaterialTheme.Current.Colors.OnSurface, .10f));

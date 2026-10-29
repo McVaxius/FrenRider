@@ -17,6 +17,7 @@ public class MainWindow : Window, IDisposable
 {
     private readonly MaterialWindowMotion motion = new();
     private readonly AethertekUI.MaterialWindowOpacity windowOpacity = new();
+    private readonly AethertekUI.Dalamud.MaterialWindowLock movementLock = new();
     private static readonly string CurrentVersion = typeof(MainWindow).Assembly.GetName().Version?.ToString() ?? "unknown";
     private readonly Plugin plugin;
 
@@ -91,13 +92,15 @@ public class MainWindow : Window, IDisposable
             MinimumSize = new Vector2(Math.Max(460, minimumWidth), 360),
             MaximumSize = new Vector2(float.MaxValue, float.MaxValue),
         };
-        motion.Prepare(this, reducedMotion: false, roundedCorners: true);
+        motion.Prepare(this, reducedMotion: !plugin.Configuration.UiStylingEnabled, roundedCorners: plugin.Configuration.UiStylingEnabled);
+        movementLock.Apply(this, plugin.Configuration.UiWindowsLocked);
     }
 
     public override void PostDraw()
     {
         try
         {
+            movementLock.Restore(this);
             motion.Restore(this);
             UiGui.ImageTitleWithStatus(this, "Fren Rider v" + CurrentVersion, plugin.OriginalIcon, plugin.TitlebarStatus());
             plugin.DrawAppearanceTitleBarPopups(this);
@@ -109,7 +112,7 @@ public class MainWindow : Window, IDisposable
     public override void Draw()
     {
         motion.DrawChrome();
-        FrenRiderPresentation.DrawBackdrop();
+        FrenRiderPresentation.DrawBackdrop(windowOpacity.CurrentOpacity);
         using var fields = new MaterialStyleScope();
         fields.Style(ImGuiStyleVar.FrameBorderSize, 1);
         fields.Color(ImGuiCol.FrameBg, MaterialTheme.Current.Colors.SurfaceContainer);
@@ -126,7 +129,8 @@ public class MainWindow : Window, IDisposable
         var footerHeight = ImGui.GetTextLineHeight() + ImGui.GetStyle().ItemSpacing.Y * 3 + 1;
         if (FrenRiderPresentation.IsLcars) footerHeight += 8 * MaterialTheme.Metrics.Scale;
         using var scrollStyle = new MaterialStyleScope();
-        if (FrenRiderPresentation.Style == FrenRiderUiStyle.Glassmorphism)
+        if (FrenRiderPresentation.Style == FrenRiderUiStyle.Glassmorphism
+            || FrenRiderPresentation.BackgroundBlurEnabled(plugin.Configuration))
             scrollStyle.Color(ImGuiCol.ChildBg, Vector4.Zero);
         var visible = ImGui.BeginChild("##FrenRiderOperatorScroll",
             new Vector2(0, -footerHeight), false);
@@ -224,7 +228,8 @@ public class MainWindow : Window, IDisposable
             {
                 var c = MaterialTheme.Current.Colors;
                 var dl = ImGui.GetWindowDrawList();
-                if (FrenRiderPresentation.Decorated) FrenRiderPresentation.DrawPanel(min - inset, max + inset, LcarsAccent(title));
+                if (FrenRiderPresentation.Decorated || FrenRiderPresentation.BackgroundBlurEnabled(plugin.Configuration))
+                    FrenRiderPresentation.DrawPanel(min - inset, max + inset, LcarsAccent(title), background: true);
                 else
                 {
                     dl.AddRectFilled(min - inset, max + inset, MaterialCanvas.Color(c.SurfaceContainerLow), UiHelpers.Scale(6));

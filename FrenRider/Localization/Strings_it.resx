@@ -3236,4 +3236,14 @@ Attivato: usa i preset BossMod sottostanti con qualsiasi provider di rotazione. 
   <data name="Wave colour 2" xml:space="preserve"><value>Colore dell&apos;onda 2</value></data>
   <data name="Wave colour 3" xml:space="preserve"><value>Colore dell&apos;onda 3</value></data>
   <data name="Reset wave colours" xml:space="preserve"><value>Ripristina colori delle onde</value></data>
+  <data name="Background blur" xml:space="preserve"><value>Sfocatura dello sfondo</value></data>
+  <data name="Blur (%)" xml:space="preserve"><value>Sfocatura (%)</value></data>
+  <data name="Glass transparency (%)" xml:space="preserve"><value>Trasparenza del vetro (%)</value></data>
+  <data name="Glass transparency reveals the backdrop. Blur uses the host preference and window strength in the main game viewport." xml:space="preserve"><value>La trasparenza del vetro lascia vedere lo sfondo. La sfocatura usa la preferenza dell’applicazione ospitante e l’intensità della finestra nell’area di visualizzazione principale del gioco.</value></data>
+  <data name="UI styling" xml:space="preserve"><value>Stile dell’interfaccia</value></data>
+  <data name="Lock window movement and resizing" xml:space="preserve"><value>Blocca spostamento e ridimensionamento delle finestre</value></data>
+  <data name="Use native UI" xml:space="preserve"><value>Usa l’interfaccia nativa</value></data>
+  <data name="Use styled UI" xml:space="preserve"><value>Usa l’interfaccia con stile</value></data>
+  <data name="Lock windows" xml:space="preserve"><value>Blocca finestre</value></data>
+  <data name="Unlock windows" xml:space="preserve"><value>Sblocca finestre</value></data>
 </root>

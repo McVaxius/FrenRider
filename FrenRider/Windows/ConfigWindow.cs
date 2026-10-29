@@ -20,6 +20,7 @@ public partial class ConfigWindow : Window, IDisposable
     private readonly AethertekUI.Dalamud.MaterialSupportLog supportLog = new();
     private readonly MaterialWindowMotion motion = new();
     private readonly AethertekUI.MaterialWindowOpacity windowOpacity = new();
+    private readonly AethertekUI.Dalamud.MaterialWindowLock movementLock = new();
     private readonly Plugin plugin;
     private readonly Configuration configuration;
     private readonly ConfigManager configManager;
@@ -180,11 +181,13 @@ public partial class ConfigWindow : Window, IDisposable
             ? $"REMOTE: {Disp(GetRemoteDisplayLabel(remote))}"
             : string.IsNullOrEmpty(sel) ? "DEFAULT CONFIG" : Disp(sel);
         WindowName = $"Fren Rider Settings - {displaySel}###FrenRiderConfig";
-        motion.Prepare(this, reducedMotion: false, roundedCorners: true);
+        motion.Prepare(this, reducedMotion: !plugin.Configuration.UiStylingEnabled, roundedCorners: plugin.Configuration.UiStylingEnabled);
+        movementLock.Apply(this, plugin.Configuration.UiWindowsLocked);
     }
 
     public override void PostDraw()
     {
+        movementLock.Restore(this);
         motion.Restore(this);
         UiGui.ImageTitleWithStatus(this, UiText.T(WindowName.Split("###", 2)[0]), plugin.OriginalIcon, plugin.TitlebarStatus());
         plugin.DrawAppearanceTitleBarPopups(this);
@@ -194,7 +197,7 @@ public partial class ConfigWindow : Window, IDisposable
     public override void Draw()
     {
         motion.DrawChrome();
-        FrenRiderPresentation.DrawBackdrop();
+        FrenRiderPresentation.DrawBackdrop(windowOpacity.CurrentOpacity);
         if (FrenRiderPresentation.IsLcars)
         {
             using (UiText.Font(UiFontRole.Title)) FrenRiderPresentation.LcarsHeader(UiText.T("Settings"));
@@ -224,7 +227,8 @@ public partial class ConfigWindow : Window, IDisposable
 
         // Retain the original child roots for moved profile fields and page controls.
         using var childStyle = new MaterialStyleScope();
-        if (FrenRiderPresentation.Style == FrenRiderUiStyle.Glassmorphism)
+        if (FrenRiderPresentation.Style == FrenRiderUiStyle.Glassmorphism
+            || FrenRiderPresentation.BackgroundBlurEnabled(configuration))
             childStyle.Color(ImGuiCol.ChildBg, Vector4.Zero);
         uint profileRoot;
         var navigationVisible = ImGui.BeginChild("LeftPanel", new Vector2(panelWidth, bodyHeight), false);

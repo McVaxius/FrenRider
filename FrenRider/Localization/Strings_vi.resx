@@ -3341,4 +3341,14 @@ Bật: dùng các preset BossMod bên dưới với mọi nhà cung cấp rotati
   <data name="Wave colour 2" xml:space="preserve"><value>Màu sóng 2</value></data>
   <data name="Wave colour 3" xml:space="preserve"><value>Màu sóng 3</value></data>
   <data name="Reset wave colours" xml:space="preserve"><value>Đặt lại màu sóng</value></data>
+  <data name="Background blur" xml:space="preserve"><value>Làm mờ nền</value></data>
+  <data name="Blur (%)" xml:space="preserve"><value>Làm mờ (%)</value></data>
+  <data name="Glass transparency (%)" xml:space="preserve"><value>Độ trong suốt của kính (%)</value></data>
+  <data name="Glass transparency reveals the backdrop. Blur uses the host preference and window strength in the main game viewport." xml:space="preserve"><value>Độ trong suốt của kính cho phép nhìn thấy nền phía sau. Hiệu ứng làm mờ sử dụng tùy chọn của ứng dụng chủ và cường độ của cửa sổ trong vùng hiển thị chính của trò chơi.</value></data>
+  <data name="UI styling" xml:space="preserve"><value>Kiểu giao diện</value></data>
+  <data name="Lock window movement and resizing" xml:space="preserve"><value>Khóa di chuyển và thay đổi kích thước cửa sổ</value></data>
+  <data name="Use native UI" xml:space="preserve"><value>Dùng giao diện gốc</value></data>
+  <data name="Use styled UI" xml:space="preserve"><value>Dùng giao diện có kiểu</value></data>
+  <data name="Lock windows" xml:space="preserve"><value>Khóa cửa sổ</value></data>
+  <data name="Unlock windows" xml:space="preserve"><value>Mở khóa cửa sổ</value></data>
 </root>

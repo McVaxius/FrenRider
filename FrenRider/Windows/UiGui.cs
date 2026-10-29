@@ -40,7 +40,7 @@ internal static class UiGui
             var inset = UiHelpers.Scale(new Vector2(FrenRiderPresentation.IsLcars ? 16 : 8, compact ? 4 : 6));
             var max = new Vector2(min.X + width, ImGui.GetCursorScreenPos().Y - ImGui.GetStyle().ItemSpacing.Y);
             ImGuiP.TablePushBackgroundChannel();
-            try { FrenRiderPresentation.DrawPanel(min - inset, max + inset, accent); }
+            try { FrenRiderPresentation.DrawPanel(min - inset, max + inset, accent, background: true); }
             finally { ImGuiP.TablePopBackgroundChannel(); }
         }
         finally { ImGui.EndTable(); }

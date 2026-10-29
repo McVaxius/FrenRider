@@ -330,6 +330,7 @@ public sealed partial class Plugin : IDalamudPlugin
 
         ApplyAppearance();
         PluginInterface.UiBuilder.Draw += DrawUi;
+        PluginInterface.UiBuilder.ResizeBuffers += ReleaseBackgroundGlassResources;
         PluginInterface.UiBuilder.OpenConfigUi += ToggleConfigUi;
         PluginInterface.UiBuilder.OpenMainUi += ToggleMainUi;
 
@@ -383,9 +384,12 @@ public sealed partial class Plugin : IDalamudPlugin
         ClientState.Login -= OnLoginEvent;
 
         PluginInterface.UiBuilder.Draw -= DrawUi;
+        PluginInterface.UiBuilder.ResizeBuffers -= ReleaseBackgroundGlassResources;
         PluginInterface.UiBuilder.OpenConfigUi -= ToggleConfigUi;
         PluginInterface.UiBuilder.OpenMainUi -= ToggleMainUi;
 
+        backgroundGlass?.Dispose();
+        backgroundGlass = null;
         WindowSystem.RemoveAllWindows();
         uiSoundPlayer?.Dispose();
 
@@ -434,13 +438,14 @@ public sealed partial class Plugin : IDalamudPlugin
     }
 
     private readonly System.Collections.Generic.Dictionary<Dalamud.Interface.Windowing.Window, AethertekUI.Dalamud.MaterialAppearanceTitleBar> appearanceTitleBars = new();
+    private FrenRiderGlass? backgroundGlass;
 
     private void PrepareAppearanceTitleBars()
     {
         foreach (var owner in WindowSystem.Windows.OfType<Dalamud.Interface.Windowing.Window>())
         {
             if ((owner.Flags & ImGuiWindowFlags.NoTitleBar) != 0 || appearanceTitleBars.ContainsKey(owner)) continue;
-            appearanceTitleBars.Add(owner, AethertekUI.Dalamud.MaterialAppearanceTitleBar.Register(owner,
+            var actions = AethertekUI.Dalamud.MaterialAppearanceTitleBar.Register(owner,
                 () => new(UiText.T("Language"), UiText.T("Compact mode"), UiText.T("Transparency"), UiText.T("Color")),
                 DrawLanguageSelector,
                 () => { Configuration.UiCompact = !Configuration.UiCompact; Configuration.Save(); },
@@ -449,7 +454,13 @@ public sealed partial class Plugin : IDalamudPlugin
                 () => UiText.T("Krangle") + ": " + UiText.T(Configuration.KrangleEnabled ? "On" : "Off"),
                 () => owner is MainWindow
                     ? new(Configuration.UiLanguageVisibleOnMainWindow, Configuration.UiCompactVisibleOnMainWindow, Configuration.UiTransparencyVisibleOnMainWindow, true)
-                    : new(true, true, true, true)));
+                    : new(true, true, true, true));
+            actions.RegisterWindowControls(
+                () => { Configuration.UiStylingEnabled = !Configuration.UiStylingEnabled; Configuration.Save(); },
+                () => UiText.T(Configuration.UiStylingEnabled ? "Use native UI" : "Use styled UI"),
+                () => { Configuration.UiWindowsLocked = !Configuration.UiWindowsLocked; Configuration.Save(); },
+                () => UiText.T(Configuration.UiWindowsLocked ? "Unlock windows" : "Lock windows"));
+            appearanceTitleBars.Add(owner, actions);
         }
     }
 
@@ -483,8 +494,39 @@ public sealed partial class Plugin : IDalamudPlugin
     private void DrawTitleColour()
     {
         using var controls = MaterialControls.Push(FrenRiderPresentation.Controls(Configuration.UiCompact ? 28 : 32, 18));
-        if (!DrawColourEditor("titlebar-colour")) return;
-        Configuration.Save();
+        var changed = DrawColourEditor("titlebar-colour");
+        ImGui.Separator();
+        changed |= DrawBackgroundBlurControls("titlebar-blur");
+        if (changed) Configuration.Save();
+    }
+
+    private bool DrawBackgroundBlurControls(string id)
+    {
+        var changed = false;
+        var settings = Configuration.UiColors ?? new MaterialColorSettings();
+        var mode = FrenRiderPresentation.ColorMode(Configuration);
+        var enabled = settings.HasBackgroundBlur(mode);
+        ImGui.PushID(id);
+        try
+        {
+            using (UiGui.SettingRow("Background blur"))
+                if (UiGui.Checkbox("Background blur###UiBackgroundBlur", ref enabled))
+                { Configuration.UiColors = colorDraft = settings = settings.WithBackgroundBlur(mode, enabled); changed = true; }
+            ImGui.BeginDisabled(!enabled);
+            try
+            {
+                var percent = settings.BackgroundBlurPercent;
+                using (UiGui.SettingRow("Blur (%)"))
+                {
+                    ImGui.SetNextItemWidth(180 * MaterialTheme.Metrics.Scale);
+                    if (UiGui.AppearanceSliderInt("Blur (%)###UiBackgroundBlurPercent", ref percent, 0, 100, "%d%%", ImGuiSliderFlags.AlwaysClamp))
+                    { Configuration.UiColors = colorDraft = settings with { BackgroundBlurPercent = percent }; changed = true; }
+                }
+            }
+            finally { ImGui.EndDisabled(); }
+        }
+        finally { ImGui.PopID(); }
+        return changed;
     }
 
     private bool DrawColourEditor(string id)
@@ -705,6 +747,8 @@ public sealed partial class Plugin : IDalamudPlugin
     }
 
 
+    private void ReleaseBackgroundGlassResources() => backgroundGlass?.ReleaseResources();
+
     private void DrawUi()
     {
         ApplyAppearance();
@@ -751,17 +795,27 @@ public sealed partial class Plugin : IDalamudPlugin
                 return;
             }
         }
-        using var theme = MaterialTheme.Push(uiTheme, ImGuiHelpers.GlobalScale, MaterialStyleMode.ColorsOnly);
+        var useGlass = FrenRiderPresentation.BackgroundBlurEnabled(Configuration);
+        if (useGlass) backgroundGlass ??= new(PluginInterface, Log);
+        backgroundGlass?.BeginFrame();
+        using var glassAppearance = FrenRiderPresentation.Push(Configuration, useGlass ? backgroundGlass : null);
+        using var theme = MaterialTheme.Push(uiTheme, ImGuiHelpers.GlobalScale,
+            Configuration.UiStylingEnabled ? MaterialStyleMode.ColorsOnly : MaterialStyleMode.Native);
         using var geometry = new MaterialStyleScope();
         var compact = Configuration.UiCompact;
         var scale = ImGuiHelpers.GlobalScale;
-        geometry.Style(ImGuiStyleVar.WindowPadding, new Vector2(compact ? 12 : 16) * scale);
-        geometry.Style(ImGuiStyleVar.ItemSpacing, new Vector2(compact ? 8 : 12, compact ? 6 : 10) * scale);
-        geometry.Style(ImGuiStyleVar.FramePadding, new Vector2(compact ? 8 : 12, compact ? 4 : 7) * scale);
-        geometry.Style(ImGuiStyleVar.CellPadding, new Vector2(compact ? 8 : 12, compact ? 5 : 8) * scale);
-        var rounding = Configuration.UiStyle == FrenRiderUiStyle.Cyberpunk ? 0 : Configuration.UiStyle == FrenRiderUiStyle.Spatial ? 10 : 4;
-        geometry.Style(ImGuiStyleVar.FrameRounding, rounding * scale);
-        geometry.Style(ImGuiStyleVar.ChildRounding, rounding * scale);
+        if (Configuration.UiStylingEnabled)
+        {
+            geometry.Style(ImGuiStyleVar.WindowPadding, new Vector2(compact ? 12 : 16) * scale);
+            geometry.Style(ImGuiStyleVar.ItemSpacing, new Vector2(compact ? 8 : 12, compact ? 6 : 10) * scale);
+            geometry.Style(ImGuiStyleVar.FramePadding, new Vector2(compact ? 8 : 12, compact ? 4 : 7) * scale);
+            geometry.Style(ImGuiStyleVar.CellPadding, new Vector2(compact ? 8 : 12, compact ? 5 : 8) * scale);
+            var rounding = Configuration.UiStyle == FrenRiderUiStyle.Cyberpunk ? 0 : Configuration.UiStyle == FrenRiderUiStyle.Spatial ? 10 : 4;
+            geometry.Style(ImGuiStyleVar.FrameRounding, rounding * scale);
+            geometry.Style(ImGuiStyleVar.ChildRounding, rounding * scale);
+            if (FrenRiderPresentation.Decorated || useGlass)
+                geometry.Color(ImGuiCol.WindowBg, Vector4.Zero);
+        }
         using var body = uiFonts.Push(UiFontRole.Body);
         using var chrome = MaterialWindowChrome.Push();
         PrepareAppearanceTitleBars();
@@ -771,21 +825,49 @@ public sealed partial class Plugin : IDalamudPlugin
             actions.SetLcarsIcons(LcarsActive);
         }
         RefreshLcarsSoundButtons();
-        WindowSystem.Draw();
+        foreach (var window in WindowSystem.Windows) window.AllowBackgroundBlur = false;
+        DrawAppearanceWindows(WindowSystem, useGlass, WindowSystem.Draw);
+    }
+
+    internal static void DrawAppearanceWindows(WindowSystem windows, bool useGlass, Action draw)
+    {
+        var restoreBackground = useGlass
+            ? windows.Windows.Where(window => (window.Flags & ImGuiWindowFlags.NoBackground) == 0).ToArray()
+            : Array.Empty<Window>();
+        var restoreViewport = useGlass
+            ? windows.Windows.Where(window => !window.ForceMainWindow).ToArray()
+            : Array.Empty<Window>();
+        try
+        {
+            foreach (var window in restoreBackground) window.Flags |= ImGuiWindowFlags.NoBackground;
+            // Glasswork captures the game target; detached viewport targets have no game pixels.
+            foreach (var window in restoreViewport) window.ForceMainWindow = true;
+            draw();
+        }
+        finally
+        {
+            foreach (var window in restoreViewport) window.ForceMainWindow = false;
+            foreach (var window in restoreBackground) window.Flags &= ~ImGuiWindowFlags.NoBackground;
+        }
     }
 
     private void DrawFontStatus(bool loading)
     {
-        using var theme = MaterialTheme.Push(uiTheme, ImGuiHelpers.GlobalScale, MaterialStyleMode.ColorsOnly);
+        using var theme = MaterialTheme.Push(uiTheme, ImGuiHelpers.GlobalScale,
+            Configuration.UiStylingEnabled ? MaterialStyleMode.ColorsOnly : MaterialStyleMode.Native);
         using var chrome = MaterialWindowChrome.Push();
         ImGui.SetNextWindowSize(new Vector2(460 * ImGuiHelpers.GlobalScale, 0));
-        fontStatusFold.PreDraw("Fren Rider##FontStatus", null, null, false, prepareFontStatusDecorations);
-        var visible = ImGui.Begin("Fren Rider##FontStatus", ImGuiWindowFlags.AlwaysAutoResize);
+        if (Configuration.UiStylingEnabled)
+            fontStatusFold.PreDraw("Fren Rider##FontStatus", null, null, false, prepareFontStatusDecorations);
+        else fontStatusFold.PreDraw("Fren Rider##FontStatus", null, null, true);
+        var flags = ImGuiWindowFlags.AlwaysAutoResize;
+        if (Configuration.UiWindowsLocked) flags |= ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize;
+        var visible = ImGui.Begin("Fren Rider##FontStatus", flags);
         try
         {
             if (visible)
             {
-                fontStatusDecorations.Paint();
+                if (Configuration.UiStylingEnabled) fontStatusDecorations.Paint();
                 FrenRiderPresentation.DrawBackdrop();
                 if (appliedLanguage == "hi")
                 {
@@ -798,7 +880,7 @@ public sealed partial class Plugin : IDalamudPlugin
         finally
         {
             ImGui.End();
-            fontStatusDecorations.Paint();
+            if (Configuration.UiStylingEnabled) fontStatusDecorations.Paint();
             fontStatusFold.PostDraw();
             ApplyWindowOpacity(fontStatusOpacity, "Fren Rider##FontStatus");
         }
@@ -899,13 +981,6 @@ public sealed partial class Plugin : IDalamudPlugin
         {
             AdsIntegrationService.Update(forceOwnershipRefresh: true);
             var allowCombatSetup = CombatService.PrepareForEnableCombatSetup();
-            if (allowCombatSetup)
-            {
-                CaptureExternalAutomationSnapshot("FrenRider enable preset preparation");
-                Log.Information("[FrenRider] Refreshing packaged BossMod presets on enable");
-                AutorotIpcService.CreatePresets(force: true,
-                    rotationProvider: CombatService.GetConfiguredRotationProvider(ConfigManager.GetActiveConfig()));
-            }
 
            // Trigger AutoDuty check when FrenRider is enabled
             Log.Information("[FrenRider] Triggering AutoDuty detection check");
@@ -997,7 +1072,21 @@ public sealed partial class Plugin : IDalamudPlugin
 
     private void OnCommand(string command, string args)
     {
+        if (TryApplyWindowCommand(Configuration, args)) { Configuration.Save(); return; }
         MainWindow.Toggle();
+    }
+
+    internal static bool TryApplyWindowCommand(Configuration configuration, string arguments)
+    {
+        switch (arguments.Trim().ToLowerInvariant())
+        {
+            case "lock": configuration.UiWindowsLocked = true; return true;
+            case "unlock": configuration.UiWindowsLocked = false; return true;
+            case "ui": configuration.UiStylingEnabled = !configuration.UiStylingEnabled; return true;
+            case "ui on": configuration.UiStylingEnabled = true; return true;
+            case "ui off": configuration.UiStylingEnabled = false; return true;
+            default: return false;
+        }
     }
 
     internal string ChocoboProbeStatus => chocoboExploration.IsSkillPreparation ? chocoboSkills.Status
@@ -1160,6 +1249,7 @@ public sealed partial class Plugin : IDalamudPlugin
 
     private void OnAliasCommand(string command, string args)
     {
+        if (TryApplyWindowCommand(Configuration, args)) { Configuration.Save(); return; }
         var arg = args.Trim().ToLowerInvariant();
         if (arg == "testchocobo")
         {
@@ -1703,6 +1793,14 @@ public sealed partial class Plugin : IDalamudPlugin
             }
         }), () => UiGui.LcarsPanel("##AppearanceMainControlsFrame", () =>
         {
+            var styling = config.UiStylingEnabled;
+            using (UiGui.SettingRow("UI styling"))
+                if (UiGui.Checkbox("UI styling###UiStylingEnabled", ref styling))
+                { config.UiStylingEnabled = styling; changed = true; }
+            var locked = config.UiWindowsLocked;
+            using (UiGui.SettingRow("Lock window movement and resizing"))
+                if (UiGui.Checkbox("Lock window movement and resizing###UiWindowsLocked", ref locked))
+                { config.UiWindowsLocked = locked; changed = true; }
             var showStatus = config.UiShowTitlebarStatus;
             using (UiGui.SettingRow("Show titlebar status"))
                 if (UiGui.Checkbox("Show titlebar status###UiShowTitlebarStatus", ref showStatus))
@@ -1725,6 +1823,7 @@ public sealed partial class Plugin : IDalamudPlugin
                 { config.UiLanguageVisibleOnMainWindow = languageVisible; changed = true; }
         }), () => UiGui.LcarsPanel("##AppearanceOpacityFrame", () =>
         {
+            changed |= DrawBackgroundBlurControls("appearance-blur");
             var enabled = config.UiTransparencyEnabled;
             using (UiGui.SettingRow("Transparency"))
                 if (UiGui.Checkbox("Transparency###UiTransparencyEnabledSettings", ref enabled))

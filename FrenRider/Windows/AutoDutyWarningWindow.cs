@@ -12,6 +12,7 @@ public class AutoDutyWarningWindow : Window
 {
     private readonly MaterialWindowMotion motion = new();
     private readonly AethertekUI.MaterialWindowOpacity windowOpacity = new();
+    private readonly AethertekUI.Dalamud.MaterialWindowLock movementLock = new();
     private readonly Plugin plugin;
     private readonly IChatGui chatGui;
     private readonly IPluginLog log;
@@ -39,11 +40,13 @@ public class AutoDutyWarningWindow : Window
         ImGui.SetNextWindowSize(new Vector2(MathF.Ceiling(Math.Max(UiHelpers.Scale(520) + framePadding, titleWidth)), 0));
         var viewport = ImGui.GetMainViewport();
         ImGui.SetNextWindowPos(viewport.WorkPos + viewport.WorkSize * .5f, ImGuiCond.Appearing, new Vector2(.5f));
-        motion.Prepare(this, reducedMotion: false, roundedCorners: true);
+        motion.Prepare(this, reducedMotion: !plugin.Configuration.UiStylingEnabled, roundedCorners: plugin.Configuration.UiStylingEnabled);
+        movementLock.Apply(this, plugin.Configuration.UiWindowsLocked);
     }
 
     public override void PostDraw()
     {
+        movementLock.Restore(this);
         motion.Restore(this);
         UiGui.ImageTitleWithStatus(this, UiText.T(WindowName.Split("##", 2)[0]), plugin.OriginalIcon, plugin.TitlebarStatus());
         plugin.DrawAppearanceTitleBarPopups(this);
@@ -53,7 +56,7 @@ public class AutoDutyWarningWindow : Window
     public override void Draw()
     {
         motion.DrawChrome();
-        FrenRiderPresentation.DrawBackdrop();
+        FrenRiderPresentation.DrawBackdrop(windowOpacity.CurrentOpacity);
         using var controls = MaterialControls.Push(MaterialControlContext.Toolbar);
         using var spacing = new MaterialStyleScope();
         spacing.Style(ImGuiStyleVar.ItemSpacing, UiHelpers.Scale(new Vector2(8, plugin.Configuration.UiCompact ? 4 : 6)));

@@ -3236,4 +3236,14 @@
   <data name="Wave colour 2" xml:space="preserve"><value>Цвет волны 2</value></data>
   <data name="Wave colour 3" xml:space="preserve"><value>Цвет волны 3</value></data>
   <data name="Reset wave colours" xml:space="preserve"><value>Сбросить цвета волн</value></data>
+  <data name="Background blur" xml:space="preserve"><value>Размытие фона</value></data>
+  <data name="Blur (%)" xml:space="preserve"><value>Размытие (%)</value></data>
+  <data name="Glass transparency (%)" xml:space="preserve"><value>Прозрачность стекла (%)</value></data>
+  <data name="Glass transparency reveals the backdrop. Blur uses the host preference and window strength in the main game viewport." xml:space="preserve"><value>Прозрачность стекла позволяет видеть фон. Размытие в основной области просмотра игры использует настройки приложения-хоста и интенсивность эффекта для окна.</value></data>
+  <data name="UI styling" xml:space="preserve"><value>Оформление интерфейса</value></data>
+  <data name="Lock window movement and resizing" xml:space="preserve"><value>Заблокировать перемещение и изменение размера окон</value></data>
+  <data name="Use native UI" xml:space="preserve"><value>Использовать стандартный интерфейс</value></data>
+  <data name="Use styled UI" xml:space="preserve"><value>Использовать оформленный интерфейс</value></data>
+  <data name="Lock windows" xml:space="preserve"><value>Заблокировать окна</value></data>
+  <data name="Unlock windows" xml:space="preserve"><value>Разблокировать окна</value></data>
 </root>

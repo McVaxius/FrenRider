@@ -3247,4 +3247,14 @@
   <data name="Wave colour 2" xml:space="preserve"><value>तरंग का रंग 2</value></data>
   <data name="Wave colour 3" xml:space="preserve"><value>तरंग का रंग 3</value></data>
   <data name="Reset wave colours" xml:space="preserve"><value>तरंगों के रंग रीसेट करें</value></data>
+  <data name="Background blur" xml:space="preserve"><value>पृष्ठभूमि धुंधलापन</value></data>
+  <data name="Blur (%)" xml:space="preserve"><value>धुंधलापन (%)</value></data>
+  <data name="Glass transparency (%)" xml:space="preserve"><value>काँच की पारदर्शिता (%)</value></data>
+  <data name="Glass transparency reveals the backdrop. Blur uses the host preference and window strength in the main game viewport." xml:space="preserve"><value>काँच की पारदर्शिता से पीछे की पृष्ठभूमि दिखती है। गेम के मुख्य दृश्य क्षेत्र में धुंधलापन होस्ट की प्राथमिकता और विंडो की तीव्रता सेटिंग का उपयोग करता है।</value></data>
+  <data name="UI styling" xml:space="preserve"><value>UI शैली</value></data>
+  <data name="Lock window movement and resizing" xml:space="preserve"><value>विंडो को खिसकाने और उसका आकार बदलने पर रोक लगाएँ</value></data>
+  <data name="Use native UI" xml:space="preserve"><value>मूल UI उपयोग करें</value></data>
+  <data name="Use styled UI" xml:space="preserve"><value>शैलीबद्ध UI उपयोग करें</value></data>
+  <data name="Lock windows" xml:space="preserve"><value>विंडो लॉक करें</value></data>
+  <data name="Unlock windows" xml:space="preserve"><value>विंडो अनलॉक करें</value></data>
 </root>

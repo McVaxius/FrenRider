@@ -23,6 +23,11 @@
 
   <ItemGroup>
     <PackageReference Include="ECommons" Version="3.2.0.17" />
+    <PackageReference Include="Glasswork.Backend" Version="[0.1.0-beta.3]" />
+    <Reference Include="TerraFX.Interop.Windows">
+      <HintPath>$(DalamudLibPath)/TerraFX.Interop.Windows.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>
@@ -34,6 +39,7 @@
     <Content Include="videos\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Update="Notices\Glasswork.MIT.txt" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <Target Name="CopyPluginArtifacts" AfterTargets="Build">
@@ -55,6 +61,10 @@
       <PluginFiles Include="$(TargetPath)" />
       <PluginFiles Include="$(OutputPath)AethertekUI.dll" />
       <PluginFiles Include="$(OutputPath)AethertekUI.Dalamud.dll" />
+      <PluginFiles Include="$(OutputPath)Glasswork.dll" />
+      <PluginFiles Include="$(OutputPath)Glasswork.Glass.dll" />
+      <PluginFiles Include="$(OutputPath)Glasswork.Backend.dll" />
+      <PluginFiles Include="$(ProjectDir)Notices\Glasswork.MIT.txt" />
 
       <PluginFiles Include="$(ProjectDir)$(AssemblyName).json" />
       <PluginFiles Include="$(ProjectDir)images\icon.png" />

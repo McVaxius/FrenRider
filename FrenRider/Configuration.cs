@@ -47,6 +47,8 @@ public class Configuration : IPluginConfiguration
     public uint UiAccentRgb { get; set; } = 0x70C677;
     public AethertekUI.MaterialColorSettings UiColors { get; set; } = new();
     public FrenRiderUiStyle UiStyle { get; set; }
+    public bool UiStylingEnabled { get; set; } = true;
+    public bool UiWindowsLocked { get; set; }
     public AethertekUI.MaterialColorSettings UiGlassColors { get; set; } = DefaultPalette(FrenRiderUiStyle.Glassmorphism);
     public AethertekUI.MaterialColorSettings UiSpatialColors { get; set; } = DefaultPalette(FrenRiderUiStyle.Spatial);
     public AethertekUI.MaterialColorSettings UiCyberpunkColors { get; set; } = DefaultPalette(FrenRiderUiStyle.Cyberpunk);

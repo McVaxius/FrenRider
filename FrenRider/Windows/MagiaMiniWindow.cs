@@ -14,6 +14,7 @@ public sealed class MagiaMiniWindow : Window, IDisposable
 {
     private readonly MaterialWindowMotion motion = new();
     private readonly AethertekUI.MaterialWindowOpacity windowOpacity = new();
+    private readonly AethertekUI.Dalamud.MaterialWindowLock movementLock = new();
     private readonly Plugin plugin;
 
     public MagiaMiniWindow(Plugin plugin)
@@ -75,13 +76,15 @@ public sealed class MagiaMiniWindow : Window, IDisposable
                 + ImGui.GetStyle().ItemSpacing.X * 2 + ImGui.GetStyle().WindowPadding.X * 2 + framePadding);
         }
         ImGui.SetNextWindowSize(new Vector2(MathF.Ceiling(width), 0));
-        motion.Prepare(this, reducedMotion: false, roundedCorners: true);
+        motion.Prepare(this, reducedMotion: !plugin.Configuration.UiStylingEnabled, roundedCorners: plugin.Configuration.UiStylingEnabled);
+        movementLock.Apply(this, plugin.Configuration.UiWindowsLocked);
     }
 
     public override void PostDraw()
     {
         try
         {
+            movementLock.Restore(this);
             motion.Restore(this);
             UiGui.ImageTitleWithStatus(this, UiText.T("Fren Rider Mini"), plugin.OriginalIcon, plugin.TitlebarStatus());
             plugin.DrawAppearanceTitleBarPopups(this);
@@ -93,7 +96,7 @@ public sealed class MagiaMiniWindow : Window, IDisposable
     public override void Draw()
     {
         motion.DrawChrome();
-        FrenRiderPresentation.DrawBackdrop();
+        FrenRiderPresentation.DrawBackdrop(windowOpacity.CurrentOpacity);
         using var fields = new MaterialStyleScope();
         fields.Style(ImGuiStyleVar.FrameBorderSize, 1);
         fields.Color(ImGuiCol.FrameBg, MaterialTheme.Current.Colors.SurfaceContainer);

@@ -3341,4 +3341,14 @@ Açık: aşağıdaki BossMod ön ayarlarını herhangi bir rotasyon sağlayıcı
   <data name="Wave colour 2" xml:space="preserve"><value>Dalga rengi 2</value></data>
   <data name="Wave colour 3" xml:space="preserve"><value>Dalga rengi 3</value></data>
   <data name="Reset wave colours" xml:space="preserve"><value>Dalga renklerini sıfırla</value></data>
+  <data name="Background blur" xml:space="preserve"><value>Arka plan bulanıklığı</value></data>
+  <data name="Blur (%)" xml:space="preserve"><value>Bulanıklık (%)</value></data>
+  <data name="Glass transparency (%)" xml:space="preserve"><value>Cam saydamlığı (%)</value></data>
+  <data name="Glass transparency reveals the backdrop. Blur uses the host preference and window strength in the main game viewport." xml:space="preserve"><value>Cam saydamlığı arkadaki görüntüyü ortaya çıkarır. Bulanıklık, oyunun ana görüntü alanında ana uygulamanın tercihini ve pencerenin yoğunluk ayarını kullanır.</value></data>
+  <data name="UI styling" xml:space="preserve"><value>Arayüz stili</value></data>
+  <data name="Lock window movement and resizing" xml:space="preserve"><value>Pencere hareketini ve yeniden boyutlandırmayı kilitle</value></data>
+  <data name="Use native UI" xml:space="preserve"><value>Yerel arayüzü kullan</value></data>
+  <data name="Use styled UI" xml:space="preserve"><value>Stilli arayüzü kullan</value></data>
+  <data name="Lock windows" xml:space="preserve"><value>Pencereleri kilitle</value></data>
+  <data name="Unlock windows" xml:space="preserve"><value>Pencerelerin kilidini aç</value></data>
 </root>

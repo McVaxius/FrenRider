@@ -838,6 +838,221 @@ public sealed class ExternalAutomationCleanupServiceTests
         Assert.True(native.AiEnabled);
     }
 
+    [Theory]
+    [InlineData("BMR", "passive - tank", false)]
+    [InlineData("VBM", "Other|passive - tank|Original", false)]
+    [InlineData("VBM", "", true)]
+    public void PackagedRefreshOverwritesAllSixShippedNamesAndPreservesCustomNamesAndRuntime(
+        string provider, string active, bool disabled)
+    {
+        var native = new NativeBossModProvider(provider, active, disabled);
+        var packaged = ReadPackagedPresets();
+        foreach (var name in packaged.Keys)
+            native.PresetDefinitions[name] = JsonSerializer.Serialize(new { Name = name, UserEdited = true });
+        native.PresetDefinitions["Custom movement"] = "{\"Name\":\"Custom movement\",\"UserEdited\":true}";
+        using var service = native.CreateService();
+
+        Assert.True(service.CreatePresets(force: true, rotationProvider: provider));
+
+        Assert.Equal(6, native.PresetCreates);
+        foreach (var (name, json) in packaged)
+            Assert.Equal(json, native.PresetDefinitions[name]);
+        Assert.Equal("{\"Name\":\"Custom movement\",\"UserEdited\":true}", native.PresetDefinitions["Custom movement"]);
+        Assert.Equal(active.Length == 0 ? [] : active.Split('|'), native.Active);
+        Assert.Equal(disabled, native.ForceDisabled);
+        Assert.DoesNotContain(native.Writes, write => write.StartsWith("BossMod.Presets.Delete", StringComparison.Ordinal));
+        Assert.Contains("acknowledged", service.LastStatus);
+    }
+
+    [Fact]
+    public void RejectedPackagedOverwriteRetainsTheEditedDefinitionAndActiveSelection()
+    {
+        var native = new NativeBossModProvider("BMR", "passive - tank") { RejectPresetWrite = true };
+        const string edited = "{\"Name\":\"passive - tank\",\"UserEdited\":true}";
+        native.PresetDefinitions["passive - tank"] = edited;
+        using var service = native.CreateService();
+
+        Assert.False(service.CreatePresets(force: true));
+
+        Assert.Equal(edited, native.PresetDefinitions["passive - tank"]);
+        Assert.Equal(new[] { "passive - tank" }, native.Active);
+        Assert.DoesNotContain(native.Writes, write => write.StartsWith("BossMod.Presets.Delete", StringComparison.Ordinal));
+        Assert.DoesNotContain("acknowledged", service.LastStatus);
+    }
+
+    [Theory]
+    [InlineData("", true)]
+    [InlineData("Preset already exists", false)]
+    public void LegacyPresetCreationCountsOnlyAnEmptySuccessResponse(string response, bool expected)
+    {
+        var native = new NativeBossModProvider("BMR", "Original")
+        { ModernPresetCreateUnavailable = true, LegacyPresetCreateResult = response };
+        using var service = native.CreateService();
+        Assert.Equal(expected, service.CreatePresets(force: true));
+    }
+
+    [Fact]
+    public void RefreshRestoresTheCompleteUnownedVbmSelectionAfterLegacyRemoval()
+    {
+        var native = new NativeBossModProvider("VBM", "Other|passive - tank|Original")
+        { ModernPresetCreateUnavailable = true, LegacyPresetCreateResult = "" };
+        native.PresetWriteCallback = name => native.Active.RemoveAll(active => active == name);
+        using var service = native.CreateService();
+
+        Assert.True(service.CreatePresets(force: true, rotationProvider: "VBM"));
+
+        Assert.Equal(new[] { "Other", "passive - tank", "Original" }, native.Active);
+        Assert.False(native.ForceDisabled);
+    }
+
+    [Fact]
+    public void RefreshRetainsAnUnrelatedRuntimeChangeInsteadOfRestoringOverAnotherOwner()
+    {
+        var native = new NativeBossModProvider("BMR", "Original");
+        native.PresetWriteCallback = _ => native.Active = ["External"];
+        using var service = native.CreateService();
+
+        Assert.False(service.CreatePresets(force: true));
+
+        Assert.Equal(new[] { "External" }, native.Active);
+        Assert.DoesNotContain(native.Writes, write => write.StartsWith("BossMod.Presets.SetActive", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void ModernRefreshRetainsAnotherOwnersClearOfAShippedActivePreset()
+    {
+        var native = new NativeBossModProvider("BMR", "passive - tank");
+        native.PresetWriteCallback = _ => native.Active.Clear();
+        using var service = native.CreateService();
+
+        Assert.False(service.CreatePresets(force: true));
+
+        Assert.Empty(native.Active);
+        Assert.DoesNotContain(native.Writes, write => write.StartsWith("BossMod.Presets.SetActive", StringComparison.Ordinal));
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void PerLoadRefreshSurvivesLateProviderOrRejectedWritesWithoutChangingCombatState(bool providerMissing)
+    {
+        var native = new NativeBossModProvider("BMR", "Original")
+        { Loaded = !providerMissing, RejectPresetWrite = !providerMissing };
+        using var service = native.CreateService();
+        using var runtime = new QuestingCombatRuntime(service, native.Interface, native.Log, 3);
+        runtime.Profile.RotationType = 2;
+        runtime.Combat.RefreshPackagedPresetsOnLoad();
+        Assert.True(service.PackagedPresetRefreshPending);
+        Assert.Null(runtime.CombatField("pendingCombatSettings"));
+        Assert.Null(runtime.CombatField("lastAppliedCombatSettings"));
+        Assert.Equal(providerMissing ? 0 : 6, native.PresetCreates);
+
+        native.Loaded = true;
+        native.RejectPresetWrite = false;
+        runtime.SetCombatField("nextPackagedPresetRefreshMs", 0L);
+        runtime.Combat.RefreshPackagedPresetsOnLoad();
+
+        Assert.Equal(providerMissing ? 6 : 12, native.PresetCreates);
+        Assert.Null(runtime.CombatField("pendingCombatSettings"));
+        Assert.Null(runtime.CombatField("lastAppliedCombatSettings"));
+        Assert.False(service.PackagedPresetRefreshPending);
+        Assert.Equal(new[] { "Original" }, native.Active);
+        Assert.Empty(runtime.Commands);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void PerLoadRefreshTargetsTheLoadedBossModIndependentlyOfTheSelectedRotation(bool vbm)
+    {
+        var native = new NativeBossModProvider(vbm ? "VBM" : "BMR", "Original");
+        using var service = native.CreateService();
+        using var runtime = new QuestingCombatRuntime(service, native.Interface, native.Log, 3);
+        runtime.Profile.AutoRotationType = "none";
+        runtime.Combat.RefreshPackagedPresetsOnLoad();
+        Assert.Equal(6, native.PresetCreates);
+        Assert.False(service.PackagedPresetRefreshPending);
+        Assert.Equal(new[] { "Original" }, native.Active);
+        native.PresetDefinitions["passive - tank"] = "edited after the load refresh";
+        runtime.SetCombatField("nextPackagedPresetRefreshMs", 0L);
+        runtime.Combat.RefreshPackagedPresetsOnLoad();
+        Assert.Equal(6, native.PresetCreates);
+        Assert.Equal("edited after the load refresh", native.PresetDefinitions["passive - tank"]);
+    }
+
+    [Fact]
+    public void PendingPackagedRefreshHonorsMountedHoldAndCompletesAfterRelease()
+    {
+        var native = new NativeBossModProvider("BMR", "Original");
+        using var service = native.CreateService();
+        using var runtime = new QuestingCombatRuntime(service, native.Interface, native.Log, 0);
+        runtime.Conditions.Add(ConditionFlag.Mounted);
+        runtime.Combat.RefreshPackagedPresetsOnLoad();
+        Assert.Equal(0, native.PresetCreates);
+        Assert.True(service.PackagedPresetRefreshPending);
+
+        runtime.Conditions.Clear();
+        runtime.Combat.RefreshPackagedPresetsOnLoad();
+        Assert.Equal(6, native.PresetCreates);
+        Assert.False(service.PackagedPresetRefreshPending);
+    }
+
+    [Fact]
+    public void RejectedPresetSelectionReturnsFalseWithoutClaimingAnActivePreset()
+    {
+        var native = new NativeBossModProvider("BMR", "Original") { RejectRuntimeWrite = true };
+        using var service = native.CreateService();
+        using var runtime = new QuestingCombatRuntime(service, native.Interface, native.Log, 0);
+        runtime.SetCombatField("lastAppliedCombatSettings", runtime.Call("CaptureCombatSettings", runtime.Profile)!);
+
+        Assert.Equal(false, runtime.Call("ApplyBossModPreset", "BMR", "Next", "test", false));
+
+        Assert.Null(runtime.CombatField("pendingCombatSettings"));
+        Assert.Empty(runtime.Combat.ActivePreset);
+        native.RejectRuntimeWrite = false;
+        Assert.Equal(true, runtime.Call("ApplyBossModPreset", "BMR", "Next", "test", false));
+        Assert.Equal("Next", runtime.Combat.ActivePreset);
+    }
+
+    [Theory]
+    [InlineData(2, false)]
+    [InlineData(2, true)]
+    [InlineData(3, false)]
+    [InlineData(3, true)]
+    [InlineData(4, false)]
+    [InlineData(4, true)]
+    public void NonBossModRotationWithNoPresetStillActivatesWhileBundledRefreshWaits(int provider, bool passive)
+    {
+        var native = new NativeBossModProvider("BMR", "Original")
+        { Loaded = false, AcceptDaedalusCommands = provider == 4 };
+        using var service = native.CreateService();
+        using var runtime = new QuestingCombatRuntime(service, native.Interface, native.Log, provider, captureCommands: true);
+        runtime.StopActivity();
+        runtime.Profile.AutoRotationType = "none";
+        runtime.Profile.DaedalusTargetMode = DaedalusTargetMode.None;
+        runtime.Combat.RefreshPackagedPresetsOnLoad();
+        if (passive)
+            runtime.Call("ApplyPassiveRotationSettings", runtime.Profile, "test");
+        else
+            runtime.Call("ActivateRotation", runtime.Profile, true);
+        Assert.NotNull(runtime.CombatField("lastAppliedCombatSettings"));
+        Assert.True(service.PackagedPresetRefreshPending);
+        Assert.Equal(0, native.PresetCreates);
+        Assert.Null(runtime.CombatField("pendingCombatSettings"));
+        if (provider == 3) Assert.Contains("/wrath auto on", runtime.Commands);
+        if (provider == 2 && !passive) Assert.Contains("/rotation auto on", runtime.Commands);
+        if (provider == 4) Assert.Contains("Daedalus.SetEnabled True", native.Writes);
+    }
+
+    private static Dictionary<string, string> ReadPackagedPresets()
+        => System.IO.Directory.GetFiles(System.IO.Path.Combine(System.IO.Path.GetDirectoryName(typeof(Plugin).Assembly.Location)!, "data", "bm"), "*.json")
+            .ToDictionary(path =>
+            {
+                using var document = JsonDocument.Parse(System.IO.File.ReadAllText(path));
+                return document.RootElement.GetProperty("Name").GetString()!;
+            },
+                System.IO.File.ReadAllText);
+
     private sealed record NativePreset(string Name, bool HiddenByDefault = false);
     private sealed record NativePresetDatabase(NativePreset[] AllPresets, NativePreset[] DefaultPresets, NativePreset[] UserPresets);
     private sealed record NativeRotationDatabase(NativePresetDatabase Presets);
@@ -853,6 +1068,13 @@ public sealed class ExternalAutomationCleanupServiceTests
 
     private sealed class NativeBossModProvider
     {
+        internal bool Loaded = true;
+        internal bool AcceptDaedalusCommands;
+        internal bool RejectPresetWrite, ModernPresetCreateUnavailable;
+        internal string? LegacyPresetCreateResult;
+        internal int PresetCreates;
+        internal readonly Dictionary<string, string> PresetDefinitions = [];
+        internal Action<string>? PresetWriteCallback;
         internal bool EmulateVbmMultibox;
         internal readonly IDalamudPluginInterface Interface;
         internal readonly IPluginLog Log;
@@ -1017,7 +1239,8 @@ public sealed class ExternalAutomationCleanupServiceTests
             });
             Interface = (IDalamudPluginInterface)Proxy(typeof(IDalamudPluginInterface), (method, args) => method.Name switch
             {
-                "get_InstalledPlugins" => new[] { (IExposedPlugin)wrapper },
+                "get_InstalledPlugins" => Loaded ? new[] { (IExposedPlugin)wrapper } : Array.Empty<IExposedPlugin>(),
+                "get_AssemblyLocation" => new System.IO.FileInfo(typeof(Plugin).Assembly.Location),
                 "GetIpcSubscriber" => Proxy(method.ReturnType, (call, values) => Invoke((string)args![0]!, call, values)),
                 _ => null,
             });
@@ -1060,10 +1283,33 @@ public sealed class ExternalAutomationCleanupServiceTests
         private object? Invoke(string channel, MethodInfo call, object?[]? values)
         {
             if (UnavailableChannel == channel) throw new InvalidOperationException("native endpoint unavailable");
+            if (channel == AutorotIpcService.DaedalusSetEnabledChannel && AcceptDaedalusCommands)
+            {
+                Writes.Add(channel + " " + values![0]);
+                return null;
+            }
             if (channel == "BossMod.Presets.GetForceDisabled") return ForceDisabled;
             if (channel == "BossMod.Presets.GetActive") return Active.Count == 1 ? Active[0] : null;
             if (channel == "BossMod.Presets.GetActiveList") return Active.ToList();
-            if (channel == "BossMod.Presets.Get") return JsonSerializer.Serialize(new { Name = (string)values![0]! });
+            if (channel == "BossMod.Presets.Get") return PresetDefinitions.GetValueOrDefault((string)values![0]!)
+                ?? JsonSerializer.Serialize(new { Name = (string)values![0]! });
+            if (channel == "BossMod.Presets.Create")
+            {
+                if (values!.Length == 2 && ModernPresetCreateUnavailable || values.Length == 1 && LegacyPresetCreateResult is null)
+                    throw new InvalidOperationException("native creation contract unavailable");
+                PresetCreates++;
+                var json = (string)values[0]!;
+                using var document = JsonDocument.Parse(json);
+                var createdName = document.RootElement.GetProperty("Name").GetString()!;
+                Writes.Add(channel + " " + createdName);
+                if (values.Length == 2) Assert.Equal(true, values[1]);
+                if (!RejectPresetWrite && (values.Length == 2 || LegacyPresetCreateResult == ""))
+                {
+                    PresetDefinitions[createdName] = json;
+                    PresetWriteCallback?.Invoke(createdName);
+                }
+                return values.Length == 2 ? !RejectPresetWrite : LegacyPresetCreateResult;
+            }
             if (channel == "BossMod.Configuration")
             {
                 var arguments = (List<string>)values![0]!;
@@ -1414,6 +1660,7 @@ public sealed class ExternalAutomationCleanupServiceTests
         internal bool LoggedIn = true;
         internal ulong ContentId = 1;
         internal readonly HashSet<ConditionFlag> Conditions = [];
+        internal readonly List<string> Commands = [];
         internal readonly ConfigManager Config;
         internal readonly CombatService Combat;
         internal readonly AutomationService Automation;
@@ -1424,7 +1671,8 @@ public sealed class ExternalAutomationCleanupServiceTests
             set => account.Characters["character"] = value;
         }
 
-        internal QuestingCombatRuntime(AutorotIpcService service, IDalamudPluginInterface pluginInterface, IPluginLog log, int provider)
+        internal QuestingCombatRuntime(AutorotIpcService service, IDalamudPluginInterface pluginInterface, IPluginLog log,
+            int provider, bool captureCommands = false)
         {
             try
             {
@@ -1443,6 +1691,8 @@ public sealed class ExternalAutomationCleanupServiceTests
                 var plugin = Uninitialized<Plugin>();
                 SetProperty(plugin, nameof(Plugin.ConfigManager), Config);
                 SetProperty(plugin, nameof(Plugin.AutorotIpcService), service);
+                SetProperty(plugin, nameof(Plugin.DaedalusTargetModeService), new DaedalusTargetModeService(pluginInterface,
+                    Proxy<ITargetManager>((_, _) => null), Proxy<IToastGui>((_, _) => null), log));
                 SetProperty(plugin, nameof(Plugin.ExternalAutomationCleanupService), new ExternalAutomationCleanupService(new FakeCommandSender(), new FakeSnapshotProvider()));
                 var ads = new AdsDutyIpcService(() => false, () => false, () => "{}", () => false, () => now);
                 SetProperty(plugin, nameof(Plugin.AdsDutyIpcService), ads);
@@ -1461,7 +1711,8 @@ public sealed class ExternalAutomationCleanupServiceTests
                 var zones = new ZoneService();
                 Activity = new QuestionableIpcService(() => running, () => now);
                 Activity.Refresh(force: true);
-                Combat = new CombatService(plugin, null!, zones, Activity);
+                Combat = new CombatService(plugin, null!, zones, Activity,
+                    captureCommands ? command => { Commands.Add(command); return true; } : null);
                 SetProperty(plugin, nameof(Plugin.CombatService), Combat);
             }
             catch
