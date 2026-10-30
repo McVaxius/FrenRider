@@ -3258,4 +3258,27 @@
   <data name="Use styled UI" xml:space="preserve"><value>शैलीबद्ध UI उपयोग करें</value></data>
   <data name="Lock windows" xml:space="preserve"><value>विंडो लॉक करें</value></data>
   <data name="Unlock windows" xml:space="preserve"><value>विंडो अनलॉक करें</value></data>
+  <data name="Background mode" xml:space="preserve"><value>पृष्ठभूमि मोड</value></data>
+  <data name="Waves" xml:space="preserve"><value>लहरें</value></data>
+  <data name="Lights" xml:space="preserve"><value>रोशनी</value></data>
+  <data name="Image" xml:space="preserve"><value>छवि</value></data>
+  <data name="Light effect" xml:space="preserve"><value>प्रकाश प्रभाव</value></data>
+  <data name="Ambient glows" xml:space="preserve"><value>हल्की परिवेश चमक</value></data>
+  <data name="Sweeping beams" xml:space="preserve"><value>चलती प्रकाश किरणें</value></data>
+  <data name="Mouse-following glow" xml:space="preserve"><value>माउस के साथ चलती चमक</value></data>
+  <data name="Image file" xml:space="preserve"><value>छवि फ़ाइल</value></data>
+  <data name="Browse..." xml:space="preserve"><value>ब्राउज़ करें...</value></data>
+  <data name="Choose background image" xml:space="preserve"><value>पृष्ठभूमि छवि चुनें</value></data>
+  <data name="Images" xml:space="preserve"><value>छवियाँ</value></data>
+  <data name="Load image" xml:space="preserve"><value>छवि लोड करें</value></data>
+  <data name="The image fills the window. Blur (%) applies to the image." xml:space="preserve"><value>छवि पूरी विंडो भरती है। धुंधलापन (%) छवि पर लागू होता है।</value></data>
+  <data name="Choose an image file." xml:space="preserve"><value>छवि फ़ाइल चुनें।</value></data>
+  <data name="Loading image..." xml:space="preserve"><value>छवि लोड हो रही है...</value></data>
+  <data name="Image could not be loaded." xml:space="preserve"><value>छवि लोड नहीं हो सकी।</value></data>
+  <data name="Image backgrounds remain visible to screenshots." xml:space="preserve"><value>छवि पृष्ठभूमि स्क्रीनशॉट में दिखाई देती है।</value></data>
+  <data name="Light colours" xml:space="preserve"><value>रोशनी के रंग</value></data>
+  <data name="Reset light colours" xml:space="preserve"><value>रोशनी के रंग रीसेट करें</value></data>
+  <data name="Light colour 1" xml:space="preserve"><value>रोशनी का रंग 1</value></data>
+  <data name="Light colour 2" xml:space="preserve"><value>रोशनी का रंग 2</value></data>
+  <data name="Light colour 3" xml:space="preserve"><value>रोशनी का रंग 3</value></data>
 </root>

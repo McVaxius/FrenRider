@@ -4,6 +4,8 @@ using System;
 namespace FrenRider;
 
 public enum FrenRiderUiStyle { Classic, Glassmorphism, Spatial, Cyberpunk }
+public enum FrenRiderGlassBackground { Waves, Lights, Image }
+public enum FrenRiderGlassLights { AmbientGlows, SweepingBeams, PointerGlow }
 
 [Serializable]
 public class Configuration : IPluginConfiguration
@@ -55,6 +57,22 @@ public class Configuration : IPluginConfiguration
     public uint UiGlassWave1Rgb { get; set; } = DefaultGlassWave1Rgb;
     public uint UiGlassWave2Rgb { get; set; } = DefaultGlassWave2Rgb;
     public uint UiGlassWave3Rgb { get; set; } = DefaultGlassWave3Rgb;
+    private FrenRiderGlassBackground uiGlassBackground;
+    public FrenRiderGlassBackground UiGlassBackground
+    {
+        get => uiGlassBackground;
+        set => uiGlassBackground = Enum.IsDefined(value) ? value : FrenRiderGlassBackground.Waves;
+    }
+    private FrenRiderGlassLights uiGlassLights;
+    public FrenRiderGlassLights UiGlassLights
+    {
+        get => uiGlassLights;
+        set => uiGlassLights = Enum.IsDefined(value) ? value : FrenRiderGlassLights.AmbientGlows;
+    }
+    public string UiGlassImagePath { get; set; } = "";
+    public uint UiGlassLight1Rgb { get; set; } = DefaultGlassWave1Rgb;
+    public uint UiGlassLight2Rgb { get; set; } = DefaultGlassWave2Rgb;
+    public uint UiGlassLight3Rgb { get; set; } = DefaultGlassWave3Rgb;
     public uint UiLcarsBackgroundRgb { get; set; } = DefaultLcarsBackgroundRgb;
     public uint UiLcarsBar1Rgb { get; set; } = DefaultLcarsBar1Rgb;
     public uint UiLcarsBar2Rgb { get; set; } = DefaultLcarsBar2Rgb;

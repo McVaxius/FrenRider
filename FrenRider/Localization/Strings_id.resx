@@ -3352,4 +3352,27 @@ Aktif: gunakan preset BossMod di bawah dengan penyedia rotasi apa pun. Preset kh
   <data name="Use styled UI" xml:space="preserve"><value>Gunakan UI bergaya</value></data>
   <data name="Lock windows" xml:space="preserve"><value>Kunci jendela</value></data>
   <data name="Unlock windows" xml:space="preserve"><value>Buka kunci jendela</value></data>
+  <data name="Background mode" xml:space="preserve"><value>Mode latar</value></data>
+  <data name="Waves" xml:space="preserve"><value>Gelombang</value></data>
+  <data name="Lights" xml:space="preserve"><value>Cahaya</value></data>
+  <data name="Image" xml:space="preserve"><value>Gambar</value></data>
+  <data name="Light effect" xml:space="preserve"><value>Efek cahaya</value></data>
+  <data name="Ambient glows" xml:space="preserve"><value>Pendar lembut</value></data>
+  <data name="Sweeping beams" xml:space="preserve"><value>Berkas cahaya bergerak</value></data>
+  <data name="Mouse-following glow" xml:space="preserve"><value>Pendar mengikuti mouse</value></data>
+  <data name="Image file" xml:space="preserve"><value>Berkas gambar</value></data>
+  <data name="Browse..." xml:space="preserve"><value>Telusuri...</value></data>
+  <data name="Choose background image" xml:space="preserve"><value>Pilih gambar latar belakang</value></data>
+  <data name="Images" xml:space="preserve"><value>Gambar</value></data>
+  <data name="Load image" xml:space="preserve"><value>Muat gambar</value></data>
+  <data name="The image fills the window. Blur (%) applies to the image." xml:space="preserve"><value>Gambar memenuhi jendela. Buram (%) diterapkan pada gambar.</value></data>
+  <data name="Choose an image file." xml:space="preserve"><value>Pilih berkas gambar.</value></data>
+  <data name="Loading image..." xml:space="preserve"><value>Memuat gambar...</value></data>
+  <data name="Image could not be loaded." xml:space="preserve"><value>Gambar tidak dapat dimuat.</value></data>
+  <data name="Image backgrounds remain visible to screenshots." xml:space="preserve"><value>Latar gambar tetap terlihat dalam tangkapan layar.</value></data>
+  <data name="Light colours" xml:space="preserve"><value>Warna cahaya</value></data>
+  <data name="Reset light colours" xml:space="preserve"><value>Atur ulang warna cahaya</value></data>
+  <data name="Light colour 1" xml:space="preserve"><value>Warna cahaya 1</value></data>
+  <data name="Light colour 2" xml:space="preserve"><value>Warna cahaya 2</value></data>
+  <data name="Light colour 3" xml:space="preserve"><value>Warna cahaya 3</value></data>
 </root>

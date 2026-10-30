@@ -36,6 +36,8 @@ internal sealed unsafe class FrenRiderDetachedGlass : IDisposable
         internal int Ran;
         internal bool Composite;
         internal bool WindowBackground;
+        internal nint ImageSource;
+        internal Vector4 ImageRootBounds;
     }
 
     // These are the pipeline slots changed by desktop rotation normalization and GlassRenderer.
@@ -89,6 +91,10 @@ internal sealed unsafe class FrenRiderDetachedGlass : IDisposable
     private bool faulted;
     private bool disposed;
     private bool? pendingScreenshotsPaused;
+    private bool screenshotPauseRequested;
+    private bool imageFrame;
+    private bool imageModeActive;
+    private readonly HashSet<nint> imageWindows = new();
     internal bool ScreenshotsPaused => capture?.IsPaused == true;
     internal bool CanPauseForScreenshots
     {
@@ -146,26 +152,34 @@ internal sealed unsafe class FrenRiderDetachedGlass : IDisposable
             pendingScreenshotsPaused = null;
             _ = SetScreenshotsPaused(paused);
         }
+        else if (screenshotPauseRequested && !ScreenshotsPaused && CanPauseForScreenshots)
+            _ = SetScreenshotsPaused(true);
         // The host finishes every platform render before opening its next draw phase.
         ClearRequests(callbacks);
         usedWindows.Clear();
+        imageWindows.Clear();
+        imageFrame = false;
         frame++;
         capture?.BeginFrame();
         AdvancePointer();
     }
 
     internal bool TryDraw(ImDrawListPtr drawList, Vector2 min, Vector2 max, float rounding,
-        in GlassMaterial material, bool windowBackground)
+        in GlassMaterial material, bool windowBackground, nint imageSource = 0, Vector4 imageRootBounds = default)
     {
         if (disposed || faulted || callbacks == null || capture == null || exclusion == null || renderer == null ||
             drawList.IsNull || !Finite(min) || !Finite(max) || !float.IsFinite(rounding) ||
             max.X <= min.X || max.Y <= min.Y) return false;
 
         var viewport = ImGui.GetWindowViewport();
-        if (viewport.IsNull || viewport.ID == ImGui.GetMainViewport().ID) return false;
+        if (viewport.IsNull || imageSource == 0 && viewport.ID == ImGui.GetMainViewport().ID) return false;
         var hwnd = (nint)(viewport.PlatformHandleRaw != null ? viewport.PlatformHandleRaw : viewport.PlatformHandle);
-        if (hwnd == 0) { Trace(1, "detached viewport has no native window yet"); return false; }
-        usedWindows.Add(hwnd);
+        if (imageSource == 0)
+        {
+            if (hwnd == 0) { Trace(1, "detached viewport has no native window yet"); return false; }
+            usedWindows.Add(hwnd);
+        }
+        else MarkImageWindow();
 
         if (windowBackground && (drawList != ImGui.GetWindowDrawList() || min != ImGui.GetWindowPos() ||
             max != min + ImGui.GetWindowSize() || !CanPrepend(drawList)))
@@ -184,8 +198,10 @@ internal sealed unsafe class FrenRiderDetachedGlass : IDisposable
         var drawMaterial = material;
         ApplyPointerLight(in shape, ref drawMaterial);
         var boundary = exclusion.MinimumFrameTimestamp;
-        var composite = enabled && (exclusion.Ready || ScreenshotsPaused) && readyWindows.TryGetValue(hwnd, out var readyBoundary) &&
-            readyBoundary == boundary;
+        var composite = imageSource != 0
+            ? readyWindows.TryGetValue(hwnd, out var imageReady) && imageReady == (long)imageSource
+            : enabled && (exclusion.Ready || ScreenshotsPaused) &&
+                readyWindows.TryGetValue(hwnd, out var readyBoundary) && readyBoundary == boundary;
         var request = (DrawRequest*)NativeMemory.AllocZeroed((nuint)sizeof(DrawRequest));
         request->State = callbacks;
         request->Next = callbacks->Requests;
@@ -199,6 +215,9 @@ internal sealed unsafe class FrenRiderDetachedGlass : IDisposable
         request->Composite = composite;
         request->WindowBackground = windowBackground;
         request->Frame = frame;
+        request->ImageSource = imageSource;
+        request->ImageRootBounds = imageRootBounds;
+        if (imageSource != 0) ((IUnknown*)imageSource)->AddRef();
         callbacks->Requests = request;
         callbacks->Pending++;
 
@@ -216,6 +235,26 @@ internal sealed unsafe class FrenRiderDetachedGlass : IDisposable
     internal void EndFrame(nint gameWindow, bool enabled)
     {
         if (disposed) return;
+        if (enabled && imageFrame)
+        {
+            if (!imageModeActive)
+            {
+                capture?.ReleaseResources();
+                readyWindows.Clear();
+                imageModeActive = true;
+            }
+            this.enabled = true;
+            if (imageWindows.Count == 0)
+            {
+                if (exclusion?.RestoreAll() == false)
+                    ReportUnavailable(exclusion.UnavailableReason ?? "Previous capture affinity could not be restored.");
+                return;
+            }
+            if (imageWindows.Count > 0 && exclusion?.AllowCapture(imageWindows) != true)
+                ReportUnavailable(exclusion?.UnavailableReason ?? "Image screenshot visibility could not be verified.");
+            return;
+        }
+        imageModeActive = false;
         if (!enabled || usedWindows.Count == 0)
         {
             Suspend();
@@ -246,6 +285,7 @@ internal sealed unsafe class FrenRiderDetachedGlass : IDisposable
         if (disposed || capture == null || exclusion == null || (paused && !ScreenshotsPaused && !CanPauseForScreenshots))
             return false;
         pendingScreenshotsPaused = paused;
+        screenshotPauseRequested = paused;
         log.Debug("[FrenRider] Screenshot pause requested: {Paused}", paused);
         return true;
     }
@@ -284,6 +324,7 @@ internal sealed unsafe class FrenRiderDetachedGlass : IDisposable
     private void Suspend()
     {
         pendingScreenshotsPaused = null;
+        imageModeActive = false;
         enabled = false;
         readyWindows.Clear();
         usedWindows.Clear();
@@ -327,7 +368,7 @@ internal sealed unsafe class FrenRiderDetachedGlass : IDisposable
             Trace(128, "callback viewport/native window mismatch");
             return;
         }
-        if (!exclusion.Ready && !ScreenshotsPaused)
+        if (request->ImageSource == 0 && !exclusion.Ready && !ScreenshotsPaused)
         {
             readyWindows.Remove(request->Hwnd);
             Trace(256, "callback capture exclusion is not ready");
@@ -362,20 +403,29 @@ internal sealed unsafe class FrenRiderDetachedGlass : IDisposable
                 return;
             }
 
-            var minimumTimestamp = exclusion.MinimumFrameTimestamp;
-            if (!capture.TryGetViewportTexture(request->Hwnd, request->ViewportOrigin, description.Width,
-                    description.Height, exclusion.Ready, minimumTimestamp, out var source) || source == 0)
+            nint source;
+            if (request->ImageSource != 0)
             {
-                readyWindows.Remove(request->Hwnd);
-                Trace(4096, "callback has no fresh desktop backdrop");
-                return;
+                if (!capture.TryGetImageBackdrop(request->ImageSource, description.Width, description.Height,
+                        request->ImageRootBounds, out source)) return;
             }
-            readyWindows[request->Hwnd] = minimumTimestamp;
-            Trace(8192, "callback desktop backdrop ready");
-            if (!request->Composite || request->CaptureBoundary != minimumTimestamp)
+            else
             {
-                Trace(16384, "callback completed initial capture probe");
-                return;
+                var minimumTimestamp = exclusion.MinimumFrameTimestamp;
+                if (!capture.TryGetViewportTexture(request->Hwnd, request->ViewportOrigin, description.Width,
+                        description.Height, exclusion.Ready, minimumTimestamp, out source) || source == 0)
+                {
+                    readyWindows.Remove(request->Hwnd);
+                    Trace(4096, "callback has no fresh desktop backdrop");
+                    return;
+                }
+                readyWindows[request->Hwnd] = minimumTimestamp;
+                Trace(8192, "callback desktop backdrop ready");
+                if (!request->Composite || request->CaptureBoundary != minimumTimestamp)
+                {
+                    Trace(16384, "callback completed initial capture probe");
+                    return;
+                }
             }
             if (!request->WindowBackground &&
                 !capture.TryComposeWindowBackdrop(source, (nint)targetTexture, out source))
@@ -386,6 +436,7 @@ internal sealed unsafe class FrenRiderDetachedGlass : IDisposable
 
             ReadOnlySpan<GlassShape> shapes = new(&shape, 1);
             renderer.Draw(context, (ID3D11Texture2D*)source, targetView, shapes, in request->Material, clip);
+            if (request->ImageSource != 0) readyWindows[request->Hwnd] = (long)request->ImageSource;
             Trace(32768, "Glasswork draw completed");
         }
         catch (Exception exception)
@@ -594,6 +645,21 @@ internal sealed unsafe class FrenRiderDetachedGlass : IDisposable
 
     private static bool Finite(Vector2 point) => float.IsFinite(point.X) && float.IsFinite(point.Y);
 
+    internal void MarkImageWindow()
+    {
+        imageFrame = true;
+        var viewport = ImGui.GetWindowViewport();
+        if (viewport.IsNull || viewport.ID == ImGui.GetMainViewport().ID) return;
+        var hwnd = (nint)(viewport.PlatformHandleRaw != null ? viewport.PlatformHandleRaw : viewport.PlatformHandle);
+        if (hwnd != 0) imageWindows.Add(hwnd);
+    }
+
+    internal void ReleaseImageSource()
+    {
+        capture?.ReleaseImageSource();
+        readyWindows.Clear();
+    }
+
     private static void ClearRequests(CallbackState* state)
     {
         if (state == null) return;
@@ -601,6 +667,7 @@ internal sealed unsafe class FrenRiderDetachedGlass : IDisposable
         while (request != null)
         {
             var next = request->Next;
+            if (request->ImageSource != 0) ((IUnknown*)request->ImageSource)->Release();
             NativeMemory.Free(request);
             request = next;
         }

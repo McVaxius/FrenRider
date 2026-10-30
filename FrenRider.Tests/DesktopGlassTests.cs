@@ -427,6 +427,56 @@ public sealed class DesktopGlassTests
         }
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public unsafe void ScreenshotPauseDefaultsOffThroughValidatedCaptureAndHonoursExplicitPauseChoice(bool moveFrozenWindow)
+    {
+        using var scene = new ScreenshotPauseScene();
+        scene.Duplication->PresentTimestamp = scene.Exclusion.MinimumFrameTimestamp + 1;
+        _ = scene.Render(composite: false);
+        var live = scene.Render(composite: true);
+        scene.AssertNonFlatGlass(live);
+        Assert.False(scene.Glass.ScreenshotsPaused);
+        Assert.False(scene.Capture.IsPaused);
+        Assert.Equal(FrenRiderCaptureExclusion.ExcludeFromCapture, scene.ReadAffinity());
+        var initialAcquisitions = scene.Duplication->Acquires;
+        scene.AdvanceFrame();
+        Assert.False(scene.Glass.ScreenshotsPaused);
+        Assert.False(scene.Capture.IsPaused);
+        Assert.Equal(FrenRiderCaptureExclusion.ExcludeFromCapture, scene.ReadAffinity());
+        _ = scene.Render(composite: false);
+        var continuedLive = scene.Render(composite: true);
+        scene.AssertNonFlatGlass(continuedLive);
+        Assert.Equal(live, continuedLive);
+        Assert.True(scene.Duplication->Acquires > initialAcquisitions,
+            "Default live mode stopped acquisition after its first validated capture.");
+
+        var liveAcquisitions = scene.Duplication->Acquires;
+        Assert.True(scene.Glass.TrySetScreenshotsPaused(true));
+        Assert.False(scene.Glass.ScreenshotsPaused);
+        scene.AdvanceFrame();
+        Assert.True(scene.Glass.ScreenshotsPaused);
+        Assert.True(scene.Capture.IsPaused);
+        Assert.Equal(0u, scene.ReadAffinity());
+        if (moveFrozenWindow)
+            Assert.True(Win32.SetWindowPos((HWND)scene.Window, default, -31000, -31000, 0, 0, 0x15).Value != 0);
+        Assert.Equal(live, scene.Render(composite: true));
+        Assert.Equal(liveAcquisitions, scene.Duplication->Acquires);
+        if (moveFrozenWindow)
+            Assert.True(Win32.SetWindowPos((HWND)scene.Window, default, -32000, -32000, 0, 0, 0x15).Value != 0);
+        Assert.True(scene.Glass.TrySetScreenshotsPaused(false));
+        scene.AdvanceFrame();
+        Assert.False(scene.Glass.ScreenshotsPaused);
+        scene.Duplication->PresentTimestamp = scene.Exclusion.MinimumFrameTimestamp + 1;
+        scene.AdvanceFrame();
+        _ = scene.Render(composite: false);
+        _ = scene.Render(composite: true);
+        scene.AdvanceFrame();
+        Assert.False(scene.Glass.ScreenshotsPaused);
+        Assert.Equal(FrenRiderCaptureExclusion.ExcludeFromCapture, scene.ReadAffinity());
+    }
+
     [Fact]
     public unsafe void NativeExclusionRestoresAnOwnedHiddenDirectCompositionStyleWindow()
     {

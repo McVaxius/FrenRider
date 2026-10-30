@@ -361,6 +361,11 @@ public sealed unsafe class ColorAppearanceTests
             "Glassmorphism", "Spatial", "Cyberpunk", "Animation", "Bar colour 1", "Bar colour 2", "Bar colour 3",
             "Reset", "Reset colours", "Movement speed (x)", "Wave colour 1", "Wave colour 2", "Wave colour 3",
             "Reset wave colours", "Background blur", "Blur (%)", "Pause backdrop for screenshots", "UI styling",
+            "Background mode", "Waves", "Lights", "Image", "Light effect", "Ambient glows", "Sweeping beams",
+            "Mouse-following glow", "Image file", "Browse...", "Choose background image", "Images", "Load image",
+            "The image fills the window. Blur (%) applies to the image.",
+            "Choose an image file.", "Loading image...", "Image could not be loaded.", "Image backgrounds remain visible to screenshots.",
+            "Light colours", "Light colour 1", "Light colour 2", "Light colour 3", "Reset light colours",
             "Lock window movement and resizing", "Use native UI", "Use styled UI", "Lock windows", "Unlock windows"];
         foreach (var language in UiText.Languages)
         {

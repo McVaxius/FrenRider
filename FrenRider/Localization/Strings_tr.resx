@@ -3352,4 +3352,27 @@ Açık: aşağıdaki BossMod ön ayarlarını herhangi bir rotasyon sağlayıcı
   <data name="Use styled UI" xml:space="preserve"><value>Stilli arayüzü kullan</value></data>
   <data name="Lock windows" xml:space="preserve"><value>Pencereleri kilitle</value></data>
   <data name="Unlock windows" xml:space="preserve"><value>Pencerelerin kilidini aç</value></data>
+  <data name="Background mode" xml:space="preserve"><value>Arka plan modu</value></data>
+  <data name="Waves" xml:space="preserve"><value>Dalgalar</value></data>
+  <data name="Lights" xml:space="preserve"><value>Işıklar</value></data>
+  <data name="Image" xml:space="preserve"><value>Resim</value></data>
+  <data name="Light effect" xml:space="preserve"><value>Işık efekti</value></data>
+  <data name="Ambient glows" xml:space="preserve"><value>Yumuşak ortam ışıkları</value></data>
+  <data name="Sweeping beams" xml:space="preserve"><value>Hareketli ışık demetleri</value></data>
+  <data name="Mouse-following glow" xml:space="preserve"><value>Fareyi izleyen parıltı</value></data>
+  <data name="Image file" xml:space="preserve"><value>Resim dosyası</value></data>
+  <data name="Browse..." xml:space="preserve"><value>Gözat...</value></data>
+  <data name="Choose background image" xml:space="preserve"><value>Arka plan resmi seç</value></data>
+  <data name="Images" xml:space="preserve"><value>Resimler</value></data>
+  <data name="Load image" xml:space="preserve"><value>Resmi yükle</value></data>
+  <data name="The image fills the window. Blur (%) applies to the image." xml:space="preserve"><value>Resim pencereyi doldurur. Bulanıklık (%) resme uygulanır.</value></data>
+  <data name="Choose an image file." xml:space="preserve"><value>Bir resim dosyası seçin.</value></data>
+  <data name="Loading image..." xml:space="preserve"><value>Resim yükleniyor...</value></data>
+  <data name="Image could not be loaded." xml:space="preserve"><value>Resim yüklenemedi.</value></data>
+  <data name="Image backgrounds remain visible to screenshots." xml:space="preserve"><value>Resim arka planları ekran görüntülerinde görünür kalır.</value></data>
+  <data name="Light colours" xml:space="preserve"><value>Işık renkleri</value></data>
+  <data name="Reset light colours" xml:space="preserve"><value>Işık renklerini sıfırla</value></data>
+  <data name="Light colour 1" xml:space="preserve"><value>Işık rengi 1</value></data>
+  <data name="Light colour 2" xml:space="preserve"><value>Işık rengi 2</value></data>
+  <data name="Light colour 3" xml:space="preserve"><value>Işık rengi 3</value></data>
 </root>

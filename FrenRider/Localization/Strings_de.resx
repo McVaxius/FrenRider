@@ -3247,4 +3247,27 @@ An: Die BossMod-Voreinstellungen unten mit jedem Rotationsanbieter verwenden. Ei
   <data name="Use styled UI" xml:space="preserve"><value>Gestaltete Benutzeroberfläche verwenden</value></data>
   <data name="Lock windows" xml:space="preserve"><value>Fenster sperren</value></data>
   <data name="Unlock windows" xml:space="preserve"><value>Fenster entsperren</value></data>
+  <data name="Background mode" xml:space="preserve"><value>Hintergrundmodus</value></data>
+  <data name="Waves" xml:space="preserve"><value>Wellen</value></data>
+  <data name="Lights" xml:space="preserve"><value>Lichter</value></data>
+  <data name="Image" xml:space="preserve"><value>Bild</value></data>
+  <data name="Light effect" xml:space="preserve"><value>Lichteffekt</value></data>
+  <data name="Ambient glows" xml:space="preserve"><value>Umgebungsleuchten</value></data>
+  <data name="Sweeping beams" xml:space="preserve"><value>Schwenkende Lichtstrahlen</value></data>
+  <data name="Mouse-following glow" xml:space="preserve"><value>Mausfolgendes Leuchten</value></data>
+  <data name="Image file" xml:space="preserve"><value>Bilddatei</value></data>
+  <data name="Browse..." xml:space="preserve"><value>Durchsuchen...</value></data>
+  <data name="Choose background image" xml:space="preserve"><value>Hintergrundbild auswählen</value></data>
+  <data name="Images" xml:space="preserve"><value>Bilder</value></data>
+  <data name="Load image" xml:space="preserve"><value>Bild laden</value></data>
+  <data name="The image fills the window. Blur (%) applies to the image." xml:space="preserve"><value>Das Bild füllt das Fenster. Unschärfe (%) gilt für das Bild.</value></data>
+  <data name="Choose an image file." xml:space="preserve"><value>Bilddatei auswählen.</value></data>
+  <data name="Loading image..." xml:space="preserve"><value>Bild wird geladen...</value></data>
+  <data name="Image could not be loaded." xml:space="preserve"><value>Bild konnte nicht geladen werden.</value></data>
+  <data name="Image backgrounds remain visible to screenshots." xml:space="preserve"><value>Bildhintergründe bleiben auf Screenshots sichtbar.</value></data>
+  <data name="Light colours" xml:space="preserve"><value>Lichtfarben</value></data>
+  <data name="Reset light colours" xml:space="preserve"><value>Lichtfarben zurücksetzen</value></data>
+  <data name="Light colour 1" xml:space="preserve"><value>Lichtfarbe 1</value></data>
+  <data name="Light colour 2" xml:space="preserve"><value>Lichtfarbe 2</value></data>
+  <data name="Light colour 3" xml:space="preserve"><value>Lichtfarbe 3</value></data>
 </root>

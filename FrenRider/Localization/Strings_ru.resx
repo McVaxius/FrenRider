@@ -3247,4 +3247,27 @@
   <data name="Use styled UI" xml:space="preserve"><value>Использовать оформленный интерфейс</value></data>
   <data name="Lock windows" xml:space="preserve"><value>Заблокировать окна</value></data>
   <data name="Unlock windows" xml:space="preserve"><value>Разблокировать окна</value></data>
+  <data name="Background mode" xml:space="preserve"><value>Режим фона</value></data>
+  <data name="Waves" xml:space="preserve"><value>Волны</value></data>
+  <data name="Lights" xml:space="preserve"><value>Свет</value></data>
+  <data name="Image" xml:space="preserve"><value>Изображение</value></data>
+  <data name="Light effect" xml:space="preserve"><value>Световой эффект</value></data>
+  <data name="Ambient glows" xml:space="preserve"><value>Мягкое фоновое свечение</value></data>
+  <data name="Sweeping beams" xml:space="preserve"><value>Движущиеся лучи</value></data>
+  <data name="Mouse-following glow" xml:space="preserve"><value>Свечение за указателем</value></data>
+  <data name="Image file" xml:space="preserve"><value>Файл изображения</value></data>
+  <data name="Browse..." xml:space="preserve"><value>Обзор...</value></data>
+  <data name="Choose background image" xml:space="preserve"><value>Выбрать фоновое изображение</value></data>
+  <data name="Images" xml:space="preserve"><value>Изображения</value></data>
+  <data name="Load image" xml:space="preserve"><value>Загрузить изображение</value></data>
+  <data name="The image fills the window. Blur (%) applies to the image." xml:space="preserve"><value>Изображение заполняет окно. Размытие (%) применяется к изображению.</value></data>
+  <data name="Choose an image file." xml:space="preserve"><value>Выберите файл изображения.</value></data>
+  <data name="Loading image..." xml:space="preserve"><value>Загрузка изображения...</value></data>
+  <data name="Image could not be loaded." xml:space="preserve"><value>Не удалось загрузить изображение.</value></data>
+  <data name="Image backgrounds remain visible to screenshots." xml:space="preserve"><value>Фоны с изображением остаются видимыми на снимках экрана.</value></data>
+  <data name="Light colours" xml:space="preserve"><value>Цвета света</value></data>
+  <data name="Reset light colours" xml:space="preserve"><value>Сбросить цвета света</value></data>
+  <data name="Light colour 1" xml:space="preserve"><value>Цвет света 1</value></data>
+  <data name="Light colour 2" xml:space="preserve"><value>Цвет света 2</value></data>
+  <data name="Light colour 3" xml:space="preserve"><value>Цвет света 3</value></data>
 </root>

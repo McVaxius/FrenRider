@@ -3247,4 +3247,27 @@
   <data name="Use styled UI" xml:space="preserve"><value>使用带样式的界面</value></data>
   <data name="Lock windows" xml:space="preserve"><value>锁定窗口</value></data>
   <data name="Unlock windows" xml:space="preserve"><value>解锁窗口</value></data>
+  <data name="Background mode" xml:space="preserve"><value>背景模式</value></data>
+  <data name="Waves" xml:space="preserve"><value>波浪</value></data>
+  <data name="Lights" xml:space="preserve"><value>灯光</value></data>
+  <data name="Image" xml:space="preserve"><value>图片</value></data>
+  <data name="Light effect" xml:space="preserve"><value>灯光效果</value></data>
+  <data name="Ambient glows" xml:space="preserve"><value>柔和光晕</value></data>
+  <data name="Sweeping beams" xml:space="preserve"><value>移动光束</value></data>
+  <data name="Mouse-following glow" xml:space="preserve"><value>跟随鼠标的光晕</value></data>
+  <data name="Image file" xml:space="preserve"><value>图片文件</value></data>
+  <data name="Browse..." xml:space="preserve"><value>浏览...</value></data>
+  <data name="Choose background image" xml:space="preserve"><value>选择背景图片</value></data>
+  <data name="Images" xml:space="preserve"><value>图片</value></data>
+  <data name="Load image" xml:space="preserve"><value>加载图片</value></data>
+  <data name="The image fills the window. Blur (%) applies to the image." xml:space="preserve"><value>图片将填满窗口。模糊 (%) 应用于图片。</value></data>
+  <data name="Choose an image file." xml:space="preserve"><value>请选择图片文件。</value></data>
+  <data name="Loading image..." xml:space="preserve"><value>正在加载图片...</value></data>
+  <data name="Image could not be loaded." xml:space="preserve"><value>无法加载图片。</value></data>
+  <data name="Image backgrounds remain visible to screenshots." xml:space="preserve"><value>图片背景仍会显示在截图中。</value></data>
+  <data name="Light colours" xml:space="preserve"><value>灯光颜色</value></data>
+  <data name="Reset light colours" xml:space="preserve"><value>重置灯光颜色</value></data>
+  <data name="Light colour 1" xml:space="preserve"><value>灯光颜色 1</value></data>
+  <data name="Light colour 2" xml:space="preserve"><value>灯光颜色 2</value></data>
+  <data name="Light colour 3" xml:space="preserve"><value>灯光颜色 3</value></data>
 </root>

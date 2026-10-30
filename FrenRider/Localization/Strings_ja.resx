@@ -3247,4 +3247,27 @@
   <data name="Use styled UI" xml:space="preserve"><value>スタイル付きUIを使用</value></data>
   <data name="Lock windows" xml:space="preserve"><value>ウィンドウをロック</value></data>
   <data name="Unlock windows" xml:space="preserve"><value>ウィンドウのロックを解除</value></data>
+  <data name="Background mode" xml:space="preserve"><value>背景モード</value></data>
+  <data name="Waves" xml:space="preserve"><value>波</value></data>
+  <data name="Lights" xml:space="preserve"><value>ライト</value></data>
+  <data name="Image" xml:space="preserve"><value>画像</value></data>
+  <data name="Light effect" xml:space="preserve"><value>ライト効果</value></data>
+  <data name="Ambient glows" xml:space="preserve"><value>柔らかな光</value></data>
+  <data name="Sweeping beams" xml:space="preserve"><value>移動する光線</value></data>
+  <data name="Mouse-following glow" xml:space="preserve"><value>マウスを追う光</value></data>
+  <data name="Image file" xml:space="preserve"><value>画像ファイル</value></data>
+  <data name="Browse..." xml:space="preserve"><value>参照...</value></data>
+  <data name="Choose background image" xml:space="preserve"><value>背景画像を選択</value></data>
+  <data name="Images" xml:space="preserve"><value>画像</value></data>
+  <data name="Load image" xml:space="preserve"><value>画像を読み込む</value></data>
+  <data name="The image fills the window. Blur (%) applies to the image." xml:space="preserve"><value>画像はウィンドウ全体を覆います。ぼかし（%）は画像に適用されます。</value></data>
+  <data name="Choose an image file." xml:space="preserve"><value>画像ファイルを選択してください。</value></data>
+  <data name="Loading image..." xml:space="preserve"><value>画像を読み込み中...</value></data>
+  <data name="Image could not be loaded." xml:space="preserve"><value>画像を読み込めませんでした。</value></data>
+  <data name="Image backgrounds remain visible to screenshots." xml:space="preserve"><value>画像背景はスクリーンショットに表示されます。</value></data>
+  <data name="Light colours" xml:space="preserve"><value>ライトの色</value></data>
+  <data name="Reset light colours" xml:space="preserve"><value>ライトの色をリセット</value></data>
+  <data name="Light colour 1" xml:space="preserve"><value>ライトの色 1</value></data>
+  <data name="Light colour 2" xml:space="preserve"><value>ライトの色 2</value></data>
+  <data name="Light colour 3" xml:space="preserve"><value>ライトの色 3</value></data>
 </root>

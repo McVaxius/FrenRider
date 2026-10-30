@@ -10,6 +10,7 @@ using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.IoC;
 using Dalamud.Plugin;
 using Dalamud.Interface.Windowing;
+using Dalamud.Interface.ImGuiFileDialog;
 using Dalamud.Plugin.Services;
 using ECommons;
 using FrenRider.IPC;
@@ -141,6 +142,10 @@ public sealed partial class Plugin : IDalamudPlugin
     private uint[]? lcarsEditorDraft;
     private (uint Background, uint First, uint Second, uint Third)? lcarsEditorSaved;
     private uint[]? glassWaveEditorDraft;
+    private bool glassWaveEditorLights;
+    private string glassImageEditorDraft = "";
+    private string? glassImageEditorSaved;
+    private readonly FileDialogManager glassImagePicker = new();
     private (uint First, uint Second, uint Third)? glassWaveEditorSaved;
     private (FrenRiderUiStyle Style, MaterialColorSettings? Glass, MaterialColorSettings? Spatial,
         MaterialColorSettings? Cyberpunk, uint Background, uint First, uint Second, uint Third) appliedSurface;
@@ -388,6 +393,7 @@ public sealed partial class Plugin : IDalamudPlugin
         PluginInterface.UiBuilder.OpenConfigUi -= ToggleConfigUi;
         PluginInterface.UiBuilder.OpenMainUi -= ToggleMainUi;
 
+        glassImagePicker.Reset();
         backgroundGlass?.Dispose();
         backgroundGlass = null;
         WindowSystem.RemoveAllWindows();
@@ -525,6 +531,12 @@ public sealed partial class Plugin : IDalamudPlugin
             }
             finally { ImGui.EndDisabled(); }
             var glass = backgroundGlass;
+            if (Configuration.UiStyle == FrenRiderUiStyle.Glassmorphism &&
+                Configuration.UiGlassBackground == FrenRiderGlassBackground.Image)
+            {
+                UiGui.TextUnformatted("Image backgrounds remain visible to screenshots.");
+                return changed;
+            }
             var paused = glass?.ScreenshotsPaused == true;
             ImGui.BeginDisabled(!paused && glass?.CanPauseForScreenshots != true);
             try
@@ -655,6 +667,8 @@ public sealed partial class Plugin : IDalamudPlugin
                 }
                 if (selection == 3)
                 {
+                    changed |= DrawGlassBackgroundSelector();
+                    if (Configuration.UiGlassBackground == FrenRiderGlassBackground.Image) return changed;
                     var animate = Configuration.UiGlassAnimation;
                     if (UiGui.Checkbox("Animation", ref animate)) { Configuration.UiGlassAnimation = animate; changed = true; }
                     ImGui.BeginDisabled(!animate);
@@ -684,14 +698,19 @@ public sealed partial class Plugin : IDalamudPlugin
                     }
                     finally { ImGui.EndDisabled(); }
                     ImGui.Spacing();
-                    UiGui.TextUnformatted("Wave colours");
-                    var waveSaved = (Configuration.UiGlassWave1Rgb, Configuration.UiGlassWave2Rgb, Configuration.UiGlassWave3Rgb);
-                    if (glassWaveEditorDraft is null || glassWaveEditorSaved != waveSaved)
+                    var lights = Configuration.UiGlassBackground == FrenRiderGlassBackground.Lights;
+                    UiGui.TextUnformatted(lights ? "Light colours" : "Wave colours");
+                    var waveSaved = lights
+                        ? (Configuration.UiGlassLight1Rgb, Configuration.UiGlassLight2Rgb, Configuration.UiGlassLight3Rgb)
+                        : (Configuration.UiGlassWave1Rgb, Configuration.UiGlassWave2Rgb, Configuration.UiGlassWave3Rgb);
+                    if (glassWaveEditorDraft is null || glassWaveEditorSaved != waveSaved || glassWaveEditorLights != lights)
                     {
                         glassWaveEditorDraft = [waveSaved.Item1, waveSaved.Item2, waveSaved.Item3];
                         glassWaveEditorSaved = waveSaved;
+                        glassWaveEditorLights = lights;
                     }
-                    string[] waveLabels = ["Wave colour 1", "Wave colour 2", "Wave colour 3"];
+                    string[] waveLabels = lights ? ["Light colour 1", "Light colour 2", "Light colour 3"]
+                        : ["Wave colour 1", "Wave colour 2", "Wave colour 3"];
                     uint[] waveDefaults = [FrenRider.Configuration.DefaultGlassWave1Rgb,
                         FrenRider.Configuration.DefaultGlassWave2Rgb, FrenRider.Configuration.DefaultGlassWave3Rgb];
                     var waveLabelWidth = waveLabels.Max(label => MaterialText.Measure(UiText.T(label)).X);
@@ -701,16 +720,25 @@ public sealed partial class Plugin : IDalamudPlugin
                     ImGui.BeginDisabled(glassWaveEditorDraft.SequenceEqual(waveDefaults));
                     try
                     {
-                        if (UiGui.Button("Reset wave colours##reset-wave-colours"))
+                        if (UiGui.Button(lights ? "Reset light colours##reset-wave-colours" : "Reset wave colours##reset-wave-colours"))
                         { waveDefaults.CopyTo(glassWaveEditorDraft, 0); waveCompleted = true; }
                     }
                     finally { ImGui.EndDisabled(); }
                     var waveDraft = (glassWaveEditorDraft[0], glassWaveEditorDraft[1], glassWaveEditorDraft[2]);
                     if (waveCompleted && waveDraft != waveSaved)
                     {
-                        Configuration.UiGlassWave1Rgb = waveDraft.Item1;
-                        Configuration.UiGlassWave2Rgb = waveDraft.Item2;
-                        Configuration.UiGlassWave3Rgb = waveDraft.Item3;
+                        if (lights)
+                        {
+                            Configuration.UiGlassLight1Rgb = waveDraft.Item1;
+                            Configuration.UiGlassLight2Rgb = waveDraft.Item2;
+                            Configuration.UiGlassLight3Rgb = waveDraft.Item3;
+                        }
+                        else
+                        {
+                            Configuration.UiGlassWave1Rgb = waveDraft.Item1;
+                            Configuration.UiGlassWave2Rgb = waveDraft.Item2;
+                            Configuration.UiGlassWave3Rgb = waveDraft.Item3;
+                        }
                         glassWaveEditorSaved = waveDraft;
                         changed = true;
                     }
@@ -719,6 +747,62 @@ public sealed partial class Plugin : IDalamudPlugin
             return changed;
         }
         finally { ImGui.PopID(); }
+    }
+
+    private bool DrawGlassBackgroundSelector()
+    {
+        var changed = false;
+        var mode = (int)Configuration.UiGlassBackground;
+        using (UiGui.SettingRow("Background mode"))
+        {
+            ImGui.SetNextItemWidth(200 * MaterialTheme.Metrics.Scale);
+            if (UiGui.Combo("Background mode", ref mode, ["Waves", "Lights", "Image"], 3))
+            { Configuration.UiGlassBackground = (FrenRiderGlassBackground)mode; changed = true; }
+        }
+        if (Configuration.UiGlassBackground == FrenRiderGlassBackground.Lights)
+        {
+            var effect = (int)Configuration.UiGlassLights;
+            using (UiGui.SettingRow("Light effect"))
+            {
+                ImGui.SetNextItemWidth(240 * MaterialTheme.Metrics.Scale);
+                if (UiGui.Combo("Light effect", ref effect, ["Ambient glows", "Sweeping beams", "Mouse-following glow"], 3))
+                { Configuration.UiGlassLights = (FrenRiderGlassLights)effect; changed = true; }
+            }
+        }
+        if (Configuration.UiGlassBackground == FrenRiderGlassBackground.Image)
+        {
+            var saved = Configuration.UiGlassImagePath ?? "";
+            if (glassImageEditorSaved != saved)
+            { glassImageEditorDraft = saved; glassImageEditorSaved = saved; }
+            using (UiGui.SettingRow("Image file"))
+            {
+                ImGui.SetNextItemWidth(Math.Max(160 * MaterialTheme.Metrics.Scale, ImGui.GetContentRegionAvail().X));
+                UiGui.InputText("Image file", ref glassImageEditorDraft, 4096);
+            }
+            var inlineButtons = ImGui.GetContentRegionAvail().X >=
+                MaterialText.Measure(UiText.T("Browse...")).X + MaterialText.Measure(UiText.T("Load image")).X +
+                ImGui.GetStyle().FramePadding.X * 4 + ImGui.GetStyle().ItemSpacing.X;
+            if (UiGui.Button("Browse..."))
+                glassImagePicker.OpenFileDialog(UiText.T("Choose background image") + "###FrenRiderBackgroundImagePicker",
+                    UiText.T("Images") + "{.png,.jpg,.jpeg,.bmp,.gif,.webp,.tif,.tiff,.dds,.tga},.*",
+                    (accepted, path) =>
+                    {
+                        if (!accepted) return;
+                        var previous = Configuration.UiGlassImagePath;
+                        Configuration.UiGlassImagePath = glassImageEditorDraft = glassImageEditorSaved = path;
+                        if (path != previous) Configuration.Save();
+                    });
+            if (inlineButtons) ImGui.SameLine();
+            if (UiGui.Button("Load image"))
+            {
+                var path = glassImageEditorDraft.Trim().Trim('"');
+                Configuration.UiGlassImagePath = glassImageEditorDraft = glassImageEditorSaved = path;
+                changed |= path != saved;
+            }
+            UiGui.TextWrapped("The image fills the window. Blur (%) applies to the image.");
+            if (backgroundGlass?.ImageProblem is { } problem) UiGui.TextWrapped(problem);
+        }
+        return changed;
     }
 
     private static bool DrawPaletteReset(bool atDefault)
@@ -762,6 +846,8 @@ public sealed partial class Plugin : IDalamudPlugin
     private void DrawUi()
     {
         ApplyAppearance();
+        // Keep the native picker usable independently of the appearance popup and plugin windows.
+        glassImagePicker.Draw();
         using var appearance = FrenRiderPresentation.Push(Configuration);
         if (!MainWindow.IsOpen && !ConfigWindow.IsOpen && !MagiaMiniWindow.IsOpen && !AutoDutyWarningWindow.IsOpen)
         {
@@ -811,9 +897,12 @@ public sealed partial class Plugin : IDalamudPlugin
             }
         }
         var useGlass = FrenRiderPresentation.BackgroundBlurEnabled(Configuration);
-        if (useGlass) backgroundGlass ??= new(PluginInterface, Log);
+        var useImage = Configuration.UiStylingEnabled && Configuration.UiStyle == FrenRiderUiStyle.Glassmorphism &&
+            Configuration.UiGlassBackground == FrenRiderGlassBackground.Image;
+        if (useGlass || useImage) backgroundGlass ??= new(PluginInterface, Log);
+        backgroundGlass?.ConfigureImage(TextureProvider, useImage, Configuration.UiGlassImagePath);
         backgroundGlass?.BeginFrame();
-        using var glassAppearance = FrenRiderPresentation.Push(Configuration, useGlass ? backgroundGlass : null);
+        using var glassAppearance = FrenRiderPresentation.Push(Configuration, useGlass || useImage ? backgroundGlass : null);
         using var theme = MaterialTheme.Push(uiTheme, ImGuiHelpers.GlobalScale,
             Configuration.UiStylingEnabled ? MaterialStyleMode.ColorsOnly : MaterialStyleMode.Native);
         using var geometry = new MaterialStyleScope();
@@ -847,7 +936,7 @@ public sealed partial class Plugin : IDalamudPlugin
             DrawAppearanceWindows(WindowSystem, useGlass, WindowSystem.Draw);
             completed = true;
         }
-        finally { backgroundGlass?.EndFrame(useGlass && completed); }
+        finally { backgroundGlass?.EndFrame((useGlass || useImage) && completed); }
     }
 
     internal static void DrawAppearanceWindows(WindowSystem windows, bool useGlass, Action draw)

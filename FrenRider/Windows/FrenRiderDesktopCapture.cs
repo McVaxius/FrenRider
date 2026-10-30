@@ -199,7 +199,9 @@ internal sealed unsafe class FrenRiderDesktopCapture : IDisposable
             Trace(2, "physical client bounds unavailable");
             return false;
         }
-        // ImGui's saved origin freezes shape coordinates. The HWND supplies the current physical desktop origin.
+        // Frozen glass follows its window using the captured location, including moves to an uncaptured monitor.
+        if (IsPaused && excludedWindowBounds.TryGetValue(hwnd, out var frozenBounds)) bounds = frozenBounds;
+        // ImGui's origin fixes shape coordinates; live sampling follows the HWND and paused sampling keeps its captured origin.
         var physicalWidth = (long)bounds.right - bounds.left;
         var physicalHeight = (long)bounds.bottom - bounds.top;
         var targetScale = new Vector2(targetWidth / (float)physicalWidth, targetHeight / (float)physicalHeight);
@@ -356,6 +358,52 @@ internal sealed unsafe class FrenRiderDesktopCapture : IDisposable
             ReportFailure(exception.Message);
             return false;
         }
+    }
+
+    internal bool TryGetImageBackdrop(nint imageTexture, uint width, uint height,
+        Vector4 rootBounds, out nint texture)
+    {
+        texture = 0;
+        if (disposed || gameDevice == null || gameContext == null || imageTexture == 0 ||
+            width == 0 || height == 0 || width > 16384 || height > 16384 ||
+            !float.IsFinite(rootBounds.X) || !float.IsFinite(rootBounds.Y) ||
+            !float.IsFinite(rootBounds.Z) || !float.IsFinite(rootBounds.W) ||
+            rootBounds.Z <= rootBounds.X || rootBounds.W <= rootBounds.Y) return false;
+        try
+        {
+            var image = (ID3D11Texture2D*)imageTexture;
+            D3D11_TEXTURE2D_DESC description;
+            image->GetDesc(&description);
+            if (description.Width == 0 || description.Height == 0 || description.SampleDesc.Count != 1) return false;
+            EnsureAtlas(width, height);
+            if (desktopView == null || desktopViewTexture != imageTexture)
+            {
+                Release(ref desktopView);
+                ID3D11ShaderResourceView* view = null;
+                Check(gameDevice->CreateShaderResourceView((ID3D11Resource*)image, null, &view), "Read selected image backdrop");
+                desktopView = view;
+                desktopViewTexture = imageTexture;
+            }
+            var rootSize = new Vector2(rootBounds.Z - rootBounds.X, rootBounds.W - rootBounds.Y);
+            var uv = FrenRiderGlass.CoverUv(new(description.Width, description.Height), rootSize);
+            var range = new Vector2(uv.Z - uv.X, uv.W - uv.Y);
+            var mapping = new Matrix3x2(width / rootSize.X * range.X, 0, 0, height / rootSize.Y * range.Y,
+                uv.X - rootBounds.X / rootSize.X * range.X, uv.Y - rootBounds.Y / rootSize.Y * range.Y);
+            DrawMapped(atlasView, desktopView, null, mapping, new Vector4(0, 0, width, height));
+            texture = (nint)atlas;
+            return true;
+        }
+        catch (Exception exception)
+        {
+            ReportFailure(exception.Message);
+            return false;
+        }
+    }
+
+    internal void ReleaseImageSource()
+    {
+        Release(ref desktopView);
+        desktopViewTexture = 0;
     }
 
     private static bool TryGetPhysicalClientBounds(nint hwnd, out RECT bounds)

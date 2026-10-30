@@ -93,6 +93,9 @@ internal sealed class FrenRiderCaptureExclusion : IDisposable
         UnavailableReason = null;
         BoundaryChangedWindows = Array.Empty<nint>();
         if (disposed) return Fail("Capture exclusion is disposed.");
+        var desired = new HashSet<nint>(ownedDetachedWindows);
+        foreach (var window in new List<nint>(entries.Keys))
+            if (!desired.Contains(window) && !Restore(window)) return false;
         foreach (var window in ownedDetachedWindows)
         {
             if (!CanModify(window)) return Fail("Screenshot visibility requires owned detached windows.");

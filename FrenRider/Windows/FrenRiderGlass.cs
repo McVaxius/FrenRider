@@ -4,6 +4,9 @@ using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
+using Dalamud.Interface.Textures.TextureWraps;
+using TerraFX.Interop.DirectX;
+using TerraFX.Interop.Windows;
 using Glasswork.Backend;
 using Glasswork.Glass;
 
@@ -20,6 +23,11 @@ internal sealed class FrenRiderGlass : IDisposable
     private FrenRiderDetachedGlass? detached;
     private nint currentDevice;
     private bool disposed;
+    private IDalamudTextureWrap? imageWrap;
+    private string? imagePath;
+    internal bool ImageAvailable => imageWrap is { Width: > 0, Height: > 0 };
+    internal bool ImageMode { get; private set; }
+    internal string? ImageProblem { get; private set; }
 #if DEBUG
     private uint tracedRoutes;
 #endif
@@ -28,6 +36,49 @@ internal sealed class FrenRiderGlass : IDisposable
     internal bool ScreenshotsPaused => detached?.ScreenshotsPaused == true;
     internal bool CanPauseForScreenshots => detached?.CanPauseForScreenshots == true;
     internal bool TrySetScreenshotsPaused(bool paused) => detached?.TrySetScreenshotsPaused(paused) == true;
+
+    internal void ConfigureImage(ITextureProvider textures, bool enabled, string? path)
+    {
+        if (ImageMode != enabled || imagePath != path) detached?.ReleaseImageSource();
+        imagePath = path;
+        ImageMode = enabled;
+        imageWrap = null;
+        ImageProblem = null;
+        if (!enabled) return;
+        if (string.IsNullOrWhiteSpace(path)) { ImageProblem = "Choose an image file."; return; }
+        try
+        {
+            if (!textures.GetFromFile(path).TryGetWrap(out imageWrap, out var error))
+                ImageProblem = error == null ? "Loading image..." : "Image could not be loaded.";
+        }
+        catch { ImageProblem = "Image could not be loaded."; }
+    }
+
+    internal bool DrawPlainImage(ImDrawListPtr drawList, Vector2 min, Vector2 max)
+    {
+        if (!ImageMode) return false;
+        detached?.MarkImageWindow();
+        if (!ImageAvailable || imageWrap == null || drawList.IsNull) return false;
+        var root = ImGuiP.GetCurrentWindowRead().RootWindow;
+        var uv = CoverUv(new(imageWrap.Width, imageWrap.Height), root.Size);
+        var range = new Vector2(uv.Z - uv.X, uv.W - uv.Y);
+        var first = new Vector2(uv.X, uv.Y) + (min - root.Pos) / root.Size * range;
+        var last = new Vector2(uv.X, uv.Y) + (max - root.Pos) / root.Size * range;
+        drawList.AddImage(imageWrap.Handle, min, max, first, last, ImGui.GetColorU32(Vector4.One));
+        return true;
+    }
+
+    internal static Vector4 CoverUv(Vector2 imageSize, Vector2 areaSize)
+    {
+        if (!float.IsFinite(imageSize.X) || !float.IsFinite(imageSize.Y) ||
+            !float.IsFinite(areaSize.X) || !float.IsFinite(areaSize.Y) ||
+            imageSize.X <= 0 || imageSize.Y <= 0 || areaSize.X <= 0 || areaSize.Y <= 0)
+            return new(0, 0, 1, 1);
+        var scale = MathF.Max(areaSize.X / imageSize.X, areaSize.Y / imageSize.Y);
+        var extent = areaSize / (imageSize * scale);
+        var start = (Vector2.One - extent) * .5f;
+        return new(start.X, start.Y, start.X + extent.X, start.Y + extent.Y);
+    }
 
     internal FrenRiderGlass(IDalamudPluginInterface pluginInterface, IPluginLog pluginLog)
     {
@@ -92,6 +143,7 @@ internal sealed class FrenRiderGlass : IDisposable
             !float.IsFinite(rounding) || !float.IsFinite(frost)) return false;
 
         var material = CreateMaterial(tint, frost, Opacity, ImGuiHelpers.GlobalScale);
+        if (ImageMode) return DrawImageBackground(drawList, min, max, rounding, in material, windowBackground);
         var viewport = ImGui.GetWindowViewport();
         if (!viewport.IsNull && viewport.ID != ImGui.GetMainViewport().ID)
         {
@@ -114,6 +166,36 @@ internal sealed class FrenRiderGlass : IDisposable
 
         var shape = GlassShape.FromRect(min, size, rounding);
         return layer.TryDraw(drawList, in shape, in material);
+    }
+
+    private unsafe bool DrawImageBackground(ImDrawListPtr drawList, Vector2 min, Vector2 max, float rounding,
+        in GlassMaterial material, bool windowBackground)
+    {
+        detached?.MarkImageWindow();
+        if (detached == null || imageWrap == null) return false;
+        var view = (ID3D11ShaderResourceView*)(nint)imageWrap.Handle.Handle;
+        if (view == null) return false;
+        ID3D11Resource* resource = null;
+        ID3D11Texture2D* texture = null;
+        try
+        {
+            view->GetResource(&resource);
+            if (resource == null) return false;
+            var id = IID.IID_ID3D11Texture2D;
+            void* queried = null;
+            if (resource->QueryInterface(&id, &queried).FAILED || queried == null) return false;
+            texture = (ID3D11Texture2D*)queried;
+            var viewport = ImGui.GetWindowViewport();
+            var root = ImGuiP.GetCurrentWindowRead().RootWindow;
+            var origin = root.Pos - viewport.Pos;
+            var bounds = new Vector4(origin.X, origin.Y, origin.X + root.Size.X, origin.Y + root.Size.Y);
+            return detached.TryDraw(drawList, min, max, rounding, in material, windowBackground, (nint)texture, bounds);
+        }
+        finally
+        {
+            if (texture != null) texture->Release();
+            if (resource != null) resource->Release();
+        }
     }
 
     internal static GlassMaterial CreateMaterial(Vector4 tint, float frost, float opacity, float scale)
@@ -155,6 +237,7 @@ internal sealed class FrenRiderGlass : IDisposable
     {
         if (disposed) return;
         disposed = true;
+        imageWrap = null;
         layer?.Dispose();
         layer = null;
         detached?.Dispose();

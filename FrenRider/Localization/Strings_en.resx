@@ -3346,4 +3346,27 @@ On: use the BossMod presets below with any rotation provider. A custom preset ma
   <data name="Use styled UI" xml:space="preserve"><value>Use styled UI</value></data>
   <data name="Lock windows" xml:space="preserve"><value>Lock windows</value></data>
   <data name="Unlock windows" xml:space="preserve"><value>Unlock windows</value></data>
+  <data name="Background mode" xml:space="preserve"><value>Background mode</value></data>
+  <data name="Waves" xml:space="preserve"><value>Waves</value></data>
+  <data name="Lights" xml:space="preserve"><value>Lights</value></data>
+  <data name="Image" xml:space="preserve"><value>Image</value></data>
+  <data name="Light effect" xml:space="preserve"><value>Light effect</value></data>
+  <data name="Ambient glows" xml:space="preserve"><value>Ambient glows</value></data>
+  <data name="Sweeping beams" xml:space="preserve"><value>Sweeping beams</value></data>
+  <data name="Mouse-following glow" xml:space="preserve"><value>Mouse-following glow</value></data>
+  <data name="Image file" xml:space="preserve"><value>Image file</value></data>
+  <data name="Browse..." xml:space="preserve"><value>Browse...</value></data>
+  <data name="Choose background image" xml:space="preserve"><value>Choose background image</value></data>
+  <data name="Images" xml:space="preserve"><value>Images</value></data>
+  <data name="Load image" xml:space="preserve"><value>Load image</value></data>
+  <data name="The image fills the window. Blur (%) applies to the image." xml:space="preserve"><value>The image fills the window. Blur (%) applies to the image.</value></data>
+  <data name="Choose an image file." xml:space="preserve"><value>Choose an image file.</value></data>
+  <data name="Loading image..." xml:space="preserve"><value>Loading image...</value></data>
+  <data name="Image could not be loaded." xml:space="preserve"><value>Image could not be loaded.</value></data>
+  <data name="Image backgrounds remain visible to screenshots." xml:space="preserve"><value>Image backgrounds remain visible to screenshots.</value></data>
+  <data name="Light colours" xml:space="preserve"><value>Light colours</value></data>
+  <data name="Reset light colours" xml:space="preserve"><value>Reset light colours</value></data>
+  <data name="Light colour 1" xml:space="preserve"><value>Light colour 1</value></data>
+  <data name="Light colour 2" xml:space="preserve"><value>Light colour 2</value></data>
+  <data name="Light colour 3" xml:space="preserve"><value>Light colour 3</value></data>
 </root>

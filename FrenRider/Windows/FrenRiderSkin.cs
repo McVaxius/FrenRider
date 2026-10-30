@@ -33,7 +33,8 @@ internal static partial class FrenRiderPresentation
         var c = MaterialTheme.Current.Colors;
         var glass = DrawGlassBackground(dl, min, max, ImGui.GetStyle().WindowRounding,
             IsLcars ? LcarsBackground : c.Background, windowBackground: true);
-        activeGlassRoot = glass ? ImGuiP.GetCurrentWindowRead().RootWindow.ID : 0;
+        activeGlassRoot = glass || activeGlass is { ImageMode: true, ImageAvailable: true }
+            ? ImGuiP.GetCurrentWindowRead().RootWindow.ID : 0;
         if (glass && (IsLcars || Style != FrenRiderUiStyle.Glassmorphism)) return;
         if (!Decorated)
         {
@@ -49,6 +50,16 @@ internal static partial class FrenRiderPresentation
             if (IsLcars) return;
             if (Style == FrenRiderUiStyle.Glassmorphism)
             {
+                if (ActiveConfiguration?.UiGlassBackground == FrenRiderGlassBackground.Lights)
+                {
+                    DrawGlassLights(dl, min, max, glass);
+                    return;
+                }
+                if (ActiveConfiguration?.UiGlassBackground == FrenRiderGlassBackground.Image)
+                {
+                    if (!glass) activeGlass?.DrawPlainImage(dl, min, max);
+                    return;
+                }
                 var size = max - min;
                 if (size.X <= 0 || size.Y <= 0) return;
                 var wave1 = Rgb(ActiveConfiguration?.UiGlassWave1Rgb ?? Configuration.DefaultGlassWave1Rgb);
@@ -143,8 +154,8 @@ internal static partial class FrenRiderPresentation
             else if (Style == FrenRiderUiStyle.Cyberpunk && !inset)
                 dl.AddRectFilled(min + new Vector2(0, 3 * s), max + new Vector2(0, 3 * s), Ink(new Vector4(0, 0, 0, .22f)), 3 * s);
         }
-        var glass = background && DrawGlassBackground(dl, min, max, rounding * s,
-            IsLcars ? LcarsBackground : c.Background);
+        var glass = background && (DrawGlassBackground(dl, min, max, rounding * s,
+            IsLcars ? LcarsBackground : c.Background) || activeGlass?.DrawPlainImage(dl, min, max) == true);
         if (!Decorated)
         {
             if (!glass) dl.AddRectFilled(min, max, Ink(c.SurfaceContainerLow), 6 * s);
