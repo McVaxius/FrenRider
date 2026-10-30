@@ -471,8 +471,12 @@ public sealed partial class Plugin : IDalamudPlugin
         }
     }
 
-    internal void DrawAppearanceTitleBarPopups(Dalamud.Interface.Windowing.Window owner)
+    internal void DrawAppearanceTitleBarPopups(Dalamud.Interface.Windowing.Window owner, MaterialWindowOpacity opacity)
     {
+        var native = Dalamud.Bindings.ImGui.ImGuiP.FindWindowByName(owner.WindowName);
+        if (backgroundGlass != null)
+            backgroundGlass.Opacity = Configuration.UiTransparencyEnabled
+                ? native.IsNull || native.Appearing ? Configuration.UiWindowOpacityPercent / 100f : opacity.CurrentOpacity : 1;
         if (appearanceTitleBars.TryGetValue(owner, out var actions)) actions.DrawPopups();
     }
 

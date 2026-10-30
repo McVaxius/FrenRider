@@ -1,5 +1,6 @@
 2026-10-29 - 4.1.0.1 - Use the approved shared Glasswork renderer
 
+- Keep titlebar popup glass at its own window opacity, including collapsed and reopened windows, without applying foreground opacity twice.
 - Use AethertekUI.Dalamud's promoted renderer, desktop capture and image backdrop implementation instead of maintaining plugin-local copies. Preserve the approved Waves/Lights/Image behavior, native file picker, background tint and foreground controls; screenshot pause remains off by default.
 - Keep FrenRider's existing saved appearance fields and custom window layout. Continue shipping all three Glasswork libraries and the MIT notice through the shared dependency. Preset installation and automation behavior are unchanged.
 

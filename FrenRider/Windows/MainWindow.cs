@@ -103,7 +103,7 @@ public class MainWindow : Window, IDisposable
             movementLock.Restore(this);
             motion.Restore(this);
             UiGui.ImageTitleWithStatus(this, "Fren Rider v" + CurrentVersion, plugin.OriginalIcon, plugin.TitlebarStatus());
-            plugin.DrawAppearanceTitleBarPopups(this);
+            plugin.DrawAppearanceTitleBarPopups(this, windowOpacity);
             plugin.ApplyWindowOpacity(windowOpacity, WindowName);
         }
         finally { ImGui.PopStyleVar(); }

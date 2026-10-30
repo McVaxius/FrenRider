@@ -49,7 +49,7 @@ public class AutoDutyWarningWindow : Window
         movementLock.Restore(this);
         motion.Restore(this);
         UiGui.ImageTitleWithStatus(this, UiText.T(WindowName.Split("##", 2)[0]), plugin.OriginalIcon, plugin.TitlebarStatus());
-        plugin.DrawAppearanceTitleBarPopups(this);
+        plugin.DrawAppearanceTitleBarPopups(this, windowOpacity);
         plugin.ApplyWindowOpacity(windowOpacity, WindowName);
     }
 
