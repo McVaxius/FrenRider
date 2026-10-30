@@ -75,15 +75,17 @@ public sealed unsafe class ColorAppearanceTests
         Assert.True(config.UiWindowsLocked);
         Assert.True(Plugin.TryApplyWindowCommand(config, "LOCK"));
         Assert.True(config.UiWindowsLocked);
-        Assert.True(Plugin.TryApplyWindowCommand(config, "ui off"));
+        Assert.True(Plugin.TryApplyWindowCommand(config, "style off"));
         Assert.False(config.UiStylingEnabled);
         Assert.Equal(FrenRiderUiStyle.Glassmorphism, config.UiStyle);
         Assert.True(config.UiWindowsLocked);
         Assert.False(Plugin.TryApplyWindowCommand(config, "off"));
+        foreach (var legacy in new[] { "ui", "ui on", "ui off" })
+            Assert.False(Plugin.TryApplyWindowCommand(config, legacy));
         Assert.True(Plugin.TryApplyWindowCommand(config, "unlock"));
         Assert.False(config.UiWindowsLocked);
         Assert.False(config.UiStylingEnabled);
-        Assert.True(Plugin.TryApplyWindowCommand(config, "ui on"));
+        Assert.True(Plugin.TryApplyWindowCommand(config, "styling on"));
         Assert.True(config.UiStylingEnabled);
         Assert.Equal(0x123456u, config.UiAccentRgb);
     }

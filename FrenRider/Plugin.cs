@@ -1191,9 +1191,9 @@ public sealed partial class Plugin : IDalamudPlugin
         {
             case "lock": configuration.UiWindowsLocked = true; return true;
             case "unlock": configuration.UiWindowsLocked = false; return true;
-            case "ui": configuration.UiStylingEnabled = !configuration.UiStylingEnabled; return true;
-            case "ui on": configuration.UiStylingEnabled = true; return true;
-            case "ui off": configuration.UiStylingEnabled = false; return true;
+            case "style": case "styling": configuration.UiStylingEnabled = !configuration.UiStylingEnabled; return true;
+            case "style on": case "styling on": configuration.UiStylingEnabled = true; return true;
+            case "style off": case "styling off": configuration.UiStylingEnabled = false; return true;
             default: return false;
         }
     }
