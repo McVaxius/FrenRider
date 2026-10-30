@@ -1,3 +1,4 @@
+using AethertekUI.Dalamud;
 using System.Numerics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -127,7 +128,7 @@ public sealed unsafe class ColorAppearanceTests
             config.UiColors = config.UiColors.WithBackgroundBlur(MaterialColorMode.Cyberpunk, true);
             var submissions = new List<(bool Window, float Frost, Vector4 Tint)>();
             var available = true;
-            using var renderer = new FrenRiderGlass((list, min, max, rounding, tint, frost, window) =>
+            using var renderer = new MaterialGlassRenderer((list, min, max, rounding, tint, frost, window) =>
             {
                 submissions.Add((window, frost, tint));
                 return available;
@@ -231,7 +232,7 @@ public sealed unsafe class ColorAppearanceTests
         {
             var config = new Configuration { UiStyle = FrenRiderUiStyle.Glassmorphism, UiGlassAnimation = false };
             var submissions = new List<(bool Window, float Frost)>();
-            using var renderer = new FrenRiderGlass((_, _, _, _, _, frost, window) =>
+            using var renderer = new MaterialGlassRenderer((_, _, _, _, _, frost, window) =>
             {
                 submissions.Add((window, frost));
                 return true;

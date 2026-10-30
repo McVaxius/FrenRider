@@ -20,20 +20,19 @@
         "resolved": "3.2.0.17",
         "contentHash": "B6l4Sb6anZh4ttLsEklx4LTE5DDxbEicZgqYNz5sgDb9y2wR5sVebYEWSrPgwSVPanx+UxQcocTtBrqBQfmN8g=="
       },
+      "Glasswork": {
+        "type": "Transitive",
+        "resolved": "0.1.0-beta.3",
+        "contentHash": "0f5lLp4ehX0b3O4Oy7lTrENtmUmfzMIsrGstrzEU0O9iqVoJIQiNN2KvGfO/hpWdsSQNxe7hRsWi/q+MEvDpFQ=="
+      },
       "Glasswork.Backend": {
-        "type": "Direct",
-        "requested": "[0.1.0-beta.3, 0.1.0-beta.3]",
+        "type": "Transitive",
         "resolved": "0.1.0-beta.3",
         "contentHash": "eVUUav5kLZmhVEcl/f5Iot2DwUzJ5zVwNDcqHfJJPd5+lPHFBC9OiKJ9KLzoZtVdkEJettyEH/eD/pDYA3vIUQ==",
         "dependencies": {
           "Glasswork": "0.1.0-beta.3",
           "Glasswork.Glass": "0.1.0-beta.3"
         }
-      },
-      "Glasswork": {
-        "type": "Transitive",
-        "resolved": "0.1.0-beta.3",
-        "contentHash": "0f5lLp4ehX0b3O4Oy7lTrENtmUmfzMIsrGstrzEU0O9iqVoJIQiNN2KvGfO/hpWdsSQNxe7hRsWi/q+MEvDpFQ=="
       },
       "Glasswork.Glass": {
         "type": "Transitive",
@@ -49,7 +48,8 @@
       "aethertekui.dalamud": {
         "type": "Project",
         "dependencies": {
-          "AethertekUI": "[0.3.0, )"
+          "AethertekUI": "[0.3.0, )",
+          "Glasswork.Backend": "[0.1.0-beta.3, 0.1.0-beta.3]"
         }
       }
     }

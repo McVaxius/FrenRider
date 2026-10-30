@@ -1,3 +1,4 @@
+using AethertekUI.Dalamud;
 using System.Numerics;
 using System.Reflection;
 using AethertekUI;
@@ -51,7 +52,7 @@ public sealed unsafe class GlassBackgroundTests
         {
             var config = new Configuration { UiStyle = FrenRiderUiStyle.Glassmorphism,
                 UiGlassBackground = FrenRiderGlassBackground.Lights, UiGlassLights = effect, UiGlassAnimation = false };
-            using var renderer = new FrenRiderGlass((_, _, _, _, _, _, _) => true);
+            using var renderer = new MaterialGlassRenderer((_, _, _, _, _, _, _) => true);
             var io = ImGui.GetIO();
             io.IniFilename = null; io.LogFilename = null; io.DisplaySize = new(1000, 800); io.DeltaTime = .1f;
             io.Fonts.AddFontDefault();
@@ -108,7 +109,7 @@ public sealed unsafe class GlassBackgroundTests
         ID3D11RenderTargetView* view = null;
         var previous = ImGui.GetCurrentContext();
         var ui = ImGui.CreateContext();
-        FrenRiderDetachedGlass? glass = null;
+        MaterialDetachedGlass? glass = null;
         try
         {
             Assert.True(DirectX.D3D11CreateDevice(null, D3D_DRIVER_TYPE.D3D_DRIVER_TYPE_WARP,
@@ -133,9 +134,9 @@ public sealed unsafe class GlassBackgroundTests
             Assert.True(device->CreateTexture2D(&description, null, &staging).SUCCEEDED);
             glass = new((nint)device, ActivationModeTests.Proxy<IPluginLog>((_, _) => null));
             const BindingFlags fields = BindingFlags.Instance | BindingFlags.NonPublic;
-            typeof(FrenRiderDetachedGlass).GetField("enabled", fields)!.SetValue(glass, true);
-            var capture = (FrenRiderDesktopCapture)typeof(FrenRiderDetachedGlass).GetField("capture", fields)!.GetValue(glass)!;
-            var exclusion = (FrenRiderCaptureExclusion)typeof(FrenRiderDetachedGlass).GetField("exclusion", fields)!.GetValue(glass)!;
+            typeof(MaterialDetachedGlass).GetField("enabled", fields)!.SetValue(glass, true);
+            var capture = (MaterialDesktopCapture)typeof(MaterialDetachedGlass).GetField("capture", fields)!.GetValue(glass)!;
+            var exclusion = (MaterialCaptureExclusion)typeof(MaterialDetachedGlass).GetField("exclusion", fields)!.GetValue(glass)!;
             Assert.False(exclusion.Ready);
             var viewport = ImGui.GetMainViewport();
             viewport.PlatformHandleRaw = (void*)11;
@@ -146,10 +147,10 @@ public sealed unsafe class GlassBackgroundTests
                 drawContext->ClearRenderTargetView(drawView, clear);
                 var renderView = drawView;
                 drawContext->OMSetRenderTargets(1, &renderView, null);
-                var request = new FrenRiderDetachedGlass.DrawRequest { Hwnd = 11,
+                var request = new MaterialDetachedGlass.DrawRequest { Hwnd = 11,
                     ViewportId = ImGui.GetMainViewport().ID, Frame = 0,
                     Shape = GlassShape.FromRect(new Vector2(8), new Vector2(112), 8), Clip = new(0, 0, 128, 128),
-                    Material = FrenRiderGlass.CreateMaterial(new(.2f, .3f, .4f, .42f), frost, 1, 1),
+                    Material = MaterialGlassRenderer.CreateMaterial(new(.2f, .3f, .4f, .42f), frost, 1, 1),
                     ImageSource = (nint)drawImage, ImageRootBounds = new(0, 0, 128, 128), WindowBackground = true, Composite = true };
                 glass.Render(&request);
                 drawContext->CopyResource((ID3D11Resource*)readback, (ID3D11Resource*)drawTarget);
@@ -177,7 +178,7 @@ public sealed unsafe class GlassBackgroundTests
                 .Average(x => Math.Abs((int)((pixels[64 * 128 + x] >> 8) & 255) - (int)((pixels[64 * 128 + x + 1] >> 8) & 255)));
             Assert.True(Detail(sharp) > 5, "The sharp image lost its patterned detail.");
             Assert.True(Detail(blurred) < Detail(sharp) * .5, "Frost did not blur the supplied image.");
-            Assert.Empty((System.Collections.IList)typeof(FrenRiderDesktopCapture).GetField("outputs", fields)!.GetValue(capture)!);
+            Assert.Empty((System.Collections.IList)typeof(MaterialDesktopCapture).GetField("outputs", fields)!.GetValue(capture)!);
             Assert.False(exclusion.Ready);
         }
         finally

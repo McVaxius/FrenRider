@@ -1,3 +1,4 @@
+using AethertekUI.Dalamud;
 using System.Numerics;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -55,7 +56,7 @@ public sealed class DesktopGlassTests
                 uint Sample(Vector4 tint)
                 {
                     drawContext->ClearRenderTargetView(drawView, clear);
-                    var material = FrenRiderGlass.CreateMaterial(tint, frost, 1, 1);
+                    var material = MaterialGlassRenderer.CreateMaterial(tint, frost, 1, 1);
                     renderer.Draw(drawContext, source, drawView, shapes, in material, clip);
                     drawContext->CopyResource((ID3D11Resource*)readback, (ID3D11Resource*)drawTarget);
                     D3D11_MAPPED_SUBRESOURCE mapped;
@@ -140,7 +141,7 @@ public sealed class DesktopGlassTests
         ID3D11Device* captureDevice = null;
         ID3D11DeviceContext* captureContext = null;
         ID3D11Texture2D* image = null;
-        FrenRiderDesktopCapture? capture = null;
+        MaterialDesktopCapture? capture = null;
         var duplication = (MaskedDuplication*)NativeMemory.AllocZeroed((nuint)sizeof(MaskedDuplication));
         duplication->Vtable = (void**)NativeMemory.AllocZeroed((nuint)(15 * sizeof(void*)));
         try
@@ -158,8 +159,8 @@ public sealed class DesktopGlassTests
             duplication->Vtable[14] = (void*)(delegate* unmanaged<MaskedDuplication*, int>)&ReleaseMaskedFrame;
             capture = new((nint)gameDevice, ActivationModeTests.Proxy<IPluginLog>((_, _) => null));
             const BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic;
-            var adapterType = typeof(FrenRiderDesktopCapture).GetNestedType("AdapterCapture", BindingFlags.NonPublic)!;
-            var outputType = typeof(FrenRiderDesktopCapture).GetNestedType("OutputCapture", BindingFlags.NonPublic)!;
+            var adapterType = typeof(MaterialDesktopCapture).GetNestedType("AdapterCapture", BindingFlags.NonPublic)!;
+            var outputType = typeof(MaterialDesktopCapture).GetNestedType("OutputCapture", BindingFlags.NonPublic)!;
             var adapter = Activator.CreateInstance(adapterType, true)!;
             var output = Activator.CreateInstance(outputType, true)!;
             void SetPointer(object owner, string name, void* pointer)
@@ -177,9 +178,9 @@ public sealed class DesktopGlassTests
                 Rotation = DXGI_MODE_ROTATION.DXGI_MODE_ROTATION_IDENTITY,
             });
             SetPointer(output, "Duplication", duplication);
-            ((System.Collections.IList)typeof(FrenRiderDesktopCapture).GetField("adapters", flags)!.GetValue(capture)!).Add(adapter);
-            ((System.Collections.IList)typeof(FrenRiderDesktopCapture).GetField("outputs", flags)!.GetValue(capture)!).Add(output);
-            var acquired = (bool)typeof(FrenRiderDesktopCapture).GetMethod("CaptureOutput", flags)!.Invoke(capture, [output])!;
+            ((System.Collections.IList)typeof(MaterialDesktopCapture).GetField("adapters", flags)!.GetValue(capture)!).Add(adapter);
+            ((System.Collections.IList)typeof(MaterialDesktopCapture).GetField("outputs", flags)!.GetValue(capture)!).Add(output);
+            var acquired = (bool)typeof(MaterialDesktopCapture).GetMethod("CaptureOutput", flags)!.Invoke(capture, [output])!;
             Assert.True(acquired, "Windows already masked the pixels; its supplied frame must remain usable.");
             Assert.True((bool)outputType.GetField("HasImage", flags)!.GetValue(output)!);
             Assert.Equal(1, duplication->FrameReleases);
@@ -232,14 +233,14 @@ public sealed class DesktopGlassTests
                     description.DesktopCoordinates.left + 32, description.DesktopCoordinates.top + 32,
                     128, 128, default, default, default, null);
             Assert.NotEqual(0, (nint)window);
-            using var capture = new FrenRiderDesktopCapture((nint)device,
+            using var capture = new MaterialDesktopCapture((nint)device,
                 ActivationModeTests.Proxy<IPluginLog>((method, args) =>
                 {
                     if (method.Name == "Warning" && args != null)
                         warnings.Add(string.Join(" ", args.Select(value => value is object[] values ? string.Join(" ", values) : value)));
                     return null;
                 }));
-            using var exclusion = new FrenRiderCaptureExclusion();
+            using var exclusion = new MaterialCaptureExclusion();
             Assert.True(exclusion.Synchronize([(nint)window], (nint)1, true), exclusion.UnavailableReason);
             capture.UpdateExclusionBoundary([(nint)window], exclusion.BoundaryChangedWindows, exclusion.MinimumFrameTimestamp);
             var elapsed = System.Diagnostics.Stopwatch.StartNew();
@@ -273,7 +274,7 @@ public sealed class DesktopGlassTests
         ID3D11RenderTargetView* targetView = null;
         var previousContext = ImGui.GetCurrentContext();
         var uiContext = ImGui.CreateContext();
-        FrenRiderDetachedGlass? glass = null;
+        MaterialDetachedGlass? glass = null;
         using var scene = new ExclusionScene();
         try
         {
@@ -291,15 +292,15 @@ public sealed class DesktopGlassTests
             context->OMSetRenderTargets(1, &targetView, null);
             glass = new((nint)device, ActivationModeTests.Proxy<IPluginLog>((_, _) => null));
             const BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic;
-            typeof(FrenRiderDetachedGlass).GetField("exclusion", flags)!.SetValue(glass, scene.Helper);
-            typeof(FrenRiderDetachedGlass).GetField("enabled", flags)!.SetValue(glass, true);
+            typeof(MaterialDetachedGlass).GetField("exclusion", flags)!.SetValue(glass, scene.Helper);
+            typeof(MaterialDetachedGlass).GetField("enabled", flags)!.SetValue(glass, true);
             Assert.True(scene.Helper.Synchronize([(nint)11], (nint)99, true));
-            var ready = (Dictionary<nint, long>)typeof(FrenRiderDetachedGlass)
+            var ready = (Dictionary<nint, long>)typeof(MaterialDetachedGlass)
                 .GetField("readyWindows", flags)!.GetValue(glass)!;
             ready[11] = scene.Helper.MinimumFrameTimestamp;
             var viewport = ImGui.GetMainViewport();
             viewport.PlatformHandleRaw = (void*)11;
-            var request = new FrenRiderDetachedGlass.DrawRequest
+            var request = new MaterialDetachedGlass.DrawRequest
             {
                 Hwnd = 11, ViewportId = viewport.ID, Frame = 0,
                 Shape = GlassShape.FromRect(new Vector2(10, 300), new Vector2(80, 40), 4),
@@ -348,7 +349,7 @@ public sealed class DesktopGlassTests
             var live = scene.Render(composite: true);
             scene.AssertNonFlatGlass(live);
             Assert.True(scene.Glass.CanPauseForScreenshots);
-            Assert.Equal(FrenRiderCaptureExclusion.ExcludeFromCapture, scene.ReadAffinity());
+            Assert.Equal(MaterialCaptureExclusion.ExcludeFromCapture, scene.ReadAffinity());
             var acquisitions = scene.Duplication->Acquires;
             var descriptorReads = scene.Output->DescriptionReads;
 
@@ -381,7 +382,7 @@ public sealed class DesktopGlassTests
             Assert.False(scene.Glass.ScreenshotsPaused);
             Assert.False(scene.Capture.IsPaused);
             Assert.False(scene.Glass.CanPauseForScreenshots);
-            Assert.Equal(FrenRiderCaptureExclusion.ExcludeFromCapture, scene.ReadAffinity());
+            Assert.Equal(MaterialCaptureExclusion.ExcludeFromCapture, scene.ReadAffinity());
             Assert.True(scene.Exclusion.MinimumFrameTimestamp > oldBoundary);
             Assert.False(scene.Capture.TryGetViewportTexture(scene.Window, scene.Origin, 128, 128,
                 scene.Exclusion.Ready, scene.Exclusion.MinimumFrameTimestamp, out var stale));
@@ -439,12 +440,12 @@ public sealed class DesktopGlassTests
         scene.AssertNonFlatGlass(live);
         Assert.False(scene.Glass.ScreenshotsPaused);
         Assert.False(scene.Capture.IsPaused);
-        Assert.Equal(FrenRiderCaptureExclusion.ExcludeFromCapture, scene.ReadAffinity());
+        Assert.Equal(MaterialCaptureExclusion.ExcludeFromCapture, scene.ReadAffinity());
         var initialAcquisitions = scene.Duplication->Acquires;
         scene.AdvanceFrame();
         Assert.False(scene.Glass.ScreenshotsPaused);
         Assert.False(scene.Capture.IsPaused);
-        Assert.Equal(FrenRiderCaptureExclusion.ExcludeFromCapture, scene.ReadAffinity());
+        Assert.Equal(MaterialCaptureExclusion.ExcludeFromCapture, scene.ReadAffinity());
         _ = scene.Render(composite: false);
         var continuedLive = scene.Render(composite: true);
         scene.AssertNonFlatGlass(continuedLive);
@@ -474,7 +475,7 @@ public sealed class DesktopGlassTests
         _ = scene.Render(composite: true);
         scene.AdvanceFrame();
         Assert.False(scene.Glass.ScreenshotsPaused);
-        Assert.Equal(FrenRiderCaptureExclusion.ExcludeFromCapture, scene.ReadAffinity());
+        Assert.Equal(MaterialCaptureExclusion.ExcludeFromCapture, scene.ReadAffinity());
     }
 
     [Fact]
@@ -491,11 +492,11 @@ public sealed class DesktopGlassTests
             uint original = 0;
             Assert.True(Win32.GetWindowDisplayAffinity(window, &original).Value != 0,
                 $"Original hidden-window affinity is unreadable: {Win32.GetLastError()}");
-            using var exclusion = new FrenRiderCaptureExclusion();
+            using var exclusion = new MaterialCaptureExclusion();
             Assert.True(exclusion.Synchronize([(nint)window], (nint)1, true), exclusion.UnavailableReason);
             uint excluded = 0;
             Assert.True(Win32.GetWindowDisplayAffinity(window, &excluded).Value != 0);
-            Assert.Equal(FrenRiderCaptureExclusion.ExcludeFromCapture, excluded);
+            Assert.Equal(MaterialCaptureExclusion.ExcludeFromCapture, excluded);
             Assert.True(exclusion.RestoreAll(), exclusion.UnavailableReason);
             uint restored = 0;
             Assert.True(Win32.GetWindowDisplayAffinity(window, &restored).Value != 0);
@@ -512,7 +513,7 @@ public sealed class DesktopGlassTests
         ID3D11Texture2D* desktop = null;
         ID3D11Texture2D* window = null;
         ID3D11Texture2D* readback = null;
-        FrenRiderDesktopCapture? capture = null;
+        MaterialDesktopCapture? capture = null;
         try
         {
             var created = DirectX.D3D11CreateDevice(null, D3D_DRIVER_TYPE.D3D_DRIVER_TYPE_WARP,
@@ -520,7 +521,7 @@ public sealed class DesktopGlassTests
             Assert.True(created.SUCCEEDED, $"Software Direct3D device failed: 0x{created.Value:X8}");
             desktop = CreateTestTexture(device, [0xFF204060, 0xFF204060, 0xFF204060, 0xFF204060]);
             window = CreateTestTexture(device, [0, 0x80800000, 0xFF10C020, 0x40000040]);
-            capture = new FrenRiderDesktopCapture((nint)device, ActivationModeTests.Proxy<IPluginLog>((_, _) => null));
+            capture = new MaterialDesktopCapture((nint)device, ActivationModeTests.Proxy<IPluginLog>((_, _) => null));
             Assert.True(capture.TryComposeWindowBackdrop((nint)desktop, (nint)window, out var result));
             Assert.NotEqual(0, result);
             var description = new D3D11_TEXTURE2D_DESC
@@ -584,11 +585,11 @@ public sealed class DesktopGlassTests
     public void PhysicalMonitorRegionsMapIntoTheActualTargetWithoutScalingScreenOrigins()
     {
         var physicalClient = Rect(-3840, -2160, 0, 0);
-        Assert.Equal(new Vector4(0, 0, 960, 1080), FrenRiderDesktopCapture.MapAtlasDestination(
+        Assert.Equal(new Vector4(0, 0, 960, 1080), MaterialDesktopCapture.MapAtlasDestination(
             Rect(0, 0, 1920, 2160), physicalClient, 1920, 1080));
-        Assert.Equal(new Vector4(960, 0, 1920, 1080), FrenRiderDesktopCapture.MapAtlasDestination(
+        Assert.Equal(new Vector4(960, 0, 1920, 1080), MaterialDesktopCapture.MapAtlasDestination(
             Rect(1920, 0, 3840, 2160), physicalClient, 1920, 1080));
-        Assert.Equal(new Vector4(7.5f, 15, 75, 90), FrenRiderDesktopCapture.MapAtlasDestination(
+        Assert.Equal(new Vector4(7.5f, 15, 75, 90), MaterialDesktopCapture.MapAtlasDestination(
             Rect(10, 20, 100, 120), Rect(-200, -300, 200, 100), 300, 300));
     }
 
@@ -602,7 +603,7 @@ public sealed class DesktopGlassTests
         DXGI_MODE_ROTATION rotation, float leftU, float leftV, float rightU, float rightV, float bottomU, float bottomV)
     {
         var monitor = Rect(-1080, -1920, 0, 0);
-        Assert.True(FrenRiderDesktopCapture.TryMapOutput(monitor, monitor, rotation, out var destination, out var uv));
+        Assert.True(MaterialDesktopCapture.TryMapOutput(monitor, monitor, rotation, out var destination, out var uv));
         Assert.Equal(Rect(0, 0, 1080, 1920), destination);
         Point(new(leftU, leftV), Vector2.Transform(Vector2.Zero, uv));
         Point(new(rightU, rightV), Vector2.Transform(Vector2.UnitX, uv));
@@ -613,13 +614,13 @@ public sealed class DesktopGlassTests
     public void NegativeMonitorOriginAndClippedEdgesUsePhysicalAtlasCoordinates()
     {
         var monitor = Rect(-1920, 0, 0, 1080);
-        Assert.True(FrenRiderDesktopCapture.TryMapOutput(Rect(-1536, 270, -768, 810), monitor,
+        Assert.True(MaterialDesktopCapture.TryMapOutput(Rect(-1536, 270, -768, 810), monitor,
             DXGI_MODE_ROTATION.DXGI_MODE_ROTATION_IDENTITY, out var destination, out var uv));
         Assert.Equal(Rect(0, 0, 768, 540), destination);
         Point(new(.2f, .25f), Vector2.Transform(Vector2.Zero, uv));
         Point(new(.6f, .75f), Vector2.Transform(Vector2.One, uv));
 
-        Assert.True(FrenRiderDesktopCapture.TryMapOutput(Rect(-2000, -100, -1600, 300), monitor,
+        Assert.True(MaterialDesktopCapture.TryMapOutput(Rect(-2000, -100, -1600, 300), monitor,
             DXGI_MODE_ROTATION.DXGI_MODE_ROTATION_IDENTITY, out destination, out uv));
         Assert.Equal(Rect(80, 100, 400, 400), destination);
         Point(Vector2.Zero, Vector2.Transform(Vector2.Zero, uv));
@@ -630,9 +631,9 @@ public sealed class DesktopGlassTests
     public void SpanningViewportCopiesBothOutputsIntoAdjacentAtlasRegions()
     {
         var viewport = Rect(-480, 270, 480, 810);
-        Assert.True(FrenRiderDesktopCapture.TryMapOutput(viewport, Rect(-1920, 0, 0, 1080),
+        Assert.True(MaterialDesktopCapture.TryMapOutput(viewport, Rect(-1920, 0, 0, 1080),
             DXGI_MODE_ROTATION.DXGI_MODE_ROTATION_IDENTITY, out var left, out var leftUv));
-        Assert.True(FrenRiderDesktopCapture.TryMapOutput(viewport, Rect(0, 0, 1920, 1080),
+        Assert.True(MaterialDesktopCapture.TryMapOutput(viewport, Rect(0, 0, 1920, 1080),
             DXGI_MODE_ROTATION.DXGI_MODE_ROTATION_IDENTITY, out var right, out var rightUv));
         Assert.Equal(Rect(0, 0, 480, 540), left);
         Assert.Equal(Rect(480, 0, 960, 540), right);
@@ -652,7 +653,7 @@ public sealed class DesktopGlassTests
             (Rect(0, 0, 100, 100), Rect(0, 0, 1920, 0)),
             (Rect(-100, -100, 0, 0), Rect(0, 0, 1920, 1080)),
         })
-            Assert.False(FrenRiderDesktopCapture.TryMapOutput(viewport, output,
+            Assert.False(MaterialDesktopCapture.TryMapOutput(viewport, output,
                 DXGI_MODE_ROTATION.DXGI_MODE_ROTATION_IDENTITY, out _, out _));
     }
 
@@ -660,14 +661,14 @@ public sealed class DesktopGlassTests
     public void DetachedCallbackTranslatesScreenGeometryOnceAndRoundsItsActualTargetClipOutwards()
     {
         var shape = GlassShape.FromRect(new(-1800, -1000), new(400, 300), 16);
-        Assert.True(FrenRiderDetachedGlass.TryTranslateToTarget(in shape, new(-1920, -1080),
+        Assert.True(MaterialDetachedGlass.TryTranslateToTarget(in shape, new(-1920, -1080),
             new(-1800.25f, -1000.75f, -1400.25f, -700.25f), 800, 600, out var target, out var clip));
         Assert.Equal(new Vector2(120, 80), target.Min);
         Assert.Equal(new Vector2(520, 380), target.Max);
         Assert.Equal(16, target.Radius);
         Assert.Equal(Rect(119, 79, 520, 380), clip);
 
-        Assert.True(FrenRiderDetachedGlass.TryTranslateToTarget(in shape, new(-1920, -1080),
+        Assert.True(MaterialDetachedGlass.TryTranslateToTarget(in shape, new(-1920, -1080),
             new(-3000, -2000, 3000, 2000), 800, 600, out target, out clip));
         Assert.Equal(new Vector2(120, 80), target.Min);
         Assert.Equal(Rect(0, 0, 800, 600), clip);
@@ -677,18 +678,18 @@ public sealed class DesktopGlassTests
     public void DetachedCallbackRejectsInvalidOrClippedGeometryButRetainsVisibleSamplingReach()
     {
         var shape = GlassShape.FromRect(new(10, 10), new(40, 30), 4);
-        Assert.False(FrenRiderDetachedGlass.TryTranslateToTarget(in shape, Vector2.Zero,
+        Assert.False(MaterialDetachedGlass.TryTranslateToTarget(in shape, Vector2.Zero,
             new(0, 0, 800, 600), 0, 600, out _, out _));
-        Assert.False(FrenRiderDetachedGlass.TryTranslateToTarget(in shape, new(float.NaN, 0),
+        Assert.False(MaterialDetachedGlass.TryTranslateToTarget(in shape, new(float.NaN, 0),
             new(0, 0, 800, 600), 800, 600, out _, out _));
-        Assert.False(FrenRiderDetachedGlass.TryTranslateToTarget(in shape, Vector2.Zero,
+        Assert.False(MaterialDetachedGlass.TryTranslateToTarget(in shape, Vector2.Zero,
             new(0, 0, float.PositiveInfinity, 600), 800, 600, out _, out _));
-        Assert.False(FrenRiderDetachedGlass.TryTranslateToTarget(in shape, Vector2.Zero,
+        Assert.False(MaterialDetachedGlass.TryTranslateToTarget(in shape, Vector2.Zero,
             new(100, 100, 200, 200), 800, 600, out _, out _));
         var outside = GlassShape.FromRect(new(-1940, 100), new(10, 20), 3);
-        Assert.False(FrenRiderDetachedGlass.TryTranslateToTarget(in outside, new(-1920, 0),
+        Assert.False(MaterialDetachedGlass.TryTranslateToTarget(in outside, new(-1920, 0),
             new(-1920, 0, -1120, 600), 800, 600, out _, out _));
-        Assert.True(FrenRiderDetachedGlass.TryTranslateToTarget(in outside, new(-1920, 0),
+        Assert.True(MaterialDetachedGlass.TryTranslateToTarget(in outside, new(-1920, 0),
             new(-1920, 0, -1120, 600), 800, 600, out var target, out _, samplingReach: 15));
         Assert.Equal(new Vector2(-20, 100), target.Min);
     }
@@ -699,7 +700,7 @@ public sealed class DesktopGlassTests
     [InlineData(1f)]
     public void CommonMaterialKeepsContinuousFrostTintAndOpacityAndScalesLengthsOnce(float frost)
     {
-        var material = FrenRiderGlass.CreateMaterial(new(.2f, .3f, .4f, .18f), frost, .5f, 4);
+        var material = MaterialGlassRenderer.CreateMaterial(new(.2f, .3f, .4f, .18f), frost, .5f, 4);
         Assert.Equal(frost, material.Frost);
         Assert.Equal(new Glasswork.Color(.2f, .3f, .4f), material.Tint);
         Assert.Equal(.18f, material.TintAmount);
@@ -713,15 +714,15 @@ public sealed class DesktopGlassTests
     [Fact]
     public void CommonMaterialClampsUserFractionsAndKeepsNonfiniteOpacityVisible()
     {
-        var minimum = FrenRiderGlass.CreateMaterial(new(.2f, .3f, .4f, -1), -1, -1, 1);
+        var minimum = MaterialGlassRenderer.CreateMaterial(new(.2f, .3f, .4f, -1), -1, -1, 1);
         Assert.Equal(0, minimum.Frost);
         Assert.Equal(0, minimum.TintAmount);
         Assert.Equal(0, minimum.Opacity);
-        var maximum = FrenRiderGlass.CreateMaterial(new(.2f, .3f, .4f, 2), 2, 2, 1);
+        var maximum = MaterialGlassRenderer.CreateMaterial(new(.2f, .3f, .4f, 2), 2, 2, 1);
         Assert.Equal(1, maximum.Frost);
         Assert.Equal(1, maximum.TintAmount);
         Assert.Equal(1, maximum.Opacity);
-        Assert.Equal(1, FrenRiderGlass.CreateMaterial(Vector4.Zero, .5f, float.NaN, 1).Opacity);
+        Assert.Equal(1, MaterialGlassRenderer.CreateMaterial(Vector4.Zero, .5f, float.NaN, 1).Opacity);
     }
 
     [Fact]
@@ -912,9 +913,9 @@ public sealed class DesktopGlassTests
         internal readonly List<string> Warnings = [];
         internal MaskedDuplication* Duplication;
         internal RetainedOutput* Output;
-        internal FrenRiderDetachedGlass Glass = null!;
-        internal FrenRiderDesktopCapture Capture = null!;
-        internal FrenRiderCaptureExclusion Exclusion = null!;
+        internal MaterialDetachedGlass Glass = null!;
+        internal MaterialDesktopCapture Capture = null!;
+        internal MaterialCaptureExclusion Exclusion = null!;
         internal nint Window;
         internal uint OriginalAffinity;
         internal bool CheckPauseRestoreOrder;
@@ -979,12 +980,12 @@ public sealed class DesktopGlassTests
                         Warnings.Add(string.Join(" ", args.Select(value => value is object[] values ? string.Join(" ", values) : value)));
                     return null;
                 });
-                Glass = new FrenRiderDetachedGlass((nint)device, log);
-                Capture = (FrenRiderDesktopCapture)Get(Glass, "capture");
-                ((FrenRiderCaptureExclusion)Get(Glass, "exclusion")).Dispose();
-                var native = (FrenRiderCaptureExclusion.Native)typeof(FrenRiderCaptureExclusion)
+                Glass = new MaterialDetachedGlass((nint)device, log);
+                Capture = (MaterialDesktopCapture)Get(Glass, "capture");
+                ((MaterialCaptureExclusion)Get(Glass, "exclusion")).Dispose();
+                var native = (MaterialCaptureExclusion.Native)typeof(MaterialCaptureExclusion)
                     .GetMethod("CreateNative", BindingFlags.Static | BindingFlags.NonPublic)!.Invoke(null, null)!;
-                Exclusion = new FrenRiderCaptureExclusion(native with
+                Exclusion = new MaterialCaptureExclusion(native with
                 {
                     SetAffinity = (window, affinity) =>
                     {
@@ -1011,8 +1012,8 @@ public sealed class DesktopGlassTests
                     DesktopCoordinates = Rect(-32000, -32000, -31872, -31872), AttachedToDesktop = true,
                     Rotation = DXGI_MODE_ROTATION.DXGI_MODE_ROTATION_IDENTITY, Monitor = (HMONITOR)(nint)7,
                 };
-                var adapterType = typeof(FrenRiderDesktopCapture).GetNestedType("AdapterCapture", BindingFlags.NonPublic)!;
-                var outputType = typeof(FrenRiderDesktopCapture).GetNestedType("OutputCapture", BindingFlags.NonPublic)!;
+                var adapterType = typeof(MaterialDesktopCapture).GetNestedType("AdapterCapture", BindingFlags.NonPublic)!;
+                var outputType = typeof(MaterialDesktopCapture).GetNestedType("OutputCapture", BindingFlags.NonPublic)!;
                 var adapter = Activator.CreateInstance(adapterType, true)!;
                 var output = Activator.CreateInstance(outputType, true)!;
                 device->AddRef(); context->AddRef();
@@ -1054,13 +1055,13 @@ public sealed class DesktopGlassTests
             context->ClearRenderTargetView(targetView, clear);
             var view = targetView;
             context->OMSetRenderTargets(1, &view, null);
-            var request = new FrenRiderDetachedGlass.DrawRequest
+            var request = new MaterialDetachedGlass.DrawRequest
             {
                 Hwnd = Window, ViewportId = ImGui.GetMainViewport().ID,
                 Frame = (int)Get(Glass, "frame"), ViewportOrigin = Origin,
                 Shape = GlassShape.FromRect(Origin + new Vector2(8), new Vector2(112), 12),
                 Clip = new Vector4(Origin.X, Origin.Y, Origin.X + 128, Origin.Y + 128),
-                Material = FrenRiderGlass.CreateMaterial(new Vector4(.2f, .3f, .4f, .42f), 1, 1, 1),
+                Material = MaterialGlassRenderer.CreateMaterial(new Vector4(.2f, .3f, .4f, .42f), 1, 1, 1),
                 CaptureBoundary = Exclusion.MinimumFrameTimestamp, Composite = composite, WindowBackground = true,
             };
             Glass.Render(&request);
@@ -1140,10 +1141,10 @@ public sealed class DesktopGlassTests
         internal readonly List<(nint Window, uint Affinity)> Writes = [];
         internal readonly List<string> Calls = [];
         internal long Clock = 1000;
-        internal readonly FrenRiderCaptureExclusion Helper;
+        internal readonly MaterialCaptureExclusion Helper;
         internal ExclusionScene(bool supported = true)
         {
-            Helper = new(new FrenRiderCaptureExclusion.Native(supported,
+            Helper = new(new MaterialCaptureExclusion.Native(supported,
                 hwnd => Windows.TryGetValue(hwnd, out var state) && state.Alive,
                 hwnd => Windows.TryGetValue(hwnd, out var state) && state.Alive && state.CurrentProcessTopLevel,
                 hwnd =>

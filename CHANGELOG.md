@@ -1,3 +1,8 @@
+2026-10-29 - 4.1.0.1 - Use the approved shared Glasswork renderer
+
+- Use AethertekUI.Dalamud's promoted renderer, desktop capture and image backdrop implementation instead of maintaining plugin-local copies. Preserve the approved Waves/Lights/Image behavior, native file picker, background tint and foreground controls; screenshot pause remains off by default.
+- Keep FrenRider's existing saved appearance fields and custom window layout. Continue shipping all three Glasswork libraries and the MIT notice through the shared dependency. Preset installation and automation behavior are unchanged.
+
 2026-10-29 - Glassmorphism background modes (unversioned, FrenRider test pilot)
 
 - Add saved Waves, Lights and Image background modes. Keep Waves and its existing palette as the legacy default. Lights has separate colours and three effects: ambient glows, sweeping beams and a mouse-following glow. Existing Animation and speed controls apply to Waves and Lights.

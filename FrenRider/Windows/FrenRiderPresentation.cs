@@ -1,3 +1,4 @@
+using AethertekUI.Dalamud;
 using System;
 using System.Numerics;
 using AethertekUI;
@@ -10,7 +11,7 @@ internal enum UiFontRole { Body, BodyStrong, Title, PluginName, Counter, Action 
 internal static partial class FrenRiderPresentation
 {
     [ThreadStatic] private static Configuration? activeConfiguration;
-    [ThreadStatic] private static FrenRiderGlass? activeGlass;
+    [ThreadStatic] private static MaterialGlassRenderer? activeGlass;
     [ThreadStatic] private static uint activeGlassRoot;
     internal static Configuration? ActiveConfiguration => activeConfiguration;
     internal static MaterialColorMode ColorMode(Configuration config) => config.UiStyle switch
@@ -46,13 +47,13 @@ internal static partial class FrenRiderPresentation
     internal static Vector4 ReadableInk(Vector4 surface) =>
         MaterialColor.Contrast(surface, Vector4.One) >= MaterialColor.Contrast(surface, new Vector4(0, 0, 0, 1))
             ? Vector4.One : new(0, 0, 0, 1);
-    internal static AppearanceScope Push(Configuration config, FrenRiderGlass? renderer = null) => new(config, renderer);
+    internal static AppearanceScope Push(Configuration config, MaterialGlassRenderer? renderer = null) => new(config, renderer);
     internal readonly ref struct AppearanceScope
     {
         private readonly Configuration? previous;
-        private readonly FrenRiderGlass? previousGlass;
+        private readonly MaterialGlassRenderer? previousGlass;
         private readonly uint previousGlassRoot;
-        internal AppearanceScope(Configuration config, FrenRiderGlass? renderer)
+        internal AppearanceScope(Configuration config, MaterialGlassRenderer? renderer)
         {
             previous = activeConfiguration;
             previousGlass = activeGlass;

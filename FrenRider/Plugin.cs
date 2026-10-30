@@ -1,3 +1,4 @@
+using AethertekUI.Dalamud;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -444,7 +445,7 @@ public sealed partial class Plugin : IDalamudPlugin
     }
 
     private readonly System.Collections.Generic.Dictionary<Dalamud.Interface.Windowing.Window, AethertekUI.Dalamud.MaterialAppearanceTitleBar> appearanceTitleBars = new();
-    private FrenRiderGlass? backgroundGlass;
+    private MaterialGlassRenderer? backgroundGlass;
 
     private void PrepareAppearanceTitleBars()
     {
