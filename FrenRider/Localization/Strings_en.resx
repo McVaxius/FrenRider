@@ -3369,4 +3369,76 @@ On: use the BossMod presets below with any rotation provider. A custom preset ma
   <data name="Light colour 1" xml:space="preserve"><value>Light colour 1</value></data>
   <data name="Light colour 2" xml:space="preserve"><value>Light colour 2</value></data>
   <data name="Light colour 3" xml:space="preserve"><value>Light colour 3</value></data>
+  <data name="FrenRider · Raid Mode" xml:space="preserve">
+    <value>FrenRider · Raid Mode</value>
+  </data>
+  <data name="Raid Mode" xml:space="preserve">
+    <value>Raid Mode</value>
+  </data>
+  <data name="ADS Loot" xml:space="preserve">
+    <value>ADS Loot</value>
+  </data>
+  <data name="Accept Rez" xml:space="preserve">
+    <value>Accept Rez</value>
+  </data>
+  <data name="Remain until manually exited" xml:space="preserve">
+    <value>Remain until manually exited</value>
+  </data>
+  <data name="Uncheck to leave after loot is distributed." xml:space="preserve">
+    <value>Uncheck to leave after loot is distributed.</value>
+  </data>
+  <data name="Wait up to" xml:space="preserve">
+    <value>Wait up to</value>
+  </data>
+  <data name="s for loot to appear" xml:space="preserve">
+    <value>s for loot to appear</value>
+  </data>
+  <data name="Disable Raid Mode" xml:space="preserve">
+    <value>Disable Raid Mode</value>
+  </data>
+  <data name="Raid mode disabled" xml:space="preserve">
+    <value>Raid mode disabled</value>
+  </data>
+  <data name="Waiting for countdown" xml:space="preserve">
+    <value>Waiting for countdown</value>
+  </data>
+  <data name="Countdown running" xml:space="preserve">
+    <value>Countdown running</value>
+  </data>
+  <data name="ADS unavailable" xml:space="preserve">
+    <value>ADS unavailable</value>
+  </data>
+  <data name="ADS start rejected" xml:space="preserve">
+    <value>ADS start rejected</value>
+  </data>
+  <data name="Waiting for duty" xml:space="preserve">
+    <value>Waiting for duty</value>
+  </data>
+  <data name="Waiting for loot" xml:space="preserve">
+    <value>Waiting for loot</value>
+  </data>
+  <data name="Waiting for loot distribution" xml:space="preserve">
+    <value>Waiting for loot distribution</value>
+  </data>
+  <data name="Waiting for manual recovery" xml:space="preserve">
+    <value>Waiting for manual recovery</value>
+  </data>
+  <data name="Remaining until manually exited" xml:space="preserve">
+    <value>Remaining until manually exited</value>
+  </data>
+  <data name="Leaving duty" xml:space="preserve">
+    <value>Leaving duty</value>
+  </data>
+  <data name="Use ADS for chests and loot rolls during Raid mode. Uses your ADS roll policy, or Need if it is Off; your normal settings are unchanged." xml:space="preserve">
+    <value>Use ADS for chests and loot rolls during Raid mode. Uses your ADS roll policy, or Need if it is Off; your normal settings are unchanged.</value>
+  </data>
+  <data name="Countdown unavailable" xml:space="preserve">
+    <value>Countdown unavailable</value>
+  </data>
+  <data name="Waiting for ADS" xml:space="preserve">
+    <value>Waiting for ADS</value>
+  </data>
+  <data name="ADS leave rejected" xml:space="preserve">
+    <value>ADS leave rejected</value>
+  </data>
 </root>

@@ -3375,4 +3375,76 @@ Aktif: gunakan preset BossMod di bawah dengan penyedia rotasi apa pun. Preset kh
   <data name="Light colour 1" xml:space="preserve"><value>Warna cahaya 1</value></data>
   <data name="Light colour 2" xml:space="preserve"><value>Warna cahaya 2</value></data>
   <data name="Light colour 3" xml:space="preserve"><value>Warna cahaya 3</value></data>
+  <data name="FrenRider · Raid Mode" xml:space="preserve">
+    <value>FrenRider · Mode Raid</value>
+  </data>
+  <data name="Raid Mode" xml:space="preserve">
+    <value>Mode Raid</value>
+  </data>
+  <data name="ADS Loot" xml:space="preserve">
+    <value>Loot ADS</value>
+  </data>
+  <data name="Accept Rez" xml:space="preserve">
+    <value>Terima kebangkitan</value>
+  </data>
+  <data name="Remain until manually exited" xml:space="preserve">
+    <value>Tetap sampai keluar manual</value>
+  </data>
+  <data name="Uncheck to leave after loot is distributed." xml:space="preserve">
+    <value>Hapus centang untuk keluar setelah loot dibagikan.</value>
+  </data>
+  <data name="Wait up to" xml:space="preserve">
+    <value>Tunggu hingga</value>
+  </data>
+  <data name="s for loot to appear" xml:space="preserve">
+    <value>d untuk kemunculan loot</value>
+  </data>
+  <data name="Disable Raid Mode" xml:space="preserve">
+    <value>Nonaktifkan Mode Raid</value>
+  </data>
+  <data name="Raid mode disabled" xml:space="preserve">
+    <value>Mode Raid nonaktif</value>
+  </data>
+  <data name="Waiting for countdown" xml:space="preserve">
+    <value>Menunggu hitung mundur</value>
+  </data>
+  <data name="Countdown running" xml:space="preserve">
+    <value>Hitung mundur berlangsung</value>
+  </data>
+  <data name="ADS unavailable" xml:space="preserve">
+    <value>ADS tidak tersedia</value>
+  </data>
+  <data name="ADS start rejected" xml:space="preserve">
+    <value>Mulai ADS ditolak</value>
+  </data>
+  <data name="Waiting for duty" xml:space="preserve">
+    <value>Menunggu duty</value>
+  </data>
+  <data name="Waiting for loot" xml:space="preserve">
+    <value>Menunggu loot</value>
+  </data>
+  <data name="Waiting for loot distribution" xml:space="preserve">
+    <value>Menunggu pembagian loot</value>
+  </data>
+  <data name="Waiting for manual recovery" xml:space="preserve">
+    <value>Menunggu pemulihan manual</value>
+  </data>
+  <data name="Remaining until manually exited" xml:space="preserve">
+    <value>Tetap sampai keluar manual</value>
+  </data>
+  <data name="Leaving duty" xml:space="preserve">
+    <value>Meninggalkan duty</value>
+  </data>
+  <data name="Use ADS for chests and loot rolls during Raid mode. Uses your ADS roll policy, or Need if it is Off; your normal settings are unchanged." xml:space="preserve">
+    <value>Gunakan ADS untuk peti dan roll loot selama Mode Raid. Menggunakan kebijakan roll ADS Anda, atau Need jika nonaktif; pengaturan normal tetap tersimpan.</value>
+  </data>
+  <data name="Countdown unavailable" xml:space="preserve">
+    <value>Hitung mundur tidak tersedia</value>
+  </data>
+  <data name="Waiting for ADS" xml:space="preserve">
+    <value>Menunggu ADS</value>
+  </data>
+  <data name="ADS leave rejected" xml:space="preserve">
+    <value>Keluar ADS ditolak</value>
+  </data>
 </root>

@@ -49,6 +49,8 @@ public partial class CombatService
     private bool dragonNeckBossModAiHeld;
     private CombatSettingsSnapshot? pendingCombatSettings;
     private CombatSettingsSnapshot? lastAppliedCombatSettings;
+    private CombatSettingsSnapshot? adsHyperFocusSavedSelection;
+    private bool adsHyperFocusSuperseded;
     private string lastBossModDefaultSettingsSignature = string.Empty;
     private string lastBossModMovementUnlockSignature = string.Empty;
     private bool mountedRotationSuppressed;
@@ -184,13 +186,14 @@ public partial class CombatService
         }
 
         var questionableSnapshot = questionableIpcService.Refresh();
+        ObserveHyperFocusSelection(config);
         RefreshQuestingRsrAggro(config, inDuty);
         var authorityDecision = RefreshDutyCombatAuthority(
             config,
             inDuty,
             questionableSnapshot,
             frenRiderBootstrapAllowed: !plugin.CoppeliaPowerlevelLeaseService.IsLeaseActive
-                && !plugin.AdsHyperFocusLeaseService.IsLeaseActive
+                && (!plugin.AdsHyperFocusLeaseService.IsLeaseActive || adsHyperFocusSuperseded)
                 && !plugin.AutomationService.IsUtilityGateActive
                 && (IsRotationDisabled(config)
                     || !inDuty
@@ -219,7 +222,7 @@ public partial class CombatService
             return;
         }
 
-        if (plugin.AdsHyperFocusLeaseService.IsLeaseActive)
+        if (plugin.AdsHyperFocusLeaseService.IsLeaseActive && !adsHyperFocusSuperseded)
         {
             HandleAdsHyperFocusLease(inCombat, inDuty);
             return;
@@ -1722,10 +1725,14 @@ public partial class CombatService
 
     internal void ActivateAdsHyperFocusLease()
     {
-        if (plugin.AdsIntegrationService.IsSoloCombatHeld
+        var config = plugin.ConfigManager.GetActiveConfig();
+        if (!config.Enabled || IsRotationDisabled(config) || plugin.AdsIntegrationService.IsSoloCombatHeld
             || !plugin.AdsHyperFocusLeaseService.IsLeaseActive
             || !plugin.AdsHyperFocusLeaseService.TryClaimCombatActivation())
             return;
+
+        adsHyperFocusSavedSelection = CaptureCombatSettings(config);
+        adsHyperFocusSuperseded = false;
 
         ResetCombatSettingsRefreshTracking();
         lastObservedCombatSettings = null;
@@ -1753,6 +1760,16 @@ public partial class CombatService
     internal void RestoreConfiguredCombatAfterAdsHyperFocusLease(string reason)
     {
         var config = plugin.ConfigManager.GetActiveConfig();
+        var captured = adsHyperFocusSavedSelection;
+        adsHyperFocusSavedSelection = null;
+        if (captured is null || adsHyperFocusSuperseded)
+        {
+            adsHyperFocusSuperseded = false;
+            return;
+        }
+        // A later provider/mode/off choice belongs to the operator. Release of
+        // our old lease must not cancel or replay over that newer selection.
+        if (!SameHyperFocusSelection(captured, CaptureCombatSettings(config))) return;
         if (!plugin.AutorotIpcService.TrySetRsrMode(AutorotIpcService.RsrStateCommandType.Off))
             SendCommand("/rotation cancel", allowWhileSuppressed: true);
 
@@ -1763,7 +1780,7 @@ public partial class CombatService
         var inDuty = IsInDuty();
         var adsOwnsDuty = plugin.AdsIntegrationService.IsHandoffPending
             || plugin.AdsIntegrationService.IsControllingDuty;
-        if (!config.Enabled || !inDuty || !adsOwnsDuty)
+        if (!config.Enabled || !inDuty || (!adsOwnsDuty && plugin.RaidModeService?.IsEnabled != true))
         {
             State = CombatState.OutOfCombat;
             StateDetail = !config.Enabled
@@ -1780,6 +1797,27 @@ public partial class CombatService
         State = CombatState.OutOfCombat;
         StateDetail = "ADS Hyper Focus ended; combat bootstrap pending";
         Plugin.Log.Information($"[FrenRider][AdsHyperFocus] Re-armed configured combat bootstrap after {reason}.");
+    }
+
+    internal static bool SameHyperFocusSelection(CombatSettingsSnapshot previous, CombatSettingsSnapshot current)
+        => ReferenceEquals(previous.Profile, current.Profile) && previous.Provider == current.Provider
+           && previous.RotationType == current.RotationType && previous.Preset == current.Preset
+           && previous.BossModAI == current.BossModAI && previous.RsrAggroType == current.RsrAggroType
+           && previous.Positional == current.Positional && previous.DaedalusTargetMode == current.DaedalusTargetMode;
+
+    private void ObserveHyperFocusSelection(CharacterConfig config)
+    {
+        if (!plugin.AdsHyperFocusLeaseService.IsLeaseActive || adsHyperFocusSavedSelection is not { } captured
+            || SameHyperFocusSelection(captured, CaptureCombatSettings(config))) return;
+        adsHyperFocusSuperseded = true;
+        adsHyperFocusSavedSelection = null;
+        // Retire only the temporary RSR Manual override, then let the ordinary
+        // selected-provider/off path apply the explicit new choice once.
+        if (!plugin.AutorotIpcService.TrySetRsrMode(AutorotIpcService.RsrStateCommandType.Off))
+            SendCommand("/rotation cancel", allowWhileSuppressed: true);
+        ClearExternalAutomationRuntimeState("newer combat selection superseded ADS Hyper Focus");
+        ResetCombatSettingsRefreshTracking();
+        lastObservedCombatSettings = null;
     }
 
     private void HandleAdsHyperFocusLease(bool inCombat, bool inDuty)

@@ -69,6 +69,9 @@ public class DutyInteractService
 
     public void Update()
     {
+        if (StopForCompletedRaid())
+            return;
+
         ApplyCofferPolicy();
         var config = plugin.ConfigManager.GetActiveConfig();
         if (!config.Enabled)
@@ -182,13 +185,7 @@ public class DutyInteractService
 
                 // Close enough to interact
                 if ((now - lastInteractTime).TotalSeconds > 3)
-                {
-                    lastInteractTime = now;
-                    lastInteractedEntityId = (uint)interactable.GameObjectId;
-
-                    Plugin.Log.Information($"[DutyInteract] Interacting with: {interactable.Name.TextValue}");
-                    GameHelpers.InteractWithObject(interactable);
-                }
+                    InteractWithObject(interactable, now);
             }
             else
             {
@@ -333,6 +330,9 @@ public class DutyInteractService
 
     private bool TryMountTowardInteractable(CharacterConfig config, IGameObject interactable, float distance, DateTime now)
     {
+        if (StopForCompletedRaid())
+            return false;
+
         if (distance <= MountAttemptDistance)
             return false;
 
@@ -355,6 +355,9 @@ public class DutyInteractService
 
     private void NavigateToInteractable(IGameObject interactable, Vector3 localPosition, float distance, DateTime now)
     {
+        if (StopForCompletedRaid())
+            return;
+
         var gameObjectId = interactable.GameObjectId;
         if (isNavigatingToInteractable && navigatingInteractableGameObjectId != gameObjectId)
             StopInteractableNavigation($"switching target to {interactable.Name.TextValue}");
@@ -393,6 +396,9 @@ public class DutyInteractService
 
     private void IssueInteractableNavCommand(IGameObject interactable, string reason)
     {
+        if (StopForCompletedRaid())
+            return;
+
         var coords = FormatVector(interactable.Position);
         var command = $"/vnav moveto {coords}";
         StateDetail = $"Moving to: {interactable.Name.TextValue}";
@@ -434,6 +440,9 @@ public class DutyInteractService
 
     private void NudgeForward()
     {
+        if (StopForCompletedRaid())
+            return;
+
         var localPlayer = Plugin.ObjectTable.LocalPlayer;
         if (localPlayer == null) return;
 
@@ -453,6 +462,29 @@ public class DutyInteractService
         SendCommand($"/vnav moveto {coords}");
         StateDetail = "No interactables found, nudging forward...";
         Plugin.Log.Information($"[DutyInteract] Nudging forward to {coords}");
+    }
+
+    private void InteractWithObject(IGameObject interactable, DateTime now)
+    {
+        if (StopForCompletedRaid())
+            return;
+
+        lastInteractTime = now;
+        lastInteractedEntityId = (uint)interactable.GameObjectId;
+        Plugin.Log.Information($"[DutyInteract] Interacting with: {interactable.Name.TextValue}");
+        GameHelpers.InteractWithObject(interactable);
+    }
+
+    private bool StopForCompletedRaid()
+    {
+        if (plugin.RaidModeService?.IsEnabled != true || !plugin.AdsIntegrationService.DutySession.IsCompleted)
+            return false;
+
+        StopInteractableNavigation("Raid duty completed");
+        Reset();
+        lastInteractedEntityId = null;
+        StateDetail = plugin.RaidModeService.StatusText;
+        return true;
     }
 
     private void Reset()

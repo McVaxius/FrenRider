@@ -1,3 +1,11 @@
+2026-10-31 - Raid mode (I704, unversioned)
+
+- Add Raid Mode entry buttons to Main and Mini and a separate regular/compact Raid window. X hides it; Disable turns Raid mode off. Keep ADS Loot initially off, Accept Rez and Remain until manually exited initially on, with a saved ten-second initial loot-appearance wait.
+- Use a completed native party countdown for one scoped ADS inside-start request. Cancel stale starts/exits on recovery and session changes; suppress ordinary start, duty-exit and automatic Return/Phoenix recovery while retaining configured combat rotation and deliberate operator actions.
+- Identify observed countdowns by revision so an intervening ADS Inside/Resume/Stop/Leave invalidates a queued grant; a later new countdown can start once without replacing manual ownership.
+- Coordinate with the matching ADS Raid capability. ADS Loot supplies a temporary chest/roll policy without changing normal settings. Optional automatic departure waits for final completion and actual unawarded-loot clearance; the editable wait limits initial loot appearance only. Dead players wait for manual recovery.
+- Keep Raid activation session-only across duties for the same active character. Run off, Disable, logout and profile changes end it; the four preferences use existing character-profile storage. Local functional tests and diagnostic UI rendering remain separate from game countdown/loot/GPU acceptance.
+
 2026-10-29 - 4.1.0.1 - Use the approved shared Glasswork renderer
 
 - Keep titlebar popup glass at its own window opacity, including collapsed and reopened windows, without applying foreground opacity twice.

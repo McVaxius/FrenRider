@@ -254,6 +254,12 @@ public class CharacterConfig
     public int ExitAfterDutySeconds { get; set; } = 20;
     public bool LeaveWhenAllLeft { get; set; } = false;
 
+    // Raid preferences persist; enabling Raid mode itself belongs to the current session.
+    public bool RaidAdsLootEnabled { get; set; } = false;
+    public bool RaidAcceptRez { get; set; } = true;
+    public bool RaidRemainUntilManualExit { get; set; } = true;
+    public int RaidLootAppearanceWaitSeconds { get; set; } = 10;
+
     // --- Autorot IPC ---
     public bool AutorotPushOnEnable { get; set; } = true;
 
@@ -399,6 +405,10 @@ public class CharacterConfig
             ExitAfterDutyEnds = ExitAfterDutyEnds,
             ExitAfterDutySeconds = ExitAfterDutySeconds,
             LeaveWhenAllLeft = LeaveWhenAllLeft,
+            RaidAdsLootEnabled = RaidAdsLootEnabled,
+            RaidAcceptRez = RaidAcceptRez,
+            RaidRemainUntilManualExit = RaidRemainUntilManualExit,
+            RaidLootAppearanceWaitSeconds = RaidLootAppearanceWaitSeconds,
             AutorotPushOnEnable = AutorotPushOnEnable,
             ProfileAcceptancePolicy = ProfileAcceptancePolicy,
             Enabled = Enabled,

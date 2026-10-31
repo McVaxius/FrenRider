@@ -88,6 +88,7 @@ public sealed partial class Plugin : IDalamudPlugin
     public DadIPC DadIPC { get; init; }
     public AutoYesService AutoYesService { get; init; }
     public RespawnService RespawnService { get; init; }
+    public RaidModeService RaidModeService { get; init; }
     internal PhoenixDownRecoveryService PhoenixDownRecoveryService { get; init; }
     public AutoDutyDetectionService AutoDutyDetectionService { get; init; }
     public bool ECommonsAvailable { get; private set; }
@@ -97,6 +98,7 @@ public sealed partial class Plugin : IDalamudPlugin
     private ConfigWindow ConfigWindow { get; init; }
     private MainWindow MainWindow { get; init; }
     private MagiaMiniWindow MagiaMiniWindow { get; init; }
+    public RaidWindow RaidWindow { get; init; }
     private AutoDutyWarningWindow AutoDutyWarningWindow { get; init; }
 
     private IDtrBarEntry? dtrEntry;
@@ -191,6 +193,8 @@ public sealed partial class Plugin : IDalamudPlugin
         FrenTeleportService = new FrenTeleportService(this, FrenTracker, ZoneService);
         AdsDutyIpcService = new AdsDutyIpcService(PluginInterface, Log);
         AdsIntegrationService = new AdsIntegrationService(this, AdsDutyIpcService);
+        RaidModeService = new RaidModeService(this);
+        RaidModeService.Initialize();
         AdsUtilityIpcService = new AdsUtilityIpcService(PluginInterface, Log);
         AdsReflectionIpcService = new AdsReflectionIpcService(this, PluginInterface, Log);
         AutorotIpcService = new AutorotIpcService(PluginInterface, Log);
@@ -300,6 +304,7 @@ public sealed partial class Plugin : IDalamudPlugin
 
         // Hook into FrenRider enabled state changes
         ConfigManager.OnEffectiveProfileChanging += EndCombatSettingsSession;
+        ConfigManager.OnEffectiveProfileChanging += RaidModeService.Disable;
         ConfigManager.OnEffectiveProfileChanging += CancelChocoboSkillSession;
         ConfigManager.OnEffectiveProfileChanging += CancelChocoboFoodSession;
         ConfigManager.OnEffectiveProfileChanging += CancelChocoboPurchaseSession;
@@ -318,10 +323,12 @@ public sealed partial class Plugin : IDalamudPlugin
         ConfigWindow = new ConfigWindow(this);
         MainWindow = new MainWindow(this);
         MagiaMiniWindow = new MagiaMiniWindow(this);
+        RaidWindow = new RaidWindow(this);
 
         WindowSystem.AddWindow(ConfigWindow);
         WindowSystem.AddWindow(MainWindow);
         WindowSystem.AddWindow(MagiaMiniWindow);
+        WindowSystem.AddWindow(RaidWindow);
         WindowSystem.AddWindow(AutoDutyWarningWindow);
 
         CommandManager.AddHandler(CommandName, new CommandInfo(OnCommand)
@@ -369,6 +376,7 @@ public sealed partial class Plugin : IDalamudPlugin
 
     public void Dispose()
     {
+        RaidModeService.Dispose();
         System.Threading.Interlocked.Increment(ref chocoboRequestGeneration);
         chocoboExploration.Dispose();
         CancelChocoboSkillSession();
@@ -376,6 +384,7 @@ public sealed partial class Plugin : IDalamudPlugin
         CancelChocoboPurchaseSession();
         EndCombatSettingsSession();
         ConfigManager.OnEffectiveProfileChanging -= EndCombatSettingsSession;
+        ConfigManager.OnEffectiveProfileChanging -= RaidModeService.Disable;
         ConfigManager.OnEffectiveProfileChanging -= CancelChocoboSkillSession;
         ConfigManager.OnEffectiveProfileChanging -= CancelChocoboFoodSession;
         ConfigManager.OnEffectiveProfileChanging -= CancelChocoboPurchaseSession;
@@ -854,7 +863,7 @@ public sealed partial class Plugin : IDalamudPlugin
         // Keep the native picker usable independently of the appearance popup and plugin windows.
         glassImagePicker.Draw();
         using var appearance = FrenRiderPresentation.Push(Configuration);
-        if (!MainWindow.IsOpen && !ConfigWindow.IsOpen && !MagiaMiniWindow.IsOpen && !AutoDutyWarningWindow.IsOpen)
+        if (!MainWindow.IsOpen && !ConfigWindow.IsOpen && !MagiaMiniWindow.IsOpen && !RaidWindow.IsOpen && !AutoDutyWarningWindow.IsOpen)
         {
             backgroundGlass?.EndFrame(false);
             return;
@@ -1082,6 +1091,7 @@ public sealed partial class Plugin : IDalamudPlugin
 
     private void ApplyEffectiveActivation(bool enabled)
     {
+        if (!enabled) RaidModeService?.Disable();
         Log.Information($"[FrenRider] FrenRider enabled state changed to: {enabled}");
         BossModConflictWarningService.Update(enabled);
         AdsIntegrationService.ResetHandoff();
@@ -1522,6 +1532,7 @@ public sealed partial class Plugin : IDalamudPlugin
             Measure("dad-questionable-settings", DadIPC.UpdateQuestionableDutySettings);
             Measure("zone", ZoneService.Update);
             Measure("effective-activation", RefreshEffectiveActivation);
+            Measure("raid-mode", RaidModeService.Update);
             Measure("ads-readiness", AdsIntegrationService.ObserveHandoffReadiness);
             Measure("casting-recovery", BossModActionTweaksService.UpdateRecovery);
             Measure("coppelia-powerlevel-lease", CoppeliaPowerlevelLeaseService.Update);
@@ -1868,6 +1879,11 @@ public sealed partial class Plugin : IDalamudPlugin
     public void ToggleConfigUi() => ConfigWindow.Toggle();
     public void ToggleMainUi() => MainWindow.Toggle();
     public void ToggleMiniUi() => MagiaMiniWindow.Toggle();
+    public void OpenRaidMode()
+    {
+        RaidModeService.Enable();
+        RaidWindow.IsOpen = true;
+    }
     internal void ApplyWindowOpacity(MaterialWindowOpacity opacity, string name)
     {
         opacity.Apply(name, Math.Clamp(Configuration.UiWindowOpacityPercent, 10, 100) / 100f, Configuration.UiTransparencyEnabled,

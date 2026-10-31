@@ -3375,4 +3375,76 @@ Bật: dùng các preset BossMod bên dưới với mọi nhà cung cấp rotati
   <data name="Light colour 1" xml:space="preserve"><value>Màu ánh sáng 1</value></data>
   <data name="Light colour 2" xml:space="preserve"><value>Màu ánh sáng 2</value></data>
   <data name="Light colour 3" xml:space="preserve"><value>Màu ánh sáng 3</value></data>
+  <data name="FrenRider · Raid Mode" xml:space="preserve">
+    <value>FrenRider · Chế độ đột kích</value>
+  </data>
+  <data name="Raid Mode" xml:space="preserve">
+    <value>Chế độ đột kích</value>
+  </data>
+  <data name="ADS Loot" xml:space="preserve">
+    <value>Chiến lợi phẩm ADS</value>
+  </data>
+  <data name="Accept Rez" xml:space="preserve">
+    <value>Chấp nhận hồi sinh</value>
+  </data>
+  <data name="Remain until manually exited" xml:space="preserve">
+    <value>Ở lại cho đến khi tự thoát</value>
+  </data>
+  <data name="Uncheck to leave after loot is distributed." xml:space="preserve">
+    <value>Bỏ chọn để thoát sau khi chia chiến lợi phẩm.</value>
+  </data>
+  <data name="Wait up to" xml:space="preserve">
+    <value>Chờ tối đa</value>
+  </data>
+  <data name="s for loot to appear" xml:space="preserve">
+    <value>giây để chiến lợi phẩm xuất hiện</value>
+  </data>
+  <data name="Disable Raid Mode" xml:space="preserve">
+    <value>Tắt chế độ đột kích</value>
+  </data>
+  <data name="Raid mode disabled" xml:space="preserve">
+    <value>Chế độ đột kích đã tắt</value>
+  </data>
+  <data name="Waiting for countdown" xml:space="preserve">
+    <value>Đang chờ đếm ngược</value>
+  </data>
+  <data name="Countdown running" xml:space="preserve">
+    <value>Đang đếm ngược</value>
+  </data>
+  <data name="ADS unavailable" xml:space="preserve">
+    <value>ADS không khả dụng</value>
+  </data>
+  <data name="ADS start rejected" xml:space="preserve">
+    <value>ADS từ chối bắt đầu</value>
+  </data>
+  <data name="Waiting for duty" xml:space="preserve">
+    <value>Đang chờ nhiệm vụ</value>
+  </data>
+  <data name="Waiting for loot" xml:space="preserve">
+    <value>Đang chờ chiến lợi phẩm</value>
+  </data>
+  <data name="Waiting for loot distribution" xml:space="preserve">
+    <value>Đang chờ chia chiến lợi phẩm</value>
+  </data>
+  <data name="Waiting for manual recovery" xml:space="preserve">
+    <value>Đang chờ tự hồi phục</value>
+  </data>
+  <data name="Remaining until manually exited" xml:space="preserve">
+    <value>Ở lại cho đến khi tự thoát</value>
+  </data>
+  <data name="Leaving duty" xml:space="preserve">
+    <value>Đang rời nhiệm vụ</value>
+  </data>
+  <data name="Use ADS for chests and loot rolls during Raid mode. Uses your ADS roll policy, or Need if it is Off; your normal settings are unchanged." xml:space="preserve">
+    <value>Dùng ADS cho rương và đổ xúc xắc chiến lợi phẩm trong chế độ đột kích. Dùng quy tắc ADS đã lưu, hoặc Need nếu đang tắt; giữ nguyên cài đặt thông thường.</value>
+  </data>
+  <data name="Countdown unavailable" xml:space="preserve">
+    <value>Đếm ngược không khả dụng</value>
+  </data>
+  <data name="Waiting for ADS" xml:space="preserve">
+    <value>Đang chờ ADS</value>
+  </data>
+  <data name="ADS leave rejected" xml:space="preserve">
+    <value>ADS từ chối thoát</value>
+  </data>
 </root>

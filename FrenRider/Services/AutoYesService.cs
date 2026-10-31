@@ -99,6 +99,7 @@ public class AutoYesService : IDisposable
         if (SelectYesnoPromptClassifier.Classify(prompt ?? string.Empty) == SelectYesnoPromptKind.Raise)
         {
             RaiseOfferActive = true;
+            if (plugin.RaidModeService is { IsEnabled: true, AcceptRez: false }) return;
             // Own the visible offer even when its button is not actionable yet.
             if (handledRaiseDialog != prompt && now - lastRaiseAcceptedTime >= handleCooldown
                 && ClickYesAndLog(prompt!, "Raise offer"))
@@ -113,6 +114,10 @@ public class AutoYesService : IDisposable
         RaiseOfferActive = now - lastRaiseAcceptedTime < handleCooldown;
         if (RaiseOfferActive)
             return;
+
+        // Raid owns only resurrection acceptance; Return and generic recovery
+        // dialogs remain manual even when ordinary profile auto-yes is enabled.
+        if (plugin.RaidModeService?.IsEnabled == true) return;
 
         if (plugin.PhoenixDownRecoveryService.HoldMovement || plugin.PhoenixDownRecoveryService.DeferReturn)
             return;
@@ -288,6 +293,9 @@ public class AutoYesService : IDisposable
     {
         try
         {
+            if (plugin?.RaidModeService is { IsEnabled: true } raid
+                && (!raid.AcceptRez || SelectYesnoPromptClassifier.Classify(dialogText) != SelectYesnoPromptKind.Raise))
+                return false;
             // Use the existing GameHelpers method
             if (!clickYes())
                 return false;

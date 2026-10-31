@@ -6,6 +6,17 @@ namespace FrenRider.Tests;
 public sealed class AdsHyperFocusLeaseTests
 {
     [Fact]
+    public void TemporaryCombatSelectionCannotRestoreAcrossANewerProviderOrExplicitOffChoice()
+    {
+        var profile = new CharacterConfig { Enabled = true };
+        var captured = new CombatSettingsSnapshot(profile, "VBM", "FRENRIDER", 0, 0, 0, 3, DaedalusTargetMode.None);
+        Assert.True(CombatService.SameHyperFocusSelection(captured, captured with { }));
+        Assert.False(CombatService.SameHyperFocusSelection(captured, captured with { Provider = "WRATH" }));
+        Assert.False(CombatService.SameHyperFocusSelection(captured, captured with { RotationType = 2 }));
+        Assert.False(CombatService.SameHyperFocusSelection(captured, captured with { Profile = profile.Clone() }));
+    }
+
+    [Fact]
     public void AcquireUsesTokenOwnershipAndSameTokenDoesNotCreateAnotherGeneration()
     {
         var harness = new LeaseHarness();

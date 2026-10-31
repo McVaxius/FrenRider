@@ -296,6 +296,10 @@ public class MainWindow : Window, IDisposable
         if (UiGui.Button("Chocobo", icon: MaterialIcon.Chocobo))
             plugin.OpenChocoboSettings();
 
+        NextButton("Raid Mode");
+        if (UiGui.Button("Raid Mode"))
+            plugin.OpenRaidMode();
+
         NextButton("Ko-fi");
         if (UiGui.Button("Ko-fi", icon: MaterialIcon.Heart))
         {

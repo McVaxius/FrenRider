@@ -3270,4 +3270,76 @@ Activado: usa los ajustes de BossMod de abajo con cualquier proveedor de rotaci�
   <data name="Light colour 1" xml:space="preserve"><value>Color de luz 1</value></data>
   <data name="Light colour 2" xml:space="preserve"><value>Color de luz 2</value></data>
   <data name="Light colour 3" xml:space="preserve"><value>Color de luz 3</value></data>
+  <data name="FrenRider · Raid Mode" xml:space="preserve">
+    <value>FrenRider · Modo incursión</value>
+  </data>
+  <data name="Raid Mode" xml:space="preserve">
+    <value>Modo incursión</value>
+  </data>
+  <data name="ADS Loot" xml:space="preserve">
+    <value>Botín de ADS</value>
+  </data>
+  <data name="Accept Rez" xml:space="preserve">
+    <value>Aceptar resurrección</value>
+  </data>
+  <data name="Remain until manually exited" xml:space="preserve">
+    <value>Permanecer hasta salir manualmente</value>
+  </data>
+  <data name="Uncheck to leave after loot is distributed." xml:space="preserve">
+    <value>Desmarca para salir tras el reparto del botín.</value>
+  </data>
+  <data name="Wait up to" xml:space="preserve">
+    <value>Esperar hasta</value>
+  </data>
+  <data name="s for loot to appear" xml:space="preserve">
+    <value>s a que aparezca el botín</value>
+  </data>
+  <data name="Disable Raid Mode" xml:space="preserve">
+    <value>Desactivar modo incursión</value>
+  </data>
+  <data name="Raid mode disabled" xml:space="preserve">
+    <value>Modo incursión desactivado</value>
+  </data>
+  <data name="Waiting for countdown" xml:space="preserve">
+    <value>Esperando la cuenta atrás</value>
+  </data>
+  <data name="Countdown running" xml:space="preserve">
+    <value>Cuenta atrás en curso</value>
+  </data>
+  <data name="ADS unavailable" xml:space="preserve">
+    <value>ADS no disponible</value>
+  </data>
+  <data name="ADS start rejected" xml:space="preserve">
+    <value>Inicio de ADS rechazado</value>
+  </data>
+  <data name="Waiting for duty" xml:space="preserve">
+    <value>Esperando el contenido</value>
+  </data>
+  <data name="Waiting for loot" xml:space="preserve">
+    <value>Esperando el botín</value>
+  </data>
+  <data name="Waiting for loot distribution" xml:space="preserve">
+    <value>Esperando el reparto del botín</value>
+  </data>
+  <data name="Waiting for manual recovery" xml:space="preserve">
+    <value>Esperando recuperación manual</value>
+  </data>
+  <data name="Remaining until manually exited" xml:space="preserve">
+    <value>Permaneciendo hasta salir manualmente</value>
+  </data>
+  <data name="Leaving duty" xml:space="preserve">
+    <value>Saliendo del contenido</value>
+  </data>
+  <data name="Use ADS for chests and loot rolls during Raid mode. Uses your ADS roll policy, or Need if it is Off; your normal settings are unchanged." xml:space="preserve">
+    <value>Usa ADS para abrir cofres y tirar por el botín en modo incursión. Aplica tu política de ADS, o Necesidad si está desactivada; tus ajustes normales se conservan.</value>
+  </data>
+  <data name="Countdown unavailable" xml:space="preserve">
+    <value>Cuenta atrás no disponible</value>
+  </data>
+  <data name="Waiting for ADS" xml:space="preserve">
+    <value>Esperando a ADS</value>
+  </data>
+  <data name="ADS leave rejected" xml:space="preserve">
+    <value>Salida de ADS rechazada</value>
+  </data>
 </root>

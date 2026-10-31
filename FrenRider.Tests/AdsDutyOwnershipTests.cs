@@ -193,6 +193,67 @@ public sealed class AdsDutyOwnershipTests
         Assert.True((bool)fixture.Field("isNavigatingToInteractable")!);
     }
 
+    [Theory]
+    [InlineData("Vault Door")]
+    [InlineData("Exit Portal")]
+    public void CompletedRaidStopsProgressionNavigationBeforeOrdinaryDutyInteractionResumes(string name)
+    {
+        using var fixture = new CofferInteractionFixture();
+        var exit = fixture.Add(name, ObjectKind.EventObj, 12);
+        fixture.Call("NavigateToInteractable", exit, Vector3.Zero, 12f, DateTime.UtcNow);
+        fixture.SetField("lastInteractedEntityId", (uint)exit.GameObjectId);
+        fixture.Commands.Clear();
+        fixture.ConfigureRaid(enabled: true, completed: true);
+
+        fixture.Update();
+        fixture.Update();
+
+        Assert.Equal(new[] { "/vnavmesh stop" }, fixture.Commands);
+        Assert.False((bool)fixture.Field("isNavigatingToInteractable")!);
+        Assert.Null(fixture.Field("navigatingInteractableGameObjectId"));
+        Assert.Null(fixture.Field("lastInteractedEntityId"));
+        Assert.False(fixture.IsActive);
+        Assert.Equal("Remaining until manually exited", fixture.StateDetail);
+    }
+
+    [Fact]
+    public void CompletedRaidBlocksFinalInteractionAndMovementDispatchAfterAdsReleasesOwnership()
+    {
+        using var fixture = new CofferInteractionFixture();
+        var exit = fixture.Add("Exit Portal", ObjectKind.EventObj, 12);
+        fixture.ConfigureRaid(enabled: true, completed: true);
+        var plugin = (Plugin)fixture.Field("plugin")!;
+        Assert.True(plugin.AdsIntegrationService.DutySession.IsCompleted);
+        Assert.False(plugin.AdsIntegrationService.ShouldPauseDutySystems);
+        var now = DateTime.UtcNow;
+
+        fixture.Call("InteractWithObject", exit, now);
+        fixture.Call("IssueInteractableNavCommand", exit, "fabricated pending exit");
+        fixture.Call("NavigateToInteractable", exit, Vector3.Zero, 12f, now);
+        fixture.Call("NudgeForward");
+        Assert.False((bool)fixture.Call("TryMountTowardInteractable", new CharacterConfig(), exit, 12f, now)!);
+
+        Assert.Empty(fixture.Commands);
+        Assert.False((bool)fixture.Field("isNavigatingToInteractable")!);
+        Assert.Null(fixture.Field("lastInteractedEntityId"));
+    }
+
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(false, true)]
+    [InlineData(true, false)]
+    public void RaidCompletionGuardPreservesOrdinaryAndDuringPullNavigation(bool enabled, bool completed)
+    {
+        using var fixture = new CofferInteractionFixture();
+        var door = fixture.Add("Vault Door", ObjectKind.EventObj, 12);
+        fixture.ConfigureRaid(enabled, completed);
+
+        fixture.Call("NavigateToInteractable", door, Vector3.Zero, 12f, DateTime.UtcNow);
+
+        Assert.StartsWith("/vnav moveto ", Assert.Single(fixture.Commands));
+        Assert.True((bool)fixture.Field("isNavigatingToInteractable")!);
+    }
+
     [Fact]
     public void OffDoesNotStopForwardNudgeOrOrdinaryFollow()
     {
@@ -821,8 +882,11 @@ public sealed class AdsDutyOwnershipTests
         private string statusJson = "{}";
         private readonly AdsDutyIpcService ads;
         private readonly DutyInteractService interaction;
+        private RaidModeService? raid;
         internal readonly FollowService Follow = (FollowService)RuntimeHelpers.GetUninitializedObject(typeof(FollowService));
         internal readonly List<string> Commands = new();
+        internal bool IsActive => interaction.IsActive;
+        internal string StateDetail => interaction.StateDetail;
 
         internal CofferInteractionFixture()
         {
@@ -882,6 +946,29 @@ public sealed class AdsDutyOwnershipTests
             ads.Refresh(true, 4242, 88, force: true);
         }
 
+        internal void ConfigureRaid(bool enabled, bool completed)
+        {
+            var plugin = (Plugin)Field("plugin")!;
+            var config = new CharacterConfig { Enabled = true };
+            var raidService = new RaidModeService(() => config, () => { }, () => new RaidRuntimeFrame
+            {
+                LoggedIn = true, CharacterId = 701, TerritoryId = 100, DutyId = 1,
+                InDuty = true, Ready = true, LootReadable = true, DutyCompleted = completed,
+            }, () => true, () => false);
+            raid = raidService;
+            if (enabled)
+                raidService.Enable();
+            var integration = new AdsIntegrationService(ads, () => config, () => { }, _ => true,
+                _ => { }, _ => { }, raidModeEnabled: () => raidService.IsEnabled);
+            typeof(Plugin).GetProperty(nameof(Plugin.RaidModeService))!.SetValue(plugin, raidService);
+            typeof(Plugin).GetProperty(nameof(Plugin.AdsIntegrationService))!.SetValue(plugin, integration);
+            if (completed)
+                integration.OnDutyCompleted(100, DateTime.UtcNow);
+            if (enabled)
+                raidService.Update();
+        }
+
+        internal void Update() => interaction.Update();
         internal IGameObject? FindNearest() => (IGameObject?)Call("FindNearestInteractable");
         internal void ClearObjects() => objects.Clear();
         internal object? Call(string method, params object?[] args)
@@ -910,6 +997,7 @@ public sealed class AdsDutyOwnershipTests
             => type == typeof(void) || !type.IsValueType ? null : Activator.CreateInstance(type);
         public void Dispose()
         {
+            raid?.Dispose();
             foreach (var (property, value) in savedStatics) property.SetValue(null, value);
             ads.Dispose();
         }

@@ -50,7 +50,8 @@ internal sealed unsafe class NativePhoenixRecoveryRuntime : IPhoenixRecoveryRunt
     {
         var local = Plugin.ObjectTable.LocalPlayer;
         var config = plugin.ConfigManager.GetActiveConfig();
-        if (!Plugin.ClientState.IsLoggedIn || !plugin.IsFrenRiderEffectivelyEnabled || !config.UsePhoenixDownsForRecovery)
+        if (plugin.RaidModeService?.IsEnabled == true || !Plugin.ClientState.IsLoggedIn
+            || !plugin.IsFrenRiderEffectivelyEnabled || !config.UsePhoenixDownsForRecovery)
             return new PhoenixRecoveryFrame { Config = config, ContextEnded = true };
         if (local == null || !plugin.ConfigManager.TryGetLocalActiveConfig(out _))
             return new PhoenixRecoveryFrame { Config = config };
@@ -236,6 +237,7 @@ internal sealed unsafe class NativePhoenixRecoveryRuntime : IPhoenixRecoveryRunt
 
     public PhoenixApproachResult Approach(PhoenixActor target, float stopRange, long now)
     {
+        if (plugin.RaidModeService?.IsEnabled == true) return PhoenixApproachResult.Blocked;
         try
         {
             var local = Plugin.ObjectTable.LocalPlayer;
@@ -296,6 +298,7 @@ internal sealed unsafe class NativePhoenixRecoveryRuntime : IPhoenixRecoveryRunt
     public void Dismount() => GameHelpers.SendChatCommand("/mount", "[Phoenix Down]");
     public bool UsePhoenixDown(ulong targetId)
     {
+        if (plugin.RaidModeService?.IsEnabled == true) return false;
         itemTarget = targetId;
         issuingItem = true;
         try { return GameHelpers.UseItem(PhoenixDownRecoveryService.ItemId, false, targetId); }

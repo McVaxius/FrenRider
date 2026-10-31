@@ -19,6 +19,7 @@ public sealed class AdsIntegrationService
     private readonly Func<string, bool> processCommand;
     private readonly Action<string> logInformation;
     private readonly Action<string> logWarning;
+    private readonly Func<bool> raidModeEnabled;
 
     private DateTime dutyEnteredUtc = DateTime.MinValue;
     private DateTime lastPraetoriumReadyWaitLogUtc = DateTime.MinValue;
@@ -38,7 +39,8 @@ public sealed class AdsIntegrationService
             () => plugin.BossModActionTweaksService.ResetRecovery(),
             command => Plugin.CommandManager.ProcessCommand(command),
             message => Plugin.Log.Information(message), message => Plugin.Log.Warning(message),
-            plugin.ConfigManager.GetEffectiveAdsDutyFamilySettings, plugin.ConfigManager.GetEffectiveDutyExitSettings)
+            plugin.ConfigManager.GetEffectiveAdsDutyFamilySettings, plugin.ConfigManager.GetEffectiveDutyExitSettings,
+            () => plugin.RaidModeService?.IsEnabled == true)
     {
     }
 
@@ -46,12 +48,14 @@ public sealed class AdsIntegrationService
         Action resetRecovery, Func<string, bool> processCommand,
         Action<string> logInformation, Action<string> logWarning,
         Func<CharacterConfig, AdsDutyCategory, AdsDutyFamilySettings>? getFamilySettings = null,
-        Func<CharacterConfig, DutyExitSettings>? getExitSettings = null)
+        Func<CharacterConfig, DutyExitSettings>? getExitSettings = null,
+        Func<bool>? raidModeEnabled = null)
     {
         this.adsDutyIpcService = adsDutyIpcService;
         this.getConfig = getConfig;
         this.getFamilySettings = getFamilySettings ?? ((config, category) => config.GetAdsDutyFamilySettings(category));
         this.getExitSettings = getExitSettings ?? DutyExitSettings.FromConfig;
+        this.raidModeEnabled = raidModeEnabled ?? (() => false);
         this.resetRecovery = resetRecovery;
         this.processCommand = processCommand;
         this.logInformation = logInformation;
@@ -81,6 +85,12 @@ public sealed class AdsIntegrationService
         handoffState.Reset();
     }
 
+    internal void ResetHandoffForRaid()
+    {
+        ResetHandoff();
+        DutySession.CancelExitTakeover();
+    }
+
     internal void ObserveHandoffReadiness()
         => ObserveHandoffReadiness(IsInDuty(), ReadLiveDutyIdentity(), ReadReadinessConditions(), DateTime.UtcNow);
 
@@ -92,7 +102,7 @@ public sealed class AdsIntegrationService
         if (!inDuty)
             trackedInDuty = false;
 
-        if (!getConfig().Enabled || !inDuty || DutySession.IsCompleted)
+        if (raidModeEnabled() || !getConfig().Enabled || !inDuty || DutySession.IsCompleted)
         {
             ResetHandoff();
             return;
@@ -220,6 +230,15 @@ public sealed class AdsIntegrationService
         }
 
         runtimeOwnedLastUpdate = IsControllingDuty;
+
+        // Keep session/real ownership observation above active. Raid starts are
+        // native countdown events, never ordinary admission, delays or retries.
+        if (raidModeEnabled())
+        {
+            ResetHandoffForRaid();
+            StatusText = IsControllingDuty ? "ADS active" : "Waiting for countdown";
+            return;
+        }
 
         if (config == null || !config.Enabled || !inDuty)
             ResetHandoff();
@@ -372,6 +391,11 @@ public sealed class AdsIntegrationService
 
     public void ReleaseDutyControlForExit(string reason)
     {
+        if (raidModeEnabled())
+        {
+            ResetHandoffForRaid();
+            return;
+        }
         var config = getConfig();
         var exits = getExitSettings(config);
         var configuredExit = exits.UseAdsLeaveAfterAdsDuty || exits.ExitAfterDutyEnds || exits.LeaveWhenAllLeft;
@@ -583,6 +607,8 @@ internal sealed class AdsDutySession
     }
 
     public void ObserveAdsControl() => HadAdsControl = true;
+
+    public void CancelExitTakeover() => ExitTakeoverActive = false;
 
     public bool TryTakeOverExit(bool configuredExit)
     {

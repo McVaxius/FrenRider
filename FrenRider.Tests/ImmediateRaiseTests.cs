@@ -10,6 +10,39 @@ namespace FrenRider.Tests;
 public sealed class ImmediateRaiseTests
 {
     [Fact]
+    public void RaidAcceptRezControlsTheEarlyRaiseBranchAndReturnRemainsManual()
+    {
+        var plugin = (Plugin)RuntimeHelpers.GetUninitializedObject(typeof(Plugin));
+        var config = new CharacterConfig { Enabled = true, RaidAcceptRez = false };
+        var frame = new RaidRuntimeFrame { LoggedIn = true, CharacterId = 701, TerritoryId = 100, DutyId = 1, InDuty = true, Ready = true };
+        using var raid = new RaidModeService(() => config, () => { }, () => frame, () => false, () => false);
+        plugin.GetType().GetProperty(nameof(Plugin.RaidModeService))!.SetValue(plugin, raid);
+        raid.Enable();
+        var condition = DispatchProxy.Create<ICondition, LogProxy>();
+        var log = DispatchProxy.Create<IPluginLog, LogProxy>();
+        string? prompt = "Accept Raise?";
+        var clicks = 0;
+        using var autoYes = new AutoYesService(plugin, condition, log, () => config, () => prompt,
+            () => { clicks++; return true; });
+        autoYes.Update();
+        Assert.Equal(0, clicks);
+        Assert.True(autoYes.RaiseOfferActive);
+        raid.AcceptRez = true;
+        autoYes.Update();
+        Assert.Equal(1, clicks);
+        prompt = "Return to the starting point?";
+        using var returnCheck = new AutoYesService(plugin, condition, log, () => config, () => prompt,
+            () => { clicks++; return true; });
+        returnCheck.Update();
+        Assert.Equal(1, clicks);
+        var respawn = new RespawnService(plugin);
+        respawn.Update();
+        Assert.Equal(RespawnState.Off, respawn.State);
+        Assert.False(respawn.ShouldOwnCurrentUnconsciousReviveFlow(config));
+        Assert.Empty(((LogProxy)(object)condition).Messages);
+    }
+
+    [Fact]
     public void RaisePrecedesDutyUtilityCombatAndRespawnGatesAndOnlySuccessfulClicksAreDeduplicated()
     {
         var plugin = (Plugin)RuntimeHelpers.GetUninitializedObject(typeof(Plugin));

@@ -3270,4 +3270,76 @@ An: Die BossMod-Voreinstellungen unten mit jedem Rotationsanbieter verwenden. Ei
   <data name="Light colour 1" xml:space="preserve"><value>Lichtfarbe 1</value></data>
   <data name="Light colour 2" xml:space="preserve"><value>Lichtfarbe 2</value></data>
   <data name="Light colour 3" xml:space="preserve"><value>Lichtfarbe 3</value></data>
+  <data name="FrenRider · Raid Mode" xml:space="preserve">
+    <value>FrenRider · Raidmodus</value>
+  </data>
+  <data name="Raid Mode" xml:space="preserve">
+    <value>Raidmodus</value>
+  </data>
+  <data name="ADS Loot" xml:space="preserve">
+    <value>ADS-Beute</value>
+  </data>
+  <data name="Accept Rez" xml:space="preserve">
+    <value>Wiederbelebung annehmen</value>
+  </data>
+  <data name="Remain until manually exited" xml:space="preserve">
+    <value>Bis zum manuellen Verlassen bleiben</value>
+  </data>
+  <data name="Uncheck to leave after loot is distributed." xml:space="preserve">
+    <value>Abwählen, um nach der Beuteverteilung zu gehen.</value>
+  </data>
+  <data name="Wait up to" xml:space="preserve">
+    <value>Bis zu</value>
+  </data>
+  <data name="s for loot to appear" xml:space="preserve">
+    <value>s auf Beute warten</value>
+  </data>
+  <data name="Disable Raid Mode" xml:space="preserve">
+    <value>Raidmodus deaktivieren</value>
+  </data>
+  <data name="Raid mode disabled" xml:space="preserve">
+    <value>Raidmodus deaktiviert</value>
+  </data>
+  <data name="Waiting for countdown" xml:space="preserve">
+    <value>Warte auf Countdown</value>
+  </data>
+  <data name="Countdown running" xml:space="preserve">
+    <value>Countdown läuft</value>
+  </data>
+  <data name="ADS unavailable" xml:space="preserve">
+    <value>ADS nicht verfügbar</value>
+  </data>
+  <data name="ADS start rejected" xml:space="preserve">
+    <value>ADS-Start abgelehnt</value>
+  </data>
+  <data name="Waiting for duty" xml:space="preserve">
+    <value>Warte auf Inhalt</value>
+  </data>
+  <data name="Waiting for loot" xml:space="preserve">
+    <value>Warte auf Beute</value>
+  </data>
+  <data name="Waiting for loot distribution" xml:space="preserve">
+    <value>Warte auf Beuteverteilung</value>
+  </data>
+  <data name="Waiting for manual recovery" xml:space="preserve">
+    <value>Warte auf manuelle Wiederbelebung</value>
+  </data>
+  <data name="Remaining until manually exited" xml:space="preserve">
+    <value>Bleibe bis zum manuellen Verlassen</value>
+  </data>
+  <data name="Leaving duty" xml:space="preserve">
+    <value>Inhalt wird verlassen</value>
+  </data>
+  <data name="Use ADS for chests and loot rolls during Raid mode. Uses your ADS roll policy, or Need if it is Off; your normal settings are unchanged." xml:space="preserve">
+    <value>ADS öffnet im Raidmodus Truhen und würfelt auf Beute. Es verwendet deine ADS-Würfelregel oder Bedarf, falls sie aus ist. Deine normalen Einstellungen bleiben erhalten.</value>
+  </data>
+  <data name="Countdown unavailable" xml:space="preserve">
+    <value>Countdown nicht verfügbar</value>
+  </data>
+  <data name="Waiting for ADS" xml:space="preserve">
+    <value>Warte auf ADS</value>
+  </data>
+  <data name="ADS leave rejected" xml:space="preserve">
+    <value>ADS-Austritt abgelehnt</value>
+  </data>
 </root>

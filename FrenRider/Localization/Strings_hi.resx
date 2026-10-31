@@ -3281,4 +3281,76 @@
   <data name="Light colour 1" xml:space="preserve"><value>रोशनी का रंग 1</value></data>
   <data name="Light colour 2" xml:space="preserve"><value>रोशनी का रंग 2</value></data>
   <data name="Light colour 3" xml:space="preserve"><value>रोशनी का रंग 3</value></data>
+  <data name="FrenRider · Raid Mode" xml:space="preserve">
+    <value>FrenRider · रेड मोड</value>
+  </data>
+  <data name="Raid Mode" xml:space="preserve">
+    <value>रेड मोड</value>
+  </data>
+  <data name="ADS Loot" xml:space="preserve">
+    <value>ADS लूट</value>
+  </data>
+  <data name="Accept Rez" xml:space="preserve">
+    <value>पुनर्जीवन स्वीकारें</value>
+  </data>
+  <data name="Remain until manually exited" xml:space="preserve">
+    <value>खुद बाहर निकलने तक रुकें</value>
+  </data>
+  <data name="Uncheck to leave after loot is distributed." xml:space="preserve">
+    <value>लूट बँटने के बाद निकलने के लिए इसे हटाएँ।</value>
+  </data>
+  <data name="Wait up to" xml:space="preserve">
+    <value>अधिकतम</value>
+  </data>
+  <data name="s for loot to appear" xml:space="preserve">
+    <value>सेकंड तक लूट आने की प्रतीक्षा</value>
+  </data>
+  <data name="Disable Raid Mode" xml:space="preserve">
+    <value>रेड मोड बंद करें</value>
+  </data>
+  <data name="Raid mode disabled" xml:space="preserve">
+    <value>रेड मोड बंद है</value>
+  </data>
+  <data name="Waiting for countdown" xml:space="preserve">
+    <value>काउंटडाउन की प्रतीक्षा</value>
+  </data>
+  <data name="Countdown running" xml:space="preserve">
+    <value>काउंटडाउन चल रहा है</value>
+  </data>
+  <data name="ADS unavailable" xml:space="preserve">
+    <value>ADS उपलब्ध नहीं है</value>
+  </data>
+  <data name="ADS start rejected" xml:space="preserve">
+    <value>ADS का आरंभ अस्वीकार हुआ</value>
+  </data>
+  <data name="Waiting for duty" xml:space="preserve">
+    <value>ड्यूटी की प्रतीक्षा</value>
+  </data>
+  <data name="Waiting for loot" xml:space="preserve">
+    <value>लूट की प्रतीक्षा</value>
+  </data>
+  <data name="Waiting for loot distribution" xml:space="preserve">
+    <value>लूट बँटने की प्रतीक्षा</value>
+  </data>
+  <data name="Waiting for manual recovery" xml:space="preserve">
+    <value>मैन्युअल रिकवरी की प्रतीक्षा</value>
+  </data>
+  <data name="Remaining until manually exited" xml:space="preserve">
+    <value>खुद बाहर निकलने तक रुक रहे हैं</value>
+  </data>
+  <data name="Leaving duty" xml:space="preserve">
+    <value>ड्यूटी से निकल रहे हैं</value>
+  </data>
+  <data name="Use ADS for chests and loot rolls during Raid mode. Uses your ADS roll policy, or Need if it is Off; your normal settings are unchanged." xml:space="preserve">
+    <value>रेड मोड में संदूक खोलने और लूट रोल के लिए ADS का उपयोग करें। आपकी ADS रोल नीति लागू होगी; बंद होने पर Need चुना जाएगा। सामान्य सेटिंग नहीं बदलतीं।</value>
+  </data>
+  <data name="Countdown unavailable" xml:space="preserve">
+    <value>काउंटडाउन उपलब्ध नहीं है</value>
+  </data>
+  <data name="Waiting for ADS" xml:space="preserve">
+    <value>ADS की प्रतीक्षा</value>
+  </data>
+  <data name="ADS leave rejected" xml:space="preserve">
+    <value>ADS से बाहर निकलना अस्वीकार हुआ</value>
+  </data>
 </root>

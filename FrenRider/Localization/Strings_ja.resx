@@ -3270,4 +3270,76 @@
   <data name="Light colour 1" xml:space="preserve"><value>ライトの色 1</value></data>
   <data name="Light colour 2" xml:space="preserve"><value>ライトの色 2</value></data>
   <data name="Light colour 3" xml:space="preserve"><value>ライトの色 3</value></data>
+  <data name="FrenRider · Raid Mode" xml:space="preserve">
+    <value>FrenRider · レイドモード</value>
+  </data>
+  <data name="Raid Mode" xml:space="preserve">
+    <value>レイドモード</value>
+  </data>
+  <data name="ADS Loot" xml:space="preserve">
+    <value>ADS戦利品</value>
+  </data>
+  <data name="Accept Rez" xml:space="preserve">
+    <value>蘇生を受ける</value>
+  </data>
+  <data name="Remain until manually exited" xml:space="preserve">
+    <value>手動で退出するまで留まる</value>
+  </data>
+  <data name="Uncheck to leave after loot is distributed." xml:space="preserve">
+    <value>オフにすると戦利品の分配後に退出します。</value>
+  </data>
+  <data name="Wait up to" xml:space="preserve">
+    <value>最大</value>
+  </data>
+  <data name="s for loot to appear" xml:space="preserve">
+    <value>秒、戦利品の出現を待つ</value>
+  </data>
+  <data name="Disable Raid Mode" xml:space="preserve">
+    <value>レイドモードを無効化</value>
+  </data>
+  <data name="Raid mode disabled" xml:space="preserve">
+    <value>レイドモード無効</value>
+  </data>
+  <data name="Waiting for countdown" xml:space="preserve">
+    <value>カウントダウン待機中</value>
+  </data>
+  <data name="Countdown running" xml:space="preserve">
+    <value>カウントダウン中</value>
+  </data>
+  <data name="ADS unavailable" xml:space="preserve">
+    <value>ADS利用不可</value>
+  </data>
+  <data name="ADS start rejected" xml:space="preserve">
+    <value>ADSの開始が拒否されました</value>
+  </data>
+  <data name="Waiting for duty" xml:space="preserve">
+    <value>コンテンツ待機中</value>
+  </data>
+  <data name="Waiting for loot" xml:space="preserve">
+    <value>戦利品待機中</value>
+  </data>
+  <data name="Waiting for loot distribution" xml:space="preserve">
+    <value>戦利品の分配待機中</value>
+  </data>
+  <data name="Waiting for manual recovery" xml:space="preserve">
+    <value>手動の復帰を待機中</value>
+  </data>
+  <data name="Remaining until manually exited" xml:space="preserve">
+    <value>手動で退出するまで滞在中</value>
+  </data>
+  <data name="Leaving duty" xml:space="preserve">
+    <value>コンテンツから退出中</value>
+  </data>
+  <data name="Use ADS for chests and loot rolls during Raid mode. Uses your ADS roll policy, or Need if it is Off; your normal settings are unchanged." xml:space="preserve">
+    <value>レイドモード中、ADSで宝箱と戦利品ロットを処理します。ADSのロット設定を使用し、オフの場合はNEEDを使用します。通常の設定は変更しません。</value>
+  </data>
+  <data name="Countdown unavailable" xml:space="preserve">
+    <value>カウントダウン利用不可</value>
+  </data>
+  <data name="Waiting for ADS" xml:space="preserve">
+    <value>ADS待機中</value>
+  </data>
+  <data name="ADS leave rejected" xml:space="preserve">
+    <value>ADSの退出が拒否されました</value>
+  </data>
 </root>

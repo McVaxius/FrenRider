@@ -85,6 +85,22 @@ The eclipse titlebar action switches between styled and native/plain UI without 
 
 Main's titlebar provides Settings, MAGIA Mini, the active-character Run toggle, and All FR on/off for the current account. Mini provides Main, Settings and Run. The packaged icon appears in Main branding and both titlebars, including collapsed windows.
 
+## Raid mode
+
+Turn FrenRider's **Run** on, then click **Raid Mode** on Main or Mini. It opens a separate window and enables the current character's Raid session. Closing that window only hides it; **Disable Raid Mode** turns the mode off. Run off, logout or an active-profile change also ends it. The mode stays armed across ordinary duty departures for the same character, while each duty gets fresh countdown and loot state. Activation is not saved across plugin reloads.
+
+While enabled, Raid replaces the ordinary ADS start and duty-exit rules. A completed party pull countdown requests ADS inside-start once, without the normal readiness delay or automatic retry. ADS Stop requires a fresh countdown before another automatic start. Keep the matching ADS build loaded for coordinated operation. Your selected combat rotation remains available, and local movement yields when ADS owns navigation.
+
+Raid refuses queued `/ads outside` takeover. Deliberate current-duty ADS **Start Inside**, **Resume**, **Stop** and **Leave** remain available. A rejected automatic departure stays visible without retrying; resolve its blocker before choosing a manual Leave or explicitly changing Remain to request a new decision.
+
+The Raid window has these controls:
+
+- **ADS Loot**, initially off, enables ADS chest and roll work for Raid only. It uses your normal ADS roll choice, or Need when that choice is Off; normal saved ADS settings stay intact.
+- **Accept Rez**, initially checked, permits resurrection offers. Return/respawn and other recovery stay manual.
+- **Remain until manually exited**, initially checked, prevents automatic departure. Uncheck it to leave after final completion and loot distribution. **Wait up to 10 s for loot to appear** is editable and limits only the first appearance wait. Once loot appears, outstanding distribution can take longer; a dead player still waits for manual recovery.
+
+These four preferences save with the existing character profile. Disable cancels pending Raid work and restores the normal policies; it does not issue a Leave command. Offline tests and native diagnostic previews do not establish live countdown, loot or GPU acceptance.
+
 ## Core Features
 
 - Party/fren tracking from the current party list, with quick-select in settings.

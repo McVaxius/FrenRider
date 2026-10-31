@@ -3375,4 +3375,76 @@ Włączone: używaj poniższych presetów BossMod z dowolnym dostawcą rotacji. 
   <data name="Light colour 1" xml:space="preserve"><value>Kolor światła 1</value></data>
   <data name="Light colour 2" xml:space="preserve"><value>Kolor światła 2</value></data>
   <data name="Light colour 3" xml:space="preserve"><value>Kolor światła 3</value></data>
+  <data name="FrenRider · Raid Mode" xml:space="preserve">
+    <value>FrenRider · Tryb rajdu</value>
+  </data>
+  <data name="Raid Mode" xml:space="preserve">
+    <value>Tryb rajdu</value>
+  </data>
+  <data name="ADS Loot" xml:space="preserve">
+    <value>Łupy ADS</value>
+  </data>
+  <data name="Accept Rez" xml:space="preserve">
+    <value>Przyjmuj wskrzeszenie</value>
+  </data>
+  <data name="Remain until manually exited" xml:space="preserve">
+    <value>Pozostań do ręcznego wyjścia</value>
+  </data>
+  <data name="Uncheck to leave after loot is distributed." xml:space="preserve">
+    <value>Odznacz, by wyjść po podziale łupów.</value>
+  </data>
+  <data name="Wait up to" xml:space="preserve">
+    <value>Czekaj do</value>
+  </data>
+  <data name="s for loot to appear" xml:space="preserve">
+    <value>s na pojawienie się łupów</value>
+  </data>
+  <data name="Disable Raid Mode" xml:space="preserve">
+    <value>Wyłącz tryb rajdu</value>
+  </data>
+  <data name="Raid mode disabled" xml:space="preserve">
+    <value>Tryb rajdu wyłączony</value>
+  </data>
+  <data name="Waiting for countdown" xml:space="preserve">
+    <value>Oczekiwanie na odliczanie</value>
+  </data>
+  <data name="Countdown running" xml:space="preserve">
+    <value>Odliczanie trwa</value>
+  </data>
+  <data name="ADS unavailable" xml:space="preserve">
+    <value>ADS niedostępny</value>
+  </data>
+  <data name="ADS start rejected" xml:space="preserve">
+    <value>Start ADS odrzucony</value>
+  </data>
+  <data name="Waiting for duty" xml:space="preserve">
+    <value>Oczekiwanie na instancję</value>
+  </data>
+  <data name="Waiting for loot" xml:space="preserve">
+    <value>Oczekiwanie na łupy</value>
+  </data>
+  <data name="Waiting for loot distribution" xml:space="preserve">
+    <value>Oczekiwanie na podział łupów</value>
+  </data>
+  <data name="Waiting for manual recovery" xml:space="preserve">
+    <value>Oczekiwanie na ręczny powrót</value>
+  </data>
+  <data name="Remaining until manually exited" xml:space="preserve">
+    <value>Pozostawanie do ręcznego wyjścia</value>
+  </data>
+  <data name="Leaving duty" xml:space="preserve">
+    <value>Opuszczanie instancji</value>
+  </data>
+  <data name="Use ADS for chests and loot rolls during Raid mode. Uses your ADS roll policy, or Need if it is Off; your normal settings are unchanged." xml:space="preserve">
+    <value>Używaj ADS do skrzyń i rzutów na łupy w trybie rajdu. Stosuje zasady ADS lub Need, gdy są wyłączone; zwykłe ustawienia pozostają bez zmian.</value>
+  </data>
+  <data name="Countdown unavailable" xml:space="preserve">
+    <value>Odliczanie niedostępne</value>
+  </data>
+  <data name="Waiting for ADS" xml:space="preserve">
+    <value>Oczekiwanie na ADS</value>
+  </data>
+  <data name="ADS leave rejected" xml:space="preserve">
+    <value>Wyjście ADS odrzucone</value>
+  </data>
 </root>

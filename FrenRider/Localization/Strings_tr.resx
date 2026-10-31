@@ -3375,4 +3375,76 @@ Açık: aşağıdaki BossMod ön ayarlarını herhangi bir rotasyon sağlayıcı
   <data name="Light colour 1" xml:space="preserve"><value>Işık rengi 1</value></data>
   <data name="Light colour 2" xml:space="preserve"><value>Işık rengi 2</value></data>
   <data name="Light colour 3" xml:space="preserve"><value>Işık rengi 3</value></data>
+  <data name="FrenRider · Raid Mode" xml:space="preserve">
+    <value>FrenRider · Baskın modu</value>
+  </data>
+  <data name="Raid Mode" xml:space="preserve">
+    <value>Baskın modu</value>
+  </data>
+  <data name="ADS Loot" xml:space="preserve">
+    <value>ADS ganimeti</value>
+  </data>
+  <data name="Accept Rez" xml:space="preserve">
+    <value>Diriltmeyi kabul et</value>
+  </data>
+  <data name="Remain until manually exited" xml:space="preserve">
+    <value>Elle çıkana kadar kal</value>
+  </data>
+  <data name="Uncheck to leave after loot is distributed." xml:space="preserve">
+    <value>Ganimet dağıtılınca çıkmak için işareti kaldırın.</value>
+  </data>
+  <data name="Wait up to" xml:space="preserve">
+    <value>Ganimetin belirmesini</value>
+  </data>
+  <data name="s for loot to appear" xml:space="preserve">
+    <value>sn bekle</value>
+  </data>
+  <data name="Disable Raid Mode" xml:space="preserve">
+    <value>Baskın modunu kapat</value>
+  </data>
+  <data name="Raid mode disabled" xml:space="preserve">
+    <value>Baskın modu kapalı</value>
+  </data>
+  <data name="Waiting for countdown" xml:space="preserve">
+    <value>Geri sayım bekleniyor</value>
+  </data>
+  <data name="Countdown running" xml:space="preserve">
+    <value>Geri sayım sürüyor</value>
+  </data>
+  <data name="ADS unavailable" xml:space="preserve">
+    <value>ADS kullanılamıyor</value>
+  </data>
+  <data name="ADS start rejected" xml:space="preserve">
+    <value>ADS başlatma reddedildi</value>
+  </data>
+  <data name="Waiting for duty" xml:space="preserve">
+    <value>Görev bekleniyor</value>
+  </data>
+  <data name="Waiting for loot" xml:space="preserve">
+    <value>Ganimet bekleniyor</value>
+  </data>
+  <data name="Waiting for loot distribution" xml:space="preserve">
+    <value>Ganimet dağıtımı bekleniyor</value>
+  </data>
+  <data name="Waiting for manual recovery" xml:space="preserve">
+    <value>Elle toparlanma bekleniyor</value>
+  </data>
+  <data name="Remaining until manually exited" xml:space="preserve">
+    <value>Elle çıkana kadar kalınıyor</value>
+  </data>
+  <data name="Leaving duty" xml:space="preserve">
+    <value>Görevden çıkılıyor</value>
+  </data>
+  <data name="Use ADS for chests and loot rolls during Raid mode. Uses your ADS roll policy, or Need if it is Off; your normal settings are unchanged." xml:space="preserve">
+    <value>Baskın modunda sandıklar ve ganimet zarları için ADS kullanır. ADS zar kuralınızı, kapalıysa Need seçeneğini kullanır; normal ayarlarınız korunur.</value>
+  </data>
+  <data name="Countdown unavailable" xml:space="preserve">
+    <value>Geri sayım kullanılamıyor</value>
+  </data>
+  <data name="Waiting for ADS" xml:space="preserve">
+    <value>ADS bekleniyor</value>
+  </data>
+  <data name="ADS leave rejected" xml:space="preserve">
+    <value>ADS çıkışı reddedildi</value>
+  </data>
 </root>

@@ -3270,4 +3270,76 @@ Activé : utilisez les préréglages BossMod ci-dessous avec tout fournisseur de
   <data name="Light colour 1" xml:space="preserve"><value>Couleur de lumière 1</value></data>
   <data name="Light colour 2" xml:space="preserve"><value>Couleur de lumière 2</value></data>
   <data name="Light colour 3" xml:space="preserve"><value>Couleur de lumière 3</value></data>
+  <data name="FrenRider · Raid Mode" xml:space="preserve">
+    <value>FrenRider · Mode raid</value>
+  </data>
+  <data name="Raid Mode" xml:space="preserve">
+    <value>Mode raid</value>
+  </data>
+  <data name="ADS Loot" xml:space="preserve">
+    <value>Butin ADS</value>
+  </data>
+  <data name="Accept Rez" xml:space="preserve">
+    <value>Accepter la résurrection</value>
+  </data>
+  <data name="Remain until manually exited" xml:space="preserve">
+    <value>Rester jusqu’à la sortie manuelle</value>
+  </data>
+  <data name="Uncheck to leave after loot is distributed." xml:space="preserve">
+    <value>Décochez pour sortir après le partage du butin.</value>
+  </data>
+  <data name="Wait up to" xml:space="preserve">
+    <value>Attendre jusqu’à</value>
+  </data>
+  <data name="s for loot to appear" xml:space="preserve">
+    <value>s l’apparition du butin</value>
+  </data>
+  <data name="Disable Raid Mode" xml:space="preserve">
+    <value>Désactiver le mode raid</value>
+  </data>
+  <data name="Raid mode disabled" xml:space="preserve">
+    <value>Mode raid désactivé</value>
+  </data>
+  <data name="Waiting for countdown" xml:space="preserve">
+    <value>En attente du compte à rebours</value>
+  </data>
+  <data name="Countdown running" xml:space="preserve">
+    <value>Compte à rebours en cours</value>
+  </data>
+  <data name="ADS unavailable" xml:space="preserve">
+    <value>ADS indisponible</value>
+  </data>
+  <data name="ADS start rejected" xml:space="preserve">
+    <value>Démarrage ADS refusé</value>
+  </data>
+  <data name="Waiting for duty" xml:space="preserve">
+    <value>En attente d’instance</value>
+  </data>
+  <data name="Waiting for loot" xml:space="preserve">
+    <value>En attente du butin</value>
+  </data>
+  <data name="Waiting for loot distribution" xml:space="preserve">
+    <value>En attente du partage du butin</value>
+  </data>
+  <data name="Waiting for manual recovery" xml:space="preserve">
+    <value>En attente d’une récupération manuelle</value>
+  </data>
+  <data name="Remaining until manually exited" xml:space="preserve">
+    <value>Maintien jusqu’à la sortie manuelle</value>
+  </data>
+  <data name="Leaving duty" xml:space="preserve">
+    <value>Sortie de l’instance</value>
+  </data>
+  <data name="Use ADS for chests and loot rolls during Raid mode. Uses your ADS roll policy, or Need if it is Off; your normal settings are unchanged." xml:space="preserve">
+    <value>Utilise ADS pour les coffres et les jets de butin en mode raid. Applique votre règle ADS, ou Besoin si elle est désactivée ; vos réglages habituels sont conservés.</value>
+  </data>
+  <data name="Countdown unavailable" xml:space="preserve">
+    <value>Compte à rebours indisponible</value>
+  </data>
+  <data name="Waiting for ADS" xml:space="preserve">
+    <value>En attente d’ADS</value>
+  </data>
+  <data name="ADS leave rejected" xml:space="preserve">
+    <value>Sortie ADS refusée</value>
+  </data>
 </root>

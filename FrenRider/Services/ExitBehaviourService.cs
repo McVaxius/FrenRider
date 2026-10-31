@@ -105,6 +105,7 @@ public class ExitBehaviourService : IDisposable
     {
         ResetOutsideDutyState();
         plugin.AdsIntegrationService.OnDutyStarted(args.TerritoryType.RowId);
+        plugin.RaidModeService?.OnDutyStarted();
     }
 
     private void OnDutyCompleted(Dalamud.Game.DutyState.IDutyStateEventArgs args)
@@ -150,6 +151,12 @@ public class ExitBehaviourService : IDisposable
     /// </summary>
     public void Update()
     {
+        if (plugin.RaidModeService?.IsEnabled == true)
+        {
+            CancelAutomaticExitForRaid();
+            StateDetail = "Raid mode";
+            return;
+        }
         var config = plugin.ConfigManager.GetActiveConfig();
         var inDuty = Plugin.Condition[ConditionFlag.BoundByDuty] ||
                      Plugin.Condition[ConditionFlag.BoundByDuty56] ||
@@ -529,6 +536,11 @@ public class ExitBehaviourService : IDisposable
 
     private void TickLeaveDutySequence()
     {
+        if (plugin.RaidModeService?.IsEnabled == true)
+        {
+            CancelAutomaticExitForRaid();
+            return;
+        }
         if (leaveDutyStep == LeaveDutyStep.None || DateTime.UtcNow < leaveDutyStepDueAt)
             return;
 
@@ -574,6 +586,15 @@ public class ExitBehaviourService : IDisposable
         leaveDutyStepDueAt = DateTime.MinValue;
         pendingLeaveReason = "";
         leaveConfirmationAttemptCount = 0;
+    }
+
+    internal void CancelAutomaticExitForRaid()
+    {
+        CancelLeaveDutySequence("Raid mode");
+        if (isNavigatingToExit) SendCommand("/vnav stop");
+        isNavigatingToExit = false;
+        exitTarget = null;
+        lastPartyCheckTime = DateTime.MinValue;
     }
 
     private void TryClickLeaveDutyButton()

@@ -48,6 +48,11 @@ public sealed class RespawnService
 
     public void Update()
     {
+        if (plugin.RaidModeService?.IsEnabled == true)
+        {
+            Reset(RespawnState.Off, "Raid mode; manual respawn");
+            return;
+        }
         if (plugin.AutoYesService.RaiseOfferActive)
         {
             Reset(RespawnState.Waiting, "Raise offer handled by AutoYes");
@@ -295,6 +300,7 @@ public sealed class RespawnService
 
     private bool CanActAfterRecheck(long now)
     {
+        if (plugin.RaidModeService?.IsEnabled == true) return false;
         var config = plugin.ConfigManager.GetActiveConfig();
         var inDuty = IsInDuty();
         var fullPartyWipe = inDuty && IsConfirmedFullPartyWipe(config);
@@ -325,7 +331,7 @@ public sealed class RespawnService
         => Plugin.Condition[ConditionFlag.BetweenAreas]
             || Plugin.Condition[ConditionFlag.BetweenAreas51];
 
-    private unsafe bool IsConfirmedFullPartyWipe(CharacterConfig config)
+    internal unsafe bool IsConfirmedFullPartyWipe(CharacterConfig config)
     {
         if (!config.Enabled || !Plugin.ClientState.IsLoggedIn || IsAreaTransitionActive()
             || !Plugin.Condition[ConditionFlag.Unconscious]
@@ -380,6 +386,7 @@ public sealed class RespawnService
 
     public bool ShouldOwnCurrentUnconsciousReviveFlow(CharacterConfig config)
     {
+        if (plugin.RaidModeService?.IsEnabled == true) return false;
         var fullPartyWipe = IsInDuty() && IsConfirmedFullPartyWipe(config);
         if (HasActiveRevival() || plugin.PhoenixDownRecoveryService.DeferReturn && !fullPartyWipe)
             return false;
@@ -506,6 +513,7 @@ public sealed class RespawnService
 
     private unsafe void TryReturn(long now)
     {
+        if (plugin.RaidModeService?.IsEnabled == true) return;
         if (!CanActAfterRecheck(now))
             return;
         if (GameHelpers.TryReadSelectYesnoPrompt(out var promptText))
@@ -574,6 +582,7 @@ public sealed class RespawnService
         string promptText,
         long now)
     {
+        if (plugin.RaidModeService?.IsEnabled == true) return;
         if (responseYes && promptKind == SelectYesnoPromptKind.DeathReturn && !CanActAfterRecheck(now))
             return;
         var callbackDispatched = responseYes

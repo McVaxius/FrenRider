@@ -155,6 +155,8 @@ public sealed class MagiaMiniWindow : Window, IDisposable
         ContinueButton(enabled ? "ON" : "OFF", 0);
         UiHelpers.StatusPill(enabled ? "ON" : "OFF", status,
             plugin.IsWaitingForDuty ? "Combat rotations paused outside duties" : null);
+        ContinueButton("Raid Mode", 0);
+        if (UiGui.Button("Raid Mode")) plugin.OpenRaidMode();
         DrawFrenSelector(config);
     }
 

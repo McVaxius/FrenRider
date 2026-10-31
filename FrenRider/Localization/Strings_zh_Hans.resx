@@ -3270,4 +3270,76 @@
   <data name="Light colour 1" xml:space="preserve"><value>灯光颜色 1</value></data>
   <data name="Light colour 2" xml:space="preserve"><value>灯光颜色 2</value></data>
   <data name="Light colour 3" xml:space="preserve"><value>灯光颜色 3</value></data>
+  <data name="FrenRider · Raid Mode" xml:space="preserve">
+    <value>FrenRider · 团队副本模式</value>
+  </data>
+  <data name="Raid Mode" xml:space="preserve">
+    <value>团队副本模式</value>
+  </data>
+  <data name="ADS Loot" xml:space="preserve">
+    <value>ADS战利品</value>
+  </data>
+  <data name="Accept Rez" xml:space="preserve">
+    <value>接受复活</value>
+  </data>
+  <data name="Remain until manually exited" xml:space="preserve">
+    <value>停留至手动离开</value>
+  </data>
+  <data name="Uncheck to leave after loot is distributed." xml:space="preserve">
+    <value>取消勾选可在战利品分配完毕后离开。</value>
+  </data>
+  <data name="Wait up to" xml:space="preserve">
+    <value>最多等待</value>
+  </data>
+  <data name="s for loot to appear" xml:space="preserve">
+    <value>秒，等待战利品出现</value>
+  </data>
+  <data name="Disable Raid Mode" xml:space="preserve">
+    <value>禁用团队副本模式</value>
+  </data>
+  <data name="Raid mode disabled" xml:space="preserve">
+    <value>团队副本模式已禁用</value>
+  </data>
+  <data name="Waiting for countdown" xml:space="preserve">
+    <value>等待倒计时</value>
+  </data>
+  <data name="Countdown running" xml:space="preserve">
+    <value>倒计时进行中</value>
+  </data>
+  <data name="ADS unavailable" xml:space="preserve">
+    <value>ADS不可用</value>
+  </data>
+  <data name="ADS start rejected" xml:space="preserve">
+    <value>ADS启动被拒绝</value>
+  </data>
+  <data name="Waiting for duty" xml:space="preserve">
+    <value>等待任务</value>
+  </data>
+  <data name="Waiting for loot" xml:space="preserve">
+    <value>等待战利品</value>
+  </data>
+  <data name="Waiting for loot distribution" xml:space="preserve">
+    <value>等待战利品分配</value>
+  </data>
+  <data name="Waiting for manual recovery" xml:space="preserve">
+    <value>等待手动恢复</value>
+  </data>
+  <data name="Remaining until manually exited" xml:space="preserve">
+    <value>停留至手动离开</value>
+  </data>
+  <data name="Leaving duty" xml:space="preserve">
+    <value>正在离开任务</value>
+  </data>
+  <data name="Use ADS for chests and loot rolls during Raid mode. Uses your ADS roll policy, or Need if it is Off; your normal settings are unchanged." xml:space="preserve">
+    <value>在团队副本模式中使用ADS处理宝箱和战利品投点。使用已保存的ADS投点策略；若为关闭，则使用需求。常规设置保持不变。</value>
+  </data>
+  <data name="Countdown unavailable" xml:space="preserve">
+    <value>倒计时不可用</value>
+  </data>
+  <data name="Waiting for ADS" xml:space="preserve">
+    <value>等待ADS</value>
+  </data>
+  <data name="ADS leave rejected" xml:space="preserve">
+    <value>ADS离开请求被拒绝</value>
+  </data>
 </root>
