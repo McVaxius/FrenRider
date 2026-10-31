@@ -675,8 +675,7 @@ public partial class CombatService
                 modeName = "Auto";
                 break;
         }
-        if (plugin.AutorotIpcService.TrySetRsrMode(stateCommand)
-            || SendCommand(config.RotationType == RotationTypeManual ? "/rotation manual" : "/rotation auto on"))
+        if (plugin.AutorotIpcService.TrySetRsrMode(stateCommand))
             return true;
         modeName = "unavailable";
         return false;

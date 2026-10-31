@@ -1025,8 +1025,9 @@ public sealed class ExternalAutomationCleanupServiceTests
     {
         var native = new NativeBossModProvider("BMR", "Original")
         { Loaded = false, AcceptDaedalusCommands = provider == 4 };
-        using var service = native.CreateService();
-        using var runtime = new QuestingCombatRuntime(service, native.Interface, native.Log, provider, captureCommands: true);
+        var rsr = provider == 2 ? new NativeRsrProvider() : null;
+        using var service = rsr?.CreateService() ?? native.CreateService();
+        using var runtime = new QuestingCombatRuntime(service, rsr?.Interface ?? native.Interface, native.Log, provider, captureCommands: true);
         runtime.StopActivity();
         runtime.Profile.AutoRotationType = "none";
         runtime.Profile.DaedalusTargetMode = DaedalusTargetMode.None;
@@ -1037,10 +1038,15 @@ public sealed class ExternalAutomationCleanupServiceTests
             runtime.Call("ActivateRotation", runtime.Profile, true);
         Assert.NotNull(runtime.CombatField("lastAppliedCombatSettings"));
         Assert.True(service.PackagedPresetRefreshPending);
-        Assert.Equal(0, native.PresetCreates);
+        if (rsr is null) Assert.Equal(0, native.PresetCreates);
         Assert.Null(runtime.CombatField("pendingCombatSettings"));
         if (provider == 3) Assert.Contains("/wrath auto on", runtime.Commands);
-        if (provider == 2 && !passive) Assert.Contains("/rotation auto on", runtime.Commands);
+        if (rsr is not null)
+        {
+            Assert.Equal(passive ? AutorotIpcService.RsrStateCommandType.Off : AutorotIpcService.RsrStateCommandType.Auto, rsr.Mode);
+            if (passive) Assert.Empty(rsr.Modes);
+            else Assert.Equal(new[] { AutorotIpcService.RsrStateCommandType.Auto }, rsr.Modes);
+        }
         if (provider == 4) Assert.Contains("Daedalus.SetEnabled True", native.Writes);
     }
 
@@ -1678,6 +1684,110 @@ public sealed class ExternalAutomationCleanupServiceTests
         Assert.Empty(native.Writes);
     }
 
+    [Fact]
+    public void CleanDutyRsrBootstrapWaitsForOperatingModeAcceptance()
+    {
+        var native = new NativeRsrProvider { Configured = 0, ModeUnavailable = true };
+        using var service = native.CreateService();
+        using var runtime = new QuestingCombatRuntime(service, native.Interface, QuestingCombatRuntime.SilentLog(), 2,
+            captureCommands: true);
+        runtime.StopActivity();
+        runtime.Profile.ActivationMode = FrenRiderActivationMode.AlwaysOn;
+        runtime.Profile.RotationType = 0;
+        runtime.Profile.RsrAggroType = 0;
+        runtime.Profile.AutoRotationType = "none";
+        var saved = JsonSerializer.Serialize(runtime.Profile);
+        Assert.False(runtime.Activity.QuestAutomationActive);
+        Assert.Null(runtime.CombatField("questingRsrAggro"));
+        Assert.Null(runtime.CombatField("dungeonRsrAggro"));
+        Assert.Null(runtime.CombatField("questingRsrStopSelection"));
+
+        // Targeting remains available. The captured chat transport accepts
+        // commands without changing native mode, just as an enqueue can do.
+        runtime.Conditions.Add(ConditionFlag.BoundByDuty);
+        runtime.Combat.Update();
+        var authority = (DutyCombatAuthorityPolicy)runtime.CombatField("dutyCombatAuthorityPolicy")!;
+        Assert.Contains("HostileType AllTargetsCanAttack", native.Writes);
+        Assert.Equal(AutorotIpcService.RsrStateCommandType.Off, native.Mode);
+        Assert.Empty(native.Modes);
+        Assert.False(authority.FrenRiderBootstrapComplete);
+        Assert.Null(runtime.CombatField("lastAppliedCombatSettings"));
+
+        native.ModeUnavailable = false;
+        runtime.SetCombatField("lastRotationToggleMs", 0L);
+        runtime.Combat.Update();
+        Assert.True(authority.FrenRiderBootstrapComplete);
+        Assert.Equal(new[] { AutorotIpcService.RsrStateCommandType.Auto }, native.Modes);
+        Assert.Equal(AutorotIpcService.RsrStateCommandType.Auto, native.Mode);
+        Assert.Equal((byte)0, native.Configured);
+
+        native.Mode = AutorotIpcService.RsrStateCommandType.Off;
+        runtime.SetCombatField("lastRotationToggleMs", 0L);
+        runtime.Combat.Update();
+        runtime.Combat.Update();
+        Assert.Single(native.Modes);
+        Assert.Equal(AutorotIpcService.RsrStateCommandType.Off, native.Mode);
+        Assert.Equal(saved, JsonSerializer.Serialize(runtime.Profile));
+    }
+
+    [Fact]
+    public void CastingRecoveryUsesCurrentSingleAssemblySettings()
+    {
+        var native = new NativeRsrProvider();
+        var recovery = (BossModActionTweaksService)RuntimeHelpers.GetUninitializedObject(typeof(BossModActionTweaksService));
+        const BindingFlags fields = BindingFlags.Instance | BindingFlags.NonPublic;
+        typeof(BossModActionTweaksService).GetField("pluginInterface", fields)!.SetValue(recovery, native.Interface);
+        typeof(BossModActionTweaksService).GetField("log", fields)!.SetValue(recovery, QuestingCombatRuntime.SilentLog());
+        var setting = (CastingMovementSetting?)typeof(BossModActionTweaksService).GetMethod("ReadRecoverySetting", fields)!
+            .Invoke(recovery, ["RotationSolver", "RSR", true]);
+
+        Assert.NotNull(setting);
+        Assert.True(setting.Read());
+        setting.Write(false);
+        Assert.False(native.PoslockCasting);
+        Assert.False(setting.Read());
+        setting.Write(true);
+        Assert.True(native.PoslockCasting);
+        Assert.True(setting.Read());
+        Assert.Empty(native.Writes); // Temporary property edits do not dispatch saved-setting IPC.
+    }
+
+    [Fact]
+    public void DutyRsrBootstrapUsesCurrentSingleAssemblyTargetingOnCleanStart()
+    {
+        var native = new NativeRsrProvider { Configured = 0 };
+        using var service = native.CreateService();
+        using var runtime = new QuestingCombatRuntime(service, native.Interface, QuestingCombatRuntime.SilentLog(), 2,
+            captureCommands: true);
+        runtime.Profile.ActivationMode = FrenRiderActivationMode.AlwaysOn;
+        runtime.Profile.RotationType = 0;
+        runtime.Profile.RsrAggroType = 0;
+        runtime.Profile.AutoRotationType = "none";
+        var saved = JsonSerializer.Serialize(runtime.Profile);
+        Assert.True(runtime.Activity.QuestAutomationActive);
+        Assert.Null(runtime.CombatField("questingRsrAggro"));
+        Assert.Null(runtime.CombatField("dungeonRsrAggro"));
+        Assert.Null(runtime.CombatField("questingRsrStopSelection"));
+        Assert.Equal(AutorotIpcService.RsrStateCommandType.Off, native.Mode);
+
+        runtime.Conditions.Add(ConditionFlag.BoundByDuty);
+        runtime.Combat.Update();
+        Assert.NotNull(runtime.CombatField("questingRsrAggro"));
+        Assert.True(((DutyCombatAuthorityPolicy)runtime.CombatField("dutyCombatAuthorityPolicy")!).FrenRiderBootstrapComplete);
+        Assert.Equal(new[] { AutorotIpcService.RsrStateCommandType.Auto }, native.Modes);
+        Assert.Equal(AutorotIpcService.RsrStateCommandType.Auto, native.Mode);
+        Assert.Equal((byte)0, native.Configured);
+        Assert.NotNull(runtime.CombatField("lastAppliedCombatSettings"));
+
+        native.Mode = AutorotIpcService.RsrStateCommandType.Off;
+        runtime.SetCombatField("lastRotationToggleMs", 0L);
+        runtime.Combat.Update();
+        runtime.Combat.Update();
+        Assert.Single(native.Modes);
+        Assert.Equal(AutorotIpcService.RsrStateCommandType.Off, native.Mode);
+        Assert.Equal(saved, JsonSerializer.Serialize(runtime.Profile));
+    }
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
@@ -1950,6 +2060,7 @@ public sealed class ExternalAutomationCleanupServiceTests
         internal AutorotIpcService.RsrStateCommandType Mode = AutorotIpcService.RsrStateCommandType.Off;
         internal bool RejectWrite;
         internal bool Unavailable;
+        internal bool ModeUnavailable;
         private readonly IDalamudPluginInterface pluginInterface;
         internal IDalamudPluginInterface Interface => pluginInterface;
         private readonly Type dataType;
@@ -1958,7 +2069,9 @@ public sealed class ExternalAutomationCleanupServiceTests
         private readonly Type overrideType;
         private readonly Type pluginType;
         private readonly object wrapper;
+        private readonly object castingSetting;
         private readonly Dictionary<uint, byte> configured = new() { [30] = 2, [32] = 4 };
+        internal bool PoslockCasting => (bool)castingSetting.GetType().GetProperty("Value")!.GetValue(castingSetting)!;
         internal uint Job
         {
             get => Convert.ToUInt32(dataType.GetField("CurrentJob")!.GetValue(null));
@@ -1991,13 +2104,13 @@ public sealed class ExternalAutomationCleanupServiceTests
             jobs.DefineLiteral("NIN", 30U);
             jobs.DefineLiteral("DRK", 32U);
             jobType = jobs.CreateTypeInfo()!;
-            var basic = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("RotationSolver.Basic") { Version = version },
-                AssemblyBuilderAccess.Run).DefineDynamicModule("Targeting");
-            var hostile = basic.DefineEnum("RotationSolver.Basic.Data.TargetHostileType", TypeAttributes.Public, typeof(byte));
+            var provider = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("RotationSolver") { Version = version },
+                AssemblyBuilderAccess.Run).DefineDynamicModule("Provider");
+            var hostile = provider.DefineEnum("RotationSolver.Basic.Data.TargetHostileType", TypeAttributes.Public, typeof(byte));
             foreach (var value in Enum.GetValues<AutorotIpcService.RsrTargetHostileType>())
                 hostile.DefineLiteral(value.ToString(), (byte)value);
             hostileType = hostile.CreateTypeInfo()!;
-            var overrides = basic.DefineType("RotationSolver.Basic.Data.IpcStateOverrides", TypeAttributes.Public | TypeAttributes.Sealed);
+            var overrides = provider.DefineType("RotationSolver.Basic.Data.IpcStateOverrides", TypeAttributes.Public | TypeAttributes.Sealed);
             var optionalHostile = typeof(Nullable<>).MakeGenericType(hostileType);
             var hostileField = overrides.DefineField("Hostile", optionalHostile, FieldAttributes.Public);
             var externalGetter = overrides.DefineMethod("get_HostileType", MethodAttributes.Public | MethodAttributes.SpecialName, optionalHostile, Type.EmptyTypes);
@@ -2006,7 +2119,7 @@ public sealed class ExternalAutomationCleanupServiceTests
             var externalProperty = overrides.DefineProperty("HostileType", PropertyAttributes.None, optionalHostile, Type.EmptyTypes);
             externalProperty.SetGetMethod(externalGetter);
             overrideType = overrides.CreateType()!;
-            var data = basic.DefineType("RotationSolver.Basic.DataCenter", TypeAttributes.Public);
+            var data = provider.DefineType("RotationSolver.Basic.DataCenter", TypeAttributes.Public);
             var currentJob = data.DefineField("CurrentJob", jobType, FieldAttributes.Public | FieldAttributes.Static);
             var external = data.DefineField("External", overrideType, FieldAttributes.Public | FieldAttributes.Static);
             var jobGetter = data.DefineMethod("get_Job", MethodAttributes.Public | MethodAttributes.Static | MethodAttributes.SpecialName, jobType, Type.EmptyTypes);
@@ -2017,7 +2130,21 @@ public sealed class ExternalAutomationCleanupServiceTests
             il = activeGetter.GetILGenerator();
             il.Emit(OpCodes.Ldsfld, external); il.Emit(OpCodes.Ret);
             data.DefineProperty("ActiveIpcOverrides", PropertyAttributes.None, overrideType, Type.EmptyTypes).SetGetMethod(activeGetter);
-            var configs = basic.DefineType("RotationSolver.Basic.Configuration.Configs", TypeAttributes.Public);
+            var casting = provider.DefineType("RotationSolver.Basic.Configuration.SyntheticCastingSetting", TypeAttributes.Public);
+            var castingValue = casting.DefineField("storedValue", typeof(bool), FieldAttributes.Private);
+            var readCasting = casting.DefineMethod("get_Value", MethodAttributes.Public | MethodAttributes.SpecialName, typeof(bool), Type.EmptyTypes);
+            il = readCasting.GetILGenerator();
+            il.Emit(OpCodes.Ldarg_0); il.Emit(OpCodes.Ldfld, castingValue); il.Emit(OpCodes.Ret);
+            var writeCasting = casting.DefineMethod("set_Value", MethodAttributes.Public | MethodAttributes.SpecialName, typeof(void), [typeof(bool)]);
+            il = writeCasting.GetILGenerator();
+            il.Emit(OpCodes.Ldarg_0); il.Emit(OpCodes.Ldarg_1); il.Emit(OpCodes.Stfld, castingValue); il.Emit(OpCodes.Ret);
+            var castingProperty = casting.DefineProperty("Value", PropertyAttributes.None, typeof(bool), Type.EmptyTypes);
+            castingProperty.SetGetMethod(readCasting); castingProperty.SetSetMethod(writeCasting);
+            var castingType = casting.CreateType()!;
+            castingSetting = Activator.CreateInstance(castingType)!;
+            castingType.GetProperty("Value")!.SetValue(castingSetting, true);
+            var configs = provider.DefineType("RotationSolver.Basic.Configuration.Configs", TypeAttributes.Public);
+            configs.DefineField("PoslockCasting", castingType, FieldAttributes.Public);
             var values = configs.DefineField("Values", typeof(Dictionary<uint, byte>), FieldAttributes.Public);
             var configuredGetter = configs.DefineMethod("get_HostileType", MethodAttributes.Public | MethodAttributes.SpecialName, hostileType, Type.EmptyTypes);
             il = configuredGetter.GetILGenerator();
@@ -2027,7 +2154,8 @@ public sealed class ExternalAutomationCleanupServiceTests
             var configType = configs.CreateType()!;
             var config = Activator.CreateInstance(configType)!;
             configType.GetField("Values")!.SetValue(config, configured);
-            var service = basic.DefineType("RotationSolver.Basic.Service", TypeAttributes.Public);
+            configType.GetField("PoslockCasting")!.SetValue(config, castingSetting);
+            var service = provider.DefineType("RotationSolver.Basic.Service", TypeAttributes.Public);
             var currentConfig = service.DefineField("CurrentConfig", configType, FieldAttributes.Public | FieldAttributes.Static);
             var configGetter = service.DefineMethod("get_Config", MethodAttributes.Public | MethodAttributes.Static | MethodAttributes.SpecialName, configType, Type.EmptyTypes);
             il = configGetter.GetILGenerator();
@@ -2049,10 +2177,7 @@ public sealed class ExternalAutomationCleanupServiceTests
             data.DefineProperty("CurrentTargetToHostileType", PropertyAttributes.None, hostileType, Type.EmptyTypes).SetGetMethod(effectiveGetter);
             dataType = data.CreateType()!;
             Job = 30;
-            var provider = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("RotationSolver") { Version = version },
-                AssemblyBuilderAccess.Run).DefineDynamicModule("Provider");
             var plugin = provider.DefineType("RotationSolver.RotationSolverPlugin", TypeAttributes.Public);
-            plugin.DefineField("BasicConfigReference", configType, FieldAttributes.Public);
             pluginType = plugin.CreateType()!;
             var exposed = provider.DefineType("Dalamud.Plugin.Internal.Types.LocalPlugin", TypeAttributes.Public, typeof(object), [typeof(IExposedPlugin)]);
             exposed.DefineField("instance", typeof(object), FieldAttributes.Public);
@@ -2083,6 +2208,8 @@ public sealed class ExternalAutomationCleanupServiceTests
                 if (Unavailable) throw new InvalidOperationException("native RSR unavailable");
                 if (method.Name == "get_InstalledPlugins") return new[] { (IExposedPlugin)wrapper };
                 if (method.Name == "GetIpcSubscriber" && (string)args![0]! == "RotationSolverReborn.ChangeOperatingMode")
+                {
+                    if (ModeUnavailable) throw new InvalidOperationException("native RSR operating-mode endpoint unavailable");
                     return Proxy(method.ReturnType, (call, arguments) =>
                     {
                         Assert.Equal("InvokeAction", call.Name);
@@ -2090,6 +2217,7 @@ public sealed class ExternalAutomationCleanupServiceTests
                         Modes.Add(Mode);
                         return null;
                     });
+                }
                 if (method.Name != "GetIpcSubscriber" || (string)args![0]! != "RotationSolverReborn.OtherCommand")
                     throw new InvalidOperationException("unexpected RSR channel " + method.Name);
                 return Proxy(method.ReturnType, (call, arguments) =>

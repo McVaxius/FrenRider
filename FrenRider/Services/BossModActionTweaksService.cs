@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
-using System.Runtime.Loader;
 using System.Text.Json;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.Enums;
@@ -189,10 +188,7 @@ public sealed class BossModActionTweaksService
 
             if (rsr)
             {
-                // Resolve Basic from this live plugin's load context; never load another copy.
-                var basic = AssemblyLoadContext.GetLoadContext(assembly)?.Assemblies
-                    .FirstOrDefault(a => a.GetName().Name == "RotationSolver.Basic");
-                var service = basic?.GetType("RotationSolver.Basic.Service");
+                var service = assembly.GetType("RotationSolver.Basic.Service");
                 var config = service == null ? null : GetStaticMember(service, "Config");
                 var poslock = config == null ? null : GetInstanceMember(config, "PoslockCasting");
                 var value = poslock?.GetType().GetProperty("Value", InstanceMembers);

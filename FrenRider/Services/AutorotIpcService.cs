@@ -5,7 +5,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Loader;
 using System.Text.Json;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Ipc;
@@ -1005,15 +1004,7 @@ public class AutorotIpcService : IDisposable
                 detail = "DAD dungeon RSR targeting is unavailable: the live provider identity is unsupported.";
                 return false;
             }
-            var reference = assembly.GetReferencedAssemblies().SingleOrDefault(name => name.Name == "RotationSolver.Basic");
-            var basic = reference is null ? null : AssemblyLoadContext.GetLoadContext(assembly)?.Assemblies
-                .SingleOrDefault(candidate => candidate.FullName == reference.FullName);
-            if (basic is null)
-            {
-                detail = "DAD dungeon RSR targeting is unavailable: the provider's already-loaded Basic assembly is unavailable.";
-                return false;
-            }
-            return TryReadRsrTargeting(instance, basic, out snapshot, out detail);
+            return TryReadRsrTargeting(instance, assembly, out snapshot, out detail);
         }
         catch (Exception ex)
         {

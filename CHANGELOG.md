@@ -1,3 +1,8 @@
+2026-10-31 - Current RSR targeting and deferred mode activation (unversioned)
+
+- Read RSR targeting and temporary casting-recovery settings from its current plugin assembly, preserving the existing live-provider and member checks.
+- Keep duty startup pending when RSR's operating-mode IPC is unavailable instead of treating a submitted chat command as activation. Use the existing cooldown, retain the selected mode and preserve later external Off choices. Saved settings and RSR's own automatic-start rules are unchanged.
+
 2026-10-31 - Mini Raid toggle and deferred duty combat activation (I713, unversioned)
 
 - Add a session Raid Mode on/off toggle to Mini, with separate access to Raid settings. Turning it off cancels pending Raid work without leaving the duty; closing settings only hides the window.
