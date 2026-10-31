@@ -59,6 +59,18 @@ public sealed class LcarsAppearanceTests
                 var zone = new ZoneService();
                 typeof(ZoneService).GetProperty(nameof(ZoneService.TerritoryId))!.SetValue(zone, eureka ? 732u : 0u);
                 typeof(Plugin).GetProperty(nameof(Plugin.ZoneService))!.SetValue(plugin, zone);
+                var raidFrame = new RaidRuntimeFrame
+                {
+                    LoggedIn = true, CharacterId = 701, TerritoryId = 100, DutyId = 1,
+                    InDuty = true, Ready = true, LootReadable = true,
+                };
+                var raidStarts = 0;
+                var raidLeaves = 0;
+                using var raid = new RaidModeService(() => config, () => Assert.Fail("Session Raid state must not save settings"),
+                    () => raidFrame, () => { raidStarts++; return true; }, () => { raidLeaves++; return true; });
+                typeof(Plugin).GetProperty(nameof(Plugin.RaidModeService))!.SetValue(plugin, raid);
+                var raidWindow = new RaidWindow(plugin);
+                typeof(Plugin).GetProperty(nameof(Plugin.RaidWindow))!.SetValue(plugin, raidWindow);
                 using var owner = new MagiaMiniWindow(plugin);
                 var motion = (MaterialWindowMotion)typeof(MagiaMiniWindow).GetField("motion", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(owner)!;
                 var warningOwner = new AutoDutyWarningWindow(plugin, ActivationModeTests.Proxy<IChatGui>((_, _) => null),
@@ -115,6 +127,37 @@ public sealed class LcarsAppearanceTests
                 Assert.True(config.Enabled);
                 Assert.Same(config, manager.GetActiveConfig());
                 Assert.Empty(commands);
+
+                var savedRunSettings = JsonConvert.SerializeObject(config);
+                void ClickCaption(string caption)
+                {
+                    var position = Caption(caption);
+                    io.AddMousePosEvent(position.X, position.Y); Frame();
+                    io.AddMouseButtonEvent(0, true); Frame();
+                    io.AddMouseButtonEvent(0, false); Frame();
+                }
+                ClickCaption("Raid Mode");
+                Assert.True(raid.IsEnabled);
+                Assert.True(raidWindow.IsOpen);
+                raidWindow.IsOpen = false;
+                raidWindow.OnClose();
+                Assert.True(raid.IsEnabled); // Hiding settings does not disable the session.
+                ClickCaption("Settings");
+                Assert.True(raidWindow.IsOpen);
+                Assert.True(raid.IsEnabled);
+                raid.ObserveNativeCountdownTick(true, .01f, 0, raidFrame, raidFrame);
+                ClickCaption("Raid Mode");
+                Assert.False(raid.IsEnabled);
+                raid.Update();
+                Assert.Equal(0, raidStarts);
+                Assert.Equal(0, raidLeaves);
+                raidWindow.IsOpen = false;
+                ClickCaption("Settings");
+                Assert.True(raidWindow.IsOpen);
+                Assert.False(raid.IsEnabled); // Opening settings while Off is not an enable action.
+                Assert.Equal(savedRunSettings, JsonConvert.SerializeObject(config));
+                Assert.Empty(commands);
+
                 warningOwner.IsOpen = false;
                 warningOwner.OnClose();
                 Assert.True(warningOwner.IsOpen);
@@ -413,7 +456,7 @@ public sealed class LcarsAppearanceTests
             windows.AddWindow(owner);
             var register = typeof(Plugin).GetMethod("PrepareAppearanceTitleBars", BindingFlags.Instance | BindingFlags.NonPublic)!;
             register.Invoke(plugin, null); register.Invoke(plugin, null);
-            Assert.Equal(6, owner.TitleBarButtons.Count);
+            Assert.Equal(8, owner.TitleBarButtons.Count);
             Assert.Same(original, owner.TitleBarButtons[0]);
             adapters[owner].SetLcarsIcons(true);
             Assert.Equal(FontAwesomeIcon.Globe, owner.TitleBarButtons[1].Icon);
@@ -431,7 +474,9 @@ public sealed class LcarsAppearanceTests
             Assert.Equal(FontAwesomeIcon.Language, owner.TitleBarButtons[1].Icon);
             Assert.Equal(FontAwesomeIcon.CompressAlt, owner.TitleBarButtons[2].Icon);
             Assert.Equal(FontAwesomeIcon.Adjust, owner.TitleBarButtons[3].Icon);
-            Assert.Same(privacy, owner.TitleBarButtons[^1]);
+            Assert.Same(privacy, owner.TitleBarButtons[5]);
+            Assert.Equal(FontAwesomeIcon.Moon, owner.TitleBarButtons[6].Icon);
+            Assert.Equal(FontAwesomeIcon.Lock, owner.TitleBarButtons[7].Icon);
         }
         finally { interfaceProperty.SetValue(null, previousInterface); }
     }

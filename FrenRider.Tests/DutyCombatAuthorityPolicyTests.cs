@@ -6,6 +6,26 @@ namespace FrenRider.Tests;
 public sealed class DutyCombatAuthorityPolicyTests
 {
     [Fact]
+    public void DeferredActivationRemainsPendingUntilExplicitAcknowledgement()
+    {
+        var policy = new DutyCombatAuthorityPolicy();
+        var first = policy.Update(Input());
+        var stillPending = policy.Update(Input());
+        var held = policy.Update(Input(frenRiderBootstrapAllowed: false));
+        var released = policy.Update(Input());
+
+        Assert.True(first.ShouldBootstrapFrenRider);
+        Assert.True(stillPending.ShouldBootstrapFrenRider);
+        Assert.False(held.ShouldBootstrapFrenRider);
+        Assert.True(released.ShouldBootstrapFrenRider);
+        Assert.False(policy.FrenRiderBootstrapComplete);
+
+        policy.MarkFrenRiderBootstrapComplete();
+        Assert.False(policy.Update(Input()).ShouldBootstrapFrenRider);
+        Assert.True(policy.FrenRiderBootstrapComplete);
+    }
+
+    [Fact]
     public void BoundByDuty95WithQuestionableLatchesUntilDutyExit()
     {
         var policy = new DutyCombatAuthorityPolicy();
@@ -75,6 +95,7 @@ public sealed class DutyCombatAuthorityPolicyTests
         var first = policy.Update(Input(
             dutyCategory: category,
             questionableRunningOrRecent: true));
+        policy.MarkFrenRiderBootstrapComplete();
         var second = policy.Update(Input(
             dutyCategory: category,
             questionableRunningOrRecent: true));
@@ -147,6 +168,7 @@ public sealed class DutyCombatAuthorityPolicyTests
         var released = policy.Update(Input(
             dutyCategory: AdsDutyCategory.FourMan,
             frenRiderBootstrapAllowed: true));
+        policy.MarkFrenRiderBootstrapComplete();
         var later = policy.Update(Input(
             dutyCategory: AdsDutyCategory.FourMan,
             frenRiderBootstrapAllowed: true));
@@ -184,6 +206,7 @@ public sealed class DutyCombatAuthorityPolicyTests
         ipc.Refresh(true, 1036, 4, force: true);
         var released = policy.Update(Input(adsDutyHandoffActive: true,
             frenRiderBootstrapAllowed: !ipc.IsInteractionVbmPauseActive));
+        policy.MarkFrenRiderBootstrapComplete();
         var repeated = policy.Update(Input(adsDutyHandoffActive: true));
 
         Assert.True(released.ShouldBootstrapFrenRider);
@@ -205,6 +228,7 @@ public sealed class DutyCombatAuthorityPolicyTests
         var first = policy.Update(Input(
             dutyCategory: AdsDutyCategory.FourMan,
             questionableRunningOrRecent: true));
+        policy.MarkFrenRiderBootstrapComplete();
         var second = policy.Update(Input(
             dutyCategory: AdsDutyCategory.FourMan,
             questionableRunningOrRecent: true));
@@ -229,6 +253,7 @@ public sealed class DutyCombatAuthorityPolicyTests
             dutyCategory: AdsDutyCategory.Solo,
             adsDutyHandoffActive: true,
             questionableRunningOrRecent: true));
+        policy.MarkFrenRiderBootstrapComplete();
         var repeated = policy.Update(Input(
             dutyCategory: AdsDutyCategory.Solo,
             adsDutyHandoffActive: true,
@@ -247,6 +272,7 @@ public sealed class DutyCombatAuthorityPolicyTests
         var policy = new DutyCombatAuthorityPolicy();
 
         var initial = policy.Update(Input(dutyCategory: AdsDutyCategory.Solo));
+        policy.MarkFrenRiderBootstrapComplete();
         var questionable = policy.Update(Input(
             dutyCategory: AdsDutyCategory.Solo,
             questionableRunningOrRecent: true));
@@ -254,6 +280,7 @@ public sealed class DutyCombatAuthorityPolicyTests
             dutyCategory: AdsDutyCategory.Solo,
             adsDutyHandoffActive: true,
             questionableRunningOrRecent: true));
+        policy.MarkFrenRiderBootstrapComplete();
         var repeated = policy.Update(Input(
             dutyCategory: AdsDutyCategory.Solo,
             adsDutyHandoffActive: true,
@@ -270,8 +297,10 @@ public sealed class DutyCombatAuthorityPolicyTests
     {
         var policy = new DutyCombatAuthorityPolicy();
         policy.Update(Input(dutyCategory: AdsDutyCategory.Solo));
+        policy.MarkFrenRiderBootstrapComplete();
         policy.Update(Input(dutyCategory: AdsDutyCategory.Solo, questionableRunningOrRecent: true));
         policy.Update(Input(dutyCategory: AdsDutyCategory.Solo, adsDutyHandoffActive: true, questionableRunningOrRecent: true));
+        policy.MarkFrenRiderBootstrapComplete();
 
         var questionableAgain = policy.Update(Input(
             dutyCategory: AdsDutyCategory.Solo,
@@ -280,6 +309,7 @@ public sealed class DutyCombatAuthorityPolicyTests
             dutyCategory: AdsDutyCategory.Solo,
             adsDutyHandoffActive: true,
             questionableRunningOrRecent: true));
+        policy.MarkFrenRiderBootstrapComplete();
         var repeated = policy.Update(Input(
             dutyCategory: AdsDutyCategory.Solo,
             adsDutyHandoffActive: true,
@@ -306,6 +336,7 @@ public sealed class DutyCombatAuthorityPolicyTests
             dutyCategory: AdsDutyCategory.Solo,
             adsDutyHandoffActive: true,
             questionableRunningOrRecent: true));
+        policy.MarkFrenRiderBootstrapComplete();
         var repeated = policy.Update(Input(
             dutyCategory: AdsDutyCategory.Solo,
             adsDutyHandoffActive: true,
@@ -361,8 +392,10 @@ public sealed class DutyCombatAuthorityPolicyTests
         var policy = new DutyCombatAuthorityPolicy();
 
         var initial = policy.Update(Input(dutyCategory: AdsDutyCategory.FourMan));
+        policy.MarkFrenRiderBootstrapComplete();
         var disabled = policy.Update(Input(enabled: false, dutyCategory: AdsDutyCategory.FourMan));
         var reenabled = policy.Update(Input(dutyCategory: AdsDutyCategory.FourMan));
+        policy.MarkFrenRiderBootstrapComplete();
         var repeated = policy.Update(Input(dutyCategory: AdsDutyCategory.FourMan));
 
         Assert.True(initial.ShouldBootstrapFrenRider);

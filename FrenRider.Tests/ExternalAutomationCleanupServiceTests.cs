@@ -1044,6 +1044,33 @@ public sealed class ExternalAutomationCleanupServiceTests
         if (provider == 4) Assert.Contains("Daedalus.SetEnabled True", native.Writes);
     }
 
+    [Fact]
+    public void DutyDaedalusBootstrapRemainsPendingUntilItsExistingEndpointAcceptsActivation()
+    {
+        var native = new NativeBossModProvider("BMR", "Original") { Loaded = false };
+        using var service = native.CreateService();
+        using var runtime = new QuestingCombatRuntime(service, native.Interface, native.Log, 4, captureCommands: true);
+        runtime.StopActivity();
+        runtime.Profile.AutoRotationType = "none";
+        runtime.Profile.DaedalusTargetMode = DaedalusTargetMode.None;
+        var saved = JsonSerializer.Serialize(runtime.Profile);
+        runtime.Conditions.Add(ConditionFlag.BoundByDuty);
+        runtime.Combat.Update();
+        var authority = (DutyCombatAuthorityPolicy)runtime.CombatField("dutyCombatAuthorityPolicy")!;
+        Assert.False(authority.FrenRiderBootstrapComplete);
+        Assert.Null(runtime.CombatField("lastAppliedCombatSettings"));
+        Assert.DoesNotContain("Daedalus.SetEnabled True", native.Writes);
+
+        native.AcceptDaedalusCommands = true;
+        runtime.SetCombatField("lastRotationToggleMs", 0L);
+        runtime.Combat.Update();
+        Assert.True(authority.FrenRiderBootstrapComplete);
+        runtime.Combat.Update();
+        runtime.Combat.Update();
+        Assert.Equal(1, native.Writes.Count(write => write == "Daedalus.SetEnabled True"));
+        Assert.Equal(saved, JsonSerializer.Serialize(runtime.Profile));
+    }
+
     private static Dictionary<string, string> ReadPackagedPresets()
         => System.IO.Directory.GetFiles(System.IO.Path.Combine(System.IO.Path.GetDirectoryName(typeof(Plugin).Assembly.Location)!, "data", "bm"), "*.json")
             .ToDictionary(path =>
@@ -1651,6 +1678,159 @@ public sealed class ExternalAutomationCleanupServiceTests
         Assert.Empty(native.Writes);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void DutyRsrBootstrapRemainsPendingUntilTargetingProviderReturns(bool midDutyEnable)
+    {
+        var native = new NativeRsrProvider { Configured = 1 };
+        using var service = native.CreateService();
+        using var runtime = new QuestingCombatRuntime(service, native.Interface, QuestingCombatRuntime.SilentLog(), 2,
+            captureCommands: true);
+        runtime.Profile.RsrAggroType = 1;
+        runtime.Profile.AutoRotationType = "none";
+        var saved = JsonSerializer.Serialize(runtime.Profile);
+
+        if (midDutyEnable)
+        {
+            runtime.Conditions.Add(ConditionFlag.BoundByDuty);
+            runtime.Profile.Enabled = false;
+            runtime.Combat.Update();
+            Assert.Empty(native.Modes);
+            runtime.Profile.Enabled = true;
+        }
+        // The normal questing path already acquired targeting. Its pending
+        // release must not consume combat startup while RSR reloads.
+        Assert.True(runtime.RefreshTargets(inDuty: midDutyEnable));
+        runtime.StopActivity();
+        native.Unavailable = true;
+        runtime.Conditions.Add(ConditionFlag.BoundByDuty);
+        runtime.Combat.Update();
+        var authority = (DutyCombatAuthorityPolicy)runtime.CombatField("dutyCombatAuthorityPolicy")!;
+        Assert.Equal(DutyCombatAuthority.FrenRider, runtime.Combat.DutyAuthority);
+        Assert.Empty(native.Modes);
+        Assert.Null(runtime.CombatField("lastAppliedCombatSettings"));
+        Assert.False(authority.FrenRiderBootstrapComplete);
+
+        native.Unavailable = false;
+        runtime.SetCombatField("lastRotationToggleMs", 0L); // Next existing cooldown opportunity; no wall-clock wait.
+        runtime.Combat.Update();
+        Assert.True(authority.FrenRiderBootstrapComplete);
+        Assert.Equal(new[] { AutorotIpcService.RsrStateCommandType.Auto }, native.Modes);
+        Assert.Equal(AutorotIpcService.RsrStateCommandType.Auto, native.Mode);
+        Assert.Equal((byte)1, native.Configured);
+        Assert.NotNull(runtime.CombatField("lastAppliedCombatSettings"));
+
+        // A later external Off choice is not a request to bootstrap again.
+        native.Mode = AutorotIpcService.RsrStateCommandType.Off;
+        runtime.Combat.Update();
+        runtime.Combat.Update();
+        Assert.Single(native.Modes);
+        Assert.Equal(AutorotIpcService.RsrStateCommandType.Off, native.Mode);
+        Assert.Equal(saved, JsonSerializer.Serialize(runtime.Profile));
+    }
+
+    [Fact]
+    public void DutyRsrBootstrapWaitsForConfirmedTargetingBeforeSubmittingAuto()
+    {
+        var native = new NativeRsrProvider { Configured = 1 };
+        using var service = native.CreateService();
+        using var runtime = new QuestingCombatRuntime(service, native.Interface, QuestingCombatRuntime.SilentLog(), 2,
+            captureCommands: true);
+        runtime.Profile.RsrAggroType = 1;
+        runtime.Profile.AutoRotationType = "none";
+        var saved = JsonSerializer.Serialize(runtime.Profile);
+        Assert.True(runtime.RefreshTargets(inDuty: false));
+        native.RejectWrite = true;
+        runtime.Conditions.Add(ConditionFlag.BoundByDuty);
+
+        runtime.Combat.Update();
+        var authority = (DutyCombatAuthorityPolicy)runtime.CombatField("dutyCombatAuthorityPolicy")!;
+        Assert.Contains("HostileType AllTargetsCanAttack", native.Writes);
+        Assert.Equal((byte)1, native.Configured); // Callable IPC did not confirm its targeting write.
+        Assert.Empty(native.Modes);
+        Assert.Null(runtime.CombatField("lastAppliedCombatSettings"));
+        Assert.False(authority.FrenRiderBootstrapComplete);
+
+        native.RejectWrite = false;
+        runtime.SetCombatField("lastRotationToggleMs", 0L);
+        runtime.Combat.Update();
+        Assert.True(authority.FrenRiderBootstrapComplete);
+        Assert.Equal((byte)0, native.Configured); // Existing questing duty policy, not a saved-profile edit.
+        Assert.Equal(new[] { AutorotIpcService.RsrStateCommandType.Auto }, native.Modes);
+        native.Mode = AutorotIpcService.RsrStateCommandType.Off;
+        runtime.Combat.Update();
+        runtime.Combat.Update();
+        Assert.Single(native.Modes);
+        Assert.Equal(AutorotIpcService.RsrStateCommandType.Off, native.Mode);
+        Assert.Equal(saved, JsonSerializer.Serialize(runtime.Profile));
+    }
+
+    [Theory]
+    [InlineData(1, AutorotIpcService.RsrStateCommandType.Manual)]
+    [InlineData(2, AutorotIpcService.RsrStateCommandType.Off)]
+    public void DutyRsrBootstrapPreservesManualAndNone(int rotationType, AutorotIpcService.RsrStateCommandType expected)
+    {
+        var native = new NativeRsrProvider { Configured = 1 };
+        using var service = native.CreateService();
+        using var runtime = new QuestingCombatRuntime(service, native.Interface, QuestingCombatRuntime.SilentLog(), 2,
+            captureCommands: true);
+        runtime.StopActivity();
+        runtime.Profile.RotationType = rotationType;
+        runtime.Profile.RsrAggroType = 1;
+        runtime.Profile.AutoRotationType = "none";
+        var saved = JsonSerializer.Serialize(runtime.Profile);
+        runtime.Conditions.Add(ConditionFlag.BoundByDuty);
+        native.Unavailable = rotationType == 2; // An intentional None requires no provider to acknowledge it.
+
+        runtime.Combat.Update();
+        var authority = (DutyCombatAuthorityPolicy)runtime.CombatField("dutyCombatAuthorityPolicy")!;
+        Assert.True(authority.FrenRiderBootstrapComplete);
+        runtime.Combat.Update();
+        Assert.Equal(expected, native.Mode);
+        if (rotationType == 2) Assert.Empty(native.Modes);
+        else Assert.Equal(new[] { expected }, native.Modes);
+        Assert.DoesNotContain(runtime.Commands, command => command.StartsWith("/rotation auto", StringComparison.OrdinalIgnoreCase));
+        Assert.Equal(saved, JsonSerializer.Serialize(runtime.Profile));
+
+        if (rotationType != 2) return;
+        native.Unavailable = false;
+        runtime.Profile.RotationType = 0; // Explicit mid-duty edit uses the normal settings-refresh path.
+        runtime.Combat.Update();
+        runtime.SetCombatField("pendingCombatSettingsRefreshMs", 1L);
+        runtime.Combat.Update();
+        Assert.Equal(new[] { AutorotIpcService.RsrStateCommandType.Auto }, native.Modes);
+        Assert.Equal(AutorotIpcService.RsrStateCommandType.Auto, native.Mode);
+        Assert.Equal((byte)1, native.Configured);
+    }
+
+    [Fact]
+    public void DutyRsrBootstrapRemainsPendingDuringUtilityWorkAndActivatesOnceAfterRelease()
+    {
+        var native = new NativeRsrProvider { Configured = 1 };
+        using var service = native.CreateService();
+        using var runtime = new QuestingCombatRuntime(service, native.Interface, QuestingCombatRuntime.SilentLog(), 2,
+            captureCommands: true);
+        runtime.StopActivity();
+        runtime.Profile.RsrAggroType = 1;
+        runtime.Profile.AutoRotationType = "none";
+        var saved = JsonSerializer.Serialize(runtime.Profile);
+        runtime.Conditions.Add(ConditionFlag.BoundByDuty);
+        var repairState = typeof(AutomationService).GetField("repairFlowState", BindingFlags.Instance | BindingFlags.NonPublic)!;
+        repairState.SetValue(runtime.Automation, Enum.Parse(repairState.FieldType, "WaitingForAdsCompletion"));
+        runtime.Combat.Update();
+        var authority = (DutyCombatAuthorityPolicy)runtime.CombatField("dutyCombatAuthorityPolicy")!;
+        Assert.False(authority.FrenRiderBootstrapComplete);
+        Assert.Empty(native.Modes);
+
+        repairState.SetValue(runtime.Automation, Enum.Parse(repairState.FieldType, "Idle"));
+        runtime.Combat.Update();
+        runtime.Combat.Update();
+        Assert.True(authority.FrenRiderBootstrapComplete);
+        Assert.Equal(new[] { AutorotIpcService.RsrStateCommandType.Auto }, native.Modes);
+        Assert.Equal(saved, JsonSerializer.Serialize(runtime.Profile));
+    }
+
     private sealed class QuestingCombatRuntime : IDisposable
     {
         private readonly Dictionary<PropertyInfo, object?> savedStatics = new();
@@ -1679,6 +1859,7 @@ public sealed class ExternalAutomationCleanupServiceTests
                 ReplaceStatic("Condition", Proxy<ICondition>((method, args) => method.Name == "get_Item" && Conditions.Contains((ConditionFlag)args![0]!)));
                 ReplaceStatic("ClientState", Proxy<IClientState>((method, _) => method.Name == "get_IsLoggedIn" ? LoggedIn : Default(method.ReturnType)));
                 ReplaceStatic("PlayerState", Proxy<IPlayerState>((method, _) => method.Name == "get_ContentId" ? ContentId : Default(method.ReturnType)));
+                ReplaceStatic("ObjectTable", Proxy<IObjectTable>((_, _) => null));
                 ReplaceStatic("Log", log);
                 Config = Uninitialized<ConfigManager>();
                 account = new AccountConfig { AccountId = "account", Characters = new() { ["character"] = new()
@@ -1765,6 +1946,8 @@ public sealed class ExternalAutomationCleanupServiceTests
     {
         private static int sequence;
         internal readonly List<string> Writes = [];
+        internal readonly List<AutorotIpcService.RsrStateCommandType> Modes = [];
+        internal AutorotIpcService.RsrStateCommandType Mode = AutorotIpcService.RsrStateCommandType.Off;
         internal bool RejectWrite;
         internal bool Unavailable;
         private readonly IDalamudPluginInterface pluginInterface;
@@ -1899,6 +2082,14 @@ public sealed class ExternalAutomationCleanupServiceTests
             {
                 if (Unavailable) throw new InvalidOperationException("native RSR unavailable");
                 if (method.Name == "get_InstalledPlugins") return new[] { (IExposedPlugin)wrapper };
+                if (method.Name == "GetIpcSubscriber" && (string)args![0]! == "RotationSolverReborn.ChangeOperatingMode")
+                    return Proxy(method.ReturnType, (call, arguments) =>
+                    {
+                        Assert.Equal("InvokeAction", call.Name);
+                        Mode = (AutorotIpcService.RsrStateCommandType)arguments![0]!;
+                        Modes.Add(Mode);
+                        return null;
+                    });
                 if (method.Name != "GetIpcSubscriber" || (string)args![0]! != "RotationSolverReborn.OtherCommand")
                     throw new InvalidOperationException("unexpected RSR channel " + method.Name);
                 return Proxy(method.ReturnType, (call, arguments) =>

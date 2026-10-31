@@ -73,8 +73,8 @@ internal sealed class DutyCombatAuthorityPolicy
                  && (!FrenRiderBootstrapComplete
                      || adsHandoffRecoveryPending))
         {
-            FrenRiderBootstrapComplete = true;
-            adsHandoffRecoveryPending = false;
+            // The service acknowledges a successful activation (or intentional
+            // None). Readiness failures must leave this request available.
             shouldBootstrapFrenRider = true;
         }
 

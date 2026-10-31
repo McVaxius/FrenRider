@@ -441,7 +441,6 @@ public partial class CombatService
             Plugin.Log.Information("[FrenRider][DutyAuthority] Duty bootstrap superseded mounted rotation suppression.");
         }
 
-        lastRotationToggleMs = 0;
         if (IsRotationDisabled(config))
         {
             State = CombatState.OutOfCombat;
@@ -451,9 +450,10 @@ public partial class CombatService
         else
         {
             State = CombatState.EnteringCombat;
-            ActivateRotation(config, ignoreCooldown: true);
+            if (!ActivateRotation(config)) return;
         }
 
+        dutyCombatAuthorityPolicy.MarkFrenRiderBootstrapComplete();
         lastObservedCombatSettings = CaptureCombatSettings(config);
         Plugin.Log.Information(
             $"[FrenRider][DutyAuthority] FrenRider combat bootstrap completed once for duty; " +
@@ -546,26 +546,26 @@ public partial class CombatService
                 : $"[FrenRider][DutyAuthority] {reason}: forced BMR/VBM/RSR/Wrath off; RSR fallback command sent; Daedalus {(daedalusHandled ? "stopped via IPC" : "IPC unavailable")}.");
     }
 
-    private void ActivateRotation(CharacterConfig config, bool ignoreCooldown = false)
+    private bool ActivateRotation(CharacterConfig config, bool ignoreCooldown = false)
     {
         if (!config.Enabled || IsRotationDisabled(config) || ShouldSuppressFrenRiderCombatCommands)
-            return;
+            return false;
 
         var pluginName = GetSelectedRotationPluginName(config);
         if (HoldQuestingVbm(config, pluginName) || pluginName == "VBM" && (IsSafetyCombatSetupHeld(IsInDuty())
             || questingVbmHeld && !plugin.AutorotIpcService.CanResumeOwnedVbm()))
-            return;
+            return false;
         if (DeferAdsInteractionVbmSetup(config, pluginName))
-            return;
+            return false;
 
         var now = Environment.TickCount64;
-        if (!ignoreCooldown && now - lastRotationToggleMs < 2000) return; // Cooldown
+        if (!ignoreCooldown && now - lastRotationToggleMs < 2000) return false; // Cooldown
         lastRotationToggleMs = now;
 
         // Select rotation plugin (different for foray)
         if (pluginName == "RSR" && (dungeonRsrAggro is not null || questingRsrAggro is not null || questingRsrStopSelection is not null
             || questionableIpcService.QuestAutomationActive) && !ApplyRsrAggro(config))
-            return;
+            return false;
         ValidateCurrentManualPreset(config, pluginName);
         lastActivePluginIdx = Array.IndexOf(RotationPluginNames, pluginName);
         var bossModPreset = GetBossModPresetForPlugin(config, pluginName);
@@ -575,14 +575,15 @@ public partial class CombatService
         plugin.CaptureExternalAutomationSnapshot("rotation activation");
         DisableOtherRotationPlugins(config);
         if (!ApplyBossModSafetyState(config, pluginName, bossModPreset, "activation"))
-            return;
+            return false;
 
         // Send activation commands
         switch (pluginName)
         {
             case "RSR":
-                var rsrModeName = ApplyRsrMode(config);
+                var rsrHandled = ApplyRsrMode(config, out var rsrModeName);
                 StateDetail = $"{pluginName} {rsrModeName}" + (string.IsNullOrEmpty(bossModPreset) ? "" : $" [{bossModPreset}]");
+                if (!rsrHandled) return false;
                 break;
             case "WRATH":
                 SetWrathAuto(true, "activation");
@@ -594,6 +595,7 @@ public partial class CombatService
                     plugin.DaedalusTargetModeService.Apply(config.DaedalusTargetMode, notifyUser: false);
                 StateDetail = $"{pluginName} {(daedalusHandled ? "active" : "unavailable")}" +
                     (string.IsNullOrEmpty(bossModPreset) ? "" : $" [{bossModPreset}]");
+                if (!daedalusHandled) return false;
                 break;
             case "BMR":
                 StateDetail = $"{pluginName} active" + (string.IsNullOrEmpty(bossModPreset) ? "" : $" [{bossModPreset}]");
@@ -609,6 +611,7 @@ public partial class CombatService
         State = CombatState.InCombat;
         lastAppliedCombatSettings = CaptureCombatSettings(config);
         Plugin.Log.Information($"Combat: Activated {pluginName} with BossMod preset '{bossModPreset}'");
+        return true;
     }
 
     private void DeactivateRotation(CharacterConfig config)
@@ -641,40 +644,42 @@ public partial class CombatService
         Plugin.Log.Information($"Combat: Deactivated {pluginName}");
     }
 
-    private string ApplyRsrMode(CharacterConfig config)
+    private bool ApplyRsrMode(CharacterConfig config, out string modeName)
     {
+        modeName = "None";
         if (config.RotationType == RotationTypeNone)
-            return "None";
+            return true;
 
         var stateCommand = ResolveRsrStateCommandType(config.RotationType);
         if (!ApplyRsrAggro(config) && (dungeonRsrAggro is not null || questingRsrAggro is not null || questingRsrStopSelection is not null
             || questionableIpcService.QuestAutomationActive))
-            return "Targeting unavailable";
+        {
+            modeName = "Targeting unavailable";
+            return false;
+        }
 
         switch (config.RotationType)
         {
             case RotationTypeManual:
-                if (!plugin.AutorotIpcService.TrySetRsrMode(stateCommand))
-                    SendCommand("/rotation manual");
-                return "Manual";
+                modeName = "Manual";
+                break;
 
             case RotationTypeAutoSupport:
                 plugin.AutorotIpcService.TrySetRsrSupportTargeting(true);
-                if (!plugin.AutorotIpcService.TrySetRsrMode(stateCommand))
-                    SendCommand("/rotation auto on");
-                return "Support";
+                modeName = "Support";
+                break;
 
             case RotationTypePreviouslyEngagedTargets:
-                if (!plugin.AutorotIpcService.TrySetRsrMode(stateCommand))
-                    SendCommand("/rotation auto on");
-                return "Auto";
-
             case RotationTypeAuto:
             default:
-                if (!plugin.AutorotIpcService.TrySetRsrMode(stateCommand))
-                    SendCommand("/rotation auto on");
-                return "Auto";
+                modeName = "Auto";
+                break;
         }
+        if (plugin.AutorotIpcService.TrySetRsrMode(stateCommand)
+            || SendCommand(config.RotationType == RotationTypeManual ? "/rotation manual" : "/rotation auto on"))
+            return true;
+        modeName = "unavailable";
+        return false;
     }
 
     private string GetManualPresetForZone(CharacterConfig config)
@@ -1457,7 +1462,6 @@ public partial class CombatService
                 break;
             case "RSR":
                 SetWrathAuto(false, $"{reason} because selected plugin is {pluginName}");
-				SendCommand($"/rotation Auto");  //ghost in the machine 8. disabling RSR when we switch to WRATH
                 break;
             case "WRATH":
 				SendCommand($"/rotation cancel");  //ghost in the machine 8. disabling RSR when we switch to WRATH
@@ -1900,7 +1904,7 @@ public partial class CombatService
         Plugin.Log.Information($"Combat: Wrath auto {(enabled ? "on" : "off")} after {reason}");
     }
 
-    private void SendCommand(string command, bool allowWhileSuppressed = false)
+    private bool SendCommand(string command, bool allowWhileSuppressed = false)
         => plugin.AutorotIpcService.SendBossModAiCommand(command, value => TrySendCommand(value, allowWhileSuppressed));
 
     private unsafe bool TrySendCommand(string command, bool allowWhileSuppressed = false)

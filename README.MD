@@ -87,7 +87,7 @@ Main's titlebar provides Settings, MAGIA Mini, the active-character Run toggle, 
 
 ## Raid mode
 
-Turn FrenRider's **Run** on, then click **Raid Mode** on Main or Mini. It opens a separate window and enables the current character's Raid session. Closing that window only hides it; **Disable Raid Mode** turns the mode off. Run off, logout or an active-profile change also ends it. The mode stays armed across ordinary duty departures for the same character, while each duty gets fresh countdown and loot state. Activation is not saved across plugin reloads.
+Turn FrenRider's **Run** on, then click **Raid Mode** on Main or turn on Mini's **Raid Mode** toggle. This enables the current character's Raid session and opens its separate settings window. Mini's adjacent **Settings** button opens that window without enabling Raid mode. Closing the window only hides it; turning Mini's Raid toggle off or choosing **Disable Raid Mode** ends the session and cancels pending Raid actions without leaving the duty. Run off, logout or an active-profile change also ends it. The mode stays armed across ordinary duty departures for the same character, while each duty gets fresh countdown and loot state. Activation is not saved across plugin reloads.
 
 While enabled, Raid replaces the ordinary ADS start and duty-exit rules. A completed party pull countdown requests ADS inside-start once, without the normal readiness delay or automatic retry. ADS Stop requires a fresh countdown before another automatic start. Keep the matching ADS build loaded for coordinated operation. Your selected combat rotation remains available, and local movement yields when ADS owns navigation.
 

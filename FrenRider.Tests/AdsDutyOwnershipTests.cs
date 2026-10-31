@@ -722,6 +722,7 @@ public sealed class AdsDutyOwnershipTests
             // Account for an earlier bootstrap before ADS classified the duty.
             Assert.True(authority.Update(new DutyCombatAuthorityInput(
                 true, true, false, null, false, false, true)).ShouldBootstrapFrenRider);
+            authority.MarkFrenRiderBootstrapComplete();
 
             AdsHandoffCountdownResult Frame(double seconds, AdsHandoffReadinessConditions conditions,
                 bool bootstrapAllowed = true)
@@ -763,6 +764,7 @@ public sealed class AdsDutyOwnershipTests
                         activations++;
                         rotationActive = true;
                     }
+                    authority.MarkFrenRiderBootstrapComplete();
                 }
                 return countdown;
             }

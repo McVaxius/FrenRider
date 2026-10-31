@@ -1,3 +1,10 @@
+2026-10-31 - Mini Raid toggle and deferred duty combat activation (I713, unversioned)
+
+- Add a session Raid Mode on/off toggle to Mini, with separate access to Raid settings. Turning it off cancels pending Raid work without leaving the duty; closing settings only hides the window.
+- Keep duty combat startup pending when the configured rotation cannot yet activate. Acknowledge accepted activation or intentional None once, using the existing cooldown and preserving ADS/solo/utility holds, targeting and saved settings. Later external Off choices do not restart a completed bootstrap.
+- Apply the selected RSR mode without an intermediate hardcoded Auto command. Manual and passive settings no longer briefly request Auto, and failed targeting or activation dispatch no longer records successful startup.
+- Include the four existing Raid preferences in Duty/full account synchronization; the session's enabled state remains unsaved.
+
 2026-10-31 - Raid mode (I704, unversioned)
 
 - Add Raid Mode entry buttons to Main and Mini and a separate regular/compact Raid window. X hides it; Disable turns Raid mode off. Keep ADS Loot initially off, Accept Rez and Remain until manually exited initially on, with a saved ten-second initial loot-appearance wait.
