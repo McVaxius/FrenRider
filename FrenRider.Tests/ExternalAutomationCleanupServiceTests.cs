@@ -141,6 +141,38 @@ public sealed class ExternalAutomationCleanupServiceTests
         Assert.Null(ownership.GetRuntimeCleanupTarget(BossModSettingsSnapshot.Unavailable, false));
     }
 
+    [Fact]
+    public void OwnedManualTargetRestoresItsBaselineAndPreservesExternalOrUnreadableState()
+    {
+        var ownership = new BossModSettingsOwnership("BMR", Settings("Original") with { ManualTarget = true });
+        Assert.True(ownership.CanChangeManualTarget(true));
+        Assert.Null(ownership.OwnedManualTarget);
+        Assert.Null(ownership.GetManualTargetCleanupTarget(true));
+
+        ownership.OwnManualTarget(false);
+        Assert.False(ownership.OwnedManualTarget);
+        Assert.True(ownership.CanChangeManualTarget(false));
+        Assert.True(ownership.GetManualTargetCleanupTarget(false));
+
+        Assert.False(ownership.CanChangeManualTarget(true));
+        Assert.Null(ownership.GetManualTargetCleanupTarget(true));
+        Assert.False(ownership.CanChangeManualTarget(null));
+        Assert.Null(ownership.GetManualTargetCleanupTarget(null));
+
+        ownership.ReleaseManualTarget();
+        Assert.Null(ownership.OwnedManualTarget);
+        Assert.Null(ownership.GetManualTargetCleanupTarget(false));
+        Assert.True(ownership.CanChangeManualTarget(true));
+
+        var unreadable = new BossModSettingsOwnership("BMR", Settings("Original"));
+        Assert.False(unreadable.CanChangeManualTarget(true));
+        Assert.False(unreadable.CanChangeManualTarget(false));
+        Assert.False(unreadable.CanChangeManualTarget(null));
+        unreadable.OwnManualTarget(false);
+        Assert.Null(unreadable.GetManualTargetCleanupTarget(false));
+        Assert.Null(unreadable.GetManualTargetCleanupTarget(null));
+    }
+
     [Theory]
     [InlineData(true)]
     [InlineData(false)]

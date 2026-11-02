@@ -617,6 +617,9 @@ public partial class CombatService
     private void DeactivateRotation(CharacterConfig config)
     {
         var pluginName = GetLastActiveRotationPluginName(config);
+        if ((!config.Enabled || config.RotationType != RotationTypeAuto || config.BossModAI == 1)
+            && !plugin.AutorotIpcService.RestoreOwnedAutomaticTargeting())
+            Plugin.Log.Warning($"Combat: BMR targeting restoration after deactivation was not confirmed: {plugin.AutorotIpcService.LastStatus}");
 
         switch (pluginName)
         {
@@ -1137,6 +1140,8 @@ public partial class CombatService
             lastObservedCombatSettings = settings;
             if (lastActivePluginIdx >= 0)
                 DeactivateRotation(config);
+            else if (!plugin.AutorotIpcService.RestoreOwnedAutomaticTargeting())
+                Plugin.Log.Warning($"Combat: BMR targeting restoration for None was not confirmed: {plugin.AutorotIpcService.LastStatus}");
             lastAppliedCombatSettings = settings;
             return;
         }
@@ -1583,9 +1588,12 @@ public partial class CombatService
         if (!dragonNeckCombat && (HoldQuestingVbm(config, pluginName) || pluginName == "VBM" && questingVbmHeld
             && !plugin.AutorotIpcService.CanResumeOwnedVbm()))
             return false;
+        var targetingRestored = true;
+        if (!config.Enabled || config.RotationType != RotationTypeAuto || config.BossModAI == 1)
+            targetingRestored = plugin.AutorotIpcService.RestoreOwnedAutomaticTargeting();
         var bossModAi = dragonNeckCombat ? 1 : config.BossModAI;
         if (bossModAi != 1 && (!config.Enabled || IsRotationDisabled(config)))
-            return true;
+            return targetingRestored;
 
         var vbmPaused = bossModAi != 1 && IsAdsInteractionVbmPauseActive(pluginName);
         var commands = BuildBossModAiCommands(config.BossModAI, pluginName, vbmPaused, dragonNeckCombat,
@@ -1596,16 +1604,23 @@ public partial class CombatService
             return false;
         }
         if (commands.Length == 0)
-            return true;
+            return targetingRestored;
+        if (!targetingRestored && bossModAi != 1)
+            return false;
 
         plugin.CaptureExternalAutomationSnapshot("BossMod AI state change");
         if (bossModAi != 1 && GetBossModPresetProvider(pluginName) == "BMR")
+        {
             plugin.AutorotIpcService.ApplyOwnedPreferredDistance(command => TrySendCommand(command), 1.5);
+            if (config.Enabled && config.RotationType == RotationTypeAuto && !IsCombatSetupHeld(IsInDuty())
+                && !plugin.AutorotIpcService.ApplyOwnedAutomaticTargeting(command => TrySendCommand(command)))
+                return false;
+        }
         foreach (var command in commands)
             SendCommand(command);
 
         Plugin.Log.Information($"Combat: BossMod AI {DescribeBossModAiSetting(bossModAi)} for {pluginName} after {reason}");
-        return true;
+        return targetingRestored;
     }
 
     internal static string[] BuildBossModAiCommands(int bossModAI, string pluginName,

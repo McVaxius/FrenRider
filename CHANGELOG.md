@@ -1,3 +1,7 @@
+2026-11-01 - BMR automatic target selection (unversioned)
+
+- Confirm BMR automatic target selection when FrenRider enables automatic combat, including when BMR supplies movement alongside another rotation provider. Restore the prior targeting choice for Manual, Support, None and AI-off selections, preserving later external changes and existing combat holds.
+
 2026-10-31 - Current RSR targeting and deferred mode activation (unversioned)
 
 - Read RSR targeting and temporary casting-recovery settings from its current plugin assembly, preserving the existing live-provider and member checks.
