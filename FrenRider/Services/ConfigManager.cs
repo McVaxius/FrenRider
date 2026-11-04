@@ -194,6 +194,7 @@ public class ConfigManager : IDadProfileStore
                 Setting("Search for Food if Depleted", (source, target) => target.FeedMeSearch = source.FeedMeSearch),
                 Setting("XP Item", (source, target) => target.XpItem = source.XpItem),
                 Setting("Repair Mode", (source, target) => target.Repair = source.Repair),
+                Setting("Repair City", (source, target) => target.RepairCity = source.RepairCity),
                 Setting("Repair At % Durability", (source, target) => target.TornClothes = source.TornClothes),
                 Setting("Enable Auto Desynth", (source, target) => target.EnableAutoDesynth = source.EnableAutoDesynth),
                 Setting("Echo Messages", (source, target) => target.SpamPrinter = source.SpamPrinter),
@@ -699,6 +700,7 @@ public class ConfigManager : IDadProfileStore
 
         var newAccount = new AccountConfig
         {
+            RotationDefaultsVersion = AccountConfig.CurrentRotationDefaultsVersion,
             AccountId = launcherAccountId,
             AccountAlias = !string.IsNullOrWhiteSpace(aliasHint)
                 ? aliasHint
@@ -752,6 +754,7 @@ public class ConfigManager : IDadProfileStore
             collectorId = $"{CollectorAccountIdPrefix}{Guid.NewGuid():N}";
             collector = new AccountConfig
             {
+                RotationDefaultsVersion = AccountConfig.CurrentRotationDefaultsVersion,
                 AccountId = collectorId,
                 AccountAlias = CollectorAccountAlias,
             };
@@ -1594,10 +1597,12 @@ public class ConfigManager : IDadProfileStore
                         account.UnlockedBeasts ??= new Dictionary<string, List<uint>>();
                         account.RemoteProfiles ??= new List<RemoteProfileRow>();
                         accounts[account.AccountId] = account;
-                        if (MigrateLegacyRsrSettings(account))
+                        var migrated = MigrateLegacyRsrSettings(account);
+                        migrated |= MigrateRotationDefaults(account);
+                        if (migrated)
                         {
                             SaveAccount(account.AccountId);
-                            log.Information($"Migrated legacy RSR settings for account {account.AccountId}");
+                            log.Information($"Migrated combat settings for account {account.AccountId}");
                         }
                         log.Information($"Loaded account {account.AccountId} ({account.AccountAlias}) with {account.Characters.Count} characters");
                     }
@@ -1612,6 +1617,30 @@ public class ConfigManager : IDadProfileStore
         {
             log.Error($"Failed to enumerate config files: {ex.Message}");
         }
+    }
+
+    internal static bool MigrateRotationDefaults(AccountConfig account)
+    {
+        if (account.RotationDefaultsVersion >= AccountConfig.CurrentRotationDefaultsVersion)
+            return false;
+
+        static void ResetProvider(CharacterConfig? config)
+        {
+            if (config == null) return;
+            config.RotationPlugin = 0;
+            config.RotationPluginForay = 0;
+        }
+
+        ResetProvider(account.DefaultConfig);
+        if (account.Characters != null)
+            foreach (var config in account.Characters.Values)
+                ResetProvider(config);
+        if (account.RemoteProfiles != null)
+            foreach (var row in account.RemoteProfiles)
+                ResetProvider(row?.Config);
+
+        account.RotationDefaultsVersion = AccountConfig.CurrentRotationDefaultsVersion;
+        return true;
     }
 
     internal static bool MigrateLegacyRsrSettings(AccountConfig account)

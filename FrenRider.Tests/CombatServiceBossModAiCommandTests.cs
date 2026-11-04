@@ -196,8 +196,8 @@ public sealed class CombatServiceBossModAiCommandTests
     [InlineData(2, "RSR")]
     [InlineData(3, "WRATH")]
     [InlineData(4, "DAEDALUS")]
-    [InlineData(-1, "RSR")]
-    [InlineData(5, "RSR")]
+    [InlineData(-1, "BMR")]
+    [InlineData(5, "BMR")]
     public void RotationPluginIndexesRemainCompatible(int pluginIndex, string pluginName)
     {
         Assert.Equal(pluginName, CombatService.ResolveRotationPluginName(pluginIndex));

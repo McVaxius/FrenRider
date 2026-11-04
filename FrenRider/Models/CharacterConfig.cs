@@ -6,6 +6,7 @@ namespace FrenRider.Models;
 
 public enum PhoenixRecoveryLimitMode { StartedCasts, Time }
 public enum FrenRiderActivationMode { AlwaysOn, DutyOnly }
+public enum RepairCity { Automatic = 0, Uldah = 1, Gridania = 2, Limsa = 3, Ishgard = 4, Crystarium = 5, Sharlayan = 6, Tuliyollal = 7 }
 
 public enum FrenRiderCleanupMode
 {
@@ -143,8 +144,8 @@ public class CharacterConfig
     public string AutoRotationType { get; set; } = "FRENRIDER";
     public string AutoRotationTypeDD { get; set; } = "DD";
     public string AutoRotationTypeFATE { get; set; } = "FATE";
-    public int RotationPlugin { get; set; } = 2; // 0=BMR, 1=VBM, 2=RSR, 3=WRATH, 4=DAEDALUS
-    public int RotationPluginForay { get; set; } = 3; // 0=BMR, 1=VBM, 2=RSR, 3=WRATH, 4=DAEDALUS
+    public int RotationPlugin { get; set; } = 0; // 0=BMR, 1=VBM, 2=RSR, 3=WRATH, 4=DAEDALUS
+    public int RotationPluginForay { get; set; } = 0; // 0=BMR, 1=VBM, 2=RSR, 3=WRATH, 4=DAEDALUS
     public DaedalusTargetMode DaedalusTargetMode { get; set; } =
         global::FrenRider.Models.DaedalusTargetMode.None;
     public bool ForceBossModPresetRegardlessOfRotation { get; set; } = false;
@@ -237,6 +238,7 @@ public class CharacterConfig
     public bool FeedMeSearch { get; set; } = true;
     public int XpItem { get; set; } = 0;
     public int Repair { get; set; } = 0; // 0=Disabled, 1=Self, 2=NPC no-inn, 3=NPC no-inn/no-TP, 4=NPC repair + inn room
+    public RepairCity RepairCity { get; set; }
     public int TornClothes { get; set; } = 75;
     public bool EnableAutoDesynth { get; set; } = false;
     public int SpamPrinter { get; set; } = 0; // 0=off, 1=on
@@ -395,6 +397,7 @@ public class CharacterConfig
             FeedMeSearch = FeedMeSearch,
             XpItem = XpItem,
             Repair = Repair,
+            RepairCity = RepairCity,
             TornClothes = TornClothes,
             EnableAutoDesynth = EnableAutoDesynth,
             SpamPrinter = SpamPrinter,

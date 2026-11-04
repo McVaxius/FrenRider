@@ -3353,4 +3353,34 @@
   <data name="ADS leave rejected" xml:space="preserve">
     <value>ADS से बाहर निकलना अस्वीकार हुआ</value>
   </data>
+  <data name="Repair City" xml:space="preserve">
+    <value>मरम्मत का शहर</value>
+  </data>
+  <data name="Automatic" xml:space="preserve">
+    <value>स्वचालित</value>
+  </data>
+  <data name="Ul&apos;dah" xml:space="preserve">
+    <value>उल्दाह</value>
+  </data>
+  <data name="Gridania" xml:space="preserve">
+    <value>ग्रिडानिया</value>
+  </data>
+  <data name="Limsa Lominsa" xml:space="preserve">
+    <value>लिम्सा लोमिन्सा</value>
+  </data>
+  <data name="Ishgard" xml:space="preserve">
+    <value>इशगार्ड</value>
+  </data>
+  <data name="Crystarium" xml:space="preserve">
+    <value>क्रिस्टेरियम</value>
+  </data>
+  <data name="Old Sharlayan" xml:space="preserve">
+    <value>ओल्ड शार्लायन</value>
+  </data>
+  <data name="Tuliyollal" xml:space="preserve">
+    <value>तुलियोल्लाल</value>
+  </data>
+  <data name="ADS does not support the selected no-inn repair city. Update ADS before using it." xml:space="preserve">
+    <value>ADS चुने गए बिना सराय वाले मरम्मत शहर का समर्थन नहीं करता। उपयोग करने से पहले ADS अपडेट करें।</value>
+  </data>
 </root>

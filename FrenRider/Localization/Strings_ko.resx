@@ -3342,4 +3342,34 @@
   <data name="ADS leave rejected" xml:space="preserve">
     <value>ADS 나가기 거부됨</value>
   </data>
+  <data name="Repair City" xml:space="preserve">
+    <value>수리 도시</value>
+  </data>
+  <data name="Automatic" xml:space="preserve">
+    <value>자동</value>
+  </data>
+  <data name="Ul&apos;dah" xml:space="preserve">
+    <value>울다하</value>
+  </data>
+  <data name="Gridania" xml:space="preserve">
+    <value>그리다니아</value>
+  </data>
+  <data name="Limsa Lominsa" xml:space="preserve">
+    <value>림사 로민사</value>
+  </data>
+  <data name="Ishgard" xml:space="preserve">
+    <value>이슈가르드</value>
+  </data>
+  <data name="Crystarium" xml:space="preserve">
+    <value>크리스타리움</value>
+  </data>
+  <data name="Old Sharlayan" xml:space="preserve">
+    <value>올드 샬레이안</value>
+  </data>
+  <data name="Tuliyollal" xml:space="preserve">
+    <value>툴라이욜랄</value>
+  </data>
+  <data name="ADS does not support the selected no-inn repair city. Update ADS before using it." xml:space="preserve">
+    <value>ADS가 선택한 여관 없는 수리 도시를 지원하지 않습니다. 사용하기 전에 ADS를 업데이트하세요.</value>
+  </data>
 </root>

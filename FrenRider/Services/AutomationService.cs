@@ -64,7 +64,7 @@ public class AutomationService : IDisposable
     private string lastRepairBlockedReason = "";
     private RepairFlowState repairFlowState;
     private bool adsRepairUtilityObserved;
-    private bool repairReturnsToInn;
+    private bool repairTravelsBetweenZones;
     private string activeRepairMode = "";
     private DateTime repairRequestedUtc;
     private int repairRequestAttempts;
@@ -184,7 +184,7 @@ public class AutomationService : IDisposable
             IsIdle = false;
             LastIdleAction = "";
             InvalidateFoodCache(); // Re-resolve food on zone change
-            if (!repairReturnsToInn)
+            if (!repairTravelsBetweenZones)
                 CancelRepairFlow("Repair reset: zone transition.");
             return;
         }
@@ -299,7 +299,7 @@ public class AutomationService : IDisposable
         if (plugin.AdsIntegrationService.ShouldPauseDutySystems)
             return;
 
-        if (zoneService.ZoneChanged && !repairReturnsToInn)
+        if (zoneService.ZoneChanged && !repairTravelsBetweenZones)
         {
             CancelRepairFlow("Repair reset: zone transition.");
         }
@@ -1170,7 +1170,9 @@ public class AutomationService : IDisposable
 
     private void IssueRepairRequest(long now, string repairMode, int threshold, string reason)
     {
-        repairReturnsToInn = repairMode == "npc-yes-inn";
+        repairTravelsBetweenZones = repairMode == "npc-yes-inn"
+                                    || repairMode.StartsWith("npc-yes-inn-", StringComparison.Ordinal)
+                                    || repairMode.StartsWith("npc-no-inn-", StringComparison.Ordinal);
         activeRepairMode = repairMode;
         repairRequestedUtc = DateTime.UtcNow;
         repairRequestAttempts++;
@@ -1220,7 +1222,7 @@ public class AutomationService : IDisposable
 
     private void ResetRepairFlow(bool preserveStatus = false, bool refreshAdsStatus = false)
     {
-        repairReturnsToInn = false;
+        repairTravelsBetweenZones = false;
         activeRepairMode = "";
         repairFlowState = RepairFlowState.Idle;
         lastRepairAttemptMs = 0;
@@ -1358,7 +1360,7 @@ public class AutomationService : IDisposable
 
     internal void RetryRepairAfterTeleportCollision(CharacterConfig config)
     {
-        if (repairReturnsToInn && plugin.AdsUtilityIpcService.Refresh(force: true).IsRepairRunning)
+        if (repairTravelsBetweenZones && plugin.AdsUtilityIpcService.Refresh(force: true).IsRepairRunning)
             return;
 
         var repairMode = ResolveAdsRepairMode(config);
@@ -1376,8 +1378,9 @@ public class AutomationService : IDisposable
             "teleport notification interrupted repair");
     }
 
-    private static string ResolveAdsRepairMode(CharacterConfig config)
-        => config.Repair switch
+    internal static string ResolveAdsRepairMode(CharacterConfig config)
+    {
+        var mode = config.Repair switch
         {
             1 => "self",
             2 => "npc-no-inn",
@@ -1386,9 +1389,26 @@ public class AutomationService : IDisposable
             _ => string.Empty,
         };
 
+        if (config.Repair is not (2 or 4)) return mode;
+        var city = config.RepairCity switch
+        {
+            RepairCity.Uldah => "uldah",
+            RepairCity.Gridania => "gridania",
+            RepairCity.Limsa => "limsa",
+            RepairCity.Ishgard => "ishgard",
+            RepairCity.Crystarium => "crystarium",
+            RepairCity.Sharlayan => "sharlayan",
+            RepairCity.Tuliyollal => "tuliyollal",
+            _ => string.Empty,
+        };
+        return string.IsNullOrEmpty(city) ? mode : $"{mode}-{city}";
+    }
+
     private static string GetRepairModeLabel(string repairMode)
         => repairMode switch
         {
+            _ when repairMode.StartsWith("npc-no-inn-", StringComparison.Ordinal) => "NPC no-inn",
+            _ when repairMode.StartsWith("npc-yes-inn-", StringComparison.Ordinal) => "NPC repair + inn room",
             "npc-no-inn" => "NPC no-inn",
             "npc-no-teleport-no-inn" => "NPC no-inn/no-teleport",
             "npc-yes-inn" => "NPC repair + inn room",

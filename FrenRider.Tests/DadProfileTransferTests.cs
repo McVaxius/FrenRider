@@ -40,6 +40,16 @@ public sealed class DadProfileTransferTests
         Assert.True(restored.IsEnabledForDuty(false));
     }
 
+    [Fact]
+    public void LegacyProfileWithoutRepairCityKeepsAutomaticDestination()
+    {
+        var profile = JsonNode.Parse(Export(new CharacterConfig { Repair = 4, RepairCity = RepairCity.Ishgard }))!;
+        profile["config"]!.AsObject().Remove("repairCity");
+        Assert.True(DadProfileTransferService.TryDeserializeProfile(profile.ToJsonString(), out var restored, out _));
+        Assert.Equal(4, restored!.Repair);
+        Assert.Equal(RepairCity.Automatic, restored.RepairCity);
+    }
+
     private const string ActiveCharacterKey = "Local Character@World";
 
     [Fact]
@@ -233,7 +243,7 @@ public sealed class DadProfileTransferTests
                      .Where(key => key is not ("clingExcludedTerritoryIds" or "pauseClingForFate" or "ignoreFates"
                          or "phoenixFullStickiness" or "phoenixRecoveryLimit" or "phoenixRecoverySeconds"
                          or "phoenixRecoveryStartedCasts" or "phoenixGiveUpWithoutItem" or "phoenixGiveUpUnreachable"
-                         or "phoenixGiveUpWithoutAds" or "activationMode" or "limitBreak")))
+                         or "phoenixGiveUpWithoutAds" or "activationMode" or "limitBreak" or "repairCity")))
         {
             var incomplete = profile.DeepClone();
             incomplete["config"]!.AsObject().Remove(property);

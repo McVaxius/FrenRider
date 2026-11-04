@@ -1,3 +1,9 @@
+2026-11-04 - 4.1.0.6 - BMR defaults and ADS repair cities (I724/I734-I737)
+
+- Default normal play and Forays to BMR, migrating saved account templates, character profiles and remote profiles once. Preserve later selections, stable provider IDs and optional providers.
+- Offer Automatic and seven cities for both traveling NPC repair modes. Preserve self/local behavior and legacy DAD profiles, and require exact ADS capability support for a city-specific no-inn request.
+- Retain the accepted city request across zone transitions and teleport-collision notifications, waiting for its matching completion without retargeting after settings change.
+
 2026-11-01 - BMR automatic target selection (unversioned)
 
 - Confirm BMR automatic target selection when FrenRider enables automatic combat, including when BMR supplies movement alongside another rotation provider. Restore the prior targeting choice for Manual, Support, None and AI-off selections, preserving later external changes and existing combat holds.

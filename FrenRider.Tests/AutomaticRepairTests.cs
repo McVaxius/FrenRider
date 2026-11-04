@@ -15,6 +15,97 @@ namespace FrenRider.Tests;
 [Collection("Activation mode static services")]
 public sealed unsafe class AutomaticRepairTests
 {
+    public static IEnumerable<object[]> CityModes()
+    {
+        foreach (var city in Enum.GetValues<RepairCity>().Where(city => city != RepairCity.Automatic))
+        foreach (var mode in new[] { 2, 4 })
+            yield return [mode, city, city.ToString().ToLowerInvariant()];
+    }
+
+    [Theory]
+    [MemberData(nameof(CityModes))]
+    public void CityRepairKeepsExactRequestThroughRunningAndCompletion(int mode, RepairCity city, string suffix)
+        => WithScenario(FrenRiderActivationMode.AlwaysOn, mode, scenario =>
+        {
+            scenario.Config.RepairCity = city;
+            var request = $"{Mode(mode)}-{suffix}";
+            scenario.Tick();
+            Assert.Equal(new[] { request }, scenario.Requests);
+            scenario.Running = true;
+            scenario.UtilityTask = ""; // City modes must identify repair without the task label.
+            scenario.Config.RepairCity = RepairCity.Automatic;
+            scenario.ZoneChanged = true;
+            scenario.Tick();
+            Assert.True(scenario.Service.IsRepairFlowActive);
+            scenario.Service.RetryRepairAfterTeleportCollision(scenario.Config);
+            Assert.Single(scenario.Requests);
+            scenario.ZoneChanged = false;
+            scenario.Condition = 30000;
+            scenario.Running = false;
+            scenario.CompletedAt = DateTime.UtcNow.AddSeconds(1);
+            scenario.Success = "Repair finished";
+            scenario.Tick();
+            Assert.False(scenario.Service.IsRepairFlowActive);
+            Assert.Contains("Repair complete", scenario.Service.RepairStatus);
+        });
+
+    [Fact]
+    public void OldAdsCannotReceiveCityNoInnRequestsButRetainsLegacyModes()
+        => WithScenario(FrenRiderActivationMode.AlwaysOn, 2, scenario =>
+        {
+            scenario.Config.RepairCity = RepairCity.Limsa;
+            scenario.RepairCapabilities = """{"schemaVersion":1}""";
+            scenario.Tick();
+            Assert.Empty(scenario.Requests);
+            Assert.Contains("does not support", scenario.Service.RepairStatus);
+            scenario.Config.RepairCity = RepairCity.Automatic;
+            scenario.Tick();
+            Assert.Equal(new[] { "npc-no-inn" }, scenario.Requests);
+        });
+
+    [Theory]
+    [InlineData(1, RepairCity.Uldah, "self")]
+    [InlineData(2, RepairCity.Automatic, "npc-no-inn")]
+    [InlineData(3, RepairCity.Tuliyollal, "npc-no-teleport-no-inn")]
+    [InlineData(4, RepairCity.Automatic, "npc-yes-inn")]
+    [InlineData(4, RepairCity.Limsa, "npc-yes-inn-limsa")]
+    public void LegacyRepairTokensDoNotRequireNewCapabilities(int mode, RepairCity city, string expected)
+        => WithScenario(FrenRiderActivationMode.AlwaysOn, mode, scenario =>
+        {
+            scenario.Config.RepairCity = city;
+            scenario.RepairCapabilities = "";
+            scenario.Tick();
+            Assert.Equal(new[] { expected }, scenario.Requests);
+            Assert.Equal(0, scenario.CapabilityReads);
+        });
+
+    [Theory]
+    [InlineData(0, "")]
+    [InlineData(1, "self")]
+    [InlineData(3, "npc-no-teleport-no-inn")]
+    public void CityPreferenceCannotRetargetDisabledSelfOrLocalRepair(int mode, string expected)
+        => Assert.Equal(expected, AutomationService.ResolveAdsRepairMode(new CharacterConfig
+        {
+            Repair = mode, RepairCity = RepairCity.Tuliyollal,
+        }));
+
+    [Fact]
+    public void RepairCitySurvivesProfileCloneAndJson()
+    {
+        var config = new CharacterConfig { Repair = 4, RepairCity = RepairCity.Crystarium };
+        foreach (var copy in new[] { config.Clone(), JsonSerializer.Deserialize<CharacterConfig>(JsonSerializer.Serialize(config))! })
+            Assert.Equal("npc-yes-inn-crystarium", AutomationService.ResolveAdsRepairMode(copy));
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("not json")]
+    [InlineData("[]")]
+    [InlineData("{\"schemaVersion\":\"1\",\"repairModes\":[\"npc-no-inn-limsa\"]}")]
+    [InlineData("{\"schemaVersion\":1,\"repairModes\":[\"npc-no-inn-uldah\"]}")]
+    public void CityCapabilityRequiresTheExactValidAdvertisedMode(string json)
+        => Assert.False(AdsUtilityIpcService.SupportsRepairMode(json, "npc-no-inn-limsa"));
+
     public static IEnumerable<object[]> EnabledModes()
     {
         foreach (var activation in new[] { FrenRiderActivationMode.AlwaysOn, FrenRiderActivationMode.DutyOnly })
@@ -272,6 +363,7 @@ public sealed unsafe class AutomaticRepairTests
         private readonly nint priorGetContainer = InventoryManager.Addresses.GetInventoryContainer.Value;
         private readonly nint memory;
         private readonly InventoryItem* items;
+        private readonly ZoneService zone = new();
         public readonly AutomationService Service;
         public readonly CharacterConfig Config;
         public readonly List<string> Requests = [];
@@ -286,6 +378,9 @@ public sealed unsafe class AutomaticRepairTests
         public string Failure = "";
         public string? UtilityMode;
         public string? UtilityTask;
+        public string? RepairCapabilities;
+        public int CapabilityReads;
+        public bool ZoneChanged { set => Set(zone, "<ZoneChanged>k__BackingField", value); }
         public ushort Condition { set => items[0].Condition = value; }
         public bool InventoryAvailable { set => inventoryAvailable = value; }
         public bool InventoryLoaded { set => container->IsLoaded = value; }
@@ -327,9 +422,18 @@ public sealed unsafe class AutomaticRepairTests
                 "GetIpcSubscriber" => Proxy(method.ReturnType, (call, values) =>
                 {
                     if (call.Name != "InvokeFunc") return null;
+                    if ((string)args![0]! == "ADS.GetCapabilitiesJson")
+                    {
+                        CapabilityReads++;
+                        return RepairCapabilities ?? JsonSerializer.Serialize(new
+                        {
+                            schemaVersion = 1,
+                            repairModes = CityModes().Select(row => $"{Mode((int)row[0])}-{row[2]}").ToArray(),
+                        });
+                    }
                     if ((string)args![0]! == "ADS.GetStatusJson")
                         return Readable ? JsonSerializer.Serialize(new { utilityRunning = Running,
-                            utilityMode = Running ? UtilityMode ?? Mode(mode) : "",
+                            utilityMode = Running ? UtilityMode ?? Requests.LastOrDefault() ?? Mode(mode) : "",
                             utilityTask = Running ? UtilityTask ?? "Repair" : "",
                             utilityLastSuccess = Success, utilityLastFailure = Failure,
                             utilityCompletedAtUtc = CompletedAt }) : "";
@@ -354,7 +458,7 @@ public sealed unsafe class AutomaticRepairTests
             Set(plugin, "<AdsIntegrationService>k__BackingField", new AdsIntegrationService(plugin, new AdsDutyIpcService(pi, log)));
             Service = (AutomationService)RuntimeHelpers.GetUninitializedObject(typeof(AutomationService));
             Set(Service, "plugin", plugin);
-            Set(Service, "zoneService", new ZoneService());
+            Set(Service, "zoneService", zone);
         }
 
         public void Tick()

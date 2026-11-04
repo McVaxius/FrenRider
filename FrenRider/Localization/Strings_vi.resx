@@ -3447,4 +3447,34 @@ Bật: dùng các preset BossMod bên dưới với mọi nhà cung cấp rotati
   <data name="ADS leave rejected" xml:space="preserve">
     <value>ADS từ chối thoát</value>
   </data>
+  <data name="Repair City" xml:space="preserve">
+    <value>Thành phố sửa chữa</value>
+  </data>
+  <data name="Automatic" xml:space="preserve">
+    <value>Tự động</value>
+  </data>
+  <data name="Ul&apos;dah" xml:space="preserve">
+    <value>Ul&apos;dah</value>
+  </data>
+  <data name="Gridania" xml:space="preserve">
+    <value>Gridania</value>
+  </data>
+  <data name="Limsa Lominsa" xml:space="preserve">
+    <value>Limsa Lominsa</value>
+  </data>
+  <data name="Ishgard" xml:space="preserve">
+    <value>Ishgard</value>
+  </data>
+  <data name="Crystarium" xml:space="preserve">
+    <value>Crystarium</value>
+  </data>
+  <data name="Old Sharlayan" xml:space="preserve">
+    <value>Old Sharlayan</value>
+  </data>
+  <data name="Tuliyollal" xml:space="preserve">
+    <value>Tuliyollal</value>
+  </data>
+  <data name="ADS does not support the selected no-inn repair city. Update ADS before using it." xml:space="preserve">
+    <value>ADS không hỗ trợ thành phố sửa chữa không vào quán trọ đã chọn. Hãy cập nhật ADS trước khi dùng.</value>
+  </data>
 </root>

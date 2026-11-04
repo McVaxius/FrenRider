@@ -101,6 +101,7 @@ public partial class ConfigWindow : Window, IDisposable
     private static readonly string[] IdleActionModes = { "Specific Action", "Action From List" };
     private static readonly string[] IdleListModes = { "Default List", "Custom List" };
     private static readonly string[] RepairModes = { "Disabled", "Self", "NPC no-inn", "NPC No Inn + No TP", "NPC repair + inn room" };
+    private static readonly string[] RepairCities = { "Automatic", "Ul'dah", "Gridania", "Limsa Lominsa", "Ishgard", "Crystarium", "Old Sharlayan", "Tuliyollal" };
 
     public ConfigWindow(Plugin plugin) : base("Fren Rider Settings###FrenRiderConfig")
     {
@@ -2417,7 +2418,7 @@ public partial class ConfigWindow : Window, IDisposable
             }, 1);
             UiGui.LcarsPanel("##AutomationSection2", () =>
             {
-                UiGui.SettingsSection("Repair", "Repair Mode", "Repair At");
+                UiGui.SettingsSection("Repair", "Repair Mode", "Repair City", "Repair At");
                 DrawRepairSection(config);
             }, 2);
             UiGui.LcarsPanel("##AutomationSection3", () =>
@@ -2663,6 +2664,21 @@ public partial class ConfigWindow : Window, IDisposable
             }
             HelpMarker("0 = disabled.\n1 = ADS self repair.\n2 = ADS NPC repair without inn fallback.\n3 = ADS NPC repair only when a mender is within 120y.\n4 = ADS NPC repair near an inn, then enter the inn room.");
             DrawDefaultSettingSyncButton("Repair Mode");
+        }
+
+        if (config.Repair is 2 or 4)
+        {
+            var repairCity = Enum.IsDefined(config.RepairCity) ? (int)config.RepairCity : 0;
+            using (UiGui.SettingRow("Repair City"))
+            {
+                ImGui.SetNextItemWidth(200);
+                if (UiGui.Combo("Repair City", ref repairCity, RepairCities, RepairCities.Length))
+                {
+                    config.RepairCity = (RepairCity)repairCity;
+                    SaveEditingAccount();
+                }
+                DrawDefaultSettingSyncButton("Repair City");
+            }
         }
 
         var tornClothes = Math.Clamp(config.TornClothes, 0, 100);

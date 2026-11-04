@@ -31,6 +31,8 @@ public sealed class AdsUtilityStatusSnapshot
     public bool IsRepairRunning
         => UtilityRunning
            && (UtilityMode is "self" or "npc-no-inn" or "npc-no-teleport-no-inn" or "npc" or "npc-yes-inn"
+               || UtilityMode.StartsWith("npc-no-inn-", StringComparison.Ordinal)
+               || UtilityMode.StartsWith("npc-yes-inn-", StringComparison.Ordinal)
                || UtilityTask.Contains("repair", StringComparison.OrdinalIgnoreCase));
 
     public bool SuppressesGenericYesNo
@@ -154,6 +156,16 @@ public sealed class AdsUtilityIpcService : IDisposable
 
         try
         {
+            if (mode.StartsWith("npc-no-inn-", StringComparison.Ordinal))
+            {
+                var capabilities = pluginInterface.GetIpcSubscriber<string>("ADS.GetCapabilitiesJson").InvokeFunc();
+                if (!SupportsRepairMode(capabilities, mode))
+                {
+                    failure = "ADS does not support the selected no-inn repair city. Update ADS before using it.";
+                    return false;
+                }
+            }
+
             var subscriber = pluginInterface.GetIpcSubscriber<string, bool>("ADS.StartRepair");
             if (subscriber.InvokeFunc(mode))
                 return true;
@@ -167,6 +179,30 @@ public sealed class AdsUtilityIpcService : IDisposable
             log.Debug($"[FrenRider][Repair] Failed to start ADS repair via IPC: {ex.Message}");
             return false;
         }
+    }
+
+    internal static bool SupportsRepairMode(string capabilities, string mode)
+    {
+        if (string.IsNullOrWhiteSpace(capabilities)) return false;
+        try
+        {
+            using var document = JsonDocument.Parse(capabilities);
+            var root = document.RootElement;
+            if (root.ValueKind != JsonValueKind.Object
+                || !root.TryGetProperty("schemaVersion", out var schema)
+                || schema.ValueKind != JsonValueKind.Number
+                || !schema.TryGetInt32(out var version) || version != 1
+                || !root.TryGetProperty("repairModes", out var modes)
+                || modes.ValueKind != JsonValueKind.Array)
+                return false;
+
+            foreach (var candidate in modes.EnumerateArray())
+                if (candidate.ValueKind == JsonValueKind.String
+                    && string.Equals(candidate.GetString(), mode, StringComparison.Ordinal))
+                    return true;
+        }
+        catch (JsonException) { }
+        return false;
     }
 
     public bool StartDesynth(string mode, out string failure)

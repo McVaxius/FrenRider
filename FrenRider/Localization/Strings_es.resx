@@ -3342,4 +3342,34 @@ Activado: usa los ajustes de BossMod de abajo con cualquier proveedor de rotaci�
   <data name="ADS leave rejected" xml:space="preserve">
     <value>Salida de ADS rechazada</value>
   </data>
+  <data name="Repair City" xml:space="preserve">
+    <value>Ciudad de reparación</value>
+  </data>
+  <data name="Automatic" xml:space="preserve">
+    <value>Automático</value>
+  </data>
+  <data name="Ul&apos;dah" xml:space="preserve">
+    <value>Ul&apos;dah</value>
+  </data>
+  <data name="Gridania" xml:space="preserve">
+    <value>Gridania</value>
+  </data>
+  <data name="Limsa Lominsa" xml:space="preserve">
+    <value>Limsa Lominsa</value>
+  </data>
+  <data name="Ishgard" xml:space="preserve">
+    <value>Ishgard</value>
+  </data>
+  <data name="Crystarium" xml:space="preserve">
+    <value>Crystarium</value>
+  </data>
+  <data name="Old Sharlayan" xml:space="preserve">
+    <value>Vieja Sharlayan</value>
+  </data>
+  <data name="Tuliyollal" xml:space="preserve">
+    <value>Tuliyollal</value>
+  </data>
+  <data name="ADS does not support the selected no-inn repair city. Update ADS before using it." xml:space="preserve">
+    <value>ADS no admite la ciudad seleccionada para reparar sin posada. Actualiza ADS antes de usarla.</value>
+  </data>
 </root>

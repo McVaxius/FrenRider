@@ -109,7 +109,8 @@ internal sealed class UiText : IDisposable
             || key == "ADS did not accept {0} repair: {1}" && index == 1
             || key == "Retry wait after ADS failure: {0}" || key == "Retry wait after rejected start: {0}")
             && value is "No ADS utility status." or "ADS repair running" or "ADS not loaded."
-                or "ADS did not accept the utility request." or "ADS status was not readable.") return T(value);
+                or "ADS did not accept the utility request." or "ADS status was not readable."
+                or "ADS does not support the selected no-inn repair city. Update ADS before using it.") return T(value);
         if (key is "Captured automation snapshot ({0})." or "Partial restore ({0}).")
             return SnapshotSummary(value);
         if (key == "ADS unavailable/pending: {0}.") return ReflectionFailures(value);

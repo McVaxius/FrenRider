@@ -1657,7 +1657,7 @@ public partial class CombatService
     {
         return pluginIdx >= 0 && pluginIdx < RotationPluginNames.Length
             ? RotationPluginNames[pluginIdx]
-            : "RSR";
+            : "BMR";
     }
 
     internal static string[] BuildQuestionableDutyCombatOffCommands(bool includeRsrFallback = true)

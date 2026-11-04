@@ -246,7 +246,7 @@ internal sealed class DadProfileTransferService : IDisposable
                     .Any(property => property is not ("clingExcludedTerritoryIds" or "pauseClingForFate" or "ignoreFates"
                         or "phoenixFullStickiness" or "phoenixRecoveryLimit" or "phoenixRecoverySeconds"
                         or "phoenixRecoveryStartedCasts" or "phoenixGiveUpWithoutItem" or "phoenixGiveUpUnreachable"
-                        or "phoenixGiveUpWithoutAds" or "activationMode" or "limitBreak")))
+                        or "phoenixGiveUpWithoutAds" or "activationMode" or "limitBreak" or "repairCity")))
             {
                 code = "incompatible-profile";
                 return false;

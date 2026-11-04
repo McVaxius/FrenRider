@@ -3342,4 +3342,34 @@
   <data name="ADS leave rejected" xml:space="preserve">
     <value>ADS离开请求被拒绝</value>
   </data>
+  <data name="Repair City" xml:space="preserve">
+    <value>修理城市</value>
+  </data>
+  <data name="Automatic" xml:space="preserve">
+    <value>自动</value>
+  </data>
+  <data name="Ul&apos;dah" xml:space="preserve">
+    <value>乌尔达哈</value>
+  </data>
+  <data name="Gridania" xml:space="preserve">
+    <value>格里达尼亚</value>
+  </data>
+  <data name="Limsa Lominsa" xml:space="preserve">
+    <value>利姆萨·罗敏萨</value>
+  </data>
+  <data name="Ishgard" xml:space="preserve">
+    <value>伊修加德</value>
+  </data>
+  <data name="Crystarium" xml:space="preserve">
+    <value>水晶都</value>
+  </data>
+  <data name="Old Sharlayan" xml:space="preserve">
+    <value>旧萨雷安</value>
+  </data>
+  <data name="Tuliyollal" xml:space="preserve">
+    <value>图莱尤拉</value>
+  </data>
+  <data name="ADS does not support the selected no-inn repair city. Update ADS before using it." xml:space="preserve">
+    <value>ADS不支持所选的不进旅馆修理城市。请先更新ADS。</value>
+  </data>
 </root>
