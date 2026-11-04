@@ -1,3 +1,9 @@
+2026-11-04 - 4.1.0.8 - Confirmed Coppelia BMR handoff (I726/I745)
+
+- Acknowledge native BMR combat suppression before Coppelia captures its rotation state, using the existing v1 lease endpoints. Legacy consumers remain compatible; new consumers wait for the explicit acknowledgement.
+- Stop BMR synchronously without a delayed off chat command, and preserve Coppelia's subsequent preset across lease heartbeats and combat updates.
+- Retain the combat hold after an expired lease until its owner restores and releases state or the user turns FrenRider off. Resume normal combat only after acknowledged cleanup.
+
 2026-11-04 - 4.1.0.7 - God Mod Companion Dhog healer rotations (I745)
 
 - Use Dhog WHM, SCH, AST and SGE in the distributed ranged preset; remove Xan healer modules and duplicate HealerAI while preserving other job strategies.

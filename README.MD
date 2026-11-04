@@ -2,6 +2,8 @@
 
 Automatic BMR healer presets use the Dhog healer rotations supplied by God Mod Companion. If those rotations cannot be found or the loaded preset drops their strategies, activation reports a warning. Saved manual presets and optional providers remain available.
 
+Coppelia's BMR handoff requires FrenRider 4.1.0.8 or newer: the lease confirms native combat suppression before Coppelia takes control. If its heartbeat expires, FrenRider retains the combat hold until Coppelia restores and releases the session, or you turn FrenRider off. This prevents recovery from replacing an unfinished Coppelia session.
+
 Fren Rider is a Dalamud plugin for multibox/follow support in FFXIV. It tracks a configured party member, follows with multiple movement backends, manages mount/flying behavior, coordinates combat automation, handles selected dialogs, and can delegate duty work to ADS.
 
 ## Install

@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using Dalamud.Game.ClientState.Conditions;
 using FFXIVClientStructs.FFXIV.Client.System.String;
@@ -73,7 +74,8 @@ public partial class CombatService
     internal bool IsQuestionableSoloAuthorityActive
         => dutyCombatAuthorityPolicy.Authority == DutyCombatAuthority.QuestionableSolo;
     private bool ShouldSuppressFrenRiderCombatCommands
-        => IsQuestionableSoloAuthorityActive || plugin.IsWaitingForDuty || plugin.AdsIntegrationService.IsSoloCombatHeld;
+        => IsQuestionableSoloAuthorityActive || plugin.IsWaitingForDuty || plugin.AdsIntegrationService.IsSoloCombatHeld
+           || plugin.CoppeliaPowerlevelLeaseService?.IsLeaseActive == true;
 
     public CombatService(
         Plugin plugin,
@@ -127,6 +129,7 @@ public partial class CombatService
 
     public bool PrepareForEnableCombatSetup()
     {
+        if (plugin.CoppeliaPowerlevelLeaseService?.IsLeaseActive == true) return false;
         if (plugin.IsWaitingForDuty) return false;
         var config = plugin.ConfigManager.GetActiveConfig();
         var inDuty = IsInDuty();
@@ -165,6 +168,11 @@ public partial class CombatService
         var inDuty = IsInDuty();
         var mountedOrMounting = Plugin.Condition[ConditionFlag.Mounted] || Plugin.Condition[ConditionFlag.Mounting71];
         var now = Environment.TickCount64;
+        if (config.Enabled && plugin.CoppeliaPowerlevelLeaseService.IsLeaseActive)
+        {
+            HandleCoppeliaPowerlevelLease(config, inCombat, inDuty);
+            return;
+        }
         ObserveDungeonRsrAggro(config, inDuty);
         plugin.AutorotIpcService.ObserveOwnedBossModIdentity(GetSelectedRotationPluginName(config),
             plugin.ConfigManager.CurrentAccountId, plugin.ConfigManager.ActiveCharacterKey, config);
@@ -213,12 +221,6 @@ public partial class CombatService
         if (authorityDecision.Authority == DutyCombatAuthority.QuestionableSolo)
         {
             SetQuestionableSoloSuppressedState(inCombat, inDuty);
-            return;
-        }
-
-        if (plugin.CoppeliaPowerlevelLeaseService.IsLeaseActive)
-        {
-            HandleCoppeliaPowerlevelLease(config, inCombat, inDuty);
             return;
         }
 
@@ -1723,30 +1725,92 @@ public partial class CombatService
         ResetCombatSettingsRefreshTracking();
         lastObservedCombatSettings = null;
         State = CombatState.OutOfCombat;
-        StateDetail = "Coppelia PowerlevelBot lease active";
+        StateDetail = plugin.CoppeliaPowerlevelLeaseService.StatusText;
         ActivePreset = "";
         wasInCombat = inCombat;
         wasInDuty = inDuty;
+    }
 
-        if (!plugin.CoppeliaPowerlevelLeaseService.TryClaimCombatSuppression())
-            return;
+    internal bool SuppressForCoppeliaLease()
+    {
+        if (plugin.CoppeliaPowerlevelLeaseService?.IsLeaseActive != true) return false;
+        var initialStop = plugin.CoppeliaPowerlevelLeaseService.TryClaimLegacyCombatSuppression();
+        if (initialStop)
+        {
+            lastAppliedCombatSettings = null;
+            plugin.CaptureExternalAutomationSnapshot("Coppelia PowerlevelBot lease");
+            var rsrHandled = plugin.AutorotIpcService.TrySetRsrMode(AutorotIpcService.RsrStateCommandType.Off);
+            var daedalusHandled = SetDaedalusEnabled(false, "Coppelia PowerlevelBot lease");
+            foreach (var command in BuildCoppeliaPowerlevelCombatOffCommands(includeRsrFallback: !rsrHandled))
+                if (command != "/bmrai off")
+                    SendCommand(command, allowWhileSuppressed: true);
+            mountedRotationSuppressed = false;
+            mountedSuppressedPluginName = string.Empty;
+            wrathAutoActive = false;
+            lastActivePluginIdx = -1;
+            lastRotationToggleMs = 0;
+            Plugin.Log.Information($"[FrenRider][CoppeliaPowerlevel] Initial combat stop requested; RSR {(rsrHandled ? "IPC accepted" : "fallback command sent")}; "
+                                   + $"Daedalus {(daedalusHandled ? "IPC accepted" : "IPC unavailable")}.");
+        }
+        // Legacy RSR/VBM consumers can run without BMR and ignore its additive
+        // acknowledgement. Retrying BMR must not stop their chosen provider again.
+        var bmrStoppedSynchronously = StopBmrAiSynchronously();
 
-        lastAppliedCombatSettings = null;
-        plugin.CaptureExternalAutomationSnapshot("Coppelia PowerlevelBot lease");
-        var rsrHandled = plugin.AutorotIpcService.TrySetRsrMode(AutorotIpcService.RsrStateCommandType.Off);
-        var daedalusHandled = SetDaedalusEnabled(false, "Coppelia PowerlevelBot lease");
-        foreach (var command in BuildCoppeliaPowerlevelCombatOffCommands(includeRsrFallback: !rsrHandled))
-            SendCommand(command);
+        // The acknowledgement covers the native BMR handoff, rather than merely
+        // submitted commands. Existing owned-state capture/readback preserves its
+        // restoration baseline before Coppelia takes its own snapshot.
+        var nativeSuppressed = false;
+        try
+        {
+            var providers = Plugin.PluginInterface.InstalledPlugins.Where(provider => provider.IsLoaded
+                && provider.InternalName is "BossModReborn" or "BossMod").ToArray();
+            if (providers.Length == 1 && providers[0].InternalName == "BossModReborn")
+            {
+                var before = BossModExternalAutomationSnapshotProvider.FindLivePluginInstance(providers[0], out _, out _);
+                var runtimeSuppressed = plugin.AutorotIpcService.DisableOwnedBossModRuntime();
+                var state = new BossModExternalAutomationSnapshotProvider(Plugin.PluginInterface, Plugin.Log)
+                    .Capture(plugin.ConfigManager.CurrentAccountId, plugin.ConfigManager.ActiveCharacterKey);
+                var after = BossModExternalAutomationSnapshotProvider.FindLivePluginInstance(providers[0], out _, out _);
+                nativeSuppressed = bmrStoppedSynchronously && runtimeSuppressed && state.Bmr.IsAvailable && state.Bmr.AiActive == false
+                                   && before is not null && ReferenceEquals(before, after);
+            }
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log.Warning($"[FrenRider][CoppeliaPowerlevel] BMR suppression readback failed: {ex.GetBaseException().Message}");
+        }
 
-        mountedRotationSuppressed = false;
-        mountedSuppressedPluginName = string.Empty;
-        wrathAutoActive = false;
-        lastActivePluginIdx = -1;
-        lastRotationToggleMs = 0;
-        Plugin.Log.Information(
-            rsrHandled
-                ? $"[FrenRider][CoppeliaPowerlevel] Forced BMR/VBM/RSR/Wrath off; RSR stopped via IPC; Daedalus {(daedalusHandled ? "stopped via IPC" : "IPC unavailable")}."
-                : $"[FrenRider][CoppeliaPowerlevel] Forced BMR/VBM/RSR/Wrath off; RSR fallback command sent; Daedalus {(daedalusHandled ? "stopped via IPC" : "IPC unavailable")}.");
+        if (initialStop || nativeSuppressed)
+            Plugin.Log.Information($"[FrenRider][CoppeliaPowerlevel] Native BMR suppression {(nativeSuppressed ? "confirmed" : "unconfirmed")}.");
+        return nativeSuppressed;
+    }
+
+    private bool StopBmrAiSynchronously()
+    {
+        try
+        {
+            var providers = Plugin.PluginInterface.InstalledPlugins.Where(provider => provider.IsLoaded
+                && provider.InternalName is "BossModReborn" or "BossMod").ToArray();
+            if (providers.Length != 1 || providers[0].InternalName != "BossModReborn") return false;
+            if (BossModExternalAutomationSnapshotProvider.FindLivePluginInstance(providers[0], out var assembly, out _) is null)
+                return false;
+            var type = assembly!.GetType("BossMod.AI.AIManager");
+            var manager = type?.GetField("Instance", BindingFlags.Static | BindingFlags.Public)?.GetValue(null);
+            var stop = type?.GetMethod("SwitchToIdle", BindingFlags.Instance | BindingFlags.Public, null, Type.EmptyTypes, null);
+            if (type is null || manager is null || manager.GetType() != type || stop is null || stop.ReturnType != typeof(void)) return false;
+            // Calling the provider directly avoids a chat stop arriving after
+            // Coppelia has captured BMR and begun its own native preset.
+            return plugin.AutorotIpcService.SendBossModAiCommand("/bmrai off", _ =>
+            {
+                stop.Invoke(manager, null);
+                return true;
+            });
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log.Warning($"[FrenRider][CoppeliaPowerlevel] Native BMR stop failed: {ex.GetBaseException().Message}");
+            return false;
+        }
     }
 
     internal void ActivateAdsHyperFocusLease()

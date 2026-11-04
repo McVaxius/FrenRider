@@ -15,6 +15,80 @@ namespace FrenRider.Tests;
 public sealed class ExternalAutomationCleanupServiceTests
 {
     [Fact]
+    public void LegacyOptionalProviderStopIsNotRepeatedWhileBmrAcknowledgementIsUnavailable()
+    {
+        var native = new NativeBossModProvider("VBM", "Original");
+        using var service = native.CreateService();
+        using var runtime = new QuestingCombatRuntime(service, native.Interface, native.Log, 1);
+        var commands = new List<string>();
+        runtime.SetCombatField("commandSender", (Func<string, bool>)(command =>
+        {
+            commands.Add(command);
+            return true;
+        }));
+        var lease = runtime.InstallCoppeliaLease();
+        var acquired = lease.Acquire("legacy-session");
+        Assert.True(acquired.Ok);
+        Assert.False(acquired.CombatSuppressed);
+        Assert.NotEmpty(commands);
+        var initialStops = commands.ToArray();
+
+        Assert.True(lease.Heartbeat("legacy-session").Ok);
+        Assert.True(lease.Acquire("legacy-session").Ok);
+        Assert.Equal(initialStops, commands);
+    }
+
+    [Theory]
+    [InlineData("confirmed", true)]
+    [InlineData("ai-still-running", false)]
+    [InlineData("runtime-write-rejected", false)]
+    [InlineData("runtime-unreadable", false)]
+    [InlineData("provider-unavailable", false)]
+    [InlineData("provider-replaced", false)]
+    [InlineData("native-stop-unavailable", false)]
+    public void CoppeliaAcknowledgementRequiresRealNativeAiAndRuntimeReadback(string state, bool expected)
+    {
+        var native = new NativeBossModProvider("BMR", "Original", exposeStop: state != "native-stop-unavailable")
+        {
+            AiEnabled = true, IgnoreAiStop = state == "ai-still-running",
+        };
+        if (state == "runtime-write-rejected") native.RejectRuntimeWrite = true;
+        if (state == "runtime-unreadable") native.UnavailableChannel = "BossMod.Presets.GetForceDisabled";
+        if (state == "provider-unavailable") native.Loaded = false;
+        if (state == "provider-replaced") native.RuntimeWriteCallback = native.Reload;
+        using var service = native.CreateService();
+        using var runtime = new QuestingCombatRuntime(service, native.Interface, native.Log, 0);
+        var commands = new List<string>();
+        runtime.SetCombatField("commandSender", (Func<string, bool>)(command =>
+        {
+            commands.Add(command);
+            return true; // Dispatch alone is deliberately insufficient.
+        }));
+        var lease = runtime.InstallCoppeliaLease();
+        var response = lease.Acquire("session");
+        Assert.True(response.Ok);
+        Assert.Equal(expected, response.CombatSuppressed);
+        Assert.Equal(expected, lease.BuildStatus().CombatSuppressed);
+        Assert.DoesNotContain("/bmrai off", commands); // No delayed chat stop exists after acknowledgement.
+        if (!expected) return;
+
+        Assert.Equal(1, native.AiStops);
+        Assert.False(native.AiEnabled);
+        Assert.True(native.ForceDisabled);
+        var stopCount = commands.Count;
+        var nativeStops = native.AiStops;
+        native.Active = ["Next"];
+        native.ForceDisabled = false;
+        runtime.Combat.Update();
+        Assert.True(lease.Heartbeat("session").CombatSuppressed);
+        Assert.Equal(stopCount, commands.Count);
+        Assert.Equal(nativeStops, native.AiStops);
+        Assert.Equal(new[] { "Next" }, native.Active);
+        Assert.False(native.ForceDisabled);
+        Assert.False(runtime.Combat.PrepareForEnableCombatSetup());
+    }
+
+    [Fact]
     public void DhogPresetAdaptationReplacesAllFourHealersWithoutChangingOtherStrategiesOrPassivePresets()
     {
         foreach (var (name, json) in ReadPackagedPresets())
@@ -1253,6 +1327,8 @@ public sealed class ExternalAutomationCleanupServiceTests
         internal List<string> Active;
         internal bool ForceDisabled;
         internal bool RejectRuntimeWrite;
+        internal bool IgnoreAiStop;
+        internal int AiStops;
         internal Action? SelectorWriteCallback;
         internal Action? RuntimeWriteCallback;
         internal string? UnavailableChannel;
@@ -1280,7 +1356,7 @@ public sealed class ExternalAutomationCleanupServiceTests
             }
         }
 
-        internal NativeBossModProvider(string provider, string names, bool disabled = false)
+        internal NativeBossModProvider(string provider, string names, bool disabled = false, bool exposeStop = true)
         {
             Active = names.Length == 0 ? [] : names.Split('|').ToList();
             ForceDisabled = disabled;
@@ -1351,9 +1427,26 @@ public sealed class ExternalAutomationCleanupServiceTests
                 var managerBuilder = module.DefineType("BossMod.AI.AIManager", TypeAttributes.Public);
                 managerBuilder.DefineField("Instance", managerBuilder, FieldAttributes.Public | FieldAttributes.Static);
                 managerBuilder.DefineField("Beh", typeof(object), FieldAttributes.Public);
+                var stopAction = managerBuilder.DefineField("StopAction", typeof(Action), FieldAttributes.Public);
+                if (exposeStop)
+                {
+                    var stopMethod = managerBuilder.DefineMethod("SwitchToIdle", MethodAttributes.Public, typeof(void), Type.EmptyTypes);
+                    var stopIl = stopMethod.GetILGenerator();
+                    stopIl.Emit(OpCodes.Ldarg_0);
+                    stopIl.Emit(OpCodes.Ldfld, stopAction);
+                    stopIl.Emit(OpCodes.Callvirt, typeof(Action).GetMethod(nameof(Action.Invoke))!);
+                    stopIl.Emit(OpCodes.Ret);
+                }
                 var managerType = managerBuilder.CreateType()!;
                 aiManager = Activator.CreateInstance(managerType)!;
                 managerType.GetField("Instance")!.SetValue(null, aiManager);
+                managerType.GetField("StopAction")!.SetValue(aiManager, (Action)(() =>
+                {
+                    AiStops++;
+                    if (IgnoreAiStop) return;
+                    AiEnabled = false;
+                    Active = [];
+                }));
             }
             var presets = new[] { "Original", "Other", "null", "Next", "External", "Reloaded", "VBM Multibox" }
                 .Select(name => new NativePreset(name, name == "VBM Multibox")).ToArray();
@@ -2092,6 +2185,7 @@ public sealed class ExternalAutomationCleanupServiceTests
         internal readonly CombatService Combat;
         internal readonly AutomationService Automation;
         internal readonly QuestionableIpcService Activity;
+        private readonly Plugin hostPlugin;
         internal CharacterConfig Profile
         {
             get => account.Characters["character"];
@@ -2108,6 +2202,7 @@ public sealed class ExternalAutomationCleanupServiceTests
                 ReplaceStatic("PlayerState", Proxy<IPlayerState>((method, _) => method.Name == "get_ContentId" ? ContentId : Default(method.ReturnType)));
                 ReplaceStatic("ObjectTable", Proxy<IObjectTable>((_, _) => null));
                 ReplaceStatic("Log", log);
+                ReplaceStatic("PluginInterface", pluginInterface);
                 Config = Uninitialized<ConfigManager>();
                 account = new AccountConfig { AccountId = "account", Characters = new() { ["character"] = new()
                     { Enabled = true, RotationPlugin = provider, RotationType = 0, RsrAggroType = 3, PositionalInCombat = 3,
@@ -2117,6 +2212,7 @@ public sealed class ExternalAutomationCleanupServiceTests
                 Config.CurrentAccountId = "account";
                 typeof(ConfigManager).GetProperty(nameof(ConfigManager.ActiveCharacterKey))!.SetValue(Config, "character");
                 var plugin = Uninitialized<Plugin>();
+                hostPlugin = plugin;
                 SetProperty(plugin, nameof(Plugin.ConfigManager), Config);
                 SetProperty(plugin, nameof(Plugin.AutorotIpcService), service);
                 SetProperty(plugin, nameof(Plugin.DaedalusTargetModeService), new DaedalusTargetModeService(pluginInterface,
@@ -2151,6 +2247,14 @@ public sealed class ExternalAutomationCleanupServiceTests
         }
 
         internal void StopActivity() { running = false; now += TimeSpan.FromSeconds(1); Activity.Refresh(force: true); }
+        internal CoppeliaPowerlevelLeaseCoordinator InstallCoppeliaLease()
+        {
+            var coordinator = new CoppeliaPowerlevelLeaseCoordinator(() => DateTimeOffset.UtcNow,
+                () => new CoppeliaPowerlevelEnvironment(true, "Leader", "Leader", 1, false, "", 0),
+                _ => { }, Combat.SuppressForCoppeliaLease);
+            SetField(hostPlugin.CoppeliaPowerlevelLeaseService, "coordinator", coordinator);
+            return coordinator;
+        }
         internal bool RefreshTargets(bool inDuty) => (bool)Call("RefreshQuestingRsrAggro", Profile, inDuty)!;
         internal object? Call(string method, params object?[] args)
             => typeof(CombatService).GetMethod(method, BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(Combat, args);

@@ -25,7 +25,8 @@ internal sealed record CoppeliaPowerlevelRequest(string SessionToken);
 internal sealed record CoppeliaPowerlevelResponse(
     bool Ok,
     string Reason,
-    int ContractVersion = CoppeliaPowerlevelContract.Version);
+    int ContractVersion = CoppeliaPowerlevelContract.Version,
+    bool CombatSuppressed = false);
 
 internal sealed record CoppeliaPowerlevelEnvironment(
     bool FrenRiderEnabled,
@@ -47,7 +48,8 @@ internal sealed record CoppeliaPowerlevelStatus(
     ulong VisibleFrenObjectId,
     bool CompanionActive,
     string CompanionName,
-    ulong CompanionObjectId);
+    ulong CompanionObjectId,
+    bool CombatSuppressed = false);
 
 internal sealed class CoppeliaPowerlevelLeaseCoordinator
 {
@@ -55,21 +57,27 @@ internal sealed class CoppeliaPowerlevelLeaseCoordinator
     private readonly Func<DateTimeOffset> utcNow;
     private readonly Func<CoppeliaPowerlevelEnvironment> readEnvironment;
     private readonly Action<string> recoverAfterLease;
+    private readonly Func<bool>? suppressCombat;
 
     private string ownerToken = string.Empty;
     private DateTimeOffset lastHeartbeatUtc = DateTimeOffset.MinValue;
+    private int combatSuppressedGeneration;
+    private bool expired;
 
     public CoppeliaPowerlevelLeaseCoordinator(
         Func<DateTimeOffset> utcNow,
         Func<CoppeliaPowerlevelEnvironment> readEnvironment,
-        Action<string> recoverAfterLease)
+        Action<string> recoverAfterLease,
+        Func<bool>? suppressCombat = null)
     {
         this.utcNow = utcNow;
         this.readEnvironment = readEnvironment;
         this.recoverAfterLease = recoverAfterLease;
+        this.suppressCombat = suppressCombat;
     }
 
     public bool IsLeaseActive => !string.IsNullOrWhiteSpace(ownerToken);
+    public bool CombatSuppressed => IsLeaseActive && !expired && combatSuppressedGeneration == LeaseGeneration;
     public string LeaseReason { get; private set; } = "No active Coppelia lease.";
     public int LeaseGeneration { get; private set; }
 
@@ -83,6 +91,8 @@ internal sealed class CoppeliaPowerlevelLeaseCoordinator
 
         if (IsLeaseActive && !string.Equals(ownerToken, sessionToken, StringComparison.Ordinal))
             return Reject("Coppelia Powerlevel lease is already owned by another session.");
+        if (expired)
+            return Reject(LeaseReason);
 
         var environment = readEnvironment();
         if (!environment.FrenRiderEnabled)
@@ -104,7 +114,7 @@ internal sealed class CoppeliaPowerlevelLeaseCoordinator
         if (!wasActive)
             LeaseGeneration++;
 
-        return new CoppeliaPowerlevelResponse(true, LeaseReason);
+        return AcknowledgeSuppression();
     }
 
     public CoppeliaPowerlevelResponse Heartbeat(string sessionToken)
@@ -117,10 +127,12 @@ internal sealed class CoppeliaPowerlevelLeaseCoordinator
 
         if (!string.Equals(ownerToken, sessionToken, StringComparison.Ordinal))
             return Reject("Coppelia Powerlevel lease is owned by another session.");
+        if (expired)
+            return Reject(LeaseReason);
 
         lastHeartbeatUtc = utcNow();
         LeaseReason = "Coppelia Powerlevel heartbeat received.";
-        return new CoppeliaPowerlevelResponse(true, LeaseReason);
+        return AcknowledgeSuppression();
     }
 
     public CoppeliaPowerlevelResponse Release(string sessionToken)
@@ -139,14 +151,16 @@ internal sealed class CoppeliaPowerlevelLeaseCoordinator
 
     public void Update()
     {
-        if (!IsLeaseActive)
+        if (!IsLeaseActive || expired)
             return;
 
         if (utcNow() - lastHeartbeatUtc <= LeaseExpiry)
             return;
 
-        ClearLease("Coppelia Powerlevel lease expired.");
-        recoverAfterLease("lease expiry");
+        // Keep the owner and combat fence until its acknowledged cleanup/release,
+        // or an explicit manual FrenRider Off. Recovery cannot outrun BMR restore.
+        expired = true;
+        LeaseReason = "Coppelia Powerlevel lease expired; restore and release or manually disable FrenRider.";
     }
 
     public void ManualFrenRiderDisable()
@@ -171,13 +185,34 @@ internal sealed class CoppeliaPowerlevelLeaseCoordinator
             environment.VisibleFrenObjectId,
             environment.CompanionActive,
             environment.CompanionName,
-            environment.CompanionObjectId);
+            environment.CompanionObjectId,
+            CombatSuppressed);
+    }
+
+    private CoppeliaPowerlevelResponse AcknowledgeSuppression()
+    {
+        if (!CombatSuppressed)
+        {
+            var generation = LeaseGeneration;
+            try
+            {
+                var suppressed = suppressCombat?.Invoke() == true;
+                Update();
+                if (suppressed && IsLeaseActive && !expired && LeaseGeneration == generation)
+                    combatSuppressedGeneration = generation;
+            }
+            catch { /* A failed provider call never acknowledges suppression. */ }
+        }
+        if (!CombatSuppressed && !expired)
+            LeaseReason = "Coppelia Powerlevel lease active; combat suppression is not confirmed.";
+        return new CoppeliaPowerlevelResponse(true, LeaseReason, CombatSuppressed: CombatSuppressed);
     }
 
     private void ClearLease(string reason)
     {
         ownerToken = string.Empty;
         lastHeartbeatUtc = DateTimeOffset.MinValue;
+        expired = false;
         LeaseReason = reason;
     }
 
@@ -201,7 +236,7 @@ public sealed class CoppeliaPowerlevelLeaseService : IDisposable
     private ICallGateProvider<string, string>? heartbeatProvider;
     private ICallGateProvider<string, string>? releaseProvider;
     private ICallGateProvider<string>? statusProvider;
-    private int combatSuppressedGeneration;
+    private int legacyCombatSuppressedGeneration;
     private bool recoveryCycleActive;
 
     public CoppeliaPowerlevelLeaseService(Plugin plugin)
@@ -210,12 +245,18 @@ public sealed class CoppeliaPowerlevelLeaseService : IDisposable
         coordinator = new CoppeliaPowerlevelLeaseCoordinator(
             () => DateTimeOffset.UtcNow,
             BuildEnvironment,
-            RecoverAfterLease);
+            RecoverAfterLease,
+            () =>
+            {
+                plugin.BossModActionTweaksService.ResetRecovery();
+                return plugin.CombatService.SuppressForCoppeliaLease();
+            });
 
         RegisterIpc();
     }
 
     public bool IsLeaseActive => coordinator.IsLeaseActive;
+    public bool CombatSuppressed => coordinator.CombatSuppressed;
     public string StatusText => coordinator.LeaseReason;
     public bool ShouldSuppressCompanionAutoSummon => coordinator.IsLeaseActive;
     public bool IsRecoveryCycleActive => recoveryCycleActive;
@@ -223,15 +264,11 @@ public sealed class CoppeliaPowerlevelLeaseService : IDisposable
     public void Update()
         => coordinator.Update();
 
-    public bool TryClaimCombatSuppression()
+    internal bool TryClaimLegacyCombatSuppression()
     {
-        if (!coordinator.IsLeaseActive)
+        if (!coordinator.IsLeaseActive || legacyCombatSuppressedGeneration == coordinator.LeaseGeneration)
             return false;
-
-        if (combatSuppressedGeneration == coordinator.LeaseGeneration)
-            return false;
-
-        combatSuppressedGeneration = coordinator.LeaseGeneration;
+        legacyCombatSuppressedGeneration = coordinator.LeaseGeneration;
         return true;
     }
 
@@ -258,13 +295,7 @@ public sealed class CoppeliaPowerlevelLeaseService : IDisposable
         releaseProvider = Plugin.PluginInterface.GetIpcProvider<string, string>(ReleaseEndpoint);
         statusProvider = Plugin.PluginInterface.GetIpcProvider<string>(StatusEndpoint);
 
-        acquireProvider.RegisterFunc(requestJson =>
-        {
-            var response = coordinator.Acquire(ReadToken(requestJson));
-            if (response.Ok)
-                plugin.BossModActionTweaksService.ResetRecovery();
-            return Serialize(response);
-        });
+        acquireProvider.RegisterFunc(requestJson => Serialize(coordinator.Acquire(ReadToken(requestJson))));
         heartbeatProvider.RegisterFunc(requestJson => Serialize(coordinator.Heartbeat(ReadToken(requestJson))));
         releaseProvider.RegisterFunc(requestJson => Serialize(coordinator.Release(ReadToken(requestJson))));
         statusProvider.RegisterFunc(() => Serialize(coordinator.BuildStatus()));
