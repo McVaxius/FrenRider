@@ -41,7 +41,7 @@
         "Option": "AOE"
       }
     ],
-    "BossMod.Autorotation.xan.AST": [
+    "BMRVariantModulePack.Autorotation.Dhog.DhogAST": [
       {
         "Track": "Targeting",
         "Option": "Auto"
@@ -51,7 +51,7 @@
         "Option": "AOE"
       }
     ],
-    "BossMod.Autorotation.xan.SGE": [
+    "BMRVariantModulePack.Autorotation.Dhog.DhogSGE": [
       {
         "Track": "Targeting",
         "Option": "Auto"
@@ -61,7 +61,7 @@
         "Option": "AOE"
       }
     ],
-    "BossMod.Autorotation.xan.WHM": [
+    "BMRVariantModulePack.Autorotation.Dhog.DhogWHM": [
       {
         "Track": "Targeting",
         "Option": "Auto"
@@ -228,20 +228,6 @@
       }
     ],
     "BossMod.Autorotation.VeynBRD": [],
-    "BossMod.Autorotation.xan.HealerAI": [
-      {
-        "Track": "Raise",
-        "Option": "Slowcast"
-      },
-      {
-        "Track": "RaiseTargets",
-        "Option": "Everyone"
-      },
-      {
-        "Track": "Esuna2",
-        "Option": "Enabled"
-      }
-    ],
     "BossMod.Autorotation.xan.MeleeAI": [],
     "BossMod.Autorotation.xan.RangedAI": [],
     "BossMod.Autorotation.akechi.AkechiPLD": [
@@ -250,7 +236,7 @@
         "Option": "Delay"
       }
     ],
-    "BossMod.Autorotation.xan.SCH": [],
+    "BMRVariantModulePack.Autorotation.Dhog.DhogSCH": [],
     "BossMod.Autorotation.xan.PhantomAI": [
       {
         "Track": "Chemist",

@@ -562,6 +562,14 @@ public partial class CombatService
         if (!ignoreCooldown && now - lastRotationToggleMs < 2000) return false; // Cooldown
         lastRotationToggleMs = now;
 
+        if (pluginName == "BMR" && !plugin.AutorotIpcService.PrepareDhogHealerRotations(
+                GetCurrentClassJobId() ?? 0, pluginName, config.ConfigureRotationPresetManually,
+                warning => plugin.ReportToChatAndLog(warning, isError: true)))
+        {
+            StateDetail = plugin.AutorotIpcService.LastStatus;
+            return false;
+        }
+
         // Select rotation plugin (different for foray)
         if (pluginName == "RSR" && (dungeonRsrAggro is not null || questingRsrAggro is not null || questingRsrStopSelection is not null
             || questionableIpcService.QuestAutomationActive) && !ApplyRsrAggro(config))

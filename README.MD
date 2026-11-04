@@ -1,5 +1,7 @@
 # Fren Rider
 
+Automatic BMR healer presets use the Dhog healer rotations supplied by God Mod Companion. If those rotations cannot be found or the loaded preset drops their strategies, activation reports a warning. Saved manual presets and optional providers remain available.
+
 Fren Rider is a Dalamud plugin for multibox/follow support in FFXIV. It tracks a configured party member, follows with multiple movement backends, manages mount/flying behavior, coordinates combat automation, handles selected dialogs, and can delegate duty work to ADS.
 
 ## Install

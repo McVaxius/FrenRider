@@ -14,6 +14,111 @@ namespace FrenRider.Tests;
 [Collection("Questing combat lifecycle")]
 public sealed class ExternalAutomationCleanupServiceTests
 {
+    [Fact]
+    public void DhogPresetAdaptationReplacesAllFourHealersWithoutChangingOtherStrategiesOrPassivePresets()
+    {
+        foreach (var (name, json) in ReadPackagedPresets())
+        {
+            Assert.Equal(json, AutorotIpcService.AdaptDhogHealerPreset(json, available: false));
+            var adapted = AutorotIpcService.AdaptDhogHealerPreset(json, available: true);
+            if (!name.StartsWith("FRENRIDER - ", StringComparison.Ordinal))
+            {
+                Assert.Equal(json, adapted);
+                continue;
+            }
+            using var original = JsonDocument.Parse(json);
+            using var updated = JsonDocument.Parse(adapted);
+            var modules = updated.RootElement.GetProperty("Modules");
+            Assert.Equal(name, updated.RootElement.GetProperty("Name").GetString());
+            foreach (var job in new[] { "WHM", "SCH", "AST", "SGE" })
+            {
+                var native = "BossMod.Autorotation.xan." + job;
+                Assert.False(modules.TryGetProperty(native, out _));
+                var before = original.RootElement.GetProperty("Modules");
+                var expected = before.TryGetProperty(native, out var legacy) ? legacy
+                    : before.GetProperty("BMRVariantModulePack.Autorotation.Dhog.Dhog" + job);
+                Assert.True(JsonElement.DeepEquals(expected,
+                    modules.GetProperty("BMRVariantModulePack.Autorotation.Dhog.Dhog" + job)));
+            }
+            Assert.False(modules.TryGetProperty("BossMod.Autorotation.xan.HealerAI", out _));
+            foreach (var module in original.RootElement.GetProperty("Modules").EnumerateObject()
+                         .Where(module => module.Name is not ("BossMod.Autorotation.xan.WHM" or "BossMod.Autorotation.xan.SCH"
+                             or "BossMod.Autorotation.xan.AST" or "BossMod.Autorotation.xan.SGE" or "BossMod.Autorotation.xan.HealerAI")))
+                Assert.True(JsonElement.DeepEquals(module.Value, modules.GetProperty(module.Name)));
+        }
+    }
+
+    [Fact]
+    public void DhogAvailabilityRequiresBothTheRegisteredModuleAndItsExactNativeNameLookup()
+    {
+        var dynamicAssembly = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("DhogRegistryTest"), AssemblyBuilderAccess.Run);
+        var module = dynamicAssembly.DefineDynamicModule("Registry");
+        try
+        {
+            foreach (var job in new[] { "WHM", "SCH", "AST", "SGE" })
+            {
+                var name = "BMRVariantModulePack.Autorotation.Dhog.Dhog" + job;
+                var type = module.DefineType(name, TypeAttributes.Public).CreateType()!;
+                DhogRegistry.Names[name] = type;
+                DhogRegistry.Modules[type] = new object();
+            }
+            Assert.True(AutorotIpcService.HasDhogHealers(AutorotIpcService.ReadDhogHealerModules(typeof(DhogRegistry))));
+            DhogRegistry.Modules.Remove(DhogRegistry.Names["BMRVariantModulePack.Autorotation.Dhog.DhogSCH"]);
+            Assert.False(AutorotIpcService.HasDhogHealers(AutorotIpcService.ReadDhogHealerModules(typeof(DhogRegistry))));
+            DhogRegistry.Modules[typeof(string)] = new object();
+            DhogRegistry.Names["BMRVariantModulePack.Autorotation.Dhog.DhogSCH"] = typeof(string);
+            Assert.False(AutorotIpcService.HasDhogHealers(AutorotIpcService.ReadDhogHealerModules(typeof(DhogRegistry))));
+            Assert.Empty(AutorotIpcService.ReadDhogHealerModules(null));
+        }
+        finally
+        {
+            DhogRegistry.Modules.Clear();
+            DhogRegistry.Names.Clear();
+        }
+    }
+
+    [Theory]
+    [InlineData("unchanged", true)]
+    [InlineData("missing", false)]
+    [InlineData("setting", false)]
+    [InlineData("native-healer", false)]
+    public void DhogHealerReadbackRejectsDroppedModulesStrategiesAndCompetingNativeHealers(string change, bool expected)
+    {
+        var json = ReadPackagedPresets()["FRENRIDER - RANGED"];
+        var actual = System.Text.Json.Nodes.JsonNode.Parse(json)!;
+        var modules = actual["Modules"]!.AsObject();
+        if (change == "missing") modules.Remove("BMRVariantModulePack.Autorotation.Dhog.DhogSCH");
+        if (change == "setting") modules["BMRVariantModulePack.Autorotation.Dhog.DhogWHM"] = new System.Text.Json.Nodes.JsonArray();
+        if (change == "native-healer") modules["BossMod.Autorotation.xan.HealerAI"] = new System.Text.Json.Nodes.JsonArray();
+        Assert.Equal(expected, AutorotIpcService.MatchesDhogHealerPreset(json, actual.ToJsonString()));
+    }
+
+    [Fact]
+    public void MissingDhogRotationsWarnOnceAndDoNotRewriteManualPresetsOrOptionalProviders()
+    {
+        var native = new NativeBossModProvider("BMR", "Original");
+        using var service = native.CreateService();
+        var warnings = new List<string>();
+        Assert.True(service.PrepareDhogHealerRotations(24, "VBM", true, warnings.Add));
+        Assert.True(service.PrepareDhogHealerRotations(19, "BMR", true, warnings.Add));
+        Assert.Empty(warnings);
+        Assert.True(service.PrepareDhogHealerRotations(6, "BMR", true, warnings.Add));
+        Assert.True(service.PrepareDhogHealerRotations(24, "BMR", true, warnings.Add));
+        Assert.Empty(warnings);
+        Assert.False(service.PrepareDhogHealerRotations(6, "BMR", false, warnings.Add));
+        Assert.False(service.PrepareDhogHealerRotations(24, "BMR", false, warnings.Add));
+        Assert.Equal(new[] { "Could not find God Mod Companion rotations" }, warnings);
+        Assert.Equal(0, native.PresetCreates);
+        Assert.Equal(new[] { "Original" }, native.Active);
+    }
+
+    private static class DhogRegistry
+    {
+        public static readonly System.Collections.IDictionary Modules = new System.Collections.Hashtable();
+        public static readonly Dictionary<string, Type> Names = new();
+        public static Type? FindType(string name) => Names.GetValueOrDefault(name);
+    }
+
     [Theory]
     [InlineData(true, "FishingCleanup", true)]
     [InlineData(false, "FishingCleanup", false)]
