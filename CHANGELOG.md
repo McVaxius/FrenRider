@@ -1,3 +1,7 @@
+2026-11-05 - RSR operating mode isolation (unversioned)
+
+- Apply RSR's None mode only when RSR is the effective rotation provider. BMR, VBM and other providers activate independently of that RSR-only setting, including Foray overrides; explicit off, manual presets and foreign ownership controls are preserved.
+
 2026-11-04 - 4.1.0.8 - Confirmed Coppelia BMR handoff (I726/I745)
 
 - Acknowledge native BMR combat suppression before Coppelia captures its rotation state, using the existing v1 lease endpoints. Legacy consumers remain compatible; new consumers wait for the explicit acknowledgement.

@@ -250,11 +250,33 @@ public sealed class CombatServiceBossModAiCommandTests
             CombatService.ResolveRsrStateCommandType(rotationType: 0));
     }
 
-    [Fact]
-    public void RotationTypeNoneDoesNotActivateDuringDutyBootstrap()
+    [Theory]
+    [InlineData(ZoneType.Duty, 0, 2, 2, false)]
+    [InlineData(ZoneType.Duty, 1, 2, 2, false)]
+    [InlineData(ZoneType.Duty, 2, 0, 2, true)]
+    [InlineData(ZoneType.Duty, 3, 2, 2, false)]
+    [InlineData(ZoneType.Duty, 4, 2, 2, false)]
+    [InlineData(ZoneType.Duty, 2, 0, 0, false)]
+    [InlineData(ZoneType.Duty, 2, 0, 1, false)]
+    [InlineData(ZoneType.Duty, 2, 0, 3, false)]
+    [InlineData(ZoneType.Duty, 2, 0, 4, false)]
+    [InlineData(ZoneType.Foray, 2, 0, 2, false)]
+    [InlineData(ZoneType.Foray, 2, 1, 2, false)]
+    [InlineData(ZoneType.Foray, 0, 2, 2, true)]
+    public void RsrNoneDisablesOnlyTheEffectiveRsrProvider(ZoneType zone, int provider, int forayProvider,
+        int rotationType, bool disabled)
     {
-        Assert.False(CombatService.ShouldActivateConfiguredRotation(rotationType: 2));
-        Assert.True(CombatService.ShouldActivateConfiguredRotation(rotationType: 0));
+        var config = new CharacterConfig
+        {
+            Enabled = true, RotationPlugin = provider, RotationPluginForay = forayProvider, RotationType = rotationType,
+        };
+        var zones = new ZoneService();
+        typeof(ZoneService).GetProperty(nameof(ZoneService.CurrentZone))!.SetValue(zones, zone);
+        var combat = new CombatService(null!, null!, zones, null!);
+        var guard = typeof(CombatService).GetMethod("IsRotationDisabled", BindingFlags.Instance | BindingFlags.NonPublic)!;
+
+        Assert.Equal(disabled, guard.Invoke(combat, [config]));
+        Assert.Equal(rotationType, config.RotationType);
     }
 
     [Theory]

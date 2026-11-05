@@ -2027,9 +2027,9 @@ public partial class CombatService
             !string.Equals(value, "none", StringComparison.OrdinalIgnoreCase);
     }
 
-    private static bool IsRotationDisabled(CharacterConfig config)
+    private bool IsRotationDisabled(CharacterConfig config)
     {
-        return !ShouldActivateConfiguredRotation(config.RotationType);
+        return GetSelectedRotationPluginName(config) == "RSR" && !ShouldActivateConfiguredRotation(config.RotationType);
     }
 
     private static bool IsInDuty()
