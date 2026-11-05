@@ -15,6 +15,10 @@
 - Offer Automatic and seven cities for both traveling NPC repair modes. Preserve self/local behavior and legacy DAD profiles, and require exact ADS capability support for a city-specific no-inn request.
 - Retain the accepted city request across zone transitions and teleport-collision notifications, waiting for its matching completion without retargeting after settings change.
 
+2026-11-01 - Optional GMC dependency (unversioned)
+
+- List God Mod Companion (BMRVariantLoader), public or private, under optional plugins in the dependency section.
+
 2026-11-01 - BMR automatic target selection (unversioned)
 
 - Confirm BMR automatic target selection when FrenRider enables automatic combat, including when BMR supplies movement alongside another rotation provider. Restore the prior targeting choice for Manual, Support, None and AI-off selections, preserving later external changes and existing combat holds.

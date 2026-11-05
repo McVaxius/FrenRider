@@ -3554,7 +3554,7 @@ public partial class ConfigWindow : Window, IDisposable
         UiGui.TextColored(UiHelpers.Yellow, "Required Dependencies:");
         UiGui.Text("vnavmesh - Navigation and pathfinding");
         UiGui.TextColored(UiHelpers.Green, "Optional Plugins:");
-        foreach (var dependency in new[] { "Visland - Alternative navigation (if vnavmesh unavailable)",
+        foreach (var dependency in new[] { "God Mod Companion (GMC)", "Visland - Alternative navigation (if vnavmesh unavailable)",
             "BossMod / BossModReborn - Combat AI and following", "Rotation Solver Reborn - Combat rotation automation",
             "WRATH - Combat rotation automation", "Daedalus - Combat rotation automation",
             "Questionable - Quest automation integration", "Automaton (CBT) by Croizat - Enhanced duty start/end, auto-leave" })
