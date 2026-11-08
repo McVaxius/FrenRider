@@ -1463,6 +1463,7 @@ public class FollowService
     {
         try
         {
+            command = AutorotIpcService.ResolveBossModAiCommand(command, Plugin.PluginInterface.InstalledPlugins);
             // Try plugin command first (for nav commands)
             if (Plugin.CommandManager.ProcessCommand(command))
                 return;

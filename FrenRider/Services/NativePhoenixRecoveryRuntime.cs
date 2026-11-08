@@ -198,7 +198,7 @@ internal sealed unsafe class NativePhoenixRecoveryRuntime : IPhoenixRecoveryRunt
         const BindingFlags staticMembers = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
         const BindingFlags instanceMembers = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
         foreach (var exposed in Plugin.PluginInterface.InstalledPlugins.Where(p => p.IsLoaded
-            && p.InternalName is "BossMod" or "BossModReborn"))
+            && p.InternalName is "GodMod" or "BossMod" or "BossModReborn"))
         {
             try
             {

@@ -8,7 +8,7 @@ public sealed class BossModConflictWarningService
 {
     internal const long WarningIntervalMs = 5_000;
     internal const string WarningMessage =
-        "BossModReborn (BMR) and BossMod (VBM) are both loaded. Disable one to avoid combat conflicts.";
+        "Multiple GodMod/BossMod providers are loaded. Disable extras to avoid combat conflicts.";
 
     private readonly Func<bool> hasConflict;
     private readonly Action<string> showWarning;
@@ -96,16 +96,17 @@ public sealed class BossModConflictWarningService
 
     private static bool HasLoadedConflict(IDalamudPluginInterface pluginInterface)
     {
-        var bmrLoaded = false;
-        var vbmLoaded = false;
+        var loaded = 0;
         foreach (var plugin in pluginInterface.InstalledPlugins)
         {
             if (!plugin.IsLoaded)
                 continue;
 
-            bmrLoaded |= string.Equals(plugin.InternalName, "BossModReborn", StringComparison.OrdinalIgnoreCase);
-            vbmLoaded |= string.Equals(plugin.InternalName, "BossMod", StringComparison.OrdinalIgnoreCase);
-            if (bmrLoaded && vbmLoaded)
+            if (string.Equals(plugin.InternalName, "GodMod", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(plugin.InternalName, "BossModReborn", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(plugin.InternalName, "BossMod", StringComparison.OrdinalIgnoreCase))
+                ++loaded;
+            if (loaded > 1)
                 return true;
         }
 

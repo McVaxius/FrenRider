@@ -627,7 +627,7 @@ public partial class CombatService
     private void DeactivateRotation(CharacterConfig config)
     {
         var pluginName = GetLastActiveRotationPluginName(config);
-        if ((!config.Enabled || config.RotationType != RotationTypeAuto || config.BossModAI == 1)
+        if (!ShouldUseAutomaticBossModTargeting(config, pluginName)
             && !plugin.AutorotIpcService.RestoreOwnedAutomaticTargeting())
             Plugin.Log.Warning($"Combat: BMR targeting restoration after deactivation was not confirmed: {plugin.AutorotIpcService.LastStatus}");
 
@@ -635,8 +635,7 @@ public partial class CombatService
         {
             case "RSR":
                 if (!plugin.AutorotIpcService.TrySetRsrMode(AutorotIpcService.RsrStateCommandType.Off))
-                    //SendCommand("/rotation cancel"); //why is this here ? GHOST IN THE MACHINE3
-					Plugin.Log.Information($"Combat: stopped {pluginName} GHOST IN THE MACHINE 3 rotation cancel");
+                    Plugin.Log.Warning("Combat: RSR off IPC unavailable during deactivation.");
                 break;
             case "WRATH":
                 SetWrathAuto(false, "deactivation");
@@ -1599,7 +1598,7 @@ public partial class CombatService
             && !plugin.AutorotIpcService.CanResumeOwnedVbm()))
             return false;
         var targetingRestored = true;
-        if (!config.Enabled || config.RotationType != RotationTypeAuto || config.BossModAI == 1)
+        if (!ShouldUseAutomaticBossModTargeting(config, pluginName))
             targetingRestored = plugin.AutorotIpcService.RestoreOwnedAutomaticTargeting();
         var bossModAi = dragonNeckCombat ? 1 : config.BossModAI;
         if (bossModAi != 1 && (!config.Enabled || IsRotationDisabled(config)))
@@ -1607,7 +1606,8 @@ public partial class CombatService
 
         var vbmPaused = bossModAi != 1 && IsAdsInteractionVbmPauseActive(pluginName);
         var commands = BuildBossModAiCommands(config.BossModAI, pluginName, vbmPaused, dragonNeckCombat,
-            dragonNeckCombat ? Plugin.CommandManager.Commands.ContainsKey : null);
+            dragonNeckCombat ? command => Plugin.CommandManager.Commands.ContainsKey(
+                AutorotIpcService.ResolveBossModAiCommand(command, Plugin.PluginInterface.InstalledPlugins)) : null);
         if (vbmPaused)
         {
             DeferCombatSettingsRefresh(config);
@@ -1622,7 +1622,7 @@ public partial class CombatService
         if (bossModAi != 1 && GetBossModPresetProvider(pluginName) == "BMR")
         {
             plugin.AutorotIpcService.ApplyOwnedPreferredDistance(command => TrySendCommand(command), 1.5);
-            if (config.Enabled && config.RotationType == RotationTypeAuto && !IsCombatSetupHeld(IsInDuty())
+            if (ShouldUseAutomaticBossModTargeting(config, pluginName) && !IsCombatSetupHeld(IsInDuty())
                 && !plugin.AutorotIpcService.ApplyOwnedAutomaticTargeting(command => TrySendCommand(command)))
                 return false;
         }
@@ -1652,6 +1652,10 @@ public partial class CombatService
             ? new[] { "/vbmai on" }
             : new[] { "/bmrai forbidactions off", "/bmrai on" };
     }
+
+    private static bool ShouldUseAutomaticBossModTargeting(CharacterConfig config, string pluginName)
+        => config.Enabled && config.BossModAI != 1
+            && (pluginName != "RSR" || config.RotationType == RotationTypeAuto);
 
     internal static string[] BuildBossModPresetCommands(string pluginName, string presetName)
     {
@@ -1763,8 +1767,8 @@ public partial class CombatService
         try
         {
             var providers = Plugin.PluginInterface.InstalledPlugins.Where(provider => provider.IsLoaded
-                && provider.InternalName is "BossModReborn" or "BossMod").ToArray();
-            if (providers.Length == 1 && providers[0].InternalName == "BossModReborn")
+                && provider.InternalName is "GodMod" or "BossModReborn" or "BossMod").ToArray();
+            if (providers.Length == 1 && providers[0].InternalName is "GodMod" or "BossModReborn")
             {
                 var before = BossModExternalAutomationSnapshotProvider.FindLivePluginInstance(providers[0], out _, out _);
                 var runtimeSuppressed = plugin.AutorotIpcService.DisableOwnedBossModRuntime();
@@ -1790,8 +1794,8 @@ public partial class CombatService
         try
         {
             var providers = Plugin.PluginInterface.InstalledPlugins.Where(provider => provider.IsLoaded
-                && provider.InternalName is "BossModReborn" or "BossMod").ToArray();
-            if (providers.Length != 1 || providers[0].InternalName != "BossModReborn") return false;
+                && provider.InternalName is "GodMod" or "BossModReborn" or "BossMod").ToArray();
+            if (providers.Length != 1 || providers[0].InternalName is not ("GodMod" or "BossModReborn")) return false;
             if (BossModExternalAutomationSnapshotProvider.FindLivePluginInstance(providers[0], out var assembly, out _) is null)
                 return false;
             var type = assembly!.GetType("BossMod.AI.AIManager");
@@ -1951,8 +1955,7 @@ public partial class CombatService
             switch (otherPluginName)
             {
                 case "RSR":
-                    //SendCommand("/rotation cancel"); //ghost in the machine 1
-					Plugin.Log.Information($"Combat: stopped {pluginName} GHOST IN THE MACHINE 1 rotation cancel");
+                    Plugin.Log.Debug($"Combat: RSR cancellation skipped while selecting {pluginName}.");
                     break;
                 case "WRATH":
                     SetWrathAuto(false, $"selected rotation plugin is {pluginName}");

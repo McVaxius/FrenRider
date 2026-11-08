@@ -14,6 +14,277 @@ namespace FrenRider.Tests;
 [Collection("Questing combat lifecycle")]
 public sealed class ExternalAutomationCleanupServiceTests
 {
+    [Theory]
+    [InlineData("GodMod", 0)]
+    [InlineData("GodMod", 1)]
+    [InlineData("GodMod", 2)]
+    [InlineData("GodMod", 3)]
+    [InlineData("BossModReborn", 0)]
+    [InlineData("BossModReborn", 1)]
+    [InlineData("BossModReborn", 2)]
+    [InlineData("BossModReborn", 3)]
+    public void BmrActivationTargetsThroughTheLoadedBackendIndependentlyOfRsrMode(string internalName, int rsrMode)
+    {
+        var native = new NativeBossModProvider("BMR", "Original", internalName: internalName) { ManualTarget = true };
+        using var service = native.CreateService();
+        using var runtime = new QuestingCombatRuntime(service, native.Interface, native.Log, 0,
+            commandSender: command => !(internalName == "GodMod" && command.StartsWith("/bmrai ", StringComparison.Ordinal))
+                && native.SendCommand(command));
+        runtime.StopActivity();
+        runtime.Profile.RotationType = rsrMode;
+        runtime.Profile.BossModAI = 0;
+        var prefix = internalName == "GodMod" ? "/gmai" : "/bmrai";
+
+        Assert.Equal(true, runtime.Call("ActivateRotation", runtime.Profile, true));
+        Assert.False(native.ManualTarget);
+        Assert.True(native.AiEnabled);
+        Assert.Equal("Next", native.Selector);
+        Assert.Equal("Next", runtime.Combat.ActivePreset);
+        Assert.Contains($"{prefix} prefdistance 1.5", native.Writes);
+        Assert.Contains($"{prefix} manualtarget off", native.Writes);
+        Assert.Contains($"{prefix} on", native.Writes);
+
+        runtime.Call("DeactivateRotation", runtime.Profile);
+        Assert.False(native.ManualTarget); // RSR None/Manual must not release another provider's targeting.
+        runtime.Profile.BossModAI = 1;
+        Assert.Equal(true, runtime.Call("ApplyConfiguredBossModAiState", runtime.Profile, "BMR", "explicit off"));
+        Assert.True(native.ManualTarget);
+        Assert.False(native.AiEnabled);
+        Assert.Contains($"{prefix} off", native.Writes);
+
+        runtime.Profile.BossModAI = 0;
+        Assert.Equal(true, runtime.Call("ApplyConfiguredBossModAiState", runtime.Profile, "BMR", "resume"));
+        Assert.False(native.ManualTarget);
+        native.ManualTarget = true; // A later native manual-target choice belongs to its new owner.
+        native.Writes.Clear();
+        Assert.Equal(false, runtime.Call("ApplyConfiguredBossModAiState", runtime.Profile, "BMR", "foreign targeting"));
+        Assert.True(native.ManualTarget);
+        Assert.DoesNotContain($"{prefix} manualtarget off", native.Writes);
+        Assert.DoesNotContain($"{prefix} on", native.Writes);
+
+        service.ReleaseOwnedBossModSettings(turnEverythingOff: false);
+        Assert.True(native.ManualTarget);
+        Assert.Equal("Original", native.Selector);
+        Assert.Equal(new[] { "Original" }, native.Active);
+        Assert.Equal(rsrMode, runtime.Profile.RotationType);
+    }
+
+    [Theory]
+    [InlineData("GodMod")]
+    [InlineData("BossModReborn")]
+    public void SavedBmrProviderActivatesAndRestoresTheLoadedBackend(string internalName)
+    {
+        var native = new NativeBossModProvider("BMR", "Original", internalName: internalName);
+        var snapshot = new BossModExternalAutomationSnapshotProvider(native.Interface, native.Log).Capture("account", "character");
+        Assert.True(snapshot.Bmr.IsAvailable);
+        using var service = native.CreateService();
+        Assert.True(service.PrepareOwnedBossModSettings("BMR", "account", "character", new CharacterConfig()));
+        Assert.True(service.ApplyOwnedBossModPreset("null"));
+        Assert.Equal(new[] { "null" }, native.Active);
+        Assert.Equal("null", native.Selector);
+        service.ReleaseOwnedBossModSettings(turnEverythingOff: false);
+        Assert.Equal(new[] { "Original" }, native.Active);
+        Assert.Equal("Original", native.Selector);
+        Assert.Empty(native.Warnings);
+    }
+
+    [Fact]
+    public void FreshGodModNullSelectorAndEmptyRuntimeActivateAndRestoreExactly()
+    {
+        var native = new NativeBossModProvider("BMR", string.Empty, internalName: "GodMod") { Selector = null };
+        using var service = native.CreateService();
+        Assert.True(service.PrepareOwnedBossModSettings("BMR", "account", "character", new CharacterConfig()));
+        Assert.True(service.ApplyOwnedBossModPreset("null"));
+        Assert.Equal(new[] { "null" }, native.Active);
+        service.ReleaseOwnedBossModSettings(turnEverythingOff: false);
+        Assert.Empty(native.Active);
+        Assert.Null(native.Selector);
+        Assert.False(native.ForceDisabled);
+        Assert.Empty(native.Warnings);
+    }
+
+    [Fact]
+    public void GodModWithoutExactSelectorCapabilityRetainsTheOriginalEmptySelector()
+    {
+        var native = new NativeBossModProvider("BMR", string.Empty, internalName: "GodMod", exposeExactSelectorRestore: false)
+            { Selector = string.Empty };
+        using var service = native.CreateService();
+        Assert.True(service.PrepareOwnedBossModSettings("BMR", "account", "character", new CharacterConfig()));
+        Assert.False(service.ApplyOwnedBossModPreset("null"));
+        Assert.Empty(native.Active);
+        Assert.Equal(string.Empty, native.Selector);
+        Assert.Empty(native.Writes);
+        Assert.Contains("restoration path", service.LastStatus);
+    }
+
+    [Theory]
+    [InlineData("GodMod", "", false)]
+    [InlineData("BossModReborn", "", false)]
+    [InlineData("GodMod", "Original", true)]
+    [InlineData("BossModReborn", "Original", true)]
+    public void ExactEmptySavedSelectorRestoresThroughItsOwnedNativeManager(string internalName, string runtime, bool aiActive)
+    {
+        var native = new NativeBossModProvider("BMR", runtime, internalName: internalName)
+            { Selector = string.Empty, AiEnabled = aiActive, CachedPresetName = "Other" };
+        using var service = native.CreateService();
+        Assert.True(service.PrepareOwnedBossModSettings("BMR", "account", "character", new CharacterConfig()));
+        Assert.True(service.ApplyOwnedBossModPreset("null"));
+        Assert.Equal("null", native.CachedPresetName);
+        service.ReleaseOwnedBossModSettings(turnEverythingOff: false);
+        Assert.Equal(string.Empty, native.Selector);
+        Assert.Null(native.CachedPresetName);
+        Assert.Null(native.BehaviorPresetName);
+        Assert.Equal(aiActive, native.AiEnabled);
+        Assert.Equal(runtime.Length == 0 ? Array.Empty<string>() : new[] { runtime }, native.Active);
+        Assert.Equal(1, native.ExactSelectorRestores);
+        Assert.Equal(1, native.ModifiedNotifications);
+        Assert.Empty(native.Warnings);
+    }
+
+    [Fact]
+    public void EmptySelectorCapabilityRequiresTheManagersActualConfigNode()
+    {
+        var native = new NativeBossModProvider("BMR", string.Empty, internalName: "GodMod") { Selector = string.Empty };
+        var manager = native.ConfigRoot.GetType().Assembly.GetType("BossMod.AI.AIManager")!;
+        var config = manager.GetField("_config", BindingFlags.Static | BindingFlags.NonPublic)!;
+        config.SetValue(null, Activator.CreateInstance(config.FieldType));
+        using var service = native.CreateService();
+        Assert.True(service.PrepareOwnedBossModSettings("BMR", "account", "character", new CharacterConfig()));
+        Assert.False(service.ApplyOwnedBossModPreset("null"));
+        Assert.Empty(native.Writes);
+        Assert.Equal(string.Empty, native.Selector);
+    }
+
+    [Theory]
+    [InlineData("Original")]
+    [InlineData("")]
+    public void OwnedGodModPresetDoesNotRestoreIntoAReplacementBmr(string selector)
+    {
+        var original = new NativeBossModProvider("BMR", "Original", internalName: "GodMod") { Selector = selector };
+        var replacement = new NativeBossModProvider("BMR", "Next");
+        using var service = original.CreateService();
+        Assert.True(service.PrepareOwnedBossModSettings("BMR", "account", "character", new CharacterConfig()));
+        Assert.True(service.ApplyOwnedBossModPreset("null"));
+        original.Writes.Clear();
+        original.InstalledPluginsOverride = new[] { replacement.Exposed };
+        service.ReleaseOwnedBossModSettings(turnEverythingOff: false);
+        Assert.Empty(original.Writes);
+        Assert.Empty(replacement.Writes);
+        Assert.Equal(new[] { "Next" }, replacement.Active);
+    }
+
+    [Theory]
+    [InlineData("GodMod", "BossModReborn", false)]
+    [InlineData("GodMod", "BossModReborn", true)]
+    [InlineData("GodMod", "GodMod", false)]
+    [InlineData("GodMod", "GodMod", true)]
+    [InlineData("BossModReborn", "GodMod", false)]
+    [InlineData("BossModReborn", "GodMod", true)]
+    public void ExternalCleanupDoesNotRestoreOrStopAReplacementBackend(string originalName, string replacementName, bool forceOff)
+    {
+        var original = new NativeBossModProvider("BMR", "Original", internalName: originalName);
+        var replacement = new NativeBossModProvider("BMR", "Next", internalName: replacementName);
+        var cleanup = new ExternalAutomationCleanupService(new NativeCommandSender(original),
+            new BossModExternalAutomationSnapshotProvider(original.Interface, original.Log));
+        cleanup.CaptureIfMissing("account", "character", "test");
+        original.InstalledPluginsOverride = new[] { replacement.Exposed };
+        var result = cleanup.Cleanup(new CharacterConfig
+        {
+            CleanupMode = forceOff ? FrenRiderCleanupMode.TurnEverythingOff : FrenRiderCleanupMode.RestoreSnapshot,
+        }, "account", "character", "test");
+        Assert.DoesNotContain(original.Writes, write => write.StartsWith("/bmrai", StringComparison.Ordinal)
+            || write.StartsWith("/gmai", StringComparison.Ordinal) || write.StartsWith("BossMod.", StringComparison.Ordinal));
+        Assert.Empty(replacement.Writes);
+        Assert.Equal(new[] { "Next" }, replacement.Active);
+        Assert.Contains(result.Commands, command => command.Contains("provider changed", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void GodModCleanupReportsAnUnreadableAiStateWithoutStartingFollow()
+    {
+        var native = new NativeBossModProvider("BMR", "Original", exposeStop: false, internalName: "GodMod")
+            { FollowTarget = true, FollowSlot = 0 };
+        native.ConfigRoot.GetType().Assembly.GetType("BossMod.AI.AIManager")!.GetField("Instance")!.SetValue(null, null);
+        var snapshots = new BossModExternalAutomationSnapshotProvider(native.Interface, native.Log);
+        Assert.Null(snapshots.Capture("account", "character").Bmr.AiActive);
+        var cleanup = new ExternalAutomationCleanupService(new NativeCommandSender(native),
+            snapshots);
+        cleanup.CaptureIfMissing("account", "character", "test");
+        var result = cleanup.Cleanup(new CharacterConfig(), "account", "character", "test");
+        Assert.Empty(native.Writes);
+        Assert.NotEqual(ExternalAutomationCleanupState.Restored, result.State);
+        Assert.Contains(result.Commands, command => command.Contains("unsupported by native commands", StringComparison.Ordinal));
+    }
+
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(8)]
+    [InlineData(63)]
+    public void GodModCleanupReportsUnsupportedNativeFollowSlotsWithoutSendingAiCommands(int slot)
+    {
+        var native = new NativeBossModProvider("BMR", "Original", internalName: "GodMod")
+            { FollowTarget = true, FollowSlot = slot, AiEnabled = true };
+        var cleanup = new ExternalAutomationCleanupService(new NativeCommandSender(native),
+            new BossModExternalAutomationSnapshotProvider(native.Interface, native.Log));
+        cleanup.CaptureIfMissing("account", "character", "test");
+        native.FollowSlot = 0;
+        var result = cleanup.Cleanup(new CharacterConfig(), "account", "character", "test");
+        Assert.Empty(native.Writes);
+        Assert.Equal(0, native.FollowSlot);
+        Assert.NotEqual(ExternalAutomationCleanupState.Restored, result.State);
+        Assert.Contains(result.Commands, command => command.Contains("unsupported by native commands", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void NativeFollowParserRejectsSlotZeroAndActivatesAiForOneBasedSlots()
+    {
+        var native = new NativeBossModProvider("BMR", "Original", internalName: "GodMod") { FollowSlot = 3, AiEnabled = false };
+        native.SendCommand("/gmai follow Slot0");
+        Assert.Equal(3, native.FollowSlot);
+        Assert.False(native.AiEnabled);
+        native.SendCommand("/gmai follow Slot8");
+        Assert.Equal(7, native.FollowSlot);
+        Assert.True(native.AiEnabled);
+        Assert.Empty(native.Active);
+    }
+
+    [Theory]
+    [InlineData(0, false, false)]
+    [InlineData(0, true, false)]
+    [InlineData(1, false, false)]
+    [InlineData(1, true, false)]
+    [InlineData(7, false, false)]
+    [InlineData(7, true, false)]
+    [InlineData(0, false, true)]
+    [InlineData(0, true, true)]
+    [InlineData(1, false, true)]
+    [InlineData(1, true, true)]
+    [InlineData(7, false, true)]
+    [InlineData(7, true, true)]
+    public void GodModCleanupRestoresNativeFollowSlotAiAndRuntimeAfterAllAiTransitions(int slot, bool aiActive, bool forceDisabled)
+    {
+        var native = new NativeBossModProvider("BMR", "Original", forceDisabled, internalName: "GodMod")
+        {
+            FollowTarget = true, FollowSlot = slot, AiEnabled = aiActive,
+        };
+        using var autorot = native.CreateService();
+        var cleanup = new ExternalAutomationCleanupService(new NativeCommandSender(native),
+            new BossModExternalAutomationSnapshotProvider(native.Interface, native.Log), autorotIpcService: autorot);
+        var config = new CharacterConfig();
+        Assert.True(autorot.PrepareOwnedBossModSettings("BMR", "account", "character", config));
+        cleanup.CaptureIfMissing("account", "character", "test");
+        Assert.True(autorot.ApplyOwnedBossModPreset("null"));
+        native.FollowSlot = slot == 0 ? 1 : 0;
+        cleanup.Cleanup(config, "account", "character", "test");
+        Assert.Equal(slot, native.FollowSlot);
+        Assert.Equal(aiActive, native.AiEnabled);
+        Assert.Equal(forceDisabled, native.ForceDisabled);
+        Assert.Equal(forceDisabled ? Array.Empty<string>() : new[] { "Original" }, native.Active);
+        Assert.Equal("Original", native.Selector);
+        Assert.Contains($"/gmai follow Slot{slot + 1}", native.Writes);
+        Assert.Empty(native.Warnings);
+    }
+
     [Fact]
     public void LegacyOptionalProviderStopIsNotRepeatedWhileBmrAcknowledgementIsUnavailable()
     {
@@ -453,7 +724,7 @@ public sealed class ExternalAutomationCleanupServiceTests
     }
 
     [Theory]
-    [InlineData("")]
+    [InlineData(" ")]
     [InlineData("Missing")]
     public void UnsupportedOriginalBmrSelectorsPreventPresetWrites(string? originalSelector)
     {
@@ -1310,9 +1581,17 @@ public sealed class ExternalAutomationCleanupServiceTests
         public bool TrySendCommand(string command) => native.SendCommand(command);
     }
 
+    private sealed class NativeConfigModified
+    {
+        public int Notifications;
+        public void Fire() => ++Notifications;
+    }
+
     private sealed class NativeBossModProvider
     {
         internal bool Loaded = true;
+        internal IExposedPlugin[]? InstalledPluginsOverride;
+        internal IExposedPlugin Exposed => (IExposedPlugin)wrapper;
         internal bool AcceptDaedalusCommands;
         internal bool RejectPresetWrite, ModernPresetCreateUnavailable;
         internal string? LegacyPresetCreateResult;
@@ -1329,6 +1608,8 @@ public sealed class ExternalAutomationCleanupServiceTests
         internal bool RejectRuntimeWrite;
         internal bool IgnoreAiStop;
         internal int AiStops;
+        internal int ExactSelectorRestores;
+        internal int ModifiedNotifications => ((NativeConfigModified)node.GetType().GetField("Modified")!.GetValue(node)!).Notifications;
         internal Action? SelectorWriteCallback;
         internal Action? RuntimeWriteCallback;
         internal string? UnavailableChannel;
@@ -1352,11 +1633,68 @@ public sealed class ExternalAutomationCleanupServiceTests
             set
             {
                 node.GetType().GetField("Enabled")!.SetValue(node, value);
-                aiManager?.GetType().GetField("Beh")!.SetValue(aiManager, value ? new object() : null);
+                var behavior = aiManager?.GetType().GetField("Beh");
+                if (behavior is not null)
+                    behavior.SetValue(aiManager, value ? Activator.CreateInstance(behavior.FieldType) : null);
             }
         }
 
-        internal NativeBossModProvider(string provider, string names, bool disabled = false, bool exposeStop = true)
+        internal bool ManualTarget
+        {
+            get => (bool)node.GetType().GetField("ManualTarget")!.GetValue(node)!;
+            set => node.GetType().GetField("ManualTarget")!.SetValue(node, value);
+        }
+
+        internal string? CachedPresetName
+        {
+            get
+            {
+                var preset = aiManager?.GetType().GetField("AiPreset")!.GetValue(aiManager);
+                return preset?.GetType().GetField("Name")!.GetValue(preset) as string;
+            }
+            set
+            {
+                var presetField = aiManager?.GetType().GetField("AiPreset");
+                if (presetField is null) return;
+                var preset = value is null ? null : Activator.CreateInstance(presetField.FieldType);
+                if (preset is not null) presetField.FieldType.GetField("Name")!.SetValue(preset, value);
+                presetField.SetValue(aiManager, preset);
+            }
+        }
+
+        internal string? BehaviorPresetName
+        {
+            get
+            {
+                var behavior = aiManager?.GetType().GetField("Beh")!.GetValue(aiManager);
+                var preset = behavior?.GetType().GetField("AIPreset")!.GetValue(behavior);
+                return preset?.GetType().GetField("Name")!.GetValue(preset) as string;
+            }
+        }
+
+        private void SetAiPreset(string? name)
+        {
+            Selector = name;
+            CachedPresetName = name;
+            var behavior = aiManager?.GetType().GetField("Beh")!.GetValue(aiManager);
+            if (behavior is not null)
+                behavior.GetType().GetField("AIPreset")!.SetValue(behavior, aiManager!.GetType().GetField("AiPreset")!.GetValue(aiManager));
+        }
+
+        internal int FollowSlot
+        {
+            get => (int)node.GetType().GetField("FollowSlot")!.GetValue(node)!;
+            set => node.GetType().GetField("FollowSlot")!.SetValue(node, value);
+        }
+
+        internal bool FollowTarget
+        {
+            get => (bool)node.GetType().GetField("FollowTarget")!.GetValue(node)!;
+            set => node.GetType().GetField("FollowTarget")!.SetValue(node, value);
+        }
+
+        internal NativeBossModProvider(string provider, string names, bool disabled = false, bool exposeStop = true,
+            string? internalName = null, bool exposeExactSelectorRestore = true)
         {
             Active = names.Length == 0 ? [] : names.Split('|').ToList();
             ForceDisabled = disabled;
@@ -1365,9 +1703,14 @@ public sealed class ExternalAutomationCleanupServiceTests
             var configNodeType = module.DefineType("BossMod.ConfigNode", TypeAttributes.Public | TypeAttributes.Abstract).CreateType()!;
             var nodeBuilder = module.DefineType("BossMod.AI.AIConfig", TypeAttributes.Public, configNodeType);
             nodeBuilder.DefineField("Enabled", typeof(bool), FieldAttributes.Public);
+            nodeBuilder.DefineField("ManualTarget", typeof(bool), FieldAttributes.Public);
             nodeBuilder.DefineField("AIAutorotPresetName", typeof(string), FieldAttributes.Public);
+            nodeBuilder.DefineField("FollowSlot", typeof(int), FieldAttributes.Public);
+            nodeBuilder.DefineField("FollowTarget", typeof(bool), FieldAttributes.Public);
+            nodeBuilder.DefineField("Modified", typeof(object), FieldAttributes.Public);
             var nodeType = nodeBuilder.CreateType()!;
             node = Activator.CreateInstance(nodeType)!;
+            nodeType.GetField("Modified")!.SetValue(node, new NativeConfigModified());
             Selector = "Original";
             var dictionaryType = typeof(Dictionary<,>).MakeGenericType(typeof(Type), configNodeType);
             var configBuilder = module.DefineType("BossMod.ConfigRoot", TypeAttributes.Public);
@@ -1424,9 +1767,28 @@ public sealed class ExternalAutomationCleanupServiceTests
             serviceType.GetField("Config")!.SetValue(null, ConfigRoot);
             if (provider == "BMR")
             {
+                var presetBuilder = module.DefineType("BossMod.Autorotation.Preset", TypeAttributes.Public);
+                presetBuilder.DefineField("Name", typeof(string), FieldAttributes.Public);
+                var presetType = presetBuilder.CreateType()!;
+                var behaviorBuilder = module.DefineType("BossMod.AI.AIBehaviour", TypeAttributes.Public);
+                behaviorBuilder.DefineField("AIPreset", presetType, FieldAttributes.Public);
+                var behaviorType = behaviorBuilder.CreateType()!;
                 var managerBuilder = module.DefineType("BossMod.AI.AIManager", TypeAttributes.Public);
                 managerBuilder.DefineField("Instance", managerBuilder, FieldAttributes.Public | FieldAttributes.Static);
-                managerBuilder.DefineField("Beh", typeof(object), FieldAttributes.Public);
+                managerBuilder.DefineField("_config", nodeType, FieldAttributes.Private | FieldAttributes.Static);
+                managerBuilder.DefineField("Beh", behaviorType, FieldAttributes.Public);
+                managerBuilder.DefineField("AiPreset", presetType, FieldAttributes.Public);
+                var presetAction = managerBuilder.DefineField("PresetAction", typeof(Action<object>), FieldAttributes.Public);
+                if (exposeExactSelectorRestore)
+                {
+                    var setPreset = managerBuilder.DefineMethod("SetAIPreset", MethodAttributes.Public, typeof(void), new[] { presetType });
+                    var setIl = setPreset.GetILGenerator();
+                    setIl.Emit(OpCodes.Ldarg_0);
+                    setIl.Emit(OpCodes.Ldfld, presetAction);
+                    setIl.Emit(OpCodes.Ldarg_1);
+                    setIl.Emit(OpCodes.Callvirt, typeof(Action<object>).GetMethod(nameof(Action<object>.Invoke))!);
+                    setIl.Emit(OpCodes.Ret);
+                }
                 var stopAction = managerBuilder.DefineField("StopAction", typeof(Action), FieldAttributes.Public);
                 if (exposeStop)
                 {
@@ -1440,6 +1802,12 @@ public sealed class ExternalAutomationCleanupServiceTests
                 var managerType = managerBuilder.CreateType()!;
                 aiManager = Activator.CreateInstance(managerType)!;
                 managerType.GetField("Instance")!.SetValue(null, aiManager);
+                managerType.GetField("_config", BindingFlags.Static | BindingFlags.NonPublic)!.SetValue(null, node);
+                managerType.GetField("PresetAction")!.SetValue(aiManager, (Action<object?>)(preset =>
+                {
+                    ExactSelectorRestores++;
+                    SetAiPreset(preset?.GetType().GetField("Name")!.GetValue(preset) as string);
+                }));
                 managerType.GetField("StopAction")!.SetValue(aiManager, (Action)(() =>
                 {
                     AiStops++;
@@ -1475,7 +1843,7 @@ public sealed class ExternalAutomationCleanupServiceTests
                     method.ReturnType, method.GetParameters().Select(parameter => parameter.ParameterType).ToArray());
                 var il = getter.GetILGenerator();
                 if (method.Name == "get_InternalName")
-                    il.Emit(OpCodes.Ldstr, provider == "VBM" ? "BossMod" : "BossModReborn");
+                    il.Emit(OpCodes.Ldstr, internalName ?? (provider == "VBM" ? "BossMod" : "BossModReborn"));
                 else if (method.Name == "get_IsLoaded")
                     il.Emit(OpCodes.Ldc_I4_1);
                 else if (method.ReturnType != typeof(void))
@@ -1502,7 +1870,7 @@ public sealed class ExternalAutomationCleanupServiceTests
             });
             Interface = (IDalamudPluginInterface)Proxy(typeof(IDalamudPluginInterface), (method, args) => method.Name switch
             {
-                "get_InstalledPlugins" => Loaded ? new[] { (IExposedPlugin)wrapper } : Array.Empty<IExposedPlugin>(),
+                "get_InstalledPlugins" => InstalledPluginsOverride ?? (Loaded ? new[] { (IExposedPlugin)wrapper } : Array.Empty<IExposedPlugin>()),
                 "get_AssemblyLocation" => new System.IO.FileInfo(typeof(Plugin).Assembly.Location),
                 "GetIpcSubscriber" => Proxy(method.ReturnType, (call, values) => Invoke((string)args![0]!, call, values)),
                 _ => null,
@@ -1523,8 +1891,22 @@ public sealed class ExternalAutomationCleanupServiceTests
         internal bool SendCommand(string command)
         {
             Writes.Add(command);
+            if (command.StartsWith("/gmai ", StringComparison.Ordinal))
+                command = "/bmrai" + command[5..];
             if (command.StartsWith("/bmrai prefdistance ", StringComparison.Ordinal))
                 Distance = double.Parse(command["/bmrai prefdistance ".Length..], CultureInfo.InvariantCulture);
+            else if (command == "/bmrai manualtarget off")
+                ManualTarget = false;
+            else if (command.StartsWith("/bmrai follow Slot", StringComparison.OrdinalIgnoreCase))
+            {
+                if (int.TryParse(command["/bmrai follow Slot".Length..], out var slot) && slot is >= 1 and <= 8)
+                {
+                    FollowSlot = slot - 1;
+                    AiEnabled = true;
+                    Active.Clear();
+                    ForceDisabled = false;
+                }
+            }
             else if (command is "/bmrai on" or "/bmrai off")
             {
                 AiEnabled = command.EndsWith(" on", StringComparison.Ordinal);
@@ -1552,6 +1934,7 @@ public sealed class ExternalAutomationCleanupServiceTests
                 return null;
             }
             if (channel == "BossMod.Presets.GetForceDisabled") return ForceDisabled;
+            if (channel == "BossMod.AI.GetPreset") return CachedPresetName ?? string.Empty;
             if (channel == "BossMod.Presets.GetActive") return Active.Count == 1 ? Active[0] : null;
             if (channel == "BossMod.Presets.GetActiveList") return Active.ToList();
             if (channel == "BossMod.Presets.Get") return PresetDefinitions.GetValueOrDefault((string)values![0]!)
@@ -1576,6 +1959,15 @@ public sealed class ExternalAutomationCleanupServiceTests
             if (channel == "BossMod.Configuration")
             {
                 var arguments = (List<string>)values![0]!;
+                if (arguments[1] == "ManualTarget")
+                {
+                    if ((bool)values[1]!)
+                    {
+                        Writes.Add("Configuration ManualTarget " + arguments[2]);
+                        ManualTarget = bool.Parse(arguments[2]);
+                    }
+                    return new List<string> { ManualTarget.ToString() };
+                }
                 if ((bool)values[1]!)
                 {
                     Writes.Add("Configuration " + arguments[2]);
@@ -1587,8 +1979,8 @@ public sealed class ExternalAutomationCleanupServiceTests
             if (channel == "BossMod.AI.SetPreset")
             {
                 Assert.Equal("InvokeAction", call.Name);
-                Selector = ((NativeRotationDatabase)database).Presets.AllPresets.FirstOrDefault(preset =>
-                    string.Equals(preset.Name.Trim(), ((string)values![0]!).Trim(), StringComparison.OrdinalIgnoreCase))?.Name;
+                SetAiPreset(((NativeRotationDatabase)database).Presets.AllPresets.FirstOrDefault(preset =>
+                    string.Equals(preset.Name.Trim(), ((string)values![0]!).Trim(), StringComparison.OrdinalIgnoreCase))?.Name);
                 SelectorWriteCallback?.Invoke();
                 return null;
             }
@@ -2193,7 +2585,7 @@ public sealed class ExternalAutomationCleanupServiceTests
         }
 
         internal QuestingCombatRuntime(AutorotIpcService service, IDalamudPluginInterface pluginInterface, IPluginLog log,
-            int provider, bool captureCommands = false)
+            int provider, bool captureCommands = false, Func<string, bool>? commandSender = null)
         {
             try
             {
@@ -2236,7 +2628,7 @@ public sealed class ExternalAutomationCleanupServiceTests
                 Activity = new QuestionableIpcService(() => running, () => now);
                 Activity.Refresh(force: true);
                 Combat = new CombatService(plugin, null!, zones, Activity,
-                    captureCommands ? command => { Commands.Add(command); return true; } : null);
+                    commandSender ?? (captureCommands ? command => { Commands.Add(command); return true; } : null));
                 SetProperty(plugin, nameof(Plugin.CombatService), Combat);
             }
             catch
@@ -2533,7 +2925,7 @@ public sealed class ExternalAutomationCleanupServiceTests
     }
 
     [Fact]
-    public void RestoreSnapshotTurnsBmrAiOffFirstWhenCapturedIdle()
+    public void RestoreSnapshotTurnsBmrAiOffAfterItsCapturedSettingsWhenIdle()
     {
         var provider = new FakeSnapshotProvider();
         provider.Snapshots[("account", "character")] = Snapshot("account", "character", forbidMovement: true, bmrAiActive: false);
@@ -2544,7 +2936,7 @@ public sealed class ExternalAutomationCleanupServiceTests
         var result = service.Cleanup(new CharacterConfig(), "account", "character", "test");
 
         Assert.Equal(ExternalAutomationCleanupState.Restored, result.State);
-        Assert.Equal("/bmrai off", sender.Commands[0]);
+        Assert.True(sender.Commands.IndexOf("/bmrai off") > sender.Commands.IndexOf("/bmrai followmodule off"));
         Assert.Contains("/bmrai forbidmovement on", sender.Commands);
         Assert.DoesNotContain("/bmrai on", sender.Commands);
     }

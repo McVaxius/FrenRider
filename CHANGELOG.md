@@ -1,4 +1,15 @@
-2026-11-05 - RSR operating mode isolation (unversioned)
+2026-11-07 - 4.1.0.11 - GodMod/BMR targeting and provider ownership
+
+- Route owned automatic-targeting and preferred-distance commands to the active GodMod or BMR command. RSR operating modes no longer prevent automatic targeting for other selected providers.
+- Preserve explicit AI-off, owned targeting restoration and the Dragon's Neck AI hold. Report skipped or unavailable RSR cancellation accurately.
+
+GodMod recognition
+
+- Keep the saved BMR provider option while recognizing active GodMod before BossModReborn. Use the existing BossMod IPC channels and route AI/follow commands to GodMod's native command when it is active.
+- Preserve captured backend identity, manual and foreign ownership guards, and shared-IPC ambiguity checks. Restore an original empty saved AI selector exactly only through its verified native manager/config operation; retain refusal when that capability is unavailable.
+- Restore BMR/GodMod party slots using the native one-based command, then restore the captured AI state before the runtime preset. Report unsupported follow-slot restoration without sending AI commands.
+
+RSR operating mode isolation
 
 - Apply RSR's None mode only when RSR is the effective rotation provider. BMR, VBM and other providers activate independently of that RSR-only setting, including Foray overrides; explicit off, manual presets and foreign ownership controls are preserved.
 

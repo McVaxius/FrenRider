@@ -1896,7 +1896,7 @@ public partial class ConfigWindow : Window, IDisposable
                         config.RotationPlugin = RotationPluginIds[rotPlugin];
                         SaveEditingAccount();
                     }
-                    HelpMarker("Which rotation automation plugin to use.\nBMR: BossModReborn\nVBM: VanillaBossMod\nRSR: RotationSolver Reborn\nWRATH: Wrath\nDAEDALUS: Daedalus");
+                    HelpMarker("Which rotation automation plugin to use.\nBMR: active GodMod, otherwise BossModReborn\nVBM: VanillaBossMod\nRSR: RotationSolver Reborn\nWRATH: Wrath\nDAEDALUS: Daedalus");
                     DrawDefaultSettingSyncButton("Rotation Plugin");
                 }
 

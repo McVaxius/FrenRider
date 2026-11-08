@@ -40,6 +40,8 @@ public sealed class BossModActionTweaksContractTests
     [Theory]
     [InlineData("BossMod", true)]
     [InlineData("BossModReborn", false)]
+    [InlineData("GodMod", true)]
+    [InlineData("GodMod", false)]
     public void PermanentCastingPreferenceUsesTheSelectedProviderConfigIpc(string provider, bool enabled)
     {
         var f = new IpcFixture(provider);
@@ -54,11 +56,13 @@ public sealed class BossModActionTweaksContractTests
     [Theory]
     [InlineData("missing")]
     [InlineData("ambiguous")]
+    [InlineData("ambiguous-godmod")]
     [InlineData("different-provider")]
     public void UnavailableOrAmbiguousIpcDoesNotDispatch(string shape)
     {
         var f = new IpcFixture("BossMod") { Available = shape != "missing" };
         if (shape == "ambiguous") f.Plugins.Add(Plugin("BossModReborn"));
+        if (shape == "ambiguous-godmod") f.Plugins.Add(Plugin("GodMod"));
         Assert.Null(BossModActionTweaksService.ApplyConfigViaIpc(f.Interface,
             shape == "different-provider" ? "BossModReborn" : "BossMod", "ActionTweaksConfig", true));
         Assert.Equal(0, f.Writes);
@@ -117,10 +121,34 @@ public sealed class BossModActionTweaksContractTests
         }
     }
 
-    private static IExposedPlugin Plugin(string name) => (IExposedPlugin)Proxy(typeof(IExposedPlugin), (method, _) => method.Name switch
+    [Theory]
+    [InlineData(true, true, "GodMod")]
+    [InlineData(true, false, "GodMod")]
+    [InlineData(false, true, "BossModReborn")]
+    [InlineData(false, false, null)]
+    public void SavedBmrProviderPrefersOnlyAnActiveGodMod(bool godModLoaded, bool bmrLoaded, string? expected)
+    {
+        var plugins = new[] { Plugin("BossModReborn", bmrLoaded), Plugin("GodMod", godModLoaded) };
+        Assert.Equal(expected, BossModExternalAutomationSnapshotProvider.FindLoadedBossModProvider(plugins, "BossModReborn")?.InternalName);
+    }
+
+    [Theory]
+    [InlineData("/bmrai on", true, "/gmai on")]
+    [InlineData("/bmrai", true, "/gmai")]
+    [InlineData("/bmrai follow Fixture", true, "/gmai follow Fixture")]
+    [InlineData("/bmrai off", false, "/bmrai off")]
+    [InlineData("/vbmai off", true, "/vbmai off")]
+    [InlineData("/bmraix on", true, "/bmraix on")]
+    public void NativeAiCommandRoutingRetainsArgumentsAndOtherProviders(string command, bool godModLoaded, string expected)
+    {
+        var plugins = new[] { Plugin("BossModReborn"), Plugin("GodMod", godModLoaded) };
+        Assert.Equal(expected, AutorotIpcService.ResolveBossModAiCommand(command, plugins));
+    }
+
+    private static IExposedPlugin Plugin(string name, bool loaded = true) => (IExposedPlugin)Proxy(typeof(IExposedPlugin), (method, _) => method.Name switch
     {
         "get_InternalName" => name,
-        "get_IsLoaded" => true,
+        "get_IsLoaded" => loaded,
         _ => throw new InvalidOperationException(method.Name),
     });
 

@@ -178,8 +178,7 @@ public sealed class BossModActionTweaksService
     {
         try
         {
-            var exposed = pluginInterface.InstalledPlugins.FirstOrDefault(p => p.IsLoaded
-                && string.Equals(p.InternalName, internalName, StringComparison.OrdinalIgnoreCase));
+            var exposed = BossModExternalAutomationSnapshotProvider.FindLoadedBossModProvider(pluginInterface.InstalledPlugins, internalName);
             if (exposed == null)
                 return null;
             var instance = BossModExternalAutomationSnapshotProvider.FindLivePluginInstance(exposed, out var assembly, out _);
@@ -217,9 +216,7 @@ public sealed class BossModActionTweaksService
     {
         try
         {
-            var exposed = pluginInterface.InstalledPlugins.FirstOrDefault(plugin =>
-                plugin.IsLoaded
-                && string.Equals(plugin.InternalName, target.InternalName, StringComparison.OrdinalIgnoreCase));
+            var exposed = BossModExternalAutomationSnapshotProvider.FindLoadedBossModProvider(pluginInterface.InstalledPlugins, target.InternalName);
             if (exposed == null)
                 return new(target.Label, ApplyOutcome.NotLoaded, string.Empty);
 
@@ -249,7 +246,7 @@ public sealed class BossModActionTweaksService
             if (current == enabled)
                 return new(target.Label, ApplyOutcome.AlreadySet, string.Empty);
 
-            var ipcApplied = ApplyConfigViaIpc(pluginInterface, target.InternalName, configNode.GetType().Name, enabled);
+            var ipcApplied = ApplyConfigViaIpc(pluginInterface, exposed.InternalName, configNode.GetType().Name, enabled);
             if (ipcApplied == false)
                 return new(target.Label, ApplyOutcome.Failed, "provider configuration IPC rejected the setting");
             if (ipcApplied == null)
@@ -412,7 +409,7 @@ public sealed class BossModActionTweaksService
     {
         // Both forks share these channels. Reflection remains the existing path
         // when the channel cannot be attributed to exactly this provider.
-        var loaded = ipc.InstalledPlugins.Where(p => p.IsLoaded && p.InternalName is "BossMod" or "BossModReborn").ToArray();
+        var loaded = ipc.InstalledPlugins.Where(p => p.IsLoaded && p.InternalName is "GodMod" or "BossMod" or "BossModReborn").ToArray();
         if (loaded.Length != 1 || loaded[0].InternalName != internalName)
             return null;
         var args = new List<string> { configName, SettingField, enabled ? "true" : "false" };

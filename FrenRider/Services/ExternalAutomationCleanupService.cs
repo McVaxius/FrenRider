@@ -121,6 +121,12 @@ public sealed record BossModAutomationSnapshot(
     int? FollowSlot,
     string Detail)
 {
+    internal WeakReference<object>? ProviderInstance { get; init; }
+
+    internal bool MatchesProvider(BossModAutomationSnapshot current)
+        => ProviderInstance is null || ProviderInstance.TryGetTarget(out var captured)
+            && current.ProviderInstance is { } provider && provider.TryGetTarget(out var live) && ReferenceEquals(captured, live);
+
     public static BossModAutomationSnapshot Unavailable(string detail) => new(false, null, null, null, null, null, null, null, detail);
 }
 
@@ -248,8 +254,9 @@ public sealed class ExternalAutomationCleanupService
         }
 
         var attempts = new List<CommandAttempt>();
-        RestoreBossMod("BMR", "/bmrai", snapshot.Bmr, attempts);
-        RestoreBossMod("VBM", "/vbmai", snapshot.Vbm, attempts);
+        var current = snapshotProvider.Capture(snapshot.AccountId, snapshot.CharacterKey);
+        RestoreBossMod("BMR", "/bmrai", snapshot.Bmr, current.Bmr, attempts);
+        RestoreBossMod("VBM", "/vbmai", snapshot.Vbm, current.Vbm, attempts);
         RestoreCbt(snapshot.Cbt, attempts);
         RestoreDaedalus(snapshot.Daedalus, attempts);
 
@@ -270,10 +277,14 @@ public sealed class ExternalAutomationCleanupService
     private ExternalAutomationCleanupResult TurnEverythingOff(string accountId, string characterKey, string reason)
     {
         var key = BuildKey(accountId, characterKey);
+        snapshots.TryGetValue(key, out var captured);
+        var current = captured is null ? null : snapshotProvider.Capture(captured.AccountId, captured.CharacterKey);
         var attempts = new List<CommandAttempt>
         {
-            Send("/bmrai off"),
-            Send("/vbmai off"),
+            captured is not null && !captured.Bmr.MatchesProvider(current!.Bmr)
+                ? new CommandAttempt("BMR off skipped: provider changed", false) : Send("/bmrai off"),
+            captured is not null && !captured.Vbm.MatchesProvider(current!.Vbm)
+                ? new CommandAttempt("VBM off skipped: provider changed", false) : Send("/vbmai off"),
             Send("/cbt disable AutoFollow"),
         };
 
@@ -343,24 +354,34 @@ public sealed class ExternalAutomationCleanupService
         return new ExternalAutomationCleanupResult(State, StatusText, commands);
     }
 
-    private void RestoreBossMod(string label, string prefix, BossModAutomationSnapshot snapshot, List<CommandAttempt> attempts)
+    private void RestoreBossMod(string label, string prefix, BossModAutomationSnapshot snapshot,
+        BossModAutomationSnapshot current, List<CommandAttempt> attempts)
     {
         if (!snapshot.IsAvailable)
             return;
-
-        if (snapshot.AiActive == false)
-            attempts.Add(Send($"{prefix} off"));
+        if (!snapshot.MatchesProvider(current))
+        {
+            attempts.Add(new CommandAttempt($"{label} restore skipped: provider changed", false));
+            return;
+        }
+        if (label == "BMR" && snapshot.FollowTarget == true
+            && (snapshot.AiActive is null || snapshot.FollowSlot is not (>= 0 and < 8)))
+        {
+            attempts.Add(new CommandAttempt("BMR follow restore skipped: captured slot or AI state is unsupported by native commands", false));
+            return;
+        }
 
         AddBoolCommand(attempts, $"{prefix} forbidmovement", snapshot.ForbidMovement);
         AddBoolCommand(attempts, $"{prefix} followoutofcombat", snapshot.FollowOutOfCombat);
         AddBoolCommand(attempts, $"{prefix} followcombat", snapshot.FollowDuringCombat);
         AddBoolCommand(attempts, $"{prefix} followmodule", snapshot.FollowDuringActiveBossModule);
 
-        if (snapshot.FollowTarget == true && snapshot.FollowSlot is { } followSlot)
-            attempts.Add(Send($"{prefix} follow Slot{followSlot}"));
+        if (snapshot.FollowTarget == true && snapshot.AiActive is not null && snapshot.FollowSlot is { } followSlot)
+            attempts.Add(Send($"{prefix} follow Slot{(label == "BMR" ? followSlot + 1 : followSlot)}"));
 
-        if (snapshot.AiActive == true)
-            attempts.Add(Send($"{prefix} on"));
+        // Following starts AI; finish all AI transitions before runtime preset restoration.
+        if (snapshot.AiActive is { } aiActive)
+            attempts.Add(Send($"{prefix} {(aiActive ? "on" : "off")}"));
 
         infoLog?.Invoke($"[ExternalCleanup] Queued {label} restore commands.");
     }
@@ -459,7 +480,8 @@ public sealed class ExternalAutomationCleanupService
 public sealed class DalamudExternalAutomationCommandSender : IExternalAutomationCommandSender
 {
     public bool TrySendCommand(string command)
-        => GameHelpers.SendChatCommand(command, "[ExternalCleanup]");
+        => GameHelpers.SendChatCommand(AutorotIpcService.ResolveBossModAiCommand(command,
+            Plugin.PluginInterface.InstalledPlugins), "[ExternalCleanup]");
 }
 
 public sealed class BossModExternalAutomationSnapshotProvider : IExternalAutomationSnapshotProvider
@@ -491,18 +513,25 @@ public sealed class BossModExternalAutomationSnapshotProvider : IExternalAutomat
         return new ExternalAutomationSnapshot(accountId, characterKey, bmr, vbm, cbt, DateTimeOffset.UtcNow);
     }
 
+    internal static IExposedPlugin? FindLoadedBossModProvider(IEnumerable<IExposedPlugin> plugins, string internalName)
+    {
+        var loaded = plugins.Where(plugin => plugin.IsLoaded);
+        return internalName == "BossModReborn"
+            ? loaded.FirstOrDefault(plugin => string.Equals(plugin.InternalName, "GodMod", StringComparison.OrdinalIgnoreCase))
+                ?? loaded.FirstOrDefault(plugin => string.Equals(plugin.InternalName, internalName, StringComparison.OrdinalIgnoreCase))
+            : loaded.FirstOrDefault(plugin => string.Equals(plugin.InternalName, internalName, StringComparison.OrdinalIgnoreCase));
+    }
+
     private BossModAutomationSnapshot CaptureBossMod(BossModTarget target)
     {
         try
         {
-            var exposed = pluginInterface.InstalledPlugins.FirstOrDefault(plugin =>
-                plugin.IsLoaded &&
-                string.Equals(plugin.InternalName, target.InternalName, StringComparison.OrdinalIgnoreCase));
+            var exposed = FindLoadedBossModProvider(pluginInterface.InstalledPlugins, target.InternalName);
             if (exposed == null)
                 return BossModAutomationSnapshot.Unavailable("not loaded");
 
-            var liveAssembly = FindLivePluginAssembly(exposed, out var discoveryFailure);
-            if (liveAssembly == null)
+            var liveInstance = FindLivePluginInstance(exposed, out var liveAssembly, out var discoveryFailure);
+            if (liveInstance == null || liveAssembly == null)
                 return BossModAutomationSnapshot.Unavailable($"live instance discovery failed: {discoveryFailure}");
 
             var serviceType = liveAssembly.GetType("BossMod.Service");
@@ -526,7 +555,7 @@ public sealed class BossModExternalAutomationSnapshotProvider : IExternalAutomat
                 TryGetBool(configNode, "FollowDuringActiveBossModule"),
                 TryGetBool(configNode, "FollowTarget"),
                 TryGetInt(configNode, "FollowSlot"),
-                string.Empty);
+                string.Empty) { ProviderInstance = new WeakReference<object>(liveInstance) };
         }
         catch (Exception ex)
         {
@@ -534,12 +563,6 @@ public sealed class BossModExternalAutomationSnapshotProvider : IExternalAutomat
             log.Warning($"[ExternalCleanup] Failed to capture {target.Label}: {message}");
             return BossModAutomationSnapshot.Unavailable(message);
         }
-    }
-
-    private static Assembly? FindLivePluginAssembly(IExposedPlugin exposed, out string failure)
-    {
-        _ = FindLivePluginInstance(exposed, out var assembly, out failure);
-        return assembly;
     }
 
     internal static object? FindLivePluginInstance(

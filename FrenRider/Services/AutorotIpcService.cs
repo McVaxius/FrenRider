@@ -15,7 +15,7 @@ using FrenRider.Models;
 namespace FrenRider.Services;
 
 /// <summary>
-/// Manages IPC communication with BMR/VBM to create and activate autorotation presets.
+/// Manages IPC communication with GodMod/BMR/VBM to create and activate autorotation presets.
 /// Loads FrenRider preset JSONs from data\bm and pushes them via IPC when requested.
 /// </summary>
 public class AutorotIpcService : IDisposable
@@ -154,6 +154,11 @@ public class AutorotIpcService : IDisposable
     internal static string GetBossModProvider(string rotationProvider)
         => string.Equals(rotationProvider, "VBM", StringComparison.OrdinalIgnoreCase) ? "VBM" : "BMR";
 
+    internal static string ResolveBossModAiCommand(string command, IEnumerable<IExposedPlugin> plugins)
+        => (command == "/bmrai" || command.StartsWith("/bmrai ", StringComparison.Ordinal))
+            && BossModExternalAutomationSnapshotProvider.FindLoadedBossModProvider(plugins, "BossModReborn")?.InternalName == "GodMod"
+            ? "/gmai" + command[6..] : command;
+
     private bool TryGetLiveBossMod(string provider, out object? instance, out Assembly? assembly, out string detail)
     {
         instance = null;
@@ -161,15 +166,16 @@ public class AutorotIpcService : IDisposable
         try
         {
             var loaded = pluginInterface.InstalledPlugins.Where(plugin => plugin.IsLoaded
-                && plugin.InternalName is "BossModReborn" or "BossMod").ToArray();
+                && plugin.InternalName is "GodMod" or "BossModReborn" or "BossMod").ToArray();
             var expectedName = provider == "VBM" ? "BossMod" : "BossModReborn";
-            if (loaded.Length != 1 || loaded[0].InternalName != expectedName)
+            var selected = BossModExternalAutomationSnapshotProvider.FindLoadedBossModProvider(loaded, expectedName);
+            if (loaded.Length != 1 || selected is null)
             {
-                detail = loaded.Length > 1 ? "Both BossMod providers are loaded; their shared IPC is ambiguous."
+                detail = loaded.Length > 1 ? "Multiple BossMod providers are loaded; their shared IPC is ambiguous."
                     : "The selected BossMod provider is not loaded.";
                 return false;
             }
-            instance = BossModExternalAutomationSnapshotProvider.FindLivePluginInstance(loaded[0], out assembly, out detail);
+            instance = BossModExternalAutomationSnapshotProvider.FindLivePluginInstance(selected, out assembly, out detail);
             return instance is not null && assembly is not null;
         }
         catch (Exception ex)
@@ -438,8 +444,51 @@ public class AutorotIpcService : IDisposable
                 string.Equals(candidate.Trim(), name.Trim(), StringComparison.OrdinalIgnoreCase)), name, StringComparison.Ordinal);
 
     private bool IsRestorableAiSelector(string? name, BossModPresetCatalog catalog)
-        => name is not null ? IsExactAiSelector(name, catalog)
-            : catalog.Readable && !catalog.NativeNames.Any(string.IsNullOrWhiteSpace);
+        => !string.IsNullOrEmpty(name) ? IsExactAiSelector(name, catalog)
+            : catalog.Readable && !catalog.NativeNames.Any(string.IsNullOrWhiteSpace)
+                && (name is null || ReadOwnedEmptySelectorRestore() is not null);
+
+    private (object Manager, object Config, FieldInfo Selector, MethodInfo SetPreset, object Modified, MethodInfo Notify)? ReadOwnedEmptySelectorRestore()
+    {
+        try
+        {
+            if (ownedIdentity.Provider != "BMR" || !TryGetLiveBossMod("BMR", out var live, out var assembly, out _)
+                || ownedProvider is null || !ownedProvider.TryGetTarget(out var captured) || !ReferenceEquals(captured, live))
+                return null;
+            const BindingFlags instance = BindingFlags.Instance | BindingFlags.Public;
+            const BindingFlags statics = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
+            var managerType = assembly!.GetType("BossMod.AI.AIManager");
+            var manager = managerType?.GetField("Instance", statics)?.GetValue(null);
+            var config = ReadAiConfig(assembly);
+            var presetType = assembly.GetType("BossMod.Autorotation.Preset");
+            if (managerType is null || manager?.GetType() != managerType || config is null || presetType is null
+                || !ReferenceEquals(managerType.GetField("_config", statics)?.GetValue(null), config))
+                return null;
+            var selector = config.GetType().GetField("AIAutorotPresetName", instance);
+            var setPreset = managerType.GetMethod("SetAIPreset", instance, null, new[] { presetType }, null);
+            var modified = LiveMember(config, "Modified");
+            var notify = modified?.GetType().GetMethod("Fire", instance, null, Type.EmptyTypes, null);
+            return selector is { IsInitOnly: false, IsLiteral: false } && selector.FieldType == typeof(string)
+                && setPreset?.ReturnType == typeof(void) && modified is not null && notify?.ReturnType == typeof(void)
+                ? (manager!, config, selector, setPreset, modified, notify) : null;
+        }
+        catch { return null; }
+    }
+
+    private bool RestoreEmptyAiSelector()
+    {
+        if (ReadOwnedEmptySelectorRestore() is not { } access)
+            return false;
+        try
+        {
+            access.SetPreset.Invoke(access.Manager, new object?[] { null });
+            access.Selector.SetValue(access.Config, string.Empty);
+            access.Notify.Invoke(access.Modified, null);
+            return ReadOwnedEmptySelectorRestore() is { } after && ReferenceEquals(after.Manager, access.Manager)
+                && ReferenceEquals(after.Config, access.Config) && after.Selector.GetValue(after.Config) is "";
+        }
+        catch (Exception ex) { log.Debug($"BossMod exact empty selector restore unavailable: {ex.GetBaseException().Message}"); return false; }
+    }
 
     internal bool ApplyOwnedBossModPreset(string presetName)
     {
@@ -525,7 +574,7 @@ public class AutorotIpcService : IDisposable
             LastStatus = "Preferred distance retained: its original or current value is unavailable or owned elsewhere.";
             return false;
         }
-        var submitted = sendCommand($"/bmrai prefdistance {requested.ToString("R", CultureInfo.InvariantCulture)}");
+        var submitted = SendBossModAiCommand($"/bmrai prefdistance {requested.ToString("R", CultureInfo.InvariantCulture)}", sendCommand);
         if (TryReadOwnedBossModSettings(out var after) && after.PreferredDistance == requested)
         {
             ownedSettings!.OwnDistance(requested);
@@ -547,7 +596,7 @@ public class AutorotIpcService : IDisposable
             LastStatus = "BMR targeting retained: its original or current value is unavailable or owned elsewhere.";
             return false;
         }
-        var submitted = sendCommand("/bmrai manualtarget off");
+        var submitted = SendBossModAiCommand("/bmrai manualtarget off", sendCommand);
         if (TryReadOwnedBossModSettings(out var after) && after.ManualTarget == false)
         {
             ownedSettings!.OwnManualTarget(false);
@@ -602,7 +651,7 @@ public class AutorotIpcService : IDisposable
         var canObserve = relevant && TryReadOwnedBossModSettings(out before, allowCleanup: cleanupStarted);
         if (relevant && !canObserve)
             return false;
-        var submitted = sendCommand(command);
+        var submitted = sendCommand(ResolveBossModAiCommand(command, pluginInterface.InstalledPlugins));
         if (submitted && canObserve && TryReadOwnedBossModSettings(out var after, allowCleanup: cleanupStarted))
         {
             var enabled = !command.EndsWith(" off", StringComparison.Ordinal);
@@ -647,7 +696,17 @@ public class AutorotIpcService : IDisposable
             }
             else
             {
-                _ = WriteAiSelector(originalSelector ?? string.Empty);
+                if (originalSelector is "")
+                {
+                    if (!RestoreEmptyAiSelector())
+                    {
+                        LastStatus = "BMR exact empty AI selector restoration could not be confirmed.";
+                        cleanupFailed = true;
+                        return false;
+                    }
+                }
+                else
+                    _ = WriteAiSelector(originalSelector ?? string.Empty);
                 if (!TryReadOwnedBossModSettings(out var after, allowCleanup: true)
                     || !ReferenceEquals(ownedSettings, ownership))
                 {
