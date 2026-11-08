@@ -1554,8 +1554,7 @@ public partial class CombatService
             return false;
         if (config.Enabled)
             plugin.CaptureExternalAutomationSnapshot($"preset selection after {reason}");
-        var applied = config.Enabled ? plugin.AutorotIpcService.ApplyOwnedBossModPreset(presetName)
-            : plugin.AutorotIpcService.ApplyUnownedBossModPreset(pluginName, presetName);
+        var applied = plugin.AutorotIpcService.ApplyBossModPreset(pluginName, presetName);
         if (applied)
             ActivePreset = presetName;
         else

@@ -1,3 +1,8 @@
+2026-11-08 - 4.1.0.13 - Automatic BossMod preset authority
+
+- Always apply FrenRider's selected BossMod preset without requiring the previous preset or restoration snapshot to match. Keep exact preset lookup and runtime readback verification.
+- Keep captured settings for cleanup separately; an unavailable original runtime no longer prevents tracking a confirmed preset selection.
+
 2026-11-08 - 4.1.0.12 - Preserve native AI ownership during settings refresh
 
 - Correct the plugin feed to advertise the already-published 4.1.0.12 package for normal installs and updates; runtime binaries are unchanged.

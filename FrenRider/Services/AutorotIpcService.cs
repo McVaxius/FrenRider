@@ -490,54 +490,59 @@ public class AutorotIpcService : IDisposable
         catch (Exception ex) { log.Debug($"BossMod exact empty selector restore unavailable: {ex.GetBaseException().Message}"); return false; }
     }
 
-    internal bool ApplyOwnedBossModPreset(string presetName)
+    internal bool ApplyBossModPreset(string rotationProvider, string presetName)
     {
         if (IsNoPreset(presetName))
             return true;
-        if (!TryReadOwnedBossModSettings(out var before))
-            return false;
-        var ownership = ownedSettings!;
-        var catalog = ReadPresetCatalog(ownedIdentity.Provider);
-        if (!catalog.Readable || !IsExactRuntimePreset(presetName)
-            || ownedSettings!.Original.Runtime is not { } original
-            || original.Names.Any(name => !IsExactRuntimePreset(name))
-            || !ownedSettings.CanChangeRuntime(before))
+        var provider = GetBossModProvider(rotationProvider);
+        if (!TryGetLiveBossMod(provider, out var live, out var assembly, out var detail))
         {
-            LastStatus = "Preset retained: its exact name, original runtime state or current ownership is unavailable.";
+            LastStatus = detail;
             return false;
         }
-        if (ownedIdentity.Provider == "BMR")
+        if (!IsExactRuntimePreset(presetName))
         {
-            var selector = ownedSettings.Original.StoredAiSelector;
-            if (!ownedSettings.Original.StoredSelectorReadable
-                || !IsRestorableAiSelector(selector, catalog) || !IsExactAiSelector(presetName, catalog)
-                || !ownedSettings.CanChangeStoredSelector(before))
+            LastStatus = $"{provider} preset '{presetName}' is unavailable by its exact name.";
+            return false;
+        }
+
+        // FrenRider's selected preset is authoritative. The captured session is
+        // only for cleanup; missing or changed original settings cannot veto it.
+        var ownership = !cleanupStarted && !cleanupFailed && ownedIdentity.Provider == provider
+            && ownedProvider is not null && ownedProvider.TryGetTarget(out var captured)
+            && ReferenceEquals(captured, live) ? ownedSettings : null;
+        if (provider == "BMR")
+        {
+            _ = WriteAiSelector(presetName);
+            if (!TryGetLiveBossMod(provider, out var selectedLive, out assembly, out detail)
+                || !ReferenceEquals(live, selectedLive))
             {
-                LastStatus = "BMR preset retained: the original saved AI selector has no verified exact restoration path.";
+                LastStatus = "BossMod provider changed during preset selection; the runtime write was not sent.";
                 return false;
             }
-            _ = WriteAiSelector(presetName);
-            if (!TryReadOwnedBossModSettings(out var selectorApplied)
-                || !ReferenceEquals(ownedSettings, ownership)
-                || !selectorApplied.StoredSelectorReadable || selectorApplied.StoredAiSelector != presetName)
+            var selectorApplied = ReadBossModSettings(provider, assembly!);
+            if (!selectorApplied.StoredSelectorReadable || selectorApplied.StoredAiSelector != presetName)
             {
                 LastStatus = "BMR saved AI preset write could not be confirmed.";
                 return false;
             }
-            ownership.OwnStoredSelector(presetName);
-            if (!ownership.CanChangeRuntime(selectorApplied))
-            {
-                LastStatus = "BossMod runtime changed during the selector callback; that external selection was retained.";
-                return false;
-            }
+            if (ReferenceEquals(ownedSettings, ownership))
+                ownership?.OwnStoredSelector(presetName);
         }
         var requested = new BossModRuntimePresetState(false, new[] { presetName });
-        var submitted = WriteRuntimePreset(ownedIdentity.Provider, requested);
-        if (TryReadOwnedBossModSettings(out var applied) && ReferenceEquals(ownedSettings, ownership)
-            && BossModRuntimePresetState.Matches(applied.Runtime, requested))
+        var submitted = WriteRuntimePreset(provider, requested);
+        if (!TryGetLiveBossMod(provider, out var appliedLive, out assembly, out detail)
+            || !ReferenceEquals(live, appliedLive))
         {
-            ownership.OwnRuntime(requested);
-            LastStatus = $"{ownedIdentity.Provider} preset '{presetName}' confirmed.";
+            LastStatus = "BossMod provider changed during preset selection; its runtime readback could not be confirmed.";
+            return false;
+        }
+        var applied = ReadBossModSettings(provider, assembly!);
+        if (BossModRuntimePresetState.Matches(applied.Runtime, requested))
+        {
+            if (ReferenceEquals(ownedSettings, ownership))
+                ownership?.OwnRuntime(requested);
+            LastStatus = $"{provider} preset '{presetName}' confirmed.";
             return true;
         }
         LastStatus = submitted ? "BossMod preset write was submitted but its exact readback was not confirmed."
@@ -865,28 +870,6 @@ public class AutorotIpcService : IDisposable
 
     internal bool CanResumeOwnedVbm()
         => ownedIdentity.Provider == "VBM" && CanResumeOwnedBossModAi();
-
-    internal bool ApplyUnownedBossModPreset(string rotationProvider, string name)
-    {
-        if (ownedSettings is not null && (cleanupStarted || cleanupFailed))
-            return false;
-        if (IsNoPreset(name))
-            return true;
-        var provider = GetBossModProvider(rotationProvider);
-        if (!TryGetLiveBossMod(provider, out _, out var assembly, out var detail)
-            || !IsExactRuntimePreset(name) || provider == "BMR" && !IsExactAiSelector(name, ReadPresetCatalog(provider)))
-        {
-            LastStatus = string.IsNullOrEmpty(detail) ? "The selected literal preset name is unavailable." : detail;
-            return false;
-        }
-        if (provider == "BMR" && !WriteAiSelector(name))
-            return false;
-        var target = new BossModRuntimePresetState(false, new[] { name });
-        _ = WriteRuntimePreset(provider, target);
-        var after = ReadBossModSettings(provider, assembly!);
-        return BossModRuntimePresetState.Matches(after.Runtime, target)
-            && (provider != "BMR" || after.StoredSelectorReadable && after.StoredAiSelector == name);
-    }
 
     /// <summary>
     /// Push the packaged autorot presets into BossMod-compatible rotation plugins.
@@ -1661,12 +1644,9 @@ internal sealed class BossModSettingsOwnership(string provider, BossModSettingsS
     private bool? ownedAiEnabled;
 
     internal bool CanChangeRuntime(BossModSettingsSnapshot current)
-        => Original.Runtime is not null && current.Runtime is not null
+        => current.Runtime is not null
             && (OwnedRuntime is null ? BossModRuntimePresetState.Matches(current.Runtime, Original.Runtime)
                 : MatchesOwnedRuntime(current));
-    internal bool CanChangeStoredSelector(BossModSettingsSnapshot current)
-        => Original.StoredSelectorReadable && current.StoredSelectorReadable
-            && string.Equals(current.StoredAiSelector, OwnedStoredSelector ?? Original.StoredAiSelector, StringComparison.Ordinal);
     internal bool CanChangeDistance(double? current)
         => Original.PreferredDistance is { } originalDistance && double.IsFinite(originalDistance)
             && current == (OwnedDistance ?? originalDistance);
