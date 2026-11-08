@@ -1,11 +1,70 @@
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
+using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Plugin.Services;
 using FrenRider.Models;
 using FrenRider.Services;
 
 namespace FrenRider.Tests;
 
+[Collection("Activation mode static services")]
 public sealed class AdsDutyExitLifecycleTests
 {
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void DisableCancelsScheduledLeaveAndStopsOnlyOwnedExitNavigationOnce(bool ownedNavigation)
+    {
+        var fields = BindingFlags.Instance | BindingFlags.NonPublic;
+        var service = (ExitBehaviourService)RuntimeHelpers.GetUninitializedObject(typeof(ExitBehaviourService));
+        void Set(string name, object value) => typeof(ExitBehaviourService).GetField(name, fields)!.SetValue(service, value);
+        object? Get(string name) => typeof(ExitBehaviourService).GetField(name, fields)!.GetValue(service);
+        Set("plugin", (Plugin)RuntimeHelpers.GetUninitializedObject(typeof(Plugin)));
+        var step = typeof(ExitBehaviourService).GetField("leaveDutyStep", fields)!;
+        step.SetValue(service, Enum.Parse(step.FieldType, "OpenContentsFinderMenu"));
+        Set("leaveDutyStepDueAt", DateTime.UtcNow.AddSeconds(-1));
+        Set("pendingLeaveReason", "synthetic scheduled leave");
+        Set("leaveConfirmationAttemptCount", 2);
+        Set("isNavigatingToExit", ownedNavigation);
+        Set("exitTarget", ActivationModeTests.Proxy<IGameObject>((_, _) => null));
+        Set("lastPartyCheckTime", DateTime.UtcNow);
+        var commands = new List<string>();
+        var log = typeof(Plugin).GetProperty("Log", BindingFlags.Static | BindingFlags.NonPublic)!;
+        var commandManager = typeof(Plugin).GetProperty("CommandManager", BindingFlags.Static | BindingFlags.NonPublic)!;
+        var previousLog = log.GetValue(null);
+        var previousCommands = commandManager.GetValue(null);
+        try
+        {
+            log.SetValue(null, ActivationModeTests.Proxy<IPluginLog>((_, _) => null));
+            commandManager.SetValue(null, ActivationModeTests.Proxy<ICommandManager>((method, args) =>
+            {
+                if (method.Name != "ProcessCommand") return null;
+                commands.Add((string)args![0]!);
+                return true;
+            }));
+
+            service.StopForDisable();
+            service.StopForDisable();
+            typeof(ExitBehaviourService).GetMethod("TickLeaveDutySequence", fields)!.Invoke(service, null);
+            typeof(ExitBehaviourService).GetMethod("TickLeaveDutySequence", fields)!.Invoke(service, null);
+
+            Assert.Equal(ownedNavigation ? new[] { "/vnav stop" } : Array.Empty<string>(), commands);
+            Assert.Equal("None", Get("leaveDutyStep")!.ToString());
+            Assert.Equal(DateTime.MinValue, Get("leaveDutyStepDueAt"));
+            Assert.Equal("", Get("pendingLeaveReason"));
+            Assert.Equal(0, Get("leaveConfirmationAttemptCount"));
+            Assert.False((bool)Get("isNavigatingToExit")!);
+            Assert.Null(Get("exitTarget"));
+            Assert.Equal(DateTime.MinValue, Get("lastPartyCheckTime"));
+        }
+        finally
+        {
+            commandManager.SetValue(null, previousCommands);
+            log.SetValue(null, previousLog);
+        }
+    }
+
     private static RaidRuntimeFrame ReadyRaidFrame => new()
     {
         LoggedIn = true, CharacterId = 701, TerritoryId = 100, DutyId = 1,

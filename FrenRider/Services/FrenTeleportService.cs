@@ -94,7 +94,7 @@ public sealed class FrenTeleportService
 
         if (!config.Enabled)
         {
-            ResetState("FrenRider disabled", FrenTeleportState.Idle);
+            StopForDisable();
             return;
         }
 
@@ -208,6 +208,9 @@ public sealed class FrenTeleportService
 
     public void ResetForAreaTransition()
         => ResetState("Blocked: area transition", FrenTeleportState.Blocked, preserveLocalRequest: true);
+
+    internal void StopForDisable()
+        => ResetState("FrenRider disabled", FrenTeleportState.Idle);
 
     private bool TryFollowLocalNetwork(CharacterConfig config, FrenTracker.FrenState? fren, long now)
     {

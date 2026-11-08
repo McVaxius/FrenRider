@@ -76,7 +76,7 @@ public class DutyInteractService
         var config = plugin.ConfigManager.GetActiveConfig();
         if (!config.Enabled)
         {
-            Reset();
+            StopForDisable();
             return;
         }
 
@@ -226,6 +226,12 @@ public class DutyInteractService
                 NudgeForward();
             }
         }
+    }
+
+    public void StopForDisable()
+    {
+        StopInteractableNavigation("FrenRider disabled");
+        Reset();
     }
 
     private bool CanNudgeForwardInDuty(CharacterConfig config, bool boundByDuty, out string blockReason)

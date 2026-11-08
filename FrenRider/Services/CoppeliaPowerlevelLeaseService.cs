@@ -328,7 +328,7 @@ public sealed class CoppeliaPowerlevelLeaseService : IDisposable
         try
         {
             Plugin.Log.Information($"[FrenRider][CoppeliaPowerlevel] Recovering after {reason}: cycling FrenRider off/on once.");
-            plugin.ConfigManager.SetFrenRiderEnabled(false);
+            plugin.ConfigManager.DisableForRecovery();
             plugin.ConfigManager.SetFrenRiderEnabled(true);
         }
         finally

@@ -25,6 +25,7 @@ public class ConfigManager : IDadProfileStore
 
     // Event to notify when FrenRider enabled state changes
     public event Action<bool>? OnFrenRiderEnabledChanged;
+    internal event Action? OnManualDisableRequested;
     internal event Action? OnEffectiveProfileChanging;
 
     private static readonly JsonSerializerOptions JsonOptions = new()
@@ -1214,24 +1215,59 @@ public class ConfigManager : IDadProfileStore
     }
 
     public void SetFrenRiderEnabled(bool enabled)
+        => SetFrenRiderEnabledCore(enabled, explicitRequest: true);
+
+    internal void DisableForRecovery()
+        => SetFrenRiderEnabledCore(false, explicitRequest: false);
+
+    private void SetFrenRiderEnabledCore(bool enabled, bool explicitRequest)
     {
         if (!TryGetActiveConfig(out var currentConfig) || currentConfig == null)
         {
-            log.Warning($"[ConfigManager] Ignored enabled state change to {enabled}: no active character profile");
+            if (!enabled)
+            {
+                NotifyRequestedActivation(false, explicitRequest);
+                log.Information("[ConfigManager] FrenRider stop requested without an active character profile.");
+            }
+            else
+                log.Warning($"[ConfigManager] Ignored enabled state change to {enabled}: no active character profile");
             return;
         }
 
         var wasEnabled = currentConfig.Enabled;
-        
-        if (wasEnabled != enabled)
+        var changed = wasEnabled != enabled;
+        currentConfig.Enabled = enabled;
+
+        // Manual Off also applies to the saved profile beneath a temporary
+        // overlay, so releasing that overlay cannot silently restart FrenRider.
+        if (!enabled && explicitRequest && TryGetLocalActiveConfig(out var localConfig) && localConfig != null
+            && !ReferenceEquals(localConfig, currentConfig) && localConfig.Enabled)
         {
-            currentConfig.Enabled = enabled;
+            localConfig.Enabled = false;
+            changed = true;
+        }
+
+        if (changed)
             SaveCurrentAccount();
-            
-            // Trigger the event
-            OnFrenRiderEnabledChanged?.Invoke(enabled);
-            
+
+        // A repeated Stop must still cancel work queued while already off.
+        if (changed || !enabled)
+            NotifyRequestedActivation(enabled, explicitRequest);
+
+        if (changed)
             log.Information($"[ConfigManager] FrenRider enabled state changed: {wasEnabled} -> {enabled}");
+    }
+
+    private void NotifyRequestedActivation(bool enabled, bool explicitRequest)
+    {
+        try
+        {
+            OnFrenRiderEnabledChanged?.Invoke(enabled);
+        }
+        finally
+        {
+            if (!enabled && explicitRequest)
+                OnManualDisableRequested?.Invoke();
         }
     }
 

@@ -5,6 +5,7 @@ using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Text.SeStringHandling;
+using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using FrenRider.Models;
 using FrenRider.Services;
@@ -340,6 +341,159 @@ public sealed class AdsDutyOwnershipTests
         fixture.Call("ApplyCofferPolicy");
 
         Assert.Empty(fixture.Commands);
+    }
+
+    [Theory]
+    [InlineData("progression", false)]
+    [InlineData("progression", true)]
+    [InlineData("coffer", false)]
+    [InlineData("coffer", true)]
+    [InlineData("nudge", false)]
+    [InlineData("nudge", true)]
+    public void DisableStopsEveryOwnedDutyNavigationOnceBeforeClearingOwnership(string navigation, bool throughDisabledUpdate)
+    {
+        ActivationModeTests.WithManager((manager, _) =>
+        {
+            using var fixture = new CofferInteractionFixture();
+            var plugin = (Plugin)fixture.Field("plugin")!;
+            typeof(Plugin).GetProperty(nameof(Plugin.ConfigManager))!.SetValue(plugin, manager);
+            fixture.SetCoffers(true);
+            if (navigation == "nudge")
+                fixture.Call("NudgeForward");
+            else
+            {
+                var target = fixture.Add(navigation == "coffer" ? "Treasure Coffer" : "Vault Door",
+                    ObjectKind.Treasure, 12);
+                fixture.Call("NavigateToInteractable", target, Vector3.Zero, 12f, DateTime.UtcNow);
+            }
+            Assert.StartsWith("/vnav moveto ", Assert.Single(fixture.Commands));
+            fixture.SetField("lastInteractedEntityId", (uint)17);
+            fixture.Commands.Clear();
+
+            for (var attempt = 0; attempt < 2; attempt++)
+            {
+                if (throughDisabledUpdate)
+                    fixture.Update();
+                else
+                    fixture.StopForDisable();
+            }
+
+            Assert.Equal(new[] { "/vnavmesh stop" }, fixture.Commands);
+            Assert.False((bool)fixture.Field("isNavigatingToInteractable")!);
+            Assert.False((bool)fixture.Field("navigatingToTreasureCoffer")!);
+            Assert.Null(fixture.Field("navigatingInteractableGameObjectId"));
+            Assert.Null(fixture.Field("lastInteractedEntityId"));
+            Assert.False(fixture.IsActive);
+            Assert.Equal("", fixture.StateDetail);
+        });
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void DutyInteractionDisableDoesNotStopNavigationOwnedByFollow(bool throughDisabledUpdate)
+    {
+        ActivationModeTests.WithManager((manager, _) =>
+        {
+            using var fixture = new CofferInteractionFixture();
+            var plugin = (Plugin)fixture.Field("plugin")!;
+            typeof(Plugin).GetProperty(nameof(Plugin.ConfigManager))!.SetValue(plugin, manager);
+            fixture.Follow.GetType().GetProperty(nameof(FollowService.State))!.SetValue(fixture.Follow, FollowState.Following);
+
+            for (var attempt = 0; attempt < 2; attempt++)
+            {
+                if (throughDisabledUpdate)
+                    fixture.Update();
+                else
+                    fixture.StopForDisable();
+            }
+
+            Assert.Empty(fixture.Commands);
+            Assert.Equal(FollowState.Following, fixture.Follow.State);
+            Assert.False((bool)fixture.Field("isNavigatingToInteractable")!);
+            Assert.False(fixture.IsActive);
+            Assert.Equal("", fixture.StateDetail);
+        });
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void FollowDisableStopsOnlyTrackedNavigationAndClearsStaleNativeFollowState(bool ownedNavigation)
+    {
+        ActivationModeTests.WithManager((manager, _) =>
+        {
+            using var fixture = new CofferInteractionFixture();
+            var plugin = (Plugin)fixture.Field("plugin")!;
+            typeof(Plugin).GetProperty(nameof(Plugin.ConfigManager))!.SetValue(plugin, manager);
+            var fields = BindingFlags.Instance | BindingFlags.NonPublic;
+            typeof(FollowService).GetField("isNavigating", fields)!.SetValue(fixture.Follow, ownedNavigation);
+            typeof(FollowService).GetField("lastMovementClingType", fields)!.SetValue(fixture.Follow, 0);
+            typeof(FollowService).GetField("bossModFollowActive", fields)!.SetValue(fixture.Follow, true);
+            typeof(FollowService).GetProperty(nameof(FollowService.IsFarChaseRequested))!.SetValue(fixture.Follow, true);
+            var piProperty = typeof(Plugin).GetProperty("PluginInterface", BindingFlags.Static | BindingFlags.NonPublic)!;
+            var previousPi = piProperty.GetValue(null);
+            try
+            {
+                piProperty.SetValue(null, ActivationModeTests.Proxy<IDalamudPluginInterface>((method, _) =>
+                    method.Name == "get_InstalledPlugins"
+                        ? Array.Empty<IExposedPlugin>()
+                        : null));
+
+                fixture.Follow.StopForDisable();
+                fixture.Follow.StopForDisable();
+
+                Assert.Equal(ownedNavigation ? new[] { "/vnavmesh stop" } : Array.Empty<string>(), fixture.Commands);
+                Assert.False((bool)typeof(FollowService).GetField("isNavigating", fields)!.GetValue(fixture.Follow)!);
+                Assert.False((bool)typeof(FollowService).GetField("bossModFollowActive", fields)!.GetValue(fixture.Follow)!);
+                Assert.False(fixture.Follow.IsFarChaseRequested);
+                Assert.Equal(FollowState.Idle, fixture.Follow.State);
+                Assert.Equal("Disabled", fixture.Follow.StateDetail);
+            }
+            finally { piProperty.SetValue(null, previousPi); }
+        });
+    }
+
+    [Fact]
+    public void DisableNeverStartsNativeFollowFromStaleMovementOwnership()
+    {
+        ActivationModeTests.WithManager((manager, _) =>
+        {
+            using var fixture = new CofferInteractionFixture();
+            var plugin = (Plugin)fixture.Field("plugin")!;
+            typeof(Plugin).GetProperty(nameof(Plugin.ConfigManager))!.SetValue(plugin, manager);
+            var fields = BindingFlags.Instance | BindingFlags.NonPublic;
+            // Native following has already stopped, but FR's old movement flag
+            // remains set and there is still a valid target for /follow to start.
+            typeof(FollowService).GetField("isNavigating", fields)!.SetValue(fixture.Follow, true);
+            typeof(FollowService).GetField("lastMovementClingType", fields)!.SetValue(fixture.Follow, 3);
+            var target = fixture.Add("Example Target", ObjectKind.Pc, 12);
+            var statics = BindingFlags.Static | BindingFlags.NonPublic;
+            var targetManager = typeof(Plugin).GetProperty("TargetManager", statics)!;
+            var pi = typeof(Plugin).GetProperty("PluginInterface", statics)!;
+            var previousTarget = targetManager.GetValue(null);
+            var previousPi = pi.GetValue(null);
+            try
+            {
+                targetManager.SetValue(null, ActivationModeTests.Proxy<ITargetManager>((method, _) =>
+                    method.Name == "get_Target" ? target : null));
+                pi.SetValue(null, ActivationModeTests.Proxy<IDalamudPluginInterface>((method, _) =>
+                    method.Name == "get_InstalledPlugins" ? Array.Empty<IExposedPlugin>() : null));
+
+                fixture.Follow.StopForDisable();
+                fixture.Follow.StopForDisable();
+
+                Assert.Same(target, Plugin.TargetManager.Target);
+                Assert.Empty(fixture.Commands);
+                Assert.False((bool)typeof(FollowService).GetField("isNavigating", fields)!.GetValue(fixture.Follow)!);
+                Assert.Equal(FollowState.Idle, fixture.Follow.State);
+            }
+            finally
+            {
+                pi.SetValue(null, previousPi);
+                targetManager.SetValue(null, previousTarget);
+            }
+        });
     }
 
     [Fact]
@@ -917,6 +1071,10 @@ public sealed class AdsDutyOwnershipTests
                 _ => Default(method.ReturnType),
             }));
             ReplaceStatic("Log", Proxy<IPluginLog>((_, _) => null));
+            ReplaceStatic("PluginInterface", Proxy<IDalamudPluginInterface>((method, _) =>
+                method.Name == "get_InstalledPlugins"
+                    ? Array.Empty<IExposedPlugin>()
+                    : Default(method.ReturnType)));
             ReplaceStatic("CommandManager", Proxy<ICommandManager>((method, args) =>
             {
                 if (method.Name != "ProcessCommand") return Default(method.ReturnType);
@@ -971,6 +1129,7 @@ public sealed class AdsDutyOwnershipTests
         }
 
         internal void Update() => interaction.Update();
+        internal void StopForDisable() => interaction.StopForDisable();
         internal IGameObject? FindNearest() => (IGameObject?)Call("FindNearestInteractable");
         internal void ClearObjects() => objects.Clear();
         internal object? Call(string method, params object?[] args)

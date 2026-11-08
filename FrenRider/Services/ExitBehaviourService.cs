@@ -169,7 +169,7 @@ public class ExitBehaviourService : IDisposable
 
         if (!config.Enabled)
         {
-            CancelLeaveDutySequence("plugin disabled");
+            StopForDisable();
             if (!inDuty && DutySession.EnteredAtUtc == DateTime.MinValue && !dutyCompleted)
                 ResetOutsideDutyState();
             return;
@@ -588,9 +588,13 @@ public class ExitBehaviourService : IDisposable
         leaveConfirmationAttemptCount = 0;
     }
 
-    internal void CancelAutomaticExitForRaid()
+    internal void StopForDisable() => CancelAutomaticExit("plugin disabled");
+
+    internal void CancelAutomaticExitForRaid() => CancelAutomaticExit("Raid mode");
+
+    private void CancelAutomaticExit(string reason)
     {
-        CancelLeaveDutySequence("Raid mode");
+        CancelLeaveDutySequence(reason);
         if (isNavigatingToExit) SendCommand("/vnav stop");
         isNavigatingToExit = false;
         exitTarget = null;

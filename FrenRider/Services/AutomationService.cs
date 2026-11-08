@@ -160,10 +160,7 @@ public class AutomationService : IDisposable
         jobStoneEquipService.Update(config);
         if (!config.Enabled)
         {
-            idleTickCounter = 0;
-            IsIdle = false;
-            CancelRepairFlow("");
-            ResetAutoDesynth("");
+            StopForDisable();
             return;
         }
 
@@ -286,13 +283,21 @@ public class AutomationService : IDisposable
         }
     }
 
+    internal void StopForDisable()
+    {
+        idleTickCounter = 0;
+        IsIdle = false;
+        companionStanceCooldownMs = 0;
+        CancelRepairFlow("");
+        ResetAutoDesynth("");
+    }
+
     public void UpdateUtilityGate()
     {
         var config = plugin.ConfigManager.GetActiveConfig();
         if (!config.Enabled)
         {
-            CancelRepairFlow("");
-            ResetAutoDesynth("");
+            StopForDisable();
             return;
         }
 

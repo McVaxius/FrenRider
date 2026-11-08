@@ -122,6 +122,216 @@ public sealed class ActivationModeTests
         });
     }
 
+    [Theory]
+    [InlineData("on", true)]
+    [InlineData(" \tON\r\n", true)]
+    [InlineData("off", false)]
+    [InlineData("  OfF  ", false)]
+    [InlineData("stop", false)]
+    [InlineData(" \tStOp\r\n", false)]
+    public void ActivationCommandsPersistSavedRunIntentWithoutChangingDutyMode(string arguments, bool enabled)
+    {
+        WithManager((manager, local) =>
+        {
+            local.Enabled = !enabled;
+            local.ActivationMode = FrenRiderActivationMode.DutyOnly;
+            var notifications = new List<bool>();
+            manager.OnFrenRiderEnabledChanged += notifications.Add;
+
+            Assert.True(Plugin.TryApplyActivationCommand(manager, arguments));
+
+            Assert.Equal(enabled, local.Enabled);
+            Assert.Equal(FrenRiderActivationMode.DutyOnly, local.ActivationMode);
+            Assert.Equal(new[] { enabled }, notifications);
+            var directory = (string)typeof(ConfigManager).GetField("configDir", BindingFlags.Instance | BindingFlags.NonPublic)!
+                .GetValue(manager)!;
+            var saved = JsonSerializer.Deserialize<AccountConfig>(File.ReadAllText(
+                Path.Combine(directory, $"{manager.CurrentAccountId}_FrenRider.json")))!;
+            Assert.Equal(enabled, saved.Characters[manager.ActiveCharacterKey].Enabled);
+            Assert.Equal(FrenRiderActivationMode.DutyOnly, saved.Characters[manager.ActiveCharacterKey].ActivationMode);
+        });
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("toggle")]
+    [InlineData("testchocobo stop")]
+    [InlineData("  TESTCHOCOBO STOP  ")]
+    [InlineData("stop now")]
+    [InlineData("on off")]
+    public void OtherCommandsDoNotChangeSavedRunIntentOrTriggerActivationCleanup(string arguments)
+    {
+        WithManager((manager, local) =>
+        {
+            local.Enabled = true;
+            var notifications = new List<bool>();
+            manager.OnFrenRiderEnabledChanged += notifications.Add;
+
+            Assert.False(Plugin.TryApplyActivationCommand(manager, arguments));
+
+            Assert.True(local.Enabled);
+            Assert.Empty(notifications);
+        });
+    }
+
+    [Theory]
+    [InlineData("off", true)]
+    [InlineData("off", false)]
+    [InlineData("stop", true)]
+    [InlineData("stop", false)]
+    public void StopPersistsAcrossDutyTransitionsAndOverlayReleaseUntilExplicitOn(string arguments, bool overlayEnabled)
+    {
+        WithManager((manager, local) =>
+        {
+            local.Enabled = true;
+            local.ActivationMode = FrenRiderActivationMode.DutyOnly;
+            var identity = new DadProfileIdentity("owner", "island", "opaque", "proposal");
+            Assert.True(manager.TryInstallTemporaryProfile(identity, new CharacterConfig
+            {
+                Enabled = overlayEnabled,
+                ActivationMode = FrenRiderActivationMode.DutyOnly,
+            }));
+            var notifications = new List<bool>();
+            manager.OnFrenRiderEnabledChanged += notifications.Add;
+
+            Assert.True(Plugin.TryApplyActivationCommand(manager, arguments));
+            Assert.True(Plugin.TryApplyActivationCommand(manager, arguments));
+            Assert.Equal(new[] { false, false }, notifications);
+            Assert.False(manager.GetActiveConfig().Enabled);
+            Assert.False(local.Enabled);
+            var directory = (string)typeof(ConfigManager).GetField("configDir", BindingFlags.Instance | BindingFlags.NonPublic)!
+                .GetValue(manager)!;
+            var saved = JsonSerializer.Deserialize<AccountConfig>(File.ReadAllText(
+                Path.Combine(directory, $"{manager.CurrentAccountId}_FrenRider.json")))!;
+            Assert.False(saved.Characters[manager.ActiveCharacterKey].Enabled);
+
+            var condition = typeof(Plugin).GetProperty("Condition", BindingFlags.Static | BindingFlags.NonPublic)!;
+            var previous = condition.GetValue(null);
+            var inDuty = false;
+            try
+            {
+                condition.SetValue(null, Proxy<ICondition>((method, args) => method.Name == "get_Item"
+                    && args![0] is Dalamud.Game.ClientState.Conditions.ConditionFlag flag
+                    && flag == Dalamud.Game.ClientState.Conditions.ConditionFlag.BoundByDuty && inDuty));
+                var plugin = (Plugin)RuntimeHelpers.GetUninitializedObject(typeof(Plugin));
+                typeof(Plugin).GetField("<ConfigManager>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic)!
+                    .SetValue(plugin, manager);
+
+                foreach (var releaseOverlay in new[] { false, true })
+                {
+                    if (releaseOverlay)
+                    {
+                        Assert.True(manager.TryReleaseTemporaryProfile(identity));
+                        Assert.Same(local, manager.GetActiveConfig());
+                    }
+                    foreach (var duty in new[] { false, true, false, true, false })
+                    {
+                        inDuty = duty;
+                        typeof(Plugin).GetMethod("RefreshEffectiveActivation", BindingFlags.Instance | BindingFlags.NonPublic)!
+                            .Invoke(plugin, null);
+                        Assert.False(manager.GetActiveConfig().Enabled);
+                        Assert.False(plugin.IsFrenRiderEffectivelyEnabled);
+                        Assert.False(plugin.AreCombatRotationsEnabled);
+                        Assert.False(plugin.IsWaitingForDuty);
+                        Assert.False(local.Enabled);
+                    }
+                }
+
+                Assert.Equal(new[] { false, false }, notifications);
+                Assert.True(Plugin.TryApplyActivationCommand(manager, "on"));
+                Assert.True(local.Enabled);
+                Assert.Equal(FrenRiderActivationMode.DutyOnly, local.ActivationMode);
+                Assert.Equal(new[] { false, false, true }, notifications);
+                foreach (var duty in new[] { false, true, false })
+                {
+                    inDuty = duty;
+                    Assert.True(plugin.IsFrenRiderEffectivelyEnabled);
+                    Assert.Equal(duty, plugin.AreCombatRotationsEnabled);
+                    Assert.Equal(!duty, plugin.IsWaitingForDuty);
+                }
+            }
+            finally { condition.SetValue(null, previous); }
+        });
+    }
+
+    [Fact]
+    public void StopWithoutActiveProfileNotifiesCleanupWithoutCreatingOrEnablingProfile()
+    {
+        WithManager((manager, local) =>
+        {
+            local.Enabled = true;
+            manager.ClearActiveCharacter();
+            var directory = (string)typeof(ConfigManager).GetField("configDir", BindingFlags.Instance | BindingFlags.NonPublic)!
+                .GetValue(manager)!;
+            var filesBefore = Directory.GetFiles(directory).OrderBy(path => path, StringComparer.Ordinal).ToArray();
+            var notifications = new List<bool>();
+            manager.OnFrenRiderEnabledChanged += notifications.Add;
+            var adsStops = 0;
+            manager.OnManualDisableRequested += () => adsStops++;
+
+            Assert.True(Plugin.TryApplyActivationCommand(manager, "stop"));
+            Assert.True(Plugin.TryApplyActivationCommand(manager, "off"));
+            Assert.True(Plugin.TryApplyActivationCommand(manager, "on"));
+
+            Assert.Equal(new[] { false, false }, notifications);
+            Assert.Equal(2, adsStops);
+            Assert.False(manager.GetActiveConfig().Enabled);
+            Assert.Equal("", manager.ActiveCharacterKey);
+            Assert.True(local.Enabled);
+            Assert.Equal(filesBefore, Directory.GetFiles(directory).OrderBy(path => path, StringComparer.Ordinal).ToArray());
+        });
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    [InlineData(null)]
+    public void AdsStopDispatchesOnlyTheSupportedCommandAndReportsAvailability(bool? accepted)
+    {
+        var commands = new List<string>();
+        var manager = accepted.HasValue ? Proxy<ICommandManager>((method, args) =>
+        {
+            if (method.Name != "ProcessCommand") return null;
+            commands.Add((string)args![0]!);
+            return accepted.Value;
+        }) : null;
+
+        Assert.Equal(accepted == true, Plugin.TryDispatchAdsStop(manager));
+        Assert.Equal(accepted.HasValue ? new[] { "/ads stop" } : Array.Empty<string>(), commands);
+    }
+
+    [Fact]
+    public void OnlyExplicitOffRequestsAdsStopIncludingWhenActivationCleanupFails()
+    {
+        WithManager((manager, local) =>
+        {
+            local.Enabled = true;
+            var stops = 0;
+            manager.OnManualDisableRequested += () => stops++;
+            var identity = new DadProfileIdentity("owner", "island", "opaque", "proposal");
+            Assert.True(manager.TryInstallTemporaryProfile(identity, new CharacterConfig { Enabled = true }));
+
+            manager.DisableForRecovery();
+            Assert.False(manager.GetActiveConfig().Enabled);
+            Assert.True(local.Enabled);
+            manager.SetFrenRiderEnabled(true);
+            Assert.True(manager.TryReleaseTemporaryProfile(identity));
+            Assert.True(manager.TryInstallTemporaryProfile(identity, new CharacterConfig { Enabled = false }));
+            Assert.True(manager.TryReleaseTemporaryProfile(identity));
+            Assert.True(local.Enabled);
+            Assert.Equal(0, stops);
+
+            manager.SetFrenRiderEnabled(false);
+            manager.SetFrenRiderEnabled(false);
+            Assert.Equal(2, stops);
+            manager.SetFrenRiderEnabled(true);
+            manager.OnFrenRiderEnabledChanged += _ => throw new InvalidOperationException("Synthetic cleanup failure");
+            Assert.Throws<InvalidOperationException>(() => manager.SetFrenRiderEnabled(false));
+            Assert.Equal(3, stops);
+            Assert.False(local.Enabled);
+        });
+    }
+
     internal static void WithManager(Action<ConfigManager, CharacterConfig> verify)
     {
         var directory = Directory.CreateTempSubdirectory("fr-activation-");

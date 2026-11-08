@@ -309,6 +309,7 @@ public sealed partial class Plugin : IDalamudPlugin
         ConfigManager.OnEffectiveProfileChanging += CancelChocoboFoodSession;
         ConfigManager.OnEffectiveProfileChanging += CancelChocoboPurchaseSession;
         ConfigManager.OnFrenRiderEnabledChanged += OnFrenRiderEnabledChanged;
+        ConfigManager.OnManualDisableRequested += OnManualFrenRiderDisabled;
         DadIPC = new DadIPC(PluginInterface, ConfigManager, FrenTracker, CombatService, Log);
 
         // Check for AutoDuty on plugin load if FrenRider is already enabled
@@ -338,7 +339,7 @@ public sealed partial class Plugin : IDalamudPlugin
 
         CommandManager.AddHandler(AliasCommandName, new CommandInfo(OnAliasCommand)
         {
-            HelpMessage = "Fren Rider: /fr [on|off|settings|s|mini|m|debug|testchocobo]; testchocobo opens reload-test controls; testchocobo on/off selects reload testing; testchocobo run/stop runs or stops discovery."
+            HelpMessage = "Fren Rider: /fr [on|off|stop|settings|s|mini|m|debug|testchocobo]; stop disables FrenRider until explicitly enabled; testchocobo opens reload-test controls; testchocobo on/off selects reload testing; testchocobo run/stop runs or stops discovery."
         });
 
         ApplyAppearance();
@@ -388,6 +389,7 @@ public sealed partial class Plugin : IDalamudPlugin
         ConfigManager.OnEffectiveProfileChanging -= CancelChocoboSkillSession;
         ConfigManager.OnEffectiveProfileChanging -= CancelChocoboFoodSession;
         ConfigManager.OnEffectiveProfileChanging -= CancelChocoboPurchaseSession;
+        ConfigManager.OnManualDisableRequested -= OnManualFrenRiderDisabled;
         PhoenixDownRecoveryService.Dispose();
         ToastGui.ErrorToast -= BossModActionTweaksService.OnErrorToast;
         BossModActionTweaksService.ResetRecovery();
@@ -1073,7 +1075,32 @@ public sealed partial class Plugin : IDalamudPlugin
         if (ImGui.IsItemHovered()) MaterialText.SetTooltip(UiText.T("Compact mode"));
     }
 
-    private void OnFrenRiderEnabledChanged(bool enabled) => RefreshEffectiveActivation();
+    private void OnFrenRiderEnabledChanged(bool enabled)
+    {
+        if (enabled)
+            RefreshEffectiveActivation();
+        else
+        {
+            wasEffectivelyEnabled = false;
+            ApplyEffectiveActivation(false);
+        }
+    }
+
+    private void OnManualFrenRiderDisabled()
+    {
+        try
+        {
+            if (!TryDispatchAdsStop(CommandManager))
+                Log?.Debug("[FrenRider] ADS stop command was not available.");
+        }
+        catch (Exception ex)
+        {
+            Log?.Warning($"[FrenRider] ADS stop command failed: {ex.Message}");
+        }
+    }
+
+    internal static bool TryDispatchAdsStop(ICommandManager? commandManager)
+        => commandManager?.ProcessCommand("/ads stop") == true;
 
     private void RefreshEffectiveActivation()
     {
@@ -1133,15 +1160,22 @@ public sealed partial class Plugin : IDalamudPlugin
         }
         else
         {
+            System.Threading.Interlocked.Increment(ref chocoboRequestGeneration);
+            chocoboExploration.Stop("FrenRider disabled");
+            CancelChocoboSkillSession();
+            CancelChocoboFoodSession();
+            CancelChocoboPurchaseSession();
             BossModActionTweaksService.ResetRecovery();
             CoppeliaPowerlevelLeaseService.HandleManualFrenRiderDisable();
             AdsHyperFocusLeaseService.HandleManualFrenRiderDisable();
-            FollowService.CancelFlyingStuckRecovery("disabled");
-            FollowService.PreemptFarChase("disabled");
             MountService.PreemptFarChase("disabled");
             MountService.ResetFateClingHold();
             RespawnService.ResetForDisable();
             PhoenixDownRecoveryService.Reset();
+            DutyInteractService.StopForDisable();
+            AutomationService.StopForDisable();
+            FrenTeleportService.StopForDisable();
+            ExitBehaviourService.StopForDisable();
             AutoDutyDetectionService.HandleFrenRiderDisabled();
             CombatService.ReleaseQuestingRsrAggroForDeparture("FrenRider disabled");
             CombatService.ReleaseDungeonRsrAggroForDeparture("FrenRider disabled");
@@ -1151,6 +1185,7 @@ public sealed partial class Plugin : IDalamudPlugin
                 GetCleanupCharacterKey(),
                 "FrenRider disabled");
             CombatService.ClearExternalAutomationRuntimeState("FrenRider disabled cleanup");
+            FollowService.StopForDisable();
         }
     }
 
@@ -1206,6 +1241,16 @@ public sealed partial class Plugin : IDalamudPlugin
             case "style off": case "styling off": configuration.UiStylingEnabled = false; return true;
             default: return false;
         }
+    }
+
+    internal static bool TryApplyActivationCommand(ConfigManager manager, string arguments)
+    {
+        var argument = arguments.Trim().ToLowerInvariant();
+        if (argument is not ("on" or "off" or "stop"))
+            return false;
+
+        manager.SetFrenRiderEnabled(argument == "on");
+        return true;
     }
 
     internal string ChocoboProbeStatus => chocoboExploration.IsSkillPreparation ? chocoboSkills.Status
@@ -1346,7 +1391,12 @@ public sealed partial class Plugin : IDalamudPlugin
         Configuration.ChocoboProbeAfterReload = selected;
         Configuration.Save();
         if (!selected) System.Threading.Interlocked.Increment(ref chocoboRequestGeneration);
-        _ = Framework.RunOnFrameworkThread(() => chocoboExploration.SelectionChanged(selected));
+        var generation = System.Threading.Volatile.Read(ref chocoboRequestGeneration);
+        _ = Framework.RunOnFrameworkThread(() =>
+        {
+            if (generation == System.Threading.Volatile.Read(ref chocoboRequestGeneration))
+                chocoboExploration.SelectionChanged(selected);
+        });
     }
 
     internal void RunChocoboProbe()
@@ -1369,6 +1419,7 @@ public sealed partial class Plugin : IDalamudPlugin
     private void OnAliasCommand(string command, string args)
     {
         if (TryApplyWindowCommand(Configuration, args)) { Configuration.Save(); return; }
+        if (TryApplyActivationCommand(ConfigManager, args)) return;
         var arg = args.Trim().ToLowerInvariant();
         if (arg == "testchocobo")
         {
@@ -1386,11 +1437,6 @@ public sealed partial class Plugin : IDalamudPlugin
         else if (arg == "testchocobo stop")
         {
             StopChocoboProbe();
-        }
-        else if (arg == "on" || arg == "off")
-        {
-            ConfigManager.SetFrenRiderEnabled(arg == "on");
-            Log.Information($"Fren Rider {(arg == "on" ? "enabled" : "disabled")} via /fr {arg}");
         }
         else if (arg == "settings" || arg == "s")
         {

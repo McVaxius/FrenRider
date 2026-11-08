@@ -120,6 +120,16 @@ public class FollowService
         StateDetail = "Area transition";
     }
 
+    public void StopForDisable()
+    {
+        SetFarChaseRequested(false, "disabled");
+        // Snapshot cleanup owns native BossMod follow restoration on disable.
+        ClearBossModFollowState();
+        StopAllFollowing(plugin.ConfigManager.GetActiveConfig(), "disabled");
+        State = FollowState.Idle;
+        StateDetail = "Disabled";
+    }
+
     public void PreemptFarChase(string reason)
     {
         ResetFarChaseDelay();
@@ -213,10 +223,7 @@ public class FollowService
 
         if (!config.Enabled)
         {
-            SetFarChaseRequested(false, "disabled");
-            StopAllFollowing(config, "disabled");
-            State = FollowState.Idle;
-            StateDetail = "Disabled";
+            StopForDisable();
             LogFateFollowDecisionIfChanged(config, tracker.Fren, "disabled");
             return;
         }
@@ -1424,7 +1431,9 @@ public class FollowService
         {
             0 => "/vnavmesh stop",
             1 => "/visland stop",
-            3 => "/follow",
+            // /follow starts following the current target; it is not a safe
+            // cancellation command when the native follow state has changed.
+            3 => null,
             _ => "/vnavmesh stop",
         };
 
@@ -1434,7 +1443,8 @@ public class FollowService
         lastNavigationWasFlying = false;
         lastNavigationWasFrenFollow = false;
         ResetFlyingIdleSampler();
-        SendCommand(cmd);
+        if (cmd != null)
+            SendCommand(cmd);
     }
 
     private void LogNavCommand(string reason, int clingType, string command, Vector3 target, Vector3 previousTarget, bool selfFlying)

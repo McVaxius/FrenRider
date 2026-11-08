@@ -1,3 +1,11 @@
+2026-11-08 - 4.1.0.14 - Explicit Stop and duty movement
+
+- Make `/fr stop` use manual Off and keep the active character disabled across duty and temporary-profile transitions until explicitly enabled again.
+- Cancel queued FrenRider actions and stop tracked vnav, duty-interaction and exit navigation immediately on disable, preserving generic duty-reset behavior and guarded native AI/rotation restoration.
+- Never issue `/follow` as a cancellation command, because it can start following the current target.
+- Explicit Stop and manual Off also dispatch ADS's supported `/ads stop` command. Automatic profile, duty and recovery transitions do not stop ADS.
+- In progress: verified AutoDuty stop observation, active vanilla-follow cancellation and already accepted Lifestream routes remain outside this corrective release.
+
 2026-11-08 - 4.1.0.13 - Automatic BossMod preset authority
 
 - Always apply FrenRider's selected BossMod preset without requiring the previous preset or restoration snapshot to match. Keep exact preset lookup and runtime readback verification.
