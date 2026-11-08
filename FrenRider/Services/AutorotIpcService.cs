@@ -651,6 +651,12 @@ public class AutorotIpcService : IDisposable
         var canObserve = relevant && TryReadOwnedBossModSettings(out before, allowCleanup: cleanupStarted);
         if (relevant && !canObserve)
             return false;
+        if (canObserve && !cleanupStarted && !command.EndsWith(" off", StringComparison.Ordinal)
+            && (!ownedSettings!.CanChangeRuntime(before) || !ownedSettings.CanChangeAi(before)))
+        {
+            LastStatus = "BossMod AI retained: its runtime preset or AI state is owned elsewhere.";
+            return false;
+        }
         var submitted = sendCommand(ResolveBossModAiCommand(command, pluginInterface.InstalledPlugins));
         if (submitted && canObserve && TryReadOwnedBossModSettings(out var after, allowCleanup: cleanupStarted))
         {
@@ -847,9 +853,18 @@ public class AutorotIpcService : IDisposable
         return DisableOwnedBossModRuntime();
     }
 
+    internal bool CanResumeOwnedBossModAi()
+    {
+        if (!TryReadOwnedBossModSettings(out var current))
+            return false;
+        if (ownedSettings!.CanChangeRuntime(current) && ownedSettings.CanChangeAi(current))
+            return true;
+        LastStatus = "BossMod AI retained: its runtime preset or AI state is owned elsewhere.";
+        return false;
+    }
+
     internal bool CanResumeOwnedVbm()
-        => ownedIdentity.Provider == "VBM" && TryReadOwnedBossModSettings(out var current)
-            && ownedSettings!.CanChangeRuntime(current) && ownedSettings.CanChangeAi(current);
+        => ownedIdentity.Provider == "VBM" && CanResumeOwnedBossModAi();
 
     internal bool ApplyUnownedBossModPreset(string rotationProvider, string name)
     {

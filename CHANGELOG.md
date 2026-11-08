@@ -1,3 +1,8 @@
+2026-11-08 - 4.1.0.12 - Preserve native AI ownership during settings refresh
+
+- Keep a newer manual preset, explicit Force off or externally changed AI state when refreshing GodMod/BMR AI settings. Refuse enabling commands before changing targeting, distance or action settings.
+- Preserve explicit FrenRider AI-off and normal owned resume/cleanup; report a refused native command without recording the settings as applied.
+
 2026-11-07 - 4.1.0.11 - GodMod/BMR targeting and provider ownership
 
 - Route owned automatic-targeting and preferred-distance commands to the active GodMod or BMR command. RSR operating modes no longer prevent automatic targeting for other selected providers.

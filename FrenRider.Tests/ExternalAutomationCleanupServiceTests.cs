@@ -15,6 +15,73 @@ namespace FrenRider.Tests;
 public sealed class ExternalAutomationCleanupServiceTests
 {
     [Theory]
+    [InlineData("GodMod", "preset")]
+    [InlineData("GodMod", "force-disabled")]
+    [InlineData("GodMod", "ai-state")]
+    [InlineData("GodMod", "owned")]
+    [InlineData("BossModReborn", "preset")]
+    [InlineData("BossModReborn", "force-disabled")]
+    [InlineData("BossModReborn", "ai-state")]
+    [InlineData("BossModReborn", "owned")]
+    public void AiOnlyRefreshPreservesNewerNativeOwnershipAndStillHonorsExplicitOff(string internalName, string state)
+    {
+        var native = new NativeBossModProvider("BMR", "Original", internalName: internalName) { ManualTarget = true };
+        using var service = native.CreateService();
+        using var runtime = new QuestingCombatRuntime(service, native.Interface, native.Log, 0,
+            commandSender: native.SendCommand);
+        runtime.StopActivity();
+        runtime.Profile.RotationType = 2; // RSR None remains unrelated to the selected BMR/GodMod host.
+        Assert.Equal(true, runtime.Call("ActivateRotation", runtime.Profile, true));
+        Assert.False(native.AiEnabled);
+        switch (state)
+        {
+            case "preset": native.Active = ["External"]; break;
+            case "force-disabled": native.ForceDisabled = true; break;
+            case "ai-state": native.AiEnabled = true; break;
+        }
+        native.Writes.Clear();
+        runtime.Profile.BossModAI = 0;
+        runtime.Call("TrackCombatSettingsChanges", runtime.Profile, 1L);
+        runtime.Call("TryApplyPendingCombatSettingsRefresh", runtime.Profile, long.MaxValue, false, false);
+        var applied = (CombatSettingsSnapshot)runtime.CombatField("lastAppliedCombatSettings")!;
+        var prefix = internalName == "GodMod" ? "/gmai" : "/bmrai";
+
+        if (state == "owned")
+        {
+            Assert.Equal(0, applied.BossModAI);
+            Assert.True(native.AiEnabled);
+            Assert.False(native.ManualTarget);
+            Assert.Contains($"{prefix} on", native.Writes);
+            runtime.Profile.BossModAI = 1;
+            runtime.Call("TrackCombatSettingsChanges", runtime.Profile, 2L);
+            runtime.Call("TryApplyPendingCombatSettingsRefresh", runtime.Profile, long.MaxValue, false, false);
+            Assert.False(native.AiEnabled);
+            Assert.True(native.ManualTarget);
+            Assert.Contains($"{prefix} off", native.Writes);
+        }
+        else
+        {
+            Assert.Equal(1, applied.BossModAI);
+            Assert.Equal(state == "preset" ? new[] { "External" } : Array.Empty<string>(), native.Active);
+            Assert.Equal(state == "force-disabled", native.ForceDisabled);
+            Assert.Equal(state == "ai-state", native.AiEnabled);
+            Assert.True(native.ManualTarget);
+            Assert.Equal(7.5, native.Distance);
+            Assert.Empty(native.Writes); // Refuse before forbidactions, targeting, distance or AI writes.
+            Assert.False(service.SendBossModAiCommand("/bmrai on", native.SendCommand));
+            Assert.False(service.SendBossModAiCommand("/bmrai follow Slot1", native.SendCommand));
+            Assert.Empty(native.Writes);
+            Assert.Contains("owned elsewhere", service.LastStatus);
+        }
+
+        service.ReleaseOwnedBossModSettings(turnEverythingOff: false);
+        if (state == "preset") Assert.Equal(new[] { "External" }, native.Active);
+        if (state == "force-disabled") Assert.True(native.ForceDisabled);
+        Assert.Equal(state == "ai-state", native.AiEnabled);
+        Assert.Equal(2, runtime.Profile.RotationType);
+    }
+
+    [Theory]
     [InlineData("GodMod", 0)]
     [InlineData("GodMod", 1)]
     [InlineData("GodMod", 2)]

@@ -1619,6 +1619,9 @@ public partial class CombatService
             return false;
 
         plugin.CaptureExternalAutomationSnapshot("BossMod AI state change");
+        if (bossModAi != 1 && (pluginName is "BMR" or "VBM")
+            && !plugin.AutorotIpcService.CanResumeOwnedBossModAi())
+            return false;
         if (bossModAi != 1 && GetBossModPresetProvider(pluginName) == "BMR")
         {
             plugin.AutorotIpcService.ApplyOwnedPreferredDistance(command => TrySendCommand(command), 1.5);
@@ -1627,7 +1630,8 @@ public partial class CombatService
                 return false;
         }
         foreach (var command in commands)
-            SendCommand(command);
+            if (!SendCommand(command))
+                return false;
 
         Plugin.Log.Information($"Combat: BossMod AI {DescribeBossModAiSetting(bossModAi)} for {pluginName} after {reason}");
         return targetingRestored;
