@@ -1,5 +1,7 @@
 2026-11-08 - 4.1.0.12 - Preserve native AI ownership during settings refresh
 
+- Correct the plugin feed to advertise the already-published 4.1.0.12 package for normal installs and updates; runtime binaries are unchanged.
+
 - Keep a newer manual preset, explicit Force off or externally changed AI state when refreshing GodMod/BMR AI settings. Refuse enabling commands before changing targeting, distance or action settings.
 - Preserve explicit FrenRider AI-off and normal owned resume/cleanup; report a refused native command without recording the settings as applied.
 
