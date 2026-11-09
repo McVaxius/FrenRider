@@ -68,11 +68,14 @@ internal static partial class FrenRiderPresentation
                 var time = ActiveConfiguration?.UiGlassAnimation != false
                     ? (float)ImGui.GetTime() * .65f * (ActiveConfiguration?.UiGlassAnimationSpeed ?? 1f) : 0;
                 // Interpolated corner colours form soft ribbons without circle edges or translucent layer steps.
-                // Cap this backdrop at 22,528 vertices, leaving room for the window's controls on a 16-bit draw list.
+                // Bound the shared grid at 89 x 65 vertices, leaving room for the window's controls.
                 var columns = Math.Clamp((int)MathF.Ceiling(size.X / (12 * SkinScale)), 48, 88);
                 var rows = Math.Clamp((int)MathF.Ceiling(size.Y / (12 * SkinScale)), 32, 64);
-                Span<uint> previousColors = stackalloc uint[89];
-                Span<uint> currentColors = stackalloc uint[89];
+                var stride = columns + 1;
+                var vertices = stride * (rows + 1);
+                Span<float> gridX = stackalloc float[vertices];
+                Span<float> gridY = stackalloc float[rows + 1];
+                Span<uint> gridColors = stackalloc uint[vertices];
                 Span<float> crossingCenters = stackalloc float[89];
                 for (var column = 0; column <= columns; column++)
                 {
@@ -82,6 +85,8 @@ internal static partial class FrenRiderPresentation
                 for (var row = 0; row <= rows; row++)
                 {
                     var v = row / (float)rows;
+                    gridY[row] = min.Y + size.Y * v;
+                    var rowOffset = row * stride;
                     var primaryCenter = .22f + .38f * v + .11f * MathF.Sin(v * 5 - time * .9f);
                     var secondaryCenter = .84f - .38f * v + .13f * MathF.Sin(v * 5.2f + time * .72f + .8f);
                     for (var column = 0; column <= columns; column++)
@@ -104,24 +109,11 @@ internal static partial class FrenRiderPresentation
                         crest *= crest;
                         color = Vector4.Lerp(color, c.OnSurface, crest * .10f);
                         color.W = waveOpacity;
-                        currentColors[column] = Ink(color);
+                        gridX[rowOffset + column] = min.X + size.X * u;
+                        gridColors[rowOffset + column] = Ink(color);
                     }
-                    if (row > 0)
-                    {
-                        var top = min.Y + size.Y * ((row - 1) / (float)rows);
-                        var bottom = min.Y + size.Y * v;
-                        for (var column = 0; column < columns; column++)
-                        {
-                            var left = min.X + size.X * (column / (float)columns);
-                            var right = min.X + size.X * ((column + 1) / (float)columns);
-                            dl.AddRectFilledMultiColor(new Vector2(left, top), new Vector2(right, bottom),
-                                previousColors[column], previousColors[column + 1], currentColors[column + 1], currentColors[column]);
-                        }
-                    }
-                    var swap = previousColors;
-                    previousColors = currentColors;
-                    currentColors = swap;
                 }
+                MaterialSkin.DrawGlassGrid(dl, columns, rows, gridX, gridY, gridColors);
             }
             else if (Style == FrenRiderUiStyle.Spatial)
             {

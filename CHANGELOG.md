@@ -1,3 +1,9 @@
+2026-11-08 - 4.1.0.15 - Shared glass rendering pilot
+
+- Update the shared UI library's text/control handling and glass mesh rendering.
+- Use the shared mesh for FrenRider Waves and Lights while retaining its palettes, animation, pointer effects and foreground controls.
+- In progress: validated rollout to the other existing UI-library consumers.
+
 2026-11-08 - 4.1.0.14 - Explicit Stop and duty movement
 
 - Make `/fr stop` use manual Off and keep the active character disabled across duty and temporary-profile transitions until explicitly enabled again.

@@ -23,14 +23,19 @@ internal static partial class FrenRiderPresentation
         var effect = config?.UiGlassLights ?? FrenRiderGlassLights.AmbientGlows;
         var columns = Math.Clamp((int)MathF.Ceiling(size.X / (16 * SkinScale)), 32, 64);
         var rows = Math.Clamp((int)MathF.Ceiling(size.Y / (16 * SkinScale)), 24, 48);
-        Span<uint> previous = stackalloc uint[65];
-        Span<uint> current = stackalloc uint[65];
+        var stride = columns + 1;
+        var vertices = stride * (rows + 1);
+        Span<float> gridX = stackalloc float[vertices];
+        Span<float> gridY = stackalloc float[rows + 1];
+        Span<uint> gridColors = stackalloc uint[vertices];
         var center1 = new Vector2(.28f + .17f * MathF.Sin(time * .61f), .33f + .20f * MathF.Cos(time * .47f));
         var center2 = new Vector2(.73f + .14f * MathF.Cos(time * .53f), .62f + .19f * MathF.Sin(time * .43f));
         var center3 = new Vector2(.50f + .22f * MathF.Sin(time * .37f + 1), .72f + .14f * MathF.Cos(time * .57f));
         for (var row = 0; row <= rows; row++)
         {
             var v = row / (float)rows;
+            gridY[row] = min.Y + size.Y * v;
+            var rowOffset = row * stride;
             for (var column = 0; column <= columns; column++)
             {
                 var point = new Vector2(column / (float)columns, v);
@@ -59,24 +64,11 @@ internal static partial class FrenRiderPresentation
                 color = Vector4.Lerp(color, second, b * .60f);
                 color = Vector4.Lerp(color, third, c * .56f);
                 color.W = glass ? strength * .55f : 1;
-                current[column] = Ink(color);
+                gridX[rowOffset + column] = min.X + size.X * point.X;
+                gridColors[rowOffset + column] = Ink(color);
             }
-            if (row > 0)
-            {
-                var top = min.Y + size.Y * ((row - 1) / (float)rows);
-                var bottom = min.Y + size.Y * v;
-                for (var column = 0; column < columns; column++)
-                {
-                    var left = min.X + size.X * (column / (float)columns);
-                    var right = min.X + size.X * ((column + 1) / (float)columns);
-                    dl.AddRectFilledMultiColor(new(left, top), new(right, bottom),
-                        previous[column], previous[column + 1], current[column + 1], current[column]);
-                }
-            }
-            var swap = previous;
-            previous = current;
-            current = swap;
         }
+        MaterialSkin.DrawGlassGrid(dl, columns, rows, gridX, gridY, gridColors);
     }
 
     private static float Band(float distance, float falloff) => MathF.Exp(-distance * distance * falloff);
