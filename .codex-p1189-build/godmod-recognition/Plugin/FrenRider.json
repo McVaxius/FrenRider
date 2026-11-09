@@ -1,0 +1,23 @@
+{
+  "Author": "DhogGPT",
+  "Name": "Fren Rider",
+  "InternalName": "FrenRider",
+  "AssemblyVersion": "4.1.0.10",
+  "Description": "Native Dalamud plugin for managing 2+ characters in various situations. Follow party members, auto-mount, combat integration, and more. Use /frenrider or /fr to open.",
+  "ApplicableVersion": "any",
+  "Tags": [
+    "multibox",
+    "follow",
+    "automation",
+    "party",
+    "mount"
+  ],
+  "DalamudApiLevel": 15,
+  "LoadRequiredState": 0,
+  "LoadSync": false,
+  "CanUnloadAsync": false,
+  "LoadPriority": 0,
+  "IconUrl": "https://raw.githubusercontent.com/McVaxius/FrenRider/refs/heads/master/FrenRider/images/icon.png",
+  "Punchline": "Multiboxing follow and automation companion for FFXIV.",
+  "AcceptsFeedback": true
+}

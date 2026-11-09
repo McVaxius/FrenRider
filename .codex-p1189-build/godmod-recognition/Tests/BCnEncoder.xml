@@ -1,0 +1,3073 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>BCnEncoder</name>
+    </assembly>
+    <members>
+        <member name="T:BCnEncoder.Decoder.BcDecoder">
+            <summary>
+            Decodes compressed files into Rgba Format.
+            </summary>
+        </member>
+        <member name="P:BCnEncoder.Decoder.BcDecoder.InputOptions">
+            <summary>
+            The input options of the decoder.
+            </summary>
+        </member>
+        <member name="P:BCnEncoder.Decoder.BcDecoder.Options">
+            <summary>
+            The options for the decoder.
+            </summary>
+        </member>
+        <member name="P:BCnEncoder.Decoder.BcDecoder.OutputOptions">
+            <summary>
+            The output options of the decoder.
+            </summary>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeRawAsync(System.IO.Stream,BCnEncoder.Shared.CompressionFormat,System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Decode a single encoded image from raw bytes.
+            This method will read the expected amount of bytes from the given input stream and decode it.
+            Make sure there is no file header information left in the stream before the encoded data.
+            </summary>
+            <param name="inputStream">The stream containing the encoded data.</param>
+            <param name="format">The Format the encoded data is in.</param>
+            <param name="pixelWidth">The pixelWidth of the image.</param>
+            <param name="pixelHeight">The pixelHeight of the image.</param>
+            <param name="token">The cancellation token for this asynchronous operation.</param>
+            <returns>The awaitable operation to retrieve the decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeRawAsync(System.ReadOnlyMemory{System.Byte},BCnEncoder.Shared.CompressionFormat,System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Decode a single encoded image from raw bytes.
+            </summary>
+            <param name="input">The <see cref="T:System.Memory`1"/> containing the encoded data.</param>
+            <param name="format">The Format the encoded data is in.</param>
+            <param name="pixelWidth">The pixelWidth of the image.</param>
+            <param name="pixelHeight">The pixelHeight of the image.</param>
+            <param name="token">The cancellation token for this asynchronous operation.</param>
+            <returns>The awaitable operation to retrieve the decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeAsync(BCnEncoder.Shared.ImageFiles.KtxFile,System.Threading.CancellationToken)">
+            <summary>
+            Decode the main image from a Ktx file.
+            </summary>
+            <param name="file">The loaded Ktx file.</param>
+            <param name="token">The cancellation token for this asynchronous operation.</param>
+            <returns>The awaitable operation to retrieve the decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeAllMipMapsAsync(BCnEncoder.Shared.ImageFiles.KtxFile,System.Threading.CancellationToken)">
+            <summary>
+            Decode all available mipmaps from a Ktx file.
+            </summary>
+            <param name="file">The loaded Ktx file.</param>
+            <param name="token">The cancellation token for this asynchronous operation.</param>
+            <returns>The awaitable operation to retrieve the decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeAsync(BCnEncoder.Shared.ImageFiles.DdsFile,System.Threading.CancellationToken)">
+            <summary>
+            Decode the main image from a Dds file.
+            </summary>
+            <param name="file">The loaded Dds file.</param>
+            <param name="token">The cancellation token for this asynchronous operation.</param>
+            <returns>The awaitable operation to retrieve the decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeAllMipMapsAsync(BCnEncoder.Shared.ImageFiles.DdsFile,System.Threading.CancellationToken)">
+            <summary>
+            Decode all available mipmaps from a Dds file.
+            </summary>
+            <param name="file">The loaded Dds file.</param>
+            <param name="token">The cancellation token for this asynchronous operation.</param>
+            <returns>The awaitable operation to retrieve the decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeRaw2DAsync(System.IO.Stream,System.Int32,System.Int32,BCnEncoder.Shared.CompressionFormat,System.Threading.CancellationToken)">
+            <summary>
+            Decode a single encoded image from raw bytes.
+            This method will read the expected amount of bytes from the given input stream and decode it.
+            Make sure there is no file header information left in the stream before the encoded data.
+            </summary>
+            <param name="inputStream">The stream containing the raw encoded data.</param>
+            <param name="format">The Format the encoded data is in.</param>
+            <param name="pixelWidth">The pixelWidth of the image.</param>
+            <param name="pixelHeight">The pixelHeight of the image.</param>
+            <param name="token">The cancellation token for this asynchronous operation.</param>
+            <returns>The awaitable operation to retrieve the decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeRaw2DAsync(System.ReadOnlyMemory{System.Byte},System.Int32,System.Int32,BCnEncoder.Shared.CompressionFormat,System.Threading.CancellationToken)">
+            <summary>
+            Decode a single encoded image from raw bytes.
+            </summary>
+            <param name="input">The <see cref="T:System.Memory`1"/> containing the encoded data.</param>
+            <param name="format">The Format the encoded data is in.</param>
+            <param name="pixelWidth">The pixelWidth of the image.</param>
+            <param name="pixelHeight">The pixelHeight of the image.</param>
+            <param name="token">The cancellation token for this asynchronous operation.</param>
+            <returns>The awaitable operation to retrieve the decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.Decode2DAsync(System.IO.Stream,System.Threading.CancellationToken)">
+            <summary>
+            Read a Ktx or Dds file from a stream and decode the main image from it.
+            The type of file will be detected automatically.
+            </summary>
+            <param name="inputStream">The stream containing a Ktx or Dds file.</param>
+            <param name="token">The cancellation token for this asynchronous operation.</param>
+            <returns>The awaitable operation to retrieve the decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeAllMipMaps2DAsync(System.IO.Stream,System.Threading.CancellationToken)">
+            <summary>
+            Read a Ktx or Dds file from a stream and decode all available mipmaps from it.
+            The type of file will be detected automatically.
+            </summary>
+            <param name="inputStream">The stream containing a Ktx or Dds file.</param>
+            <param name="token">The cancellation token for this asynchronous operation.</param>
+            <returns>The awaitable operation to retrieve the decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.Decode2DAsync(BCnEncoder.Shared.ImageFiles.KtxFile,System.Threading.CancellationToken)">
+            <summary>
+            Decode the main image from a Ktx file.
+            </summary>
+            <param name="file">The loaded Ktx file.</param>
+            <param name="token">The cancellation token for this asynchronous operation.</param>
+            <returns>The awaitable operation to retrieve the decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeAllMipMaps2DAsync(BCnEncoder.Shared.ImageFiles.KtxFile,System.Threading.CancellationToken)">
+            <summary>
+            Decode all available mipmaps from a Ktx file.
+            </summary>
+            <param name="file">The loaded Ktx file.</param>
+            <param name="token">The cancellation token for this asynchronous operation.</param>
+            <returns>The awaitable operation to retrieve the decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.Decode2DAsync(BCnEncoder.Shared.ImageFiles.DdsFile,System.Threading.CancellationToken)">
+            <summary>
+            Decode the main image from a Dds file.
+            </summary>
+            <param name="file">The loaded Dds file.</param>
+            <param name="token">The cancellation token for this asynchronous operation.</param>
+            <returns>The awaitable operation to retrieve the decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeAllMipMaps2DAsync(BCnEncoder.Shared.ImageFiles.DdsFile,System.Threading.CancellationToken)">
+            <summary>
+            Decode all available mipmaps from a Dds file.
+            </summary>
+            <param name="file">The loaded Dds file.</param>
+            <param name="token">The cancellation token for this asynchronous operation.</param>
+            <returns>The awaitable operation to retrieve the decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeRaw(System.IO.Stream,System.Int32,System.Int32,BCnEncoder.Shared.CompressionFormat)">
+            <summary>
+            Decode a single encoded image from raw bytes.
+            This method will read the expected amount of bytes from the given input stream and decode it.
+            Make sure there is no file header information left in the stream before the encoded data.
+            </summary>
+            <param name="inputStream">The stream containing the raw encoded data.</param>
+            <param name="pixelWidth">The pixelWidth of the image.</param>
+            <param name="pixelHeight">The pixelHeight of the image.</param>
+            <param name="format">The Format the encoded data is in.</param>
+            <returns>The decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeRaw(System.Byte[],System.Int32,System.Int32,BCnEncoder.Shared.CompressionFormat)">
+            <summary>
+            Decode a single encoded image from raw bytes.
+            </summary>
+            <param name="input">The byte array containing the raw encoded data.</param>
+            <param name="pixelWidth">The pixelWidth of the image.</param>
+            <param name="pixelHeight">The pixelHeight of the image.</param>
+            <param name="format">The Format the encoded data is in.</param>
+            <returns>The decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.Decode(BCnEncoder.Shared.ImageFiles.KtxFile)">
+            <summary>
+            Decode the main image from a Ktx file.
+            </summary>
+            <param name="file">The loaded Ktx file.</param>
+            <returns>The decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeAllMipMaps(BCnEncoder.Shared.ImageFiles.KtxFile)">
+            <summary>
+            Decode all available mipmaps from a Ktx file.
+            </summary>
+            <param name="file">The loaded Ktx file.</param>
+            <returns>An array of decoded images.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.Decode(BCnEncoder.Shared.ImageFiles.DdsFile)">
+            <summary>
+            Decode the main image from a Dds file.
+            </summary>
+            <param name="file">The loaded Dds file.</param>
+            <returns>The decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeAllMipMaps(BCnEncoder.Shared.ImageFiles.DdsFile)">
+            <summary>
+            Decode all available mipmaps from a Dds file.
+            </summary>
+            <param name="file">The loaded Dds file.</param>
+            <returns>An array of decoded images.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeRaw2D(System.IO.Stream,System.Int32,System.Int32,BCnEncoder.Shared.CompressionFormat)">
+            <summary>
+            Decode a single encoded image from raw bytes.
+            This method will read the expected amount of bytes from the given input stream and decode it.
+            Make sure there is no file header information left in the stream before the encoded data.
+            </summary>
+            <param name="inputStream">The stream containing the encoded data.</param>
+            <param name="pixelWidth">The pixelWidth of the image.</param>
+            <param name="pixelHeight">The pixelHeight of the image.</param>
+            <param name="format">The Format the encoded data is in.</param>
+            <returns>The decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeRaw2D(System.Byte[],System.Int32,System.Int32,BCnEncoder.Shared.CompressionFormat)">
+            <summary>
+            Decode a single encoded image from raw bytes.
+            </summary>
+            <param name="input">The byte array containing the raw encoded data.</param>
+            <param name="pixelWidth">The pixelWidth of the image.</param>
+            <param name="pixelHeight">The pixelHeight of the image.</param>
+            <param name="format">The Format the encoded data is in.</param>
+            <returns>The decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.Decode2D(System.IO.Stream)">
+            <summary>
+            Read a Ktx or Dds file from a stream and decode the main image from it.
+            The type of file will be detected automatically.
+            </summary>
+            <param name="inputStream">The stream containing a Ktx or Dds file.</param>
+            <returns>The decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeAllMipMaps2D(System.IO.Stream)">
+            <summary>
+            Read a Ktx or Dds file from a stream and decode all available mipmaps from it.
+            The type of file will be detected automatically.
+            </summary>
+            <param name="inputStream">The stream containing a Ktx or Dds file.</param>
+            <returns>An array of decoded images.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.Decode2D(BCnEncoder.Shared.ImageFiles.KtxFile)">
+            <summary>
+            Decode the main image from a Ktx file.
+            </summary>
+            <param name="file">The loaded Ktx file.</param>
+            <returns>The decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeAllMipMaps2D(BCnEncoder.Shared.ImageFiles.KtxFile)">
+            <summary>
+            Decode all available mipmaps from a Ktx file.
+            </summary>
+            <param name="file">The loaded Ktx file.</param>
+            <returns>An array of decoded images.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.Decode2D(BCnEncoder.Shared.ImageFiles.DdsFile)">
+            <summary>
+            Decode the main image from a Dds file.
+            </summary>
+            <param name="file">The loaded Dds file.</param>
+            <returns>The decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeAllMipMaps2D(BCnEncoder.Shared.ImageFiles.DdsFile)">
+            <summary>
+            Decode all available mipmaps from a Dds file.
+            </summary>
+            <param name="file">The loaded Dds file.</param>
+            <returns>An array of decoded images.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeBlock(System.ReadOnlySpan{System.Byte},BCnEncoder.Shared.CompressionFormat)">
+            <summary>
+            Decode a single block from raw bytes and return it as a <see cref="T:CommunityToolkit.HighPerformance.Memory2D`1"/>.
+            Input Span size needs to equal the block size.
+            To get the block size (in bytes) of the compression format used, see <see cref="M:BCnEncoder.Decoder.BcDecoder.GetBlockSize(BCnEncoder.Shared.CompressionFormat)"/>.
+            </summary>
+            <param name="blockData">The encoded block in bytes.</param>
+            <param name="format">The compression format used.</param>
+            <returns>The decoded 4x4 block.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeBlock(System.ReadOnlySpan{System.Byte},BCnEncoder.Shared.CompressionFormat,CommunityToolkit.HighPerformance.Span2D{BCnEncoder.Shared.ColorRgba32})">
+            <summary>
+            Decode a single block from raw bytes and write it to the given output span.
+            Output span size must be exactly 4x4 and input Span size needs to equal the block size.
+            To get the block size (in bytes) of the compression format used, see <see cref="M:BCnEncoder.Decoder.BcDecoder.GetBlockSize(BCnEncoder.Shared.CompressionFormat)"/>.
+            </summary>
+            <param name="blockData">The encoded block in bytes.</param>
+            <param name="format">The compression format used.</param>
+            <param name="outputSpan">The destination span of the decoded data.</param>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeBlock(System.IO.Stream,BCnEncoder.Shared.CompressionFormat,CommunityToolkit.HighPerformance.Span2D{BCnEncoder.Shared.ColorRgba32})">
+            <summary>
+            Decode a single block from a stream and write it to the given output span.
+            Output span size must be exactly 4x4.
+            </summary>
+            <param name="inputStream">The stream to read encoded blocks from.</param>
+            <param name="format">The compression format used.</param>
+            <param name="outputSpan">The destination span of the decoded data.</param>
+            <returns>The number of bytes read from the stream. Zero (0) if reached the end of stream.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.IsSupportedFormat(BCnEncoder.Shared.ImageFiles.KtxFile)">
+            <summary>
+            Check whether a file is encoded in a supported format.
+            </summary>
+            <param name="file">The loaded ktx file to check</param>
+            <returns>If the format of the file is one of the supported formats.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.IsSupportedFormat(BCnEncoder.Shared.ImageFiles.DdsFile)">
+            <summary>
+            Check whether a file is encoded in a supported format.
+            </summary>
+            <param name="file">The loaded dds file to check</param>
+            <returns>If the format of the file is one of the supported formats.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.GetFormat(BCnEncoder.Shared.ImageFiles.KtxFile)">
+            <summary>
+            Gets the format of the file.
+            </summary>
+            <param name="file">The loaded ktx file to check</param>
+            <returns>The <see cref="T:BCnEncoder.Shared.CompressionFormat"/> of the file.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.GetFormat(BCnEncoder.Shared.ImageFiles.DdsFile)">
+            <summary>
+            Gets the format of the file.
+            </summary>
+            <param name="file">The loaded dds file to check</param>
+            <returns>The <see cref="T:BCnEncoder.Shared.CompressionFormat"/> of the file.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeRawHdrAsync(System.IO.Stream,BCnEncoder.Shared.CompressionFormat,System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Decode a single encoded image from raw bytes.
+            This method will read the expected amount of bytes from the given input stream and decode it.
+            Make sure there is no file header information left in the stream before the encoded data.
+            This method is only for compressed Hdr formats. Please use the non-Hdr methods for other formats.
+            </summary>
+            <param name="inputStream">The stream containing the encoded data.</param>
+            <param name="format">The Format the encoded data is in.</param>
+            <param name="pixelWidth">The pixelWidth of the image.</param>
+            <param name="pixelHeight">The pixelHeight of the image.</param>
+            <param name="token">The cancellation token for this asynchronous operation.</param>
+            <returns>The awaitable operation to retrieve the decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeRawHdrAsync(System.ReadOnlyMemory{System.Byte},BCnEncoder.Shared.CompressionFormat,System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Decode a single encoded image from raw bytes.
+            This method is only for compressed Hdr formats. Please use the non-Hdr methods for other formats.
+            </summary>
+            <param name="input">The <see cref="T:System.Memory`1"/> containing the encoded data.</param>
+            <param name="format">The Format the encoded data is in.</param>
+            <param name="pixelWidth">The pixelWidth of the image.</param>
+            <param name="pixelHeight">The pixelHeight of the image.</param>
+            <param name="token">The cancellation token for this asynchronous operation.</param>
+            <returns>The awaitable operation to retrieve the decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeHdrAsync(BCnEncoder.Shared.ImageFiles.KtxFile,System.Threading.CancellationToken)">
+            <summary>
+            Decode the main image from a Ktx file.
+            This method is only for compressed Hdr formats. Please use the non-Hdr methods for other formats.
+            </summary>
+            <param name="file">The loaded Ktx file.</param>
+            <param name="token">The cancellation token for this asynchronous operation.</param>
+            <returns>The awaitable operation to retrieve the decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeAllMipMapsHdrAsync(BCnEncoder.Shared.ImageFiles.KtxFile,System.Threading.CancellationToken)">
+            <summary>
+            Decode all available mipmaps from a Ktx file.
+            This method is only for compressed Hdr formats. Please use the non-Hdr methods for other formats.
+            </summary>
+            <param name="file">The loaded Ktx file.</param>
+            <param name="token">The cancellation token for this asynchronous operation.</param>
+            <returns>The awaitable operation to retrieve the decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeHdrAsync(BCnEncoder.Shared.ImageFiles.DdsFile,System.Threading.CancellationToken)">
+            <summary>
+            Decode the main image from a Dds file.
+            This method is only for compressed Hdr formats. Please use the non-Hdr methods for other formats.
+            </summary>
+            <param name="file">The loaded Dds file.</param>
+            <param name="token">The cancellation token for this asynchronous operation.</param>
+            <returns>The awaitable operation to retrieve the decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeAllMipMapsHdrAsync(BCnEncoder.Shared.ImageFiles.DdsFile,System.Threading.CancellationToken)">
+            <summary>
+            Decode all available mipmaps from a Dds file.
+            This method is only for compressed Hdr formats. Please use the non-Hdr methods for other formats.
+            </summary>
+            <param name="file">The loaded Dds file.</param>
+            <param name="token">The cancellation token for this asynchronous operation.</param>
+            <returns>The awaitable operation to retrieve the decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeRawHdr2DAsync(System.IO.Stream,System.Int32,System.Int32,BCnEncoder.Shared.CompressionFormat,System.Threading.CancellationToken)">
+            <summary>
+            Decode a single encoded image from raw bytes.
+            This method will read the expected amount of bytes from the given input stream and decode it.
+            Make sure there is no file header information left in the stream before the encoded data.
+            This method is only for compressed Hdr formats. Please use the non-Hdr methods for other formats.
+            </summary>
+            <param name="inputStream">The stream containing the raw encoded data.</param>
+            <param name="format">The Format the encoded data is in.</param>
+            <param name="pixelWidth">The pixelWidth of the image.</param>
+            <param name="pixelHeight">The pixelHeight of the image.</param>
+            <param name="token">The cancellation token for this asynchronous operation.</param>
+            <returns>The awaitable operation to retrieve the decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeRawHdr2DAsync(System.ReadOnlyMemory{System.Byte},System.Int32,System.Int32,BCnEncoder.Shared.CompressionFormat,System.Threading.CancellationToken)">
+            <summary>
+            Decode a single encoded image from raw bytes.
+            This method is only for compressed Hdr formats. Please use the non-Hdr methods for other formats.
+            </summary>
+            <param name="input">The <see cref="T:System.Memory`1"/> containing the encoded data.</param>
+            <param name="format">The Format the encoded data is in.</param>
+            <param name="pixelWidth">The pixelWidth of the image.</param>
+            <param name="pixelHeight">The pixelHeight of the image.</param>
+            <param name="token">The cancellation token for this asynchronous operation.</param>
+            <returns>The awaitable operation to retrieve the decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeHdr2DAsync(System.IO.Stream,System.Threading.CancellationToken)">
+            <summary>
+            Read a Ktx or Dds file from a stream and decode the main image from it.
+            The type of file will be detected automatically.
+            This method is only for compressed Hdr formats. Please use the non-Hdr methods for other formats.
+            </summary>
+            <param name="inputStream">The stream containing a Ktx or Dds file.</param>
+            <param name="token">The cancellation token for this asynchronous operation.</param>
+            <returns>The awaitable operation to retrieve the decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeAllMipMapsHdr2DAsync(System.IO.Stream,System.Threading.CancellationToken)">
+            <summary>
+            Read a Ktx or Dds file from a stream and decode all available mipmaps from it.
+            The type of file will be detected automatically.
+            This method is only for compressed Hdr formats. Please use the non-Hdr methods for other formats.
+            </summary>
+            <param name="inputStream">The stream containing a Ktx or Dds file.</param>
+            <param name="token">The cancellation token for this asynchronous operation.</param>
+            <returns>The awaitable operation to retrieve the decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeHdr2DAsync(BCnEncoder.Shared.ImageFiles.KtxFile,System.Threading.CancellationToken)">
+            <summary>
+            Decode the main image from a Ktx file.
+            This method is only for compressed Hdr formats. Please use the non-Hdr methods for other formats.
+            </summary>
+            <param name="file">The loaded Ktx file.</param>
+            <param name="token">The cancellation token for this asynchronous operation.</param>
+            <returns>The awaitable operation to retrieve the decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeAllMipMapsHdr2DAsync(BCnEncoder.Shared.ImageFiles.KtxFile,System.Threading.CancellationToken)">
+            <summary>
+            Decode all available mipmaps from a Ktx file.
+            This method is only for compressed Hdr formats. Please use the non-Hdr methods for other formats.
+            </summary>
+            <param name="file">The loaded Ktx file.</param>
+            <param name="token">The cancellation token for this asynchronous operation.</param>
+            <returns>The awaitable operation to retrieve the decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeHdr2DAsync(BCnEncoder.Shared.ImageFiles.DdsFile,System.Threading.CancellationToken)">
+            <summary>
+            Decode the main image from a Dds file.
+            This method is only for compressed Hdr formats. Please use the non-Hdr methods for other formats.
+            </summary>
+            <param name="file">The loaded Dds file.</param>
+            <param name="token">The cancellation token for this asynchronous operation.</param>
+            <returns>The awaitable operation to retrieve the decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeAllMipMapsHdr2DAsync(BCnEncoder.Shared.ImageFiles.DdsFile,System.Threading.CancellationToken)">
+            <summary>
+            Decode all available mipmaps from a Dds file.
+            This method is only for compressed Hdr formats. Please use the non-Hdr methods for other formats.
+            </summary>
+            <param name="file">The loaded Dds file.</param>
+            <param name="token">The cancellation token for this asynchronous operation.</param>
+            <returns>The awaitable operation to retrieve the decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeRawHdr(System.IO.Stream,System.Int32,System.Int32,BCnEncoder.Shared.CompressionFormat)">
+            <summary>
+            Decode a single encoded image from raw bytes.
+            This method will read the expected amount of bytes from the given input stream and decode it.
+            Make sure there is no file header information left in the stream before the encoded data.
+            This method is only for compressed Hdr formats. Please use the non-Hdr methods for other formats.
+            </summary>
+            <param name="inputStream">The stream containing the raw encoded data.</param>
+            <param name="pixelWidth">The pixelWidth of the image.</param>
+            <param name="pixelHeight">The pixelHeight of the image.</param>
+            <param name="format">The Format the encoded data is in.</param>
+            <returns>The decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeRawHdr(System.Byte[],System.Int32,System.Int32,BCnEncoder.Shared.CompressionFormat)">
+            <summary>
+            Decode a single encoded image from raw bytes.
+            This method is only for compressed Hdr formats. Please use the non-Hdr methods for other formats.
+            </summary>
+            <param name="input">The byte array containing the raw encoded data.</param>
+            <param name="pixelWidth">The pixelWidth of the image.</param>
+            <param name="pixelHeight">The pixelHeight of the image.</param>
+            <param name="format">The Format the encoded data is in.</param>
+            <returns>The decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeHdr(BCnEncoder.Shared.ImageFiles.KtxFile)">
+            <summary>
+            Decode the main image from a Ktx file.
+            This method is only for compressed Hdr formats. Please use the non-Hdr methods for other formats.
+            </summary>
+            <param name="file">The loaded Ktx file.</param>
+            <returns>The decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeAllMipMapsHdr(BCnEncoder.Shared.ImageFiles.KtxFile)">
+            <summary>
+            Decode all available mipmaps from a Ktx file.
+            This method is only for compressed Hdr formats. Please use the non-Hdr methods for other formats.
+            </summary>
+            <param name="file">The loaded Ktx file.</param>
+            <returns>An array of decoded images.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeHdr(BCnEncoder.Shared.ImageFiles.DdsFile)">
+            <summary>
+            Decode the main image from a Dds file.
+            This method is only for compressed Hdr formats. Please use the non-Hdr methods for other formats.
+            </summary>
+            <param name="file">The loaded Dds file.</param>
+            <returns>The decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeAllMipMapsHdr(BCnEncoder.Shared.ImageFiles.DdsFile)">
+            <summary>
+            Decode all available mipmaps from a Dds file.
+            This method is only for compressed Hdr formats. Please use the non-Hdr methods for other formats.
+            </summary>
+            <param name="file">The loaded Dds file.</param>
+            <returns>An array of decoded images.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeRawHdr2D(System.IO.Stream,System.Int32,System.Int32,BCnEncoder.Shared.CompressionFormat)">
+            <summary>
+            Decode a single encoded image from raw bytes.
+            This method will read the expected amount of bytes from the given input stream and decode it.
+            Make sure there is no file header information left in the stream before the encoded data.
+            This method is only for compressed Hdr formats. Please use the non-Hdr methods for other formats.
+            </summary>
+            <param name="inputStream">The stream containing the encoded data.</param>
+            <param name="pixelWidth">The pixelWidth of the image.</param>
+            <param name="pixelHeight">The pixelHeight of the image.</param>
+            <param name="format">The Format the encoded data is in.</param>
+            <returns>The decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeRawHdr2D(System.Byte[],System.Int32,System.Int32,BCnEncoder.Shared.CompressionFormat)">
+            <summary>
+            Decode a single encoded image from raw bytes.
+            This method is only for compressed Hdr formats. Please use the non-Hdr methods for other formats.
+            </summary>
+            <param name="input">The byte array containing the raw encoded data.</param>
+            <param name="pixelWidth">The pixelWidth of the image.</param>
+            <param name="pixelHeight">The pixelHeight of the image.</param>
+            <param name="format">The Format the encoded data is in.</param>
+            <returns>The decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeHdr2D(System.IO.Stream)">
+            <summary>
+            Read a Ktx or Dds file from a stream and decode the main image from it.
+            The type of file will be detected automatically.
+            This method is only for compressed Hdr formats. Please use the non-Hdr methods for other formats.
+            </summary>
+            <param name="inputStream">The stream containing a Ktx or Dds file.</param>
+            <returns>The decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeAllMipMapsHdr2D(System.IO.Stream)">
+            <summary>
+            Read a Ktx or Dds file from a stream and decode all available mipmaps from it.
+            The type of file will be detected automatically.
+            This method is only for compressed Hdr formats. Please use the non-Hdr methods for other formats.
+            </summary>
+            <param name="inputStream">The stream containing a Ktx or Dds file.</param>
+            <returns>An array of decoded images.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeHdr2D(BCnEncoder.Shared.ImageFiles.KtxFile)">
+            <summary>
+            Decode the main image from a Ktx file.
+            This method is only for compressed Hdr formats. Please use the non-Hdr methods for other formats.
+            </summary>
+            <param name="file">The loaded Ktx file.</param>
+            <returns>The decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeAllMipMapsHdr2D(BCnEncoder.Shared.ImageFiles.KtxFile)">
+            <summary>
+            Decode all available mipmaps from a Ktx file.
+            This method is only for compressed Hdr formats. Please use the non-Hdr methods for other formats.
+            </summary>
+            <param name="file">The loaded Ktx file.</param>
+            <returns>An array of decoded images.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeHdr2D(BCnEncoder.Shared.ImageFiles.DdsFile)">
+            <summary>
+            Decode the main image from a Dds file.
+            This method is only for compressed Hdr formats. Please use the non-Hdr methods for other formats.
+            </summary>
+            <param name="file">The loaded Dds file.</param>
+            <returns>The decoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeAllMipMapsHdr2D(BCnEncoder.Shared.ImageFiles.DdsFile)">
+            <summary>
+            Decode all available mipmaps from a Dds file.
+            This method is only for compressed Hdr formats. Please use the non-Hdr methods for other formats.
+            </summary>
+            <param name="file">The loaded Dds file.</param>
+            <returns>An array of decoded images.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeBlockHdr(System.ReadOnlySpan{System.Byte},BCnEncoder.Shared.CompressionFormat)">
+            <summary>
+            Decode a single block from raw bytes and return it as a <see cref="T:CommunityToolkit.HighPerformance.Memory2D`1"/>.
+            Input Span size needs to equal the block size.
+            To get the block size (in bytes) of the compression format used, see <see cref="M:BCnEncoder.Decoder.BcDecoder.GetBlockSize(BCnEncoder.Shared.CompressionFormat)"/>.
+            This method is only for compressed Hdr formats. Please use the non-Hdr methods for other formats.
+            </summary>
+            <param name="blockData">The encoded block in bytes.</param>
+            <param name="format">The compression format used.</param>
+            <returns>The decoded 4x4 block.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeBlockHdr(System.ReadOnlySpan{System.Byte},BCnEncoder.Shared.CompressionFormat,CommunityToolkit.HighPerformance.Span2D{BCnEncoder.Shared.ColorRgbFloat})">
+            <summary>
+            Decode a single block from raw bytes and write it to the given output span.
+            Output span size must be exactly 4x4 and input Span size needs to equal the block size.
+            To get the block size (in bytes) of the compression format used, see <see cref="M:BCnEncoder.Decoder.BcDecoder.GetBlockSize(BCnEncoder.Shared.CompressionFormat)"/>.
+            This method is only for compressed Hdr formats. Please use the non-Hdr methods for other formats.
+            </summary>
+            <param name="blockData">The encoded block in bytes.</param>
+            <param name="format">The compression format used.</param>
+            <param name="outputSpan">The destination span of the decoded data.</param>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeBlockHdr(System.IO.Stream,BCnEncoder.Shared.CompressionFormat,CommunityToolkit.HighPerformance.Span2D{BCnEncoder.Shared.ColorRgbFloat})">
+            <summary>
+            Decode a single block from a stream and write it to the given output span.
+            Output span size must be exactly 4x4.
+            This method is only for compressed Hdr formats. Please use the non-Hdr methods for other formats.
+            </summary>
+            <param name="inputStream">The stream to read encoded blocks from.</param>
+            <param name="format">The compression format used.</param>
+            <param name="outputSpan">The destination span of the decoded data.</param>
+            <returns>The number of bytes read from the stream. Zero (0) if reached the end of stream.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.IsHdrFormat(BCnEncoder.Shared.ImageFiles.KtxFile)">
+            <summary>
+            Check whether a file is encoded in a supported HDR format.
+            </summary>
+            <param name="file">The loaded ktx file to check</param>
+            <returns>If the format of the file is one of the supported HDR formats.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.IsHdrFormat(BCnEncoder.Shared.ImageFiles.DdsFile)">
+            <summary>
+            Check whether a file is encoded in a supported HDR format.
+            </summary>
+            <param name="file">The loaded dds file to check</param>
+            <returns>If the format of the file is one of the supported HDR formats.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeFromStreamInternal2D(System.IO.Stream,System.Boolean,System.Threading.CancellationToken)">
+            <summary>
+            Load a stream and extract either the main image or all mip maps.
+            </summary>
+            <param name="stream">The stream containing the image file.</param>
+            <param name="allMipMaps">If all mip maps or only the main image should be decoded.</param>
+            <param name="token">The cancellation token for this operation. Can be default, if the operation is not asynchronous.</param>
+            <returns>An array of decoded Rgba32 images.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeInternal(BCnEncoder.Shared.ImageFiles.KtxFile,System.Boolean,System.Threading.CancellationToken)">
+            <summary>
+            Load a KTX file and extract either the main image or all mip maps.
+            </summary>
+            <param name="file">The Ktx file to decode.</param>
+            <param name="allMipMaps">If all mip maps or only the main image should be decoded.</param>
+            <param name="token">The cancellation token for this operation. Can be default, if the operation is not asynchronous.</param>
+            <returns>An array of decoded Rgba32 images.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeInternal(BCnEncoder.Shared.ImageFiles.DdsFile,System.Boolean,System.Threading.CancellationToken)">
+            <summary>
+            Load a DDS file and extract either the main image or all mip maps.
+            </summary>
+            <param name="file">The Dds file to decode.</param>
+            <param name="allMipMaps">If all mip maps or only the main image should be decoded.</param>
+            <param name="token">The cancellation token for this operation. Can be default, if the operation is not asynchronous.</param>
+            <returns>An array of decoded Rgba32 images.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeRawInternal(System.ReadOnlyMemory{System.Byte},System.Int32,System.Int32,BCnEncoder.Shared.CompressionFormat,System.Threading.CancellationToken)">
+            <summary>
+            Decode raw encoded image asynchronously.
+            </summary>
+            <param name="input">The <see cref="T:System.Memory`1"/> containing the encoded data.</param>
+            <param name="pixelWidth">The width of the image.</param>
+            <param name="pixelHeight">The height of the image.</param>
+            <param name="format">The Format the encoded data is in.</param>
+            <param name="token">The cancellation token for this operation. May be default, if the operation is not asynchronous.</param>
+            <returns>The decoded Rgba32 image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeFromStreamInternalHdr2D(System.IO.Stream,System.Boolean,System.Threading.CancellationToken)">
+            <summary>
+            Load a stream and extract either the main image or all mip maps.
+            </summary>
+            <param name="stream">The stream containing the image file.</param>
+            <param name="allMipMaps">If all mip maps or only the main image should be decoded.</param>
+            <param name="token">The cancellation token for this operation. Can be default, if the operation is not asynchronous.</param>
+            <returns>An array of decoded Rgba32 images.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeInternalHdr(BCnEncoder.Shared.ImageFiles.KtxFile,System.Boolean,System.Threading.CancellationToken)">
+            <summary>
+            Load a KTX file and extract either the main image or all mip maps.
+            </summary>
+            <param name="file">The Ktx file to decode.</param>
+            <param name="allMipMaps">If all mip maps or only the main image should be decoded.</param>
+            <param name="token">The cancellation token for this operation. Can be default, if the operation is not asynchronous.</param>
+            <returns>An array of decoded Rgba32 images.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeInternalHdr(BCnEncoder.Shared.ImageFiles.DdsFile,System.Boolean,System.Threading.CancellationToken)">
+            <summary>
+            Load a DDS file and extract either the main image or all mip maps.
+            </summary>
+            <param name="file">The Dds file to decode.</param>
+            <param name="allMipMaps">If all mip maps or only the main image should be decoded.</param>
+            <param name="token">The cancellation token for this operation. Can be default, if the operation is not asynchronous.</param>
+            <returns>An array of decoded Rgba32 images.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.DecodeRawInternalHdr(System.ReadOnlyMemory{System.Byte},System.Int32,System.Int32,BCnEncoder.Shared.CompressionFormat,System.Threading.CancellationToken)">
+            <summary>
+            Decode raw encoded image asynchronously.
+            </summary>
+            <param name="input">The <see cref="T:System.Memory`1"/> containing the encoded data.</param>
+            <param name="pixelWidth">The width of the image.</param>
+            <param name="pixelHeight">The height of the image.</param>
+            <param name="format">The Format the encoded data is in.</param>
+            <param name="token">The cancellation token for this operation. May be default, if the operation is not asynchronous.</param>
+            <returns>The decoded Rgba32 image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.GetBlockCount(System.Int32,System.Int32)">
+            <summary>
+            Gets the number of total blocks in an image with the given pixel width and height.
+            </summary>
+            <param name="pixelWidth">The pixel width of the image</param>
+            <param name="pixelHeight">The pixel height of the image</param>
+            <returns>The total number of blocks.</returns>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.GetBlockCount(System.Int32,System.Int32,System.Int32@,System.Int32@)">
+            <summary>
+            Gets the number of blocks in an image with the given pixel width and height.
+            </summary>
+            <param name="pixelWidth">The pixel width of the image</param>
+            <param name="pixelHeight">The pixel height of the image</param>
+            <param name="blocksWidth">The amount of blocks in the x-axis</param>
+            <param name="blocksHeight">The amount of blocks in the y-axis</param>
+        </member>
+        <member name="M:BCnEncoder.Decoder.BcDecoder.GetBlockSize(BCnEncoder.Shared.CompressionFormat)">
+            <summary>
+            Get the size of blocks for the given compression format in bytes.
+            </summary>
+            <param name="format">The compression format used.</param>
+            <returns>The size of a single block in bytes.</returns>
+        </member>
+        <member name="T:BCnEncoder.Decoder.Options.DecoderInputOptions">
+            <summary>
+            A class for the decoder input options.
+            </summary>
+        </member>
+        <member name="P:BCnEncoder.Decoder.Options.DecoderInputOptions.DdsBc1ExpectAlpha">
+            <summary>
+            The DDS file Format doesn't seem to have a standard for indicating whether a BC1 texture
+            includes 1bit of alpha. This option will assume that all Bc1 textures contain alpha.
+            If this option is false, but the dds header includes a DDPF_ALPHAPIXELS flag, alpha will be included.
+            Default is true.
+            </summary>
+        </member>
+        <member name="T:BCnEncoder.Decoder.Options.DecoderOptions">
+            <summary>
+            General options for the decoder.
+            </summary>
+        </member>
+        <member name="P:BCnEncoder.Decoder.Options.DecoderOptions.IsParallel">
+            <summary>
+            Whether the blocks should be decoded in parallel. This can be much faster than single-threaded decoding,
+            but is slow if multiple textures are being processed at the same time.
+            When a debugger is attached, the decoder defaults to single-threaded operation to ease debugging.
+            Default is false.
+            </summary>
+            <remarks>Parallel execution will be ignored in RawDecoders, due to minimal performance gain.</remarks>
+        </member>
+        <member name="P:BCnEncoder.Decoder.Options.DecoderOptions.TaskCount">
+            <summary>
+            Determines how many tasks should be used for parallel processing.
+            </summary>
+        </member>
+        <member name="P:BCnEncoder.Decoder.Options.DecoderOptions.Progress">
+            <summary>
+            The progress context for the operation.
+            </summary>
+        </member>
+        <member name="T:BCnEncoder.Decoder.Options.DecoderOutputOptions">
+            <summary>
+            A class for the decoder output options.
+            </summary>
+        </member>
+        <member name="P:BCnEncoder.Decoder.Options.DecoderOutputOptions.RedAsLuminance">
+            <summary>
+            If true, when decoding from R8 raw format,
+            output pixels will have all colors set to the same value (greyscale).
+            Default is true. (Does not apply to BC4 format.)
+            </summary>
+        </member>
+        <member name="P:BCnEncoder.Decoder.Options.DecoderOutputOptions.Bc4Component">
+            <summary>
+            The color channel to populate with the values of a BC4 block.
+            </summary>
+        </member>
+        <member name="P:BCnEncoder.Decoder.Options.DecoderOutputOptions.Bc5Component1">
+            <summary>
+            The color channel to populate with the values of the first BC5 block.
+            </summary>
+        </member>
+        <member name="P:BCnEncoder.Decoder.Options.DecoderOutputOptions.Bc5Component2">
+            <summary>
+            The color channel to populate with the values of the second BC5 block.
+            </summary>
+        </member>
+        <member name="T:BCnEncoder.Decoder.RawRDecoder">
+            <summary>
+            A class to decode data to R components.
+            </summary>
+        </member>
+        <member name="M:BCnEncoder.Decoder.RawRDecoder.#ctor(System.Boolean)">
+            <summary>
+            Create a new instance of <see cref="T:BCnEncoder.Decoder.RawRDecoder"/>.
+            </summary>
+            <param name="redAsLuminance">If the decoded component should be used as the red component or luminance.</param>
+        </member>
+        <member name="M:BCnEncoder.Decoder.RawRDecoder.Decode(System.ReadOnlyMemory{System.Byte},BCnEncoder.Shared.OperationContext)">
+            <summary>
+            Decode the data to color components.
+            </summary>
+            <param name="data">The data to decode.</param>
+            <param name="context">The context of the current operation.</param>
+            <returns>The decoded color components.</returns>
+        </member>
+        <member name="T:BCnEncoder.Decoder.RawRgDecoder">
+            <summary>
+            A class to decode data to RG components.
+            </summary>
+        </member>
+        <member name="M:BCnEncoder.Decoder.RawRgDecoder.Decode(System.ReadOnlyMemory{System.Byte},BCnEncoder.Shared.OperationContext)">
+            <summary>
+            Decode the data to color components.
+            </summary>
+            <param name="data">The data to decode.</param>
+            <param name="context">The context of the current operation.</param>
+            <returns>The decoded color components.</returns>
+        </member>
+        <member name="T:BCnEncoder.Decoder.RawRgbDecoder">
+            <summary>
+            A class to decode data to RGB components.
+            </summary>
+        </member>
+        <member name="M:BCnEncoder.Decoder.RawRgbDecoder.Decode(System.ReadOnlyMemory{System.Byte},BCnEncoder.Shared.OperationContext)">
+            <summary>
+            Decode the data to color components.
+            </summary>
+            <param name="data">The data to decode.</param>
+            <param name="context">The context of the current operation.</param>
+            <returns>The decoded color components.</returns>
+        </member>
+        <member name="T:BCnEncoder.Decoder.RawRgbaDecoder">
+            <summary>
+            A class to decode data to RGBA components.
+            </summary>
+        </member>
+        <member name="M:BCnEncoder.Decoder.RawRgbaDecoder.Decode(System.ReadOnlyMemory{System.Byte},BCnEncoder.Shared.OperationContext)">
+            <summary>
+            Decode the data to color components.
+            </summary>
+            <param name="data">The data to decode.</param>
+            <param name="context">The context of the current operation.</param>
+            <returns>The decoded color components.</returns>
+        </member>
+        <member name="T:BCnEncoder.Decoder.RawBgraDecoder">
+            <summary>
+            A class to decode data to BGRA components.
+            </summary>
+        </member>
+        <member name="M:BCnEncoder.Decoder.RawBgraDecoder.Decode(System.ReadOnlyMemory{System.Byte},BCnEncoder.Shared.OperationContext)">
+            <summary>
+            Decode the data to color components.
+            </summary>
+            <param name="data">The data to decode.</param>
+            <param name="context">The context of the current operation.</param>
+            <returns>The decoded color components.</returns>
+        </member>
+        <member name="T:BCnEncoder.Encoder.PixelFormat">
+            <summary>
+            The pixel format determining the rgba layout of input data in <see cref="T:BCnEncoder.Encoder.BcEncoder"/>.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Encoder.PixelFormat.Rgba32">
+            <summary>
+            8 bits per channel RGBA.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Encoder.PixelFormat.Bgra32">
+            <summary>
+            8 bits per channel BGRA.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Encoder.PixelFormat.Argb32">
+            <summary>
+            8 bits per channel ARGB.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Encoder.PixelFormat.Rgb24">
+            <summary>
+            8 bits per channel RGB.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Encoder.PixelFormat.Bgr24">
+            <summary>
+            8 bits per channel BGR.
+            </summary>
+        </member>
+        <member name="T:BCnEncoder.Encoder.BcEncoder">
+            <summary>
+            Handles all encoding of images into compressed or uncompressed formats. For decoding, <see cref="T:BCnEncoder.Decoder.BcDecoder"/>
+            </summary>
+        </member>
+        <member name="P:BCnEncoder.Encoder.BcEncoder.InputOptions">
+            <summary>
+            The input options of the encoder.
+            </summary>
+        </member>
+        <member name="P:BCnEncoder.Encoder.BcEncoder.OutputOptions">
+            <summary>
+            The output options of the encoder.
+            </summary>
+        </member>
+        <member name="P:BCnEncoder.Encoder.BcEncoder.Options">
+            <summary>
+            The encoder options.
+            </summary>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.#ctor(BCnEncoder.Shared.CompressionFormat)">
+            <summary>
+            Creates a new instance of <see cref="T:BCnEncoder.Encoder.BcEncoder"/>.
+            </summary>
+            <param name="format">The block compression Format to encode an image with.</param>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeToStreamAsync(System.ReadOnlyMemory{System.Byte},System.Int32,System.Int32,BCnEncoder.Encoder.PixelFormat,System.IO.Stream,System.Threading.CancellationToken)">
+            <summary>
+            Encodes all mipmap levels into a ktx or a dds file and writes it to the output stream asynchronously.
+            </summary>
+            <param name="input">The input to encode represented by a <see cref="T:System.ReadOnlyMemory`1"/>.</param>
+            <param name="width">The width of the image.</param>
+            <param name="height">The height of the image.</param>
+            <param name="format">The pixel format the given data is in.</param>
+            <param name="outputStream">The stream to write the encoded image to.</param>
+            <param name="token">The cancellation token for this operation. Can be default if cancellation is not needed.</param>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeToStreamAsync(CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},System.IO.Stream,System.Threading.CancellationToken)">
+            <summary>
+            Encodes all mipmap levels into a ktx or a dds file and writes it to the output stream asynchronously.
+            </summary>
+            <param name="input">The input to encode represented by a <see cref="T:CommunityToolkit.HighPerformance.ReadOnlyMemory2D`1"/>.</param>
+            <param name="outputStream">The stream to write the encoded image to.</param>
+            <param name="token">The cancellation token for this operation. Can be default if cancellation is not needed.</param>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeToKtxAsync(System.ReadOnlyMemory{System.Byte},System.Int32,System.Int32,BCnEncoder.Encoder.PixelFormat,System.Threading.CancellationToken)">
+            <summary>
+            Encodes all mipmap levels into a Ktx file asynchronously.
+            </summary>
+            <param name="input">The input to encode represented by a <see cref="T:System.ReadOnlyMemory`1"/>.</param>
+            <param name="width">The width of the image.</param>
+            <param name="height">The height of the image.</param>
+            <param name="format">The pixel format the given data is in.</param>
+            <param name="token">The cancellation token for this operation. Can be default if cancellation is not needed.</param>
+            <returns>The Ktx file containing the encoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeToKtxAsync(CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},System.Threading.CancellationToken)">
+            <summary>
+            Encodes all mipmap levels into a Ktx file asynchronously.
+            </summary>
+            <param name="input">The input to encode represented by a <see cref="T:CommunityToolkit.HighPerformance.ReadOnlyMemory2D`1"/>.</param>
+            <param name="token">The cancellation token for this operation. Can be default if cancellation is not needed.</param>
+            <returns>The Ktx file containing the encoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeToDdsAsync(System.ReadOnlyMemory{System.Byte},System.Int32,System.Int32,BCnEncoder.Encoder.PixelFormat,System.Threading.CancellationToken)">
+            <summary>
+            Encodes all mipmap levels into a Dds file asynchronously.
+            </summary>
+            <param name="input">The input to encode represented by a <see cref="T:System.ReadOnlyMemory`1"/>.</param>
+            <param name="width">The width of the image.</param>
+            <param name="height">The height of the image.</param>
+            <param name="format">The pixel format the given data is in.</param>
+            <param name="token">The cancellation token for this operation. Can be default if cancellation is not needed.</param>
+            <returns>The Dds file containing the encoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeToDdsAsync(CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},System.Threading.CancellationToken)">
+            <summary>
+            Encodes all mipmap levels into a Dds file asynchronously.
+            </summary>
+            <param name="input">The input to encode represented by a <see cref="T:CommunityToolkit.HighPerformance.ReadOnlyMemory2D`1"/>.</param>
+            <param name="token">The cancellation token for this operation. Can be default if cancellation is not needed.</param>
+            <returns>The Dds file containing the encoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeToRawBytesAsync(System.ReadOnlyMemory{System.Byte},System.Int32,System.Int32,BCnEncoder.Encoder.PixelFormat,System.Threading.CancellationToken)">
+            <summary>
+            Encodes all mipmap levels into a list of byte buffers asynchronously. This data does not contain any file headers, just the raw encoded pixel data.
+            </summary>
+            <param name="input">The input to encode represented by a <see cref="T:System.ReadOnlyMemory`1"/>.</param>
+            <param name="width">The width of the image.</param>
+            <param name="height">The height of the image.</param>
+            <param name="format">The pixel format the given data is in.</param>
+            <param name="token">The cancellation token for this operation. Can be default if cancellation is not needed.</param>
+            <returns>A list of raw encoded mipmap input.</returns>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeToRawBytesAsync(CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},System.Threading.CancellationToken)">
+            <summary>
+            Encodes all mipmap levels into an array of byte buffers asynchronously. This data does not contain any file headers, just the raw encoded pixel data.
+            </summary>
+            <param name="input">The input to encode represented by a <see cref="T:CommunityToolkit.HighPerformance.ReadOnlyMemory2D`1"/>.</param>
+            <param name="token">The cancellation token for this operation. Can be default if cancellation is not needed.</param>
+            <returns>A list of raw encoded mipmap input.</returns>
+            <remarks>To get the width and height of the encoded mip levels, see <see cref="M:BCnEncoder.Encoder.BcEncoder.CalculateMipMapSize(System.Int32,System.Int32,System.Int32,System.Int32@,System.Int32@)"/>.</remarks>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeToRawBytesAsync(System.ReadOnlyMemory{System.Byte},System.Int32,System.Int32,BCnEncoder.Encoder.PixelFormat,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Encodes a single mip level of the input image to a byte buffer asynchronously. This data does not contain any file headers, just the raw encoded pixel data.
+            </summary>
+            <param name="input">The input to encode represented by a <see cref="T:System.ReadOnlyMemory`1"/>.</param>
+            <param name="width">The width of the image.</param>
+            <param name="height">The height of the image.</param>
+            <param name="format">The pixel format the given data is in.</param>
+            <param name="mipLevel">The mipmap to encode.</param>
+            <param name="token">The cancellation token for this operation. Can be default, if the operation is not asynchronous.</param>
+            <returns>The raw encoded input.</returns>
+            <remarks>To get the width and height of the encoded mip level, see <see cref="M:BCnEncoder.Encoder.BcEncoder.CalculateMipMapSize(System.Int32,System.Int32,System.Int32,System.Int32@,System.Int32@)"/>.</remarks>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeToRawBytesAsync(CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Encodes a single mip level of the input image to a byte buffer asynchronously. This data does not contain any file headers, just the raw encoded pixel data.
+            </summary>
+            <param name="input">The input to encode represented by a <see cref="T:CommunityToolkit.HighPerformance.ReadOnlyMemory2D`1"/>.</param>
+            <param name="mipLevel">The mipmap to encode.</param>
+            <param name="token">The cancellation token for this operation. Can be default if cancellation is not needed.</param>
+            <returns>The raw encoded input.</returns>
+            <remarks>To get the width and height of the encoded mip level, see <see cref="M:BCnEncoder.Encoder.BcEncoder.CalculateMipMapSize(System.Int32,System.Int32,System.Int32,System.Int32@,System.Int32@)"/>.</remarks>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeCubeMapToStreamAsync(CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},System.IO.Stream,System.Threading.CancellationToken)">
+            <summary>
+            Encodes all mipMaps of a cubeMap image to a stream asynchronously either in ktx or dds format.
+            The format can be set in <see cref="P:BCnEncoder.Encoder.Options.EncoderOutputOptions.FileFormat"/>.
+            Order of faces is +X, -X, +Y, -Y, +Z, -Z. Back maps to positive Z and front to negative Z.
+            </summary>
+            <param name="right">The positive X-axis face of the cubeMap</param>
+            <param name="left">The negative X-axis face of the cubeMap</param>
+            <param name="top">The positive Y-axis face of the cubeMap</param>
+            <param name="down">The negative Y-axis face of the cubeMap</param>
+            <param name="back">The positive Z-axis face of the cubeMap</param>
+            <param name="front">The negative Z-axis face of the cubeMap</param>
+            <param name="outputStream">The stream to write the encoded image to.</param>
+            <param name="token">The cancellation token for this operation. Can be default if cancellation is not needed.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/>.</returns>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeCubeMapToKtxAsync(CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},System.Threading.CancellationToken)">
+            <summary>
+            Encodes all mipMaps of a cubeMap image to a <see cref="T:BCnEncoder.Shared.ImageFiles.KtxFile"/> asynchronously.
+            The format can be set in <see cref="P:BCnEncoder.Encoder.Options.EncoderOutputOptions.FileFormat"/>.
+            Order of faces is +X, -X, +Y, -Y, +Z, -Z. Back maps to positive Z and front to negative Z.
+            </summary>
+            <param name="right">The positive X-axis face of the cubeMap</param>
+            <param name="left">The negative X-axis face of the cubeMap</param>
+            <param name="top">The positive Y-axis face of the cubeMap</param>
+            <param name="down">The negative Y-axis face of the cubeMap</param>
+            <param name="back">The positive Z-axis face of the cubeMap</param>
+            <param name="front">The negative Z-axis face of the cubeMap</param>
+            <param name="token">The cancellation token for this operation. Can be default if cancellation is not needed.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task`1"/> of type <see cref="T:BCnEncoder.Shared.ImageFiles.KtxFile"/>.</returns>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeCubeMapToDdsAsync(CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},System.Threading.CancellationToken)">
+            <summary>
+            Encodes all mipMaps of a cubeMap image to a <see cref="T:BCnEncoder.Shared.ImageFiles.DdsFile"/> asynchronously.
+            The format can be set in <see cref="P:BCnEncoder.Encoder.Options.EncoderOutputOptions.FileFormat"/>.
+            Order of faces is +X, -X, +Y, -Y, +Z, -Z. Back maps to positive Z and front to negative Z.
+            </summary>
+            <param name="right">The positive X-axis face of the cubeMap</param>
+            <param name="left">The negative X-axis face of the cubeMap</param>
+            <param name="top">The positive Y-axis face of the cubeMap</param>
+            <param name="down">The negative Y-axis face of the cubeMap</param>
+            <param name="back">The positive Z-axis face of the cubeMap</param>
+            <param name="front">The negative Z-axis face of the cubeMap</param>
+            <param name="token">The cancellation token for this operation. Can be default if cancellation is not needed.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task`1"/> of type <see cref="T:BCnEncoder.Shared.ImageFiles.DdsFile"/>.</returns>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeToStream(System.ReadOnlySpan{System.Byte},System.Int32,System.Int32,BCnEncoder.Encoder.PixelFormat,System.IO.Stream)">
+            <summary>
+            Encodes all mipmap levels into a ktx or a dds file and writes it to the output stream.
+            </summary>
+            <param name="input">The input to encode represented by a <see cref="T:System.ReadOnlySpan`1"/>.</param>
+            <param name="width">The width of the image.</param>
+            <param name="height">The height of the image.</param>
+            <param name="format">The pixel format the input data is in.</param>
+            <param name="outputStream">The stream to write the encoded image to.</param>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeToStream(CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},System.IO.Stream)">
+            <summary>
+            Encodes all mipmap levels into a ktx or a dds file and writes it to the output stream.
+            </summary>
+            <param name="input">The input to encode represented by a <see cref="T:CommunityToolkit.HighPerformance.ReadOnlyMemory2D`1"/>.</param>
+            <param name="outputStream">The stream to write the encoded image to.</param>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeToKtx(System.ReadOnlySpan{System.Byte},System.Int32,System.Int32,BCnEncoder.Encoder.PixelFormat)">
+            <summary>
+            Encodes all mipmap levels into a Ktx file.
+            </summary>
+            <param name="input">The input to encode represented by a <see cref="T:System.ReadOnlySpan`1"/>.</param>
+            <param name="width">The width of the image.</param>
+            <param name="height">The height of the image.</param>
+            <param name="format">The pixel format the input data is in.</param>
+            <returns>The <see cref="T:BCnEncoder.Shared.ImageFiles.KtxFile"/> containing the encoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeToKtx(CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32})">
+            <summary>
+            Encodes all mipmap levels into a Ktx file.
+            </summary>
+            <param name="input">The input to encode represented by a <see cref="T:CommunityToolkit.HighPerformance.ReadOnlyMemory2D`1"/>.</param>
+            <returns>The <see cref="T:BCnEncoder.Shared.ImageFiles.KtxFile"/> containing the encoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeToDds(System.ReadOnlySpan{System.Byte},System.Int32,System.Int32,BCnEncoder.Encoder.PixelFormat)">
+            <summary>
+            Encodes all mipmap levels into a Dds file.
+            </summary>
+            <param name="input">The input to encode represented by a <see cref="T:System.ReadOnlySpan`1"/>.</param>
+            <param name="width">The width of the image.</param>
+            <param name="height">The height of the image.</param>
+            <param name="format">The pixel format the input data is in.</param>
+            <returns>The <see cref="T:BCnEncoder.Shared.ImageFiles.DdsFile"/> containing the encoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeToDds(CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32})">
+            <summary>
+            Encodes all mipmap levels into a Dds file.
+            </summary>
+            <param name="input">The input to encode represented by a <see cref="T:CommunityToolkit.HighPerformance.ReadOnlyMemory2D`1"/>.</param>
+            <returns>The <see cref="T:BCnEncoder.Shared.ImageFiles.DdsFile"/> containing the encoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeToRawBytes(System.ReadOnlySpan{System.Byte},System.Int32,System.Int32,BCnEncoder.Encoder.PixelFormat)">
+            <summary>
+            Encodes all mipmap levels into an array of byte buffers. This data does not contain any file headers, just the raw encoded pixel data.
+            </summary>
+            <param name="input">The input to encode represented by a <see cref="T:System.ReadOnlySpan`1"/>.</param>
+            <param name="width">The width of the image.</param>
+            <param name="height">The height of the image.</param>
+            <param name="format">The pixel format the input data is in.</param>
+            <returns>An array of byte buffers containing all mipmap levels.</returns>
+            <remarks>To get the width and height of the encoded mip levels, see <see cref="M:BCnEncoder.Encoder.BcEncoder.CalculateMipMapSize(System.Int32,System.Int32,System.Int32,System.Int32@,System.Int32@)"/>.</remarks>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeToRawBytes(CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32})">
+            <summary>
+            Encodes all mipmap levels into a list of byte buffers. This data does not contain any file headers, just the raw encoded pixel data.
+            </summary>
+            <param name="input">The input to encode represented by a <see cref="T:CommunityToolkit.HighPerformance.ReadOnlyMemory2D`1"/>.</param>
+            <returns>An array of byte buffers containing all mipmap levels.</returns>
+            <remarks>To get the width and height of the encoded mip levels, see <see cref="M:BCnEncoder.Encoder.BcEncoder.CalculateMipMapSize(System.Int32,System.Int32,System.Int32,System.Int32@,System.Int32@)"/>.</remarks>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeToRawBytes(System.ReadOnlySpan{System.Byte},System.Int32,System.Int32,BCnEncoder.Encoder.PixelFormat,System.Int32,System.Int32@,System.Int32@)">
+            <summary>
+            Encodes a single mip level of the input image to a byte buffer. This data does not contain any file headers, just the raw encoded pixel data.
+            </summary>
+            <param name="input">The input to encode represented by a <see cref="T:System.ReadOnlySpan`1"/>.</param>
+            <param name="width">The width of the image.</param>
+            <param name="height">The height of the image.</param>
+            <param name="format">The pixel format the input data is in.</param>
+            <param name="mipLevel">The mipmap to encode.</param>
+            <param name="mipWidth">The width of the mipmap.</param>
+            <param name="mipHeight">The height of the mipmap.</param>
+            <returns>A byte buffer containing the encoded data of the requested mip-level.</returns>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeToRawBytes(CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},System.Int32,System.Int32@,System.Int32@)">
+            <summary>
+            Encodes a single mip level of the input image to a byte buffer. This data does not contain any file headers, just the raw encoded pixel data.
+            </summary>
+            <param name="input">The input to encode represented by a <see cref="T:CommunityToolkit.HighPerformance.ReadOnlyMemory2D`1"/>.</param>
+            <param name="mipLevel">The mipmap to encode.</param>
+            <param name="mipWidth">The width of the mipmap.</param>
+            <param name="mipHeight">The height of the mipmap.</param>
+            <returns>A byte buffer containing the encoded data of the requested mip-level.</returns>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeCubeMapToStream(System.ReadOnlySpan{System.Byte},System.ReadOnlySpan{System.Byte},System.ReadOnlySpan{System.Byte},System.ReadOnlySpan{System.Byte},System.ReadOnlySpan{System.Byte},System.ReadOnlySpan{System.Byte},System.Int32,System.Int32,BCnEncoder.Encoder.PixelFormat,System.IO.Stream)">
+            <summary>
+            Encodes all mipMaps of a cubeMap image to a stream either in ktx or dds format.
+            The format can be set in <see cref="P:BCnEncoder.Encoder.Options.EncoderOutputOptions.FileFormat"/>.
+            Order of faces is +X, -X, +Y, -Y, +Z, -Z. Back maps to positive Z and front to negative Z.
+            </summary>
+            <param name="right">The positive X-axis face of the cubeMap</param>
+            <param name="left">The negative X-axis face of the cubeMap</param>
+            <param name="top">The positive Y-axis face of the cubeMap</param>
+            <param name="down">The negative Y-axis face of the cubeMap</param>
+            <param name="back">The positive Z-axis face of the cubeMap</param>
+            <param name="front">The negative Z-axis face of the cubeMap</param>
+            <param name="width">The width of the faces.</param>
+            <param name="height">The height of the faces.</param>
+            <param name="format">The pixel format the input data is in.</param>
+            <param name="outputStream">The stream to write the encoded image to.</param>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeCubeMapToStream(CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},System.IO.Stream)">
+            <summary>
+            Encodes all mipMaps of a cubeMap image to a stream either in ktx or dds format.
+            The format can be set in <see cref="P:BCnEncoder.Encoder.Options.EncoderOutputOptions.FileFormat"/>.
+            Order of faces is +X, -X, +Y, -Y, +Z, -Z. Back maps to positive Z and front to negative Z.
+            </summary>
+            <param name="right">The positive X-axis face of the cubeMap</param>
+            <param name="left">The negative X-axis face of the cubeMap</param>
+            <param name="top">The positive Y-axis face of the cubeMap</param>
+            <param name="down">The negative Y-axis face of the cubeMap</param>
+            <param name="back">The positive Z-axis face of the cubeMap</param>
+            <param name="front">The negative Z-axis face of the cubeMap</param>
+            <param name="outputStream">The stream to write the encoded image to.</param>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeCubeMapToKtx(System.ReadOnlySpan{System.Byte},System.ReadOnlySpan{System.Byte},System.ReadOnlySpan{System.Byte},System.ReadOnlySpan{System.Byte},System.ReadOnlySpan{System.Byte},System.ReadOnlySpan{System.Byte},System.Int32,System.Int32,BCnEncoder.Encoder.PixelFormat)">
+            <summary>
+            Encodes all mipMaps of a cubeMap image to a <see cref="T:BCnEncoder.Shared.ImageFiles.KtxFile"/>.
+            The format can be set in <see cref="P:BCnEncoder.Encoder.Options.EncoderOutputOptions.FileFormat"/>.
+            Order of faces is +X, -X, +Y, -Y, +Z, -Z. Back maps to positive Z and front to negative Z.
+            </summary>
+            <param name="right">The positive X-axis face of the cubeMap</param>
+            <param name="left">The negative X-axis face of the cubeMap</param>
+            <param name="top">The positive Y-axis face of the cubeMap</param>
+            <param name="down">The negative Y-axis face of the cubeMap</param>
+            <param name="back">The positive Z-axis face of the cubeMap</param>
+            <param name="front">The negative Z-axis face of the cubeMap</param>
+            <param name="width">The width of the faces.</param>
+            <param name="height">The height of the faces.</param>
+            <param name="format">The pixel format the input data is in.</param>
+            <returns>The encoded image as a <see cref="T:BCnEncoder.Shared.ImageFiles.KtxFile"/>.</returns>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeCubeMapToKtx(CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32})">
+            <summary>
+            Encodes all mipMaps of a cubeMap image to a <see cref="T:BCnEncoder.Shared.ImageFiles.KtxFile"/>.
+            The format can be set in <see cref="P:BCnEncoder.Encoder.Options.EncoderOutputOptions.FileFormat"/>.
+            Order of faces is +X, -X, +Y, -Y, +Z, -Z. Back maps to positive Z and front to negative Z.
+            </summary>
+            <param name="right">The positive X-axis face of the cubeMap</param>
+            <param name="left">The negative X-axis face of the cubeMap</param>
+            <param name="top">The positive Y-axis face of the cubeMap</param>
+            <param name="down">The negative Y-axis face of the cubeMap</param>
+            <param name="back">The positive Z-axis face of the cubeMap</param>
+            <param name="front">The negative Z-axis face of the cubeMap</param>
+            <returns>The encoded image as a <see cref="T:BCnEncoder.Shared.ImageFiles.KtxFile"/>.</returns>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeCubeMapToDds(System.ReadOnlySpan{System.Byte},System.ReadOnlySpan{System.Byte},System.ReadOnlySpan{System.Byte},System.ReadOnlySpan{System.Byte},System.ReadOnlySpan{System.Byte},System.ReadOnlySpan{System.Byte},System.Int32,System.Int32,BCnEncoder.Encoder.PixelFormat)">
+            <summary>
+            Encodes all mipMaps of a cubeMap image to a <see cref="T:BCnEncoder.Shared.ImageFiles.DdsFile"/>.
+            The format can be set in <see cref="P:BCnEncoder.Encoder.Options.EncoderOutputOptions.FileFormat"/>.
+            Order of faces is +X, -X, +Y, -Y, +Z, -Z. Back maps to positive Z and front to negative Z.
+            </summary>
+            <param name="right">The positive X-axis face of the cubeMap</param>
+            <param name="left">The negative X-axis face of the cubeMap</param>
+            <param name="top">The positive Y-axis face of the cubeMap</param>
+            <param name="down">The negative Y-axis face of the cubeMap</param>
+            <param name="back">The positive Z-axis face of the cubeMap</param>
+            <param name="front">The negative Z-axis face of the cubeMap</param>
+            <param name="width">The width of the faces.</param>
+            <param name="height">The height of the faces.</param>
+            <param name="format">The pixel format the input data is in.</param>
+            <returns>The encoded image as a <see cref="T:BCnEncoder.Shared.ImageFiles.DdsFile"/>.</returns>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeCubeMapToDds(CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32})">
+            <summary>
+            Encodes all mipMaps of a cubeMap image to a <see cref="T:BCnEncoder.Shared.ImageFiles.DdsFile"/>.
+            The format can be set in <see cref="P:BCnEncoder.Encoder.Options.EncoderOutputOptions.FileFormat"/>.
+            Order of faces is +X, -X, +Y, -Y, +Z, -Z. Back maps to positive Z and front to negative Z.
+            </summary>
+            <param name="right">The positive X-axis face of the cubeMap</param>
+            <param name="left">The negative X-axis face of the cubeMap</param>
+            <param name="top">The positive Y-axis face of the cubeMap</param>
+            <param name="down">The negative Y-axis face of the cubeMap</param>
+            <param name="back">The positive Z-axis face of the cubeMap</param>
+            <param name="front">The negative Z-axis face of the cubeMap</param>
+            <returns>The encoded image as a <see cref="T:BCnEncoder.Shared.ImageFiles.DdsFile"/>.</returns>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeBlock(System.ReadOnlySpan{BCnEncoder.Shared.ColorRgba32})">
+            <summary>
+            Encodes a single 4x4 block to raw encoded bytes. Input Span length must be exactly 16.
+            </summary>
+            <param name="inputBlock">Input 4x4 color block</param>
+            <returns>Raw encoded data</returns>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeBlock(CommunityToolkit.HighPerformance.ReadOnlySpan2D{BCnEncoder.Shared.ColorRgba32})">
+            <summary>
+            Encodes a single 4x4 block to raw encoded bytes. Input Span width and height must be exactly 4.
+            </summary>
+            <param name="inputBlock">Input 4x4 color block</param>
+            <returns>Raw encoded data</returns>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeBlock(System.ReadOnlySpan{BCnEncoder.Shared.ColorRgba32},System.IO.Stream)">
+            <summary>
+            Encodes a single 4x4 block and writes the encoded block to a stream. Input Span length must be exactly 16.
+            </summary>
+            <param name="inputBlock">Input 4x4 color block</param>
+            <param name="outputStream">Output stream where the encoded block will be written to.</param>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeBlock(CommunityToolkit.HighPerformance.ReadOnlySpan2D{BCnEncoder.Shared.ColorRgba32},System.IO.Stream)">
+            <summary>
+            Encodes a single 4x4 block and writes the encoded block to a stream. Input Span width and height must be exactly 4.
+            </summary>
+            <param name="inputBlock">Input 4x4 color block</param>
+            <param name="outputStream">Output stream where the encoded block will be written to.</param>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.GetBlockSize">
+            <summary>
+            Gets the block size of the currently selected compression format in bytes.
+            </summary>
+            <returns>The size of a single 4x4 block in bytes</returns>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.GetBlockCount(System.Int32,System.Int32)">
+            <summary>
+            Gets the number of total blocks in an image with the given pixel width and height.
+            </summary>
+            <param name="pixelWidth">The pixel width of the image</param>
+            <param name="pixelHeight">The pixel height of the image</param>
+            <returns>The total number of blocks.</returns>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.GetBlockCount(System.Int32,System.Int32,System.Int32@,System.Int32@)">
+            <summary>
+            Gets the number of blocks in an image with the given pixel width and height.
+            </summary>
+            <param name="pixelWidth">The pixel width of the image</param>
+            <param name="pixelHeight">The pixel height of the image</param>
+            <param name="blocksWidth">The amount of blocks in the x-axis</param>
+            <param name="blocksHeight">The amount of blocks in the y-axis</param>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeToStreamHdrAsync(CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},System.IO.Stream,System.Threading.CancellationToken)">
+            <summary>
+            Encodes all mipmap levels into a ktx or a dds file and writes it to the output stream asynchronously.
+            </summary>
+            <param name="input">The input to encode represented by a <see cref="T:CommunityToolkit.HighPerformance.ReadOnlyMemory2D`1"/>.</param>
+            <param name="outputStream">The stream to write the encoded image to.</param>
+            <param name="token">The cancellation token for this operation. Can be default if cancellation is not needed.</param>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeToKtxHdrAsync(CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},System.Threading.CancellationToken)">
+            <summary>
+            Encodes all mipmap levels into a Ktx file asynchronously.
+            </summary>
+            <param name="input">The input to encode represented by a <see cref="T:CommunityToolkit.HighPerformance.ReadOnlyMemory2D`1"/>.</param>
+            <param name="token">The cancellation token for this operation. Can be default if cancellation is not needed.</param>
+            <returns>The Ktx file containing the encoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeToDdsHdrAsync(CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},System.Threading.CancellationToken)">
+            <summary>
+            Encodes all mipmap levels into a Dds file asynchronously.
+            </summary>
+            <param name="input">The input to encode represented by a <see cref="T:CommunityToolkit.HighPerformance.ReadOnlyMemory2D`1"/>.</param>
+            <param name="token">The cancellation token for this operation. Can be default if cancellation is not needed.</param>
+            <returns>The Dds file containing the encoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeToRawBytesHdrAsync(CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},System.Threading.CancellationToken)">
+            <summary>
+            Encodes all mipmap levels of an HDR image into an array of byte buffers asynchronously. This data does not contain any file headers, just the raw encoded pixel data.
+            </summary>
+            <param name="input">The input to encode represented by a <see cref="T:CommunityToolkit.HighPerformance.ReadOnlyMemory2D`1"/>.</param>
+            <param name="token">The cancellation token for this operation. Can be default if cancellation is not needed.</param>
+            <returns>A list of raw encoded mipmap input.</returns>
+            <remarks>To get the width and height of the encoded mip levels, see <see cref="M:BCnEncoder.Encoder.BcEncoder.CalculateMipMapSize(System.Int32,System.Int32,System.Int32,System.Int32@,System.Int32@)"/>.</remarks>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeToRawBytesHdrAsync(CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Encodes a single mip level of the input HDR image to a byte buffer asynchronously. This data does not contain any file headers, just the raw encoded pixel data.
+            </summary>
+            <param name="input">The input to encode represented by a <see cref="T:CommunityToolkit.HighPerformance.ReadOnlyMemory2D`1"/>.</param>
+            <param name="mipLevel">The mipmap to encode.</param>
+            <param name="token">The cancellation token for this operation. Can be default if cancellation is not needed.</param>
+            <returns>The raw encoded input.</returns>
+            <remarks>To get the width and height of the encoded mip level, see <see cref="M:BCnEncoder.Encoder.BcEncoder.CalculateMipMapSize(System.Int32,System.Int32,System.Int32,System.Int32@,System.Int32@)"/>.</remarks>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeCubeMapToStreamHdrAsync(CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},System.IO.Stream,System.Threading.CancellationToken)">
+            <summary>
+            Encodes all mipMaps of a cubeMap HDR image to a stream asynchronously either in ktx or dds format.
+            The format can be set in <see cref="P:BCnEncoder.Encoder.Options.EncoderOutputOptions.FileFormat"/>.
+            Order of faces is +X, -X, +Y, -Y, +Z, -Z. Back maps to positive Z and front to negative Z.
+            </summary>
+            <param name="right">The positive X-axis face of the cubeMap</param>
+            <param name="left">The negative X-axis face of the cubeMap</param>
+            <param name="top">The positive Y-axis face of the cubeMap</param>
+            <param name="down">The negative Y-axis face of the cubeMap</param>
+            <param name="back">The positive Z-axis face of the cubeMap</param>
+            <param name="front">The negative Z-axis face of the cubeMap</param>
+            <param name="outputStream">The stream to write the encoded image to.</param>
+            <param name="token">The cancellation token for this operation. Can be default if cancellation is not needed.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/>.</returns>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeCubeMapToKtxHdrAsync(CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},System.Threading.CancellationToken)">
+            <summary>
+            Encodes all mipMaps of a cubeMap HDR image to a <see cref="T:BCnEncoder.Shared.ImageFiles.KtxFile"/> asynchronously.
+            The format can be set in <see cref="P:BCnEncoder.Encoder.Options.EncoderOutputOptions.FileFormat"/>.
+            Order of faces is +X, -X, +Y, -Y, +Z, -Z. Back maps to positive Z and front to negative Z.
+            </summary>
+            <param name="right">The positive X-axis face of the cubeMap</param>
+            <param name="left">The negative X-axis face of the cubeMap</param>
+            <param name="top">The positive Y-axis face of the cubeMap</param>
+            <param name="down">The negative Y-axis face of the cubeMap</param>
+            <param name="back">The positive Z-axis face of the cubeMap</param>
+            <param name="front">The negative Z-axis face of the cubeMap</param>
+            <param name="token">The cancellation token for this operation. Can be default if cancellation is not needed.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task`1"/> of type <see cref="T:BCnEncoder.Shared.ImageFiles.KtxFile"/>.</returns>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeCubeMapToDdsHdrAsync(CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},System.Threading.CancellationToken)">
+            <summary>
+            Encodes all mipMaps of a cubeMap HDR image to a <see cref="T:BCnEncoder.Shared.ImageFiles.DdsFile"/> asynchronously.
+            The format can be set in <see cref="P:BCnEncoder.Encoder.Options.EncoderOutputOptions.FileFormat"/>.
+            Order of faces is +X, -X, +Y, -Y, +Z, -Z. Back maps to positive Z and front to negative Z.
+            </summary>
+            <param name="right">The positive X-axis face of the cubeMap</param>
+            <param name="left">The negative X-axis face of the cubeMap</param>
+            <param name="top">The positive Y-axis face of the cubeMap</param>
+            <param name="down">The negative Y-axis face of the cubeMap</param>
+            <param name="back">The positive Z-axis face of the cubeMap</param>
+            <param name="front">The negative Z-axis face of the cubeMap</param>
+            <param name="token">The cancellation token for this operation. Can be default if cancellation is not needed.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task`1"/> of type <see cref="T:BCnEncoder.Shared.ImageFiles.DdsFile"/>.</returns>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeToStreamHdr(CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},System.IO.Stream)">
+            <summary>
+            Encodes all mipmap levels into a ktx or a dds file and writes it to the output stream.
+            </summary>
+            <param name="input">The input to encode represented by a <see cref="T:CommunityToolkit.HighPerformance.ReadOnlyMemory2D`1"/>.</param>
+            <param name="outputStream">The stream to write the encoded image to.</param>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeToKtxHdr(CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat})">
+            <summary>
+            Encodes all mipmap levels into a Ktx file.
+            </summary>
+            <param name="input">The input to encode represented by a <see cref="T:CommunityToolkit.HighPerformance.ReadOnlyMemory2D`1"/>.</param>
+            <returns>The <see cref="T:BCnEncoder.Shared.ImageFiles.KtxFile"/> containing the encoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeToDdsHdr(CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat})">
+            <summary>
+            Encodes all mipmap levels into a Dds file.
+            </summary>
+            <param name="input">The input to encode represented by a <see cref="T:CommunityToolkit.HighPerformance.ReadOnlyMemory2D`1"/>.</param>
+            <returns>The <see cref="T:BCnEncoder.Shared.ImageFiles.DdsFile"/> containing the encoded image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeToRawBytesHdr(CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat})">
+            <summary>
+            Encodes all mipmap levels of a HDR image into a list of byte buffers. This data does not contain any file headers, just the raw encoded pixel data.
+            </summary>
+            <param name="input">The input to encode represented by a <see cref="T:CommunityToolkit.HighPerformance.ReadOnlyMemory2D`1"/>.</param>
+            <returns>An array of byte buffers containing all mipmap levels.</returns>
+            <remarks>To get the width and height of the encoded mip levels, see <see cref="M:BCnEncoder.Encoder.BcEncoder.CalculateMipMapSize(System.Int32,System.Int32,System.Int32,System.Int32@,System.Int32@)"/>.</remarks>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeToRawBytesHdr(CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},System.Int32,System.Int32@,System.Int32@)">
+            <summary>
+            Encodes a single mip level of the HDR input image to a byte buffer. This data does not contain any file headers, just the raw encoded pixel data.
+            </summary>
+            <param name="input">The input to encode represented by a <see cref="T:CommunityToolkit.HighPerformance.ReadOnlyMemory2D`1"/>.</param>
+            <param name="mipLevel">The mipmap to encode.</param>
+            <param name="mipWidth">The width of the mipmap.</param>
+            <param name="mipHeight">The height of the mipmap.</param>
+            <returns>A byte buffer containing the encoded data of the requested mip-level.</returns>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeCubeMapToStreamHdr(CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},System.IO.Stream)">
+            <summary>
+            Encodes all mipMaps of a HDR cubeMap image to a stream either in ktx or dds format.
+            The format can be set in <see cref="P:BCnEncoder.Encoder.Options.EncoderOutputOptions.FileFormat"/>.
+            Order of faces is +X, -X, +Y, -Y, +Z, -Z. Back maps to positive Z and front to negative Z.
+            </summary>
+            <param name="right">The positive X-axis face of the cubeMap</param>
+            <param name="left">The negative X-axis face of the cubeMap</param>
+            <param name="top">The positive Y-axis face of the cubeMap</param>
+            <param name="down">The negative Y-axis face of the cubeMap</param>
+            <param name="back">The positive Z-axis face of the cubeMap</param>
+            <param name="front">The negative Z-axis face of the cubeMap</param>
+            <param name="outputStream">The stream to write the encoded image to.</param>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeCubeMapToKtxHdr(CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat})">
+            <summary>
+            Encodes all mipMaps of a HDR cubeMap image to a <see cref="T:BCnEncoder.Shared.ImageFiles.KtxFile"/>.
+            The format can be set in <see cref="P:BCnEncoder.Encoder.Options.EncoderOutputOptions.FileFormat"/>.
+            Order of faces is +X, -X, +Y, -Y, +Z, -Z. Back maps to positive Z and front to negative Z.
+            </summary>
+            <param name="right">The positive X-axis face of the cubeMap</param>
+            <param name="left">The negative X-axis face of the cubeMap</param>
+            <param name="top">The positive Y-axis face of the cubeMap</param>
+            <param name="down">The negative Y-axis face of the cubeMap</param>
+            <param name="back">The positive Z-axis face of the cubeMap</param>
+            <param name="front">The negative Z-axis face of the cubeMap</param>
+            <returns>The encoded image as a <see cref="T:BCnEncoder.Shared.ImageFiles.KtxFile"/>.</returns>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeCubeMapToDdsHdr(CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat})">
+            <summary>
+            Encodes all mipMaps of a HDR cubeMap image to a <see cref="T:BCnEncoder.Shared.ImageFiles.DdsFile"/>.
+            The format can be set in <see cref="P:BCnEncoder.Encoder.Options.EncoderOutputOptions.FileFormat"/>.
+            Order of faces is +X, -X, +Y, -Y, +Z, -Z. Back maps to positive Z and front to negative Z.
+            </summary>
+            <param name="right">The positive X-axis face of the cubeMap</param>
+            <param name="left">The negative X-axis face of the cubeMap</param>
+            <param name="top">The positive Y-axis face of the cubeMap</param>
+            <param name="down">The negative Y-axis face of the cubeMap</param>
+            <param name="back">The positive Z-axis face of the cubeMap</param>
+            <param name="front">The negative Z-axis face of the cubeMap</param>
+            <returns>The encoded image as a <see cref="T:BCnEncoder.Shared.ImageFiles.DdsFile"/>.</returns>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeBlockHdr(System.ReadOnlySpan{BCnEncoder.Shared.ColorRgbFloat})">
+            <summary>
+            Encodes a single 4x4 HDR block to raw encoded bytes. Input Span length must be exactly 16.
+            </summary>
+            <param name="inputBlock">Input 4x4 color block</param>
+            <returns>Raw encoded data</returns>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeBlockHdr(CommunityToolkit.HighPerformance.ReadOnlySpan2D{BCnEncoder.Shared.ColorRgbFloat})">
+            <summary>
+            Encodes a single 4x4 HDR block to raw encoded bytes. Input Span width and height must be exactly 4.
+            </summary>
+            <param name="inputBlock">Input 4x4 color block</param>
+            <returns>Raw encoded data</returns>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeBlockHdr(System.ReadOnlySpan{BCnEncoder.Shared.ColorRgbFloat},System.IO.Stream)">
+            <summary>
+            Encodes a single 4x4 HDR block and writes the encoded block to a stream. Input Span length must be exactly 16.
+            </summary>
+            <param name="inputBlock">Input 4x4 color block</param>
+            <param name="outputStream">Output stream where the encoded block will be written to.</param>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.EncodeBlockHdr(CommunityToolkit.HighPerformance.ReadOnlySpan2D{BCnEncoder.Shared.ColorRgbFloat},System.IO.Stream)">
+            <summary>
+            Encodes a single 4x4 HDR block and writes the encoded block to a stream. Input Span width and height must be exactly 4.
+            </summary>
+            <param name="inputBlock">Input 4x4 color block</param>
+            <param name="outputStream">Output stream where the encoded block will be written to.</param>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.CalculateNumberOfMipLevels(System.Int32,System.Int32)">
+            <summary>
+            Calculates the number of mipmap levels that will be generated for the given input image.
+            </summary>
+            <param name="imagePixelWidth">The width of the input image in pixels</param>
+            <param name="imagePixelHeight">The height of the input image in pixels</param>
+            <returns>The number of mipmap levels that will be generated for the input image.</returns>
+        </member>
+        <member name="M:BCnEncoder.Encoder.BcEncoder.CalculateMipMapSize(System.Int32,System.Int32,System.Int32,System.Int32@,System.Int32@)">
+            <summary>
+            Calculates the size of a given mipmap level.
+            </summary>
+            <param name="imagePixelWidth">The width of the input image in pixels</param>
+            <param name="imagePixelHeight">The height of the input image in pixels</param>
+            <param name="mipLevel">The mipLevel to calculate (0 is original image)</param>
+            <param name="mipWidth">The mipmap width calculated</param>
+            <param name="mipHeight">The mipmap height calculated</param>
+        </member>
+        <member name="M:BCnEncoder.Encoder.Bptc.Bc6EncodingHelpers.PreQuantize(System.Single,System.Boolean)">
+            <summary>
+            Opposite of <see cref="M:BCnEncoder.Shared.Bc6Block.FinishUnQuantize(System.Int32,System.Boolean)"/>
+            </summary>
+        </member>
+        <member name="M:BCnEncoder.Encoder.Bptc.Bc6EncodingHelpers.Quantize(System.Int32,System.Int32,System.Boolean)">
+            <summary>
+            Opposite of <see cref="M:BCnEncoder.Shared.Bc6Block.UnQuantize(System.Int32,System.Int32,System.Boolean)"/>
+            </summary>
+        </member>
+        <member name="M:BCnEncoder.Encoder.Bptc.Bc7EncodingHelpers.GetColorComponentPrecisionWithPBit(BCnEncoder.Shared.Bc7BlockType)">
+            <summary>
+            Includes PBit
+            </summary>
+        </member>
+        <member name="M:BCnEncoder.Encoder.Bptc.Bc7EncodingHelpers.GetAlphaComponentPrecisionWithPBit(BCnEncoder.Shared.Bc7BlockType)">
+            <summary>
+            Includes PBit
+            </summary>
+        </member>
+        <member name="M:BCnEncoder.Encoder.Bptc.Bc7EncodingHelpers.GetColorComponentPrecision(BCnEncoder.Shared.Bc7BlockType)">
+            <summary>
+            Does not include pBit
+            </summary>
+        </member>
+        <member name="M:BCnEncoder.Encoder.Bptc.Bc7EncodingHelpers.GetAlphaComponentPrecision(BCnEncoder.Shared.Bc7BlockType)">
+            <summary>
+            Does not include pBit
+            </summary>
+        </member>
+        <member name="M:BCnEncoder.Encoder.Bptc.Bc7EncodingHelpers.FillAlphaColorIndices(BCnEncoder.Shared.Bc7BlockType,BCnEncoder.Shared.RawBlock4X4Rgba32,BCnEncoder.Shared.ColorRgba32,BCnEncoder.Shared.ColorRgba32,System.Span{System.Byte},System.Span{System.Byte},System.Int32)">
+            <summary>
+            Used for Modes 4 and 5
+            </summary>
+        </member>
+        <member name="M:BCnEncoder.Encoder.Bptc.ClusterIndices4X4.Reduce(System.Int32@)">
+            <summary>
+            Reduces block down to adjacent cluster indices. For example,
+            block that contains clusters 5, 16 and 77 will become a block that contains clusters 0, 1 and 2
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Encoder.CompressionQuality.Fast">
+            <summary>
+            Fast, but low Quality. Especially bad with gradients.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Encoder.CompressionQuality.Balanced">
+            <summary>
+            Strikes a balance between speed and Quality. Good enough for most purposes.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Encoder.CompressionQuality.BestQuality">
+            <summary>
+            Aims for best Quality encoding. Can be very slow.
+            </summary>
+        </member>
+        <member name="T:BCnEncoder.Encoder.LeastSquares">
+            <summary>
+            Least squares optimization from https://github.com/knarkowicz/GPURealTimeBC6H
+            Code is public domain
+            </summary>
+        </member>
+        <member name="T:BCnEncoder.Encoder.Options.EncoderInputOptions">
+            <summary>
+            The input options for the decoder.
+            </summary>
+        </member>
+        <member name="P:BCnEncoder.Encoder.Options.EncoderInputOptions.LuminanceAsRed">
+            <summary>
+            If true, when encoding to R8 raw format,
+            use the pixel luminance instead of just the red channel. Default is false. (Does not apply to BC4 format)
+            </summary>
+        </member>
+        <member name="P:BCnEncoder.Encoder.Options.EncoderInputOptions.Bc4Component">
+            <summary>
+            The color channel to take for the values of a BC4 block. Default is red.
+            </summary>
+        </member>
+        <member name="P:BCnEncoder.Encoder.Options.EncoderInputOptions.Bc5Component1">
+            <summary>
+            The color channel to take for the values of the first BC5 block. Default is red.
+            </summary>
+        </member>
+        <member name="P:BCnEncoder.Encoder.Options.EncoderInputOptions.Bc5Component2">
+            <summary>
+            The color channel to take for the values of the second BC5 block. Default is green.
+            </summary>
+        </member>
+        <member name="T:BCnEncoder.Encoder.Options.EncoderOptions">
+            <summary>
+            General options for the encoder.
+            </summary>
+        </member>
+        <member name="P:BCnEncoder.Encoder.Options.EncoderOptions.IsParallel">
+            <summary>
+            Whether the blocks should be encoded in parallel. This can be much faster than single-threaded encoding,
+            but is slow if multiple textures are being processed at the same time.
+            When a debugger is attached, the encoder defaults to single-threaded operation to ease debugging.
+            Default is true.
+            </summary>
+        </member>
+        <member name="P:BCnEncoder.Encoder.Options.EncoderOptions.TaskCount">
+            <summary>
+            Determines how many tasks should be used for parallel processing.
+            </summary>
+        </member>
+        <member name="P:BCnEncoder.Encoder.Options.EncoderOptions.Progress">
+            <summary>
+            The progress context for the operation.
+            </summary>
+        </member>
+        <member name="T:BCnEncoder.Encoder.Options.EncoderOutputOptions">
+            <summary>
+            The output options for the encoder.
+            </summary>
+        </member>
+        <member name="P:BCnEncoder.Encoder.Options.EncoderOutputOptions.GenerateMipMaps">
+            <summary>
+            Whether to generate mipMaps. Default is true.
+            </summary>
+        </member>
+        <member name="P:BCnEncoder.Encoder.Options.EncoderOutputOptions.MaxMipMapLevel">
+            <summary>
+            The maximum number of mipmap levels to generate. -1 or 0 is unbounded.
+            Default is -1.
+            </summary>
+        </member>
+        <member name="P:BCnEncoder.Encoder.Options.EncoderOutputOptions.Format">
+            <summary>
+            The compression Format to use. Default is Bc1.
+            </summary>
+        </member>
+        <member name="P:BCnEncoder.Encoder.Options.EncoderOutputOptions.Quality">
+            <summary>
+            The Quality of the compression. Use either fast or balanced for testing.
+            Fast can be used for near real-time encoding for most algorithms.
+            Use bestQuality when needed. Default is balanced.
+            </summary>
+        </member>
+        <member name="P:BCnEncoder.Encoder.Options.EncoderOutputOptions.FileFormat">
+            <summary>
+            The output file Format of the data. Either Ktx or Dds.
+            Default is Ktx.
+            </summary>
+        </member>
+        <member name="P:BCnEncoder.Encoder.Options.EncoderOutputOptions.DdsBc1WriteAlphaFlag">
+            <summary>
+            The DDS file Format doesn't seem to have a standard for indicating whether a BC1 texture
+            includes 1bit of alpha. This option will write DDPF_ALPHAPIXELS flag to the header
+            to indicate the presence of an alpha channel. Some programs read and write this flag,
+            but some programs don't like it and get confused. Your mileage may vary.
+            Default is false.
+            </summary>
+        </member>
+        <member name="P:BCnEncoder.Encoder.Options.EncoderOutputOptions.DdsPreferDxt10Header">
+            <summary>
+            When writing a dds file, always prefer using the Dxt10 header
+            to write the compression format instead of DwFourCC.
+            </summary>
+        </member>
+        <member name="M:BCnEncoder.Shared.Bc6Block.GetIndexBitCount(System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Decrements bitCount by one if index is one of the anchor indices.
+            </summary>
+        </member>
+        <member name="P:BCnEncoder.Shared.Bc7Block.ColorComponentPrecision">
+            <summary>
+            Bitcount of color component including Pbit
+            </summary>
+        </member>
+        <member name="P:BCnEncoder.Shared.Bc7Block.AlphaComponentPrecision">
+            <summary>
+            Bitcount of alpha component including Pbit
+            </summary>
+        </member>
+        <member name="P:BCnEncoder.Shared.Bc7Block.Type4IndexMode">
+            <summary>
+            Type 4 has 2-bit and 3-bit indices. If index mode is 0, color components will use 2-bit indices and alpha will use 3-bit indices.
+            In index mode 1, color will use 3-bit indices and alpha will use 2-bit indices.
+            </summary>
+        </member>
+        <member name="M:BCnEncoder.Shared.Bc7Block.GetIndexBitCount(System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Decrements bitCount by one if index is one of the anchor indices.
+            </summary>
+        </member>
+        <member name="M:BCnEncoder.Shared.Bc7Block.SwapChannels(BCnEncoder.Shared.ColorRgba32,System.Int32)">
+            <summary>
+            00 – no swapping
+            01 – swap A and R
+            10 – swap A and G
+            11 - swap A and B
+            </summary>
+        </member>
+        <member name="T:BCnEncoder.Shared.ColorComponent">
+            <summary>
+            The component to take from colors for BC4 and BC5.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.ColorComponent.R">
+            <summary>
+            The red component of an Rgba32 color.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.ColorComponent.G">
+            <summary>
+            The green component of an Rgba32 color.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.ColorComponent.B">
+            <summary>
+            The blue component of an Rgba32 color.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.ColorComponent.A">
+            <summary>
+            The alpha component of an Rgba32 color.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.ColorComponent.Luminance">
+            <summary>
+            Use the color's luminance value as the component.
+            </summary>
+        </member>
+        <member name="M:BCnEncoder.Shared.ColorRgba32.op_LeftShift(BCnEncoder.Shared.ColorRgba32,System.Int32)">
+            <summary>
+            Component-wise left shift
+            </summary>
+        </member>
+        <member name="M:BCnEncoder.Shared.ColorRgba32.op_RightShift(BCnEncoder.Shared.ColorRgba32,System.Int32)">
+            <summary>
+            Component-wise right shift
+            </summary>
+        </member>
+        <member name="M:BCnEncoder.Shared.ColorRgba32.op_BitwiseOr(BCnEncoder.Shared.ColorRgba32,BCnEncoder.Shared.ColorRgba32)">
+            <summary>
+            Component-wise bitwise OR operation
+            </summary>
+        </member>
+        <member name="M:BCnEncoder.Shared.ColorRgba32.op_BitwiseOr(BCnEncoder.Shared.ColorRgba32,System.Int32)">
+            <summary>
+            Component-wise bitwise OR operation
+            </summary>
+        </member>
+        <member name="M:BCnEncoder.Shared.ColorRgba32.op_BitwiseAnd(BCnEncoder.Shared.ColorRgba32,BCnEncoder.Shared.ColorRgba32)">
+            <summary>
+            Component-wise bitwise AND operation
+            </summary>
+        </member>
+        <member name="M:BCnEncoder.Shared.ColorRgba32.op_BitwiseAnd(BCnEncoder.Shared.ColorRgba32,System.Int32)">
+            <summary>
+            Component-wise bitwise AND operation
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.CompressionFormat.R">
+            <summary>
+            Raw unsigned byte 8-bit Luminance data
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.CompressionFormat.Rg">
+            <summary>
+            Raw unsigned byte 16-bit RG data
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.CompressionFormat.Rgb">
+            <summary>
+            Raw unsigned byte 24-bit RGB data
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.CompressionFormat.Rgba">
+            <summary>
+            Raw unsigned byte 32-bit RGBA data
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.CompressionFormat.Bgra">
+            <summary>
+            Raw unsigned byte 32-bit BGRA data
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.CompressionFormat.Bc1">
+            <summary>
+            BC1 / DXT1 with no alpha. Very widely supported and good compression ratio.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.CompressionFormat.Bc1WithAlpha">
+            <summary>
+            BC1 / DXT1 with 1-bit of alpha.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.CompressionFormat.Bc2">
+            <summary>
+            BC2 / DXT3 encoding with alpha. Good for sharp alpha transitions.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.CompressionFormat.Bc3">
+            <summary>
+            BC3 / DXT5 encoding with alpha. Good for smooth alpha transitions.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.CompressionFormat.Bc4">
+            <summary>
+            BC4 single-channel encoding. Only luminance is encoded.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.CompressionFormat.Bc5">
+            <summary>
+            BC5 dual-channel encoding. Only red and green channels are encoded.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.CompressionFormat.Bc6U">
+            <summary>
+            BC6H / BPTC unsigned float encoding. Can compress HDR textures without alpha. Does not support negative values.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.CompressionFormat.Bc6S">
+            <summary>
+            BC6H / BPTC signed float encoding. Can compress HDR textures without alpha. Supports negative values.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.CompressionFormat.Bc7">
+            <summary>
+            BC7 / BPTC unorm encoding. Very high Quality rgba or rgb encoding. Also very slow.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.CompressionFormat.Atc">
+            <summary>
+            ATC / Adreno Texture Compression encoding. Derivative of BC1.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.CompressionFormat.AtcExplicitAlpha">
+            <summary>
+            ATC / Adreno Texture Compression encoding. Derivative of BC2. Good for sharp alpha transitions.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.CompressionFormat.AtcInterpolatedAlpha">
+            <summary>
+            ATC / Adreno Texture Compression encoding. Derivative of BC3. Good for smooth alpha transitions.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.CompressionFormat.Unknown">
+            <summary>
+            Unknown format
+            </summary>
+        </member>
+        <member name="T:BCnEncoder.Shared.Half">
+             <summary>
+             Represents a half-precision floating point number. 
+             </summary>
+             <remarks>
+             Note:
+                 Half is not fast enought and precision is also very bad, 
+                 so is should not be used for mathematical computation (use Single instead).
+                 The main advantage of Half type is lower memory cost: two bytes per number. 
+                 Half is typically used in graphical applications.
+                 
+             Note: 
+                 All functions, where is used conversion half->float/float->half, 
+                 are approx. ten times slower than float->double/double->float, i.e. ~3ns on 2GHz CPU.
+            
+             References:
+                 - Code retrieved from http://sourceforge.net/p/csharp-half/code/HEAD/tree/ on 2015-12-04
+                 - Fast Half Float Conversions, Jeroen van der Zijp, link: http://www.fox-toolkit.org/ftp/fasthalffloatconversion.pdf
+                 - IEEE 754 revision, link: http://grouper.ieee.org/groups/754/
+             </remarks>
+        </member>
+        <member name="F:BCnEncoder.Shared.Half.Value">
+            <summary>
+            Internal representation of the half-precision floating-point number.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.Half.Epsilon">
+            <summary>
+            Represents the smallest positive System.Half value greater than zero. This field is constant.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.Half.MaxValue">
+            <summary>
+            Represents the largest possible value of System.Half. This field is constant.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.Half.MinValue">
+            <summary>
+            Represents the smallest possible value of System.Half. This field is constant.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.Half.NaN">
+            <summary>
+            Represents not a number (NaN). This field is constant.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.Half.NegativeInfinity">
+            <summary>
+            Represents negative infinity. This field is constant.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.Half.PositiveInfinity">
+            <summary>
+            Represents positive infinity. This field is constant.
+            </summary>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.#ctor(System.Single)">
+            <summary>
+            Initializes a new instance of System.Half to the value of the specified single-precision floating-point number.
+            </summary>
+            <param name="value">The value to represent as a System.Half.</param>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.#ctor(System.Int32)">
+            <summary>
+            Initializes a new instance of System.Half to the value of the specified 32-bit signed integer.
+            </summary>
+            <param name="value">The value to represent as a System.Half.</param>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.#ctor(System.Int64)">
+            <summary>
+            Initializes a new instance of System.Half to the value of the specified 64-bit signed integer.
+            </summary>
+            <param name="value">The value to represent as a System.Half.</param>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.#ctor(System.Double)">
+            <summary>
+            Initializes a new instance of System.Half to the value of the specified double-precision floating-point number.
+            </summary>
+            <param name="value">The value to represent as a System.Half.</param>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.#ctor(System.Decimal)">
+            <summary>
+            Initializes a new instance of System.Half to the value of the specified decimal number.
+            </summary>
+            <param name="value">The value to represent as a System.Half.</param>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.#ctor(System.UInt32)">
+            <summary>
+            Initializes a new instance of System.Half to the value of the specified 32-bit unsigned integer.
+            </summary>
+            <param name="value">The value to represent as a System.Half.</param>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.#ctor(System.UInt64)">
+            <summary>
+            Initializes a new instance of System.Half to the value of the specified 64-bit unsigned integer.
+            </summary>
+            <param name="value">The value to represent as a System.Half.</param>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.Negate(BCnEncoder.Shared.Half)">
+            <summary>
+            Returns the result of multiplying the specified System.Half value by negative one.
+            </summary>
+            <param name="half">A System.Half.</param>
+            <returns>A System.Half with the value of half, but the opposite sign. -or- Zero, if half is zero.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.Add(BCnEncoder.Shared.Half,BCnEncoder.Shared.Half)">
+            <summary>
+            Adds two specified System.Half values.
+            </summary>
+            <param name="half1">A System.Half.</param>
+            <param name="half2">A System.Half.</param>
+            <returns>A System.Half value that is the sum of half1 and half2.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.Subtract(BCnEncoder.Shared.Half,BCnEncoder.Shared.Half)">
+            <summary>
+            Subtracts one specified System.Half value from another.
+            </summary>
+            <param name="half1">A System.Half (the minuend).</param>
+            <param name="half2">A System.Half (the subtrahend).</param>
+            <returns>The System.Half result of subtracting half2 from half1.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.Multiply(BCnEncoder.Shared.Half,BCnEncoder.Shared.Half)">
+            <summary>
+            Multiplies two specified System.Half values.
+            </summary>
+            <param name="half1">A System.Half (the multiplicand).</param>
+            <param name="half2">A System.Half (the multiplier).</param>
+            <returns>A System.Half that is the result of multiplying half1 and half2.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.Divide(BCnEncoder.Shared.Half,BCnEncoder.Shared.Half)">
+            <summary>
+            Divides two specified System.Half values.
+            </summary>
+            <param name="half1">A System.Half (the dividend).</param>
+            <param name="half2">A System.Half (the divisor).</param>
+            <returns>The System.Half that is the result of dividing half1 by half2.</returns>
+            <exception cref="T:System.DivideByZeroException">half2 is zero.</exception>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.op_UnaryPlus(BCnEncoder.Shared.Half)">
+            <summary>
+            Returns the value of the System.Half operand (the sign of the operand is unchanged).
+            </summary>
+            <param name="half">The System.Half operand.</param>
+            <returns>The value of the operand, half.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.op_UnaryNegation(BCnEncoder.Shared.Half)">
+            <summary>
+            Negates the value of the specified System.Half operand.
+            </summary>
+            <param name="half">The System.Half operand.</param>
+            <returns>The result of half multiplied by negative one (-1).</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.op_Increment(BCnEncoder.Shared.Half)">
+            <summary>
+            Increments the System.Half operand by 1.
+            </summary>
+            <param name="half">The System.Half operand.</param>
+            <returns>The value of half incremented by 1.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.op_Decrement(BCnEncoder.Shared.Half)">
+            <summary>
+            Decrements the System.Half operand by one.
+            </summary>
+            <param name="half">The System.Half operand.</param>
+            <returns>The value of half decremented by 1.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.op_Addition(BCnEncoder.Shared.Half,BCnEncoder.Shared.Half)">
+            <summary>
+            Adds two specified System.Half values.
+            </summary>
+            <param name="half1">A System.Half.</param>
+            <param name="half2">A System.Half.</param>
+            <returns>The System.Half result of adding half1 and half2.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.op_Subtraction(BCnEncoder.Shared.Half,BCnEncoder.Shared.Half)">
+            <summary>
+            Subtracts two specified System.Half values.
+            </summary>
+            <param name="half1">A System.Half.</param>
+            <param name="half2">A System.Half.</param>
+            <returns>The System.Half result of subtracting half1 and half2.</returns>        
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.op_Multiply(BCnEncoder.Shared.Half,BCnEncoder.Shared.Half)">
+            <summary>
+            Multiplies two specified System.Half values.
+            </summary>
+            <param name="half1">A System.Half.</param>
+            <param name="half2">A System.Half.</param>
+            <returns>The System.Half result of multiplying half1 by half2.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.op_Division(BCnEncoder.Shared.Half,BCnEncoder.Shared.Half)">
+            <summary>
+            Divides two specified System.Half values.
+            </summary>
+            <param name="half1">A System.Half (the dividend).</param>
+            <param name="half2">A System.Half (the divisor).</param>
+            <returns>The System.Half result of half1 by half2.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.op_Equality(BCnEncoder.Shared.Half,BCnEncoder.Shared.Half)">
+            <summary>
+            Returns a value indicating whether two instances of System.Half are equal.
+            </summary>
+            <param name="half1">A System.Half.</param>
+            <param name="half2">A System.Half.</param>
+            <returns>true if half1 and half2 are equal; otherwise, false.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.op_Inequality(BCnEncoder.Shared.Half,BCnEncoder.Shared.Half)">
+            <summary>
+            Returns a value indicating whether two instances of System.Half are not equal.
+            </summary>
+            <param name="half1">A System.Half.</param>
+            <param name="half2">A System.Half.</param>
+            <returns>true if half1 and half2 are not equal; otherwise, false.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.op_LessThan(BCnEncoder.Shared.Half,BCnEncoder.Shared.Half)">
+            <summary>
+            Returns a value indicating whether a specified System.Half is less than another specified System.Half.
+            </summary>
+            <param name="half1">A System.Half.</param>
+            <param name="half2">A System.Half.</param>
+            <returns>true if half1 is less than half1; otherwise, false.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.op_GreaterThan(BCnEncoder.Shared.Half,BCnEncoder.Shared.Half)">
+            <summary>
+            Returns a value indicating whether a specified System.Half is greater than another specified System.Half.
+            </summary>
+            <param name="half1">A System.Half.</param>
+            <param name="half2">A System.Half.</param>
+            <returns>true if half1 is greater than half2; otherwise, false.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.op_LessThanOrEqual(BCnEncoder.Shared.Half,BCnEncoder.Shared.Half)">
+            <summary>
+            Returns a value indicating whether a specified System.Half is less than or equal to another specified System.Half.
+            </summary>
+            <param name="half1">A System.Half.</param>
+            <param name="half2">A System.Half.</param>
+            <returns>true if half1 is less than or equal to half2; otherwise, false.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.op_GreaterThanOrEqual(BCnEncoder.Shared.Half,BCnEncoder.Shared.Half)">
+            <summary>
+            Returns a value indicating whether a specified System.Half is greater than or equal to another specified System.Half.
+            </summary>
+            <param name="half1">A System.Half.</param>
+            <param name="half2">A System.Half.</param>
+            <returns>true if half1 is greater than or equal to half2; otherwise, false.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.op_Implicit(System.Byte)~BCnEncoder.Shared.Half">
+            <summary>
+            Converts an 8-bit unsigned integer to a System.Half.
+            </summary>
+            <param name="value">An 8-bit unsigned integer.</param>
+            <returns>A System.Half that represents the converted 8-bit unsigned integer.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.op_Implicit(System.Int16)~BCnEncoder.Shared.Half">
+            <summary>
+            Converts a 16-bit signed integer to a System.Half.
+            </summary>
+            <param name="value">A 16-bit signed integer.</param>
+            <returns>A System.Half that represents the converted 16-bit signed integer.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.op_Implicit(System.Char)~BCnEncoder.Shared.Half">
+            <summary>
+            Converts a Unicode character to a System.Half.
+            </summary>
+            <param name="value">A Unicode character.</param>
+            <returns>A System.Half that represents the converted Unicode character.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.op_Implicit(System.Int32)~BCnEncoder.Shared.Half">
+            <summary>
+            Converts a 32-bit signed integer to a System.Half.
+            </summary>
+            <param name="value">A 32-bit signed integer.</param>
+            <returns>A System.Half that represents the converted 32-bit signed integer.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.op_Implicit(System.Int64)~BCnEncoder.Shared.Half">
+            <summary>
+            Converts a 64-bit signed integer to a System.Half.
+            </summary>
+            <param name="value">A 64-bit signed integer.</param>
+            <returns>A System.Half that represents the converted 64-bit signed integer.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.op_Explicit(System.Single)~BCnEncoder.Shared.Half">
+            <summary>
+            Converts a single-precision floating-point number to a System.Half.
+            </summary>
+            <param name="value">A single-precision floating-point number.</param>
+            <returns>A System.Half that represents the converted single-precision floating point number.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.op_Explicit(System.Double)~BCnEncoder.Shared.Half">
+            <summary>
+            Converts a double-precision floating-point number to a System.Half.
+            </summary>
+            <param name="value">A double-precision floating-point number.</param>
+            <returns>A System.Half that represents the converted double-precision floating point number.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.op_Explicit(System.Decimal)~BCnEncoder.Shared.Half">
+            <summary>
+            Converts a decimal number to a System.Half.
+            </summary>
+            <param name="value">decimal number</param>
+            <returns>A System.Half that represents the converted decimal number.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.op_Explicit(BCnEncoder.Shared.Half)~System.Byte">
+            <summary>
+            Converts a System.Half to an 8-bit unsigned integer.
+            </summary>
+            <param name="value">A System.Half to convert.</param>
+            <returns>An 8-bit unsigned integer that represents the converted System.Half.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.op_Explicit(BCnEncoder.Shared.Half)~System.Char">
+            <summary>
+            Converts a System.Half to a Unicode character.
+            </summary>
+            <param name="value">A System.Half to convert.</param>
+            <returns>A Unicode character that represents the converted System.Half.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.op_Explicit(BCnEncoder.Shared.Half)~System.Int16">
+            <summary>
+            Converts a System.Half to a 16-bit signed integer.
+            </summary>
+            <param name="value">A System.Half to convert.</param>
+            <returns>A 16-bit signed integer that represents the converted System.Half.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.op_Explicit(BCnEncoder.Shared.Half)~System.Int32">
+            <summary>
+            Converts a System.Half to a 32-bit signed integer.
+            </summary>
+            <param name="value">A System.Half to convert.</param>
+            <returns>A 32-bit signed integer that represents the converted System.Half.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.op_Explicit(BCnEncoder.Shared.Half)~System.Int64">
+            <summary>
+            Converts a System.Half to a 64-bit signed integer.
+            </summary>
+            <param name="value">A System.Half to convert.</param>
+            <returns>A 64-bit signed integer that represents the converted System.Half.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.op_Implicit(BCnEncoder.Shared.Half)~System.Single">
+            <summary>
+            Converts a System.Half to a single-precision floating-point number.
+            </summary>
+            <param name="value">A System.Half to convert.</param>
+            <returns>A single-precision floating-point number that represents the converted System.Half.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.op_Implicit(BCnEncoder.Shared.Half)~System.Double">
+            <summary>
+            Converts a System.Half to a double-precision floating-point number.
+            </summary>
+            <param name="value">A System.Half to convert.</param>
+            <returns>A double-precision floating-point number that represents the converted System.Half.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.op_Explicit(BCnEncoder.Shared.Half)~System.Decimal">
+            <summary>
+            Converts a System.Half to a decimal number.
+            </summary>
+            <param name="value">A System.Half to convert.</param>
+            <returns>A decimal number that represents the converted System.Half.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.op_Implicit(System.SByte)~BCnEncoder.Shared.Half">
+            <summary>
+            Converts an 8-bit signed integer to a System.Half.
+            </summary>
+            <param name="value">An 8-bit signed integer.</param>
+            <returns>A System.Half that represents the converted 8-bit signed integer.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.op_Implicit(System.UInt16)~BCnEncoder.Shared.Half">
+            <summary>
+            Converts a 16-bit unsigned integer to a System.Half.
+            </summary>
+            <param name="value">A 16-bit unsigned integer.</param>
+            <returns>A System.Half that represents the converted 16-bit unsigned integer.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.op_Implicit(System.UInt32)~BCnEncoder.Shared.Half">
+            <summary>
+            Converts a 32-bit unsigned integer to a System.Half.
+            </summary>
+            <param name="value">A 32-bit unsigned integer.</param>
+            <returns>A System.Half that represents the converted 32-bit unsigned integer.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.op_Implicit(System.UInt64)~BCnEncoder.Shared.Half">
+            <summary>
+            Converts a 64-bit unsigned integer to a System.Half.
+            </summary>
+            <param name="value">A 64-bit unsigned integer.</param>
+            <returns>A System.Half that represents the converted 64-bit unsigned integer.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.op_Explicit(BCnEncoder.Shared.Half)~System.SByte">
+            <summary>
+            Converts a System.Half to an 8-bit signed integer.
+            </summary>
+            <param name="value">A System.Half to convert.</param>
+            <returns>An 8-bit signed integer that represents the converted System.Half.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.op_Explicit(BCnEncoder.Shared.Half)~System.UInt16">
+            <summary>
+            Converts a System.Half to a 16-bit unsigned integer.
+            </summary>
+            <param name="value">A System.Half to convert.</param>
+            <returns>A 16-bit unsigned integer that represents the converted System.Half.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.op_Explicit(BCnEncoder.Shared.Half)~System.UInt32">
+            <summary>
+            Converts a System.Half to a 32-bit unsigned integer.
+            </summary>
+            <param name="value">A System.Half to convert.</param>
+            <returns>A 32-bit unsigned integer that represents the converted System.Half.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.op_Explicit(BCnEncoder.Shared.Half)~System.UInt64">
+            <summary>
+            Converts a System.Half to a 64-bit unsigned integer.
+            </summary>
+            <param name="value">A System.Half to convert.</param>
+            <returns>A 64-bit unsigned integer that represents the converted System.Half.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.CompareTo(BCnEncoder.Shared.Half)">
+            <summary>
+            Compares this instance to a specified System.Half object.
+            </summary>
+            <param name="other">A System.Half object.</param>
+            <returns>
+            A signed number indicating the relative values of this instance and value.
+            Return Value Meaning Less than zero This instance is less than value. Zero
+            This instance is equal to value. Greater than zero This instance is greater than value.
+            </returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.CompareTo(System.Object)">
+            <summary>
+            Compares this instance to a specified System.Object.
+            </summary>
+            <param name="obj">An System.Object or null.</param>
+            <returns>
+            A signed number indicating the relative values of this instance and value.
+            Return Value Meaning Less than zero This instance is less than value. Zero
+            This instance is equal to value. Greater than zero This instance is greater
+            than value. -or- value is null.
+            </returns>
+            <exception cref="T:System.ArgumentException">value is not a System.Half</exception>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.Equals(BCnEncoder.Shared.Half)">
+            <summary>
+            Returns a value indicating whether this instance and a specified System.Half object represent the same value.
+            </summary>
+            <param name="other">A System.Half object to compare to this instance.</param>
+            <returns>true if value is equal to this instance; otherwise, false.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.Equals(System.Object)">
+            <summary>
+            Returns a value indicating whether this instance and a specified System.Object
+            represent the same type and value.
+            </summary>
+            <param name="obj">An System.Object.</param>
+            <returns>true if value is a System.Half and equal to this instance; otherwise, false.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.GetHashCode">
+            <summary>
+            Returns the hash code for this instance.
+            </summary>
+            <returns>A 32-bit signed integer hash code.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.GetTypeCode">
+            <summary>
+            Returns the System.TypeCode for value type System.Half.
+            </summary>
+            <returns>The enumerated constant (TypeCode)255.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.GetBytes(BCnEncoder.Shared.Half)">
+            <summary>
+            Returns the specified half-precision floating point value as an array of bytes.
+            </summary>
+            <param name="value">The number to convert.</param>
+            <returns>An array of bytes with length 2.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.GetBits(BCnEncoder.Shared.Half)">
+            <summary>
+            Converts the value of a specified instance of System.Half to its equivalent binary representation.
+            </summary>
+            <param name="value">A System.Half value.</param>
+            <returns>A 16-bit unsigned integer that contain the binary representation of value.</returns>        
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.ToHalf(System.Byte[],System.Int32)">
+            <summary>
+            Returns a half-precision floating point number converted from two bytes
+            at a specified position in a byte array.
+            </summary>
+            <param name="value">An array of bytes.</param>
+            <param name="startIndex">The starting position within value.</param>
+            <returns>A half-precision floating point number formed by two bytes beginning at startIndex.</returns>
+            <exception cref="T:System.ArgumentException">
+            startIndex is greater than or equal to the length of value minus 1, and is
+            less than or equal to the length of value minus 1.
+            </exception>
+            <exception cref="T:System.ArgumentNullException">value is null.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">startIndex is less than zero or greater than the length of value minus 1.</exception>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.ToHalf(System.UInt16)">
+            <summary>
+            Returns a half-precision floating point number converted from its binary representation.
+            </summary>
+            <param name="bits">Binary representation of System.Half value</param>
+            <returns>A half-precision floating point number formed by its binary representation.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.Sign(BCnEncoder.Shared.Half)">
+            <summary>
+            Returns a value indicating the sign of a half-precision floating-point number.
+            </summary>
+            <param name="value">A signed number.</param>
+            <returns>
+            A number indicating the sign of value. Number Description -1 value is less
+            than zero. 0 value is equal to zero. 1 value is greater than zero.
+            </returns>
+            <exception cref="T:System.ArithmeticException">value is equal to System.Half.NaN.</exception>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.Abs(BCnEncoder.Shared.Half)">
+            <summary>
+            Returns the absolute value of a half-precision floating-point number.
+            </summary>
+            <param name="value">A number in the range System.Half.MinValue ≤ value ≤ System.Half.MaxValue.</param>
+            <returns>A half-precision floating-point number, x, such that 0 ≤ x ≤System.Half.MaxValue.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.Max(BCnEncoder.Shared.Half,BCnEncoder.Shared.Half)">
+            <summary>
+            Returns the larger of two half-precision floating-point numbers.
+            </summary>
+            <param name="value1">The first of two half-precision floating-point numbers to compare.</param>
+            <param name="value2">The second of two half-precision floating-point numbers to compare.</param>
+            <returns>
+            Parameter value1 or value2, whichever is larger. If value1, or value2, or both val1
+            and value2 are equal to System.Half.NaN, System.Half.NaN is returned.
+            </returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.Min(BCnEncoder.Shared.Half,BCnEncoder.Shared.Half)">
+            <summary>
+            Returns the smaller of two half-precision floating-point numbers.
+            </summary>
+            <param name="value1">The first of two half-precision floating-point numbers to compare.</param>
+            <param name="value2">The second of two half-precision floating-point numbers to compare.</param>
+            <returns>
+            Parameter value1 or value2, whichever is smaller. If value1, or value2, or both val1
+            and value2 are equal to System.Half.NaN, System.Half.NaN is returned.
+            </returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.IsNaN(BCnEncoder.Shared.Half)">
+            <summary>
+            Returns a value indicating whether the specified number evaluates to not a number (System.Half.NaN).
+            </summary>
+            <param name="half">A half-precision floating-point number.</param>
+            <returns>true if value evaluates to not a number (System.Half.NaN); otherwise, false.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.IsInfinity(BCnEncoder.Shared.Half)">
+            <summary>
+            Returns a value indicating whether the specified number evaluates to negative or positive infinity.
+            </summary>
+            <param name="half">A half-precision floating-point number.</param>
+            <returns>true if half evaluates to System.Half.PositiveInfinity or System.Half.NegativeInfinity; otherwise, false.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.IsNegativeInfinity(BCnEncoder.Shared.Half)">
+            <summary>
+            Returns a value indicating whether the specified number evaluates to negative infinity.
+            </summary>
+            <param name="half">A half-precision floating-point number.</param>
+            <returns>true if half evaluates to System.Half.NegativeInfinity; otherwise, false.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.IsPositiveInfinity(BCnEncoder.Shared.Half)">
+            <summary>
+            Returns a value indicating whether the specified number evaluates to positive infinity.
+            </summary>
+            <param name="half">A half-precision floating-point number.</param>
+            <returns>true if half evaluates to System.Half.PositiveInfinity; otherwise, false.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.Parse(System.String)">
+            <summary>
+            Converts the string representation of a number to its System.Half equivalent.
+            </summary>
+            <param name="value">The string representation of the number to convert.</param>
+            <returns>The System.Half number equivalent to the number contained in value.</returns>
+            <exception cref="T:System.ArgumentNullException">value is null.</exception>
+            <exception cref="T:System.FormatException">value is not in the correct format.</exception>
+            <exception cref="T:System.OverflowException">value represents a number less than System.Half.MinValue or greater than System.Half.MaxValue.</exception>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.Parse(System.String,System.IFormatProvider)">
+            <summary>
+            Converts the string representation of a number to its System.Half equivalent 
+            using the specified culture-specific format information.
+            </summary>
+            <param name="value">The string representation of the number to convert.</param>
+            <param name="provider">An System.IFormatProvider that supplies culture-specific parsing information about value.</param>
+            <returns>The System.Half number equivalent to the number contained in s as specified by provider.</returns>
+            <exception cref="T:System.ArgumentNullException">value is null.</exception>
+            <exception cref="T:System.FormatException">value is not in the correct format.</exception>
+            <exception cref="T:System.OverflowException">value represents a number less than System.Half.MinValue or greater than System.Half.MaxValue.</exception>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.Parse(System.String,System.Globalization.NumberStyles)">
+            <summary>
+            Converts the string representation of a number in a specified style to its System.Half equivalent.
+            </summary>
+            <param name="value">The string representation of the number to convert.</param>
+            <param name="style">
+            A bitwise combination of System.Globalization.NumberStyles values that indicates
+            the style elements that can be present in value. A typical value to specify is
+            System.Globalization.NumberStyles.Number.
+            </param>
+            <returns>The System.Half number equivalent to the number contained in s as specified by style.</returns>
+            <exception cref="T:System.ArgumentNullException">value is null.</exception>
+            <exception cref="T:System.ArgumentException">
+            style is not a System.Globalization.NumberStyles value. -or- style is the
+            System.Globalization.NumberStyles.AllowHexSpecifier value.
+            </exception>
+            <exception cref="T:System.FormatException">value is not in the correct format.</exception>
+            <exception cref="T:System.OverflowException">value represents a number less than System.Half.MinValue or greater than System.Half.MaxValue.</exception>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.Parse(System.String,System.Globalization.NumberStyles,System.IFormatProvider)">
+            <summary>
+            Converts the string representation of a number to its System.Half equivalent 
+            using the specified style and culture-specific format.
+            </summary>
+            <param name="value">The string representation of the number to convert.</param>
+            <param name="style">
+            A bitwise combination of System.Globalization.NumberStyles values that indicates
+            the style elements that can be present in value. A typical value to specify is 
+            System.Globalization.NumberStyles.Number.
+            </param>
+            <param name="provider">An System.IFormatProvider object that supplies culture-specific information about the format of value.</param>
+            <returns>The System.Half number equivalent to the number contained in s as specified by style and provider.</returns>
+            <exception cref="T:System.ArgumentNullException">value is null.</exception>
+            <exception cref="T:System.ArgumentException">
+            style is not a System.Globalization.NumberStyles value. -or- style is the
+            System.Globalization.NumberStyles.AllowHexSpecifier value.
+            </exception>
+            <exception cref="T:System.FormatException">value is not in the correct format.</exception>
+            <exception cref="T:System.OverflowException">value represents a number less than System.Half.MinValue or greater than System.Half.MaxValue.</exception>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.TryParse(System.String,BCnEncoder.Shared.Half@)">
+            <summary>
+            Converts the string representation of a number to its System.Half equivalent.
+            A return value indicates whether the conversion succeeded or failed.
+            </summary>
+            <param name="value">The string representation of the number to convert.</param>
+            <param name="result">
+            When this method returns, contains the System.Half number that is equivalent
+            to the numeric value contained in value, if the conversion succeeded, or is zero
+            if the conversion failed. The conversion fails if the s parameter is null,
+            is not a number in a valid format, or represents a number less than System.Half.MinValue
+            or greater than System.Half.MaxValue. This parameter is passed uninitialized.
+            </param>
+            <returns>true if s was converted successfully; otherwise, false.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.TryParse(System.String,System.Globalization.NumberStyles,System.IFormatProvider,BCnEncoder.Shared.Half@)">
+            <summary>
+            Converts the string representation of a number to its System.Half equivalent
+            using the specified style and culture-specific format. A return value indicates
+            whether the conversion succeeded or failed.
+            </summary>
+            <param name="value">The string representation of the number to convert.</param>
+            <param name="style">
+            A bitwise combination of System.Globalization.NumberStyles values that indicates
+            the permitted format of value. A typical value to specify is System.Globalization.NumberStyles.Number.
+            </param>
+            <param name="provider">An System.IFormatProvider object that supplies culture-specific parsing information about value.</param>
+            <param name="result">
+            When this method returns, contains the System.Half number that is equivalent
+            to the numeric value contained in value, if the conversion succeeded, or is zero
+            if the conversion failed. The conversion fails if the s parameter is null,
+            is not in a format compliant with style, or represents a number less than
+            System.Half.MinValue or greater than System.Half.MaxValue. This parameter is passed uninitialized.
+            </param>
+            <returns>true if s was converted successfully; otherwise, false.</returns>
+            <exception cref="T:System.ArgumentException">
+            style is not a System.Globalization.NumberStyles value. -or- style 
+            is the System.Globalization.NumberStyles.AllowHexSpecifier value.
+            </exception>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.ToString">
+            <summary>
+            Converts the numeric value of this instance to its equivalent string representation.
+            </summary>
+            <returns>A string that represents the value of this instance.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.ToString(System.IFormatProvider)">
+            <summary>
+            Converts the numeric value of this instance to its equivalent string representation
+            using the specified culture-specific format information.
+            </summary>
+            <param name="formatProvider">An System.IFormatProvider that supplies culture-specific formatting information.</param>
+            <returns>The string representation of the value of this instance as specified by provider.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.ToString(System.String)">
+            <summary>
+            Converts the numeric value of this instance to its equivalent string representation, using the specified format.
+            </summary>
+            <param name="format">A numeric format string.</param>
+            <returns>The string representation of the value of this instance as specified by format.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Half.ToString(System.String,System.IFormatProvider)">
+            <summary>
+            Converts the numeric value of this instance to its equivalent string representation 
+            using the specified format and culture-specific format information.
+            </summary>
+            <param name="format">A numeric format string.</param>
+            <param name="formatProvider">An System.IFormatProvider that supplies culture-specific formatting information.</param>
+            <returns>The string representation of the value of this instance as specified by format and provider.</returns>
+            <exception cref="T:System.FormatException">format is invalid.</exception>
+        </member>
+        <member name="T:BCnEncoder.Shared.HalfHelper">
+            <summary>
+            Helper class for Half conversions and some low level operations.
+            This class is internally used in the Half class.
+            </summary>
+            <remarks>
+            References:
+                - Code retrieved from http://sourceforge.net/p/csharp-half/code/HEAD/tree/ on 2015-12-04
+                - Fast Half Float Conversions, Jeroen van der Zijp, link: http://www.fox-toolkit.org/ftp/fasthalffloatconversion.pdf
+            </remarks>
+        </member>
+        <member name="T:BCnEncoder.Shared.HdrImage">
+            <summary>
+            Reads and writes .hdr RGBE/Radiance HDR files. File format by Gregory Ward.
+            This class is experimental, incomplete and probably going to be removed in a future version.
+            Use only if you don't have anything better.
+            </summary>
+        </member>
+        <member name="P:BCnEncoder.Shared.HdrImage.PixelSpan">
+            <summary>
+            Gets a span2D over the <see cref="F:BCnEncoder.Shared.HdrImage.pixels"/> array.
+            </summary>
+        </member>
+        <member name="P:BCnEncoder.Shared.HdrImage.PixelMemory">
+            <summary>
+            Gets a span2D over the <see cref="F:BCnEncoder.Shared.HdrImage.pixels"/> array.
+            </summary>
+        </member>
+        <member name="M:BCnEncoder.Shared.HdrImage.Read(System.String)">
+            <summary>
+            Read a Radiance HDR image by filename.
+            Just calls <see cref="M:BCnEncoder.Shared.HdrImage.Read(System.IO.Stream)"/> internally.
+            </summary>
+            <param name="filename">The filename or path of the image</param>
+            <returns>A new HdrImage with the data</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.HdrImage.Read(System.IO.Stream)">
+            <summary>
+            Read a Radiance HDR image from a stream
+            </summary>
+            <param name="stream">The stream to read from</param>
+            <returns>A new HdrImage with the data</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.HdrImage.Write(System.IO.Stream)">
+            <summary>
+            Write this file to a stream.
+            </summary>
+            <param name="stream">The stream to write it to.</param>
+        </member>
+        <member name="F:BCnEncoder.Shared.ImageFiles.DdsHeader.dwSize">
+            <summary>
+            Has to be 124
+            </summary>
+        </member>
+        <member name="T:BCnEncoder.Shared.ImageFiles.HeaderFlags">
+            <summary>
+            Flags to indicate which members contain valid data.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.ImageFiles.HeaderFlags.DdsdCaps">
+            <summary>
+            Required in every .dds file.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.ImageFiles.HeaderFlags.DdsdHeight">
+            <summary>
+            Required in every .dds file.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.ImageFiles.HeaderFlags.DdsdWidth">
+            <summary>
+            Required in every .dds file.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.ImageFiles.HeaderFlags.DdsdPitch">
+            <summary>
+            Required when pitch is provided for an uncompressed texture.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.ImageFiles.HeaderFlags.DdsdPixelformat">
+            <summary>
+            Required in every .dds file.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.ImageFiles.HeaderFlags.DdsdMipmapcount">
+            <summary>
+            Required in a mipmapped texture.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.ImageFiles.HeaderFlags.DdsdLinearsize">
+            <summary>
+            Required when pitch is provided for a compressed texture.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.ImageFiles.HeaderFlags.DdsdDepth">
+            <summary>
+            Required in a depth texture.
+            </summary>
+        </member>
+        <member name="T:BCnEncoder.Shared.ImageFiles.HeaderCaps">
+            <summary>
+            Specifies the complexity of the surfaces stored.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.ImageFiles.HeaderCaps.DdscapsComplex">
+            <summary>
+            Optional; must be used on any file that contains more than one surface (a mipmap, a cubic environment map, or mipmapped volume texture).
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.ImageFiles.HeaderCaps.DdscapsMipmap">
+            <summary>
+            Optional; should be used for a mipmap.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.ImageFiles.HeaderCaps.DdscapsTexture">
+            <summary>
+            Required
+            </summary>
+        </member>
+        <member name="T:BCnEncoder.Shared.ImageFiles.HeaderCaps2">
+            <summary>
+            Additional detail about the surfaces stored.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.ImageFiles.HeaderCaps2.Ddscaps2Cubemap">
+            <summary>
+            Required for a cube map.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.ImageFiles.HeaderCaps2.Ddscaps2CubemapPositivex">
+            <summary>
+            Required when these surfaces are stored in a cube map.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.ImageFiles.HeaderCaps2.Ddscaps2CubemapNegativex">
+            <summary>
+            Required when these surfaces are stored in a cube map.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.ImageFiles.HeaderCaps2.Ddscaps2CubemapPositivey">
+            <summary>
+            Required when these surfaces are stored in a cube map.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.ImageFiles.HeaderCaps2.Ddscaps2CubemapNegativey">
+            <summary>
+            Required when these surfaces are stored in a cube map.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.ImageFiles.HeaderCaps2.Ddscaps2CubemapPositivez">
+            <summary>
+            Required when these surfaces are stored in a cube map.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.ImageFiles.HeaderCaps2.Ddscaps2CubemapNegativez">
+            <summary>
+            Required when these surfaces are stored in a cube map.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.ImageFiles.HeaderCaps2.Ddscaps2Volume">
+            <summary>
+            Required for a volume texture.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.ImageFiles.PixelFormatFlags.DdpfAlphaPixels">
+            <summary>
+            Texture contains alpha data; dwRGBAlphaBitMask contains valid data.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.ImageFiles.PixelFormatFlags.DdpfAlpha">
+            <summary>
+            Used in some older DDS files for alpha channel only uncompressed data (dwRGBBitCount contains the alpha channel bitcount; dwABitMask contains valid data)
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.ImageFiles.PixelFormatFlags.DdpfFourcc">
+            <summary>
+            Texture contains compressed RGB data; dwFourCC contains valid data.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.ImageFiles.PixelFormatFlags.DdpfRgb">
+            <summary>
+            Texture contains uncompressed RGB data; dwRGBBitCount and the RGB masks (dwRBitMask, dwGBitMask, dwBBitMask) contain valid data.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.ImageFiles.PixelFormatFlags.DdpfYuv">
+            <summary>
+            Used in some older DDS files for YUV uncompressed data (dwRGBBitCount contains the YUV bit count; dwRBitMask contains the Y mask, dwGBitMask contains the U mask, dwBBitMask contains the V mask)
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.ImageFiles.PixelFormatFlags.DdpfLuminance">
+            <summary>
+            Used in some older DDS files for single channel color uncompressed data (dwRGBBitCount contains the luminance channel bit count; dwRBitMask contains the channel mask). Can be combined with DDPF_ALPHAPIXELS for a two channel DDS file.
+            </summary>
+        </member>
+        <member name="T:BCnEncoder.Shared.ImageFiles.ImageFileFormat">
+            <summary>
+            The format identifier of an image file.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.ImageFiles.ImageFileFormat.Ktx">
+            <summary>
+            Represents the KTX image file format.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.ImageFiles.ImageFileFormat.Dds">
+            <summary>
+            Represents the DDS image file format.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.ImageFiles.ImageFileFormat.Unknown">
+            <summary>
+            Represents an unknown image file format.
+            </summary>
+        </member>
+        <member name="T:BCnEncoder.Shared.ImageFiles.ImageFile">
+            <summary>
+            Static helper class to determine the format of an image file.
+            </summary>
+        </member>
+        <member name="M:BCnEncoder.Shared.ImageFiles.ImageFile.DetermineImageFormat(System.IO.Stream)">
+            <summary>
+            Determines the image file format of the given stream.
+            </summary>
+            <param name="stream">The stream of data to identify.</param>
+            <returns>The format this image file may contain.</returns>
+        </member>
+        <member name="T:BCnEncoder.Shared.ImageFiles.KtxFile">
+            <summary>
+            A representation of a ktx file.
+            This class handles loading and saving ktx files into streams.
+            The full spec can be found here: https://www.khronos.org/opengles/sdk/tools/KTX/file_format_spec/
+            </summary>
+        </member>
+        <member name="M:BCnEncoder.Shared.ImageFiles.KtxFile.Write(System.IO.Stream)">
+            <summary>
+            Writes this ktx file into a stream.
+            </summary>
+        </member>
+        <member name="M:BCnEncoder.Shared.ImageFiles.KtxFile.Load(System.IO.Stream)">
+            <summary>
+            Loads a KTX file from a stream.
+            </summary>
+        </member>
+        <member name="M:BCnEncoder.Shared.ImageFiles.KtxFile.GetTotalSize">
+            <summary>
+            Gets the total size of all mipmaps and faces.
+            </summary>
+        </member>
+        <member name="M:BCnEncoder.Shared.ImageFiles.KtxFile.GetAllTextureDataFaceMajor">
+            <summary>
+            Gets all texture data of the file in face-major order (face0_mip0 ... face0_mip1 ... face1_mip0 ...)
+            </summary>
+        </member>
+        <member name="M:BCnEncoder.Shared.ImageFiles.KtxFile.GetAllTextureDataMipMajor">
+            <summary>
+            Gets all texture data of the file in MipMap-major order (face0_mip0 ... face1_mip0 ... face0_mip1 ...)
+            </summary>
+        </member>
+        <member name="M:BCnEncoder.Shared.Interpolation.InterpolateHalf(BCnEncoder.Shared.ColorRgb24,BCnEncoder.Shared.ColorRgb24)">
+            <summary>
+            Interpolates two colors by half.
+            </summary>
+            <param name="c0">The first color endpoint.</param>
+            <param name="c1">The second color endpoint.</param>
+            <returns>The interpolated color.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Interpolation.InterpolateThird(BCnEncoder.Shared.ColorRgb24,BCnEncoder.Shared.ColorRgb24,System.Int32)">
+            <summary>
+            Interpolates two colors by third.
+            </summary>
+            <param name="c0">The first color endpoint.</param>
+            <param name="c1">The second color endpoint.</param>
+            <param name="num">The dividend in the third.</param>
+            <returns>The interpolated color.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Interpolation.InterpolateFourthAtc(BCnEncoder.Shared.ColorRgb24,BCnEncoder.Shared.ColorRgb24,System.Int32)">
+            <summary>
+            Interpolates two colors by fourth with ATC interpolation.
+            </summary>
+            <param name="c0">The first color endpoint.</param>
+            <param name="c1">The second color endpoint.</param>
+            <param name="num">The dividend in the fourth.</param>
+            <returns>The interpolated color.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Interpolation.InterpolateFifth(System.Byte,System.Byte,System.Int32)">
+            <summary>
+            Interpolates two colors by fifth.
+            </summary>
+            <param name="a0">The first component.</param>
+            <param name="a1">The second component.</param>
+            <param name="num">The dividend in the fifth.</param>
+            <returns>The interpolated component.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Interpolation.InterpolateSeventh(System.Byte,System.Byte,System.Int32)">
+            <summary>
+            Interpolates two colors by seventh.
+            </summary>
+            <param name="a0">The first component.</param>
+            <param name="a1">The second component.</param>
+            <param name="num">The dividend in the seventh.</param>
+            <returns>The interpolated component.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Interpolation.InterpolateColor(BCnEncoder.Shared.ColorRgb24,BCnEncoder.Shared.ColorRgb24,System.Int32,System.Int32)">
+            <summary>
+            Interpolates two colors.
+            </summary>
+            <param name="c0">The first color.</param>
+            <param name="c1">The second color.</param>
+            <param name="num">The dividend on each color component.</param>
+            <param name="den">The divisor on each color component.</param>
+            <returns>The interpolated color.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Interpolation.InterpolateColorAtc(BCnEncoder.Shared.ColorRgb24,BCnEncoder.Shared.ColorRgb24,System.Int32,System.Int32)">
+            <summary>
+            Interpolates two colors with the ATC interpolation.
+            </summary>
+            <param name="c0">The first color.</param>
+            <param name="c1">The second color.</param>
+            <param name="num">The dividend on each color component.</param>
+            <param name="den">The divisor on each color component.</param>
+            <returns>The interpolated color.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Interpolation.Interpolate(System.Int32,System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Interpolates two components.
+            </summary>
+            <param name="a">The first component.</param>
+            <param name="b">The second component.</param>
+            <param name="num">The dividend.</param>
+            <param name="den">The divisor.</param>
+            <param name="correction">A correction value for increased accuracy when working with integer interpolated values.</param>
+            <returns>The interpolated component.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.Interpolation.InterpolateAtc(System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Interpolates two components with the ATC interpolation.
+            </summary>
+            <param name="a">The first component.</param>
+            <param name="b">The second component.</param>
+            <param name="num">The dividend.</param>
+            <param name="den">The divisor.</param>
+            <returns>The interpolated component.</returns>
+        </member>
+        <member name="T:BCnEncoder.Shared.LinearClustering">
+            <summary>
+            Simple Linear Iterative Clustering.
+            </summary>
+        </member>
+        <member name="M:BCnEncoder.Shared.LinearClustering.ClusterPixels(System.ReadOnlySpan{BCnEncoder.Shared.ColorRgba32},System.Int32,System.Int32,System.Int32,System.Single,System.Int32,System.Boolean)">
+            <summary>
+            The greater the value of M,
+            the more spatial proximity is emphasized and the more compact the cluster,
+            M should be in range of 1 to 20.
+            </summary>
+        </member>
+        <member name="M:BCnEncoder.Shared.LinearClustering.ClusterPixels(System.ReadOnlySpan{BCnEncoder.Shared.ColorRgbFloat},System.Int32,System.Int32,System.Int32,System.Single,System.Int32,System.Boolean)">
+            <summary>
+            The greater the value of M,
+            the more spatial proximity is emphasized and the more compact the cluster,
+            M should be in range of 1 to 20.
+            </summary>
+        </member>
+        <member name="M:BCnEncoder.Shared.MathHelper.FrExp(System.Double,System.Int32@)">
+            <summary>
+            Breaks down the floating-point value x into a component m for the normalized fraction component and another term n for the exponent, such that the absolute value of m is greater than or equal to 0.5 and less than 1.0 or equal to 0, and x = m * 2n. The function stores the integer exponent n at the location to which expptr points. 
+            </summary>
+            <param name="x"></param>
+            <param name="eptr"></param>
+            <returns>Returns the normalized fraction m. If x is 0, the function returns 0 for both the fraction and exponent. The fraction has the same sign as the argument x. The result of the function cannot have a range error.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.MathHelper.LdExp(System.Single,System.Int32)">
+            <summary>
+            Multiplies a floating point value arg by the number 2 raised to the exp power.
+            </summary>
+            <param name="arg"></param>
+            <param name="exp"></param>
+            <returns></returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.MipMapper.GenerateMipChain(System.ReadOnlyMemory{BCnEncoder.Shared.ColorRgba32},System.Int32,System.Int32,System.Int32@)">
+            <summary>
+            Generate a chain of <paramref name="numMipMaps"/> elements.
+            </summary>
+            <param name="input">The original image to scale down.</param>
+            <param name="width">The original image width.</param>
+            <param name="height">The original image height.</param>
+            <param name="numMipMaps">The number of mipmaps to generate.</param>
+            <returns>Will generate as many mipmaps as possible until a mipmap of 1x1 is reached for <paramref name="numMipMaps"/> 0 or smaller.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.MipMapper.GenerateMipChain(CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgba32},System.Int32@)">
+            <summary>
+            Generate a chain of <paramref name="numMipMaps"/> elements.
+            </summary>
+            <param name="pixels">The original image to scale down.</param>
+            <param name="numMipMaps">The number of mipmaps to generate.</param>
+            <returns>Will generate as many mipmaps as possible until a mipmap of 1x1 is reached for <paramref name="numMipMaps"/> 0 or smaller.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.MipMapper.GenerateMipChain(System.ReadOnlyMemory{BCnEncoder.Shared.ColorRgbFloat},System.Int32,System.Int32,System.Int32@)">
+            <summary>
+            Generate a chain of <paramref name="numMipMaps"/> elements.
+            </summary>
+            <param name="input">The original image to scale down.</param>
+            <param name="width">The original image width.</param>
+            <param name="height">The original image height.</param>
+            <param name="numMipMaps">The number of mipmaps to generate.</param>
+            <returns>Will generate as many mipmaps as possible until a mipmap of 1x1 is reached for <paramref name="numMipMaps"/> 0 or smaller.</returns>
+        </member>
+        <member name="M:BCnEncoder.Shared.MipMapper.GenerateMipChain(CommunityToolkit.HighPerformance.ReadOnlyMemory2D{BCnEncoder.Shared.ColorRgbFloat},System.Int32@)">
+            <summary>
+            Generate a chain of <paramref name="numMipMaps"/> elements.
+            </summary>
+            <param name="pixels">The original image to scale down.</param>
+            <param name="numMipMaps">The number of mipmaps to generate.</param>
+            <returns>Will generate as many mipmaps as possible until a mipmap of 1x1 is reached for <paramref name="numMipMaps"/> 0 or smaller.</returns>
+        </member>
+        <member name="T:BCnEncoder.Shared.OperationContext">
+            <summary>
+            The operation context.
+            </summary>
+        </member>
+        <member name="P:BCnEncoder.Shared.OperationContext.IsParallel">
+            <summary>
+            Whether the blocks should be decoded in parallel.
+            </summary>
+        </member>
+        <member name="P:BCnEncoder.Shared.OperationContext.TaskCount">
+            <summary>
+            Determines how many tasks should be used for parallel processing.
+            </summary>
+        </member>
+        <member name="P:BCnEncoder.Shared.OperationContext.CancellationToken">
+            <summary>
+            The cancellation token to check if the asynchronous operation was cancelled.
+            </summary>
+        </member>
+        <member name="P:BCnEncoder.Shared.OperationContext.Progress">
+            <summary>
+            The progress context for the operation.
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.OutputFileFormat.Ktx">
+            <summary>
+            Khronos texture Format https://www.khronos.org/opengles/sdk/tools/KTX/file_format_spec/
+            </summary>
+        </member>
+        <member name="F:BCnEncoder.Shared.OutputFileFormat.Dds">
+            <summary>
+            Direct draw surface Format https://docs.microsoft.com/en-us/windows/win32/direct3ddds/dx-graphics-dds
+            </summary>
+        </member>
+        <member name="M:BCnEncoder.Shared.PcaVectors.CalculatePrincipalAxis(System.Numerics.Matrix4x4)">
+            <summary>
+            Calculate principal axis with the power-method
+            </summary>
+            <param name="covarianceMatrix"></param>
+            <returns></returns>
+        </member>
+        <member name="P:BCnEncoder.Shared.ProgressElement.CurrentBlock">
+            <summary>
+            Current block being processed
+            </summary>
+        </member>
+        <member name="P:BCnEncoder.Shared.ProgressElement.TotalBlocks">
+            <summary>
+            The total amount of blocks to be processed
+            </summary>
+        </member>
+        <member name="P:BCnEncoder.Shared.ProgressElement.Percentage">
+            <summary>
+            Returns the progress percentage as a float from 0 to 1
+            </summary>
+        </member>
+        <member name="T:BCnEncoder.Shared.RgbBoundingBox">
+            <summary>
+            Calculate the bounding box of rgb values as described in
+            "Real-Time DXT Compression by J.M.P. van Waveren, 2006, Id Software, Inc." and
+            "Real-Time YCoCg-DXT Compression J.M.P. van Waveren,  Ignacio Castaño id Software, Inc. NVIDIA Corp."
+            </summary>
+        </member>
+        <member name="M:BCnEncoder.Shared.RgbBoundingBox.InsetHdrChannel(System.ReadOnlySpan{BCnEncoder.Shared.ColorRgbFloat},System.Int32,System.Single@,System.Single@)">
+            <summary>
+            Hdr rgb bounding box inset by Krzysztof Narkowicz. https://github.com/knarkowicz/GPURealTimeBC6H
+            Code is public domain.
+            </summary>
+        </member>
+    </members>
+</doc>

@@ -1,0 +1,125 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v10.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v10.0": {
+      "FrenRider/4.1.0.10": {
+        "dependencies": {
+          "AethertekUI": "0.3.0",
+          "AethertekUI.Dalamud": "0.3.0",
+          "ECommons": "3.2.0.17"
+        },
+        "runtime": {
+          "FrenRider.dll": {}
+        }
+      },
+      "ECommons/3.2.0.17": {
+        "runtime": {
+          "lib/net10.0-windows7.0/ECommons.dll": {
+            "assemblyVersion": "3.2.0.17",
+            "fileVersion": "3.2.0.17"
+          }
+        }
+      },
+      "Glasswork/0.1.0-beta.3": {
+        "runtime": {
+          "lib/net10.0/Glasswork.dll": {
+            "assemblyVersion": "0.1.0.0",
+            "fileVersion": "0.1.0.0"
+          }
+        }
+      },
+      "Glasswork.Backend/0.1.0-beta.3": {
+        "dependencies": {
+          "Glasswork": "0.1.0-beta.3",
+          "Glasswork.Glass": "0.1.0-beta.3"
+        },
+        "runtime": {
+          "lib/net10.0-windows7.0/Glasswork.Backend.dll": {
+            "assemblyVersion": "0.1.0.0",
+            "fileVersion": "0.1.0.0"
+          }
+        }
+      },
+      "Glasswork.Glass/0.1.0-beta.3": {
+        "dependencies": {
+          "Glasswork": "0.1.0-beta.3"
+        },
+        "runtime": {
+          "lib/net10.0-windows7.0/Glasswork.Glass.dll": {
+            "assemblyVersion": "0.1.0.0",
+            "fileVersion": "0.1.0.0"
+          }
+        }
+      },
+      "AethertekUI/0.3.0": {
+        "runtime": {
+          "AethertekUI.dll": {
+            "assemblyVersion": "0.3.0.0",
+            "fileVersion": "0.3.0.0"
+          }
+        }
+      },
+      "AethertekUI.Dalamud/0.3.0": {
+        "dependencies": {
+          "AethertekUI": "0.3.0",
+          "Glasswork.Backend": "0.1.0-beta.3"
+        },
+        "runtime": {
+          "AethertekUI.Dalamud.dll": {
+            "assemblyVersion": "0.3.0.0",
+            "fileVersion": "0.3.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "FrenRider/4.1.0.10": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "ECommons/3.2.0.17": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-B6l4Sb6anZh4ttLsEklx4LTE5DDxbEicZgqYNz5sgDb9y2wR5sVebYEWSrPgwSVPanx+UxQcocTtBrqBQfmN8g==",
+      "path": "ecommons/3.2.0.17",
+      "hashPath": "ecommons.3.2.0.17.nupkg.sha512"
+    },
+    "Glasswork/0.1.0-beta.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-0f5lLp4ehX0b3O4Oy7lTrENtmUmfzMIsrGstrzEU0O9iqVoJIQiNN2KvGfO/hpWdsSQNxe7hRsWi/q+MEvDpFQ==",
+      "path": "glasswork/0.1.0-beta.3",
+      "hashPath": "glasswork.0.1.0-beta.3.nupkg.sha512"
+    },
+    "Glasswork.Backend/0.1.0-beta.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-eVUUav5kLZmhVEcl/f5Iot2DwUzJ5zVwNDcqHfJJPd5+lPHFBC9OiKJ9KLzoZtVdkEJettyEH/eD/pDYA3vIUQ==",
+      "path": "glasswork.backend/0.1.0-beta.3",
+      "hashPath": "glasswork.backend.0.1.0-beta.3.nupkg.sha512"
+    },
+    "Glasswork.Glass/0.1.0-beta.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-+wYrCDgM+ICo3bBDe+kxZHJIxSl7B7O6+gujN7ihSgPgsdDOWsx8LaffRDD4HJWIX44FGuJK+IaJxCrtzJTsFQ==",
+      "path": "glasswork.glass/0.1.0-beta.3",
+      "hashPath": "glasswork.glass.0.1.0-beta.3.nupkg.sha512"
+    },
+    "AethertekUI/0.3.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "AethertekUI.Dalamud/0.3.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

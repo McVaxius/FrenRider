@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>CheapLoc</name>
+    </assembly>
+    <members>
+        <member name="T:CheapLoc.Loc">
+            <summary>
+            Static class providing run-time localization services.
+            </summary>
+        </member>
+        <member name="M:CheapLoc.Loc.Setup(System.String)">
+            <summary>
+            Set-up localization data for the calling assembly with the provided JSON structure.
+            </summary>
+            <param name="locData">JSON structure containing a key/LocEntry mapping.</param>
+        </member>
+        <member name="M:CheapLoc.Loc.Setup(System.String,System.Reflection.Assembly)">
+            <summary>
+            Set-up localization data for the provided assembly with the provided JSON structure.
+            </summary>
+            <param name="locData">JSON structure containing a key/LocEntry mapping.</param>
+            <param name="assembly">Assembly to load the localization data for.</param>
+        </member>
+        <member name="M:CheapLoc.Loc.SetupWithFallbacks">
+            <summary>
+            Set-up empty localization data to force all fallbacks to show for the calling assembly.
+            </summary>
+        </member>
+        <member name="M:CheapLoc.Loc.SetupWithFallbacks(System.Reflection.Assembly)">
+            <summary>
+            Set-up empty localization data to force all fallbacks to show for the provided assembly.
+            </summary>
+            <param name="assembly">Assembly to load the localization data for.</param>
+        </member>
+        <member name="M:CheapLoc.Loc.Localize(System.String,System.String)">
+             <summary>
+             Search the set-up localization data for the provided assembly for the given string key and return it.
+             If the key is not present, the fallback is shown.
+             The fallback is also required to create the string files to be localized.
+            
+             Calling this method should always be the first step in your localization chain.
+             </summary>
+             <param name="key">The string key to be returned.</param>
+             <param name="fallBack">The fallback string, usually your source language.</param>#
+             <returns>The localized string, fallback or string key if not found.</returns>
+        </member>
+        <member name="M:CheapLoc.Loc.Localize(System.String,System.String,System.Reflection.Assembly)">
+            <summary>
+            Search the set-up localization data for the calling assembly for the given string key and return it.
+            If the key is not present, the fallback is shown.
+            The fallback is also required to create the string files to be localized.
+            </summary>
+            <param name="key">The string key to be returned.</param>
+            <param name="fallBack">The fallback string, usually your source language.</param>#
+            <param name="assembly">Assembly to load the localization data for.</param>
+            <returns>The localized string, fallback or string key if not found.</returns>
+        </member>
+        <member name="M:CheapLoc.Loc.ExportLocalizableForAssembly(System.Reflection.Assembly,System.Boolean)">
+            <summary>
+            Saves localizable JSON data in the current working directory for the provided assembly.
+            </summary>
+            <param name="assembly">Assembly to save localization data from.</param>
+            <param name="ignoreInvalidFunctions">If set to true, this ignores malformed Localize functions instead of failing.</param>
+        </member>
+        <member name="M:CheapLoc.Loc.ExportLocalizable(System.Boolean)">
+            <summary>
+            Saves localizable JSON data in the current working directory for the calling assembly.
+            </summary>
+            <param name="ignoreInvalidFunctions">If set to true, this ignores malformed Localize functions instead of failing.</param>
+        </member>
+    </members>
+</doc>
