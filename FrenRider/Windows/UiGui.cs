@@ -383,6 +383,7 @@ internal static class UiGui
         if (FrenRiderPresentation.Decorated) FrenRiderPresentation.PaintToggle(track, size * s, value, fill);
         else
         {
+            fill = MaterialTheme.Current.ControlColor(fill);
             dl.AddRectFilled(track, track + size * s, MaterialCanvas.Color(fill), radius * s);
             dl.AddCircleFilled(track + new Vector2(value ? size.X - radius : radius, radius) * s, (radius - 3) * s, MaterialCanvas.Color(foreground), 24);
         }

@@ -3372,4 +3372,10 @@ Activé : utilisez les préréglages BossMod ci-dessous avec tout fournisseur de
   <data name="ADS does not support the selected no-inn repair city. Update ADS before using it." xml:space="preserve">
     <value>ADS ne prend pas en charge la ville de réparation sans auberge sélectionnée. Mettez ADS à jour avant de l&apos;utiliser.</value>
   </data>
+  <data name="Highlight contrast" xml:space="preserve">
+    <value>Contraste de surbrillance</value>
+  </data>
+  <data name="Makes controls and selection states more distinct." xml:space="preserve">
+    <value>Rend les commandes et les états de sélection plus distincts.</value>
+  </data>
 </root>

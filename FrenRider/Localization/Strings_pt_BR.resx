@@ -3477,4 +3477,10 @@ Ativado: use as predefinições do BossMod abaixo com qualquer provedor de rota�
   <data name="ADS does not support the selected no-inn repair city. Update ADS before using it." xml:space="preserve">
     <value>O ADS não suporta a cidade de reparo sem estalagem selecionada. Atualize o ADS antes de usá-la.</value>
   </data>
+  <data name="Highlight contrast" xml:space="preserve">
+    <value>Contraste de realce</value>
+  </data>
+  <data name="Makes controls and selection states more distinct." xml:space="preserve">
+    <value>Torna os controles e os estados de seleção mais distintos.</value>
+  </data>
 </root>

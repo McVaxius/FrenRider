@@ -3372,4 +3372,10 @@ An: Die BossMod-Voreinstellungen unten mit jedem Rotationsanbieter verwenden. Ei
   <data name="ADS does not support the selected no-inn repair city. Update ADS before using it." xml:space="preserve">
     <value>ADS unterstützt die ausgewählte Reparaturstadt ohne Gasthaus nicht. Aktualisiere ADS vor der Verwendung.</value>
   </data>
+  <data name="Highlight contrast" xml:space="preserve">
+    <value>Kontrast der Hervorhebung</value>
+  </data>
+  <data name="Makes controls and selection states more distinct." xml:space="preserve">
+    <value>Hebt Bedienelemente und Auswahlzustände deutlicher hervor.</value>
+  </data>
 </root>

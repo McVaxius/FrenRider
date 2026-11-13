@@ -101,7 +101,11 @@ internal static partial class FrenRiderPresentation
         var style = config.UiStyle;
         var lcars = style == FrenRiderUiStyle.Classic && config.UiColors?.Mode == MaterialColorMode.Lcars;
         if (style is not (FrenRiderUiStyle.Glassmorphism or FrenRiderUiStyle.Spatial or FrenRiderUiStyle.Cyberpunk) && !lcars)
-            return Theme(config.UiAccentRgb, config.UiColors ?? new());
+        {
+            var result = Theme(config.UiAccentRgb, config.UiColors ?? new());
+            result.HighlightContrastPercent = config.UiHighlightContrastPercent;
+            return result;
+        }
         var selected = Palette(config);
         var background = Rgb(lcars ? config.UiLcarsBackgroundRgb : selected.BackgroundRgb);
         var primary = Rgb(lcars ? config.UiLcarsBar1Rgb : selected.ControlsRgb);
@@ -135,7 +139,7 @@ internal static partial class FrenRiderPresentation
             Tertiary = tertiary, OnTertiary = ReadableInk(tertiary), TertiaryContainer = Mix(surface, tertiary, .12f),
             OnTertiaryContainer = text, InverseSurface = text, InverseOnSurface = background, InversePrimary = primary,
         };
-        return new(colors) { SurfaceOpacity = 1 };
+        return new(colors) { SurfaceOpacity = 1, HighlightContrastPercent = config.UiHighlightContrastPercent };
     }
 
     internal static MaterialTheme Theme(uint accent, MaterialColorSettings colorSettings)

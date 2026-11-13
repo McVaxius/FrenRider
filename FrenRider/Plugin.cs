@@ -570,6 +570,20 @@ public sealed partial class Plugin : IDalamudPlugin
     private bool DrawColourEditor(string id)
     {
         var changed = false;
+        ImGui.PushID(id);
+        try
+        {
+            var contrast = Configuration.UiHighlightContrastPercent;
+            using (UiGui.SettingRow("Highlight contrast"))
+            {
+                if (UiGui.AppearanceSliderInt("##UiHighlightContrastPercent", ref contrast, 0, 100, "%d%%", ImGuiSliderFlags.AlwaysClamp))
+                    Configuration.UiHighlightContrastPercent = contrast;
+                changed |= ImGui.IsItemDeactivatedAfterEdit();
+            }
+            UiHelpers.SafeWrappedText("Makes controls and selection states more distinct.");
+            ImGui.Spacing();
+        }
+        finally { ImGui.PopID(); }
         var selection = Configuration.UiStyle switch
         {
             FrenRiderUiStyle.Glassmorphism => 3, FrenRiderUiStyle.Spatial => 4, FrenRiderUiStyle.Cyberpunk => 5,
@@ -1043,6 +1057,7 @@ public sealed partial class Plugin : IDalamudPlugin
             var color = FrenRiderPresentation.Rgb(appliedAccent);
             accentDraft = new(color.X, color.Y, color.Z);
         }
+        uiTheme.HighlightContrastPercent = Configuration.UiHighlightContrastPercent;
         if (LcarsActive || Configuration.UiStyle != FrenRiderUiStyle.Classic)
             uiTheme.Density = Configuration.UiCompact ? MaterialDensity.Compact : MaterialDensity.Standard;
     }

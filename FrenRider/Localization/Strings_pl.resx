@@ -3477,4 +3477,10 @@ Włączone: używaj poniższych presetów BossMod z dowolnym dostawcą rotacji. 
   <data name="ADS does not support the selected no-inn repair city. Update ADS before using it." xml:space="preserve">
     <value>ADS nie obsługuje wybranego miasta napraw bez gospody. Zaktualizuj ADS przed użyciem.</value>
   </data>
+  <data name="Highlight contrast" xml:space="preserve">
+    <value>Kontrast wyróżnienia</value>
+  </data>
+  <data name="Makes controls and selection states more distinct." xml:space="preserve">
+    <value>Ułatwia rozróżnianie elementów sterujących i stanów zaznaczenia.</value>
+  </data>
 </root>

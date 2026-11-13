@@ -450,7 +450,37 @@ internal static partial class FrenRiderPresentation
         if (!Decorated || IsLcars) return scope;
         var min = ImGui.GetCursorScreenPos();
         var max = min + new Vector2(ImGui.CalcItemWidth(), ImGui.GetFrameHeight());
-        DrawPanel(min, max, inset: true, background: false);
+        var theme = MaterialTheme.Current;
+        var list = ImGui.GetWindowDrawList();
+        if (theme.HighlightContrastPercent == 0 || theme.IsNative)
+            DrawPanel(min, max, inset: true, background: false);
+        else if (max.X > min.X && max.Y > min.Y)
+        {
+            var c = theme.Colors;
+            var s = SkinScale;
+            // These are DrawPanel's three inset field paths. Adjust role colours
+            // before tessellation so solid and transparent AA vertices agree.
+            if (Style == FrenRiderUiStyle.Glassmorphism)
+            {
+                list.AddRectFilled(min + new Vector2(0, 3 * s), max + new Vector2(0, 3 * s), Ink(new Vector4(0, 0, 0, .15f)), 10 * s);
+                GlassGlow(list, min, max, 10 * s, .55f);
+                list.AddRectFilled(min, max, Ink(theme.ControlColor(c.SurfaceContainerLowest), .68f), 10 * s);
+                list.AddRect(min, max, Ink(theme.ControlColor(Vector4.Lerp(c.Primary, c.OnSurface, .35f), border: true), .5f), 10 * s);
+                list.AddLine(min + new Vector2(10, 1) * s, new Vector2(max.X - 10 * s, min.Y + s), Ink(c.OnSurface, .36f), s);
+            }
+            else if (Style == FrenRiderUiStyle.Spatial)
+            {
+                list.AddRectFilled(min, max, Ink(theme.ControlColor(c.SurfaceContainer)), 6 * s);
+                list.AddRect(min, max, Ink(theme.ControlColor(c.Outline, border: true), .25f), 6 * s);
+                list.AddLine(min + new Vector2(6, 1) * s, new Vector2(max.X - 6 * s, min.Y + s), Ink(theme.ControlColor(c.Outline, border: true), .3f), 2 * s);
+                list.AddLine(new Vector2(min.X + 6 * s, max.Y - s), max - new Vector2(6, 1) * s, Ink(Vector4.One, .8f), s);
+            }
+            else if (Style == FrenRiderUiStyle.Cyberpunk)
+            {
+                list.AddRectFilled(min, max, Ink(theme.ControlColor(c.SurfaceContainerLowest)), 3 * s);
+                list.AddLine(min + new Vector2(3, 1) * s, new Vector2(max.X - 3 * s, min.Y + s), Ink(c.OnSurface, .06f), s);
+            }
+        }
         scope.Color(ImGuiCol.FrameBg, Vector4.Zero);
         scope.Color(ImGuiCol.FrameBgHovered, Alpha(MaterialTheme.Current.Colors.OnSurface, .06f));
         scope.Color(ImGuiCol.FrameBgActive, Alpha(MaterialTheme.Current.Colors.OnSurface, .10f));
@@ -467,6 +497,7 @@ internal static partial class FrenRiderPresentation
 
     internal static void PaintToggle(Vector2 min, Vector2 size, bool value, Vector4 fill)
     {
+        fill = MaterialTheme.Current.ControlColor(fill);
         var dl = ImGui.GetWindowDrawList();
         var c = MaterialTheme.Current.Colors;
         var s = SkinScale;
@@ -504,12 +535,13 @@ internal static partial class FrenRiderPresentation
         var fill = selected ? accent : IsLcars ? LcarsBackground : c.SurfaceContainer;
         if (ImGui.IsItemHovered()) fill = MaterialColor.Layer(fill, IsLcars ? LcarsText : c.OnSurface, .12f);
         if (ImGui.IsItemActive()) fill = MaterialColor.Layer(fill, IsLcars ? LcarsText : c.OnSurface, .16f);
+        fill = MaterialTheme.Current.ControlColor(fill);
         if (Style == FrenRiderUiStyle.Spatial && !IsLcars)
             ContactShadow(dl, min, max, radio ? size * .5f : 4 * s);
         if (radio)
         {
             var center = (min + max) * .5f;
-            dl.AddCircleFilled(center, size * .43f, Ink(IsLcars ? LcarsBackground : c.SurfaceContainerLow), 32);
+            dl.AddCircleFilled(center, size * .43f, Ink(MaterialTheme.Current.ControlColor(IsLcars ? LcarsBackground : c.SurfaceContainerLow)), 32);
             dl.AddCircle(center, size * .4f, Ink(selected ? accent : c.Outline), 32, 1.5f * s);
             if (selected) dl.AddCircleFilled(center, size * .25f, Ink(accent), 24);
         }

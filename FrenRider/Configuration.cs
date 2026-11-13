@@ -50,6 +50,12 @@ public class Configuration : IPluginConfiguration
     public AethertekUI.MaterialColorSettings UiColors { get; set; } = new();
     public FrenRiderUiStyle UiStyle { get; set; }
     public bool UiStylingEnabled { get; set; } = true;
+    private int uiHighlightContrastPercent = 50;
+    public int UiHighlightContrastPercent
+    {
+        get => uiHighlightContrastPercent;
+        set => uiHighlightContrastPercent = Math.Clamp(value, 0, 100);
+    }
     public bool UiWindowsLocked { get; set; }
     public AethertekUI.MaterialColorSettings UiGlassColors { get; set; } = DefaultPalette(FrenRiderUiStyle.Glassmorphism);
     public AethertekUI.MaterialColorSettings UiSpatialColors { get; set; } = DefaultPalette(FrenRiderUiStyle.Spatial);

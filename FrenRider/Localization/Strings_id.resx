@@ -3477,4 +3477,10 @@ Aktif: gunakan preset BossMod di bawah dengan penyedia rotasi apa pun. Preset kh
   <data name="ADS does not support the selected no-inn repair city. Update ADS before using it." xml:space="preserve">
     <value>ADS tidak mendukung kota perbaikan tanpa penginapan yang dipilih. Perbarui ADS sebelum menggunakannya.</value>
   </data>
+  <data name="Highlight contrast" xml:space="preserve">
+    <value>Kontras sorotan</value>
+  </data>
+  <data name="Makes controls and selection states more distinct." xml:space="preserve">
+    <value>Membuat kontrol dan status pilihan lebih mudah dibedakan.</value>
+  </data>
 </root>

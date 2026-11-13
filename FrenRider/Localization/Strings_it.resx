@@ -3372,4 +3372,10 @@ Attivato: usa i preset BossMod sottostanti con qualsiasi provider di rotazione. 
   <data name="ADS does not support the selected no-inn repair city. Update ADS before using it." xml:space="preserve">
     <value>ADS non supporta la città selezionata per la riparazione senza locanda. Aggiorna ADS prima di usarla.</value>
   </data>
+  <data name="Highlight contrast" xml:space="preserve">
+    <value>Contrasto dell'evidenziazione</value>
+  </data>
+  <data name="Makes controls and selection states more distinct." xml:space="preserve">
+    <value>Rende più distinguibili i controlli e gli stati di selezione.</value>
+  </data>
 </root>

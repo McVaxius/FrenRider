@@ -1,3 +1,7 @@
+2026-11-12 - 4.1.0.17 - Highlight contrast
+
+- Add a saved Highlight contrast control to the Colour menu and window appearance settings, defaulting to 50%, with captions and help in all 15 interface languages.
+
 2026-11-08 - 4.1.0.15 - Shared glass rendering pilot
 
 - Update the shared UI library's text/control handling and glass mesh rendering.

@@ -3372,4 +3372,10 @@
   <data name="ADS does not support the selected no-inn repair city. Update ADS before using it." xml:space="preserve">
     <value>ADS不支持所选的不进旅馆修理城市。请先更新ADS。</value>
   </data>
+  <data name="Highlight contrast" xml:space="preserve">
+    <value>高亮对比度</value>
+  </data>
+  <data name="Makes controls and selection states more distinct." xml:space="preserve">
+    <value>使控件和选中状态更易于区分。</value>
+  </data>
 </root>

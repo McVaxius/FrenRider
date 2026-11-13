@@ -3477,4 +3477,10 @@ Bật: dùng các preset BossMod bên dưới với mọi nhà cung cấp rotati
   <data name="ADS does not support the selected no-inn repair city. Update ADS before using it." xml:space="preserve">
     <value>ADS không hỗ trợ thành phố sửa chữa không vào quán trọ đã chọn. Hãy cập nhật ADS trước khi dùng.</value>
   </data>
+  <data name="Highlight contrast" xml:space="preserve">
+    <value>Độ tương phản khi làm nổi bật</value>
+  </data>
+  <data name="Makes controls and selection states more distinct." xml:space="preserve">
+    <value>Làm cho các thành phần điều khiển và trạng thái chọn dễ phân biệt hơn.</value>
+  </data>
 </root>

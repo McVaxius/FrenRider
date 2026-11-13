@@ -3383,4 +3383,10 @@
   <data name="ADS does not support the selected no-inn repair city. Update ADS before using it." xml:space="preserve">
     <value>ADS चुने गए बिना सराय वाले मरम्मत शहर का समर्थन नहीं करता। उपयोग करने से पहले ADS अपडेट करें।</value>
   </data>
+  <data name="Highlight contrast" xml:space="preserve">
+    <value>हाइलाइट का कंट्रास्ट</value>
+  </data>
+  <data name="Makes controls and selection states more distinct." xml:space="preserve">
+    <value>नियंत्रणों और चयन की स्थितियों को अधिक स्पष्ट बनाता है।</value>
+  </data>
 </root>

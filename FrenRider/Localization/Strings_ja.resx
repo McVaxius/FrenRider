@@ -3372,4 +3372,10 @@
   <data name="ADS does not support the selected no-inn repair city. Update ADS before using it." xml:space="preserve">
     <value>ADSは選択した宿屋なしの修理都市に対応していません。使用する前にADSを更新してください。</value>
   </data>
+  <data name="Highlight contrast" xml:space="preserve">
+    <value>ハイライトのコントラスト</value>
+  </data>
+  <data name="Makes controls and selection states more distinct." xml:space="preserve">
+    <value>コントロールや選択状態をより見分けやすくします。</value>
+  </data>
 </root>

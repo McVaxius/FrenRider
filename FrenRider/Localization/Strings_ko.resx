@@ -3372,4 +3372,10 @@
   <data name="ADS does not support the selected no-inn repair city. Update ADS before using it." xml:space="preserve">
     <value>ADS가 선택한 여관 없는 수리 도시를 지원하지 않습니다. 사용하기 전에 ADS를 업데이트하세요.</value>
   </data>
+  <data name="Highlight contrast" xml:space="preserve">
+    <value>강조 대비</value>
+  </data>
+  <data name="Makes controls and selection states more distinct." xml:space="preserve">
+    <value>컨트롤과 선택 상태를 더 쉽게 구분할 수 있게 합니다.</value>
+  </data>
 </root>
