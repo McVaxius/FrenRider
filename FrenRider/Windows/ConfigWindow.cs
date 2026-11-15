@@ -78,9 +78,9 @@ public partial class ConfigWindow : Window, IDisposable
     private static readonly string[] ChocoboSkillTrees = { "Defender", "Attacker", "Healer" };
     private static readonly string[] ChocoboSkillPriorityLabels = { "First skill tree", "Second skill tree (optional)", "Third skill tree (optional)" };
     private static readonly string[] ClingTypes = { "NavMesh", "Visland", "BossMod Follow", "Vanilla Follow" };
-    private static readonly string[] RotationPlugins = { "BMR", "DAEDALUS", "RSR", "VBM", "WRATH" };
+    private static readonly string[] RotationPlugins = { "BMR", "DAEDALUS", "GODMOD", "RSR", "VBM", "WRATH" };
     // Keep saved plugin IDs stable while displaying names alphabetically.
-    private static readonly int[] RotationPluginIds = { 0, 4, 2, 1, 3 };
+    private static readonly int[] RotationPluginIds = { 0, 4, 5, 2, 1, 3 };
     private static readonly string[] DaedalusTargetModes = { "None", "Focus", "Split", "Kill Adds" };
     private static readonly string[] RsrOperatingModes = { "Auto", "Manual", "None", "Support" };
     private static readonly string[] RsrAggroTypes =
@@ -1896,7 +1896,7 @@ public partial class ConfigWindow : Window, IDisposable
                         config.RotationPlugin = RotationPluginIds[rotPlugin];
                         SaveEditingAccount();
                     }
-                    HelpMarker("Which rotation automation plugin to use.\nBMR: active GodMod, otherwise BossModReborn\nVBM: VanillaBossMod\nRSR: RotationSolver Reborn\nWRATH: Wrath\nDAEDALUS: Daedalus");
+                    HelpMarker("Which rotation automation plugin to use.\nGODMOD: GodMod (default; must be loaded)\nBMR: BossModReborn\nVBM: VanillaBossMod\nRSR: RotationSolver Reborn\nWRATH: Wrath\nDAEDALUS: Daedalus\nGodMod does not fall back to BMR when missing.");
                     DrawDefaultSettingSyncButton("Rotation Plugin");
                 }
 

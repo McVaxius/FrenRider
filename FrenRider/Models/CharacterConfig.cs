@@ -144,8 +144,8 @@ public class CharacterConfig
     public string AutoRotationType { get; set; } = "FRENRIDER";
     public string AutoRotationTypeDD { get; set; } = "DD";
     public string AutoRotationTypeFATE { get; set; } = "FATE";
-    public int RotationPlugin { get; set; } = 0; // 0=BMR, 1=VBM, 2=RSR, 3=WRATH, 4=DAEDALUS
-    public int RotationPluginForay { get; set; } = 0; // 0=BMR, 1=VBM, 2=RSR, 3=WRATH, 4=DAEDALUS
+    public int RotationPlugin { get; set; } = 5; // 0=BMR, 1=VBM, 2=RSR, 3=WRATH, 4=DAEDALUS, 5=GodMod
+    public int RotationPluginForay { get; set; } = 5; // Existing saved IDs remain unchanged.
     public DaedalusTargetMode DaedalusTargetMode { get; set; } =
         global::FrenRider.Models.DaedalusTargetMode.None;
     public bool ForceBossModPresetRegardlessOfRotation { get; set; } = false;

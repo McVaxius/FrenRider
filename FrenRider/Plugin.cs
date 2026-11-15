@@ -1168,10 +1168,12 @@ public sealed partial class Plugin : IDalamudPlugin
                 Log.Information($"[FrenRider][DutyAuthority] Skipped enable-time combat setup: {CombatService.StateDetail}.");
             }
 
-            CommandManager.ProcessCommand(
-                ConfigManager.GetActiveConfig().ObstacleMapsOn
+            var obstacleConfig = ConfigManager.GetActiveConfig();
+            AutorotIpcService.SendBossModAiCommand(
+                obstacleConfig.ObstacleMapsOn
                     ? "/bmrai obstaclemaps on"
-                    : "/bmrai obstaclemaps off");
+                    : "/bmrai obstaclemaps off", CommandManager.ProcessCommand,
+                CombatService.GetConfiguredRotationProvider(obstacleConfig));
         }
         else
         {
@@ -1634,6 +1636,8 @@ public sealed partial class Plugin : IDalamudPlugin
                 return;
             }
             loggingOutCleanupDone = false;
+
+            Measure("duty-only-combat-hold", CombatService.RefreshDutyOnlyCombatHold);
 
             if (IsAreaTransitionActive())
             {

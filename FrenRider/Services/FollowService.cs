@@ -41,6 +41,8 @@ public class FollowService
     private long lastOffsetChangeMs;
     private long lastFlyingAdjustMs;
     private bool bossModFollowActive;
+    private string bossModFollowProvider = string.Empty;
+    private WeakReference<object>? bossModFollowProviderInstance;
     private string bossModFollowTarget = string.Empty;
     private uint bossModFollowTerritoryId;
     private int bossModFollowCombatMode = -1;
@@ -1335,6 +1337,11 @@ public class FollowService
 
     private void EnsureBossModFollow(CharacterConfig config, FrenTracker.FrenState fren)
     {
+        if (plugin.IsWaitingForDuty)
+        {
+            ClearBossModFollowState();
+            return;
+        }
         if (plugin.CombatService.IsQuestionableSoloAuthorityActive)
             return;
 
@@ -1342,7 +1349,13 @@ public class FollowService
         if (string.IsNullOrWhiteSpace(targetName))
             return;
 
+        var provider = AutorotIpcService.GetBossModProvider(plugin.CombatService.GetConfiguredRotationProvider(config));
+        var available = plugin.AutorotIpcService.TryGetSelectedBossModInstance(provider, out var providerInstance);
+        var unavailableDetail = plugin.AutorotIpcService.LastStatus;
         var signatureMatches = bossModFollowActive
+            && bossModFollowProvider == provider && available
+            && bossModFollowProviderInstance is { } capturedProvider && capturedProvider.TryGetTarget(out var capturedInstance)
+            && ReferenceEquals(capturedInstance, providerInstance)
             && string.Equals(bossModFollowTarget, targetName, StringComparison.Ordinal)
             && bossModFollowTerritoryId == zoneService.TerritoryId
             && bossModFollowCombatMode == config.FollowInCombat
@@ -1355,26 +1368,31 @@ public class FollowService
         if (bossModFollowActive)
             StopBossModFollow();
 
+        if (!available)
+        {
+            StateDetail = unavailableDetail;
+            return;
+        }
+
         if (isNavigating)
             StopNavigation(config, "switching to BossMod follow");
 
         plugin.DutyInteractService?.ReleaseCofferNavigationForFollow();
         plugin.CaptureExternalAutomationSnapshot("BossMod follow start");
-        SendCommand($"/bmrai follow {targetName}");
-        SendCommand("/bmrai followoutofcombat on");
-
-        if (config.FollowInCombat == 0)
+        var prefix = provider == "VBM" ? "/vbmai" : provider == "GodMod" ? "/gmai" : "/bmrai";
+        var combatMode = config.FollowInCombat == 0 ? "off" : "on";
+        if (!SendBossModFollowCommand($"{prefix} follow {targetName}", provider, providerInstance!)
+            || !SendBossModFollowCommand($"{prefix} followoutofcombat on", provider, providerInstance!)
+            || !SendBossModFollowCommand($"{prefix} followcombat {combatMode}", provider, providerInstance!)
+            || !SendBossModFollowCommand($"{prefix} followmodule {combatMode}", provider, providerInstance!))
         {
-            SendCommand("/bmrai followcombat off");
-            SendCommand("/bmrai followmodule off");
-        }
-        else
-        {
-            SendCommand("/bmrai followcombat on");
-            SendCommand("/bmrai followmodule on");
+            StateDetail = plugin.AutorotIpcService.LastStatus;
+            return;
         }
 
         bossModFollowActive = true;
+        bossModFollowProvider = provider;
+        bossModFollowProviderInstance = new WeakReference<object>(providerInstance!);
         bossModFollowTarget = targetName;
         bossModFollowTerritoryId = zoneService.TerritoryId;
         bossModFollowCombatMode = config.FollowInCombat;
@@ -1395,17 +1413,34 @@ public class FollowService
             return;
         }
 
+        var provider = bossModFollowProvider;
+        if (bossModFollowProviderInstance is not { } capturedProvider || !capturedProvider.TryGetTarget(out var capturedInstance)
+            || !plugin.AutorotIpcService.TryGetSelectedBossModInstance(provider, out var live)
+            || !ReferenceEquals(capturedInstance, live))
+        {
+            ClearBossModFollowState();
+            StateDetail = "Previous BossMod follow session changed; stop skipped";
+            Plugin.Log.Information("[FR] Relinquished BossMod follow state after its provider session changed");
+            return;
+        }
+
         plugin.CaptureExternalAutomationSnapshot("BossMod follow stop");
-        SendCommand("/bmrai followoutofcombat off");
-        SendCommand("/bmrai followcombat off");
-        SendCommand("/bmrai followmodule off");
+        var prefix = provider == "VBM" ? "/vbmai" : provider == "GodMod" ? "/gmai" : "/bmrai";
+        var stopped = SendBossModFollowCommand($"{prefix} followoutofcombat off", provider, capturedInstance)
+            && SendBossModFollowCommand($"{prefix} followcombat off", provider, capturedInstance)
+            && SendBossModFollowCommand($"{prefix} followmodule off", provider, capturedInstance);
         ClearBossModFollowState();
-        Plugin.Log.Information("[FR] Stopped BossMod follow");
+        if (stopped)
+            Plugin.Log.Information("[FR] Stopped BossMod follow");
+        else
+            StateDetail = plugin.AutorotIpcService.LastStatus;
     }
 
     private void ClearBossModFollowState()
     {
         bossModFollowActive = false;
+        bossModFollowProvider = string.Empty;
+        bossModFollowProviderInstance = null;
         bossModFollowTarget = string.Empty;
         bossModFollowTerritoryId = 0;
         bossModFollowCombatMode = -1;
@@ -1469,30 +1504,38 @@ public class FollowService
     /// Send a slash command to the game.
     /// Uses UIModule.ProcessChatBoxEntry to send commands directly to game (like typing in chat).
     /// </summary>
-    private static unsafe void SendCommand(string command)
+    private bool SendCommand(string command)
+        => plugin.AutorotIpcService.SendBossModAiCommand(command, SendRawCommand,
+            plugin.CombatService.GetConfiguredRotationProvider(plugin.ConfigManager.GetActiveConfig()));
+
+    private bool SendBossModFollowCommand(string command, string provider, object providerInstance)
+        => plugin.AutorotIpcService.SendBossModAiCommand(command, SendRawCommand, provider, providerInstance);
+
+    private static unsafe bool SendRawCommand(string command)
     {
         try
         {
-            command = AutorotIpcService.ResolveBossModAiCommand(command, Plugin.PluginInterface.InstalledPlugins);
             // Try plugin command first (for nav commands)
             if (Plugin.CommandManager.ProcessCommand(command))
-                return;
+                return true;
             
             // Fall back to game command (for /hold, /release, etc.)
             var uiModule = UIModule.Instance();
             if (uiModule == null)
             {
                 Plugin.Log.Error("UIModule is null, cannot send command");
-                return;
+                return false;
             }
 
             var bytes = Encoding.UTF8.GetBytes(command);
             var utf8String = Utf8String.FromSequence(bytes);
             uiModule->ProcessChatBoxEntry(utf8String, nint.Zero);
+            return true;
         }
         catch (Exception ex)
         {
             Plugin.Log.Error($"Command failed [{command}]: {ex.Message}");
+            return false;
         }
     }
 

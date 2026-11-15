@@ -7,11 +7,14 @@ namespace FrenRider.Tests;
 public sealed class ConfigurationMigrationTests
 {
     [Fact]
-    public void NewProfilesUseBmrInBothContexts()
+    public void NewAndUnsetProfilesUseGodModInBothContexts()
     {
         var config = new CharacterConfig();
-        Assert.Equal(0, config.RotationPlugin);
-        Assert.Equal(0, config.RotationPluginForay);
+        Assert.Equal(5, config.RotationPlugin);
+        Assert.Equal(5, config.RotationPluginForay);
+        var unset = JsonSerializer.Deserialize<CharacterConfig>("{}")!;
+        Assert.Equal(5, unset.RotationPlugin);
+        Assert.Equal(5, unset.RotationPluginForay);
     }
 
     [Theory]
@@ -36,7 +39,7 @@ public sealed class ConfigurationMigrationTests
     }
 
     [Fact]
-    public void LegacyAccountMigratesEverySavedProfileOnceAndRetainsLaterChoices()
+    public void LegacyAccountRetainsExplicitProfilesAndItsExistingMigrationState()
     {
         var account = JsonSerializer.Deserialize<AccountConfig>("""
             {"DefaultConfig":{"RotationPlugin":2,"RotationPluginForay":3,"CustomIdleList":["/wave"],"Repair":3},
@@ -44,12 +47,10 @@ public sealed class ConfigurationMigrationTests
              "RemoteProfiles":[{"Config":{"RotationPlugin":3,"RotationPluginForay":2,"TornClothes":42}}]}
             """)!;
 
-        Assert.True(ConfigManager.MigrateRotationDefaults(account));
-        foreach (var config in new[] { account.DefaultConfig, account.Characters["Example"], account.RemoteProfiles[0].Config })
-        {
-            Assert.Equal(0, config.RotationPlugin);
-            Assert.Equal(0, config.RotationPluginForay);
-        }
+        var before = JsonSerializer.Serialize(account);
+        Assert.False(ConfigManager.MigrateRotationDefaults(account));
+        Assert.Equal(before, JsonSerializer.Serialize(account));
+        Assert.Equal(0, account.RotationDefaultsVersion);
         Assert.Equal(new[] { "/wave" }, account.DefaultConfig.CustomIdleList);
         Assert.Equal(3, account.DefaultConfig.Repair);
         Assert.Equal(7f, account.Characters["Example"].Cling);
@@ -63,6 +64,22 @@ public sealed class ConfigurationMigrationTests
         Assert.Equal(2, reloaded.DefaultConfig.RotationPlugin);
         Assert.Equal(3, reloaded.Characters["Example"].RotationPluginForay);
         Assert.Equal(4, reloaded.RemoteProfiles[0].Config.RotationPlugin);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    [InlineData(4)]
+    [InlineData(5)]
+    public void ExplicitProviderIdsRoundTripWithoutADefaultSweep(int provider)
+    {
+        var profile = JsonSerializer.Deserialize<CharacterConfig>(
+            $"{{\"RotationPlugin\":{provider},\"RotationPluginForay\":{provider}}}")!;
+        Assert.Equal(provider, profile.RotationPlugin);
+        Assert.Equal(provider, profile.RotationPluginForay);
+        Assert.Equal(provider, profile.Clone().RotationPlugin);
     }
 
     [Fact]

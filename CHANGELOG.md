@@ -1,3 +1,13 @@
+2026-11-14 - 4.1.0.18 - GodMod and duty combat controls
+
+- **Added GodMod:** Select GodMod separately; new and unset profiles default to it for normal play and Forays.
+- **Updated Rotation Selection:** Preserve saved provider choices and report missing GodMod without switching to BMR.
+- **Fixed Duty Only:** Pause owned combat rotations and GodMod/BMR/VBM AI outside duties, prevent BossMod following from restarting AI, and resume ordinary duty rules on entry.
+- **Fixed BossMod Ownership:** Keep activation and cleanup tied to the selected provider, preserve newer external choices, and report conflicting loaded providers.
+- **Fixed BossMod Follow:** Use the selected provider's commands and avoid changing replacement hosts after provider switches or reloads.
+- **Fixed Death Recovery:** Restore a previously owned GodMod/BMR preset once after observed combat death and revival when native death clearing is enabled and settings and combat authority remain unchanged.
+- **Updated Recovery Controls:** Respect Off, combat holds and observed newer choices; identical manual disables after death clearing remain indistinguishable.
+
 2026-11-12 - 4.1.0.17 - Highlight contrast
 
 - Add a saved Highlight contrast control to the Colour menu and window appearance settings, defaulting to 50%, with captions and help in all 15 interface languages.

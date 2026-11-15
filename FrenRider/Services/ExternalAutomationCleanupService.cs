@@ -149,9 +149,10 @@ public sealed record ExternalAutomationSnapshot(
     DateTimeOffset CapturedAtUtc,
     DaedalusAutomationSnapshot? Daedalus = null)
 {
-    public bool HasAnyAvailableState => Bmr.IsAvailable || Vbm.IsAvailable || Cbt.IsAvailable || Daedalus?.IsAvailable == true;
+    public BossModAutomationSnapshot? GodMod { get; init; }
+    public bool HasAnyAvailableState => Bmr.IsAvailable || Vbm.IsAvailable || GodMod?.IsAvailable == true || Cbt.IsAvailable || Daedalus?.IsAvailable == true;
     public bool HasUnavailableState =>
-        !Bmr.IsAvailable || !Vbm.IsAvailable || !Cbt.IsAvailable || Daedalus is { IsAvailable: false };
+        !Bmr.IsAvailable || !Vbm.IsAvailable || !Cbt.IsAvailable || GodMod is { IsAvailable: false } || Daedalus is { IsAvailable: false };
 }
 
 public sealed record ExternalAutomationCleanupResult(
@@ -256,6 +257,9 @@ public sealed class ExternalAutomationCleanupService
         var attempts = new List<CommandAttempt>();
         var current = snapshotProvider.Capture(snapshot.AccountId, snapshot.CharacterKey);
         RestoreBossMod("BMR", "/bmrai", snapshot.Bmr, current.Bmr, attempts);
+        if (snapshot.GodMod is { } godMod)
+            RestoreBossMod("GodMod", "/gmai", godMod,
+                current.GodMod ?? BossModAutomationSnapshot.Unavailable("not loaded"), attempts);
         RestoreBossMod("VBM", "/vbmai", snapshot.Vbm, current.Vbm, attempts);
         RestoreCbt(snapshot.Cbt, attempts);
         RestoreDaedalus(snapshot.Daedalus, attempts);
@@ -278,15 +282,19 @@ public sealed class ExternalAutomationCleanupService
     {
         var key = BuildKey(accountId, characterKey);
         snapshots.TryGetValue(key, out var captured);
-        var current = captured is null ? null : snapshotProvider.Capture(captured.AccountId, captured.CharacterKey);
-        var attempts = new List<CommandAttempt>
-        {
-            captured is not null && !captured.Bmr.MatchesProvider(current!.Bmr)
-                ? new CommandAttempt("BMR off skipped: provider changed", false) : Send("/bmrai off"),
-            captured is not null && !captured.Vbm.MatchesProvider(current!.Vbm)
-                ? new CommandAttempt("VBM off skipped: provider changed", false) : Send("/vbmai off"),
-            Send("/cbt disable AutoFollow"),
-        };
+        var current = snapshotProvider.Capture(accountId, characterKey);
+        var targets = captured ?? current;
+        var attempts = new List<CommandAttempt>();
+        if (targets.Bmr.IsAvailable)
+            attempts.Add(!targets.Bmr.MatchesProvider(current.Bmr)
+                ? new CommandAttempt("BMR off skipped: provider changed", false) : Send("/bmrai off"));
+        if (targets.Vbm.IsAvailable)
+            attempts.Add(!targets.Vbm.MatchesProvider(current.Vbm)
+                ? new CommandAttempt("VBM off skipped: provider changed", false) : Send("/vbmai off"));
+        attempts.Add(Send("/cbt disable AutoFollow"));
+        if (targets.GodMod is { IsAvailable: true } godMod)
+            attempts.Add(current.GodMod is { } currentGodMod && godMod.MatchesProvider(currentGodMod)
+                ? Send("/gmai off") : new CommandAttempt("GodMod off skipped: provider changed", false));
 
         RsrCleanupAttempt rsr;
         try
@@ -364,10 +372,10 @@ public sealed class ExternalAutomationCleanupService
             attempts.Add(new CommandAttempt($"{label} restore skipped: provider changed", false));
             return;
         }
-        if (label == "BMR" && snapshot.FollowTarget == true
+        if ((label is "BMR" or "GodMod") && snapshot.FollowTarget == true
             && (snapshot.AiActive is null || snapshot.FollowSlot is not (>= 0 and < 8)))
         {
-            attempts.Add(new CommandAttempt("BMR follow restore skipped: captured slot or AI state is unsupported by native commands", false));
+            attempts.Add(new CommandAttempt($"{label} follow restore skipped: captured slot or AI state is unsupported by native commands", false));
             return;
         }
 
@@ -377,7 +385,7 @@ public sealed class ExternalAutomationCleanupService
         AddBoolCommand(attempts, $"{prefix} followmodule", snapshot.FollowDuringActiveBossModule);
 
         if (snapshot.FollowTarget == true && snapshot.AiActive is not null && snapshot.FollowSlot is { } followSlot)
-            attempts.Add(Send($"{prefix} follow Slot{(label == "BMR" ? followSlot + 1 : followSlot)}"));
+            attempts.Add(Send($"{prefix} follow Slot{(label is "BMR" or "GodMod" ? followSlot + 1 : followSlot)}"));
 
         // Following starts AI; finish all AI transitions before runtime preset restoration.
         if (snapshot.AiActive is { } aiActive)
@@ -443,7 +451,8 @@ public sealed class ExternalAutomationCleanupService
     }
 
     private CommandAttempt Send(string command)
-        => new(command, autorotIpcService?.SendBossModAiCommand(command, commandSender.TrySendCommand)
+        => new(command, autorotIpcService?.SendBossModAiCommand(command, commandSender.TrySendCommand,
+                command.StartsWith("/gmai", StringComparison.Ordinal) ? "GodMod" : "BMR")
             ?? commandSender.TrySendCommand(command));
 
     private static string FormatSnapshotSummary(ExternalAutomationSnapshot snapshot)
@@ -454,6 +463,8 @@ public sealed class ExternalAutomationCleanupService
             FormatTarget("VBM", snapshot.Vbm.IsAvailable, snapshot.Vbm.Detail),
             FormatTarget("CBT", snapshot.Cbt.IsAvailable, snapshot.Cbt.Detail),
         };
+        if (snapshot.GodMod is { } godMod)
+            targets.Add(FormatTarget("GodMod", godMod.IsAvailable, godMod.Detail));
         if (snapshot.Daedalus != null)
             targets.Add(FormatTarget("Daedalus", snapshot.Daedalus.IsAvailable, snapshot.Daedalus.Detail));
 
@@ -480,8 +491,7 @@ public sealed class ExternalAutomationCleanupService
 public sealed class DalamudExternalAutomationCommandSender : IExternalAutomationCommandSender
 {
     public bool TrySendCommand(string command)
-        => GameHelpers.SendChatCommand(AutorotIpcService.ResolveBossModAiCommand(command,
-            Plugin.PluginInterface.InstalledPlugins), "[ExternalCleanup]");
+        => GameHelpers.SendChatCommand(command, "[ExternalCleanup]");
 }
 
 public sealed class BossModExternalAutomationSnapshotProvider : IExternalAutomationSnapshotProvider
@@ -494,6 +504,7 @@ public sealed class BossModExternalAutomationSnapshotProvider : IExternalAutomat
     {
         new("BossModReborn", "BMR"),
         new("BossMod", "VBM"),
+        new("GodMod", "GodMod"),
     };
 
     private readonly IDalamudPluginInterface pluginInterface;
@@ -510,16 +521,14 @@ public sealed class BossModExternalAutomationSnapshotProvider : IExternalAutomat
         var bmr = CaptureBossMod(Targets[0]);
         var vbm = CaptureBossMod(Targets[1]);
         var cbt = CbtAutomationSnapshot.Unavailable("live AutoFollow read unavailable");
-        return new ExternalAutomationSnapshot(accountId, characterKey, bmr, vbm, cbt, DateTimeOffset.UtcNow);
+        return new ExternalAutomationSnapshot(accountId, characterKey, bmr, vbm, cbt, DateTimeOffset.UtcNow)
+            { GodMod = CaptureBossMod(Targets[2]) };
     }
 
     internal static IExposedPlugin? FindLoadedBossModProvider(IEnumerable<IExposedPlugin> plugins, string internalName)
     {
         var loaded = plugins.Where(plugin => plugin.IsLoaded);
-        return internalName == "BossModReborn"
-            ? loaded.FirstOrDefault(plugin => string.Equals(plugin.InternalName, "GodMod", StringComparison.OrdinalIgnoreCase))
-                ?? loaded.FirstOrDefault(plugin => string.Equals(plugin.InternalName, internalName, StringComparison.OrdinalIgnoreCase))
-            : loaded.FirstOrDefault(plugin => string.Equals(plugin.InternalName, internalName, StringComparison.OrdinalIgnoreCase));
+        return loaded.FirstOrDefault(plugin => string.Equals(plugin.InternalName, internalName, StringComparison.OrdinalIgnoreCase));
     }
 
     private BossModAutomationSnapshot CaptureBossMod(BossModTarget target)

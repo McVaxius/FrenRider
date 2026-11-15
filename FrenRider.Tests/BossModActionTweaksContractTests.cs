@@ -122,11 +122,11 @@ public sealed class BossModActionTweaksContractTests
     }
 
     [Theory]
-    [InlineData(true, true, "GodMod")]
-    [InlineData(true, false, "GodMod")]
+    [InlineData(true, true, "BossModReborn")]
+    [InlineData(true, false, null)]
     [InlineData(false, true, "BossModReborn")]
     [InlineData(false, false, null)]
-    public void SavedBmrProviderPrefersOnlyAnActiveGodMod(bool godModLoaded, bool bmrLoaded, string? expected)
+    public void ExplicitBmrProviderNeverSelectsGodMod(bool godModLoaded, bool bmrLoaded, string? expected)
     {
         var plugins = new[] { Plugin("BossModReborn", bmrLoaded), Plugin("GodMod", godModLoaded) };
         Assert.Equal(expected, BossModExternalAutomationSnapshotProvider.FindLoadedBossModProvider(plugins, "BossModReborn")?.InternalName);
@@ -136,13 +136,14 @@ public sealed class BossModActionTweaksContractTests
     [InlineData("/bmrai on", true, "/gmai on")]
     [InlineData("/bmrai", true, "/gmai")]
     [InlineData("/bmrai follow Fixture", true, "/gmai follow Fixture")]
-    [InlineData("/bmrai off", false, "/bmrai off")]
+    [InlineData("/bmrai off", false, "/gmai off")]
     [InlineData("/vbmai off", true, "/vbmai off")]
     [InlineData("/bmraix on", true, "/bmraix on")]
     public void NativeAiCommandRoutingRetainsArgumentsAndOtherProviders(string command, bool godModLoaded, string expected)
     {
         var plugins = new[] { Plugin("BossModReborn"), Plugin("GodMod", godModLoaded) };
-        Assert.Equal(expected, AutorotIpcService.ResolveBossModAiCommand(command, plugins));
+        Assert.Equal(expected, AutorotIpcService.ResolveBossModAiCommand(command, plugins, "GodMod"));
+        Assert.Equal(command, AutorotIpcService.ResolveBossModAiCommand(command, plugins, "BMR"));
     }
 
     private static IExposedPlugin Plugin(string name, bool loaded = true) => (IExposedPlugin)Proxy(typeof(IExposedPlugin), (method, _) => method.Name switch

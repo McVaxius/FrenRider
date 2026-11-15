@@ -1,6 +1,6 @@
 # Fren Rider
 
-Automatic BMR healer presets use the Dhog healer rotations supplied by God Mod Companion. If those rotations cannot be found or the loaded preset drops their strategies, activation reports a warning. Saved manual presets and optional providers remain available.
+Automatic GodMod/BMR healer presets use the Dhog healer rotations supplied by God Mod Companion. If those rotations cannot be found or the loaded preset drops their strategies, activation reports a warning. Saved manual presets and optional providers remain available.
 
 Coppelia's BMR handoff requires FrenRider 4.1.0.8 or newer: the lease confirms native combat suppression before Coppelia takes control. If its heartbeat expires, FrenRider retains the combat hold until Coppelia restores and releases the session, or you turn FrenRider off. This prevents recovery from replacing an unfinished Coppelia session.
 
@@ -114,7 +114,7 @@ These four preferences save with the existing character profile. Disable cancels
 - Social spacing with configurable X/Z wiggle and indoor behavior.
 - Formation following for party-slot based positioning.
 - Mount and flying behavior, including Fly You Fools, own-mount chase, far-chase recovery, and vnavmesh flying-stuck recovery through ECommons keypress support. Fly You Fools uses ground navigation in no-flight Forays but remains flight-enabled in the Diadem; nearby own mounts use the local ClientStructs mount state (excluding pillion) for dismount correction.
-- Combat integration for BMR, VBM, RotationSolver Reborn, Wrath, and Daedalus, with packaged BossMod presets.
+- Combat integration for GodMod, BMR, VBM, RotationSolver Reborn, Wrath, and Daedalus, with packaged BossMod presets.
 - Separate RotationSolver Reborn operating-mode and hostile-target choices, synchronized per character.
 - FATE sync, food use/search, companion summon/stance, idle commands, auto-discard, repair, and desynthesis helpers.
 - Optional per-character job-stone equip for level 30+ base classes, disabled by default.
@@ -196,13 +196,15 @@ Global UI settings are stored by Dalamud in the normal Fren Rider plugin config.
 
 Companion HealRider requires no FrenRider profile setup. At grounded pickup readiness, Companion temporarily enables a clone of the active profile, targets the assigned Helper, and uses pillion riding with close following. Combat settings and normal enable/disable effects remain active. The optional `forceTemporary: true` field on `FrenRider.Dad.ApplyProfile` installs the existing in-memory overlay regardless of the saved Off/Temporary/Permanent acceptance setting, without saving or changing that setting. Companion retains the exact owner tuple and calls `FrenRider.Dad.ReleaseTemporaryProfile` on arrival, cancellation, timeout, stop, session loss, duty handoff, or disposal to reveal the saved profile. Other owners cannot replace or release it. Existing callers that omit `forceTemporary` retain acceptance-policy behavior.
 
-**Don't move while casting** is a global setting that defaults on. Fren Rider applies the stored value when the plugin loads and whenever the checkbox changes: BMR and VBM receive their existing Action Tweaks setting, while RotationSolver Reborn receives `PoslockCasting true|false` through typed IPC. Existing global v1 configurations enable the setting during their one-time v2 migration; a later v2 opt-out remains off.
+**Don't move while casting** is a global setting that defaults on. Fren Rider applies the stored value when the plugin loads and whenever the checkbox changes: GodMod, BMR and VBM receive their existing Action Tweaks setting, while RotationSolver Reborn receives `PoslockCasting true|false` through typed IPC. Existing global v1 configurations enable the setting during their one-time v2 migration; a later v2 opt-out remains off.
 
 While Fren Rider has control outside combat, three localized target range/line-of-sight errors within five seconds against the same living hostile target, with movement limited to 0.5 yalms, temporarily release casting movement locks confirmed on in BMR, VBM, and RSR. Only those settings are restored when combat begins or five seconds pass; further errors do not extend the deadline. Disable, character/zone transitions, unload, and control transfer also restore them. The casting checkbox overrides pending recovery. Recovery does not start during ADS ownership, pending handoff, utility activity, Hyper Focus, Questionable or Coppelia control, or unreadable ADS ownership in a duty.
 
-**Activation mode** in Main and Settings > Profile defaults to **Always on**, including existing profiles. **Duty only** keeps Run On and pauses only combat rotations outside duties. Following, repairs, recovery and other individually configured actions continue. Entering a duty enables ordinary combat rules; leaving it pauses rotations without disabling the plugin or releasing its movement ownership. Run Off still performs full cleanup. New profiles inherit the default mode; existing profiles change through explicit sync. DAD chooses Duty only for duty-running profiles and restores the local mode and Run intent after releasing its temporary profile.
+**Activation mode** in Main and Settings > Profile defaults to **Always on**, including existing profiles. **Duty only** keeps Run On and pauses FrenRider-owned combat rotations and GodMod/BMR/VBM AI outside duties. BossMod-based following also pauses so it cannot turn AI back on; other following, repairs, recovery and individually configured actions continue. Entering a duty enables ordinary combat rules; leaving it pauses owned AI and rotations without disabling the plugin. Newer external selections are preserved. Run Off still performs full cleanup. New profiles inherit the default mode; existing profiles change through explicit sync. DAD chooses Duty only for duty-running profiles and restores the local mode and Run intent after releasing its temporary profile.
 
-Fren Rider has authority to apply its selected BMR/VBM preset, including replacing a preset selected elsewhere. With manual preset configuration off, it selects `FRENRIDER - TANK`, `FRENRIDER - MELEE` or `FRENRIDER - RANGED` for the current job. Previous settings are captured for cleanup; a missing snapshot or changed previous preset does not prevent selection. Cleanup preserves newer external changes, and existing combat holds still determine when setup runs.
+Fren Rider has authority to apply its selected GodMod/BMR/VBM preset, including replacing a preset selected elsewhere. With manual preset configuration off, it selects `FRENRIDER - TANK`, `FRENRIDER - MELEE` or `FRENRIDER - RANGED` for the current job. Previous settings are captured for cleanup; a missing snapshot or changed previous preset does not prevent selection. Cleanup preserves newer external changes, and existing combat holds still determine when setup runs.
+
+After observing a living character die in combat, Fren Rider can restore its previously confirmed owned GodMod/BMR preset once after revival in the same duty authority and provider session. This requires native `ClearPresetOnDeath` to remain enabled and unchanged AI, saved selector and FrenRider selection. Off, combat holds and observed external changes cancel recovery. A manual force-disable that writes the identical already-cleared state after death cannot be distinguished from native death clearing.
 
 Settings keeps edits bound to the selected saved account and DEFAULT, character or remote profile, including at the title screen. Use the account dropdown to choose an existing saved account; this does not activate it for automation. Limit Break role choices are saved independently and survive login, logout and reload.
 
@@ -212,7 +214,7 @@ Automatic LB requires effective FrenRider activation, combat, a living unoccupie
 
 The main window has large red **All FR off** and green **All FR on** buttons beneath the top bar, above the scrolling content. They remain available while FrenRider is disabled and are disabled only when no account is loaded. These controls, also available as compact buttons beside the enabled checkbox in **DEFAULT CONFIG**, immediately set the default and all local characters in the current account, including the active temporary profile. The main window's **Run** checkbox still controls only the current character. Other settings and remote profiles are preserved.
 
-BMR is the default rotation provider for normal play and Forays. Existing account templates, character profiles, and saved remote profiles switch to BMR once; later provider selections remain saved. VBM, RSR, Wrath, and Daedalus remain available with their existing provider IDs. Unrelated profile settings and custom commands are preserved.
+GodMod is the default rotation provider for new or unset profiles in normal play and Forays. It must be loaded when selected; Fren Rider reports its absence without switching to BMR. Existing explicit choices and migration state remain saved. Provider IDs remain BMR `0`, VBM `1`, RSR `2`, Wrath `3` and Daedalus `4`; GodMod is `5`.
 
 RotationSolver Reborn configuration keeps Auto, Manual, None, and Support under **RSR Operating Mode**. **RSR Aggro Type** independently exposes all five upstream hostile-target choices and applies the selected value through RSR settings IPC. Existing per-character value `4` from the former combined operating-mode list migrates once to Auto plus Previously Engaged Targets.
 
@@ -222,9 +224,9 @@ During the same automation, selected VBM has both its FrenRider-owned AI and run
 
 **Equip job stone for current class** is a per-character Automation setting and defaults off. While Fren Rider is enabled, it acts only on a level 30+ base class when equipment can be changed safely and the character has a valid current gearset. Fren Rider checks the Soul Crystal armoury chest in slot order, equips the first stone whose job belongs to the current class, confirms the equipped slot, and updates that gearset once. A character already on a job is never scanned; Arcanist uses whichever matching Summoner or Scholar stone is encountered first.
 
-BossMod preset activation is provider-specific: VBM selections receive only the VBM preset command, while BMR and non-VBM rotation selections use BMR for BossMod AI and receive only the BMR preset command. **Push Presets Now** installs the packaged presets and applies the current selection through the same routing.
+BossMod preset activation is provider-specific: GodMod uses GodMod, BMR uses BossModReborn, and VBM uses VanillaBossMod. RSR, Wrath and Daedalus retain their BMR companion routing. **Push Presets Now** installs the packaged presets and applies the current selection through the same routing. Multiple loaded BossMod providers block shared IPC writes because the endpoint owner is ambiguous.
 
-Plugin loads and updates automatically install the six shipped BossMod preset definitions when the provider is available. Edited copies under those six names are replaced; differently named custom presets and the current runtime selection are preserved. This definition push runs independently of rotation activation and needs no enable toggle.
+Plugin loads and updates automatically install the six shipped BossMod preset definitions when the selected provider is available. Edited copies under those six names are replaced; differently named custom presets and the current runtime selection are preserved. This definition push runs independently of rotation activation and needs no enable toggle.
 
 Combat's **Configure rotation preset manually** uses your selected existing preset for the current normal, deep-dungeon or FATE context. With it off, Fren Rider selects its packaged preset by job role. These choices belong to the active character profile; editing another profile in Settings does not redirect active automation.
 
@@ -236,7 +238,7 @@ Daedalus custom repository URL:
 https://raw.githubusercontent.com/ofnature/Daedalus/main/repo.json
 ```
 
-While Fren Rider is enabled, it warns immediately and every five seconds if both loaded internal plugins `BossModReborn` (BMR) and `BossMod` (VBM) are detected. The warning is informational: Fren Rider does not disable either plugin or block combat.
+While Fren Rider is enabled, it warns immediately and every five seconds if multiple GodMod/BMR/VBM providers are loaded. Fren Rider does not disable the conflicting plugins. Shared BossMod IPC writes are refused while their endpoint owner is ambiguous.
 
 Per-account Fren Rider config files are stored in the plugin config directory as:
 

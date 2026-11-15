@@ -1657,26 +1657,9 @@ public class ConfigManager : IDadProfileStore
 
     internal static bool MigrateRotationDefaults(AccountConfig account)
     {
-        if (account.RotationDefaultsVersion >= AccountConfig.CurrentRotationDefaultsVersion)
-            return false;
-
-        static void ResetProvider(CharacterConfig? config)
-        {
-            if (config == null) return;
-            config.RotationPlugin = 0;
-            config.RotationPluginForay = 0;
-        }
-
-        ResetProvider(account.DefaultConfig);
-        if (account.Characters != null)
-            foreach (var config in account.Characters.Values)
-                ResetProvider(config);
-        if (account.RemoteProfiles != null)
-            foreach (var row in account.RemoteProfiles)
-                ResetProvider(row?.Config);
-
-        account.RotationDefaultsVersion = AccountConfig.CurrentRotationDefaultsVersion;
-        return true;
+        // Retire the old account-wide provider reset. New/unset fields use the
+        // model defaults; explicit selections and the existing marker stay intact.
+        return false;
     }
 
     internal static bool MigrateLegacyRsrSettings(AccountConfig account)

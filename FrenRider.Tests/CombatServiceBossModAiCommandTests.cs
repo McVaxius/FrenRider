@@ -10,6 +10,7 @@ public sealed class CombatServiceBossModAiCommandTests
     [Theory]
     [InlineData(true, "VBM", true, false, false, true)]
     [InlineData(true, "BMR", true, false, false, false)]
+    [InlineData(true, "GodMod", true, false, false, false)]
     [InlineData(true, "RSR", true, false, false, false)]
     [InlineData(false, "VBM", true, false, false, false)]
     [InlineData(true, "VBM", false, false, false, false)]
@@ -82,6 +83,7 @@ public sealed class CombatServiceBossModAiCommandTests
 
     [Theory]
     [InlineData("BMR")]
+    [InlineData("GodMod")]
     [InlineData("VBM")]
     [InlineData("RSR")]
     [InlineData("WRATH")]
@@ -135,6 +137,7 @@ public sealed class CombatServiceBossModAiCommandTests
 
     [Theory]
     [InlineData(0, "BMR", new[] { "/bmrai forbidactions off", "/bmrai on" })]
+    [InlineData(0, "GodMod", new[] { "/bmrai forbidactions off", "/bmrai on" })]
     [InlineData(99, "RSR", new[] { "/bmrai forbidactions off", "/bmrai on" })]
     [InlineData(0, "WRATH", new[] { "/bmrai forbidactions off", "/bmrai on" })]
     [InlineData(0, "DAEDALUS", new[] { "/bmrai forbidactions off", "/bmrai on" })]
@@ -149,6 +152,7 @@ public sealed class CombatServiceBossModAiCommandTests
     [Theory]
     [InlineData("VBM", new string[] { })]
     [InlineData("BMR", new[] { "/bmrai forbidactions off", "/bmrai on" })]
+    [InlineData("GodMod", new[] { "/bmrai forbidactions off", "/bmrai on" })]
     [InlineData("RSR", new[] { "/bmrai forbidactions off", "/bmrai on" })]
     [InlineData("WRATH", new[] { "/bmrai forbidactions off", "/bmrai on" })]
     [InlineData("DAEDALUS", new[] { "/bmrai forbidactions off", "/bmrai on" })]
@@ -159,12 +163,14 @@ public sealed class CombatServiceBossModAiCommandTests
     [Theory]
     [InlineData("VBM")]
     [InlineData("BMR")]
+    [InlineData("GodMod")]
     public void AdsInteractionPausePreservesExplicitAiOff(string provider)
         => Assert.Equal(new[] { "/bmrai off", "/vbmai off" },
             CombatService.BuildBossModAiCommands(1, provider, interactionVbmPauseActive: true));
 
     [Theory]
     [InlineData("BMR", "FRENRIDER - TANK", "/bmrai setpresetname FRENRIDER - TANK")]
+    [InlineData("GodMod", "FRENRIDER - TANK", "/bmrai setpresetname FRENRIDER - TANK")]
     [InlineData("RSR", "passive - ranged", "/bmrai setpresetname passive - ranged")]
     [InlineData("WRATH", "passive - melee", "/bmrai setpresetname passive - melee")]
     [InlineData("DAEDALUS", "passive - tank", "/bmrai setpresetname passive - tank")]
@@ -196,8 +202,9 @@ public sealed class CombatServiceBossModAiCommandTests
     [InlineData(2, "RSR")]
     [InlineData(3, "WRATH")]
     [InlineData(4, "DAEDALUS")]
-    [InlineData(-1, "BMR")]
-    [InlineData(5, "BMR")]
+    [InlineData(5, "GodMod")]
+    [InlineData(-1, "GodMod")]
+    [InlineData(6, "GodMod")]
     public void RotationPluginIndexesRemainCompatible(int pluginIndex, string pluginName)
     {
         Assert.Equal(pluginName, CombatService.ResolveRotationPluginName(pluginIndex));

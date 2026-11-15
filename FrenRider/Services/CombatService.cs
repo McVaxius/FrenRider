@@ -60,7 +60,7 @@ public partial class CombatService
     private uint lastWarnedManagedPresetJobId = uint.MaxValue;
     private bool warnedMissingManagedPresetJob;
 
-    private static readonly string[] RotationPluginNames = { "BMR", "VBM", "RSR", "WRATH", "DAEDALUS" };
+    private static readonly string[] RotationPluginNames = { "BMR", "VBM", "RSR", "WRATH", "DAEDALUS", "GodMod" };
     private const long CombatSettingsRefreshDebounceMs = 400;
     private const string ManagedPresetRoleTank = "TANK";
     private const string ManagedPresetRoleMelee = "MELEE";
@@ -102,11 +102,12 @@ public partial class CombatService
             questionableIpcService.QuestAutomationActive, IsInDuty(), Plugin.Condition[ConditionFlag.InCombat]))
             return;
         nextPackagedPresetRefreshMs = Environment.TickCount64 + CombatSettingsRefreshDebounceMs;
-        _ = plugin.AutorotIpcService.RefreshPackagedPresetsOnLoad();
+        _ = plugin.AutorotIpcService.RefreshPackagedPresetsOnLoad(GetSelectedRotationPluginName(config));
     }
 
     public void ClearExternalAutomationRuntimeState(string reason)
     {
+        plugin.AutorotIpcService.ResetOwnedDeathRecovery();
         ReleaseQuestingRsrAggroForDeparture(reason);
         questingRsrStopSelection = null;
         questingVbmHeld = false;
@@ -170,6 +171,7 @@ public partial class CombatService
         var now = Environment.TickCount64;
         if (config.Enabled && plugin.CoppeliaPowerlevelLeaseService.IsLeaseActive)
         {
+            plugin.AutorotIpcService.ResetOwnedDeathRecovery();
             HandleCoppeliaPowerlevelLease(config, inCombat, inDuty);
             return;
         }
@@ -214,28 +216,56 @@ public partial class CombatService
 
         if (plugin.AdsIntegrationService.IsSoloCombatHeld)
         {
+            plugin.AutorotIpcService.ResetOwnedDeathRecovery();
             HoldAdsSoloCombat(authorityDecision, inCombat, inDuty);
             return;
         }
 
         if (authorityDecision.Authority == DutyCombatAuthority.QuestionableSolo)
         {
+            plugin.AutorotIpcService.ResetOwnedDeathRecovery();
             SetQuestionableSoloSuppressedState(inCombat, inDuty);
             return;
         }
 
         if (plugin.AdsHyperFocusLeaseService.IsLeaseActive && !adsHyperFocusSuperseded)
         {
+            plugin.AutorotIpcService.ResetOwnedDeathRecovery();
             HandleAdsHyperFocusLease(inCombat, inDuty);
             return;
         }
 
         if (plugin.IsWaitingForDuty)
         {
+            plugin.AutorotIpcService.ResetOwnedDeathRecovery();
             HoldDutyOnlyRotation(config);
             return;
         }
         dutyOnlyRotationHeld = false;
+
+        var player = Plugin.ObjectTable.LocalPlayer;
+        bool? dead = player is null ? null : player.CurrentHp == 0 || Plugin.Condition[ConditionFlag.Unconscious];
+        var ready = dead == false && Plugin.ClientState.IsLoggedIn
+            && !Plugin.Condition[ConditionFlag.BetweenAreas] && !Plugin.Condition[ConditionFlag.BetweenAreas51]
+            && !Plugin.Condition[ConditionFlag.WatchingCutscene] && !Plugin.Condition[ConditionFlag.WatchingCutscene78]
+            && !Plugin.Condition[ConditionFlag.OccupiedInCutSceneEvent];
+        var recoveryAllowed = inDuty && dutyCombatAuthorityPolicy.Authority == DutyCombatAuthority.FrenRider
+            && dutyCombatAuthorityPolicy.FrenRiderBootstrapComplete && !mountedOrMounting
+            && !IsCombatSetupHeld(inDuty) && !plugin.PhoenixDownRecoveryService.HoldMovement
+            && !IsRotationDisabled(config);
+        if (plugin.AutorotIpcService.ObserveOwnedDeathRecovery(CaptureCombatSettings(config), dead, ready,
+                recoveryAllowed, inCombat))
+        {
+            ActivePreset = GetBossModPresetForPlugin(config, GetSelectedRotationPluginName(config));
+            StateDetail = "Owned rotation restored after revival";
+        }
+        if (dead == true)
+        {
+            StateDetail = "Waiting for revival";
+            wasInCombat = inCombat;
+            wasInDuty = inDuty;
+            return;
+        }
 
         if (authorityDecision.ShouldBootstrapFrenRider)
         {
@@ -487,39 +517,60 @@ public partial class CombatService
         ActivePreset = "";
     }
 
+    internal void RefreshDutyOnlyCombatHold()
+    {
+        if (!plugin.IsWaitingForDuty)
+        {
+            dutyOnlyRotationHeld = false;
+            return;
+        }
+        if (plugin.CoppeliaPowerlevelLeaseService.IsLeaseActive)
+            return;
+        var config = plugin.ConfigManager.GetActiveConfig();
+        plugin.AutorotIpcService.ObserveOwnedBossModIdentity(GetSelectedRotationPluginName(config),
+            plugin.ConfigManager.CurrentAccountId, plugin.ConfigManager.ActiveCharacterKey, config);
+        HoldDutyOnlyRotation(config);
+    }
+
     private void HoldDutyOnlyRotation(CharacterConfig config)
     {
-        // Retain movement/AI ownership and all noncombat services. Only the
-        // configured rotation and our owned runtime preset are paused here.
+        // Pause only our native AI/runtime and the configured rotation.
+        // Keep the settings session so normal duty entry can resume it.
         var provider = GetSelectedRotationPluginName(config);
         if (!dutyOnlyRotationHeld || dutyOnlyHeldProvider != provider)
         {
             plugin.CaptureExternalAutomationSnapshot("Duty only combat hold");
-            plugin.AutorotIpcService.DisableOwnedBossModRuntime();
+            var confirmed = plugin.AutorotIpcService.PauseOwnedBossMod(
+                command => TrySendCommand(command, allowWhileSuppressed: true));
             switch (GetLastActiveRotationPluginName(config))
             {
                 case "RSR":
-                    if (!plugin.AutorotIpcService.TrySetRsrMode(AutorotIpcService.RsrStateCommandType.Off))
-                        SendCommand("/rotation cancel", allowWhileSuppressed: true);
+                    confirmed &= plugin.AutorotIpcService.TrySetRsrMode(AutorotIpcService.RsrStateCommandType.Off)
+                        || SendCommand("/rotation cancel", allowWhileSuppressed: true);
                     break;
                 case "WRATH":
-                    SendCommand("/wrath auto off", allowWhileSuppressed: true);
+                    confirmed &= SendCommand("/wrath auto off", allowWhileSuppressed: true);
                     break;
                 case "DAEDALUS":
-                    SetDaedalusEnabled(false, "Duty only combat hold");
+                    confirmed &= SetDaedalusEnabled(false, "Duty only combat hold");
                     break;
             }
-            dutyOnlyRotationHeld = true;
+            dutyOnlyRotationHeld = confirmed;
             dutyOnlyHeldProvider = provider;
         }
         ResetCombatSettingsRefreshTracking();
         lastObservedCombatSettings = lastAppliedCombatSettings = null;
         lastBossModDefaultSettingsSignature = lastBossModMovementUnlockSignature = string.Empty;
-        lastActivePluginIdx = -1;
+        if (dutyOnlyRotationHeld)
+        {
+            lastActivePluginIdx = -1;
+            wrathAutoActive = false;
+        }
         lastRotationToggleMs = 0;
-        wrathAutoActive = wasInCombat = wasInDuty = false;
+        wasInCombat = wasInDuty = false;
         State = CombatState.OutOfCombat;
-        StateDetail = "Combat rotations paused outside duties";
+        StateDetail = dutyOnlyRotationHeld ? "Combat rotations paused outside duties"
+            : "Combat pause could not be confirmed outside duties";
         ActivePreset = string.Empty;
     }
 
@@ -554,6 +605,13 @@ public partial class CombatService
             return false;
 
         var pluginName = GetSelectedRotationPluginName(config);
+        if ((pluginName is "BMR" or "GodMod" or "VBM")
+            && !plugin.AutorotIpcService.IsSelectedBossModAvailable(pluginName))
+        {
+            ActivePreset = string.Empty;
+            StateDetail = plugin.AutorotIpcService.LastStatus;
+            return false;
+        }
         if (HoldQuestingVbm(config, pluginName) || pluginName == "VBM" && (IsSafetyCombatSetupHeld(IsInDuty())
             || questingVbmHeld && !plugin.AutorotIpcService.CanResumeOwnedVbm()))
             return false;
@@ -564,7 +622,7 @@ public partial class CombatService
         if (!ignoreCooldown && now - lastRotationToggleMs < 2000) return false; // Cooldown
         lastRotationToggleMs = now;
 
-        if (pluginName == "BMR" && !plugin.AutorotIpcService.PrepareDhogHealerRotations(
+        if (AutorotIpcService.IsNativeBossModProvider(pluginName) && !plugin.AutorotIpcService.PrepareDhogHealerRotations(
                 GetCurrentClassJobId() ?? 0, pluginName, config.ConfigureRotationPresetManually,
                 warning => plugin.ReportToChatAndLog(warning, isError: true)))
         {
@@ -607,6 +665,7 @@ public partial class CombatService
                     (string.IsNullOrEmpty(bossModPreset) ? "" : $" [{bossModPreset}]");
                 if (!daedalusHandled) return false;
                 break;
+            case "GodMod":
             case "BMR":
                 StateDetail = $"{pluginName} active" + (string.IsNullOrEmpty(bossModPreset) ? "" : $" [{bossModPreset}]");
                 break;
@@ -643,6 +702,7 @@ public partial class CombatService
             case "DAEDALUS":
                 SetDaedalusEnabled(false, "deactivation");
                 break;
+            case "GodMod":
             case "BMR":
             case "VBM":
                 break;
@@ -748,7 +808,7 @@ public partial class CombatService
     internal static string SelectBossModPresetForProvider(CharacterConfig config, string provider, ZoneType zone,
         bool inFate, string role)
         => config.ConfigureRotationPresetManually ? SelectManualPresetForZone(config, zone, inFate)
-            : provider is "BMR" or "VBM" ? $"FRENRIDER - {role}" : $"passive - {role.ToLowerInvariant()}";
+            : provider is "BMR" or "GodMod" or "VBM" ? $"FRENRIDER - {role}" : $"passive - {role.ToLowerInvariant()}";
 
     private string GetManagedPresetRole()
     {
@@ -842,6 +902,13 @@ public partial class CombatService
             return;
 
         var pluginName = GetSelectedRotationPluginName(config);
+        if ((pluginName is "BMR" or "GodMod" or "VBM")
+            && !plugin.AutorotIpcService.IsSelectedBossModAvailable(pluginName))
+        {
+            ActivePreset = string.Empty;
+            StateDetail = plugin.AutorotIpcService.LastStatus;
+            return;
+        }
         if (HoldQuestingVbm(config, pluginName) || pluginName == "VBM" && (IsSafetyCombatSetupHeld(IsInDuty())
             || questingVbmHeld && !plugin.AutorotIpcService.CanResumeOwnedVbm()))
             return;
@@ -872,6 +939,7 @@ public partial class CombatService
                 if (SetDaedalusEnabled(true, reason))
                     plugin.DaedalusTargetModeService.Apply(config.DaedalusTargetMode, notifyUser: false);
                 break;
+            case "GodMod":
             case "BMR":
             case "VBM":
                 break;
@@ -891,6 +959,13 @@ public partial class CombatService
         if (config.Enabled && IsCombatSetupHeld(IsInDuty()))
             return;
         var pluginName = GetSelectedRotationPluginName(config);
+        if ((pluginName is "BMR" or "GodMod" or "VBM")
+            && !plugin.AutorotIpcService.IsSelectedBossModAvailable(pluginName))
+        {
+            ActivePreset = string.Empty;
+            StateDetail = plugin.AutorotIpcService.LastStatus;
+            return;
+        }
         if (DeferAdsInteractionVbmSetup(config, pluginName))
             return;
         if (config.Enabled)
@@ -1025,6 +1100,7 @@ public partial class CombatService
 
         switch (pluginName)
         {
+            case "GodMod":
             case "BMR":
                 SendCommand("/bmrai off");
                 break;
@@ -1063,6 +1139,7 @@ public partial class CombatService
 
         switch (pluginName)
         {
+            case "GodMod":
             case "BMR":
                 if (!ApplyConfiguredBossModAiState(config, pluginName, $"mounted lifecycle restore ({reason})"))
                     return;
@@ -1460,11 +1537,12 @@ public partial class CombatService
 
         ApplyBossModDefaultSettingsOnce(pluginName, selectedPreset, reason);
         ApplyBossModMovementUnlockOnce(pluginName, selectedPreset, reason);
-        if (!ApplyBossModPreset(pluginName, selectedPreset, reason) && (pluginName is "BMR" or "VBM"))
+        if (!ApplyBossModPreset(pluginName, selectedPreset, reason) && (pluginName is "BMR" or "GodMod" or "VBM"))
             return false;
 
         switch (pluginName)
         {
+            case "GodMod":
             case "BMR":
 				SendCommand($"/rotation cancel");  //ghost in the machine 8. disabling RSR when we switch to bmr
                 SetWrathAuto(false, $"{reason} because selected plugin is {pluginName}");
@@ -1560,6 +1638,7 @@ public partial class CombatService
         else
         {
             ActivePreset = string.Empty;
+            StateDetail = plugin.AutorotIpcService.LastStatus;
             Plugin.Log.Warning($"Combat: BossMod preset retained after {reason}: {plugin.AutorotIpcService.LastStatus}");
         }
         return applied;
@@ -1606,7 +1685,7 @@ public partial class CombatService
         var vbmPaused = bossModAi != 1 && IsAdsInteractionVbmPauseActive(pluginName);
         var commands = BuildBossModAiCommands(config.BossModAI, pluginName, vbmPaused, dragonNeckCombat,
             dragonNeckCombat ? command => Plugin.CommandManager.Commands.ContainsKey(
-                AutorotIpcService.ResolveBossModAiCommand(command, Plugin.PluginInterface.InstalledPlugins)) : null);
+                AutorotIpcService.ResolveBossModAiCommand(command, Plugin.PluginInterface.InstalledPlugins, pluginName)) : null);
         if (vbmPaused)
         {
             DeferCombatSettingsRefresh(config);
@@ -1618,19 +1697,25 @@ public partial class CombatService
             return false;
 
         plugin.CaptureExternalAutomationSnapshot("BossMod AI state change");
-        if (bossModAi != 1 && (pluginName is "BMR" or "VBM")
+        if (bossModAi != 1 && (pluginName is "BMR" or "GodMod" or "VBM")
             && !plugin.AutorotIpcService.CanResumeOwnedBossModAi())
             return false;
-        if (bossModAi != 1 && GetBossModPresetProvider(pluginName) == "BMR")
+        if (bossModAi != 1 && AutorotIpcService.IsNativeBossModProvider(GetBossModPresetProvider(pluginName)))
         {
             plugin.AutorotIpcService.ApplyOwnedPreferredDistance(command => TrySendCommand(command), 1.5);
             if (ShouldUseAutomaticBossModTargeting(config, pluginName) && !IsCombatSetupHeld(IsInDuty())
                 && !plugin.AutorotIpcService.ApplyOwnedAutomaticTargeting(command => TrySendCommand(command)))
                 return false;
         }
+        var optionalBmrOffAbsent = bossModAi == 1 && (pluginName is "RSR" or "WRATH" or "DAEDALUS")
+            && plugin.AutorotIpcService.IsBmrAbsent();
         foreach (var command in commands)
+        {
+            if (optionalBmrOffAbsent && command == "/bmrai off")
+                continue;
             if (!SendCommand(command))
                 return false;
+        }
 
         Plugin.Log.Information($"Combat: BossMod AI {DescribeBossModAiSetting(bossModAi)} for {pluginName} after {reason}");
         return targetingRestored;
@@ -1674,7 +1759,7 @@ public partial class CombatService
     {
         return pluginIdx >= 0 && pluginIdx < RotationPluginNames.Length
             ? RotationPluginNames[pluginIdx]
-            : "BMR";
+            : "GodMod";
     }
 
     internal static string[] BuildQuestionableDutyCombatOffCommands(bool includeRsrFallback = true)
@@ -1778,7 +1863,8 @@ public partial class CombatService
                 var state = new BossModExternalAutomationSnapshotProvider(Plugin.PluginInterface, Plugin.Log)
                     .Capture(plugin.ConfigManager.CurrentAccountId, plugin.ConfigManager.ActiveCharacterKey);
                 var after = BossModExternalAutomationSnapshotProvider.FindLivePluginInstance(providers[0], out _, out _);
-                nativeSuppressed = bmrStoppedSynchronously && runtimeSuppressed && state.Bmr.IsAvailable && state.Bmr.AiActive == false
+                var nativeState = providers[0].InternalName == "GodMod" ? state.GodMod : state.Bmr;
+                nativeSuppressed = bmrStoppedSynchronously && runtimeSuppressed && nativeState?.IsAvailable == true && nativeState.AiActive == false
                                    && before is not null && ReferenceEquals(before, after);
             }
         }
@@ -1796,9 +1882,11 @@ public partial class CombatService
     {
         try
         {
+            var rotationProvider = GetBossModPresetProvider(GetSelectedRotationPluginName(plugin.ConfigManager.GetActiveConfig()));
+            if (!AutorotIpcService.IsNativeBossModProvider(rotationProvider)) return false;
             var providers = Plugin.PluginInterface.InstalledPlugins.Where(provider => provider.IsLoaded
                 && provider.InternalName is "GodMod" or "BossModReborn" or "BossMod").ToArray();
-            if (providers.Length != 1 || providers[0].InternalName is not ("GodMod" or "BossModReborn")) return false;
+            if (providers.Length != 1 || providers[0].InternalName != (rotationProvider == "GodMod" ? "GodMod" : "BossModReborn")) return false;
             if (BossModExternalAutomationSnapshotProvider.FindLivePluginInstance(providers[0], out var assembly, out _) is null)
                 return false;
             var type = assembly!.GetType("BossMod.AI.AIManager");
@@ -1811,7 +1899,7 @@ public partial class CombatService
             {
                 stop.Invoke(manager, null);
                 return true;
-            });
+            }, rotationProvider);
         }
         catch (Exception ex)
         {
@@ -1948,7 +2036,7 @@ public partial class CombatService
                 continue; // Skip the active plugin
             }
 
-            if (otherPluginName is "BMR" or "VBM")
+            if (otherPluginName is "BMR" or "GodMod" or "VBM")
             {
                 Plugin.Log.Debug($"  Leaving {otherPluginName} enabled for avoidance / movement");
                 continue;
@@ -1982,7 +2070,7 @@ public partial class CombatService
     }
 
     private static string GetBossModPresetProvider(string pluginName)
-        => string.Equals(pluginName, "VBM", StringComparison.OrdinalIgnoreCase) ? "VBM" : "BMR";
+        => AutorotIpcService.GetBossModProvider(pluginName);
 
     private void SetWrathAuto(bool enabled, string reason)
     {
@@ -1997,7 +2085,8 @@ public partial class CombatService
     }
 
     private bool SendCommand(string command, bool allowWhileSuppressed = false)
-        => plugin.AutorotIpcService.SendBossModAiCommand(command, value => TrySendCommand(value, allowWhileSuppressed));
+        => plugin.AutorotIpcService.SendBossModAiCommand(command, value => TrySendCommand(value, allowWhileSuppressed),
+            GetSelectedRotationPluginName(plugin.ConfigManager.GetActiveConfig()));
 
     private unsafe bool TrySendCommand(string command, bool allowWhileSuppressed = false)
     {

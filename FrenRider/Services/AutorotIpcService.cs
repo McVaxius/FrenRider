@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -64,6 +64,9 @@ public class AutorotIpcService : IDisposable
     private BossModRuntimePresetState? cleanupRuntimeTarget;
     private bool? packagedDhogHealers;
     private bool warnedMissingDhogHealers;
+    private bool? observedPlayerDead;
+    private (CombatSettingsSnapshot Selection, BossModSettingsSnapshot Runtime, BossModSettingsOwnership Owner, bool InCombat)? livingDeathBaseline;
+    private (CombatSettingsSnapshot Selection, BossModSettingsSnapshot Runtime, BossModSettingsOwnership Owner, bool Cleared)? pendingDeathRecovery;
 
     internal const string MissingDhogHealerRotations = "Could not find God Mod Companion rotations";
     private static readonly string[] DhogHealerJobs = { "WHM", "SCH", "AST", "SGE" };
@@ -134,7 +137,7 @@ public class AutorotIpcService : IDisposable
         }
         displayed.RemoveAll(name => !string.Equals(nativeNames.FirstOrDefault(candidate =>
                 string.Equals(candidate, name, StringComparison.CurrentCultureIgnoreCase)), name, StringComparison.Ordinal)
-            || provider == "BMR" && !string.Equals(nativeNames.FirstOrDefault(candidate =>
+            || IsNativeBossModProvider(provider) && !string.Equals(nativeNames.FirstOrDefault(candidate =>
                 string.Equals(candidate.Trim(), name.Trim(), StringComparison.OrdinalIgnoreCase)), name, StringComparison.Ordinal));
         return new BossModPresetCatalog(provider, true, displayed.Distinct(StringComparer.Ordinal).ToArray(),
             definitions, nativeNames, string.Empty);
@@ -152,11 +155,14 @@ public class AutorotIpcService : IDisposable
         => string.IsNullOrWhiteSpace(name) || string.Equals(name, "none", StringComparison.OrdinalIgnoreCase);
 
     internal static string GetBossModProvider(string rotationProvider)
-        => string.Equals(rotationProvider, "VBM", StringComparison.OrdinalIgnoreCase) ? "VBM" : "BMR";
+        => rotationProvider switch { "VBM" => "VBM", "GodMod" => "GodMod", _ => "BMR" };
 
-    internal static string ResolveBossModAiCommand(string command, IEnumerable<IExposedPlugin> plugins)
+    internal static bool IsNativeBossModProvider(string provider) => provider is "BMR" or "GodMod";
+
+    internal static string ResolveBossModAiCommand(string command, IEnumerable<IExposedPlugin> plugins,
+        string rotationProvider = "BMR")
         => (command == "/bmrai" || command.StartsWith("/bmrai ", StringComparison.Ordinal))
-            && BossModExternalAutomationSnapshotProvider.FindLoadedBossModProvider(plugins, "BossModReborn")?.InternalName == "GodMod"
+            && GetBossModProvider(rotationProvider) == "GodMod"
             ? "/gmai" + command[6..] : command;
 
     private bool TryGetLiveBossMod(string provider, out object? instance, out Assembly? assembly, out string detail)
@@ -167,12 +173,12 @@ public class AutorotIpcService : IDisposable
         {
             var loaded = pluginInterface.InstalledPlugins.Where(plugin => plugin.IsLoaded
                 && plugin.InternalName is "GodMod" or "BossModReborn" or "BossMod").ToArray();
-            var expectedName = provider == "VBM" ? "BossMod" : "BossModReborn";
+            var expectedName = provider switch { "VBM" => "BossMod", "GodMod" => "GodMod", _ => "BossModReborn" };
             var selected = BossModExternalAutomationSnapshotProvider.FindLoadedBossModProvider(loaded, expectedName);
             if (loaded.Length != 1 || selected is null)
             {
                 detail = loaded.Length > 1 ? "Multiple BossMod providers are loaded; their shared IPC is ambiguous."
-                    : "The selected BossMod provider is not loaded.";
+                    : $"{provider} is not loaded; select another rotation provider explicitly.";
                 return false;
             }
             instance = BossModExternalAutomationSnapshotProvider.FindLivePluginInstance(selected, out assembly, out detail);
@@ -185,9 +191,32 @@ public class AutorotIpcService : IDisposable
         }
     }
 
+    internal bool IsSelectedBossModAvailable(string rotationProvider)
+        => TryGetSelectedBossModInstance(rotationProvider, out _);
+
+    internal bool IsBmrAbsent()
+    {
+        try
+        {
+            var loaded = pluginInterface.InstalledPlugins.Where(plugin => plugin.IsLoaded
+                && plugin.InternalName is "GodMod" or "BossModReborn" or "BossMod").ToArray();
+            // An unreadable or ambiguous inventory cannot establish an optional no-op.
+            return loaded.Length <= 1 && loaded.All(plugin => plugin.InternalName != "BossModReborn");
+        }
+        catch { return false; }
+    }
+
+    internal bool TryGetSelectedBossModInstance(string rotationProvider, out object? instance)
+    {
+        if (TryGetLiveBossMod(GetBossModProvider(rotationProvider), out instance, out _, out var detail))
+            return true;
+        LastStatus = detail;
+        return false;
+    }
+
     internal static object? ReadRotationDatabase(string provider, object instance, Assembly assembly)
     {
-        if (provider == "BMR")
+        if (IsNativeBossModProvider(provider))
             return LiveMember(instance, "_rotationDB");
         var tickType = assembly.GetType("BossMod.Services.TickService");
         var host = LiveMember(instance, "Host");
@@ -255,8 +284,8 @@ public class AutorotIpcService : IDisposable
     internal bool PrepareDhogHealerRotations(uint job, string rotationProvider, bool manualPreset,
         Action<string> reportWarning)
     {
-        if (rotationProvider != "BMR" || manualPreset || !IsDhogHealerJob(job)) return true;
-        var available = TryGetLiveBossMod("BMR", out _, out var assembly, out _)
+        if (!IsNativeBossModProvider(rotationProvider) || manualPreset || !IsDhogHealerJob(job)) return true;
+        var available = TryGetLiveBossMod(rotationProvider, out _, out var assembly, out _)
                         && HasDhogHealers(ReadDhogHealerModules(assembly!.GetType("BossMod.Autorotation.RotationModuleRegistry")));
         if (!available)
         {
@@ -266,7 +295,7 @@ public class AutorotIpcService : IDisposable
             packagedDhogHealers = false;
             return false;
         }
-        if (packagedDhogHealers != true && !CreatePresets(force: true, rotationProvider: "BMR")) return false;
+        if (packagedDhogHealers != true && !CreatePresets(force: true, rotationProvider: rotationProvider)) return false;
         var expected = LoadPresetFiles().Where(preset => preset.Name == "FRENRIDER - RANGED").Select(preset => preset.Json).FirstOrDefault();
         if (expected == null || !MatchesDhogHealerPreset(AdaptDhogHealerPreset(expected, true),
                 TryStringIpc("BossMod.Presets.Get", "FRENRIDER - RANGED")))
@@ -313,6 +342,7 @@ public class AutorotIpcService : IDisposable
         if (ownedSettings is not null && ownedIdentity.Provider == provider
             && (!ownedProvider!.TryGetTarget(out var captured) || !ReferenceEquals(captured, live)))
         {
+            ResetOwnedDeathRecovery();
             LastStatus = "BossMod provider reloaded; the departed session cannot be restored into its replacement.";
             log.Warning($"[FrenRider] Owned BossMod settings cleanup was incomplete: {LastStatus}");
             ownedSettings = null;
@@ -328,6 +358,7 @@ public class AutorotIpcService : IDisposable
             return false;
         if (ownedSettings is null)
         {
+            ResetOwnedDeathRecovery();
             ownedIdentity = identity;
             ownedProvider = new WeakReference<object>(live!);
             ownedSettings = new BossModSettingsOwnership(provider, ReadBossModSettings(provider, assembly!));
@@ -374,16 +405,16 @@ public class AutorotIpcService : IDisposable
         }
         catch (Exception ex) { log.Debug($"BossMod runtime preset read unavailable: {ex.GetBaseException().Message}"); }
         var node = ReadAiConfig(assembly);
-        var storedReadable = provider == "BMR" && node is not null
+        var storedReadable = IsNativeBossModProvider(provider) && node is not null
             && BossModExternalAutomationSnapshotProvider.TryGetInstanceMember(node, "AIAutorotPresetName", out var value)
             && value is null or string;
         var stored = storedReadable ? LiveMember(node!, "AIAutorotPresetName") as string : null;
-        var aiEnabled = provider == "BMR" ? BossModExternalAutomationSnapshotProvider.TryGetAiActive(assembly)
+        var aiEnabled = IsNativeBossModProvider(provider) ? BossModExternalAutomationSnapshotProvider.TryGetAiActive(assembly)
             : node is null ? null : LiveMember(node, "Enabled") as bool?;
-        var manualTarget = provider == "BMR" && node is not null
+        var manualTarget = IsNativeBossModProvider(provider) && node is not null
             ? LiveMember(node, "ManualTarget") as bool? : null;
         double? distance = null;
-        if (provider == "BMR")
+        if (IsNativeBossModProvider(provider))
         {
             try
             {
@@ -397,12 +428,12 @@ public class AutorotIpcService : IDisposable
         return new BossModSettingsSnapshot(runtime, storedReadable, stored, distance, aiEnabled, manualTarget);
     }
 
-    private static object? ReadAiConfig(Assembly assembly)
+    private static object? ReadAiConfig(Assembly assembly, string configTypeName = "BossMod.AI.AIConfig")
     {
         try
         {
             var service = assembly.GetType("BossMod.Service");
-            var aiConfigType = assembly.GetType("BossMod.AI.AIConfig");
+            var aiConfigType = assembly.GetType(configTypeName);
             const BindingFlags flags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
             var root = service?.GetProperty("Config", flags)?.GetValue(null) ?? service?.GetField("Config", flags)?.GetValue(null);
             if (root is null || root.GetType().Assembly != assembly || aiConfigType is null)
@@ -452,7 +483,7 @@ public class AutorotIpcService : IDisposable
     {
         try
         {
-            if (ownedIdentity.Provider != "BMR" || !TryGetLiveBossMod("BMR", out var live, out var assembly, out _)
+            if (!IsNativeBossModProvider(ownedIdentity.Provider) || !TryGetLiveBossMod(ownedIdentity.Provider, out var live, out var assembly, out _)
                 || ownedProvider is null || !ownedProvider.TryGetTarget(out var captured) || !ReferenceEquals(captured, live))
                 return null;
             const BindingFlags instance = BindingFlags.Instance | BindingFlags.Public;
@@ -511,7 +542,7 @@ public class AutorotIpcService : IDisposable
         var ownership = !cleanupStarted && !cleanupFailed && ownedIdentity.Provider == provider
             && ownedProvider is not null && ownedProvider.TryGetTarget(out var captured)
             && ReferenceEquals(captured, live) ? ownedSettings : null;
-        if (provider == "BMR")
+        if (IsNativeBossModProvider(provider))
         {
             _ = WriteAiSelector(presetName);
             if (!TryGetLiveBossMod(provider, out var selectedLive, out assembly, out detail)
@@ -523,7 +554,7 @@ public class AutorotIpcService : IDisposable
             var selectorApplied = ReadBossModSettings(provider, assembly!);
             if (!selectorApplied.StoredSelectorReadable || selectorApplied.StoredAiSelector != presetName)
             {
-                LastStatus = "BMR saved AI preset write could not be confirmed.";
+                LastStatus = "BossMod saved AI preset write could not be confirmed.";
                 return false;
             }
             if (ReferenceEquals(ownedSettings, ownership))
@@ -572,7 +603,7 @@ public class AutorotIpcService : IDisposable
 
     internal bool ApplyOwnedPreferredDistance(Func<string, bool> sendCommand, double requested)
     {
-        if (ownedIdentity.Provider != "BMR" || !double.IsFinite(requested)
+        if (!IsNativeBossModProvider(ownedIdentity.Provider) || !double.IsFinite(requested)
             || !TryReadOwnedBossModSettings(out var before)
             || !ownedSettings!.CanChangeDistance(before.PreferredDistance))
         {
@@ -592,13 +623,13 @@ public class AutorotIpcService : IDisposable
 
     internal bool ApplyOwnedAutomaticTargeting(Func<string, bool> sendCommand)
     {
-        if (ownedIdentity.Provider != "BMR" || !TryReadOwnedBossModSettings(out var before))
+        if (!IsNativeBossModProvider(ownedIdentity.Provider) || !TryReadOwnedBossModSettings(out var before))
             return false;
         if (before.ManualTarget == false)
             return true;
         if (!ownedSettings!.CanChangeManualTarget(before.ManualTarget))
         {
-            LastStatus = "BMR targeting retained: its original or current value is unavailable or owned elsewhere.";
+            LastStatus = "BossMod targeting retained: its original or current value is unavailable or owned elsewhere.";
             return false;
         }
         var submitted = SendBossModAiCommand("/bmrai manualtarget off", sendCommand);
@@ -607,8 +638,8 @@ public class AutorotIpcService : IDisposable
             ownedSettings!.OwnManualTarget(false);
             return true;
         }
-        LastStatus = submitted ? "BMR automatic-targeting command was submitted but its readback was not confirmed."
-            : "BMR automatic-targeting command dispatch failed.";
+        LastStatus = submitted ? "BossMod automatic-targeting command was submitted but its readback was not confirmed."
+            : "BossMod automatic-targeting command dispatch failed.";
         return false;
     }
 
@@ -620,7 +651,7 @@ public class AutorotIpcService : IDisposable
             return false;
         if (current.ManualTarget is null)
         {
-            LastStatus = "BMR targeting restoration retained: current state is unreadable.";
+            LastStatus = "BossMod targeting restoration retained: current state is unreadable.";
             return false;
         }
         if (ownedSettings.GetManualTargetCleanupTarget(current.ManualTarget) is { } originalManualTarget
@@ -633,23 +664,36 @@ public class AutorotIpcService : IDisposable
                 if (!TryReadOwnedBossModSettings(out var after, allowCleanup: cleanupStarted)
                     || after.ManualTarget != originalManualTarget)
                 {
-                    LastStatus = "BMR targeting restoration could not be confirmed.";
+                    LastStatus = "BossMod targeting restoration could not be confirmed.";
                     return false;
                 }
             }
-            catch { LastStatus = "BMR targeting restoration endpoint is unavailable."; return false; }
+            catch { LastStatus = "BossMod targeting restoration endpoint is unavailable."; return false; }
         }
         ownedSettings.ReleaseManualTarget();
         return true;
     }
 
-    internal bool SendBossModAiCommand(string command, Func<string, bool> sendCommand)
+    internal bool SendBossModAiCommand(string command, Func<string, bool> sendCommand,
+        string? rotationProvider = null, object? expectedProviderInstance = null)
     {
+        var godModCommand = command == "/gmai" || command.StartsWith("/gmai ", StringComparison.Ordinal);
+        var provider = godModCommand ? "GodMod"
+            : rotationProvider is null ? ownedSettings is null ? "GodMod" : ownedIdentity.Provider
+            : GetBossModProvider(rotationProvider);
+        var canonical = godModCommand ? "/bmrai" + command[5..] : command;
+        var nativeCommand = canonical == "/bmrai" || canonical.StartsWith("/bmrai ", StringComparison.Ordinal);
+        if (nativeCommand && !TryGetLiveBossMod(provider, out _, out _, out var detail))
+        {
+            LastStatus = detail;
+            return false;
+        }
         var relevant = ownedSettings is not null
-            && (command is "/bmrai on" or "/bmrai off" or "/vbmai on" or "/vbmai off"
-                || command.StartsWith("/bmrai follow ", StringComparison.Ordinal)
-                || command.StartsWith("/vbmai follow ", StringComparison.Ordinal))
-            && command.StartsWith(ownedIdentity.Provider == "VBM" ? "/vbmai " : "/bmrai ", StringComparison.Ordinal);
+            && (canonical is "/bmrai on" or "/bmrai off" or "/vbmai on" or "/vbmai off"
+                || canonical.StartsWith("/bmrai follow ", StringComparison.Ordinal)
+                || canonical.StartsWith("/vbmai follow ", StringComparison.Ordinal))
+            && canonical.StartsWith(ownedIdentity.Provider == "VBM" ? "/vbmai " : "/bmrai ", StringComparison.Ordinal)
+            && (!nativeCommand || provider == ownedIdentity.Provider);
         if (relevant && cleanupFailed && !cleanupStarted)
             return false;
         var before = BossModSettingsSnapshot.Unavailable;
@@ -662,7 +706,13 @@ public class AutorotIpcService : IDisposable
             LastStatus = "BossMod AI retained: its runtime preset or AI state is owned elsewhere.";
             return false;
         }
-        var submitted = sendCommand(ResolveBossModAiCommand(command, pluginInterface.InstalledPlugins));
+        if (expectedProviderInstance is not null
+            && (!TryGetSelectedBossModInstance(provider, out var live) || !ReferenceEquals(live, expectedProviderInstance)))
+        {
+            LastStatus = $"{provider} follow command skipped: its provider session changed.";
+            return false;
+        }
+        var submitted = sendCommand(ResolveBossModAiCommand(canonical, pluginInterface.InstalledPlugins, provider));
         if (submitted && canObserve && TryReadOwnedBossModSettings(out var after, allowCleanup: cleanupStarted))
         {
             var enabled = !command.EndsWith(" off", StringComparison.Ordinal);
@@ -676,6 +726,7 @@ public class AutorotIpcService : IDisposable
 
     internal bool BeginOwnedBossModCleanup(string account, string character)
     {
+        ResetOwnedDeathRecovery();
         cleanupStarted = ownedSettings is not null && ownedIdentity.Account == account && ownedIdentity.Character == character;
         cleanupRuntimeExpected = null;
         cleanupRuntimeTarget = null;
@@ -702,7 +753,7 @@ public class AutorotIpcService : IDisposable
             var originalSelector = ownership.Original.StoredAiSelector;
             if (!IsRestorableAiSelector(originalSelector, ReadPresetCatalog(ownedIdentity.Provider)))
             {
-                LastStatus = "BMR saved AI selector restoration could not be confirmed.";
+                LastStatus = "BossMod saved AI selector restoration could not be confirmed.";
                 cleanupFailed = true;
             }
             else
@@ -711,7 +762,7 @@ public class AutorotIpcService : IDisposable
                 {
                     if (!RestoreEmptyAiSelector())
                     {
-                        LastStatus = "BMR exact empty AI selector restoration could not be confirmed.";
+                        LastStatus = "BossMod exact empty AI selector restoration could not be confirmed.";
                         cleanupFailed = true;
                         return false;
                     }
@@ -721,7 +772,7 @@ public class AutorotIpcService : IDisposable
                 if (!TryReadOwnedBossModSettings(out var after, allowCleanup: true)
                     || !ReferenceEquals(ownedSettings, ownership))
                 {
-                    LastStatus = "BMR saved AI selector restoration could not be confirmed.";
+                    LastStatus = "BossMod saved AI selector restoration could not be confirmed.";
                     cleanupFailed = true;
                     return false;
                 }
@@ -733,7 +784,7 @@ public class AutorotIpcService : IDisposable
                 current = after;
                 if (!after.StoredSelectorReadable || after.StoredAiSelector != originalSelector)
                 {
-                    LastStatus = "BMR saved AI selector restoration could not be confirmed.";
+                    LastStatus = "BossMod saved AI selector restoration could not be confirmed.";
                     cleanupFailed = true;
                 }
                 else
@@ -742,7 +793,7 @@ public class AutorotIpcService : IDisposable
         }
         else if (ownedSettings.OwnedStoredSelector is not null && !current.StoredSelectorReadable)
         {
-            LastStatus = "BMR saved AI selector restoration retained: current state is unreadable.";
+            LastStatus = "BossMod saved AI selector restoration retained: current state is unreadable.";
             cleanupFailed = true;
         }
         if (ownedSettings.OwnedDistance is { } distance && current.PreferredDistance == distance
@@ -826,6 +877,106 @@ public class AutorotIpcService : IDisposable
             ReleaseOwnedBossModSettings(ownedIdentity.Config.CleanupMode == FrenRiderCleanupMode.TurnEverythingOff);
     }
 
+    internal void ResetOwnedDeathRecovery()
+    {
+        observedPlayerDead = null;
+        livingDeathBaseline = null;
+        pendingDeathRecovery = null;
+    }
+
+    internal bool ObserveOwnedDeathRecovery(CombatSettingsSnapshot selection, bool? dead, bool ready,
+        bool allowed, bool inCombat)
+    {
+        if (!allowed || dead is null || !IsNativeBossModProvider(selection.Provider)
+            || !selection.Profile.Enabled || selection.BossModAI == 1 || IsNoPreset(selection.Preset)
+            || ownedSettings is null || ownedIdentity.Config != selection.Profile
+            || ownedIdentity.Provider != GetBossModProvider(selection.Provider)
+            || !TryReadOwnedBossModSettings(out var current)
+            || !TryGetLiveBossMod(ownedIdentity.Provider, out _, out var assembly, out _)
+            || ReadAiConfig(assembly!, "BossMod.Autorotation.AutorotationConfig") is not { } config
+            || LiveMember(config, "ClearPresetOnDeath") is not true)
+        {
+            ResetOwnedDeathRecovery();
+            return false;
+        }
+
+        static bool SameControls(BossModSettingsSnapshot before, BossModSettingsSnapshot after)
+            => before.AiEnabled == true && after.AiEnabled == true
+                && before.StoredSelectorReadable && after.StoredSelectorReadable
+                && before.StoredAiSelector == after.StoredAiSelector && before.ManualTarget == after.ManualTarget;
+
+        if (dead == true)
+        {
+            if (observedPlayerDead == false && livingDeathBaseline is { } living
+                && living.Selection == selection && ReferenceEquals(living.Owner, ownedSettings)
+                && living.InCombat && (current.Runtime is { Names.Count: 0 }
+                    || BossModRuntimePresetState.Matches(living.Runtime.Runtime, current.Runtime))
+                && SameControls(living.Runtime, current))
+                pendingDeathRecovery = (selection, current, ownedSettings, current.Runtime is { Names.Count: 0 });
+            else if (pendingDeathRecovery is { } pending
+                && pending.Selection == selection && ReferenceEquals(pending.Owner, ownedSettings)
+                && SameControls(pending.Runtime, current))
+            {
+                if ((!pending.Cleared && current.Runtime is { Names.Count: 0 })
+                    // Native combat-end clearing can follow native force-disable
+                    // while dead. A later false -> true force-disable is newer intent.
+                    || (pending.Runtime.Runtime is { ForceDisabled: true, Names.Count: 0 }
+                        && current.Runtime is { ForceDisabled: false, Names.Count: 0 } && !inCombat
+                        && LiveMember(config, "ClearForceDisableOnCombatEnd") is true))
+                    pendingDeathRecovery = (selection, current, ownedSettings, true);
+                else if (!BossModRuntimePresetState.Matches(pending.Runtime.Runtime, current.Runtime))
+                    pendingDeathRecovery = null;
+            }
+            else
+                pendingDeathRecovery = null;
+            livingDeathBaseline = null;
+            observedPlayerDead = true;
+            return false;
+        }
+
+        observedPlayerDead = false;
+        if (pendingDeathRecovery is { } recovery)
+        {
+            if (!recovery.Cleared || recovery.Selection != selection || !ReferenceEquals(recovery.Owner, ownedSettings)
+                || !SameControls(recovery.Runtime, current)
+                || !BossModRuntimePresetState.Matches(recovery.Runtime.Runtime, current.Runtime))
+                pendingDeathRecovery = null;
+            else if (!ready)
+                return false;
+            else
+            {
+                // Consume before the single attempt. A failed write does not arm
+                // another bootstrap, and the native death setting stays unchanged.
+                pendingDeathRecovery = null;
+                livingDeathBaseline = null;
+                if (!IsExactRuntimePreset(selection.Preset) || !TryReadOwnedBossModSettings(out var before)
+                    || !ReferenceEquals(recovery.Owner, ownedSettings) || !SameControls(recovery.Runtime, before)
+                    || !BossModRuntimePresetState.Matches(recovery.Runtime.Runtime, before.Runtime))
+                    return false;
+                var requested = new BossModRuntimePresetState(false, new[] { selection.Preset });
+                _ = WriteRuntimePreset(ownedIdentity.Provider, requested);
+                var restored = TryReadOwnedBossModSettings(out var after) && ReferenceEquals(recovery.Owner, ownedSettings)
+                    && SameControls(recovery.Runtime, after) && BossModRuntimePresetState.Matches(after.Runtime, requested);
+                if (restored)
+                {
+                    ownedSettings!.OwnRuntime(requested);
+                    log.Information($"[FrenRider] Restored owned {selection.Provider} preset after observed death and revival.");
+                }
+                else
+                    LastStatus = "Owned BossMod death recovery was attempted once; runtime readback was not confirmed.";
+                return restored;
+            }
+        }
+
+        livingDeathBaseline = ready && ownedSettings.OwnedRuntime is not null
+            && current.Runtime is { ForceDisabled: false, Names.Count: 1 } active
+            && active.Names[0] == selection.Preset && ownedSettings.OwnedStoredSelector == selection.Preset
+            && ownedSettings.MatchesOwnedRuntime(current)
+            && current.AiEnabled == true && current.StoredSelectorReadable && current.StoredAiSelector == selection.Preset
+            ? (selection, current, ownedSettings, inCombat) : null;
+        return false;
+    }
+
     internal bool DisableOwnedBossModRuntime()
     {
         if (!TryReadOwnedBossModSettings(out var current) || !ownedSettings!.CanChangeRuntime(current))
@@ -839,15 +990,25 @@ public class AutorotIpcService : IDisposable
     }
 
     internal bool PauseOwnedVbm(Func<string, bool> sendCommand)
+        => ownedIdentity.Provider == "VBM" && PauseOwnedBossMod(sendCommand);
+
+    internal bool PauseOwnedBossMod(Func<string, bool> sendCommand)
     {
-        if (ownedIdentity.Provider != "VBM" || !TryReadOwnedBossModSettings(out var current) || current.AiEnabled is null
+        // No owned session means there is no native state for us to pause.
+        if (ownedSettings is null)
+            return true;
+        if (!TryReadOwnedBossModSettings(out var current) || current.AiEnabled is null
             || !ownedSettings!.CanChangeRuntime(current) || !ownedSettings.CanChangeAi(current))
             return false;
         if (current.AiEnabled != false)
         {
-            if (!SendBossModAiCommand("/vbmai off", sendCommand)
+            var command = ownedIdentity.Provider == "VBM" ? "/vbmai off" : "/bmrai off";
+            if (!SendBossModAiCommand(command, sendCommand)
                 || !TryReadOwnedBossModSettings(out current) || current.AiEnabled != false)
+            {
+                LastStatus = "BossMod AI pause could not be confirmed.";
                 return false;
+            }
         }
         var disabled = new BossModRuntimePresetState(true, Array.Empty<string>());
         if (BossModRuntimePresetState.Matches(current.Runtime, disabled))
@@ -855,7 +1016,10 @@ public class AutorotIpcService : IDisposable
             ownedSettings!.OwnRuntime(disabled);
             return true;
         }
-        return DisableOwnedBossModRuntime();
+        if (DisableOwnedBossModRuntime())
+            return true;
+        LastStatus = "BossMod runtime pause could not be confirmed.";
+        return false;
     }
 
     internal bool CanResumeOwnedBossModAi()
@@ -875,19 +1039,18 @@ public class AutorotIpcService : IDisposable
     /// Push the packaged autorot presets into BossMod-compatible rotation plugins.
     /// Tries the current BossMod IPC contract first, then legacy aliases if needed.
     /// </summary>
-    internal bool RefreshPackagedPresetsOnLoad()
+    internal bool RefreshPackagedPresetsOnLoad(string rotationProvider = "GodMod")
     {
         if (!PackagedPresetRefreshPending)
             return true;
-        if (TryGetLiveBossMod("BMR", out _, out _, out var detail))
-            return CreatePresets(force: true, rotationProvider: "BMR");
-        if (TryGetLiveBossMod("VBM", out _, out _, out detail))
-            return CreatePresets(force: true, rotationProvider: "VBM");
+        var provider = GetBossModProvider(rotationProvider);
+        if (TryGetLiveBossMod(provider, out _, out _, out var detail))
+            return CreatePresets(force: true, rotationProvider: provider);
         LastStatus = $"Bundled preset refresh pending: {detail}";
         return false;
     }
 
-    public bool CreatePresets(bool force = false, string rotationProvider = "BMR")
+    public bool CreatePresets(bool force = false, string rotationProvider = "GodMod")
     {
         log.Information($"Starting autorot preset push (force={force})");
         var provider = GetBossModProvider(rotationProvider);
@@ -917,7 +1080,7 @@ public class AutorotIpcService : IDisposable
 
         var created = 0;
         var usedLegacy = false;
-        var useDhogHealers = provider == "BMR"
+        var useDhogHealers = IsNativeBossModProvider(provider)
                             && HasDhogHealers(ReadDhogHealerModules(assembly!.GetType("BossMod.Autorotation.RotationModuleRegistry")));
         foreach (var preset in presets)
         {
@@ -964,7 +1127,7 @@ public class AutorotIpcService : IDisposable
             LastStatus = "Six BossMod preset writes acknowledged; runtime selection preserved";
             log.Information(LastStatus);
             PackagedPresetRefreshPending = false;
-            if (provider == "BMR") packagedDhogHealers = useDhogHealers;
+            if (IsNativeBossModProvider(provider)) packagedDhogHealers = useDhogHealers;
             return true;
         }
         else if (created > 0)
@@ -1677,7 +1840,7 @@ internal sealed class BossModSettingsOwnership(string provider, BossModSettingsS
         if (ownedAiEnabled is null || current.AiEnabled != ownedAiEnabled || previous.ForceDisabled
             || current.Runtime is not { ForceDisabled: false } runtime)
             return false;
-        if (provider == "BMR")
+        if (AutorotIpcService.IsNativeBossModProvider(provider))
             return ownedAiEnabled == true && OwnedStoredSelector is { } selector
                 && current.StoredSelectorReadable && current.StoredAiSelector == selector
                 && runtime.Names.Count == 1 && runtime.Names[0] == selector;
@@ -1698,7 +1861,7 @@ internal sealed class BossModSettingsOwnership(string provider, BossModSettingsS
             var names = before.Runtime.Names.Where(name => name != "VBM Multibox");
             return after.Runtime.Names.SequenceEqual(enabled ? names.Append("VBM Multibox") : names, StringComparer.Ordinal);
         }
-        return provider == "BMR" && after.Runtime is { ForceDisabled: false, Names.Count: 0 };
+        return AutorotIpcService.IsNativeBossModProvider(provider) && after.Runtime is { ForceDisabled: false, Names.Count: 0 };
     }
     internal void ObserveAiCommand(BossModSettingsSnapshot before, BossModSettingsSnapshot after, bool enabled)
     {

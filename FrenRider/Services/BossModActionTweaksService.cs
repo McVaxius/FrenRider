@@ -27,6 +27,7 @@ public sealed class BossModActionTweaksService
     {
         new("BossModReborn", "BMR"),
         new("BossMod", "VBM"),
+        new("GodMod", "GodMod"),
     };
 
     private readonly IDalamudPluginInterface pluginInterface;
