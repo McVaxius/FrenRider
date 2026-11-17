@@ -35,6 +35,8 @@ public class PartyService
         this.gameGui = gameGui;
     }
 
+    private bool waitForInviteDialogClear;
+
     public void Initialize()
     {
         Plugin.ChatGui.ChatMessageUnhandled += OnChatMessage;
@@ -45,11 +47,25 @@ public class PartyService
         Plugin.ChatGui.ChatMessageUnhandled -= OnChatMessage;
     }
 
+    internal void SuspendAutomatic()
+    {
+        lastInParty = Plugin.PartyList.Length > 0;
+        lastInviterName = null;
+        lastPromptInviter = null;
+        lastPromptHandled = 0;
+        callbackAttempts = 0;
+        waitForInviteDialogClear = true;
+    }
+
     public void Update()
     {
         var config = plugin.ConfigManager.GetActiveConfig();
-        if (!config.Enabled || config.InviteWhitelist.Count == 0)
+        if (!plugin.IsFrenRiderEffectivelyEnabled)
+        {
+            SuspendAutomatic();
             return;
+        }
+        if (config.InviteWhitelist.Count == 0) return;
 
         if (plugin.AutomationService.IsUtilityGateActive
             || plugin.AdsUtilityIpcService.ShouldSuppressGenericYesNo()
@@ -61,6 +77,7 @@ public class PartyService
         // If we just joined a party and we had a whitelisted inviter, set them as fren
         if (inParty && !lastInParty && !string.IsNullOrEmpty(lastInviterName))
         {
+            if (!plugin.IsFrenRiderEffectivelyEnabled) { SuspendAutomatic(); return; }
             config.FrenName = lastInviterName;
             plugin.ConfigManager.SaveCurrentAccount();
             log.Information($"Auto-set fren to whitelisted inviter: {lastInviterName}");
@@ -86,8 +103,12 @@ public class PartyService
     private void HandleChatMessage(XivChatType type, SeString message)
     {
         var config = plugin.ConfigManager.GetActiveConfig();
-        if (!config.Enabled || config.InviteWhitelist.Count == 0)
+        if (!plugin.IsFrenRiderEffectivelyEnabled)
+        {
+            SuspendAutomatic();
             return;
+        }
+        if (config.InviteWhitelist.Count == 0) return;
 
         if (plugin.AutomationService.IsUtilityGateActive
             || plugin.AdsUtilityIpcService.ShouldSuppressGenericYesNo()
@@ -114,6 +135,7 @@ public class PartyService
         var normalized = NormalizeName(inviterName);
         if (IsWhitelisted(config, normalized, out var matchedEntry))
         {
+            if (!plugin.IsFrenRiderEffectivelyEnabled) { SuspendAutomatic(); return; }
             lastInviterName = matchedEntry; // Store the whitelist entry, not the full name
             log.Information($"Whitelisted party invite detected from: {matchedEntry}. Waiting for SelectYesno dialog to accept.");
         }
@@ -121,6 +143,7 @@ public class PartyService
 
     private unsafe void CheckInviteDialog(CharacterConfig config)
     {
+        if (!plugin.IsFrenRiderEffectivelyEnabled) { SuspendAutomatic(); return; }
         if (config.InviteWhitelist.Count == 0)
             return;
 
@@ -131,11 +154,11 @@ public class PartyService
         // Just check index 1 - no need to spam multiple indices
         nint addonPtr = gameGui.GetAddonByName("SelectYesno", 1);
         if (addonPtr == 0)
-            return;
+        { waitForInviteDialogClear = false; return; }
 
         var addon = (AddonSelectYesno*)addonPtr;
         if (!addon->AtkUnitBase.IsVisible)
-            return;
+        { waitForInviteDialogClear = false; return; }
 
         var promptNode = addon->PromptText;
         if (promptNode == null)
@@ -152,7 +175,9 @@ public class PartyService
 
         var match = InvitePromptRegex.Match(prompt.Trim());
         if (!match.Success)
-            return;
+        { waitForInviteDialogClear = false; return; }
+        // An invite visible while automatic work was suspended is never replayed on duty entry.
+        if (waitForInviteDialogClear) return;
 
         var inviterRaw = match.Groups["name"].Value;
         var normalizedInviter = NormalizeName(inviterRaw);
@@ -169,6 +194,7 @@ public class PartyService
             lastPromptInviter = normalizedInviter;
             lastPromptHandled = 0;
             callbackAttempts = 0;
+            if (!plugin.IsFrenRiderEffectivelyEnabled) { SuspendAutomatic(); return; }
             lastInviterName = matchedEntry; // Store the whitelist entry, not the full name
             log.Information($"SelectYesno invite matched whitelist: {normalizedInviter}");
         }
@@ -200,6 +226,7 @@ public class PartyService
     {
         try
         {
+            if (!plugin.IsFrenRiderEffectivelyEnabled) { SuspendAutomatic(); return false; }
             var unitBase = &addon->AtkUnitBase;
             if (unitBase == null || !unitBase->IsVisible)
                 return false;
@@ -209,6 +236,7 @@ public class PartyService
             atkValues[0].Type = AtkValueType.Int;
             atkValues[0].Int = 0;
 
+            if (!plugin.IsFrenRiderEffectivelyEnabled) { SuspendAutomatic(); return false; }
             unitBase->FireCallback(1, atkValues, true);
             log.Information($"Invite accept attempt #{attempt} for {inviterName}: SelectYesno direct Yes callback fired");
             return true;

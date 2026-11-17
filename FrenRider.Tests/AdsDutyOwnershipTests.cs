@@ -499,23 +499,29 @@ public sealed class AdsDutyOwnershipTests
     [Fact]
     public void FollowReleasesOnlyOwnedCofferBeforeReplacementNavigation()
     {
-        using var fixture = new CofferInteractionFixture();
-        var coffer = fixture.Add("Treasure Coffer", ObjectKind.Treasure, 12);
-        fixture.SetCoffers(true);
-        fixture.Call("NavigateToInteractable", coffer, Vector3.Zero, 12f, DateTime.UtcNow);
-        fixture.Commands.Clear();
+        ActivationModeTests.WithManager((manager, local) =>
+        {
+            local.Enabled = true;
+            using var fixture = new CofferInteractionFixture();
+            typeof(Plugin).GetProperty(nameof(Plugin.ConfigManager))!
+                .SetValue((Plugin)fixture.Field("plugin")!, manager);
+            var coffer = fixture.Add("Treasure Coffer", ObjectKind.Treasure, 12);
+            fixture.SetCoffers(true);
+            fixture.Call("NavigateToInteractable", coffer, Vector3.Zero, 12f, DateTime.UtcNow);
+            fixture.Commands.Clear();
 
-        fixture.CallFollow("IssueNavCommand", new CharacterConfig { ClingType = 0 },
-            new Vector3(20, 0, 0), false, "fabricated follow replacement", true);
-        Assert.Equal(2, fixture.Commands.Count);
-        Assert.Equal("/vnavmesh stop", fixture.Commands[0]);
-        Assert.StartsWith("/vnav moveto ", fixture.Commands[1]);
-        fixture.Commands.Clear();
-        fixture.Call("Reset");
-        fixture.SetCoffers(false);
-        fixture.Call("ApplyCofferPolicy");
+            fixture.CallFollow("IssueNavCommand", new CharacterConfig { ClingType = 0 },
+                new Vector3(20, 0, 0), false, "fabricated follow replacement", true);
+            Assert.Equal(2, fixture.Commands.Count);
+            Assert.Equal("/vnavmesh stop", fixture.Commands[0]);
+            Assert.StartsWith("/vnav moveto ", fixture.Commands[1]);
+            fixture.Commands.Clear();
+            fixture.Call("Reset");
+            fixture.SetCoffers(false);
+            fixture.Call("ApplyCofferPolicy");
 
-        Assert.Empty(fixture.Commands);
+            Assert.Empty(fixture.Commands);
+        });
     }
 
     [Fact]
@@ -1039,6 +1045,7 @@ public sealed class AdsDutyOwnershipTests
         private readonly AdsDutyIpcService ads;
         private readonly DutyInteractService interaction;
         private RaidModeService? raid;
+        private readonly AutorotIpcService autorot;
         internal readonly FollowService Follow = (FollowService)RuntimeHelpers.GetUninitializedObject(typeof(FollowService));
         internal readonly List<string> Commands = new();
         internal bool IsActive => interaction.IsActive;
@@ -1081,6 +1088,11 @@ public sealed class AdsDutyOwnershipTests
                 Commands.Add((string)args![0]!);
                 return true;
             }));
+            autorot = new AutorotIpcService(Plugin.PluginInterface, Plugin.Log);
+            typeof(Plugin).GetProperty(nameof(Plugin.AutorotIpcService))!.SetValue(plugin, autorot);
+            typeof(Plugin).GetProperty(nameof(Plugin.CombatService))!.SetValue(plugin,
+                new CombatService(plugin, null!, new ZoneService(),
+                    new QuestionableIpcService(() => false, () => DateTime.UtcNow)));
         }
 
         internal IGameObject Add(string name, ObjectKind kind, float distance)
@@ -1159,6 +1171,7 @@ public sealed class AdsDutyOwnershipTests
         public void Dispose()
         {
             raid?.Dispose();
+            autorot.Dispose();
             foreach (var (property, value) in savedStatics) property.SetValue(null, value);
             ads.Dispose();
         }

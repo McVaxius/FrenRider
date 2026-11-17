@@ -109,6 +109,9 @@ internal sealed class AdsHyperFocusLeaseCoordinator
         if (!string.Equals(ownerToken, sessionToken, StringComparison.Ordinal))
             return Reject("ADS Hyper Focus lease is owned by another session.");
 
+        var environment = readEnvironment();
+        if (!environment.FrenRiderEnabled || !environment.InDuty)
+            return Reject("FrenRider automatic duty activation is unavailable.");
         lastHeartbeatUtc = utcNow();
         LeaseReason = "ADS Hyper Focus heartbeat received.";
         return new AdsHyperFocusResponse(true, LeaseReason);
@@ -201,7 +204,8 @@ public sealed class AdsHyperFocusLeaseService : IDisposable
 
     public bool TryClaimCombatActivation()
     {
-        if (!coordinator.IsLeaseActive || combatActivatedGeneration == coordinator.LeaseGeneration)
+        if (!plugin.IsFrenRiderEffectivelyEnabled || !coordinator.IsLeaseActive
+            || combatActivatedGeneration == coordinator.LeaseGeneration)
             return false;
 
         combatActivatedGeneration = coordinator.LeaseGeneration;
@@ -236,7 +240,7 @@ public sealed class AdsHyperFocusLeaseService : IDisposable
         {
             var generation = coordinator.LeaseGeneration;
             var response = coordinator.Acquire(ReadToken(requestJson));
-            if (response.Ok && coordinator.LeaseGeneration != generation)
+            if (response.Ok && plugin.IsFrenRiderEffectivelyEnabled && coordinator.LeaseGeneration != generation)
             {
                 plugin.BossModActionTweaksService.ResetRecovery();
                 plugin.CombatService.ActivateAdsHyperFocusLease();

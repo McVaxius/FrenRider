@@ -33,6 +33,7 @@ internal sealed class JobStoneEquipService
 
     public void Update(CharacterConfig config)
     {
+        if (!Plugin.IsAutomaticActivationAllowed(config)) { SuspendAutomatic(); return; }
         var now = Environment.TickCount64;
         if (pendingEquip != null)
         {
@@ -42,7 +43,7 @@ internal sealed class JobStoneEquipService
                 return;
             }
 
-            ConfirmEquip(now);
+            ConfirmEquip(config, now);
             return;
         }
 
@@ -52,6 +53,8 @@ internal sealed class JobStoneEquipService
         lastCheckMs = now;
         TryBeginEquip(config, now);
     }
+
+    internal void SuspendAutomatic() => pendingEquip = null;
 
     internal static bool ShouldAttempt(JobStonePolicyInput input)
         => input.FrenRiderEnabled
@@ -142,7 +145,7 @@ internal sealed class JobStoneEquipService
             var soulCrystalSlotEmpty = equippedStone != null && equippedStone->GetBaseItemId() == 0;
 
             var policy = new JobStonePolicyInput(
-                config.Enabled,
+                Plugin.IsAutomaticActivationAllowed(config),
                 config.EquipJobStoneForCurrentClass,
                 isBaseClass,
                 Plugin.PlayerState.Level,
@@ -171,6 +174,7 @@ internal sealed class JobStoneEquipService
             if (match == null)
                 return;
 
+            if (!Plugin.IsAutomaticActivationAllowed(config)) { SuspendAutomatic(); return; }
             var moveResult = inventory->MoveItemSlot(
                 InventoryType.ArmorySoulCrystal,
                 (ushort)match.Value.Slot,
@@ -191,7 +195,7 @@ internal sealed class JobStoneEquipService
         }
     }
 
-    private unsafe void ConfirmEquip(long now)
+    private unsafe void ConfirmEquip(CharacterConfig config, long now)
     {
         var pending = pendingEquip;
         if (pending == null || now < pending.NextConfirmMs)
@@ -229,6 +233,7 @@ internal sealed class JobStoneEquipService
                 return;
             }
 
+            if (!Plugin.IsAutomaticActivationAllowed(config)) { SuspendAutomatic(); return; }
             pendingEquip = null;
             var updateResult = gearsets->UpdateGearset(pending.GearsetId);
             if (updateResult == 0)

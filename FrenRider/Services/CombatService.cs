@@ -93,7 +93,7 @@ public partial class CombatService
 
     public void RefreshPackagedPresetsOnLoad()
     {
-        if (!plugin.AutorotIpcService.PackagedPresetRefreshPending
+        if (!plugin.IsFrenRiderEffectivelyEnabled || !plugin.AutorotIpcService.PackagedPresetRefreshPending
             || Environment.TickCount64 < nextPackagedPresetRefreshMs || IsCombatSetupHeld(IsInDuty()))
             return;
         var config = plugin.ConfigManager.GetActiveConfig();
@@ -116,12 +116,14 @@ public partial class CombatService
             Plugin.Log.Information($"[FrenRider] Cleared local external automation runtime flags after {reason}.");
 
         dutyOnlyRotationHeld = false;
+        dutyOnlyHeldProvider = string.Empty;
         mountedRotationSuppressed = false;
         mountedSuppressedPluginName = string.Empty;
         wrathAutoActive = false;
         lastRotationToggleMs = 0;
         wasInCombat = false;
         wasInDuty = false;
+        lastActivePluginIdx = -1;
         lastAppliedCombatSettings = null;
         lastObservedCombatSettings = null;
         ResetCombatSettingsRefreshTracking();
@@ -131,7 +133,7 @@ public partial class CombatService
     public bool PrepareForEnableCombatSetup()
     {
         if (plugin.CoppeliaPowerlevelLeaseService?.IsLeaseActive == true) return false;
-        if (plugin.IsWaitingForDuty) return false;
+        if (!plugin.IsFrenRiderEffectivelyEnabled) return false;
         var config = plugin.ConfigManager.GetActiveConfig();
         var inDuty = IsInDuty();
         var decision = RefreshDutyCombatAuthority(
@@ -165,6 +167,13 @@ public partial class CombatService
     public void Update()
     {
         var config = plugin.ConfigManager.GetActiveConfig();
+        if (plugin.IsWaitingForDuty)
+        {
+            plugin.AutorotIpcService.ResetOwnedDeathRecovery();
+            return; // The activation transition suspends only work owned by this instance.
+        }
+        dutyOnlyRotationHeld = false;
+        dutyOnlyHeldProvider = string.Empty;
         var inCombat = Plugin.Condition[ConditionFlag.InCombat];
         var inDuty = IsInDuty();
         var mountedOrMounting = Plugin.Condition[ConditionFlag.Mounted] || Plugin.Condition[ConditionFlag.Mounting71];
@@ -234,14 +243,6 @@ public partial class CombatService
             HandleAdsHyperFocusLease(inCombat, inDuty);
             return;
         }
-
-        if (plugin.IsWaitingForDuty)
-        {
-            plugin.AutorotIpcService.ResetOwnedDeathRecovery();
-            HoldDutyOnlyRotation(config);
-            return;
-        }
-        dutyOnlyRotationHeld = false;
 
         var player = Plugin.ObjectTable.LocalPlayer;
         bool? dead = player is null ? null : player.CurrentHp == 0 || Plugin.Condition[ConditionFlag.Unconscious];
@@ -522,6 +523,7 @@ public partial class CombatService
         if (!plugin.IsWaitingForDuty)
         {
             dutyOnlyRotationHeld = false;
+            dutyOnlyHeldProvider = string.Empty;
             return;
         }
         if (plugin.CoppeliaPowerlevelLeaseService.IsLeaseActive)
@@ -534,43 +536,50 @@ public partial class CombatService
 
     private void HoldDutyOnlyRotation(CharacterConfig config)
     {
-        // Pause only our native AI/runtime and the configured rotation.
-        // Keep the settings session so normal duty entry can resume it.
-        var provider = GetSelectedRotationPluginName(config);
-        if (!dutyOnlyRotationHeld || dutyOnlyHeldProvider != provider)
+        if (dutyOnlyRotationHeld) return;
+
+        // Capture our applied provider; a later selection is not ownership.
+        if (dutyOnlyHeldProvider.Length == 0)
         {
-            plugin.CaptureExternalAutomationSnapshot("Duty only combat hold");
-            var confirmed = plugin.AutorotIpcService.PauseOwnedBossMod(
-                command => TrySendCommand(command, allowWhileSuppressed: true));
-            switch (GetLastActiveRotationPluginName(config))
-            {
-                case "RSR":
-                    confirmed &= plugin.AutorotIpcService.TrySetRsrMode(AutorotIpcService.RsrStateCommandType.Off)
-                        || SendCommand("/rotation cancel", allowWhileSuppressed: true);
-                    break;
-                case "WRATH":
-                    confirmed &= SendCommand("/wrath auto off", allowWhileSuppressed: true);
-                    break;
-                case "DAEDALUS":
-                    confirmed &= SetDaedalusEnabled(false, "Duty only combat hold");
-                    break;
-            }
-            dutyOnlyRotationHeld = confirmed;
-            dutyOnlyHeldProvider = provider;
+            if (lastAppliedCombatSettings is { } applied
+                && lastActivePluginIdx >= 0 && lastActivePluginIdx < RotationPluginNames.Length
+                && RotationPluginNames[lastActivePluginIdx] == applied.Provider
+                && (applied.Provider != "WRATH" || wrathAutoActive))
+                dutyOnlyHeldProvider = applied.Provider;
+            else if (plugin.AdsHyperFocusLeaseService.IsLeaseActive
+                && adsHyperFocusSavedSelection is not null && !adsHyperFocusSuperseded
+                && lastActivePluginIdx == Array.IndexOf(RotationPluginNames, "RSR"))
+                dutyOnlyHeldProvider = "RSR"; // The existing lease owns its temporary RSR Manual override.
         }
-        ResetCombatSettingsRefreshTracking();
-        lastObservedCombatSettings = lastAppliedCombatSettings = null;
-        lastBossModDefaultSettingsSignature = lastBossModMovementUnlockSignature = string.Empty;
-        if (dutyOnlyRotationHeld)
+
+        // Native ownership and its readback remain independent of the rotation stop.
+        var nativePaused = plugin.AutorotIpcService.PauseOwnedBossMod(
+            command => TrySendCommand(command, allowWhileSuppressed: true));
+        var rotationStopAccepted = dutyOnlyHeldProvider switch
         {
+            "RSR" => plugin.AutorotIpcService.TrySetRsrMode(AutorotIpcService.RsrStateCommandType.Off)
+                || SendCommand("/rotation cancel", allowWhileSuppressed: true),
+            "WRATH" => SendCommand("/wrath auto off", allowWhileSuppressed: true),
+            "DAEDALUS" => SetDaedalusEnabled(false, "Duty only combat hold"),
+            _ => true,
+        };
+        if (rotationStopAccepted && dutyOnlyHeldProvider.Length != 0)
+        {
+            // Consume an accepted stop even if native pause still awaits readback.
+            dutyOnlyHeldProvider = string.Empty;
             lastActivePluginIdx = -1;
             wrathAutoActive = false;
         }
+        dutyOnlyRotationHeld = nativePaused && rotationStopAccepted;
+
+        ResetCombatSettingsRefreshTracking();
+        lastObservedCombatSettings = lastAppliedCombatSettings = null;
+        lastBossModDefaultSettingsSignature = lastBossModMovementUnlockSignature = string.Empty;
         lastRotationToggleMs = 0;
         wasInCombat = wasInDuty = false;
         State = CombatState.OutOfCombat;
-        StateDetail = dutyOnlyRotationHeld ? "Combat rotations paused outside duties"
-            : "Combat pause could not be confirmed outside duties";
+        StateDetail = dutyOnlyRotationHeld ? "Owned rotation stop request accepted outside duties"
+            : "Owned rotation stop request or native pause is pending outside duties";
         ActivePreset = string.Empty;
     }
 
@@ -601,10 +610,19 @@ public partial class CombatService
 
     private bool ActivateRotation(CharacterConfig config, bool ignoreCooldown = false)
     {
-        if (!config.Enabled || IsRotationDisabled(config) || ShouldSuppressFrenRiderCombatCommands)
+        if (!plugin.IsFrenRiderEffectivelyEnabled || IsRotationDisabled(config) || ShouldSuppressFrenRiderCombatCommands)
             return false;
 
         var pluginName = GetSelectedRotationPluginName(config);
+        if ((pluginName is "RSR" or "DAEDALUS")
+            && !(lastAppliedCombatSettings is null
+                && lastActivePluginIdx == Array.IndexOf(RotationPluginNames, "RSR")
+                && adsHyperFocusSavedSelection is not null && !adsHyperFocusSuperseded
+                && plugin.AdsHyperFocusLeaseService.IsLeaseActive)
+            && (lastAppliedCombatSettings is not { } applied
+                || !ReferenceEquals(applied.Profile, config) || applied.Provider != pluginName
+                || lastActivePluginIdx != Array.IndexOf(RotationPluginNames, pluginName)))
+            lastActivePluginIdx = -1;
         if ((pluginName is "BMR" or "GodMod" or "VBM")
             && !plugin.AutorotIpcService.IsSelectedBossModAvailable(pluginName))
         {
@@ -635,7 +653,8 @@ public partial class CombatService
             || questionableIpcService.QuestAutomationActive) && !ApplyRsrAggro(config))
             return false;
         ValidateCurrentManualPreset(config, pluginName);
-        lastActivePluginIdx = Array.IndexOf(RotationPluginNames, pluginName);
+        if (pluginName is not ("RSR" or "DAEDALUS"))
+            lastActivePluginIdx = Array.IndexOf(RotationPluginNames, pluginName);
         var bossModPreset = GetBossModPresetForPlugin(config, pluginName);
         ActivePreset = bossModPreset;
 
@@ -654,8 +673,14 @@ public partial class CombatService
                 if (!rsrHandled) return false;
                 break;
             case "WRATH":
-                SetWrathAuto(true, "activation");
-                StateDetail = $"{pluginName} auto" + (string.IsNullOrEmpty(bossModPreset) ? "" : $" [{bossModPreset}]");
+                if (!SetWrathAuto(true, "activation"))
+                {
+                    lastActivePluginIdx = -1;
+                    ActivePreset = string.Empty;
+                    StateDetail = "WRATH start request was not accepted";
+                    return false;
+                }
+                StateDetail = $"{pluginName} auto request accepted" + (string.IsNullOrEmpty(bossModPreset) ? "" : $" [{bossModPreset}]");
                 break;
             case "DAEDALUS":
                 var daedalusHandled = SetDaedalusEnabled(true, "activation");
@@ -678,6 +703,8 @@ public partial class CombatService
         SetPositional(config, pluginName);
 
         State = CombatState.InCombat;
+        if (pluginName is "RSR" or "DAEDALUS")
+            lastActivePluginIdx = Array.IndexOf(RotationPluginNames, pluginName);
         lastAppliedCombatSettings = CaptureCombatSettings(config);
         Plugin.Log.Information($"Combat: Activated {pluginName} with BossMod preset '{bossModPreset}'");
         return true;
@@ -902,6 +929,15 @@ public partial class CombatService
             return;
 
         var pluginName = GetSelectedRotationPluginName(config);
+        if ((pluginName is "RSR" or "DAEDALUS")
+            && !(lastAppliedCombatSettings is null
+                && lastActivePluginIdx == Array.IndexOf(RotationPluginNames, "RSR")
+                && adsHyperFocusSavedSelection is not null && !adsHyperFocusSuperseded
+                && plugin.AdsHyperFocusLeaseService.IsLeaseActive)
+            && (lastAppliedCombatSettings is not { } applied
+                || !ReferenceEquals(applied.Profile, config) || applied.Provider != pluginName
+                || lastActivePluginIdx != Array.IndexOf(RotationPluginNames, pluginName)))
+            lastActivePluginIdx = -1;
         if ((pluginName is "BMR" or "GodMod" or "VBM")
             && !plugin.AutorotIpcService.IsSelectedBossModAvailable(pluginName))
         {
@@ -918,7 +954,8 @@ public partial class CombatService
             || questionableIpcService.QuestAutomationActive) && !ApplyRsrAggro(config))
             return;
         ValidateCurrentManualPreset(config, pluginName);
-        lastActivePluginIdx = Array.IndexOf(RotationPluginNames, pluginName);
+        if (pluginName is not ("RSR" or "DAEDALUS"))
+            lastActivePluginIdx = Array.IndexOf(RotationPluginNames, pluginName);
         var bossModPreset = GetBossModPresetForPlugin(config, pluginName);
         ActivePreset = bossModPreset;
         plugin.CaptureExternalAutomationSnapshot($"rotation settings after {reason}");
@@ -933,11 +970,18 @@ public partial class CombatService
                 SetPositional(config, pluginName);
                 break;
             case "WRATH":
-                SetWrathAuto(true, reason);
+                if (!SetWrathAuto(true, reason))
+                {
+                    lastActivePluginIdx = -1;
+                    ActivePreset = string.Empty;
+                    StateDetail = "WRATH start request was not accepted";
+                    return;
+                }
                 break;
             case "DAEDALUS":
-                if (SetDaedalusEnabled(true, reason))
-                    plugin.DaedalusTargetModeService.Apply(config.DaedalusTargetMode, notifyUser: false);
+                if (!SetDaedalusEnabled(true, reason))
+                    return;
+                plugin.DaedalusTargetModeService.Apply(config.DaedalusTargetMode, notifyUser: false);
                 break;
             case "GodMod":
             case "BMR":
@@ -945,6 +989,8 @@ public partial class CombatService
                 break;
         }
 
+        if (pluginName == "DAEDALUS")
+            lastActivePluginIdx = Array.IndexOf(RotationPluginNames, pluginName);
         lastAppliedCombatSettings = CaptureCombatSettings(config);
         Plugin.Log.Information($"Combat: Reapplied {pluginName} settings after {reason} with BossMod preset '{bossModPreset}'");
     }
@@ -980,7 +1026,8 @@ public partial class CombatService
             return;
 
         ValidateCurrentManualPreset(config, pluginName);
-        lastActivePluginIdx = Array.IndexOf(RotationPluginNames, pluginName);
+        if (pluginName is not ("RSR" or "DAEDALUS"))
+            lastActivePluginIdx = Array.IndexOf(RotationPluginNames, pluginName);
         var bossModPreset = GetBossModPresetForPlugin(config, pluginName);
         ActivePreset = bossModPreset;
         ApplyBossModPreset(pluginName, bossModPreset, reason, installPresets: false);
@@ -1024,6 +1071,7 @@ public partial class CombatService
         var confirmed = plugin.AutorotIpcService.PauseOwnedVbm(command => TrySendCommand(command));
         questingVbmHeld = true;
         lastRotationToggleMs = 0;
+        lastActivePluginIdx = -1;
         lastAppliedCombatSettings = null;
         lastObservedCombatSettings = null;
         ResetCombatSettingsRefreshTracking();
@@ -1057,6 +1105,7 @@ public partial class CombatService
     {
         if (config.Enabled && !IsRotationDisabled(config))
         {
+            lastActivePluginIdx = -1;
             lastAppliedCombatSettings = null;
             pendingCombatSettings = CaptureCombatSettings(config);
             pendingCombatSettingsRefreshMs = Environment.TickCount64 + CombatSettingsRefreshDebounceMs;
@@ -1152,8 +1201,9 @@ public partial class CombatService
                 SendCommand("/rotation auto");
                 break;
             case "WRATH":
-                if (reapplySelection && !IsRotationDisabled(config))
-                    SetWrathAuto(true, $"mounted lifecycle restore ({reason})");
+                if (reapplySelection && !IsRotationDisabled(config)
+                    && !SetWrathAuto(true, $"mounted lifecycle restore ({reason})"))
+                    return;
                 break;
         }
 
@@ -1337,7 +1387,7 @@ public partial class CombatService
     {
         var config = plugin.ConfigManager.GetActiveConfig();
         var character = plugin.ConfigManager.QuestionableCharacterIdentity;
-        if (string.IsNullOrWhiteSpace(runId) || string.IsNullOrEmpty(character)
+        if (!plugin.IsFrenRiderEffectivelyEnabled || string.IsNullOrWhiteSpace(runId) || string.IsNullOrEmpty(character)
             || GetSelectedRotationPluginName(config) != "RSR" || IsRotationDisabled(config)
             || !TryReadDungeonScope(expectedContentFinderConditionId, out var territory))
         {
@@ -1357,7 +1407,7 @@ public partial class CombatService
             expectedContentFinderConditionId, territory, config.RsrAggroType, live!);
         pendingDungeonRsrAggroApply = true;
         lastObservedCombatSettings = null;
-        if (config.Enabled && !IsCombatSetupHeld(IsInDuty()))
+        if (plugin.IsFrenRiderEffectivelyEnabled && !IsCombatSetupHeld(IsInDuty()))
             ApplyRsrAggro(config);
         Plugin.Log.Information($"[FrenRider][DAD] {plugin.AutorotIpcService.LastStatus}");
         return true;
@@ -1911,7 +1961,7 @@ public partial class CombatService
     internal void ActivateAdsHyperFocusLease()
     {
         var config = plugin.ConfigManager.GetActiveConfig();
-        if (!config.Enabled || IsRotationDisabled(config) || plugin.AdsIntegrationService.IsSoloCombatHeld
+        if (!plugin.IsFrenRiderEffectivelyEnabled || IsRotationDisabled(config) || plugin.AdsIntegrationService.IsSoloCombatHeld
             || !plugin.AdsHyperFocusLeaseService.IsLeaseActive
             || !plugin.AdsHyperFocusLeaseService.TryClaimCombatActivation())
             return;
@@ -2060,6 +2110,7 @@ public partial class CombatService
 
     private bool SetDaedalusEnabled(bool enabled, string reason)
     {
+        if (enabled && !plugin.IsFrenRiderEffectivelyEnabled) return false;
         var handled = plugin.AutorotIpcService.TrySetDaedalusEnabled(enabled);
         if (handled)
             Plugin.Log.Information($"Combat: Daedalus {(enabled ? "enabled" : "disabled")} after {reason}");
@@ -2072,16 +2123,20 @@ public partial class CombatService
     private static string GetBossModPresetProvider(string pluginName)
         => AutorotIpcService.GetBossModProvider(pluginName);
 
-    private void SetWrathAuto(bool enabled, string reason)
+    private bool SetWrathAuto(bool enabled, string reason)
     {
-        if (ShouldSuppressFrenRiderCombatCommands || wrathAutoActive == enabled)
-            return;
+        if (enabled && !plugin.IsFrenRiderEffectivelyEnabled) return false;
+        if (ShouldSuppressFrenRiderCombatCommands) return false;
+        if (wrathAutoActive == enabled) return true;
 
-        SendCommand(enabled ? "/wrath auto on" : "/wrath auto off");
+        if (!SendCommand(enabled ? "/wrath auto on" : "/wrath auto off"))
+            return false;
+        // This records dispatch acceptance, not an observed WRATH state.
         wrathAutoActive = enabled;
         if (enabled)
             plugin.MarkWrathAutoStartedByFrenRider(reason);
-        Plugin.Log.Information($"Combat: Wrath auto {(enabled ? "on" : "off")} after {reason}");
+        Plugin.Log.Information($"Combat: Wrath auto {(enabled ? "on" : "off")} requested after {reason}");
+        return true;
     }
 
     private bool SendCommand(string command, bool allowWhileSuppressed = false)

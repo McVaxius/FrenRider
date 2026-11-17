@@ -53,6 +53,12 @@ public sealed class AdsReflectionIpcService : IDisposable
     public void Update(bool force = false)
     {
         var config = plugin.ConfigManager.GetActiveConfig();
+        if (!plugin.IsFrenRiderEffectivelyEnabled)
+        {
+            HasPendingActions = false;
+            StatusText = "Automatic ADS reflection paused.";
+            return;
+        }
         Apply(config, force);
     }
 
@@ -108,6 +114,7 @@ public sealed class AdsReflectionIpcService : IDisposable
 
         var failures = new List<string>();
 
+        if (!plugin.IsFrenRiderEffectivelyEnabled) return;
         if (desiredRange && (!rangeApplied || force))
         {
             if (TrySetMaxLoadDistance(ReducedOutdoorMaxLoadDistance, out var error))
@@ -123,6 +130,7 @@ public sealed class AdsReflectionIpcService : IDisposable
                 failures.Add($"range reset ({error})");
         }
 
+        if (!plugin.IsFrenRiderEffectivelyEnabled) return;
         if (desiredHunts && (!huntsApplied || force))
         {
             if (TrySetHuntsDisabled(true, out var error))
@@ -138,6 +146,7 @@ public sealed class AdsReflectionIpcService : IDisposable
                 failures.Add($"hunts reset ({error})");
         }
 
+        if (!plugin.IsFrenRiderEffectivelyEnabled) return;
         if (desiredQueen && (!queenApplied || force))
         {
             if (TrySetQueenLunatenderDisabled(true, out var error))

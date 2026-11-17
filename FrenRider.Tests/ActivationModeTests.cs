@@ -68,41 +68,78 @@ public sealed class ActivationModeTests
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public void DutyTransitionsChangeOnlyCombatEligibilityWithoutPluginLifecycleCleanup(bool enabled)
+    public void DutyTransitionsSuspendAutomaticWorkAndPreserveManualCompanionQueues(bool enabled)
     {
-        WithManager((manager, _) =>
+        foreach (var manual in new[] { false, true })
         {
-            var config = manager.GetActiveConfig();
-            config.Enabled = enabled;
-            config.ActivationMode = FrenRiderActivationMode.DutyOnly;
-            var condition = typeof(Plugin).GetProperty("Condition", BindingFlags.Static | BindingFlags.NonPublic)!;
-            var previous = condition.GetValue(null);
-            var inDuty = false;
-            try
+            var log = Proxy<IPluginLog>((_, _) => null);
+            var pi = Proxy<IDalamudPluginInterface>((method, _) => method.Name == "get_InstalledPlugins"
+                ? Array.Empty<IExposedPlugin>() : null);
+            using var autorot = new AutorotIpcService(pi, log);
+            using var runtime = new ExternalAutomationCleanupServiceTests.QuestingCombatRuntime(autorot, pi, log, 0, captureCommands: true);
+            runtime.StopActivity();
+            runtime.InstallActivationCollaborators();
+            runtime.Profile.Enabled = enabled;
+            runtime.Profile.ActivationMode = FrenRiderActivationMode.DutyOnly;
+            runtime.Profile.ChocoboAutoFeed = true;
+            runtime.Profile.ChocoboFoodItemId = 7894;
+            runtime.Profile.ChocoboAutoAllocateSkills = true;
+            var saved = JsonSerializer.Serialize(runtime.Profile);
+
+            runtime.Conditions.Add(Dalamud.Game.ClientState.Conditions.ConditionFlag.BoundByDuty);
+            runtime.RefreshActivation(); // Real parent activation; no fabricated applied-owner record.
+            Assert.Equal(enabled, runtime.Host.IsFrenRiderEffectivelyEnabled);
+            var admitted = manual || enabled;
+            Assert.Equal(admitted, runtime.Food.Start(automatically: !manual));
+            Assert.Equal(admitted, runtime.Skills.Start(automatically: !manual));
+            Assert.Equal(admitted, runtime.Exploration.Start(automatically: !manual));
+            if (enabled)
             {
-                condition.SetValue(null, Proxy<ICondition>((method, args) => method.Name == "get_Item"
-                    && args![0] is Dalamud.Game.ClientState.Conditions.ConditionFlag flag
-                    && flag == Dalamud.Game.ClientState.Conditions.ConditionFlag.BoundByDuty && inDuty));
-                var plugin = (Plugin)RuntimeHelpers.GetUninitializedObject(typeof(Plugin));
-                typeof(Plugin).GetField("<ConfigManager>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic)!
-                    .SetValue(plugin, manager);
-                typeof(Plugin).GetField("wasEffectivelyEnabled", BindingFlags.Instance | BindingFlags.NonPublic)!
-                    .SetValue(plugin, enabled);
-                // Setup/cleanup services are absent: entering/leaving duties must
-                // never invoke the master activation lifecycle.
-                foreach (var duty in new[] { false, true, false, true, false })
-                {
-                    inDuty = duty;
-                    typeof(Plugin).GetMethod("RefreshEffectiveActivation", BindingFlags.Instance | BindingFlags.NonPublic)!
-                        .Invoke(plugin, null);
-                    Assert.Equal(enabled, config.Enabled);
-                    Assert.Equal(enabled, plugin.IsFrenRiderEffectivelyEnabled);
-                    Assert.Equal(enabled && duty, plugin.AreCombatRotationsEnabled);
-                    Assert.Equal(enabled && !duty, plugin.IsWaitingForDuty);
-                }
+                typeof(PartyService).GetField("lastInviterName", BindingFlags.Instance | BindingFlags.NonPublic)!
+                    .SetValue(runtime.Host.PartyService, "Example Inviter");
+                runtime.SetAutoDesynth("PendingExit");
             }
-            finally { condition.SetValue(null, previous); }
-        });
+            runtime.Commands.Clear();
+            var dispatchesBeforeWait = runtime.CompanionDispatches;
+
+            runtime.Conditions.Clear();
+            runtime.RefreshActivation(); // Real parent Duty Only suspension with every collaborator wired.
+            runtime.RefreshActivation(); // Repeated outside-duty frames must not repeat cleanup.
+            runtime.Food.Tick();
+            runtime.Skills.Tick();
+            runtime.Exploration.Tick();
+
+            Assert.Equal(enabled, runtime.Profile.Enabled);
+            Assert.False(runtime.Host.IsFrenRiderEffectivelyEnabled);
+            Assert.False(runtime.Host.AreCombatRotationsEnabled);
+            Assert.Equal(enabled, runtime.Host.IsWaitingForDuty);
+            Assert.Equal(manual, runtime.Food.IsActive);
+            Assert.Equal(manual, runtime.Skills.IsActive);
+            Assert.Equal(manual, runtime.Exploration.IsActive);
+            Assert.Empty(runtime.Commands);
+            Assert.Equal(dispatchesBeforeWait, runtime.CompanionDispatches);
+            if (enabled)
+            {
+                Assert.Equal("Waiting for duty", runtime.Host.FollowService.StateDetail);
+                Assert.Equal("Raid mode disabled", runtime.Host.RaidModeService.StatusText);
+                Assert.Contains("paused", runtime.Automation.AutoDesynthStatus);
+                Assert.Null(typeof(PartyService).GetField("lastInviterName", BindingFlags.Instance | BindingFlags.NonPublic)!
+                    .GetValue(runtime.Host.PartyService));
+            }
+            runtime.Food.Stop();
+            runtime.Skills.Stop();
+            runtime.Exploration.Stop("manual stop");
+            var dispatches = runtime.CompanionDispatches;
+            Assert.False(runtime.Food.Start(automatically: true));
+            Assert.False(runtime.Skills.Start(automatically: true));
+            Assert.False(runtime.Exploration.Start(automatically: true));
+            Assert.Equal(dispatches, runtime.CompanionDispatches);
+            Assert.True(runtime.Food.Start(automatically: false));
+            Assert.True(runtime.Skills.Start(automatically: false));
+            Assert.True(runtime.Exploration.Start(automatically: false));
+            Assert.Equal(dispatches + 3, runtime.CompanionDispatches);
+            Assert.Equal(saved, JsonSerializer.Serialize(runtime.Profile));
+        }
     }
 
     [Fact]
@@ -245,7 +282,8 @@ public sealed class ActivationModeTests
                 foreach (var duty in new[] { false, true, false })
                 {
                     inDuty = duty;
-                    Assert.True(plugin.IsFrenRiderEffectivelyEnabled);
+                    Assert.True(manager.GetActiveConfig().Enabled);
+                    Assert.Equal(duty, plugin.IsFrenRiderEffectivelyEnabled);
                     Assert.Equal(duty, plugin.AreCombatRotationsEnabled);
                     Assert.Equal(!duty, plugin.IsWaitingForDuty);
                 }

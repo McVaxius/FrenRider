@@ -34,7 +34,7 @@ jobs:
         with:
           repository: McVaxius/aethertekUI
           # Publish compatible library APIs before consumer changes.
-          ref: 1f26dbfa27ebff286dc74d07cb32840606d116d2
+          ref: a902c6714d9ea655dd41931f737390e2f1159b93
           path: aethertekUI
           # Repository-specific read-only SSH deploy key; no expiration.
           ssh-key: ${{ secrets.AETHERTEKUI_DEPLOY_KEY }}
@@ -97,11 +97,32 @@ jobs:
             echo "version=${version}" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Read canonical release notes
+        id: notes
+        env:
+          RELEASE_VERSION: ${{ steps.get_version.outputs.version }}
+        run: |
+          python3 - <<'PY'
+          import os, re
+          from pathlib import Path
+          version = os.environ['RELEASE_VERSION'].removeprefix('v')
+          text = Path('CHANGELOG.md').read_text(encoding='utf-8-sig')
+          pattern = rf'(?ms)^\d{{4}}-\d{{2}}-\d{{2}} - {re.escape(version)}(?: - [^\r\n]+)?\r?\n(?P<body>.*?)(?=^\d{{4}}-\d{{2}}-\d{{2}} - |\Z)'
+          entries = re.findall(pattern, text)
+          if len(entries) != 1 or not entries[0].strip(): raise SystemExit('Expected one dated changelog entry for ' + version)
+          body = entries[0].strip()
+          marker = 'FRENRIDER_RELEASE_BODY'
+          if marker in body.splitlines(): raise SystemExit('Release notes contain the output delimiter')
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as output:
+              output.write(f'body<<{marker}\n{body}\n{marker}\n')
+          PY
+
       - name: Create Release
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.get_version.outputs.version }}
           name: Release ${{ steps.get_version.outputs.version }}
+          body: ${{ steps.notes.outputs.body }}
           draft: false
           prerelease: false
           files: |

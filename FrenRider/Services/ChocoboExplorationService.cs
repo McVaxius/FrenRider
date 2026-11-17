@@ -18,6 +18,8 @@ internal sealed class ChocoboExplorationService
         uint AgentAddonId = 0);
 
     private readonly Func<bool> canRun;
+    private readonly Func<bool> automaticAllowed;
+    private bool automatic;
     private readonly Func<ulong> identity;
     private readonly Func<WindowSnapshot?> readWindow;
     private readonly Func<bool> open;
@@ -58,8 +60,9 @@ internal sealed class ChocoboExplorationService
         }
     }
     internal bool PrepareSkills() => Start(forSkills: true);
+    internal bool PrepareSkills(bool automatically) => Start(forSkills: true, automatically: automatically);
 
-    public ChocoboExplorationService() : this(
+    public ChocoboExplorationService(Func<bool>? automaticAllowed = null) : this(
         () => Plugin.ClientState.IsLoggedIn && Plugin.ObjectTable.LocalPlayer != null
             && !Plugin.Condition[ConditionFlag.InCombat]
             && !Plugin.Condition[ConditionFlag.LoggingOut]
@@ -68,14 +71,16 @@ internal sealed class ChocoboExplorationService
         () => Plugin.PlayerState.ContentId, ReadWindow, GameHelpers.TryOpenCompanionWindow,
         SelectTab, Capture, CloseWindow,
         message => Plugin.Log.Information($"[FrenRider][ChocoboProbe] {message}"),
-        () => Environment.TickCount64)
+        () => Environment.TickCount64, automaticAllowed: automaticAllowed)
     { }
 
     internal ChocoboExplorationService(Func<bool> canRun, Func<ulong> identity,
         Func<WindowSnapshot?> readWindow, Func<bool> open, Action<int> selectTab,
-        Action capture, Action close, Action<string> log, Func<long> clock, Func<bool>? skillsChildReady = null)
+        Action capture, Action close, Action<string> log, Func<long> clock, Func<bool>? skillsChildReady = null,
+        Func<bool>? automaticAllowed = null)
     {
         this.canRun = canRun;
+        this.automaticAllowed = automaticAllowed ?? (() => true);
         this.identity = identity;
         this.readWindow = readWindow;
         this.open = open;
@@ -108,6 +113,7 @@ internal sealed class ChocoboExplorationService
         if (disposed || !pendingReload) return;
         try
         {
+            if (!automaticAllowed()) { pendingReload = false; return; }
             var currentOwner = identity();
             if (reloadOwner != 0 && currentOwner != 0 && currentOwner != reloadOwner)
             {
@@ -118,7 +124,7 @@ internal sealed class ChocoboExplorationService
             if (!characterRegistered || currentOwner == 0) return;
             pendingReload = false; // Consume before the ordinary manual preflight and native dispatch.
             log($"reload consumed build={BuildMarker}");
-            Start();
+            Start(automatically: true);
         }
         catch (Exception ex)
         {
@@ -127,14 +133,14 @@ internal sealed class ChocoboExplorationService
         }
     }
 
-    internal bool Start(bool forSkills = false)
+    internal bool Start(bool forSkills = false, bool automatically = false)
     {
         if (disposed) return false;
         pendingReload = false; // An explicit manual attempt supersedes pending reload discovery.
         if (active) { log("already active; duplicate start ignored"); return false; }
         try
         {
-            if (!canRun() || identity() == 0) { log("blocked: current character is not ready or context is unsafe"); return false; }
+            if (!canRun() || identity() == 0 || automatically && !automaticAllowed()) { log("blocked: current character is not ready or context is unsafe"); return false; }
             original = readWindow();
             log(original.HasValue
                 ? $"preflight: Buddy ready={original.Value.Ready}; native-tab={original.Value.Tab}; selected-radio={original.Value.SelectedTab}; addon-id={original.Value.Id}; agent-addon-id={original.Value.AgentAddonId}"
@@ -146,6 +152,7 @@ internal sealed class ChocoboExplorationService
             ownedWindow = null;
             nextTab = 0;
             preparingSkills = forSkills;
+            automatic = automatically;
             skillsReady = false;
             awaitingWindow = true;
             deadline = clock() + TimeoutMs;
@@ -154,6 +161,7 @@ internal sealed class ChocoboExplorationService
             if (!original.HasValue)
             {
                 log("dispatch: open Companion window");
+                if (automatic && !automaticAllowed()) { Stop("automatic discovery paused"); return false; }
                 if (!open()) { Stop("open request unavailable", restore: false); return false; }
             }
             return active;
@@ -164,6 +172,7 @@ internal sealed class ChocoboExplorationService
     internal void Tick()
     {
         if (!active) return;
+        if (automatic && !automaticAllowed()) { SuspendAutomatic(); return; }
         try
         {
             if (!canRun() || identity() != owner) { Stop("context/character departed", restore: false); return; }
@@ -216,6 +225,7 @@ internal sealed class ChocoboExplorationService
 
     private void DispatchNextTab()
     {
+        if (automatic && !automaticAllowed()) { SuspendAutomatic(); return; }
         if (!canRun() || identity() != owner) { Stop("context/character departed", restore: false); return; }
         if (preparingSkills)
         {
@@ -230,6 +240,12 @@ internal sealed class ChocoboExplorationService
         settleUntil = clock() + SettleMs;
         log($"dispatch: select tab={expectedTab}");
         selectTab(expectedTab); // The step is consumed before invoking native code.
+    }
+
+    internal void SuspendAutomatic()
+    {
+        pendingReload = false;
+        if (active && automatic) Stop("automatic discovery paused");
     }
 
     internal void Stop(string reason, bool restore = true)

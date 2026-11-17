@@ -130,6 +130,8 @@ internal sealed class CoppeliaPowerlevelLeaseCoordinator
         if (expired)
             return Reject(LeaseReason);
 
+        if (!readEnvironment().FrenRiderEnabled)
+            return Reject("FrenRider automatic activation is unavailable.");
         lastHeartbeatUtc = utcNow();
         LeaseReason = "Coppelia Powerlevel heartbeat received.";
         return AcknowledgeSuppression();
@@ -191,6 +193,8 @@ internal sealed class CoppeliaPowerlevelLeaseCoordinator
 
     private CoppeliaPowerlevelResponse AcknowledgeSuppression()
     {
+        if (!readEnvironment().FrenRiderEnabled)
+            return Reject("FrenRider automatic activation is unavailable.");
         if (!CombatSuppressed)
         {
             var generation = LeaseGeneration;
@@ -248,6 +252,7 @@ public sealed class CoppeliaPowerlevelLeaseService : IDisposable
             RecoverAfterLease,
             () =>
             {
+                if (!plugin.IsFrenRiderEffectivelyEnabled) return false;
                 plugin.BossModActionTweaksService.ResetRecovery();
                 return plugin.CombatService.SuppressForCoppeliaLease();
             });

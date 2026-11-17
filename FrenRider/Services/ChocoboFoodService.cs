@@ -50,7 +50,7 @@ internal sealed class ChocoboFoodService
         {
             var active = currentProfile();
             if (!canRun() || identity() == 0 || active == null
-                || (automatically && (!active.Enabled || !active.ChocoboAutoFeed)))
+                || (automatically && (!Plugin.IsAutomaticActivationAllowed(active) || !active.ChocoboAutoFeed)))
             { Status = "Companion feeding is unavailable in the current context."; return false; }
             if (!IsSupportedFood(active.ChocoboFoodItemId))
             { Status = "Select a supported companion food."; return false; }
@@ -74,6 +74,8 @@ internal sealed class ChocoboFoodService
             suspendedFood = food;
             Status = "Waiting for observed companion feeding.";
             log($"dispatch feeding: item={food}");
+            if (automatic && !Plugin.IsAutomaticActivationAllowed(currentProfile()))
+            { Stop("Automatic companion feeding paused."); return false; }
             if (!dispatch(food, before)) Stop("Companion feeding request was rejected; no retry.");
             return IsActive;
         }
@@ -84,7 +86,7 @@ internal sealed class ChocoboFoodService
     internal void CheckAutomatic()
     {
         var active = currentProfile();
-        if (active?.Enabled != true || !active.ChocoboAutoFeed)
+        if (!Plugin.IsAutomaticActivationAllowed(active) || active?.ChocoboAutoFeed != true)
         { suspendedProfile = null; return; }
         if (IsActive || !canRun()
             || (ReferenceEquals(active, suspendedProfile) && active.ChocoboFoodItemId == suspendedFood)) return;
@@ -99,7 +101,7 @@ internal sealed class ChocoboFoodService
             if (active?.Enabled != true || !active.ChocoboAutoFeed) suspendedProfile = null;
             if (!IsActive) return;
             if (!canRun() || identity() != owner || !ReferenceEquals(active, profile)
-                || active?.ChocoboFoodItemId != food || (automatic && (!active.Enabled || !active.ChocoboAutoFeed)))
+                || active?.ChocoboFoodItemId != food || (automatic && (!Plugin.IsAutomaticActivationAllowed(active) || !active.ChocoboAutoFeed)))
             { Stop("Companion feeding cancelled: context or profile changed."); return; }
             var snapshot = read(food);
             if (!snapshot.HasValue || snapshot.Value.BuddyEntityId != before.BuddyEntityId)
@@ -116,6 +118,11 @@ internal sealed class ChocoboFoodService
                 Stop("Companion feeding stopped: consumption and effect were not observed; no retry.");
         }
         catch (Exception ex) { Stop("Companion feeding failed."); log($"feeding failed: {ex.GetType().Name}"); }
+    }
+
+    internal void SuspendAutomatic()
+    {
+        if (IsActive && automatic) Stop("Automatic companion feeding paused.");
     }
 
     internal void Stop(string reason = "Companion feeding stopped.")

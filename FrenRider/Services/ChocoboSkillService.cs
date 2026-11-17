@@ -44,6 +44,7 @@ internal sealed class ChocoboSkillService
     private bool automaticSuspended;
 
     internal bool IsActive { get; private set; }
+    internal bool IsAutomatic => automatic;
     internal string Status { get; private set; } = "No skill allocation is pending.";
 
     internal ChocoboSkillService(Func<bool> canRun, Func<ulong> identity,
@@ -73,7 +74,7 @@ internal sealed class ChocoboSkillService
             var active = currentProfile();
             var snapshot = read();
             if (!canRun() || identity() == 0 || active == null || !snapshot.HasValue
-                || (automatically && (!active.Enabled || !active.ChocoboAutoAllocateSkills)))
+                || (automatically && (!Plugin.IsAutomaticActivationAllowed(active) || !active.ChocoboAutoAllocateSkills)))
             { Status = "Skill allocation is unavailable in the current context."; return false; }
             var selected = active.ChocoboSkillPriority;
             priority = selected?.Select(value => (ChocoboSkillTree)value).ToArray()
@@ -100,6 +101,8 @@ internal sealed class ChocoboSkillService
                 preparationOwned = true; // Own cleanup before preparation can reject or throw.
                 deadline = clock() + PreparationMs;
                 Status = "Waiting for Companion readiness.";
+                if (automatic && !Plugin.IsAutomaticActivationAllowed(currentProfile()))
+                { Stop("Automatic skill allocation paused.", contextChanged: true); return false; }
                 if (!prepare()) Stop("Skill allocation is unavailable in the current context.");
             }
             else RequestNext(snapshot.Value);
@@ -111,7 +114,7 @@ internal sealed class ChocoboSkillService
     internal void CheckAutomatic()
     {
         var active = currentProfile();
-        if (active?.Enabled != true || !active.ChocoboAutoAllocateSkills)
+        if (!Plugin.IsAutomaticActivationAllowed(active) || active?.ChocoboAutoAllocateSkills != true)
         {
             ResetAutomaticState();
             return;
@@ -145,7 +148,7 @@ internal sealed class ChocoboSkillService
             if (!canRun() || identity() != owner || !ReferenceEquals(active, profile)
                 || active?.ChocoboSkillPriority == null
                 || !active.ChocoboSkillPriority.SequenceEqual(priority.Select(tree => (int)tree))
-                || (automatic && (!active.Enabled || !active.ChocoboAutoAllocateSkills)))
+                || (automatic && (!Plugin.IsAutomaticActivationAllowed(active) || !active.ChocoboAutoAllocateSkills)))
             { Stop("Skill allocation cancelled: context or profile changed.", contextChanged: true); return; }
             var snapshot = read();
             if (!snapshot.HasValue || !pending.HasValue)
@@ -184,6 +187,8 @@ internal sealed class ChocoboSkillService
                 Stop("Skill allocation stopped: learning was not observed; no retry.");
             else if (confirm != null && !confirmationAccepted)
             {
+                if (automatic && !Plugin.IsAutomaticActivationAllowed(currentProfile()))
+                { SuspendAutomatic(); return; }
                 var result = confirm(before, step);
                 if (!IsActive) return;
                 switch (result)
@@ -213,7 +218,14 @@ internal sealed class ChocoboSkillService
         deadline = clock() + AcknowledgementMs;
         Status = "Waiting for observed skill learning.";
         log($"dispatch learning: tree={(int)step.Tree}; level={step.Level}; cost={step.Cost}");
+        if (automatic && !Plugin.IsAutomaticActivationAllowed(currentProfile()))
+        { SuspendAutomatic(); return; }
         if (!dispatch(snapshot, step)) Stop("Skill learning request was rejected; no retry.");
+    }
+
+    internal void SuspendAutomatic()
+    {
+        if (IsActive && automatic) Stop("Automatic skill allocation paused.", contextChanged: true);
     }
 
     internal void Stop(string reason = "Skill allocation stopped.", bool contextChanged = false)

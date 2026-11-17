@@ -64,6 +64,7 @@ public class AutomationService : IDisposable
     private string lastRepairBlockedReason = "";
     private RepairFlowState repairFlowState;
     private bool adsRepairUtilityObserved;
+    private bool manualRepair;
     private bool repairTravelsBetweenZones;
     private string activeRepairMode = "";
     private DateTime repairRequestedUtc;
@@ -137,7 +138,7 @@ public class AutomationService : IDisposable
     public string GetAutoDesynthStatusJson()
     {
         var config = plugin.ConfigManager.GetActiveConfig();
-        var enabled = config.Enabled && config.EnableAutoDesynth;
+        var enabled = plugin.IsFrenRiderEffectivelyEnabled && config.EnableAutoDesynth;
         var sameCharacter = autoDesynthCharacter == Plugin.PlayerState.ContentId;
         return JsonSerializer.Serialize(new
         {
@@ -157,12 +158,12 @@ public class AutomationService : IDisposable
     public void Update()
     {
         var config = plugin.ConfigManager.GetActiveConfig();
-        jobStoneEquipService.Update(config);
-        if (!config.Enabled)
+        if (!plugin.IsFrenRiderEffectivelyEnabled)
         {
-            StopForDisable();
+            SuspendAutomatic();
             return;
         }
+        jobStoneEquipService.Update(config);
 
         if (plugin.AdsIntegrationService.ShouldPauseDutySystems)
         {
@@ -283,11 +284,24 @@ public class AutomationService : IDisposable
         }
     }
 
+    internal void SuspendAutomatic()
+    {
+        idleTickCounter = 0;
+        IsIdle = false;
+        companionStanceCooldownMs = 0;
+        jobStoneEquipService?.SuspendAutomatic();
+        if (!manualRepair && IsRepairFlowActive)
+            CancelRepairFlow("Automatic repair paused; issued ADS utility was not cancelled.");
+        if (autoDesynthFlowState != AutoDesynthFlowState.Idle)
+            ResetAutoDesynth("Automatic desynthesis paused; issued ADS utility was not cancelled.");
+    }
+
     internal void StopForDisable()
     {
         idleTickCounter = 0;
         IsIdle = false;
         companionStanceCooldownMs = 0;
+        jobStoneEquipService?.SuspendAutomatic();
         CancelRepairFlow("");
         ResetAutoDesynth("");
     }
@@ -295,9 +309,10 @@ public class AutomationService : IDisposable
     public void UpdateUtilityGate()
     {
         var config = plugin.ConfigManager.GetActiveConfig();
-        if (!config.Enabled)
+        if (!plugin.IsFrenRiderEffectivelyEnabled)
         {
-            StopForDisable();
+            SuspendAutomatic();
+            if (manualRepair) CheckRepair(config, Environment.TickCount64);
             return;
         }
 
@@ -385,6 +400,7 @@ public class AutomationService : IDisposable
     /// </summary>
     private void CheckFood(CharacterConfig config)
     {
+        if (!plugin.IsFrenRiderEffectivelyEnabled) return;
         if (config.FeedMeItemId <= 0 && string.IsNullOrWhiteSpace(config.FeedMeItem)) return;
         if (!GameHelpers.IsPlayerAlive()) return;
 
@@ -435,6 +451,7 @@ public class AutomationService : IDisposable
                 lastFoodAttemptMs = now;
                 var qualityLabel = QualityLabel(resolvedFoodUseHighQuality);
                 Plugin.Log.Information($"Eating food: {resolvedFoodItemName} [{qualityLabel}] (ID={resolvedFoodItemId}, count={count}, wellFed={wellFedRemaining:F1}s)");
+                if (!plugin.IsFrenRiderEffectivelyEnabled) return;
                 var result = GameHelpers.UseItem(resolvedFoodItemId, resolvedFoodUseHighQuality);
                 if (result)
                 {
@@ -660,6 +677,7 @@ public class AutomationService : IDisposable
         // Summon companion!
         lastCompanionAttemptMs = now;
         Plugin.Log.Information($"Summoning companion chocobo (buddyTime={buddyTime:F1}s, greens={greensCount})");
+        if (!plugin.IsFrenRiderEffectivelyEnabled) return;
         var result = GameHelpers.UseItem(GameHelpers.GysahlGreensItemId);
         if (result)
         {
@@ -699,7 +717,8 @@ public class AutomationService : IDisposable
     private void OnDutyCompleted(Dalamud.Game.DutyState.IDutyStateEventArgs args)
     {
         var config = plugin.ConfigManager.GetActiveConfig();
-        if (!config.Enabled || !config.EnableAutoDesynth)
+        if (!plugin.IsFrenRiderEffectivelyEnabled || !config.EnableAutoDesynth
+            || config.ActivationMode == FrenRiderActivationMode.DutyOnly)
             return;
 
         autoDesynthFlowState = AutoDesynthFlowState.PendingExit;
@@ -715,6 +734,7 @@ public class AutomationService : IDisposable
 
     private void CheckAutoDesynth(CharacterConfig config, long now)
     {
+        if (!plugin.IsFrenRiderEffectivelyEnabled) { SuspendAutomatic(); return; }
         if (!config.EnableAutoDesynth || autoDesynthCharacter != Plugin.PlayerState.ContentId)
         {
             if (autoDesynthFlowState is not AutoDesynthFlowState.Idle)
@@ -802,11 +822,13 @@ public class AutomationService : IDisposable
 
     private void IssueAutoDesynthRequest(long now)
     {
+        if (!plugin.IsFrenRiderEffectivelyEnabled) { SuspendAutomatic(); return; }
         autoDesynthRequestAttempts++;
         lastAutoDesynthAttemptMs = now;
         lastAutoDesynthAttemptUtc = DateTime.UtcNow;
         autoDesynthFlowState = AutoDesynthFlowState.WaitingStart;
 
+        if (!plugin.IsFrenRiderEffectivelyEnabled) { SuspendAutomatic(); return; }
         if (plugin.AdsUtilityIpcService.StartDesynth("configured", out var failure))
         {
             AutoDesynthStatus = $"Waiting start: configured desynthesis requested (attempt {autoDesynthRequestAttempts}).";
@@ -900,6 +922,7 @@ public class AutomationService : IDisposable
 
     private void CheckRepair(CharacterConfig config, long now)
     {
+        if (!manualRepair && !plugin.IsFrenRiderEffectivelyEnabled) { SuspendAutomatic(); return; }
         var repairMode = ResolveAdsRepairMode(config);
         if (string.IsNullOrWhiteSpace(repairMode))
         {
@@ -1170,11 +1193,13 @@ public class AutomationService : IDisposable
             return;
         }
 
-        IssueRepairRequest(now, repairMode, threshold, $"still below {threshold}% after {elapsedSinceRequest / 1000}s");
+        IssueRepairRequest(now, repairMode, threshold, $"still below {threshold}% after {elapsedSinceRequest / 1000}s", manualRepair);
     }
 
-    private void IssueRepairRequest(long now, string repairMode, int threshold, string reason)
+    private void IssueRepairRequest(long now, string repairMode, int threshold, string reason, bool manual = false)
     {
+        if (!manual && !plugin.IsFrenRiderEffectivelyEnabled) { SuspendAutomatic(); return; }
+        manualRepair = manual;
         repairTravelsBetweenZones = repairMode == "npc-yes-inn"
                                     || repairMode.StartsWith("npc-yes-inn-", StringComparison.Ordinal)
                                     || repairMode.StartsWith("npc-no-inn-", StringComparison.Ordinal);
@@ -1197,6 +1222,7 @@ public class AutomationService : IDisposable
             Plugin.Log.Warning($"[FrenRider][Repair] Retrying ADS {repairMode} repair attempt {repairRequestAttempts} via IPC ({reason}).");
         }
 
+        if (!manual && !plugin.IsFrenRiderEffectivelyEnabled) { SuspendAutomatic(); return; }
         if (plugin.AdsUtilityIpcService.StartRepair(repairMode, out var failure))
         {
             RepairStatus = $"{modeLabel} repair requested below {threshold}%; FrenRider paused.";
@@ -1228,6 +1254,7 @@ public class AutomationService : IDisposable
     private void ResetRepairFlow(bool preserveStatus = false, bool refreshAdsStatus = false)
     {
         repairTravelsBetweenZones = false;
+        manualRepair = false;
         activeRepairMode = "";
         repairFlowState = RepairFlowState.Idle;
         lastRepairAttemptMs = 0;
@@ -1359,7 +1386,7 @@ public class AutomationService : IDisposable
 
         if (GameHelpers.NeedsRepair(threshold))
         {
-            IssueRepairRequest(now, repairMode, threshold, $"manual trigger below {threshold}%");
+            IssueRepairRequest(now, repairMode, threshold, $"manual trigger below {threshold}%", manual: true);
         }
     }
 
@@ -1380,7 +1407,7 @@ public class AutomationService : IDisposable
             Environment.TickCount64,
             repairMode,
             threshold,
-            "teleport notification interrupted repair");
+            "teleport notification interrupted repair", manualRepair);
     }
 
     internal static string ResolveAdsRepairMode(CharacterConfig config)
@@ -1448,8 +1475,8 @@ public class AutomationService : IDisposable
         cachedFeedMeUseHighQuality = false;
     }
 
-    private static bool SendCommand(string command)
+    private bool SendCommand(string command)
     {
-        return GameHelpers.SendChatCommand(command, "Automation");
+        return plugin.IsFrenRiderEffectivelyEnabled && GameHelpers.SendChatCommand(command, "Automation");
     }
 }

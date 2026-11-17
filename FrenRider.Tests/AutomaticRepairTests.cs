@@ -108,20 +108,18 @@ public sealed unsafe class AutomaticRepairTests
 
     public static IEnumerable<object[]> EnabledModes()
     {
-        foreach (var activation in new[] { FrenRiderActivationMode.AlwaysOn, FrenRiderActivationMode.DutyOnly })
         foreach (var mode in new[] { 1, 2, 3, 4 })
-            yield return [activation, mode];
+            yield return [FrenRiderActivationMode.AlwaysOn, mode];
     }
 
     public static IEnumerable<object[]> ObservedReplacementUtilities()
     {
-        foreach (var activation in new[] { FrenRiderActivationMode.AlwaysOn, FrenRiderActivationMode.DutyOnly })
         foreach (var replacement in new[]
                  {
                      ("shop-purchase", "shop purchasing"), ("auto-equip", "recommended equipment"),
                      ("self", "self-repair"), ("npc-no-inn", "NPC repair"), ("npc-no-teleport-no-inn", "NPC repair"),
                  })
-            yield return [activation, replacement.Item1, replacement.Item2];
+            yield return [FrenRiderActivationMode.AlwaysOn, replacement.Item1, replacement.Item2];
     }
 
     [Theory]
@@ -236,7 +234,7 @@ public sealed unsafe class AutomaticRepairTests
     [InlineData(ConditionFlag.Occupied39)]
     [InlineData(ConditionFlag.WatchingCutscene)]
     public void AutomaticRepairRetainsConditionSafetyHolds(ConditionFlag flag)
-        => WithScenario(FrenRiderActivationMode.DutyOnly, 1, scenario =>
+        => WithScenario(FrenRiderActivationMode.AlwaysOn, 1, scenario =>
         {
             scenario.Flags.Add(flag);
             scenario.Tick();
@@ -344,6 +342,65 @@ public sealed unsafe class AutomaticRepairTests
             Assert.Single(scenario.Requests);
         });
 
+    [Theory]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    [InlineData(4)]
+    public void DutyOnlyOutsideDutyCannotStartOrReplayAutomaticRepair(int mode)
+        => WithScenario(FrenRiderActivationMode.DutyOnly, mode, scenario =>
+        {
+            scenario.Tick();
+            scenario.Service.RetryRepairAfterTeleportCollision(scenario.Config);
+            Assert.Empty(scenario.Requests);
+            Assert.False(scenario.Service.IsRepairFlowActive);
+        });
+
+    [Fact]
+    public void DutyWaitRetiresLocalAutomaticRepairWithoutCancellingProviderWork()
+        => WithScenario(FrenRiderActivationMode.AlwaysOn, 1, scenario =>
+        {
+            scenario.Tick();
+            Assert.Single(scenario.Requests);
+            scenario.Running = true;
+            scenario.Config.ActivationMode = FrenRiderActivationMode.DutyOnly;
+            scenario.Tick();
+            Assert.False(scenario.Service.IsRepairFlowActive);
+            Assert.True(scenario.Running);
+            Assert.Contains("was not cancelled", scenario.Service.RepairStatus);
+            scenario.Service.RetryRepairAfterTeleportCollision(scenario.Config);
+            Assert.Single(scenario.Requests);
+        });
+
+    [Fact]
+    public void AutomaticRepairRechecksDutyScopeAfterProviderRead()
+        => WithScenario(FrenRiderActivationMode.AlwaysOn, 1, scenario =>
+        {
+            scenario.OnStatusRead = () => scenario.Config.ActivationMode = FrenRiderActivationMode.DutyOnly;
+            scenario.Tick();
+            Assert.Empty(scenario.Requests);
+            Assert.False(scenario.Service.IsRepairFlowActive);
+        });
+
+    [Fact]
+    public void DutyOnlyOutsideDutyRetainsManualRepairPollingAndCompletion()
+        => WithScenario(FrenRiderActivationMode.DutyOnly, 1, scenario =>
+        {
+            scenario.Service.TriggerRepair(scenario.Config);
+            Assert.Single(scenario.Requests);
+            scenario.Running = true;
+            scenario.Tick();
+            Assert.True(scenario.Service.IsRepairFlowActive);
+            scenario.Condition = 30000;
+            scenario.Running = false;
+            scenario.CompletedAt = DateTime.UtcNow.AddSeconds(1);
+            scenario.Success = "Repair finished";
+            scenario.Tick();
+            Assert.False(scenario.Service.IsRepairFlowActive);
+            Assert.Contains("Repair complete", scenario.Service.RepairStatus);
+            Assert.Single(scenario.Requests);
+        });
+
     private static string Mode(int mode) => mode switch
     {
         1 => "self", 2 => "npc-no-inn", 3 => "npc-no-teleport-no-inn", 4 => "npc-yes-inn", _ => "",
@@ -380,6 +437,7 @@ public sealed unsafe class AutomaticRepairTests
         public string? UtilityTask;
         public string? RepairCapabilities;
         public int CapabilityReads;
+        public Action? OnStatusRead;
         public bool ZoneChanged { set => Set(zone, "<ZoneChanged>k__BackingField", value); }
         public ushort Condition { set => items[0].Condition = value; }
         public bool InventoryAvailable { set => inventoryAvailable = value; }
@@ -432,11 +490,14 @@ public sealed unsafe class AutomaticRepairTests
                         });
                     }
                     if ((string)args![0]! == "ADS.GetStatusJson")
+                    {
+                        OnStatusRead?.Invoke();
                         return Readable ? JsonSerializer.Serialize(new { utilityRunning = Running,
                             utilityMode = Running ? UtilityMode ?? Requests.LastOrDefault() ?? Mode(mode) : "",
                             utilityTask = Running ? UtilityTask ?? "Repair" : "",
                             utilityLastSuccess = Success, utilityLastFailure = Failure,
                             utilityCompletedAtUtc = CompletedAt }) : "";
+                    }
                     Assert.Equal("ADS.StartRepair", args[0]);
                     Requests.Add((string)values![0]!);
                     return true;

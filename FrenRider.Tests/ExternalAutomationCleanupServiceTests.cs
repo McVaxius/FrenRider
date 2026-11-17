@@ -1334,22 +1334,77 @@ public sealed class ExternalAutomationCleanupServiceTests
             { AiEnabled = true, RejectRuntimeWrite = !ignoreStop };
         using var service = native.CreateService();
         var off = internalName == "GodMod" ? "/gmai off" : "/bmrai off";
+        var wrathEnabled = true;
+        var rejectWrathStart = true;
         using var runtime = new QuestingCombatRuntime(service, native.Interface, native.Log, internalName == "GodMod" ? 5 : 0,
             commandSender: command =>
             {
+                if (command == "/wrath auto off") wrathEnabled = false;
+                if (rejectWrathStart)
+                {
+                    native.Writes.Add(command);
+                    return command != "/wrath auto on";
+                }
                 if (!ignoreStop || command != off) return native.SendCommand(command);
                 native.Writes.Add(command);
                 return true; // Accepted without changing the observed host state.
             });
         runtime.StopActivity();
+        runtime.Profile.ActivationMode = FrenRiderActivationMode.AlwaysOn;
+        var provider = runtime.Profile.RotationPlugin;
+        var preset = runtime.Profile.AutoRotationType;
+        native.Loaded = false; // Reuse the existing non-BossMod/no-preset activation path.
+        runtime.Profile.RotationPlugin = 3;
+        runtime.Profile.AutoRotationType = "none";
+        Assert.Equal(false, runtime.Call("ActivateRotation", runtime.Profile, true));
+        Assert.Contains("/wrath auto on", native.Writes); // The rejected dispatch was reached.
+        Assert.False(runtime.Combat.WrathAutoActive);
+        Assert.Equal(-1, runtime.CombatField("lastActivePluginIdx"));
+        Assert.Null(runtime.CombatField("lastAppliedCombatSettings"));
+        native.Writes.Clear();
+        runtime.Call("ApplyPassiveRotationSettings", runtime.Profile, "rejected WRATH start");
+        Assert.Contains("/wrath auto on", native.Writes);
+        Assert.False(runtime.Combat.WrathAutoActive);
+        Assert.Null(runtime.CombatField("lastAppliedCombatSettings"));
+
         runtime.Profile.ActivationMode = FrenRiderActivationMode.DutyOnly;
+        native.Writes.Clear();
+        runtime.Combat.RefreshDutyOnlyCombatHold();
+        Assert.True(wrathEnabled); // Failed startup did not adopt or stop manual WRATH.
+        Assert.Empty(native.Writes);
+        rejectWrathStart = false;
+        native.Loaded = true;
+        runtime.Profile.AutoRotationType = preset;
         runtime.Profile.BossModAI = 0;
+        runtime.Profile.RotationPlugin = provider;
+        runtime.Conditions.Add(ConditionFlag.BoundByDuty);
+        runtime.Combat.RefreshDutyOnlyCombatHold();
+        runtime.Conditions.Clear();
         Assert.True(service.PrepareOwnedBossModSettings(internalName == "GodMod" ? "GodMod" : "BMR", "account", "character", runtime.Profile));
 
+        // Seed an accepted WRATH start record; this is not backend-state readback.
+        runtime.Profile.RotationPlugin = 3;
+        runtime.SetCombatField("lastAppliedCombatSettings", runtime.Call("CaptureCombatSettings", runtime.Profile)!);
+        runtime.SetCombatField("lastActivePluginIdx", 3);
+        runtime.SetCombatField("wrathAutoActive", true);
+        runtime.Profile.RotationPlugin = provider;
         runtime.Combat.RefreshDutyOnlyCombatHold();
         Assert.Equal(false, runtime.CombatField("dutyOnlyRotationHeld"));
         Assert.Equal(ignoreStop, native.AiEnabled);
         Assert.Contains(off, native.Writes);
+        Assert.False(wrathEnabled);
+        Assert.Single(native.Writes.Where(command => command == "/wrath auto off"));
+        Assert.Equal(-1, runtime.CombatField("lastActivePluginIdx"));
+        Assert.Equal(string.Empty, runtime.CombatField("dutyOnlyHeldProvider"));
+
+        wrathEnabled = true; // A newer foreign/manual activation after our accepted stop.
+        runtime.Profile.RotationPlugin = 3;
+        native.Writes.Clear();
+        // Keep the independent native identity fence on its original host.
+        runtime.Call("HoldDutyOnlyRotation", runtime.Profile);
+        Assert.True(wrathEnabled);
+        Assert.DoesNotContain("/wrath auto off", native.Writes);
+        runtime.Profile.RotationPlugin = provider;
 
         ignoreStop = false;
         native.RejectRuntimeWrite = false;
@@ -1362,6 +1417,12 @@ public sealed class ExternalAutomationCleanupServiceTests
         native.Writes.Clear();
         runtime.Combat.RefreshDutyOnlyCombatHold();
         Assert.Empty(native.Writes);
+        runtime.Profile.RotationPlugin = 3;
+        runtime.Call("HoldDutyOnlyRotation", runtime.Profile);
+        runtime.Call("HoldDutyOnlyRotation", runtime.Profile);
+        Assert.True(wrathEnabled);
+        Assert.Empty(native.Writes);
+        runtime.Profile.RotationPlugin = provider;
 
         var follow = (FollowService)RuntimeHelpers.GetUninitializedObject(typeof(FollowService));
         var fields = BindingFlags.Instance | BindingFlags.NonPublic;
@@ -1622,7 +1683,7 @@ public sealed class ExternalAutomationCleanupServiceTests
     [InlineData("BMR", 0)]
     [InlineData("VBM", 1)]
     [InlineData("GodMod", 5)]
-    public void DutyOnlyUpdatePausesOwnedAiAndRotationAndRetainsSettingsForCleanup(string provider, int index)
+    public void DutyOnlyTransitionPausesOwnedAiAndRotationAndRetainsSettingsForCleanup(string provider, int index)
     {
         var native = new NativeBossModProvider(provider == "GodMod" ? "BMR" : provider, "Original",
             internalName: provider == "GodMod" ? "GodMod" : null) { AiEnabled = true };
@@ -1630,18 +1691,34 @@ public sealed class ExternalAutomationCleanupServiceTests
         using var runtime = new QuestingCombatRuntime(service, native.Interface, native.Log, index,
             commandSender: native.SendCommand);
         runtime.StopActivity();
+        runtime.InstallActivationCollaborators(native.SendCommand);
         runtime.Profile.ActivationMode = FrenRiderActivationMode.DutyOnly;
+        runtime.Profile.BossModAI = 0;
+        runtime.Combat.Update();
+        runtime.Combat.Update();
+        Assert.Empty(native.Writes); // A cold outside-duty update does not own or stop another runtime.
+        Assert.True(native.AiEnabled);
+        Assert.Equal(new[] { "Original" }, native.Active);
+
         var cleanup = new ExternalAutomationCleanupService(new NativeCommandSender(native),
             new BossModExternalAutomationSnapshotProvider(native.Interface, native.Log), autorotIpcService: service);
         cleanup.CaptureIfMissing("account", "character", "test");
-        Assert.True(service.PrepareOwnedBossModSettings(provider, "account", "character", runtime.Profile));
-        Assert.True(service.ApplyBossModPreset(provider, "Next"));
+        runtime.Conditions.Add(ConditionFlag.BoundByDuty);
+        runtime.RefreshActivation();
+        Assert.Equal(true, runtime.Call("ActivateRotation", runtime.Profile, true));
+        Assert.True(native.AiEnabled);
+        Assert.False(native.ForceDisabled);
+        Assert.True(service.CanResumeOwnedBossModAi(), service.LastStatus);
+        Assert.Equal(index, runtime.CombatField("lastActivePluginIdx"));
+        Assert.NotNull(runtime.CombatField("lastAppliedCombatSettings"));
         var selector = native.Selector;
         var distance = native.Distance;
         native.Writes.Clear();
-        runtime.Combat.Update();
-        runtime.Combat.Update();
-        Assert.Equal("Combat rotations paused outside duties", runtime.Combat.StateDetail);
+
+        runtime.Conditions.Clear();
+        runtime.RefreshActivation();
+        runtime.RefreshActivation();
+        Assert.Equal("Owned rotation stop request accepted outside duties", runtime.Combat.StateDetail);
         Assert.True(runtime.Profile.Enabled);
         Assert.False(native.AiEnabled);
         Assert.True(native.ForceDisabled);
@@ -1869,6 +1946,194 @@ public sealed class ExternalAutomationCleanupServiceTests
             else Assert.Equal(new[] { AutorotIpcService.RsrStateCommandType.Auto }, rsr.Modes);
         }
         if (provider == 4) Assert.Contains("Daedalus.SetEnabled True", native.Writes);
+    }
+
+    [Theory]
+    [InlineData(2, "cold")]
+    [InlineData(2, "same")]
+    [InlineData(2, "profile")]
+    [InlineData(2, "provider")]
+    [InlineData(2, "clear")]
+    [InlineData(2, "vbm-pause")]
+    [InlineData(2, "vbm-defer")]
+    [InlineData(2, "lease-ended")]
+    [InlineData(2, "lease-new-owner")]
+    [InlineData(2, "pending-stop")]
+    [InlineData(4, "cold")]
+    [InlineData(4, "same")]
+    [InlineData(4, "profile")]
+    [InlineData(4, "provider")]
+    [InlineData(4, "clear")]
+    [InlineData(4, "vbm-pause")]
+    [InlineData(4, "vbm-defer")]
+    [InlineData(4, "lease-ended")]
+    [InlineData(4, "lease-new-owner")]
+    [InlineData(4, "pending-stop")]
+    public void PassiveSettingsAndRejectedMainStartsCannotPromoteConfigurationCachesToOwners(
+        int provider, string prior)
+    {
+        var native = new NativeBossModProvider("BMR", "Original") { Loaded = false };
+        var rsr = provider == 2 ? new NativeRsrProvider() : null;
+        using var service = rsr?.CreateService() ?? native.CreateService();
+        var commands = new List<string>();
+        var rejectCommands = false;
+        using var runtime = new QuestingCombatRuntime(service, rsr?.Interface ?? native.Interface,
+            native.Log, provider, captureCommands: true, commandSender: command =>
+            {
+                commands.Add(command);
+                return !rejectCommands;
+            });
+        if (prior != "vbm-pause") runtime.StopActivity();
+        runtime.Profile.AutoRotationType = "none";
+        runtime.Profile.DaedalusTargetMode = DaedalusTargetMode.None;
+        runtime.Profile.ActivationMode = FrenRiderActivationMode.AlwaysOn;
+
+        void AllowRequests(bool allow)
+        {
+            if (rsr is not null) rsr.ModeUnavailable = !allow;
+            native.AcceptDaedalusCommands = allow;
+        }
+        bool RequestManualChoice() => rsr is not null
+            ? service.TrySetRsrMode(AutorotIpcService.RsrStateCommandType.Manual)
+            : service.TrySetDaedalusEnabled(true);
+
+        AllowRequests(true);
+        Assert.True(RequestManualChoice());
+        object? accepted = null;
+        if (prior != "cold")
+        {
+            if (prior == "provider") runtime.Profile.RotationPlugin = 3;
+            Assert.Equal(true, runtime.Call("ActivateRotation", runtime.Profile, true));
+            accepted = runtime.CombatField("lastAppliedCombatSettings");
+            Assert.NotNull(accepted);
+            Assert.Equal(prior == "provider" ? 3 : provider, runtime.CombatField("lastActivePluginIdx"));
+            runtime.Profile.RotationPlugin = provider;
+            if (prior == "profile") runtime.Profile = runtime.Profile.Clone();
+            if (prior is "vbm-pause" or "vbm-defer")
+            {
+                Assert.True(runtime.Combat.ReleaseQuestingRsrAggroForDeparture("selected VBM"));
+                runtime.Profile.RotationPlugin = 1;
+                if (prior == "vbm-pause")
+                    Assert.Equal(true, runtime.Call("HoldQuestingVbm", runtime.Profile, "VBM"));
+                else
+                    runtime.Call("DeferCombatSettingsRefresh", runtime.Profile);
+                runtime.StopActivity();
+                runtime.Profile.RotationPlugin = provider;
+            }
+            if (prior == "clear")
+                runtime.Combat.ClearExternalAutomationRuntimeState("normal session departure");
+            if (prior is "clear" or "vbm-pause" or "vbm-defer")
+            {
+                Assert.Equal(-1, runtime.CombatField("lastActivePluginIdx"));
+                Assert.Null(runtime.CombatField("lastAppliedCombatSettings"));
+            }
+            if (prior is "lease-ended" or "lease-new-owner")
+            {
+                var host = (Plugin)runtime.CombatField("plugin")!;
+                var lease = new AdsHyperFocusLeaseCoordinator(() => DateTimeOffset.UnixEpoch,
+                    () => new AdsHyperFocusEnvironment(true, true, AdsDutyCategory.Solo, true, false, false),
+                    runtime.Combat.RestoreConfiguredCombatAfterAdsHyperFocusLease);
+                typeof(AdsHyperFocusLeaseService).GetField("plugin", BindingFlags.Instance | BindingFlags.NonPublic)!
+                    .SetValue(host.AdsHyperFocusLeaseService, host);
+                typeof(AdsHyperFocusLeaseService).GetField("coordinator", BindingFlags.Instance | BindingFlags.NonPublic)!
+                    .SetValue(host.AdsHyperFocusLeaseService, lease);
+                Assert.True(lease.Acquire("owned-hyperfocus").Ok);
+                runtime.Combat.ActivateAdsHyperFocusLease();
+                Assert.True(lease.IsLeaseActive);
+                Assert.NotNull(runtime.CombatField("adsHyperFocusSavedSelection"));
+                Assert.Equal(2, runtime.CombatField("lastActivePluginIdx"));
+                Assert.Null(runtime.CombatField("lastAppliedCombatSettings"));
+                AllowRequests(false);
+                Assert.Equal(false, runtime.Call("ActivateRotation", runtime.Profile, true));
+                Assert.Equal(2, runtime.CombatField("lastActivePluginIdx")); // The active lease owns RSR even for a Daedalus selection.
+                Assert.Null(runtime.CombatField("lastAppliedCombatSettings"));
+                AllowRequests(true);
+                runtime.Profile = runtime.Profile.Clone();
+                if (prior == "lease-new-owner")
+                {
+                    Assert.Equal(true, runtime.Call("ActivateRotation", runtime.Profile, true));
+                    accepted = runtime.CombatField("lastAppliedCombatSettings");
+                    Assert.NotNull(accepted);
+                    Assert.Equal(provider, runtime.CombatField("lastActivePluginIdx"));
+                }
+                Assert.True(lease.Release("owned-hyperfocus").Ok);
+                Assert.False(lease.IsLeaseActive);
+                Assert.Null(runtime.CombatField("adsHyperFocusSavedSelection"));
+                if (prior == "lease-ended")
+                {
+                    Assert.Equal(2, runtime.CombatField("lastActivePluginIdx")); // Retired at ordinary admission.
+                    Assert.Null(runtime.CombatField("lastAppliedCombatSettings"));
+                }
+                else Assert.Equal(accepted, runtime.CombatField("lastAppliedCombatSettings"));
+            }
+            if (prior == "pending-stop")
+            {
+                AllowRequests(false);
+                rejectCommands = true;
+                runtime.Profile.ActivationMode = FrenRiderActivationMode.DutyOnly;
+                runtime.Combat.RefreshDutyOnlyCombatHold();
+                Assert.Equal(provider, runtime.CombatField("lastActivePluginIdx"));
+                Assert.Equal(provider == 2 ? "RSR" : "DAEDALUS", runtime.CombatField("dutyOnlyHeldProvider"));
+                Assert.Null(runtime.CombatField("lastAppliedCombatSettings"));
+                runtime.Profile.ActivationMode = FrenRiderActivationMode.AlwaysOn;
+                runtime.Combat.RefreshDutyOnlyCombatHold();
+                Assert.Equal(string.Empty, runtime.CombatField("dutyOnlyHeldProvider"));
+                Assert.Equal(provider, runtime.CombatField("lastActivePluginIdx"));
+                rejectCommands = false;
+            }
+            AllowRequests(true);
+            if (prior is not ("same" or "lease-new-owner")) Assert.True(RequestManualChoice());
+        }
+
+        AllowRequests(false);
+        runtime.Call("ApplyPassiveRotationSettings", runtime.Profile, "targeting-only or rejected passive start");
+        var retainsOwner = prior is "same" or "lease-new-owner";
+        Assert.Equal(retainsOwner ? provider : -1, runtime.CombatField("lastActivePluginIdx"));
+        if (rsr is not null) Assert.NotNull(runtime.CombatField("lastAppliedCombatSettings")); // Settings cache only.
+        if (retainsOwner) Assert.Equal(accepted, runtime.CombatField("lastAppliedCombatSettings"));
+        if (prior == "provider") Assert.False(runtime.Combat.WrathAutoActive);
+
+        runtime.Combat.ApplyPresetSelection("configuration-only selection", installPresets: false);
+        Assert.Equal(retainsOwner ? provider : -1, runtime.CombatField("lastActivePluginIdx"));
+        var configured = runtime.CombatField("lastAppliedCombatSettings");
+        Assert.Equal(false, runtime.Call("ActivateRotation", runtime.Profile, true));
+        Assert.Equal(retainsOwner ? provider : -1, runtime.CombatField("lastActivePluginIdx"));
+        Assert.Equal(configured, runtime.CombatField("lastAppliedCombatSettings"));
+
+        // No second passive call may clean up a false receipt before this hold.
+        AllowRequests(true);
+        native.Writes.Clear();
+        rsr?.Modes.Clear();
+        commands.Clear();
+        runtime.Profile.ActivationMode = FrenRiderActivationMode.DutyOnly;
+        var saved = JsonSerializer.Serialize(runtime.Profile);
+        runtime.Combat.RefreshDutyOnlyCombatHold();
+        Assert.Equal(-1, runtime.CombatField("lastActivePluginIdx"));
+        Assert.Null(runtime.CombatField("lastAppliedCombatSettings"));
+        if (rsr is not null)
+        {
+            Assert.Equal(retainsOwner ? new[] { AutorotIpcService.RsrStateCommandType.Off }
+                : Array.Empty<AutorotIpcService.RsrStateCommandType>(), rsr.Modes);
+            Assert.Equal(retainsOwner ? AutorotIpcService.RsrStateCommandType.Off
+                : AutorotIpcService.RsrStateCommandType.Manual, rsr.Mode);
+        }
+        else
+            Assert.Equal(retainsOwner ? new[] { "Daedalus.SetEnabled False" } : Array.Empty<string>(), native.Writes);
+        Assert.Empty(commands);
+
+        Assert.True(RequestManualChoice());
+        native.Writes.Clear();
+        rsr?.Modes.Clear();
+        runtime.Combat.RefreshDutyOnlyCombatHold();
+        runtime.Combat.RefreshDutyOnlyCombatHold();
+        Assert.Empty(native.Writes);
+        if (rsr is not null)
+        {
+            Assert.Empty(rsr.Modes);
+            Assert.Equal(AutorotIpcService.RsrStateCommandType.Manual, rsr.Mode);
+        }
+        Assert.Empty(commands);
+        Assert.Equal(saved, JsonSerializer.Serialize(runtime.Profile));
     }
 
     [Fact]
@@ -3103,7 +3368,7 @@ public sealed class ExternalAutomationCleanupServiceTests
         Assert.Equal(saved, JsonSerializer.Serialize(runtime.Profile));
     }
 
-    private sealed class QuestingCombatRuntime : IDisposable
+    internal sealed class QuestingCombatRuntime : IDisposable
     {
         private readonly Dictionary<PropertyInfo, object?> savedStatics = new();
         private readonly AccountConfig account;
@@ -3182,6 +3447,71 @@ public sealed class ExternalAutomationCleanupServiceTests
             }
         }
 
+        internal Plugin Host => hostPlugin;
+        internal ChocoboFoodService Food { get; private set; } = null!;
+        internal ChocoboSkillService Skills { get; private set; } = null!;
+        internal ChocoboExplorationService Exploration { get; private set; } = null!;
+        internal int CompanionDispatches { get; private set; }
+        private bool activationCollaboratorsInstalled;
+
+        internal void InstallActivationCollaborators(Func<string, bool>? sendCommand = null)
+        {
+            ReplaceStatic("CommandManager", Proxy<ICommandManager>((method, args) =>
+            {
+                if (method.Name != "ProcessCommand") return Default(method.ReturnType);
+                var command = (string)args![0]!;
+                if (sendCommand != null) return sendCommand(command);
+                Commands.Add(command);
+                return true;
+            }));
+            ReplaceStatic("PartyList", Proxy<IPartyList>((method, _) => Default(method.ReturnType)));
+            var framework = Proxy<IFramework>((method, _) => Default(method.ReturnType));
+            var chat = Proxy<IChatGui>((method, _) => Default(method.ReturnType));
+            ReplaceStatic("DutyState", Proxy<IDutyState>((method, _) => Default(method.ReturnType)));
+            SetProperty(hostPlugin, nameof(Plugin.Configuration), new Configuration());
+            SetProperty(hostPlugin, nameof(Plugin.BossModConflictWarningService),
+                BossModConflictWarningService.CreateForTesting(() => false, _ => { }, () => 0));
+            SetProperty(hostPlugin, nameof(Plugin.RaidModeService),
+                new RaidModeService(() => Profile, () => { }, () => new RaidRuntimeFrame(), () => false, () => false));
+            SetProperty(hostPlugin, nameof(Plugin.PartyService),
+                new PartyService(hostPlugin, Plugin.Log, Proxy<IGameGui>((method, _) => Default(method.ReturnType))));
+            SetField(Automation, "jobStoneEquipService", new JobStoneEquipService());
+            Food = new ChocoboFoodService(() => true, () => ContentId, () => Profile,
+                _ => new CompanionFoodSnapshot(7, 2, 0), (_, _) => { CompanionDispatches++; return true; }, _ => { }, () => 0);
+            Skills = new ChocoboSkillService(() => true, () => ContentId, () => Profile,
+                () => new CompanionSnapshot { SkillPoints = 1 }, (_, _) => { CompanionDispatches++; return true; }, _ => { }, () => 0);
+            Exploration = new ChocoboExplorationService(() => true, () => ContentId, () => null,
+                () => { CompanionDispatches++; return true; }, _ => { }, () => { }, () => { }, _ => { }, () => 0,
+                skillsChildReady: () => true, automaticAllowed: () => hostPlugin.IsFrenRiderEffectivelyEnabled);
+            SetField(hostPlugin, "chocoboFood", Food);
+            SetField(hostPlugin, "chocoboSkills", Skills);
+            SetField(hostPlugin, "chocoboExploration", Exploration);
+            var zones = new ZoneService();
+            SetProperty(hostPlugin, nameof(Plugin.FollowService), new FollowService(hostPlugin, null!, zones));
+            SetProperty(hostPlugin, nameof(Plugin.MountService), new MountService(hostPlugin, null!, zones));
+            SetProperty(hostPlugin, nameof(Plugin.RespawnService), new RespawnService(hostPlugin));
+            SetProperty(hostPlugin, nameof(Plugin.PhoenixDownRecoveryService), new PhoenixDownRecoveryService(
+                Proxy<IPhoenixRecoveryRuntime>((method, _) => method.Name == "ReadFrame"
+                    ? new PhoenixRecoveryFrame { Config = Profile } : Default(method.ReturnType))));
+            var interaction = Uninitialized<DutyInteractService>();
+            SetField(interaction, "plugin", hostPlugin);
+            SetField(interaction, "interactableKeywords", new List<string>());
+            SetProperty(hostPlugin, nameof(Plugin.DutyInteractService), interaction);
+            SetProperty(hostPlugin, nameof(Plugin.FrenTeleportService), new FrenTeleportService(hostPlugin, null!, zones));
+            SetProperty(hostPlugin, nameof(Plugin.ExitBehaviourService), new ExitBehaviourService(hostPlugin, null!, zones));
+            var tweaks = Uninitialized<BossModActionTweaksService>();
+            SetField(tweaks, "recovery", new CastingFailureRecovery(() => Array.Empty<CastingMovementSetting>(), _ => { }));
+            SetProperty(hostPlugin, nameof(Plugin.BossModActionTweaksService), tweaks);
+            SetProperty(hostPlugin, nameof(Plugin.AutoDutyDetectionService),
+                new AutoDutyDetectionService(hostPlugin, chat, framework, Plugin.Log,
+                    new FrenRider.Windows.AutoDutyWarningWindow(hostPlugin, chat, Plugin.Log)));
+            activationCollaboratorsInstalled = true;
+        }
+
+        internal void RefreshActivation()
+            => typeof(Plugin).GetMethod("RefreshEffectiveActivation", BindingFlags.Instance | BindingFlags.NonPublic)!
+                .Invoke(hostPlugin, null);
+
         internal void StopActivity() { running = false; now += TimeSpan.FromSeconds(1); Activity.Refresh(force: true); }
         internal FollowService CreateFollow(Func<string, bool> sendCommand)
         {
@@ -3236,6 +3566,15 @@ public sealed class ExternalAutomationCleanupServiceTests
         }
         public void Dispose()
         {
+            if (activationCollaboratorsInstalled)
+            {
+                hostPlugin.AutoDutyDetectionService.Dispose();
+                hostPlugin.ExitBehaviourService.Dispose();
+                hostPlugin.PhoenixDownRecoveryService.Dispose();
+                Exploration.Dispose();
+                hostPlugin.FollowService.Dispose();
+                hostPlugin.RaidModeService.Dispose();
+            }
             foreach (var (property, value) in savedStatics) property.SetValue(null, value);
         }
     }

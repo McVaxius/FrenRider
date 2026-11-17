@@ -1,3 +1,10 @@
+2026-11-17 - 4.1.0.19 - Startup and Duty Only fixes
+
+- **Fixed startup:** Fix an error when enabling FrenRider.
+- **Updated Duty Only:** Prevent new automatic actions outside duties while keeping manual controls usable.
+- **Fixed rotation ownership:** Keep RSR targeting updates, rejected WRATH/Daedalus start requests and expired RSR overrides from authorizing Duty Only stop requests.
+- **In progress:** Stopping existing vanilla follow and already-started repair/desynthesis work on duty exit.
+
 2026-11-14 - 4.1.0.18 - GodMod and duty combat controls
 
 - **Added GodMod:** Select GodMod separately; new and unset profiles default to it for normal play and Forays.
