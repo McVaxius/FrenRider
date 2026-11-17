@@ -563,6 +563,7 @@ public partial class CombatService
             "DAEDALUS" => SetDaedalusEnabled(false, "Duty only combat hold"),
             _ => true,
         };
+        var observeWrathStop = rotationStopAccepted && dutyOnlyHeldProvider == "WRATH";
         if (rotationStopAccepted && dutyOnlyHeldProvider.Length != 0)
         {
             // Consume an accepted stop even if native pause still awaits readback.
@@ -581,6 +582,23 @@ public partial class CombatService
         StateDetail = dutyOnlyRotationHeld ? "Owned rotation stop request accepted outside duties"
             : "Owned rotation stop request or native pause is pending outside duties";
         ActivePreset = string.Empty;
+        if (observeWrathStop)
+        {
+            var postStopStatus = StateDetail;
+            var postStopHeld = dutyOnlyRotationHeld;
+            var postStopSettings = CaptureCombatSettings(config);
+            var readable = plugin.AutorotIpcService.TryGetWrathAutoRotationState(out var enabled);
+            if (plugin.IsWaitingForDuty
+                && ReferenceEquals(plugin.ConfigManager.GetActiveConfig(), config)
+                && CaptureCombatSettings(config) == postStopSettings
+                && State == CombatState.OutOfCombat && StateDetail == postStopStatus
+                && ActivePreset.Length == 0 && dutyOnlyRotationHeld == postStopHeld
+                && dutyOnlyHeldProvider.Length == 0 && lastActivePluginIdx == -1
+                && lastAppliedCombatSettings is null && !wrathAutoActive)
+                StateDetail = postStopStatus + (readable
+                    ? $"; WRATH reported auto-rotation {(enabled ? "ON" : "OFF")} after that request"
+                    : "; WRATH state after that request is unknown");
+        }
     }
 
     private void ForceDutyCombatOff(string reason)

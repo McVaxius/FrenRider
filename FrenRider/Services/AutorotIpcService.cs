@@ -1468,6 +1468,24 @@ public class AutorotIpcService : IDisposable
         return TrySetRsrSetting("PoslockCasting", enabled ? "true" : "false");
     }
 
+    public bool TryGetWrathAutoRotationState(out bool enabled)
+    {
+        enabled = false;
+
+        try
+        {
+            var subscriber = pluginInterface.GetIpcSubscriber<bool>("WrathCombo.GetAutoRotationState");
+            enabled = subscriber.InvokeFunc();
+            log.Debug($"Wrath auto-rotation state read via IPC: {enabled}");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            log.Debug($"Wrath auto-rotation state IPC unavailable: {ex.Message}");
+            return false;
+        }
+    }
+
     public bool TryGetDaedalusEnabled(out bool enabled)
     {
         enabled = false;

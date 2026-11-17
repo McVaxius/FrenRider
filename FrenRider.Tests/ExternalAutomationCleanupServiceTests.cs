@@ -1324,6 +1324,156 @@ public sealed class ExternalAutomationCleanupServiceTests
     }
 
     [Theory]
+    [InlineData("OFF", false)]
+    [InlineData("ON", false)]
+    [InlineData("unavailable", false)]
+    [InlineData("OFF", true)]
+    [InlineData("ON", true)]
+    [InlineData("unavailable", true)]
+    [InlineData("OFF-reentry", false)]
+    public void WrathDutyOnlyReadbackIsOneShotAndCannotReclaimConsumedStopOwnership(
+        string observation, bool pendingNativePause)
+    {
+        var getterReentry = observation == "OFF-reentry";
+        if (getterReentry) observation = "OFF";
+        var native = new NativeBossModProvider("BMR", "Original") { Loaded = getterReentry };
+        var wrathEnabled = true;
+        var readbacks = 0;
+        var commands = new List<string>();
+        var ignoreNativeStop = pendingNativePause;
+        Action? onReadback = null;
+        var newerStatus = string.Empty;
+        var newerPreset = string.Empty;
+        object? newerApplied = null;
+        var pluginInterface = DispatchProxy.Create<IDalamudPluginInterface, QuestionableTestProxy>();
+        ((QuestionableTestProxy)(object)pluginInterface).Handler = (method, args) =>
+        {
+            if (method.Name != "GetIpcSubscriber" || (string)args![0]! != "WrathCombo.GetAutoRotationState")
+                return method.Invoke(native.Interface, args);
+            var subscriber = DispatchProxy.Create(method.ReturnType, typeof(QuestionableTestProxy));
+            ((QuestionableTestProxy)subscriber).Handler = (call, _) =>
+            {
+                Assert.Equal("InvokeFunc", call.Name);
+                readbacks++;
+                if (observation == "unavailable")
+                    throw new InvalidOperationException("WRATH getter unavailable");
+                var reported = wrathEnabled;
+                onReadback?.Invoke();
+                return reported;
+            };
+            return subscriber;
+        };
+        using var service = new AutorotIpcService(pluginInterface, native.Log);
+        using var runtime = new QuestingCombatRuntime(service, pluginInterface, native.Log, 3,
+            captureCommands: true, commandSender: command =>
+            {
+                commands.Add(command);
+                if (command == "/wrath auto on") wrathEnabled = true;
+                if (command == "/wrath auto off" && observation == "OFF") wrathEnabled = false;
+                if (command == "/bmrai off" && ignoreNativeStop) return true;
+                return native.SendCommand(command);
+            });
+        runtime.StopActivity();
+        runtime.Profile.ActivationMode = FrenRiderActivationMode.AlwaysOn;
+        runtime.Profile.AutoRotationType = "none";
+        Assert.Equal(true, runtime.Call("ActivateRotation", runtime.Profile, true));
+        Assert.True(runtime.Combat.WrathAutoActive);
+        Assert.Equal(3, runtime.CombatField("lastActivePluginIdx"));
+        Assert.NotNull(runtime.CombatField("lastAppliedCombatSettings"));
+        Assert.Equal(0, readbacks);
+        if (getterReentry)
+            onReadback = () =>
+            {
+                runtime.Profile.ActivationMode = FrenRiderActivationMode.AlwaysOn;
+                runtime.Profile.AutoRotationType = "Next";
+                Assert.Equal(true, runtime.Call("ActivateRotation", runtime.Profile, true));
+                newerStatus = runtime.Combat.StateDetail;
+                newerPreset = runtime.Combat.ActivePreset;
+                newerApplied = runtime.CombatField("lastAppliedCombatSettings");
+                Assert.Equal("Next", newerPreset);
+                Assert.NotNull(newerApplied);
+            };
+
+        if (pendingNativePause)
+        {
+            native.Loaded = true;
+            native.AiEnabled = true;
+            native.RejectRuntimeWrite = true;
+            runtime.Profile.RotationPlugin = 0;
+            runtime.Profile.BossModAI = 0;
+            Assert.True(service.PrepareOwnedBossModSettings("BMR", "account", "character", runtime.Profile));
+        }
+        runtime.Profile.ActivationMode = FrenRiderActivationMode.DutyOnly;
+        var saved = JsonSerializer.Serialize(runtime.Profile);
+        commands.Clear();
+        runtime.Combat.RefreshDutyOnlyCombatHold();
+        Assert.Single(commands, command => command == "/wrath auto off");
+        Assert.Equal(1, readbacks);
+        if (getterReentry)
+        {
+            Assert.True(wrathEnabled);
+            Assert.True(runtime.Combat.WrathAutoActive);
+            Assert.Equal(CombatState.InCombat, runtime.Combat.State);
+            Assert.Equal(newerStatus, runtime.Combat.StateDetail);
+            Assert.Equal(newerPreset, runtime.Combat.ActivePreset);
+            Assert.Same(newerApplied, runtime.CombatField("lastAppliedCombatSettings"));
+            Assert.Equal(3, runtime.CombatField("lastActivePluginIdx"));
+            Assert.Contains("/wrath auto on", commands);
+            commands.Clear();
+            runtime.Combat.RefreshDutyOnlyCombatHold();
+            Assert.Equal(newerStatus, runtime.Combat.StateDetail);
+            Assert.Equal(newerPreset, runtime.Combat.ActivePreset);
+            Assert.Same(newerApplied, runtime.CombatField("lastAppliedCombatSettings"));
+            Assert.True(runtime.Combat.WrathAutoActive);
+            Assert.Equal(3, runtime.CombatField("lastActivePluginIdx"));
+            Assert.Equal(1, readbacks);
+            Assert.DoesNotContain("/wrath auto off", commands);
+            return;
+        }
+        Assert.Equal(observation != "OFF", wrathEnabled);
+        Assert.Equal(-1, runtime.CombatField("lastActivePluginIdx"));
+        Assert.Equal(string.Empty, runtime.CombatField("dutyOnlyHeldProvider"));
+        Assert.False(runtime.Combat.WrathAutoActive);
+        Assert.Null(runtime.CombatField("lastAppliedCombatSettings"));
+        Assert.Equal(!pendingNativePause, runtime.CombatField("dutyOnlyRotationHeld"));
+        var expected = observation == "unavailable"
+            ? "; WRATH state after that request is unknown"
+            : $"; WRATH reported auto-rotation {observation} after that request";
+        Assert.EndsWith(expected, runtime.Combat.StateDetail);
+        if (observation != "OFF")
+            Assert.DoesNotContain("reported auto-rotation OFF", runtime.Combat.StateDetail);
+        var firstStatus = runtime.Combat.StateDetail;
+
+        // A newer manual ON is not authority to repeat our consumed stop.
+        wrathEnabled = true;
+        commands.Clear();
+        runtime.Combat.RefreshDutyOnlyCombatHold();
+        runtime.Combat.Update();
+        Assert.True(wrathEnabled);
+        Assert.Equal(1, readbacks);
+        Assert.DoesNotContain("/wrath auto off", commands);
+        if (pendingNativePause)
+        {
+            Assert.DoesNotContain("WRATH", runtime.Combat.StateDetail); // A later native-only status replaces the old observation.
+            native.RejectRuntimeWrite = false;
+            ignoreNativeStop = false;
+            runtime.Combat.RefreshDutyOnlyCombatHold();
+            Assert.Equal(true, runtime.CombatField("dutyOnlyRotationHeld"));
+        }
+        else
+            Assert.Equal(firstStatus, runtime.Combat.StateDetail); // "reported ... after that request" is historical.
+
+        runtime.Combat.RefreshDutyOnlyCombatHold();
+        runtime.Combat.Update();
+        Assert.True(wrathEnabled);
+        Assert.Equal(1, readbacks);
+        Assert.DoesNotContain("/wrath auto off", commands);
+        Assert.Equal(-1, runtime.CombatField("lastActivePluginIdx"));
+        Assert.Equal(string.Empty, runtime.CombatField("dutyOnlyHeldProvider"));
+        Assert.Equal(saved, JsonSerializer.Serialize(runtime.Profile));
+    }
+
+    [Theory]
     [InlineData("BossModReborn", true)]
     [InlineData("BossModReborn", false)]
     [InlineData("GodMod", true)]

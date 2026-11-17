@@ -1,3 +1,8 @@
+2026-11-17 - 4.1.0.20 - WRATH stop status
+
+- **Updated WRATH stop status:** Show the reported auto-rotation state after an automatic stop request; unavailable readback stays unknown and newer FrenRider choices remain intact.
+- **In progress:** Stopping existing vanilla follow and already-started repair/desynthesis work on duty exit.
+
 2026-11-17 - 4.1.0.19 - Startup and Duty Only fixes
 
 - **Fixed startup:** Fix an error when enabling FrenRider.
