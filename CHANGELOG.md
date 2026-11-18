@@ -1,3 +1,7 @@
+2026-11-18 - 4.1.0.22 - Party duty exit
+
+- **Fixed Leave when all party members left** so FrenRider waits for duty completion and confirmed teammate departures. Solo duties stay open with this option.
+
 2026-11-18 - 4.1.0.21 - Duty Only and ADS utility fixes
 
 - **Fixed Duty Only companion care** so automatic feeding and skill requests stay paused while waiting for duty or inside one.

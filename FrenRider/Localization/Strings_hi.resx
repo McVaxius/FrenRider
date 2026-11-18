@@ -1046,8 +1046,8 @@
   <data name="Immediately follow a fren's aethernet jump through Lifestream when you are at the same origin. Supports connected city, residential, and custom networks, including Bozja and Eureka." xml:space="preserve">
     <value>एक ही शुरुआती स्थान पर होने पर Lifestream से Fren के aethernet बदलाव के पीछे तुरंत जाएँ. Bozja और Eureka सहित जुड़े शहर, आवासीय और खास नेटवर्क समर्थित हैं.</value>
   </data>
-  <data name="Leave the duty if no other party members are visible in the zone." xml:space="preserve">
-    <value>क्षेत्र में कोई दूसरा पार्टी सदस्य दिखाई न दे तो ड्यूटी से बाहर निकलें.</value>
+  <data name="Leave a completed duty once every party member who entered with you has been confirmed to have left." xml:space="preserve">
+    <value>पूरी हो चुकी ड्यूटी से तब निकलें जब आपके साथ आए सभी पार्टी सदस्यों के जाने की पुष्टि हो जाए।</value>
   </data>
   <data name="Max distance to targets for combat AI.&#xA;424242 = Auto (plugin decides based on job: melee 2.6, caster 10)." xml:space="preserve">
     <value>लड़ाई AI के लिए लक्ष्यों की अधिकतम दूरी.&#xA;424242 = स्वचालित (प्लगइन जॉब से तय करता है: melee 2.6, caster 10).</value>

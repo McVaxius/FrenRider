@@ -1051,8 +1051,8 @@
   <data name="Immediately follow a fren's aethernet jump through Lifestream when you are at the same origin. Supports connected city, residential, and custom networks, including Bozja and Eureka." xml:space="preserve">
     <value>같은 출발점에서 Lifestream으로 친구의 에테라이트 이동을 즉시 따라갑니다. 도시·주거·특수망 및 Bozja/Eureka를 지원합니다.</value>
   </data>
-  <data name="Leave the duty if no other party members are visible in the zone." xml:space="preserve">
-    <value>지역에 다른 파티원이 보이지 않으면 퇴장합니다.</value>
+  <data name="Leave a completed duty once every party member who entered with you has been confirmed to have left." xml:space="preserve">
+    <value>임무 완료 후 함께 입장한 파티원 전원이 나간 것이 확인되면 퇴장합니다.</value>
   </data>
   <data name="Max distance to targets for combat AI.&#10;424242 = Auto (plugin decides based on job: melee 2.6, caster 10)." xml:space="preserve">
     <value>전투 AI 최대 대상 거리입니다. 424242는 직업별 자동(근접 2.6, 마법 10)입니다.</value>

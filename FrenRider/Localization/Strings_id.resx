@@ -1092,8 +1092,8 @@ Tidak bekerja dengan benar di luar party (tidak naik ke udara untuk mengikuti).<
   <data name="Immediately follow a fren's aethernet jump through Lifestream when you are at the same origin. Supports connected city, residential, and custom networks, including Bozja and Eureka." xml:space="preserve">
     <value>Ikuti perpindahan aethernet fren langsung melalui Lifestream saat berada di asal yang sama. Mendukung jaringan kota, perumahan, dan khusus yang terhubung, termasuk Bozja dan Eureka.</value>
   </data>
-  <data name="Leave the duty if no other party members are visible in the zone." xml:space="preserve">
-    <value>Keluar duty jika tidak ada anggota party lain terlihat di zona.</value>
+  <data name="Leave a completed duty once every party member who entered with you has been confirmed to have left." xml:space="preserve">
+    <value>Keluar dari duty yang selesai setelah semua anggota party yang masuk bersamamu dipastikan telah pergi.</value>
   </data>
   <data name="Max distance to targets for combat AI.&#xA;424242 = Auto (plugin decides based on job: melee 2.6, caster 10)." xml:space="preserve">
     <value>Jarak target maksimum untuk AI pertempuran.

@@ -3020,7 +3020,7 @@ public partial class ConfigWindow : Window, IDisposable
                 config.LeaveWhenAllLeft = true;
                 SaveEditingAccount();
             }
-            HelpMarker("Leave the duty if no other party members are visible in the zone.");
+            HelpMarker("Leave a completed duty once every party member who entered with you has been confirmed to have left.");
             DrawDefaultSettingSyncButton("Exit Method", "LeaveWhenAllLeft");
         }
 

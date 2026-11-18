@@ -1092,8 +1092,8 @@ Não funciona corretamente fora do grupo (não sobe ao ar para seguir).</value>
   <data name="Immediately follow a fren's aethernet jump through Lifestream when you are at the same origin. Supports connected city, residential, and custom networks, including Bozja and Eureka." xml:space="preserve">
     <value>Seguir imediatamente o salto de aethernet do fren pelo Lifestream quando estiverem na mesma origem. Suporta redes conectadas de cidades, residenciais e personalizadas, incluindo Bozja e Eureka.</value>
   </data>
-  <data name="Leave the duty if no other party members are visible in the zone." xml:space="preserve">
-    <value>Sair do conteúdo se nenhum outro membro do grupo estiver visível na zona.</value>
+  <data name="Leave a completed duty once every party member who entered with you has been confirmed to have left." xml:space="preserve">
+    <value>Saia do conteúdo concluído quando for confirmado que todos os membros do grupo que entraram com você saíram.</value>
   </data>
   <data name="Max distance to targets for combat AI.&#10;424242 = Auto (plugin decides based on job: melee 2.6, caster 10)." xml:space="preserve">
     <value>Distância máxima dos alvos para a IA de combate.

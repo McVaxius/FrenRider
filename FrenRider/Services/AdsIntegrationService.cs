@@ -92,13 +92,21 @@ public sealed class AdsIntegrationService
     }
 
     internal void ObserveHandoffReadiness()
-        => ObserveHandoffReadiness(IsInDuty(), ReadLiveDutyIdentity(), ReadReadinessConditions(), DateTime.UtcNow);
+        => ObserveHandoffReadiness(IsInDuty(), ReadLiveDutyIdentity(), ReadReadinessConditions(), DateTime.UtcNow,
+            ExitBehaviourService.ReadPartyRoster);
 
     internal void ObserveHandoffReadiness(bool inDuty,
         (uint TerritoryTypeId, uint ContentFinderConditionId) identity,
-        AdsHandoffReadinessConditions conditions, DateTime nowUtc)
+        AdsHandoffReadinessConditions conditions, DateTime nowUtc, Func<uint, DutyPartyRoster?>? readPartyRoster = null)
     {
         ObserveDutySession(inDuty, identity, conditions, nowUtc);
+        if (readPartyRoster != null)
+        {
+            if (inDuty && identity.TerritoryTypeId != 0 && AdsIntegrationPolicy.GetHandoffReadinessBlocker(conditions) is null)
+                DutySession.PartyExit.Observe(identity, DutySession.IsCompleted, nowUtc, readPartyRoster);
+            else
+                DutySession.PartyExit.InterruptObservation();
+        }
         if (!inDuty)
             trackedInDuty = false;
 
@@ -553,6 +561,7 @@ internal sealed class AdsDutySession
 {
     private uint dutyTerritoryId;
 
+    internal DutyPartyExitState PartyExit { get; } = new();
     public DateTime EnteredAtUtc { get; private set; } = DateTime.MinValue;
     public DateTime CompletedAtUtc { get; private set; } = DateTime.MinValue;
     public bool IsCompleted => CompletedAtUtc != DateTime.MinValue;
@@ -570,6 +579,7 @@ internal sealed class AdsDutySession
         if (!conditions.IsLoggedIn || confirmedExit)
         {
             var hadSession = EnteredAtUtc != DateTime.MinValue || IsCompleted;
+            PartyExit.Reset();
             Reset();
             return hadSession;
         }

@@ -1092,8 +1092,8 @@ Grup dışında düzgün çalışmaz (takip için havaya zıplamaz).</value>
   <data name="Immediately follow a fren's aethernet jump through Lifestream when you are at the same origin. Supports connected city, residential, and custom networks, including Bozja and Eureka." xml:space="preserve">
     <value>Aynı başlangıç noktasındayken fren'in aethernet geçişini Lifestream üzerinden hemen takip et. Bozja ve Eureka dahil bağlı şehir, konut ve özel ağları destekler.</value>
   </data>
-  <data name="Leave the duty if no other party members are visible in the zone." xml:space="preserve">
-    <value>Bölgede başka grup üyesi görünmüyorsa görevden ayrıl.</value>
+  <data name="Leave a completed duty once every party member who entered with you has been confirmed to have left." xml:space="preserve">
+    <value>Tamamlanan görevden, sizinle giren tüm grup üyelerinin ayrıldığı doğrulandığında çıkın.</value>
   </data>
   <data name="Max distance to targets for combat AI.&#xA;424242 = Auto (plugin decides based on job: melee 2.6, caster 10)." xml:space="preserve">
     <value>Savaş AI'sı için hedeflere en fazla uzaklık.

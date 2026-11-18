@@ -28,7 +28,7 @@ public sealed class AdsDutyExitLifecycleTests
         Set("leaveConfirmationAttemptCount", 2);
         Set("isNavigatingToExit", ownedNavigation);
         Set("exitTarget", ActivationModeTests.Proxy<IGameObject>((_, _) => null));
-        Set("lastPartyCheckTime", DateTime.UtcNow);
+        Set("pendingPartyDepartureExit", true);
         var commands = new List<string>();
         var log = typeof(Plugin).GetProperty("Log", BindingFlags.Static | BindingFlags.NonPublic)!;
         var commandManager = typeof(Plugin).GetProperty("CommandManager", BindingFlags.Static | BindingFlags.NonPublic)!;
@@ -56,13 +56,122 @@ public sealed class AdsDutyExitLifecycleTests
             Assert.Equal(0, Get("leaveConfirmationAttemptCount"));
             Assert.False((bool)Get("isNavigatingToExit")!);
             Assert.Null(Get("exitTarget"));
-            Assert.Equal(DateTime.MinValue, Get("lastPartyCheckTime"));
+            Assert.False((bool)Get("pendingPartyDepartureExit")!);
         }
         finally
         {
             commandManager.SetValue(null, previousCommands);
             log.SetValue(null, previousLog);
         }
+    }
+
+    [Theory]
+    [InlineData("solo")]
+    [InlineData("unknown")]
+    [InlineData("party before completion")]
+    [InlineData("party after completion")]
+    [InlineData("option off")]
+    [InlineData("ownership handoff")]
+    public void LeaveWhenAllLeftRequiresConfirmedEntryPartyDeparturesInACompletedDuty(string scenario)
+    {
+        const ulong self = 101;
+        const ulong teammate = 102;
+        const ulong otherTeammate = 103;
+        const uint territory = 301;
+        const uint outside = 302;
+        const string owner = "synthetic-run";
+        const string character = "synthetic-character";
+        var config = new CharacterConfig { Enabled = true, LeaveWhenAllLeft = true };
+        var ownership = new QuestionableDutySettingsOverride();
+        var ready = new AdsHandoffReadinessConditions(true, true, true, false, false, false, false);
+        var now = DateTime.UnixEpoch;
+        var ads = new AdsIntegrationService(new AdsDutyIpcService(() => false, () => false, () => "{}", () => false, () => now),
+            () => config, () => { }, _ => false, _ => { }, _ => { });
+        var session = ads.DutySession;
+
+        DutyPartyRoster Roster(ulong[] hud, params (ulong Id, uint Territory)[] members)
+            => new(self, 0, false, members.ToDictionary(member => member.Id, member => new DutyPartyMember(member.Territory, false)), hud.ToHashSet());
+
+        void Observe(DutyPartyRoster? roster, bool inDuty = true, bool loading = false, uint dutyId = 1)
+        {
+            now = now.AddSeconds(3);
+            ads.ObserveHandoffReadiness(inDuty, inDuty ? (territory, dutyId) : (outside, 0u),
+                ready with { IsBetweenAreas = loading }, now, _ => roster);
+        }
+
+        bool CanLeave() => ExitBehaviourService.CanLeaveAfterPartyDeparture(session, ownership.ResolveExit(config, character));
+
+        var matchedParty = Roster([self, teammate, otherTeammate], (self, territory), (teammate, territory), (otherTeammate, territory));
+        var localOnly = Roster([self], (self, territory));
+        var solo = Roster([self]) with { CanConfirmSolo = true };
+        var empty = Roster([]);
+        ads.OnDutyStarted(territory, now);
+        Observe(localOnly); // The matched roster may appear after the HUD has filled the local row.
+        Observe(scenario switch
+        {
+            "solo" => solo,
+            "unknown" => Roster([self, teammate], (self, territory)),
+            _ => matchedParty,
+        });
+
+        if (scenario is "solo" or "unknown")
+        {
+            ads.OnDutyCompleted(territory, now);
+            Observe(matchedParty);
+            Observe(localOnly);
+            Observe(localOnly);
+            Assert.False(CanLeave());
+            return;
+        }
+
+        if (scenario == "ownership handoff")
+        {
+            Assert.True(ownership.Apply(owner, """
+                {"AdsSoloEnabled":true,"AdsSoloMaturityThreshold":0,"AdsSoloHandoffDelaySeconds":10,
+                "AdsFourManEnabled":true,"AdsFourManMaturityThreshold":0,"AdsFourManHandoffDelaySeconds":2,
+                "UseAdsLeaveAfterAdsDuty":true,"ExitAfterDutyEnds":false,"LeaveWhenAllLeft":false,"ExitAfterDutySeconds":20}
+                """, character));
+        }
+        if (scenario != "party before completion")
+            ads.OnDutyCompleted(territory, now);
+
+        // A teammate with a different territory is confirmed even if later samples omit that row.
+        Observe(Roster([self, teammate, otherTeammate], (self, territory), (teammate, outside), (otherTeammate, territory)));
+        Observe(empty);
+        Observe(null);
+        Observe(localOnly); // First ready sample of a vanished row is insufficient.
+        Assert.False(CanLeave());
+        Observe(empty); // Temporary roster loss also breaks the confirmation of that vanished row.
+        Observe(localOnly);
+        Assert.False(CanLeave());
+        Observe(localOnly, loading: true);
+        Observe(localOnly);
+        Assert.False(CanLeave());
+        Observe(localOnly, dutyId: 2);
+        Observe(localOnly);
+        Assert.False(CanLeave());
+        Observe(localOnly);
+
+        if (scenario == "party before completion")
+        {
+            Assert.False(CanLeave());
+            ads.OnDutyCompleted(territory, now);
+        }
+        if (scenario == "ownership handoff")
+        {
+            Assert.False(CanLeave());
+            Assert.True(ownership.Release(owner));
+        }
+        if (scenario == "option off")
+            config.LeaveWhenAllLeft = false;
+        Assert.Equal(scenario != "option off", CanLeave());
+
+        Observe(null, inDuty: false);
+        ads.OnDutyStarted(territory, now);
+        Observe(solo);
+        ads.OnDutyCompleted(territory, now);
+        config.LeaveWhenAllLeft = true;
+        Assert.False(CanLeave());
     }
 
     private static RaidRuntimeFrame ReadyRaidFrame => new()

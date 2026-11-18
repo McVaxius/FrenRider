@@ -12,6 +12,8 @@ using Dalamud.Game.ClientState.Objects.Types;
 using ECommons.Automation;
 using FFXIVClientStructs.FFXIV.Client.System.String;
 using FFXIVClientStructs.FFXIV.Client.UI;
+using FFXIVClientStructs.FFXIV.Client.UI.Agent;
+using FFXIVClientStructs.FFXIV.Client.UI.Info;
 using FrenRider.Models;
 
 namespace FrenRider.Services;
@@ -23,11 +25,138 @@ internal readonly record struct DutyExitConditions(
     bool UtilityActive,
     bool AdsPaused);
 
+internal readonly record struct DutyPartyMember(uint TerritoryId, bool HasLocalObject);
+
+internal sealed record DutyPartyRoster(ulong LocalCharacterId, long PartyId, bool CanConfirmSolo,
+    IReadOnlyDictionary<ulong, DutyPartyMember> Members, IReadOnlySet<ulong> HudMembers)
+{
+    public bool RostersAgree => Members.ContainsKey(LocalCharacterId) && HudMembers.SetEquals(Members.Keys);
+}
+
+internal sealed class DutyPartyExitState
+{
+    private enum Departure { Present, MissingFromReadyRoster, Confirmed }
+
+    private Dictionary<ulong, Departure>? entryTeammates;
+    private ulong localCharacterId;
+    private long entryPartyId;
+    private (uint TerritoryTypeId, uint ContentFinderConditionId) entryDuty;
+    private DateTime nextSampleUtc;
+    private bool observationReady;
+
+    internal bool AllTeammatesDeparted => observationReady && entryTeammates is { Count: > 0 }
+        && entryTeammates.Values.All(state => state == Departure.Confirmed);
+
+    internal void Observe((uint TerritoryTypeId, uint ContentFinderConditionId) duty, bool dutyCompleted,
+        DateTime nowUtc, Func<uint, DutyPartyRoster?> readRoster)
+    {
+        if (entryTeammates != null && (duty.TerritoryTypeId != entryDuty.TerritoryTypeId
+            || entryDuty.ContentFinderConditionId != 0 && duty.ContentFinderConditionId != entryDuty.ContentFinderConditionId))
+        {
+            InterruptObservation();
+            return;
+        }
+        observationReady = true;
+        if (nowUtc < nextSampleUtc || entryTeammates is { Count: 0 } || dutyCompleted && entryTeammates == null)
+            return;
+        nextSampleUtc = nowUtc.AddSeconds(3);
+        var roster = readRoster(duty.TerritoryTypeId);
+        if (entryTeammates == null)
+        {
+            if (roster != null) CaptureEntry(duty, roster);
+            return;
+        }
+        if (entryDuty.ContentFinderConditionId == 0)
+            entryDuty = duty;
+
+        if (roster != null && roster.LocalCharacterId != localCharacterId)
+        {
+            InterruptObservation();
+            return;
+        }
+        if (roster == null || !roster.Members.ContainsKey(localCharacterId) || !roster.HudMembers.Contains(localCharacterId))
+        {
+            ClearUnconfirmedDepartures();
+            return;
+        }
+
+        // Two consecutive agreeing, nonempty rosters confirm a departure when the native row is removed.
+        var readyRoster = roster.RostersAgree && (roster.PartyId == entryPartyId
+            || roster.PartyId == 0 && roster.Members.Count == 1);
+        foreach (var id in entryTeammates.Keys)
+        {
+            var previous = entryTeammates[id];
+            if (roster.Members.TryGetValue(id, out var member))
+            {
+                if (member.HasLocalObject || member.TerritoryId == duty.TerritoryTypeId)
+                    entryTeammates[id] = Departure.Present;
+                else if (member.TerritoryId != 0)
+                    entryTeammates[id] = Departure.Confirmed;
+                else if (previous == Departure.MissingFromReadyRoster)
+                    entryTeammates[id] = Departure.Present;
+            }
+            else if (readyRoster && previous != Departure.Confirmed)
+            {
+                entryTeammates[id] = previous == Departure.MissingFromReadyRoster
+                    ? Departure.Confirmed : Departure.MissingFromReadyRoster;
+            }
+            else if (!readyRoster && previous == Departure.MissingFromReadyRoster)
+                entryTeammates[id] = Departure.Present;
+        }
+    }
+
+    private void CaptureEntry((uint TerritoryTypeId, uint ContentFinderConditionId) duty, DutyPartyRoster roster)
+    {
+        if (roster.Members.Count <= 1 && roster.PartyId == 0 && roster.CanConfirmSolo
+            && roster.HudMembers.Count == 1 && roster.HudMembers.Contains(roster.LocalCharacterId)
+            && (roster.Members.Count == 0 || roster.RostersAgree))
+        {
+            entryDuty = duty;
+            entryTeammates = [];
+            return;
+        }
+        if (roster.Members.Count <= 1 || !roster.RostersAgree || roster.Members.Any(entry => entry.Key != roster.LocalCharacterId
+                && !entry.Value.HasLocalObject && entry.Value.TerritoryId != duty.TerritoryTypeId))
+            return;
+
+        entryDuty = duty;
+        localCharacterId = roster.LocalCharacterId;
+        entryPartyId = roster.PartyId;
+        entryTeammates = roster.Members.Keys.Where(id => id != localCharacterId).ToDictionary(id => id, _ => Departure.Present);
+    }
+
+    internal void InterruptObservation()
+    {
+        observationReady = false;
+        ClearUnconfirmedDepartures();
+    }
+
+    private void ClearUnconfirmedDepartures()
+    {
+        if (entryTeammates == null) return;
+        foreach (var id in entryTeammates.Keys)
+        {
+            if (entryTeammates[id] == Departure.MissingFromReadyRoster)
+                entryTeammates[id] = Departure.Present;
+        }
+    }
+
+    internal void Reset()
+    {
+        entryTeammates = null;
+        localCharacterId = 0;
+        entryPartyId = 0;
+        entryDuty = default;
+        nextSampleUtc = default;
+        observationReady = false;
+    }
+}
+
 /// <summary>
 /// Handles automatic exit behaviour based on configurable rules:
 /// 1. Exit if an exit object (Cairn of Return, etc.) exists in the zone - path to it + interact
 /// 2. Exit N seconds after duty ends (via IDutyState.DutyCompleted)
-/// 3. Leave duty when all other party members have left the zone
+/// 3. Leave completed duty after the entry party has departed
 /// 4. Exit via CBT (Automaton) auto-leave after N seconds
 /// </summary>
 public class ExitBehaviourService : IDisposable
@@ -48,12 +177,12 @@ public class ExitBehaviourService : IDisposable
     private bool isNavigatingToExit;
     private DateTime lastExitInteractTime = DateTime.MinValue;
     private DateTime lastExitScanTime = DateTime.MinValue;
-    private DateTime lastPartyCheckTime = DateTime.MinValue;
     private DateTime lastLeaveAttemptTime = DateTime.MinValue;
     private int leaveAttemptCount;
     private LeaveDutyStep leaveDutyStep = LeaveDutyStep.None;
     private DateTime leaveDutyStepDueAt = DateTime.MinValue;
     private string pendingLeaveReason = "";
+    private bool pendingPartyDepartureExit;
     private int leaveConfirmationAttemptCount;
     private const int MaxLeaveConfirmationAttempts = 3;
 
@@ -124,8 +253,7 @@ public class ExitBehaviourService : IDisposable
                        || leaveAttemptCount > 0
                        || exitTarget != null
                        || isNavigatingToExit
-                       || leaveDutyStep != LeaveDutyStep.None
-                       || lastPartyCheckTime > DateTime.MinValue;
+                       || leaveDutyStep != LeaveDutyStep.None;
 
         CancelLeaveDutySequence("not in duty");
         if (isNavigatingToExit)
@@ -134,7 +262,6 @@ public class ExitBehaviourService : IDisposable
         leaveAttemptCount = 0;
         lastExitInteractTime = DateTime.MinValue;
         lastExitScanTime = DateTime.MinValue;
-        lastPartyCheckTime = DateTime.MinValue;
         lastLeaveAttemptTime = DateTime.MinValue;
         leaveConfirmationAttemptCount = 0;
         pendingLeaveReason = "";
@@ -218,6 +345,9 @@ public class ExitBehaviourService : IDisposable
             return;
         }
 
+        var partyExitReady = CanLeaveAfterPartyDeparture(DutySession, exits) && !Plugin.Condition[ConditionFlag.InCombat];
+        if (pendingPartyDepartureExit && !partyExitReady)
+            CancelLeaveDutySequence("party departure condition no longer met");
         TickLeaveDutySequence();
 
         // Don't try to leave during combat
@@ -263,23 +393,14 @@ public class ExitBehaviourService : IDisposable
             }
         }
 
-        // Rule 3: Leave when all others have left the zone
-        if (exits.LeaveWhenAllLeft)
-        {
-            CheckPartyInZone();
-        }
-        else
-        {
-            // Clear party check state when feature is disabled
-            if (lastPartyCheckTime > DateTime.MinValue)
-            {
-                Plugin.Log.Debug("[ExitBehaviour] Leave when all others left feature disabled - clearing check state");
-                lastPartyCheckTime = DateTime.MinValue;
-            }
-        }
+        if (partyExitReady)
+            LeaveDuty(partyDeparture: true);
 
         // CBT auto-leave feature removed
     }
+
+    internal static bool CanLeaveAfterPartyDeparture(AdsDutySession session, DutyExitSettings exits)
+        => exits.LeaveWhenAllLeft && session.IsCompleted && session.PartyExit.AllTeammatesDeparted;
 
     internal static bool TryIssueCompletedExit(AdsDutySession session, CharacterConfig config,
         DateTime nowUtc, DutyExitConditions conditions, Action<bool> issueExit, Models.DutyExitSettings? effectiveSettings = null)
@@ -436,72 +557,59 @@ public class ExitBehaviourService : IDisposable
         }
     }
 
-    private void CheckPartyInZone()
+    internal static unsafe DutyPartyRoster? ReadPartyRoster(uint territoryId)
     {
-        var now = DateTime.UtcNow;
-        // Throttle to every 3 seconds
-        if ((now - lastPartyCheckTime).TotalSeconds < 3.0) return;
-        lastPartyCheckTime = now;
-
-        var localPlayer = Plugin.ObjectTable.LocalPlayer;
-        if (localPlayer == null) return;
-
-        // Count party members actually visible in the zone (present in ObjectTable)
-        // PartyList.Length counts ALL party members including those who left the instance
-        var partyList = Plugin.PartyList;
-        
-        Plugin.Log.Debug($"[ExitBehaviour] Party check: Party list has {partyList.Length} members");
-
-        if (partyList.Length <= 1)
+        try
         {
-            // Solo or empty party - leave
-            Plugin.Log.Information($"[ExitBehaviour] Party list empty/solo (count={partyList.Length}) - leaving duty");
-            LeaveDuty();
-            return;
-        }
+            var local = Plugin.ObjectTable.LocalPlayer;
+            var characterId = Plugin.PlayerState.ContentId;
+            var party = Plugin.PartyList;
+            var hud = AgentHUD.Instance();
+            if (local == null || characterId == 0 || party.GroupManagerAddress == 0 || hud == null
+                || Plugin.ClientState.TerritoryType != territoryId)
+                return null;
 
-        // Check how many party members are actually visible in the zone
-        int membersInZone = 0;
-        var memberNames = new System.Collections.Generic.List<string>();
-        
-        foreach (var member in partyList)
-        {
-            if (member == null) continue;
+            var count = party.Length;
+            var partyId = party.PartyId;
+            var hudCount = hud->PartyMemberCount;
+            if (count is < 0 or > 8 || hudCount is < 0 or > 8)
+                return null;
 
-            // Skip self
-            var memberName = member.Name.ToString();
-            var localName = localPlayer.Name.ToString();
-            if (memberName == localName) continue;
-
-            memberNames.Add(memberName);
-
-            // Check if this party member is visible in the ObjectTable (meaning they're in the same zone)
-            foreach (var obj in Plugin.ObjectTable)
+            var members = new Dictionary<ulong, DutyPartyMember>(count);
+            foreach (var member in party)
             {
-                if (obj == null) continue;
-                if (obj.ObjectKind != ObjectKind.Pc) continue;
-                if (obj.Name.ToString() == memberName)
-                {
-                    membersInZone++;
-                    break;
-                }
+                var id = member.ContentId;
+                if (id == 0 || id == characterId && member.EntityId != local.EntityId
+                    || !members.TryAdd(id, new(member.Territory.RowId, member.GameObject?.ObjectKind == ObjectKind.Pc)))
+                    return null;
             }
-        }
 
-        Plugin.Log.Debug($"[ExitBehaviour] Party members in zone: {membersInZone}/{partyList.Length - 1} (checking: {string.Join(", ", memberNames)})");
+            var hudMembers = new HashSet<ulong>();
+            for (var index = 0; index < hudCount; index++)
+            {
+                var member = hud->PartyMembers[index];
+                if (member.ContentId == 0 || member.ContentId == characterId && member.EntityId != local.EntityId
+                    || !hudMembers.Add(member.ContentId))
+                    return null;
+            }
 
-        if (membersInZone == 0)
-        {
-            Plugin.Log.Information($"[ExitBehaviour] No other party members in zone (party list={partyList.Length}, in zone=0) - leaving duty");
-            LeaveDuty();
+            // An early local-only HUD can precede the matched roster. Commence and
+            // a settled non-cross-realm party state are required to classify solo.
+            var canConfirmSolo = count <= 1 && partyId == 0 && Plugin.DutyState.IsDutyStarted
+                && !InfoProxyCrossRealm.IsCrossRealmParty();
+            return members.Count == count && party.Length == count && party.PartyId == partyId
+                && hud->PartyMemberCount == hudCount && Plugin.PlayerState.ContentId == characterId
+                && Plugin.ClientState.TerritoryType == territoryId
+                    ? new DutyPartyRoster(characterId, partyId, canConfirmSolo, members, hudMembers)
+                    : null;
         }
-        else
+        catch
         {
-            Plugin.Log.Debug($"[ExitBehaviour] Party check: {membersInZone} member(s) still in zone - not leaving");
+            return null;
         }
     }
 
-    private void LeaveDuty()
+    private void LeaveDuty(bool partyDeparture = false)
     {
         var now = DateTime.UtcNow;
         // Throttle leave attempts to every 5 seconds
@@ -513,7 +621,11 @@ public class ExitBehaviourService : IDisposable
         var config = plugin.ConfigManager.GetActiveConfig();
         string leaveReason = "Unknown";
         
-        if (config.ExitAfterDutyEnds && dutyCompleted)
+        if (partyDeparture)
+        {
+            leaveReason = "Duty completed and all entry teammates have departed";
+        }
+        else if (config.ExitAfterDutyEnds && dutyCompleted)
         {
             var elapsed = (DateTime.UtcNow - dutyCompletedTime).TotalSeconds;
             leaveReason = $"Exit after duty ends - {elapsed:F0}s elapsed (configured: {config.ExitAfterDutySeconds}s)";
@@ -529,6 +641,7 @@ public class ExitBehaviourService : IDisposable
         // Open duty panel to access Leave Duty button
         SendCommand("/dutyfinder");
         leaveConfirmationAttemptCount = 0;
+        pendingPartyDepartureExit = partyDeparture;
         ScheduleLeaveDutyStep(LeaveDutyStep.OpenContentsFinderMenu, TimeSpan.FromMilliseconds(500), leaveReason);
 
         StateDetail = $"Leaving duty (attempt #{leaveAttemptCount}) - {leaveReason}";
@@ -567,6 +680,8 @@ public class ExitBehaviourService : IDisposable
             Plugin.Log.Error($"[ExitBehaviour] Leave duty sequence step {step} failed: {ex.Message}");
             CancelLeaveDutySequence("step exception");
         }
+        if (leaveDutyStep == LeaveDutyStep.None)
+            pendingPartyDepartureExit = false;
     }
 
     private void ScheduleLeaveDutyStep(LeaveDutyStep step, TimeSpan delay, string leaveReason)
@@ -578,6 +693,7 @@ public class ExitBehaviourService : IDisposable
 
     private void CancelLeaveDutySequence(string reason)
     {
+        pendingPartyDepartureExit = false;
         if (leaveDutyStep == LeaveDutyStep.None)
             return;
 
@@ -598,7 +714,6 @@ public class ExitBehaviourService : IDisposable
         if (isNavigatingToExit) SendCommand("/vnav stop");
         isNavigatingToExit = false;
         exitTarget = null;
-        lastPartyCheckTime = DateTime.MinValue;
     }
 
     private void TryClickLeaveDutyButton()

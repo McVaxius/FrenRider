@@ -1051,8 +1051,8 @@ Non è reversibile.</value>
   <data name="Immediately follow a fren's aethernet jump through Lifestream when you are at the same origin. Supports connected city, residential, and custom networks, including Bozja and Eureka." xml:space="preserve">
     <value>Segui subito il salto eterite dell'amico con Lifestream dalla stessa origine. Reti cittadine, residenziali e speciali, incluse Bozja/Eureka.</value>
   </data>
-  <data name="Leave the duty if no other party members are visible in the zone." xml:space="preserve">
-    <value>Esci se nessun altro compagno è visibile nella zona.</value>
+  <data name="Leave a completed duty once every party member who entered with you has been confirmed to have left." xml:space="preserve">
+    <value>Esci dalla missione completata dopo aver verificato che tutti i compagni entrati con te siano usciti.</value>
   </data>
   <data name="Max distance to targets for combat AI.&#10;424242 = Auto (plugin decides based on job: melee 2.6, caster 10)." xml:space="preserve">
     <value>Distanza IA massima. 424242 = auto per classe: mischia 2,6; incantatore 10.</value>
