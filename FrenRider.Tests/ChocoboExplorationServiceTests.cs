@@ -29,6 +29,83 @@ public sealed class ChocoboExplorationServiceTests
         Assert.Equal(2, probe.Window!.Value.Tab);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void DutyEntryStopsPendingAutomaticSkillPreparationAndPreservesAnAlreadyReadyWindow(bool skillsReady)
+    {
+        var outsideDuty = true;
+        var probe = new Probe(automaticSkillPreparationAllowed: () => outsideDuty);
+        Assert.True(probe.Service.PrepareSkills(automatically: true));
+        Assert.Equal(1, probe.OpenCalls);
+        if (skillsReady)
+        {
+            probe.Tick();
+            probe.Tick(300);
+            Assert.True(probe.Service.SkillsReady);
+        }
+
+        outsideDuty = false;
+        probe.Tick();
+
+        if (skillsReady)
+        {
+            Assert.True(probe.Service.SkillsReady);
+            Assert.Equal(new[] { 1 }, probe.SelectedTabs);
+            Assert.Equal(0, probe.CloseCalls);
+            probe.Service.Stop("allocation complete");
+        }
+        else
+        {
+            Assert.False(probe.Service.IsActive);
+            Assert.Empty(probe.SelectedTabs);
+        }
+        Assert.Equal(1, probe.CloseCalls);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void AutomaticSkillsPreparationChecksDutyBeforeOpeningTheCompanionWindow(bool enterDutyAtDispatch)
+    {
+        var outsideDuty = enterDutyAtDispatch;
+        var probe = new Probe(automaticSkillPreparationAllowed: () => outsideDuty, onLog: message =>
+        {
+            if (message == "dispatch: open Companion window") outsideDuty = false;
+        });
+        Assert.False(probe.Service.PrepareSkills(automatically: true));
+        Assert.Equal(enterDutyAtDispatch ? 1 : 0, probe.ReadCalls);
+        Assert.Equal(0, probe.OpenCalls);
+        Assert.Equal(0, probe.CloseCalls);
+        Assert.False(probe.Service.IsActive);
+
+        Assert.True(probe.Service.PrepareSkills(automatically: false));
+        Assert.Equal(1, probe.OpenCalls);
+
+        var reload = new Probe(automaticSkillPreparationAllowed: () => false);
+        reload.Service.InitializeReload(selectedAtLoad: true, ownerAtLoad: reload.Identity);
+        reload.Tick();
+        Assert.Equal(1, reload.OpenCalls);
+    }
+
+    [Fact]
+    public void DutyEntryDuringSkillsTabLogClosesOnlyTheOwnedWindow()
+    {
+        var outsideDuty = true;
+        var probe = new Probe(automaticSkillPreparationAllowed: () => outsideDuty, onLog: message =>
+        {
+            if (message == "dispatch: select Skills tab=1") outsideDuty = false;
+        });
+        Assert.True(probe.Service.PrepareSkills(automatically: true));
+
+        probe.Tick();
+        probe.Tick();
+
+        Assert.False(probe.Service.IsActive);
+        Assert.Empty(probe.SelectedTabs);
+        Assert.Equal(1, probe.CloseCalls);
+    }
+
     [Fact]
     public void MissingSkillsChildTimesOutWithoutRepeatingTabSelection()
     {
@@ -984,7 +1061,8 @@ public sealed class ChocoboExplorationServiceTests
         public ChocoboExplorationService Service { get; }
         private long now;
 
-        public Probe(WindowSnapshot? window = null)
+        public Probe(WindowSnapshot? window = null, Func<bool>? automaticSkillPreparationAllowed = null,
+            Action<string>? onLog = null)
         {
             Window = window;
             Service = new ChocoboExplorationService(
@@ -1020,7 +1098,8 @@ public sealed class ChocoboExplorationServiceTests
                     CloseCalls++;
                     if (CloseFailure != null) throw CloseFailure;
                     Window = null;
-                }, Logs.Add, () => now, () => ChildReady);
+                }, message => { Logs.Add(message); onLog?.Invoke(message); }, () => now, () => ChildReady,
+                automaticSkillPreparationAllowed: automaticSkillPreparationAllowed);
         }
 
         public void Tick(long elapsed = 0)

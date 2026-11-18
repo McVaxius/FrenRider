@@ -161,10 +161,7 @@ public class MainWindow : Window, IDisposable
                             if (UiGui.ActivationModeControls(config)) plugin.ConfigManager.SaveCurrentAccount();
                         });
                         if (plugin.IsWaitingForDuty)
-                        {
-                            UiGui.TextColored(UiHelpers.Yellow, "Combat rotations paused outside duties");
-                            if (ImGui.IsItemHovered()) UiGui.SetTooltip("Run is On. Following, repairs and other configured actions continue. Combat rotations wait for a duty.");
-                        }
+                            UiGui.TextColored(UiHelpers.Yellow, "Waiting for duty");
                     }
                     finally { ImGui.PopID(); }
                 }, heading: false);

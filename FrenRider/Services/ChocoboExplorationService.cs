@@ -19,6 +19,7 @@ internal sealed class ChocoboExplorationService
 
     private readonly Func<bool> canRun;
     private readonly Func<bool> automaticAllowed;
+    private readonly Func<bool> automaticSkillPreparationAllowed;
     private bool automatic;
     private readonly Func<ulong> identity;
     private readonly Func<WindowSnapshot?> readWindow;
@@ -62,7 +63,8 @@ internal sealed class ChocoboExplorationService
     internal bool PrepareSkills() => Start(forSkills: true);
     internal bool PrepareSkills(bool automatically) => Start(forSkills: true, automatically: automatically);
 
-    public ChocoboExplorationService(Func<bool>? automaticAllowed = null) : this(
+    public ChocoboExplorationService(Func<bool>? automaticAllowed = null,
+        Func<bool>? automaticSkillPreparationAllowed = null) : this(
         () => Plugin.ClientState.IsLoggedIn && Plugin.ObjectTable.LocalPlayer != null
             && !Plugin.Condition[ConditionFlag.InCombat]
             && !Plugin.Condition[ConditionFlag.LoggingOut]
@@ -71,16 +73,18 @@ internal sealed class ChocoboExplorationService
         () => Plugin.PlayerState.ContentId, ReadWindow, GameHelpers.TryOpenCompanionWindow,
         SelectTab, Capture, CloseWindow,
         message => Plugin.Log.Information($"[FrenRider][ChocoboProbe] {message}"),
-        () => Environment.TickCount64, automaticAllowed: automaticAllowed)
+        () => Environment.TickCount64, automaticAllowed: automaticAllowed,
+        automaticSkillPreparationAllowed: automaticSkillPreparationAllowed)
     { }
 
     internal ChocoboExplorationService(Func<bool> canRun, Func<ulong> identity,
         Func<WindowSnapshot?> readWindow, Func<bool> open, Action<int> selectTab,
         Action capture, Action close, Action<string> log, Func<long> clock, Func<bool>? skillsChildReady = null,
-        Func<bool>? automaticAllowed = null)
+        Func<bool>? automaticAllowed = null, Func<bool>? automaticSkillPreparationAllowed = null)
     {
         this.canRun = canRun;
         this.automaticAllowed = automaticAllowed ?? (() => true);
+        this.automaticSkillPreparationAllowed = automaticSkillPreparationAllowed ?? (() => true);
         this.identity = identity;
         this.readWindow = readWindow;
         this.open = open;
@@ -140,7 +144,9 @@ internal sealed class ChocoboExplorationService
         if (active) { log("already active; duplicate start ignored"); return false; }
         try
         {
-            if (!canRun() || identity() == 0 || automatically && !automaticAllowed()) { log("blocked: current character is not ready or context is unsafe"); return false; }
+            if (!canRun() || identity() == 0
+                || automatically && (!automaticAllowed() || forSkills && !automaticSkillPreparationAllowed()))
+            { log("blocked: current character is not ready or context is unsafe"); return false; }
             original = readWindow();
             log(original.HasValue
                 ? $"preflight: Buddy ready={original.Value.Ready}; native-tab={original.Value.Tab}; selected-radio={original.Value.SelectedTab}; addon-id={original.Value.Id}; agent-addon-id={original.Value.AgentAddonId}"
@@ -161,7 +167,8 @@ internal sealed class ChocoboExplorationService
             if (!original.HasValue)
             {
                 log("dispatch: open Companion window");
-                if (automatic && !automaticAllowed()) { Stop("automatic discovery paused"); return false; }
+                if (automatically && (!automaticAllowed() || forSkills && !automaticSkillPreparationAllowed()))
+                { Stop("automatic discovery paused"); return false; }
                 if (!open()) { Stop("open request unavailable", restore: false); return false; }
             }
             return active;
@@ -229,9 +236,14 @@ internal sealed class ChocoboExplorationService
         if (!canRun() || identity() != owner) { Stop("context/character departed", restore: false); return; }
         if (preparingSkills)
         {
-            expectedTab = 1;
-            settleUntil = clock() + SettleMs;
+            if (automatic && !automaticSkillPreparationAllowed()) { SuspendAutomatic(); return; }
+            var skillsSettleUntil = clock() + SettleMs;
             log("dispatch: select Skills tab=1");
+            if (!active) return;
+            if (automatic && (!automaticAllowed() || !automaticSkillPreparationAllowed()))
+            { SuspendAutomatic(); return; }
+            expectedTab = 1;
+            settleUntil = skillsSettleUntil;
             selectTab(1);
             return;
         }

@@ -154,7 +154,7 @@ public sealed class MagiaMiniWindow : Window, IDisposable
         var status = plugin.IsWaitingForDuty ? UiHelpers.Yellow : enabled ? UiHelpers.Green : UiHelpers.Grey;
         ContinueButton(enabled ? "ON" : "OFF", 0);
         UiHelpers.StatusPill(enabled ? "ON" : "OFF", status,
-            plugin.IsWaitingForDuty ? "Combat rotations paused outside duties" : null);
+            plugin.IsWaitingForDuty ? "Waiting for duty" : null);
         var raidEnabled = plugin.RaidModeService.IsEnabled;
         if (UiGui.HeaderToggle("RaidMode", ref raidEnabled, display: UiText.T("Raid Mode")))
         {

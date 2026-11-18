@@ -74,7 +74,7 @@ internal sealed class ChocoboSkillService
             var active = currentProfile();
             var snapshot = read();
             if (!canRun() || identity() == 0 || active == null || !snapshot.HasValue
-                || (automatically && (!Plugin.IsAutomaticActivationAllowed(active) || !active.ChocoboAutoAllocateSkills)))
+                || (automatically && (!Plugin.IsAutomaticCompanionCareAllowed(active) || !active.ChocoboAutoAllocateSkills)))
             { Status = "Skill allocation is unavailable in the current context."; return false; }
             var selected = active.ChocoboSkillPriority;
             priority = selected?.Select(value => (ChocoboSkillTree)value).ToArray()
@@ -101,7 +101,7 @@ internal sealed class ChocoboSkillService
                 preparationOwned = true; // Own cleanup before preparation can reject or throw.
                 deadline = clock() + PreparationMs;
                 Status = "Waiting for Companion readiness.";
-                if (automatic && !Plugin.IsAutomaticActivationAllowed(currentProfile()))
+                if (automatic && !Plugin.IsAutomaticCompanionCareAllowed(currentProfile()))
                 { Stop("Automatic skill allocation paused.", contextChanged: true); return false; }
                 if (!prepare()) Stop("Skill allocation is unavailable in the current context.");
             }
@@ -114,7 +114,7 @@ internal sealed class ChocoboSkillService
     internal void CheckAutomatic()
     {
         var active = currentProfile();
-        if (!Plugin.IsAutomaticActivationAllowed(active) || active?.ChocoboAutoAllocateSkills != true)
+        if (!Plugin.IsAutomaticCompanionCareAllowed(active) || active?.ChocoboAutoAllocateSkills != true)
         {
             ResetAutomaticState();
             return;
@@ -156,6 +156,8 @@ internal sealed class ChocoboSkillService
             var step = pending.Value;
             if (awaitingPreparation)
             {
+                if (automatic && !Plugin.IsAutomaticCompanionCareAllowed(active))
+                { SuspendAutomatic(); return; }
                 if (snapshot.Value != before)
                 { Stop("Skill allocation stopped: unexpected progression change."); return; }
                 if (clock() >= deadline)
@@ -166,7 +168,6 @@ internal sealed class ChocoboSkillService
                 if (!snapshot.HasValue || snapshot.Value != before
                     || !ChocoboSkillPlan.TryGetNext(snapshot.Value, priority, out var readyStep) || readyStep != step)
                 { Stop("Skill allocation stopped: unexpected progression change."); return; }
-                awaitingPreparation = false; // Consume readiness before native dispatch.
                 RequestNext(snapshot.Value);
                 return;
             }
@@ -187,7 +188,7 @@ internal sealed class ChocoboSkillService
                 Stop("Skill allocation stopped: learning was not observed; no retry.");
             else if (confirm != null && !confirmationAccepted)
             {
-                if (automatic && !Plugin.IsAutomaticActivationAllowed(currentProfile()))
+                if (automatic && !Plugin.IsAutomaticCompanionCareAllowed(currentProfile()))
                 { SuspendAutomatic(); return; }
                 var result = confirm(before, step);
                 if (!IsActive) return;
@@ -212,14 +213,23 @@ internal sealed class ChocoboSkillService
     {
         if (learned >= 30 || !ChocoboSkillPlan.TryGetNext(snapshot, priority, out var step))
         { Stop("Skill allocation completed; progression was observed."); return; }
+        if (automatic && !Plugin.IsAutomaticCompanionCareAllowed(currentProfile()))
+        { SuspendAutomatic(); return; }
+        var nextDeadline = clock() + AcknowledgementMs;
+        log($"dispatch learning: tree={(int)step.Tree}; level={step.Level}; cost={step.Cost}");
+        if (!IsActive) return;
+        if (automatic && !Plugin.IsAutomaticCompanionCareAllowed(currentProfile()))
+        {
+            ResetAutomaticState();
+            SuspendAutomatic();
+            return;
+        }
+        awaitingPreparation = false;
         before = snapshot;
         pending = step;
         confirmationAccepted = false;
-        deadline = clock() + AcknowledgementMs;
+        deadline = nextDeadline;
         Status = "Waiting for observed skill learning.";
-        log($"dispatch learning: tree={(int)step.Tree}; level={step.Level}; cost={step.Cost}");
-        if (automatic && !Plugin.IsAutomaticActivationAllowed(currentProfile()))
-        { SuspendAutomatic(); return; }
         if (!dispatch(snapshot, step)) Stop("Skill learning request was rejected; no retry.");
     }
 

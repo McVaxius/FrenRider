@@ -215,7 +215,10 @@ public sealed unsafe class AutomaticRepairTests
             scenario.Config.Repair = 1;
             scenario.Config.Enabled = false;
             scenario.Tick();
+            scenario.Service.TriggerRepair(scenario.Config);
+            scenario.Service.RetryRepairAfterTeleportCollision(scenario.Config);
             Assert.Empty(scenario.Requests);
+            Assert.False(scenario.Service.IsRepairFlowActive);
         });
     }
 
@@ -401,6 +404,26 @@ public sealed unsafe class AutomaticRepairTests
             Assert.Single(scenario.Requests);
         });
 
+    [Theory]
+    [InlineData(ConditionFlag.BoundByDuty)]
+    [InlineData(ConditionFlag.BoundByDuty56)]
+    [InlineData(ConditionFlag.BoundByDuty95)]
+    public void PostDutyDesynthesisWaitsForEveryDutyFlagBeforeDispatching(ConditionFlag dutyFlag)
+        => WithScenario(FrenRiderActivationMode.AlwaysOn, 0, scenario =>
+        {
+            scenario.QueuePostDutyDesynthesis();
+            scenario.Flags.Add(dutyFlag);
+            scenario.Tick();
+            Assert.Empty(scenario.DesynthRequests);
+            Assert.Equal("Pending duty exit.", scenario.Service.AutoDesynthStatus);
+            Assert.False(scenario.Service.IsUtilityGateActive);
+
+            scenario.Flags.Remove(dutyFlag);
+            scenario.Tick();
+            Assert.Equal("configured", Assert.Single(scenario.DesynthRequests));
+            Assert.Contains("attempt 1", scenario.Service.AutoDesynthStatus);
+        });
+
     private static string Mode(int mode) => mode switch
     {
         1 => "self", 2 => "npc-no-inn", 3 => "npc-no-teleport-no-inn", 4 => "npc-yes-inn", _ => "",
@@ -424,6 +447,7 @@ public sealed unsafe class AutomaticRepairTests
         public readonly AutomationService Service;
         public readonly CharacterConfig Config;
         public readonly List<string> Requests = [];
+        public readonly List<string> DesynthRequests = [];
         public readonly HashSet<ConditionFlag> Flags = [];
         public bool Available = true;
         public bool Readable = true;
@@ -498,8 +522,13 @@ public sealed unsafe class AutomaticRepairTests
                             utilityLastSuccess = Success, utilityLastFailure = Failure,
                             utilityCompletedAtUtc = CompletedAt }) : "";
                     }
-                    Assert.Equal("ADS.StartRepair", args[0]);
-                    Requests.Add((string)values![0]!);
+                    if ((string)args[0]! == "ADS.StartDesynth")
+                        DesynthRequests.Add((string)values![0]!);
+                    else
+                    {
+                        Assert.Equal("ADS.StartRepair", args[0]);
+                        Requests.Add((string)values![0]!);
+                    }
                     return true;
                 }),
                 _ => null,
@@ -513,6 +542,7 @@ public sealed unsafe class AutomaticRepairTests
                 "get_CurrentHp" => Hp, "get_IsCasting" => Casting, _ => Default(method.ReturnType),
             });
             SetStatic("ObjectTable", Proxy<IObjectTable>((method, _) => method.Name == "get_LocalPlayer" ? player : Default(method.ReturnType)));
+            SetStatic("PlayerState", Proxy<IPlayerState>((method, _) => method.Name == "get_ContentId" ? 1UL : Default(method.ReturnType)));
             var plugin = (Plugin)RuntimeHelpers.GetUninitializedObject(typeof(Plugin));
             Set(plugin, "<ConfigManager>k__BackingField", manager);
             Set(plugin, "<AdsUtilityIpcService>k__BackingField", new AdsUtilityIpcService(pi, log));
@@ -520,6 +550,15 @@ public sealed unsafe class AutomaticRepairTests
             Service = (AutomationService)RuntimeHelpers.GetUninitializedObject(typeof(AutomationService));
             Set(Service, "plugin", plugin);
             Set(Service, "zoneService", zone);
+        }
+
+        public void QueuePostDutyDesynthesis()
+        {
+            Config.EnableAutoDesynth = true;
+            var state = typeof(AutomationService).GetNestedType("AutoDesynthFlowState", BindingFlags.NonPublic)!;
+            Set(Service, "autoDesynthFlowState", Enum.Parse(state, "PendingExit"));
+            Set(Service, "autoDesynthFlowStartedMs", Environment.TickCount64);
+            Set(Service, "autoDesynthCharacter", 1UL);
         }
 
         public void Tick()

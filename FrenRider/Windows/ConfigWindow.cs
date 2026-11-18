@@ -2838,6 +2838,11 @@ public partial class ConfigWindow : Window, IDisposable
 
     private void TestAdsNpcNoInnRepair()
     {
+        if (!plugin.ConfigManager.GetActiveConfig().Enabled)
+        {
+            plugin.ReportToChatAndLog($"[FrenRider] {UiText.T("Disabled")}. {UiText.T("/fr on - Enable Fren Rider")}", isError: true);
+            return;
+        }
         if (!plugin.AdsUtilityIpcService.CheckAvailability())
         {
             plugin.ReportToChatAndLog("FrenRider repair test failed: ADS not loaded.", isError: true);

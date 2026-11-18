@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using FrenRider.IPC;
@@ -31,6 +32,90 @@ public sealed class ActivationModeTests
         var config = new CharacterConfig { Enabled = enabled, ActivationMode = mode };
         Assert.Equal(expected, config.IsEnabledForDuty(inDuty));
         Assert.Equal(enabled, config.Enabled);
+    }
+
+    [Theory]
+    [InlineData(ConditionFlag.BoundByDuty)]
+    [InlineData(ConditionFlag.BoundByDuty56)]
+    [InlineData(ConditionFlag.BoundByDuty95)]
+    public void AutomaticCompanionCareWaitsForEveryDutyFlagToClear(ConditionFlag dutyFlag)
+    {
+        var log = Proxy<IPluginLog>((_, _) => null);
+        var pi = Proxy<IDalamudPluginInterface>((method, _) => method.Name == "get_InstalledPlugins"
+            ? Array.Empty<IExposedPlugin>() : null);
+        using var autorot = new AutorotIpcService(pi, log);
+        using var runtime = new ExternalAutomationCleanupServiceTests.QuestingCombatRuntime(autorot, pi, log, 0, captureCommands: true);
+        runtime.InstallActivationCollaborators();
+        runtime.Profile.ChocoboAutoFeed = true;
+        runtime.Profile.ChocoboFoodItemId = 7894;
+        runtime.Profile.ChocoboAutoAllocateSkills = true;
+        runtime.Conditions.Add(dutyFlag);
+
+        foreach (var mode in new[] { FrenRiderActivationMode.AlwaysOn, FrenRiderActivationMode.DutyOnly })
+        {
+            runtime.Profile.ActivationMode = mode;
+            Assert.True(runtime.Host.IsFrenRiderEffectivelyEnabled);
+            CheckCompanionCare();
+            Assert.Equal(0, runtime.CompanionDispatches);
+        }
+
+        runtime.Conditions.Clear();
+        CheckCompanionCare();
+        Assert.Equal(0, runtime.CompanionDispatches);
+        runtime.Profile.ActivationMode = FrenRiderActivationMode.AlwaysOn;
+        CheckCompanionCare();
+        Assert.Equal(2, runtime.CompanionDispatches);
+        Assert.True(runtime.Skills.IsActive);
+        Assert.True(runtime.Food.IsActive);
+
+        void CheckCompanionCare()
+        {
+            runtime.Host.CheckAutomaticChocoboSkills();
+            runtime.Host.CheckAutomaticChocoboFood();
+        }
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void DutyEntryDuringSkillLearningLogBlocksOnlyAutomaticDispatch(bool automatic)
+    {
+        var log = Proxy<IPluginLog>((_, _) => null);
+        var pi = Proxy<IDalamudPluginInterface>((method, _) => method.Name == "get_InstalledPlugins"
+            ? Array.Empty<IExposedPlugin>() : null);
+        using var autorot = new AutorotIpcService(pi, log);
+        using var runtime = new ExternalAutomationCleanupServiceTests.QuestingCombatRuntime(autorot, pi, log, 0, captureCommands: true);
+        runtime.Profile.Enabled = true;
+        runtime.Profile.ChocoboAutoAllocateSkills = true;
+        var snapshot = new CompanionSnapshot(9, 0, 0, 3, 0, 0, 0);
+        var requests = 0;
+        var releases = 0;
+        var enterDuty = true;
+        var skill = new ChocoboSkillService(() => true, () => runtime.ContentId, () => runtime.Profile,
+            () => snapshot, (_, _) => { requests++; return true; }, message =>
+            {
+                if (!enterDuty || !message.StartsWith("dispatch learning:", StringComparison.Ordinal)) return;
+                enterDuty = false;
+                runtime.Conditions.Add(ConditionFlag.BoundByDuty95);
+            }, () => 0, prepare: () => true, prepared: () => true, release: () => releases++);
+
+        if (automatic) skill.CheckAutomatic();
+        else Assert.True(skill.Start());
+        Assert.True(skill.IsActive);
+        skill.Tick();
+
+        Assert.Equal(automatic ? 0 : 1, requests);
+        Assert.Equal(automatic ? 1 : 0, releases);
+        Assert.Equal(!automatic, skill.IsActive);
+        if (automatic)
+        {
+            runtime.Conditions.Clear();
+            skill.CheckAutomatic();
+            Assert.True(skill.IsActive);
+            skill.Tick();
+            Assert.Equal(1, requests);
+        }
+        skill.Stop();
     }
 
     [Fact]
@@ -90,8 +175,8 @@ public sealed class ActivationModeTests
             runtime.RefreshActivation(); // Real parent activation; no fabricated applied-owner record.
             Assert.Equal(enabled, runtime.Host.IsFrenRiderEffectivelyEnabled);
             var admitted = manual || enabled;
-            Assert.Equal(admitted, runtime.Food.Start(automatically: !manual));
-            Assert.Equal(admitted, runtime.Skills.Start(automatically: !manual));
+            Assert.Equal(manual, runtime.Food.Start(automatically: !manual));
+            Assert.Equal(manual, runtime.Skills.Start(automatically: !manual));
             Assert.Equal(admitted, runtime.Exploration.Start(automatically: !manual));
             if (enabled)
             {
@@ -304,15 +389,12 @@ public sealed class ActivationModeTests
             var filesBefore = Directory.GetFiles(directory).OrderBy(path => path, StringComparer.Ordinal).ToArray();
             var notifications = new List<bool>();
             manager.OnFrenRiderEnabledChanged += notifications.Add;
-            var adsStops = 0;
-            manager.OnManualDisableRequested += () => adsStops++;
 
             Assert.True(Plugin.TryApplyActivationCommand(manager, "stop"));
             Assert.True(Plugin.TryApplyActivationCommand(manager, "off"));
             Assert.True(Plugin.TryApplyActivationCommand(manager, "on"));
 
             Assert.Equal(new[] { false, false }, notifications);
-            Assert.Equal(2, adsStops);
             Assert.False(manager.GetActiveConfig().Enabled);
             Assert.Equal("", manager.ActiveCharacterKey);
             Assert.True(local.Enabled);
@@ -320,32 +402,12 @@ public sealed class ActivationModeTests
         });
     }
 
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    [InlineData(null)]
-    public void AdsStopDispatchesOnlyTheSupportedCommandAndReportsAvailability(bool? accepted)
-    {
-        var commands = new List<string>();
-        var manager = accepted.HasValue ? Proxy<ICommandManager>((method, args) =>
-        {
-            if (method.Name != "ProcessCommand") return null;
-            commands.Add((string)args![0]!);
-            return accepted.Value;
-        }) : null;
-
-        Assert.Equal(accepted == true, Plugin.TryDispatchAdsStop(manager));
-        Assert.Equal(accepted.HasValue ? new[] { "/ads stop" } : Array.Empty<string>(), commands);
-    }
-
     [Fact]
-    public void OnlyExplicitOffRequestsAdsStopIncludingWhenActivationCleanupFails()
+    public void ExplicitOffDisablesSavedProfileAndRepeatedOffNotifiesCleanup()
     {
         WithManager((manager, local) =>
         {
             local.Enabled = true;
-            var stops = 0;
-            manager.OnManualDisableRequested += () => stops++;
             var identity = new DadProfileIdentity("owner", "island", "opaque", "proposal");
             Assert.True(manager.TryInstallTemporaryProfile(identity, new CharacterConfig { Enabled = true }));
 
@@ -357,16 +419,18 @@ public sealed class ActivationModeTests
             Assert.True(manager.TryInstallTemporaryProfile(identity, new CharacterConfig { Enabled = false }));
             Assert.True(manager.TryReleaseTemporaryProfile(identity));
             Assert.True(local.Enabled);
-            Assert.Equal(0, stops);
+            Assert.True(manager.TryInstallTemporaryProfile(identity, new CharacterConfig { Enabled = true }));
 
+            var notifications = new List<bool>();
+            manager.OnFrenRiderEnabledChanged += notifications.Add;
             manager.SetFrenRiderEnabled(false);
+            Assert.False(local.Enabled);
             manager.SetFrenRiderEnabled(false);
-            Assert.Equal(2, stops);
             manager.SetFrenRiderEnabled(true);
             manager.OnFrenRiderEnabledChanged += _ => throw new InvalidOperationException("Synthetic cleanup failure");
             Assert.Throws<InvalidOperationException>(() => manager.SetFrenRiderEnabled(false));
-            Assert.Equal(3, stops);
-            Assert.False(local.Enabled);
+            Assert.Equal(new[] { false, false, true, false }, notifications);
+            Assert.False(manager.GetActiveConfig().Enabled);
         });
     }
 

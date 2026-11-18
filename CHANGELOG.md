@@ -1,3 +1,13 @@
+2026-11-18 - 4.1.0.21 - Duty Only and ADS utility fixes
+
+- **Fixed Duty Only companion care** so automatic feeding and skill requests stay paused while waiting for duty or inside one.
+- **Fixed FrenRider Off** to block new ADS repair and desynthesis requests while letting accepted requests finish.
+- **Fixed post-duty desynthesis** so it waits for every duty flag to clear before requesting ADS.
+
+**In progress**
+
+- Stopping an already-active vanilla follow when leaving a duty.
+
 2026-11-17 - 4.1.0.20 - WRATH stop status
 
 - **Updated WRATH stop status:** Show the reported auto-rotation state after an automatic stop request; unavailable readback stays unknown and newer FrenRider choices remain intact.

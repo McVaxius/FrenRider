@@ -25,7 +25,6 @@ public class ConfigManager : IDadProfileStore
 
     // Event to notify when FrenRider enabled state changes
     public event Action<bool>? OnFrenRiderEnabledChanged;
-    internal event Action? OnManualDisableRequested;
     internal event Action? OnEffectiveProfileChanging;
 
     private static readonly JsonSerializerOptions JsonOptions = new()
@@ -1226,7 +1225,7 @@ public class ConfigManager : IDadProfileStore
         {
             if (!enabled)
             {
-                NotifyRequestedActivation(false, explicitRequest);
+                OnFrenRiderEnabledChanged?.Invoke(false);
                 log.Information("[ConfigManager] FrenRider stop requested without an active character profile.");
             }
             else
@@ -1252,23 +1251,10 @@ public class ConfigManager : IDadProfileStore
 
         // A repeated Stop must still cancel work queued while already off.
         if (changed || !enabled)
-            NotifyRequestedActivation(enabled, explicitRequest);
+            OnFrenRiderEnabledChanged?.Invoke(enabled);
 
         if (changed)
             log.Information($"[ConfigManager] FrenRider enabled state changed: {wasEnabled} -> {enabled}");
-    }
-
-    private void NotifyRequestedActivation(bool enabled, bool explicitRequest)
-    {
-        try
-        {
-            OnFrenRiderEnabledChanged?.Invoke(enabled);
-        }
-        finally
-        {
-            if (!enabled && explicitRequest)
-                OnManualDisableRequested?.Invoke();
-        }
     }
 
     public int SetAllFrenRiderEnabled(bool enabled, string? accountId = null)

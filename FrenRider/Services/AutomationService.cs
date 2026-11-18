@@ -116,7 +116,7 @@ public class AutomationService : IDisposable
             or AutoDesynthFlowState.WaitingStart
             or AutoDesynthFlowState.Running
             or AutoDesynthFlowState.RetryWait
-           && !IsInDuty();
+           && !Plugin.IsBoundByDuty();
 
     public AutomationService(Plugin plugin, FrenTracker tracker, ZoneService zoneService)
     {
@@ -753,12 +753,7 @@ public class AutomationService : IDisposable
             return;
         }
 
-        if (IsInDuty())
-        {
-            autoDesynthFlowState = AutoDesynthFlowState.PendingExit;
-            AutoDesynthStatus = "Pending duty exit.";
-            return;
-        }
+        if (WaitForAutoDesynthDutyExit()) return;
 
         var adsStatus = plugin.AdsUtilityIpcService.Refresh(force: true);
         if (!adsStatus.IsAvailable)
@@ -820,9 +815,18 @@ public class AutomationService : IDisposable
         IssueAutoDesynthRequest(now);
     }
 
+    private bool WaitForAutoDesynthDutyExit()
+    {
+        if (!Plugin.IsBoundByDuty()) return false;
+        autoDesynthFlowState = AutoDesynthFlowState.PendingExit;
+        AutoDesynthStatus = "Pending duty exit.";
+        return true;
+    }
+
     private void IssueAutoDesynthRequest(long now)
     {
         if (!plugin.IsFrenRiderEffectivelyEnabled) { SuspendAutomatic(); return; }
+        if (WaitForAutoDesynthDutyExit()) return;
         autoDesynthRequestAttempts++;
         lastAutoDesynthAttemptMs = now;
         lastAutoDesynthAttemptUtc = DateTime.UtcNow;
@@ -881,7 +885,7 @@ public class AutomationService : IDisposable
             reason = "in combat";
             return false;
         }
-        if (IsInDuty())
+        if (Plugin.IsBoundByDuty())
         {
             reason = "in duty";
             return false;
@@ -916,9 +920,6 @@ public class AutomationService : IDisposable
         reason = "ready";
         return true;
     }
-
-    private static bool IsInDuty()
-        => Plugin.Condition[ConditionFlag.BoundByDuty] || Plugin.Condition[ConditionFlag.BoundByDuty56];
 
     private void CheckRepair(CharacterConfig config, long now)
     {
@@ -1198,6 +1199,7 @@ public class AutomationService : IDisposable
 
     private void IssueRepairRequest(long now, string repairMode, int threshold, string reason, bool manual = false)
     {
+        if (!plugin.ConfigManager.GetActiveConfig().Enabled) return;
         if (!manual && !plugin.IsFrenRiderEffectivelyEnabled) { SuspendAutomatic(); return; }
         manualRepair = manual;
         repairTravelsBetweenZones = repairMode == "npc-yes-inn"
@@ -1222,6 +1224,7 @@ public class AutomationService : IDisposable
             Plugin.Log.Warning($"[FrenRider][Repair] Retrying ADS {repairMode} repair attempt {repairRequestAttempts} via IPC ({reason}).");
         }
 
+        if (!plugin.ConfigManager.GetActiveConfig().Enabled) return;
         if (!manual && !plugin.IsFrenRiderEffectivelyEnabled) { SuspendAutomatic(); return; }
         if (plugin.AdsUtilityIpcService.StartRepair(repairMode, out var failure))
         {
@@ -1365,6 +1368,7 @@ public class AutomationService : IDisposable
     /// </summary>
     public void TriggerRepair(CharacterConfig config)
     {
+        if (!plugin.ConfigManager.GetActiveConfig().Enabled) return;
         var repairMode = ResolveAdsRepairMode(config);
         if (string.IsNullOrWhiteSpace(repairMode))
             return;

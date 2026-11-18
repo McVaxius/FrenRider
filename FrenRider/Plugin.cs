@@ -111,8 +111,14 @@ public sealed partial class Plugin : IDalamudPlugin
     private bool startupCastingSettingsPending = true;
 
     internal static bool IsAutomaticActivationAllowed(CharacterConfig? config)
-        => config?.IsEnabledForDuty(Condition is not null && (Condition[ConditionFlag.BoundByDuty]
-            || Condition[ConditionFlag.BoundByDuty56] || Condition[ConditionFlag.BoundByDuty95])) == true;
+        => config?.IsEnabledForDuty(IsBoundByDuty()) == true;
+
+    internal static bool IsAutomaticCompanionCareAllowed(CharacterConfig? config)
+        => !IsBoundByDuty() && config?.IsEnabledForDuty(false) == true;
+
+    internal static bool IsBoundByDuty()
+        => Condition is not null && (Condition[ConditionFlag.BoundByDuty]
+            || Condition[ConditionFlag.BoundByDuty56] || Condition[ConditionFlag.BoundByDuty95]);
 
     internal bool IsFrenRiderEffectivelyEnabled => IsAutomaticActivationAllowed(ConfigManager.GetActiveConfig());
 
@@ -188,7 +194,8 @@ public sealed partial class Plugin : IDalamudPlugin
         }
 
         ConfigManager = new ConfigManager(PluginInterface, Log);
-        chocoboExploration = new ChocoboExplorationService(() => IsFrenRiderEffectivelyEnabled);
+        chocoboExploration = new ChocoboExplorationService(() => IsFrenRiderEffectivelyEnabled,
+            () => IsAutomaticCompanionCareAllowed(ConfigManager.GetActiveConfig()));
         chocoboExploration.InitializeReload(Configuration.ChocoboProbeAfterReload,
             ClientState.IsLoggedIn ? PlayerState.ContentId : 0);
 
@@ -313,7 +320,6 @@ public sealed partial class Plugin : IDalamudPlugin
         ConfigManager.OnEffectiveProfileChanging += CancelChocoboFoodSession;
         ConfigManager.OnEffectiveProfileChanging += CancelChocoboPurchaseSession;
         ConfigManager.OnFrenRiderEnabledChanged += OnFrenRiderEnabledChanged;
-        ConfigManager.OnManualDisableRequested += OnManualFrenRiderDisabled;
         DadIPC = new DadIPC(PluginInterface, ConfigManager, FrenTracker, CombatService, Log);
 
         // Check for AutoDuty on plugin load if FrenRider is already enabled
@@ -393,7 +399,6 @@ public sealed partial class Plugin : IDalamudPlugin
         ConfigManager.OnEffectiveProfileChanging -= CancelChocoboSkillSession;
         ConfigManager.OnEffectiveProfileChanging -= CancelChocoboFoodSession;
         ConfigManager.OnEffectiveProfileChanging -= CancelChocoboPurchaseSession;
-        ConfigManager.OnManualDisableRequested -= OnManualFrenRiderDisabled;
         PhoenixDownRecoveryService.Dispose();
         ToastGui.ErrorToast -= BossModActionTweaksService.OnErrorToast;
         BossModActionTweaksService.ResetRecovery();
@@ -1105,22 +1110,6 @@ public sealed partial class Plugin : IDalamudPlugin
             ApplyEffectiveActivation(false);
         }
     }
-
-    private void OnManualFrenRiderDisabled()
-    {
-        try
-        {
-            if (!TryDispatchAdsStop(CommandManager))
-                Log?.Debug("[FrenRider] ADS stop command was not available.");
-        }
-        catch (Exception ex)
-        {
-            Log?.Warning($"[FrenRider] ADS stop command failed: {ex.Message}");
-        }
-    }
-
-    internal static bool TryDispatchAdsStop(ICommandManager? commandManager)
-        => commandManager?.ProcessCommand("/ads stop") == true;
 
     private void RefreshEffectiveActivation()
     {
@@ -1926,8 +1915,8 @@ public sealed partial class Plugin : IDalamudPlugin
         if (IsWaitingForDuty)
         {
             dtrEntry.Tooltip = new SeString(new TextPayload(uiText.Language == "hi"
-                ? "Run is On. Following, repairs and other configured actions continue. Combat rotations wait for a duty."
-                : UiText.T("Run is On. Following, repairs and other configured actions continue. Combat rotations wait for a duty.")));
+                ? "Waiting for duty"
+                : UiText.T("Waiting for duty")));
             return;
         }
         var fren = Configuration.KrangleEnabled ? KrangleService.KrangleName(config.FrenName) : config.FrenName;

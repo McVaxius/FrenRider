@@ -64,10 +64,8 @@ internal static class UiGui
             config.ActivationMode = FrenRiderActivationMode.DutyOnly;
             changed = true;
         }
-        if (ImGui.IsItemHovered()) SetTooltip("Only combat rotations wait outside duties. Following, repairs and other configured actions continue.");
-        TextDisabled(config.ActivationMode == FrenRiderActivationMode.AlwaysOn
-            ? "On applies inside and outside duties."
-            : "Only combat rotations wait outside duties. Following, repairs and other configured actions continue.");
+        if (config.ActivationMode == FrenRiderActivationMode.AlwaysOn)
+            TextDisabled("On applies inside and outside duties.");
         return changed;
     }
     private static bool Feedback(bool activated, MaterialUiSoundCue cue = MaterialUiSoundCue.Click)

@@ -50,7 +50,7 @@ internal sealed class ChocoboFoodService
         {
             var active = currentProfile();
             if (!canRun() || identity() == 0 || active == null
-                || (automatically && (!Plugin.IsAutomaticActivationAllowed(active) || !active.ChocoboAutoFeed)))
+                || (automatically && (!Plugin.IsAutomaticCompanionCareAllowed(active) || !active.ChocoboAutoFeed)))
             { Status = "Companion feeding is unavailable in the current context."; return false; }
             if (!IsSupportedFood(active.ChocoboFoodItemId))
             { Status = "Select a supported companion food."; return false; }
@@ -74,7 +74,7 @@ internal sealed class ChocoboFoodService
             suspendedFood = food;
             Status = "Waiting for observed companion feeding.";
             log($"dispatch feeding: item={food}");
-            if (automatic && !Plugin.IsAutomaticActivationAllowed(currentProfile()))
+            if (automatic && !Plugin.IsAutomaticCompanionCareAllowed(currentProfile()))
             { Stop("Automatic companion feeding paused."); return false; }
             if (!dispatch(food, before)) Stop("Companion feeding request was rejected; no retry.");
             return IsActive;
@@ -86,7 +86,7 @@ internal sealed class ChocoboFoodService
     internal void CheckAutomatic()
     {
         var active = currentProfile();
-        if (!Plugin.IsAutomaticActivationAllowed(active) || active?.ChocoboAutoFeed != true)
+        if (!Plugin.IsAutomaticCompanionCareAllowed(active) || active?.ChocoboAutoFeed != true)
         { suspendedProfile = null; return; }
         if (IsActive || !canRun()
             || (ReferenceEquals(active, suspendedProfile) && active.ChocoboFoodItemId == suspendedFood)) return;
