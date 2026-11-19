@@ -1,4 +1,4 @@
-Unreleased
+2026-11-19 - 4.1.0.23 - Saved Arcanist job preference
 
 - Save a per-character Arcanist preference for Scholar or Summoner, defaulting to Scholar. Auto-equip uses the other eligible crystal when needed and works outside duty in both activation modes while Run and job-stone auto-equip are enabled.
 
