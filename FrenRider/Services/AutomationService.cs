@@ -44,7 +44,7 @@ public class AutomationService : IDisposable
     private readonly Plugin plugin;
     private readonly FrenTracker tracker;
     private readonly ZoneService zoneService;
-    private readonly JobStoneEquipService jobStoneEquipService = new();
+    private readonly JobStoneEquipService jobStoneEquipService;
 
     private int idleTickCounter;
     private long lastIdleActionMs;
@@ -123,6 +123,7 @@ public class AutomationService : IDisposable
         this.plugin = plugin;
         this.tracker = tracker;
         this.zoneService = zoneService;
+        jobStoneEquipService = new JobStoneEquipService(plugin);
         autoDesynthStatusProvider = Plugin.PluginInterface.GetIpcProvider<string>("FrenRider.GetAutoDesynthStatusJson");
         autoDesynthStatusProvider.RegisterFunc(GetAutoDesynthStatusJson);
         Plugin.DutyState.DutyCompleted += OnDutyCompleted;
@@ -155,6 +156,8 @@ public class AutomationService : IDisposable
         });
     }
 
+    internal void UpdateJobStoneEquip(bool movementHeld) => jobStoneEquipService.Update(movementHeld);
+
     public void Update()
     {
         var config = plugin.ConfigManager.GetActiveConfig();
@@ -163,8 +166,6 @@ public class AutomationService : IDisposable
             SuspendAutomatic();
             return;
         }
-        jobStoneEquipService.Update(config);
-
         if (plugin.AdsIntegrationService.ShouldPauseDutySystems)
         {
             idleTickCounter = 0;
@@ -289,7 +290,6 @@ public class AutomationService : IDisposable
         idleTickCounter = 0;
         IsIdle = false;
         companionStanceCooldownMs = 0;
-        jobStoneEquipService?.SuspendAutomatic();
         if (!manualRepair && IsRepairFlowActive)
             CancelRepairFlow("Automatic repair paused; issued ADS utility was not cancelled.");
         if (autoDesynthFlowState != AutoDesynthFlowState.Idle)

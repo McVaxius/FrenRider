@@ -1321,8 +1321,17 @@ RSR: RotationSolver Reborn
 WRATH: Wrath
 DAEDALUS: Daedalus</value>
   </data>
-  <data name="While Fren Rider is enabled, equip the first matching armoury-chest soul crystal when the current character is on a level 30+ base class and equipment can be changed safely. The current gearset is updated after the equip is confirmed." xml:space="preserve">
-    <value>Gdy Fren Rider jest włączony, załóż pierwszy pasujący soul crystal z szafy zbrojowni, jeśli postać jest klasą bazową poziomu 30+ i można bezpiecznie zmienić wyposażenie. Bieżący zestaw wyposażenia zostaje zaktualizowany po potwierdzeniu założenia.</value>
+  <data name="Arcanist job preference" xml:space="preserve">
+    <value>Preferowana profesja Arcanisty</value>
+  </data>
+  <data name="Scholar" xml:space="preserve">
+    <value>Scholar</value>
+  </data>
+  <data name="Summoner" xml:space="preserve">
+    <value>Summoner</value>
+  </data>
+  <data name="While Fren Rider is enabled, equip a matching armoury-chest soul crystal outside duty when the current character is on a level 30+ base class and equipment can be changed safely. The current gearset is updated after the equip is confirmed." xml:space="preserve">
+    <value>Gdy Fren Rider jest włączony, poza zadaniami załóż pasujący kryształ duszy ze zbrojowni, jeśli bieżąca klasa podstawowa ma co najmniej 30. poziom i można bezpiecznie zmienić wyposażenie. Bieżący zestaw wyposażenia jest aktualizowany po potwierdzeniu założenia.</value>
   </data>
   <data name="While FrenRider is enabled on Beastmaster, try Capture on eligible living beasts closer than 10 yalms, including passive beasts outside combat.&#xA;Prefers an eligible current target; otherwise automatically targets the nearest eligible beast when Capture is ready.&#xA;Skips owned beasts and enemies above your effective level, and respects both HP thresholds.&#xA;Retries on later cooldowns, including already marked beasts." xml:space="preserve">
     <value>Gdy FrenRider jest włączony na Beastmaster, próbuj Capture na żywych bestiach spełniających warunki bliżej niż 10 yalmów, także pasywnych poza walką.

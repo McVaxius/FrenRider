@@ -35,6 +35,40 @@ public sealed class ActivationModeTests
     }
 
     [Theory]
+    [InlineData(null)]
+    [InlineData(ConditionFlag.BoundByDuty)]
+    [InlineData(ConditionFlag.BoundByDuty56)]
+    [InlineData(ConditionFlag.BoundByDuty95)]
+    public void JobStoneConfirmationSurvivesDutyOnlyWaitAndRetiresWhenBlocked(ConditionFlag? dutyFlag)
+    {
+        var log = Proxy<IPluginLog>((_, _) => null);
+        var pi = Proxy<IDalamudPluginInterface>((method, _) => method.Name == "get_InstalledPlugins"
+            ? Array.Empty<IExposedPlugin>() : null);
+        using var autorot = new AutorotIpcService(pi, log);
+        using var runtime = new ExternalAutomationCleanupServiceTests.QuestingCombatRuntime(autorot, pi, log, 0);
+        runtime.InstallActivationCollaborators();
+        runtime.Profile.ActivationMode = FrenRiderActivationMode.DutyOnly;
+        runtime.Profile.EquipJobStoneForCurrentClass = true;
+
+        const BindingFlags fields = BindingFlags.Instance | BindingFlags.NonPublic;
+        var service = typeof(AutomationService).GetField("jobStoneEquipService", fields)!.GetValue(runtime.Automation);
+        var pendingField = typeof(JobStoneEquipService).GetField("pendingEquip", fields)!;
+        var outstanding = Activator.CreateInstance(pendingField.FieldType, 100u, 0, runtime.ContentId,
+            "GodMod", Environment.TickCount64, long.MaxValue);
+        pendingField.SetValue(service, outstanding);
+
+        Assert.False(runtime.Host.IsFrenRiderEffectivelyEnabled);
+        runtime.Automation.UpdateUtilityGate();
+        runtime.Automation.UpdateJobStoneEquip(movementHeld: false);
+        Assert.Same(outstanding, pendingField.GetValue(service));
+
+        if (dutyFlag is { } flag) runtime.Conditions.Add(flag);
+        else runtime.Profile.Enabled = false;
+        runtime.Automation.UpdateJobStoneEquip(movementHeld: false);
+        Assert.Null(pendingField.GetValue(service));
+    }
+
+    [Theory]
     [InlineData(ConditionFlag.BoundByDuty)]
     [InlineData(ConditionFlag.BoundByDuty56)]
     [InlineData(ConditionFlag.BoundByDuty95)]

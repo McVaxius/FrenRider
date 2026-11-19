@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Dalamud.Game.ClientState.Conditions;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
@@ -22,32 +21,35 @@ internal readonly record struct JobStoneSlot(int Slot, uint ItemId);
 
 internal sealed class JobStoneEquipService
 {
+    internal const uint ArcanistClassId = 26;
+    private const uint SummonerJobId = 27;
+    private const uint ScholarJobId = 28;
     private const int MinimumLevel = 30;
     private const ushort EquippedSoulCrystalSlot = 13;
     private const long CheckIntervalMs = 5000;
     private const long ConfirmDelayMs = 250;
     private const long ConfirmTimeoutMs = 5000;
 
+    private readonly Plugin plugin;
     private long lastCheckMs;
     private PendingEquip? pendingEquip;
 
-    public void Update(CharacterConfig config)
+    public JobStoneEquipService(Plugin plugin) => this.plugin = plugin;
+
+    public void Update(bool movementHeld)
     {
-        if (!Plugin.IsAutomaticActivationAllowed(config)) { SuspendAutomatic(); return; }
+        var config = plugin.ConfigManager.GetActiveConfig();
+        if (!CanRun(config)) { SuspendAutomatic(); return; }
+        if (movementHeld) return;
+
         var now = Environment.TickCount64;
         if (pendingEquip != null)
         {
-            if (!config.Enabled || !config.EquipJobStoneForCurrentClass)
-            {
-                pendingEquip = null;
-                return;
-            }
-
             ConfirmEquip(config, now);
             return;
         }
 
-        if (!config.Enabled || !config.EquipJobStoneForCurrentClass || now - lastCheckMs < CheckIntervalMs)
+        if (now - lastCheckMs < CheckIntervalMs)
             return;
 
         lastCheckMs = now;
@@ -55,6 +57,15 @@ internal sealed class JobStoneEquipService
     }
 
     internal void SuspendAutomatic() => pendingEquip = null;
+
+    private static bool CanRun(CharacterConfig config)
+        => config.Enabled && config.EquipJobStoneForCurrentClass
+           && !Plugin.IsBoundByDuty();
+
+    private bool CanWrite(CharacterConfig config, ulong characterId, string provider)
+        => plugin.AutorotIpcService.ReadJobStoneProvider() == provider
+           && characterId != 0 && Plugin.PlayerState.ContentId == characterId
+           && ReferenceEquals(config, plugin.ConfigManager.GetActiveConfig()) && CanRun(config);
 
     internal static bool ShouldAttempt(JobStonePolicyInput input)
         => input.FrenRiderEnabled
@@ -65,17 +76,21 @@ internal sealed class JobStoneEquipService
            && input.HasValidCurrentGearset
            && input.SoulCrystalSlotEmpty;
 
-    internal static JobStoneSlot? SelectFirstMatchingStone(
+    internal static JobStoneSlot? SelectMatchingStone(
         IReadOnlySet<uint> eligibleItemIds,
-        IEnumerable<JobStoneSlot> slots)
+        IEnumerable<JobStoneSlot> slots,
+        uint preferredItemId = 0)
     {
+        JobStoneSlot? firstMatch = null;
         foreach (var slot in slots)
         {
-            if (slot.ItemId != 0 && eligibleItemIds.Contains(slot.ItemId))
+            if (slot.ItemId == 0 || !eligibleItemIds.Contains(slot.ItemId)) continue;
+            if (preferredItemId == 0 || slot.ItemId == preferredItemId)
                 return slot;
+            firstMatch ??= slot;
         }
 
-        return null;
+        return firstMatch;
     }
 
     private static unsafe bool TryGetCurrentGearset(out RaptureGearsetModule* gearsets, out int gearsetId)
@@ -83,6 +98,14 @@ internal sealed class JobStoneEquipService
         gearsets = RaptureGearsetModule.Instance();
         gearsetId = gearsets == null ? -1 : gearsets->CurrentGearsetIndex;
         return gearsets != null && gearsetId >= 0 && gearsets->IsValidGearset(gearsetId);
+    }
+
+    private static unsafe InventoryItem* ReadInventorySlot(InventoryManager* inventory, InventoryType type, int slot)
+    {
+        var container = inventory == null ? null : inventory->GetInventoryContainer(type);
+        return container != null && container->IsLoaded && slot >= 0 && slot < container->Size
+            ? container->GetInventorySlot(slot)
+            : null;
     }
 
     private static bool CanChangeEquipmentNow()
@@ -96,8 +119,7 @@ internal sealed class JobStoneEquipService
         var condition = Plugin.Condition;
         return !condition[ConditionFlag.InCombat]
                && !condition[ConditionFlag.Casting]
-               && !condition[ConditionFlag.BoundByDuty]
-               && !condition[ConditionFlag.BoundByDuty56]
+               && !Plugin.IsBoundByDuty()
                && !condition[ConditionFlag.WatchingCutscene]
                && !condition[ConditionFlag.OccupiedInCutSceneEvent]
                && !condition[ConditionFlag.Occupied]
@@ -115,37 +137,48 @@ internal sealed class JobStoneEquipService
                && !GameHelpers.IsAddonVisible("SelectYesno");
     }
 
-    private static HashSet<uint> GetEligibleStoneIds(ClassJob currentClass)
+    private static HashSet<uint> GetEligibleStoneIds(ClassJob currentClass, ArcanistJobPreference preference,
+        out uint preferredItemId)
     {
+        preferredItemId = 0;
         var sheet = Plugin.DataManager.GetExcelSheet<ClassJob>();
         if (sheet == null)
             return new HashSet<uint>();
 
-        return sheet
-            .Where(job => job.ClassJobParent.RowId == currentClass.RowId && job.ItemSoulCrystal.RowId != 0)
-            .Select(job => job.ItemSoulCrystal.RowId)
-            .ToHashSet();
+        var preferredJobId = preference == ArcanistJobPreference.Summoner ? SummonerJobId : ScholarJobId;
+        var eligibleItemIds = new HashSet<uint>();
+        foreach (var job in sheet)
+        {
+            var itemId = job.ItemSoulCrystal.RowId;
+            if (job.ClassJobParent.RowId != currentClass.RowId || itemId == 0) continue;
+            eligibleItemIds.Add(itemId);
+            if (currentClass.RowId == ArcanistClassId && job.RowId == preferredJobId)
+                preferredItemId = itemId;
+        }
+
+        return eligibleItemIds;
     }
 
     private unsafe void TryBeginEquip(CharacterConfig config, long now)
     {
         try
         {
+            var provider = plugin.AutorotIpcService.ReadJobStoneProvider();
+            if (provider == null)
+                return;
+
+            var characterId = Plugin.PlayerState.ContentId;
+            if (characterId == 0) return;
             var currentClass = Plugin.PlayerState.ClassJob.Value;
             var isBaseClass = currentClass.RowId != 0 && currentClass.ItemSoulCrystal.RowId == 0;
             var hasValidGearset = TryGetCurrentGearset(out _, out var gearsetId);
 
             var inventory = InventoryManager.Instance();
-            var equipped = inventory == null
-                ? null
-                : inventory->GetInventoryContainer(InventoryType.EquippedItems);
-            var equippedStone = equipped != null && equipped->IsLoaded && equipped->Size > EquippedSoulCrystalSlot
-                ? equipped->GetInventorySlot(EquippedSoulCrystalSlot)
-                : null;
+            var equippedStone = ReadInventorySlot(inventory, InventoryType.EquippedItems, EquippedSoulCrystalSlot);
             var soulCrystalSlotEmpty = equippedStone != null && equippedStone->GetBaseItemId() == 0;
 
             var policy = new JobStonePolicyInput(
-                Plugin.IsAutomaticActivationAllowed(config),
+                config.Enabled,
                 config.EquipJobStoneForCurrentClass,
                 isBaseClass,
                 Plugin.PlayerState.Level,
@@ -155,7 +188,7 @@ internal sealed class JobStoneEquipService
             if (!ShouldAttempt(policy))
                 return;
 
-            var eligibleItemIds = GetEligibleStoneIds(currentClass);
+            var eligibleItemIds = GetEligibleStoneIds(currentClass, config.PreferredArcanistJob, out var preferredItemId);
             if (eligibleItemIds.Count == 0 || inventory == null)
                 return;
 
@@ -170,11 +203,21 @@ internal sealed class JobStoneEquipService
                 slots.Add(new JobStoneSlot(slot, item == null ? 0 : item->GetBaseItemId()));
             }
 
-            var match = SelectFirstMatchingStone(eligibleItemIds, slots);
+            var match = SelectMatchingStone(eligibleItemIds, slots, preferredItemId);
             if (match == null)
                 return;
 
-            if (!Plugin.IsAutomaticActivationAllowed(config)) { SuspendAutomatic(); return; }
+            if (!CanWrite(config, characterId, provider) || !CanChangeEquipmentNow()
+                || pendingEquip != null
+                || Plugin.PlayerState.ClassJob.RowId != currentClass.RowId || Plugin.PlayerState.Level < MinimumLevel
+                || !TryGetCurrentGearset(out _, out var currentGearsetId) || currentGearsetId != gearsetId
+                || InventoryManager.Instance() != inventory)
+                return;
+            var source = ReadInventorySlot(inventory, InventoryType.ArmorySoulCrystal, match.Value.Slot);
+            equippedStone = ReadInventorySlot(inventory, InventoryType.EquippedItems, EquippedSoulCrystalSlot);
+            if (source == null || source->GetBaseItemId() != match.Value.ItemId
+                || equippedStone == null || equippedStone->GetBaseItemId() != 0)
+                return;
             var moveResult = inventory->MoveItemSlot(
                 InventoryType.ArmorySoulCrystal,
                 (ushort)match.Value.Slot,
@@ -186,7 +229,7 @@ internal sealed class JobStoneEquipService
                 return;
             }
 
-            pendingEquip = new PendingEquip(match.Value.ItemId, gearsetId, now, now + ConfirmDelayMs);
+            pendingEquip = new PendingEquip(match.Value.ItemId, gearsetId, characterId, provider, now, now + ConfirmDelayMs);
             Plugin.Log.Information($"[FrenRider][JobStone] Requested armoury slot {match.Value.Slot} item {match.Value.ItemId} for base class {currentClass.Abbreviation}.");
         }
         catch (Exception ex)
@@ -198,7 +241,14 @@ internal sealed class JobStoneEquipService
     private unsafe void ConfirmEquip(CharacterConfig config, long now)
     {
         var pending = pendingEquip;
-        if (pending == null || now < pending.NextConfirmMs)
+        if (pending == null)
+            return;
+        if (pending.CharacterId != Plugin.PlayerState.ContentId)
+        {
+            SuspendAutomatic();
+            return;
+        }
+        if (now < pending.NextConfirmMs)
             return;
 
         if (now - pending.StartedMs > ConfirmTimeoutMs)
@@ -208,32 +258,26 @@ internal sealed class JobStoneEquipService
             return;
         }
 
-        if (!CanChangeEquipmentNow())
-            return;
-
         try
         {
-            var inventory = InventoryManager.Instance();
-            var equipped = inventory == null
-                ? null
-                : inventory->GetInventoryContainer(InventoryType.EquippedItems);
-            var item = equipped != null && equipped->IsLoaded && equipped->Size > EquippedSoulCrystalSlot
-                ? equipped->GetInventorySlot(EquippedSoulCrystalSlot)
-                : null;
+            var canWrite = CanWrite(config, pending.CharacterId, pending.Provider);
+            if (!ReferenceEquals(pending, pendingEquip))
+                return;
+            if (!canWrite) { SuspendAutomatic(); return; }
+            if (!CanChangeEquipmentNow())
+                return;
+
+            var item = ReadInventorySlot(InventoryManager.Instance(), InventoryType.EquippedItems, EquippedSoulCrystalSlot);
             if (item == null || item->GetBaseItemId() != pending.ItemId)
                 return;
 
-            var gearsets = RaptureGearsetModule.Instance();
-            if (gearsets == null
-                || gearsets->CurrentGearsetIndex != pending.GearsetId
-                || !gearsets->IsValidGearset(pending.GearsetId))
+            if (!TryGetCurrentGearset(out var gearsets, out var gearsetId) || gearsetId != pending.GearsetId)
             {
                 Plugin.Log.Warning("[FrenRider][JobStone] Job stone equipped, but the active gearset changed before confirmation; no gearset was updated.");
                 pendingEquip = null;
                 return;
             }
 
-            if (!Plugin.IsAutomaticActivationAllowed(config)) { SuspendAutomatic(); return; }
             pendingEquip = null;
             var updateResult = gearsets->UpdateGearset(pending.GearsetId);
             if (updateResult == 0)
@@ -248,5 +292,5 @@ internal sealed class JobStoneEquipService
         }
     }
 
-    private sealed record PendingEquip(uint ItemId, int GearsetId, long StartedMs, long NextConfirmMs);
+    private sealed record PendingEquip(uint ItemId, int GearsetId, ulong CharacterId, string Provider, long StartedMs, long NextConfirmMs);
 }

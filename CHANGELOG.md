@@ -1,3 +1,7 @@
+Unreleased
+
+- Save a per-character Arcanist preference for Scholar or Summoner, defaulting to Scholar. Auto-equip uses the other eligible crystal when needed and works outside duty in both activation modes while Run and job-stone auto-equip are enabled.
+
 2026-11-18 - 4.1.0.22 - Party duty exit
 
 - **Fixed Leave when all party members left** so FrenRider waits for duty completion and confirmed teammate departures. Solo duties stay open with this option.

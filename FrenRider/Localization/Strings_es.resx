@@ -1219,8 +1219,17 @@ No se puede deshacer.</value>
   <data name="Which rotation automation plugin to use.&#10;BMR: BossModReborn&#10;VBM: VanillaBossMod&#10;RSR: RotationSolver Reborn&#10;WRATH: Wrath&#10;DAEDALUS: Daedalus" xml:space="preserve">
     <value>Plugin de rotación: BMR=BossModReborn, VBM=VanillaBossMod, RSR=RotationSolver Reborn, WRATH=Wrath, DAEDALUS=Daedalus.</value>
   </data>
-  <data name="While Fren Rider is enabled, equip the first matching armoury-chest soul crystal when the current character is on a level 30+ base class and equipment can be changed safely. The current gearset is updated after the equip is confirmed." xml:space="preserve">
-    <value>Con Fren Rider activo, clase base nivel 30+ y cambio de equipo seguro, equipar primer cristal correspondiente del arsenal. Actualizar conjunto tras confirmación.</value>
+  <data name="Arcanist job preference" xml:space="preserve">
+    <value>Preferencia de oficio del arcanista</value>
+  </data>
+  <data name="Scholar" xml:space="preserve">
+    <value>Erudito</value>
+  </data>
+  <data name="Summoner" xml:space="preserve">
+    <value>Invocador</value>
+  </data>
+  <data name="While Fren Rider is enabled, equip a matching armoury-chest soul crystal outside duty when the current character is on a level 30+ base class and equipment can be changed safely. The current gearset is updated after the equip is confirmed." xml:space="preserve">
+    <value>Con Fren Rider activo, equipa fuera de las misiones un cristal de alma compatible del arsenal si la clase base actual es de nivel 30 o superior y se puede cambiar el equipo con seguridad. El conjunto actual se actualiza al confirmar el cambio.</value>
   </data>
   <data name="While FrenRider is enabled on Beastmaster, try Capture on eligible living beasts closer than 10 yalms, including passive beasts outside combat.&#10;Prefers an eligible current target; otherwise automatically targets the nearest eligible beast when Capture is ready.&#10;Skips owned beasts and enemies above your effective level, and respects both HP thresholds.&#10;Retries on later cooldowns, including already marked beasts." xml:space="preserve">
     <value>Domador activo: capturar bestias vivas válidas a menos de 10y, incluso pasivas fuera de combate. Priorizar objetivo actual o más cercano cuando listo. Omitir propias y nivel mayor, respetar ambos umbrales. Reintentar luego, incluidas marcadas.</value>

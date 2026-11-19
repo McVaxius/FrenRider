@@ -1793,6 +1793,8 @@ public sealed partial class Plugin : IDalamudPlugin
             Measure("chocobo-skills", chocoboSkills.Tick);
             Measure("chocobo-food", chocoboFood.Tick);
             Measure("chocobo-purchase", chocoboPurchase.Tick);
+            Measure("job-stone-equip", () => AutomationService.UpdateJobStoneEquip(
+                chocoboPurchase.HoldsMovement || PhoenixDownRecoveryService.HoldMovement));
             if (!IsFrenRiderEffectivelyEnabled)
             {
                 // Manual queues above keep polling; automatic pending work must not replay on entry.

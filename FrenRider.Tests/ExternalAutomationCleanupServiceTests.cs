@@ -2527,9 +2527,51 @@ public sealed class ExternalAutomationCleanupServiceTests
         Assert.True(native.ClearPresetOnDeath);
     }
 
+    [Fact]
+    public void JobStoneWritesRequireTheAdmittedProviderAndFreshDutyState()
+    {
+        var godMod = new NativeBossModProvider("GodMod", "Original", internalName: "GodMod");
+        using var service = godMod.CreateService();
+        using var runtime = new QuestingCombatRuntime(service, godMod.Interface, godMod.Log, 0);
+        runtime.Profile.ActivationMode = FrenRiderActivationMode.DutyOnly;
+        runtime.Profile.EquipJobStoneForCurrentClass = true;
+
+        var jobStones = new JobStoneEquipService(runtime.Host);
+        var canWrite = typeof(JobStoneEquipService).GetMethod("CanWrite", BindingFlags.Instance | BindingFlags.NonPublic)!;
+        bool CanWrite(string provider) => (bool)canWrite.Invoke(jobStones, [runtime.Profile, runtime.ContentId, provider])!;
+
+        Assert.False(runtime.Host.IsFrenRiderEffectivelyEnabled);
+        Assert.True(CanWrite("GodMod"));
+        godMod.BeforePresetRead = () => runtime.Conditions.Add(ConditionFlag.BoundByDuty95);
+        Assert.False(CanWrite("GodMod"));
+        godMod.BeforePresetRead = null;
+        runtime.Conditions.Clear();
+        godMod.UnavailableChannel = "BossMod.Presets.GetForceDisabled";
+        Assert.False(CanWrite("GodMod"));
+        godMod.UnavailableChannel = null;
+        godMod.Loaded = false;
+        Assert.False(CanWrite("GodMod"));
+
+        var bmr = new NativeBossModProvider("BMR", "Original");
+        var gmc = new NativeBossModProvider("BMR", "", internalName: "BMRVariantLoader");
+        godMod.InstalledPluginsOverride = [bmr.Exposed];
+        Assert.False(CanWrite("BMR"));
+        godMod.InstalledPluginsOverride = [bmr.Exposed, gmc.Exposed];
+        Assert.False(CanWrite("BMR"));
+        godMod.GmcReady = true;
+        Assert.True(CanWrite("BMR"));
+        Assert.False(CanWrite("GodMod"));
+        godMod.InstalledPluginsOverride = [godMod.Exposed, bmr.Exposed, gmc.Exposed];
+        Assert.False(CanWrite("GodMod"));
+        Assert.False(CanWrite("BMR"));
+        Assert.Empty(godMod.Writes);
+    }
+
     private sealed class NativeBossModProvider
     {
         internal bool Loaded = true;
+        internal bool GmcReady;
+        internal Action? BeforePresetRead;
         internal IExposedPlugin[]? InstalledPluginsOverride;
         internal IExposedPlugin Exposed => (IExposedPlugin)wrapper;
         internal bool AcceptDaedalusCommands;
@@ -2888,7 +2930,12 @@ public sealed class ExternalAutomationCleanupServiceTests
                 Writes.Add(channel + " " + values![0]);
                 return null;
             }
-            if (channel == "BossMod.Presets.GetForceDisabled") return ForceDisabled;
+            if (channel == AutorotIpcService.GmcSuiteReadyChannel) return GmcReady;
+            if (channel == "BossMod.Presets.GetForceDisabled")
+            {
+                BeforePresetRead?.Invoke();
+                return ForceDisabled;
+            }
             if (channel == "BossMod.AI.GetPreset") return CachedPresetName ?? string.Empty;
             if (channel == "BossMod.Presets.GetActive") return Active.Count == 1 ? Active[0] : null;
             if (channel == "BossMod.Presets.GetActiveList") return Active.ToList();
@@ -3625,7 +3672,7 @@ public sealed class ExternalAutomationCleanupServiceTests
                 new RaidModeService(() => Profile, () => { }, () => new RaidRuntimeFrame(), () => false, () => false));
             SetProperty(hostPlugin, nameof(Plugin.PartyService),
                 new PartyService(hostPlugin, Plugin.Log, Proxy<IGameGui>((method, _) => Default(method.ReturnType))));
-            SetField(Automation, "jobStoneEquipService", new JobStoneEquipService());
+            SetField(Automation, "jobStoneEquipService", new JobStoneEquipService(hostPlugin));
             Food = new ChocoboFoodService(() => true, () => ContentId, () => Profile,
                 _ => new CompanionFoodSnapshot(7, 2, 0), (_, _) => { CompanionDispatches++; return true; }, _ => { }, () => 0);
             Skills = new ChocoboSkillService(() => true, () => ContentId, () => Profile,

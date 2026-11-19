@@ -206,6 +206,7 @@ public class ConfigManager : IDadProfileStore
                 Setting("Idle Ticks Before Action", (source, target) => target.IdleTicksBeforeAction = source.IdleTicksBeforeAction),
                 Setting("Auto Discard", (source, target) => target.EnableAutoDiscard = source.EnableAutoDiscard),
                 Setting("Equip job stone for current class", (source, target) => target.EquipJobStoneForCurrentClass = source.EquipJobStoneForCurrentClass),
+                Setting("Arcanist job preference", (source, target) => target.PreferredArcanistJob = source.PreferredArcanistJob),
                 Setting("Push Presets On Enable", (source, target) => target.AutorotPushOnEnable = source.AutorotPushOnEnable),
             }),
     };

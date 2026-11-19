@@ -1,3 +1,4 @@
+using System.Text.Json;
 using FrenRider.Models;
 using FrenRider.Services;
 
@@ -13,6 +14,9 @@ public sealed class FrenRiderNarrowBundleTests
         Assert.Equal(0, config.RotationType);
         Assert.Equal(0, config.RsrAggroType);
         Assert.False(config.EquipJobStoneForCurrentClass);
+        Assert.Equal(ArcanistJobPreference.Scholar, config.PreferredArcanistJob);
+        Assert.Equal(ArcanistJobPreference.Scholar,
+            JsonSerializer.Deserialize<CharacterConfig>("{\"EquipJobStoneForCurrentClass\":true}")!.PreferredArcanistJob);
     }
 
     [Fact]
@@ -22,12 +26,14 @@ public sealed class FrenRiderNarrowBundleTests
         {
             RsrAggroType = 4,
             EquipJobStoneForCurrentClass = true,
+            PreferredArcanistJob = ArcanistJobPreference.Summoner,
         };
 
         var clone = config.Clone();
 
         Assert.Equal(4, clone.RsrAggroType);
         Assert.True(clone.EquipJobStoneForCurrentClass);
+        Assert.Equal(ArcanistJobPreference.Summoner, clone.PreferredArcanistJob);
     }
 
     [Fact]
@@ -39,6 +45,7 @@ public sealed class FrenRiderNarrowBundleTests
             {
                 RsrAggroType = 3,
                 EquipJobStoneForCurrentClass = true,
+                PreferredArcanistJob = ArcanistJobPreference.Summoner,
             },
             Characters = new Dictionary<string, CharacterConfig>
             {
@@ -54,6 +61,7 @@ public sealed class FrenRiderNarrowBundleTests
         {
             Assert.Equal(3, config.RsrAggroType);
             Assert.True(config.EquipJobStoneForCurrentClass);
+            Assert.Equal(ArcanistJobPreference.Summoner, config.PreferredArcanistJob);
         });
     }
 
@@ -126,8 +134,14 @@ public sealed class FrenRiderNarrowBundleTests
             new JobStoneSlot(2, 100),
         };
 
-        var selected = JobStoneEquipService.SelectFirstMatchingStone(eligible, slots);
+        var selected = JobStoneEquipService.SelectMatchingStone(eligible, slots);
 
         Assert.Equal(new JobStoneSlot(1, 200), selected);
+        Assert.Equal(slots[2], JobStoneEquipService.SelectMatchingStone(eligible, slots, preferredItemId: 100));
+        Assert.Equal(slots[1], JobStoneEquipService.SelectMatchingStone(eligible, slots, preferredItemId: 200));
+        Assert.Equal(slots[1], JobStoneEquipService.SelectMatchingStone(eligible, slots[..2], preferredItemId: 100));
+        Assert.Equal(slots[2], JobStoneEquipService.SelectMatchingStone(eligible, slots[2..], preferredItemId: 200));
+        Assert.Equal(slots[1], JobStoneEquipService.SelectMatchingStone(eligible, slots, preferredItemId: 999));
+        Assert.Null(JobStoneEquipService.SelectMatchingStone(eligible, slots[..1], preferredItemId: 100));
     }
 }

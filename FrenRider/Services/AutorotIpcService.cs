@@ -22,6 +22,37 @@ public class AutorotIpcService : IDisposable
 {
     internal const string DaedalusIsEnabledChannel = "Daedalus.IsEnabled";
     internal const string DaedalusSetEnabledChannel = "Daedalus.SetEnabled";
+    internal const string GmcSuiteReadyChannel = "BMRVariantLoader.Suite.IsReady.v1";
+
+    internal string? ReadJobStoneProvider()
+    {
+        try
+        {
+            string? host = null;
+            var gmcLoaded = false;
+            foreach (var plugin in pluginInterface.InstalledPlugins)
+            {
+                if (!plugin.IsLoaded) continue;
+                if (plugin.InternalName == "BMRVariantLoader") gmcLoaded = true;
+                if (plugin.InternalName is not ("GodMod" or "BossModReborn" or "BossMod")) continue;
+                if (host is not null) return null;
+                host = plugin.InternalName;
+            }
+
+            if (host == "BossModReborn" && gmcLoaded &&
+                pluginInterface.GetIpcSubscriber<bool>(GmcSuiteReadyChannel).InvokeFunc())
+                host = "BMR";
+            if (host is not ("GodMod" or "BMR")) return null;
+
+            // A readable result proves the selected native host has registered its preset IPC.
+            _ = pluginInterface.GetIpcSubscriber<bool>("BossMod.Presets.GetForceDisabled").InvokeFunc();
+            return host;
+        }
+        catch
+        {
+            return null;
+        }
+    }
 
     public enum RsrStateCommandType : byte
     {

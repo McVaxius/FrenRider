@@ -6,6 +6,7 @@ namespace FrenRider.Models;
 
 public enum PhoenixRecoveryLimitMode { StartedCasts, Time }
 public enum FrenRiderActivationMode { AlwaysOn, DutyOnly }
+public enum ArcanistJobPreference { Scholar, Summoner }
 public enum RepairCity { Automatic = 0, Uldah = 1, Gridania = 2, Limsa = 3, Ishgard = 4, Crystarium = 5, Sharlayan = 6, Tuliyollal = 7 }
 
 public enum FrenRiderCleanupMode
@@ -232,6 +233,7 @@ public class CharacterConfig
     // --- Automation / Misc ---
     public bool EnableAutoDiscard { get; set; } = false;
     public bool EquipJobStoneForCurrentClass { get; set; } = false;
+    public ArcanistJobPreference PreferredArcanistJob { get; set; } = ArcanistJobPreference.Scholar;
     public int FeedMeItemId { get; set; } = 0;
     public string FeedMeItem { get; set; } = "Boiled Egg";
     public bool FeedMeUseHighQuality { get; set; } = false;
@@ -391,6 +393,7 @@ public class CharacterConfig
             UseAdsLeaveAfterAdsDuty = UseAdsLeaveAfterAdsDuty,
             EnableAutoDiscard = EnableAutoDiscard,
             EquipJobStoneForCurrentClass = EquipJobStoneForCurrentClass,
+            PreferredArcanistJob = PreferredArcanistJob,
             FeedMeItemId = FeedMeItemId,
             FeedMeItem = FeedMeItem,
             FeedMeUseHighQuality = FeedMeUseHighQuality,

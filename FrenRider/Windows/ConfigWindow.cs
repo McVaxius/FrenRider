@@ -100,6 +100,7 @@ public partial class ConfigWindow : Window, IDisposable
     private static readonly string[] OnOff = { "Off", "On" };
     private static readonly string[] IdleActionModes = { "Specific Action", "Action From List" };
     private static readonly string[] IdleListModes = { "Default List", "Custom List" };
+    private static readonly string[] ArcanistJobOptions = { "Scholar", "Summoner" };
     private static readonly string[] RepairModes = { "Disabled", "Self", "NPC no-inn", "NPC No Inn + No TP", "NPC repair + inn room" };
     private static readonly string[] RepairCities = { "Automatic", "Ul'dah", "Gridania", "Limsa Lominsa", "Ishgard", "Crystarium", "Old Sharlayan", "Tuliyollal" };
 
@@ -2403,13 +2404,17 @@ public partial class ConfigWindow : Window, IDisposable
     private void DrawAutomationTab(CharacterConfig config)
     {
         using (UiText.Font(UiFontRole.PluginName)) UiGui.Text("Automation");
-        MaterialSettings.Columns("##AutomationGroups", UiGui.SettingsMinimum("Equip job stone for current class", "Idle Ticks Before Action"), () =>
+        var isArcanist = Plugin.ObjectTable?.LocalPlayer?.ClassJob.RowId == JobStoneEquipService.ArcanistClassId;
+        var minimumWidth = isArcanist
+            ? UiGui.SettingsMinimum("Equip job stone for current class", "Arcanist job preference", "Idle Ticks Before Action")
+            : UiGui.SettingsMinimum("Equip job stone for current class", "Idle Ticks Before Action");
+        MaterialSettings.Columns("##AutomationGroups", minimumWidth, () =>
         {
             UiGui.LcarsPanel("##AutomationSection0", () =>
             {
                 UiGui.SettingsSection("Loot & Equipment", "Loot Type");
                 DrawLootSection(config);
-                DrawEquipmentSection(config);
+                DrawEquipmentSection(config, isArcanist);
             }, 0);
             UiGui.LcarsPanel("##AutomationSection1", () =>
             {
@@ -2447,7 +2452,7 @@ public partial class ConfigWindow : Window, IDisposable
         });
     }
 
-    private void DrawEquipmentSection(CharacterConfig config)
+    private void DrawEquipmentSection(CharacterConfig config, bool isArcanist)
     {
         var equipJobStone = config.EquipJobStoneForCurrentClass;
         using (UiGui.SettingRow("Equip job stone for current class"))
@@ -2457,8 +2462,21 @@ public partial class ConfigWindow : Window, IDisposable
                 config.EquipJobStoneForCurrentClass = equipJobStone;
                 SaveEditingAccount();
             }
-            HelpMarker("While Fren Rider is enabled, equip the first matching armoury-chest soul crystal when the current character is on a level 30+ base class and equipment can be changed safely. The current gearset is updated after the equip is confirmed.");
+            HelpMarker("While Fren Rider is enabled, equip a matching armoury-chest soul crystal outside duty when the current character is on a level 30+ base class and equipment can be changed safely. The current gearset is updated after the equip is confirmed.");
             DrawDefaultSettingSyncButton("Equip job stone for current class");
+        }
+
+        if (!isArcanist) return;
+
+        var preferredJob = config.PreferredArcanistJob == ArcanistJobPreference.Summoner ? 1 : 0;
+        using (UiGui.SettingRow("Arcanist job preference"))
+        {
+            if (UiGui.Combo("Arcanist job preference", ref preferredJob, ArcanistJobOptions, ArcanistJobOptions.Length))
+            {
+                config.PreferredArcanistJob = (ArcanistJobPreference)preferredJob;
+                SaveEditingAccount();
+            }
+            DrawDefaultSettingSyncButton("Arcanist job preference");
         }
     }
 

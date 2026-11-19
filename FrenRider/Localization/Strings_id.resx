@@ -1321,8 +1321,17 @@ RSR: RotationSolver Reborn
 WRATH: Wrath
 DAEDALUS: Daedalus</value>
   </data>
-  <data name="While Fren Rider is enabled, equip the first matching armoury-chest soul crystal when the current character is on a level 30+ base class and equipment can be changed safely. The current gearset is updated after the equip is confirmed." xml:space="preserve">
-    <value>Saat Fren Rider aktif, pakai soul crystal pertama yang cocok dari armoury chest jika karakter berada di kelas dasar level 30+ dan perlengkapan dapat diganti dengan aman. Gearset saat ini diperbarui setelah pemakaian dikonfirmasi.</value>
+  <data name="Arcanist job preference" xml:space="preserve">
+    <value>Pilihan job Arcanist</value>
+  </data>
+  <data name="Scholar" xml:space="preserve">
+    <value>Scholar</value>
+  </data>
+  <data name="Summoner" xml:space="preserve">
+    <value>Summoner</value>
+  </data>
+  <data name="While Fren Rider is enabled, equip a matching armoury-chest soul crystal outside duty when the current character is on a level 30+ base class and equipment can be changed safely. The current gearset is updated after the equip is confirmed." xml:space="preserve">
+    <value>Saat Fren Rider aktif, pakai soul crystal yang cocok dari armoury chest di luar duty jika karakter memakai kelas dasar level 30 ke atas dan perlengkapan dapat diganti dengan aman. Gearset saat ini diperbarui setelah pemakaian dikonfirmasi.</value>
   </data>
   <data name="While FrenRider is enabled on Beastmaster, try Capture on eligible living beasts closer than 10 yalms, including passive beasts outside combat.&#xA;Prefers an eligible current target; otherwise automatically targets the nearest eligible beast when Capture is ready.&#xA;Skips owned beasts and enemies above your effective level, and respects both HP thresholds.&#xA;Retries on later cooldowns, including already marked beasts." xml:space="preserve">
     <value>Saat FrenRider aktif sebagai Beastmaster, coba Capture pada beast hidup yang memenuhi syarat dalam 10 yalms, termasuk beast pasif di luar pertempuran.
