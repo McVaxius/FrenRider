@@ -1,3 +1,9 @@
+2026-11-19 - 4.1.0.24 - Shared combat presets
+
+- Require GodMod or God Mod Companion with BossModReborn for FrenRider's Run automation. Settings remain available.
+- Select existing presets from GodMod or God Mod Companion and preserve saved manual choices.
+- Check the active combat host before starting an alternative rotation and clear stale Coppelia suppression confirmation when the combat host reloads.
+
 2026-11-19 - 4.1.0.23 - Saved Arcanist job preference
 
 - Save a per-character Arcanist preference for Scholar or Summoner, defaulting to Scholar. Auto-equip uses the other eligible crystal when needed and works outside duty in both activation modes while Run and job-stone auto-equip are enabled.

@@ -252,7 +252,7 @@ public sealed class CoppeliaPowerlevelLeaseService : IDisposable
             RecoverAfterLease,
             () =>
             {
-                if (!plugin.IsFrenRiderEffectivelyEnabled) return false;
+                if (!plugin.IsFrenRiderRunActive) return false;
                 plugin.BossModActionTweaksService.ResetRecovery();
                 return plugin.CombatService.SuppressForCoppeliaLease();
             });
@@ -261,7 +261,8 @@ public sealed class CoppeliaPowerlevelLeaseService : IDisposable
     }
 
     public bool IsLeaseActive => coordinator.IsLeaseActive;
-    public bool CombatSuppressed => coordinator.CombatSuppressed;
+    public bool CombatSuppressed => coordinator.CombatSuppressed && Plugin.Framework.IsInFrameworkUpdateThread
+        && plugin.CombatService.IsCoppeliaSuppressionCurrent;
     public string StatusText => coordinator.LeaseReason;
     public bool ShouldSuppressCompanionAutoSummon => coordinator.IsLeaseActive;
     public bool IsRecoveryCycleActive => recoveryCycleActive;
@@ -300,11 +301,17 @@ public sealed class CoppeliaPowerlevelLeaseService : IDisposable
         releaseProvider = Plugin.PluginInterface.GetIpcProvider<string, string>(ReleaseEndpoint);
         statusProvider = Plugin.PluginInterface.GetIpcProvider<string>(StatusEndpoint);
 
-        acquireProvider.RegisterFunc(requestJson => Serialize(coordinator.Acquire(ReadToken(requestJson))));
-        heartbeatProvider.RegisterFunc(requestJson => Serialize(coordinator.Heartbeat(ReadToken(requestJson))));
+        acquireProvider.RegisterFunc(requestJson => Serialize(CanConfirmLease()
+            ? coordinator.Acquire(ReadToken(requestJson))
+            : new CoppeliaPowerlevelResponse(false, "Coppelia's suppressed combat provider changed. Release the lease before reacquiring.")));
+        heartbeatProvider.RegisterFunc(requestJson => Serialize(CanConfirmLease()
+            ? coordinator.Heartbeat(ReadToken(requestJson))
+            : new CoppeliaPowerlevelResponse(false, "Coppelia's suppressed combat provider changed. Release the lease before reacquiring.")));
         releaseProvider.RegisterFunc(requestJson => Serialize(coordinator.Release(ReadToken(requestJson))));
-        statusProvider.RegisterFunc(() => Serialize(coordinator.BuildStatus()));
+        statusProvider.RegisterFunc(() => Serialize(coordinator.BuildStatus() with { CombatSuppressed = CombatSuppressed }));
     }
+
+    private bool CanConfirmLease() => !coordinator.CombatSuppressed || CombatSuppressed;
 
     private CoppeliaPowerlevelEnvironment BuildEnvironment()
     {
@@ -313,7 +320,7 @@ public sealed class CoppeliaPowerlevelLeaseService : IDisposable
         var (companionActive, companionName, companionObjectId) = FindCompanion();
 
         return new CoppeliaPowerlevelEnvironment(
-            plugin.IsFrenRiderEffectivelyEnabled,
+            plugin.IsFrenRiderRunActive,
             config.FrenName ?? string.Empty,
             fren is { IsFound: true, IsVisible: true } ? fren.Name : string.Empty,
             fren is { IsFound: true, IsVisible: true } ? FindObjectIdByName(fren.Name) : 0,
@@ -325,8 +332,8 @@ public sealed class CoppeliaPowerlevelLeaseService : IDisposable
 
     private void RecoverAfterLease(string reason)
     {
-        var config = plugin.ConfigManager.GetActiveConfig();
-        if (!plugin.IsFrenRiderEffectivelyEnabled)
+        var canRecover = plugin.CombatService.FinishCoppeliaSuppression();
+        if (!canRecover || !plugin.IsFrenRiderRunActive)
             return;
 
         recoveryCycleActive = true;

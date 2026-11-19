@@ -1806,7 +1806,7 @@ public sealed class ExternalAutomationCleanupServiceTests
             case "update": runtime.Combat.Update(); break;
             case "activation": runtime.Call("ActivateRotation", runtime.Profile, true); break;
             case "passive": runtime.Call("ApplyPassiveRotationSettings", runtime.Profile, "test"); break;
-            case "preset selection": runtime.Combat.ApplyPresetSelection("test", installPresets: false); break;
+            case "preset selection": runtime.Combat.ApplyPresetSelection("test"); break;
             case "follow startup": runtime.Combat.ApplyBossModFollowStartupDefaults(); break;
             case "mount restoration":
                 runtime.SetCombatField("mountedRotationSuppressed", true);
@@ -1977,74 +1977,6 @@ public sealed class ExternalAutomationCleanupServiceTests
         Assert.DoesNotContain(native.Writes, write => write.StartsWith("BossMod.Presets.SetActive", StringComparison.Ordinal));
     }
 
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public void PerLoadRefreshSurvivesLateProviderOrRejectedWritesWithoutChangingCombatState(bool providerMissing)
-    {
-        var native = new NativeBossModProvider("BMR", "Original")
-        { Loaded = !providerMissing, RejectPresetWrite = !providerMissing };
-        using var service = native.CreateService();
-        using var runtime = new QuestingCombatRuntime(service, native.Interface, native.Log, 3);
-        runtime.Profile.RotationType = 2;
-        runtime.Combat.RefreshPackagedPresetsOnLoad();
-        Assert.True(service.PackagedPresetRefreshPending);
-        Assert.Null(runtime.CombatField("pendingCombatSettings"));
-        Assert.Null(runtime.CombatField("lastAppliedCombatSettings"));
-        Assert.Equal(providerMissing ? 0 : 6, native.PresetCreates);
-
-        native.Loaded = true;
-        native.RejectPresetWrite = false;
-        runtime.SetCombatField("nextPackagedPresetRefreshMs", 0L);
-        runtime.Combat.RefreshPackagedPresetsOnLoad();
-
-        Assert.Equal(providerMissing ? 6 : 12, native.PresetCreates);
-        Assert.Null(runtime.CombatField("pendingCombatSettings"));
-        Assert.Null(runtime.CombatField("lastAppliedCombatSettings"));
-        Assert.False(service.PackagedPresetRefreshPending);
-        Assert.Equal(new[] { "Original" }, native.Active);
-        Assert.Empty(runtime.Commands);
-    }
-
-    [Theory]
-    [InlineData("BMR", "BossModReborn", 0)]
-    [InlineData("VBM", "BossMod", 1)]
-    [InlineData("BMR", "GodMod", 5)]
-    public void PerLoadRefreshTargetsTheSelectedBossModOnce(string provider, string internalName, int index)
-    {
-        var native = new NativeBossModProvider(provider, "Original", internalName: internalName);
-        using var service = native.CreateService();
-        using var runtime = new QuestingCombatRuntime(service, native.Interface, native.Log, index);
-        runtime.StopActivity();
-        runtime.Profile.AutoRotationType = "none";
-        runtime.Combat.RefreshPackagedPresetsOnLoad();
-        Assert.Equal(6, native.PresetCreates);
-        Assert.False(service.PackagedPresetRefreshPending);
-        Assert.Equal(new[] { "Original" }, native.Active);
-        native.PresetDefinitions["passive - tank"] = "edited after the load refresh";
-        runtime.SetCombatField("nextPackagedPresetRefreshMs", 0L);
-        runtime.Combat.RefreshPackagedPresetsOnLoad();
-        Assert.Equal(6, native.PresetCreates);
-        Assert.Equal("edited after the load refresh", native.PresetDefinitions["passive - tank"]);
-    }
-
-    [Fact]
-    public void PendingPackagedRefreshHonorsMountedHoldAndCompletesAfterRelease()
-    {
-        var native = new NativeBossModProvider("BMR", "Original");
-        using var service = native.CreateService();
-        using var runtime = new QuestingCombatRuntime(service, native.Interface, native.Log, 0);
-        runtime.Conditions.Add(ConditionFlag.Mounted);
-        runtime.Combat.RefreshPackagedPresetsOnLoad();
-        Assert.Equal(0, native.PresetCreates);
-        Assert.True(service.PackagedPresetRefreshPending);
-
-        runtime.Conditions.Clear();
-        runtime.Combat.RefreshPackagedPresetsOnLoad();
-        Assert.Equal(6, native.PresetCreates);
-        Assert.False(service.PackagedPresetRefreshPending);
-    }
-
     [Fact]
     public void RejectedPresetSelectionReturnsFalseWithoutClaimingAnActivePreset()
     {
@@ -2069,7 +2001,7 @@ public sealed class ExternalAutomationCleanupServiceTests
     [InlineData(3, true)]
     [InlineData(4, false)]
     [InlineData(4, true)]
-    public void NonBossModRotationWithNoPresetStillActivatesWhileBundledRefreshWaits(int provider, bool passive)
+    public void AlternativeRotationWithNoNativeProviderDoesNotStart(int provider, bool passive)
     {
         var native = new NativeBossModProvider("BMR", "Original")
         { Loaded = false, AcceptDaedalusCommands = provider == 4 };
@@ -2079,23 +2011,13 @@ public sealed class ExternalAutomationCleanupServiceTests
         runtime.StopActivity();
         runtime.Profile.AutoRotationType = "none";
         runtime.Profile.DaedalusTargetMode = DaedalusTargetMode.None;
-        runtime.Combat.RefreshPackagedPresetsOnLoad();
         if (passive)
             runtime.Call("ApplyPassiveRotationSettings", runtime.Profile, "test");
         else
             runtime.Call("ActivateRotation", runtime.Profile, true);
-        Assert.NotNull(runtime.CombatField("lastAppliedCombatSettings"));
-        Assert.True(service.PackagedPresetRefreshPending);
-        if (rsr is null) Assert.Equal(0, native.PresetCreates);
-        Assert.Null(runtime.CombatField("pendingCombatSettings"));
-        if (provider == 3) Assert.Contains("/wrath auto on", runtime.Commands);
-        if (rsr is not null)
-        {
-            Assert.Equal(passive ? AutorotIpcService.RsrStateCommandType.Off : AutorotIpcService.RsrStateCommandType.Auto, rsr.Mode);
-            if (passive) Assert.Empty(rsr.Modes);
-            else Assert.Equal(new[] { AutorotIpcService.RsrStateCommandType.Auto }, rsr.Modes);
-        }
-        if (provider == 4) Assert.Contains("Daedalus.SetEnabled True", native.Writes);
+        Assert.DoesNotContain("/wrath auto on", runtime.Commands);
+        if (rsr is not null) Assert.Equal(AutorotIpcService.RsrStateCommandType.Off, rsr.Mode);
+        if (rsr is null) Assert.DoesNotContain(AutorotIpcService.DaedalusSetEnabledChannel + " True", native.Writes);
     }
 
     [Theory]
@@ -2243,7 +2165,7 @@ public sealed class ExternalAutomationCleanupServiceTests
         if (retainsOwner) Assert.Equal(accepted, runtime.CombatField("lastAppliedCombatSettings"));
         if (prior == "provider") Assert.False(runtime.Combat.WrathAutoActive);
 
-        runtime.Combat.ApplyPresetSelection("configuration-only selection", installPresets: false);
+        runtime.Combat.ApplyPresetSelection("configuration-only selection");
         Assert.Equal(retainsOwner ? provider : -1, runtime.CombatField("lastActivePluginIdx"));
         var configured = runtime.CombatField("lastAppliedCombatSettings");
         Assert.Equal(false, runtime.Call("ActivateRotation", runtime.Profile, true));

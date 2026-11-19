@@ -24,6 +24,22 @@ public class AutorotIpcService : IDisposable
     internal const string DaedalusSetEnabledChannel = "Daedalus.SetEnabled";
     internal const string GmcSuiteReadyChannel = "BMRVariantLoader.Suite.IsReady.v1";
 
+    internal string? ReadAutomationProvider()
+    {
+        string? host = null;
+        var gmcLoaded = false;
+        foreach (var plugin in pluginInterface.InstalledPlugins)
+        {
+            if (!plugin.IsLoaded) continue;
+            if (plugin.InternalName == "BMRVariantLoader") gmcLoaded = true;
+            if (plugin.InternalName is not ("GodMod" or "BossModReborn" or "BossMod")) continue;
+            if (host is not null) return null;
+            host = plugin.InternalName;
+        }
+
+        return host == "BossModReborn" && gmcLoaded ? "BMR" : host == "GodMod" ? host : null;
+    }
+
     internal string? ReadJobStoneProvider()
     {
         try
@@ -1244,10 +1260,14 @@ public class AutorotIpcService : IDisposable
     }
 
     public bool TrySetRsrMode(RsrStateCommandType mode)
+        => TrySetRsrMode(mode, null);
+
+    internal bool TrySetRsrMode(RsrStateCommandType mode, Func<bool>? canDispatch)
     {
         try
         {
             var subscriber = pluginInterface.GetIpcSubscriber<RsrStateCommandType, object>("RotationSolverReborn.ChangeOperatingMode");
+            if (canDispatch?.Invoke() == false) return false;
             subscriber.InvokeAction(mode);
             log.Debug($"RSR mode set via IPC: {mode}");
             return true;
@@ -1536,10 +1556,14 @@ public class AutorotIpcService : IDisposable
     }
 
     public bool TrySetDaedalusEnabled(bool enabled)
+        => TrySetDaedalusEnabled(enabled, null);
+
+    internal bool TrySetDaedalusEnabled(bool enabled, Func<bool>? canDispatch)
     {
         try
         {
             var subscriber = pluginInterface.GetIpcSubscriber<bool, object>(DaedalusSetEnabledChannel);
+            if (canDispatch?.Invoke() == false) return false;
             subscriber.InvokeAction(enabled);
             log.Debug($"Daedalus enabled state set via IPC: {enabled}");
             return true;

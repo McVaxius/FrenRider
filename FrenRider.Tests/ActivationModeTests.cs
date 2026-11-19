@@ -192,8 +192,7 @@ public sealed class ActivationModeTests
         foreach (var manual in new[] { false, true })
         {
             var log = Proxy<IPluginLog>((_, _) => null);
-            var pi = Proxy<IDalamudPluginInterface>((method, _) => method.Name == "get_InstalledPlugins"
-                ? Array.Empty<IExposedPlugin>() : null);
+            var pi = PluginInterfaceWithGodMod();
             using var autorot = new AutorotIpcService(pi, log);
             using var runtime = new ExternalAutomationCleanupServiceTests.QuestingCombatRuntime(autorot, pi, log, 0, captureCommands: true);
             runtime.StopActivity();
@@ -373,6 +372,10 @@ public sealed class ActivationModeTests
                 typeof(Plugin).GetField("<ConfigManager>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic)!
                     .SetValue(plugin, manager);
 
+                using var autorot = new AutorotIpcService(PluginInterfaceWithGodMod(), Proxy<IPluginLog>((_, _) => null));
+                typeof(Plugin).GetField("<AutorotIpcService>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic)!
+                    .SetValue(plugin, autorot);
+
                 foreach (var releaseOverlay in new[] { false, true })
                 {
                     if (releaseOverlay)
@@ -490,6 +493,18 @@ public sealed class ActivationModeTests
                     StringComparison.OrdinalIgnoreCase)) throw new IOException("Unexpected synthetic test directory.");
             directory.Delete(true);
         }
+    }
+
+    private static IDalamudPluginInterface PluginInterfaceWithGodMod()
+    {
+        var godMod = Proxy<IExposedPlugin>((method, _) => method.Name switch
+        {
+            "get_InternalName" => "GodMod",
+            "get_IsLoaded" => true,
+            _ => null,
+        });
+        return Proxy<IDalamudPluginInterface>((method, _) => method.Name == "get_InstalledPlugins"
+            ? new[] { godMod } : null);
     }
 
     internal static T Proxy<T>(Func<MethodInfo, object?[]?, object?> handler) where T : class

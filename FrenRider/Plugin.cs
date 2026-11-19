@@ -122,10 +122,12 @@ public sealed partial class Plugin : IDalamudPlugin
 
     internal bool IsFrenRiderEffectivelyEnabled => IsAutomaticActivationAllowed(ConfigManager.GetActiveConfig());
 
-    internal bool AreCombatRotationsEnabled => IsFrenRiderEffectivelyEnabled;
+    internal string? AutomationProvider => AutorotIpcService.ReadAutomationProvider();
+    internal bool IsFrenRiderRunActive => IsFrenRiderEffectivelyEnabled && AutomationProvider is not null;
+    internal bool AreCombatRotationsEnabled => IsFrenRiderRunActive;
 
     internal bool IsWaitingForDuty => ConfigManager.GetActiveConfig() is { Enabled: true,
-        ActivationMode: FrenRiderActivationMode.DutyOnly } && !AreCombatRotationsEnabled;
+        ActivationMode: FrenRiderActivationMode.DutyOnly } && !IsFrenRiderEffectivelyEnabled;
     private readonly ChocoboExplorationService chocoboExploration;
     private int chocoboRequestGeneration;
     private readonly ChocoboSkillService chocoboSkills;
@@ -1113,18 +1115,19 @@ public sealed partial class Plugin : IDalamudPlugin
 
     private void RefreshEffectiveActivation()
     {
-        if (IsFrenRiderEffectivelyEnabled && startupCastingSettingsPending
+        if (IsFrenRiderRunActive && startupCastingSettingsPending
             && ConfigManager.TryGetActiveConfig(out var startupProfile)
             && startupProfile != null)
         {
             startupCastingSettingsPending = false;
             BossModActionTweaksService.ApplyDontMoveWhileCastingOnLoad(Configuration.DontMoveWhileCasting);
         }
-        var enabled = IsFrenRiderEffectivelyEnabled;
+        var enabled = IsFrenRiderRunActive;
         if (enabled == wasEffectivelyEnabled) return;
         wasEffectivelyEnabled = enabled;
-        if (!enabled && IsWaitingForDuty)
-            SuspendAutomaticForDutyWait();
+        var providerMissing = !enabled && IsFrenRiderEffectivelyEnabled;
+        if (!enabled && (IsWaitingForDuty || providerMissing))
+            SuspendAutomaticForDutyWait(preserveUtility: providerMissing);
         else
         {
             dutyWaitSuspended = false;
@@ -1132,17 +1135,20 @@ public sealed partial class Plugin : IDalamudPlugin
         }
     }
 
-    private void SuspendAutomaticForDutyWait()
+    private void SuspendAutomaticForDutyWait(bool preserveUtility)
     {
         // Do not use disable/restore: that can restore external follow or AI ON.
         // This transition is reached only after this instance activated automatic work.
         dutyWaitSuspended = true;
-        RaidModeService.Disable();
-        AutomationService.SuspendAutomatic();
+        if (!preserveUtility)
+        {
+            RaidModeService.Disable();
+            AutomationService.SuspendAutomatic();
+            chocoboSkills.SuspendAutomatic();
+            chocoboFood.SuspendAutomatic();
+            chocoboExploration.SuspendAutomatic();
+        }
         PartyService.SuspendAutomatic();
-        chocoboSkills.SuspendAutomatic();
-        chocoboFood.SuspendAutomatic();
-        chocoboExploration.SuspendAutomatic();
         FollowService.SuspendForActivation();
         MountService.PreemptFarChase("waiting for duty");
         MountService.ResetFateClingHold();
@@ -1159,7 +1165,7 @@ public sealed partial class Plugin : IDalamudPlugin
 
     private void ApplyEffectiveActivation(bool enabled)
     {
-        if (enabled && !IsFrenRiderEffectivelyEnabled) return;
+        if (enabled && !IsFrenRiderRunActive) return;
         if (!enabled) RaidModeService?.Disable();
         Log.Information($"[FrenRider] FrenRider enabled state changed to: {enabled}");
         BossModConflictWarningService.Update(enabled);
@@ -1180,7 +1186,7 @@ public sealed partial class Plugin : IDalamudPlugin
 			//commandManager?.ProcessCommand("/xldisableplugin AutoDuty");
 			//commandManager?.ProcessCommand("/echo hi");
 
-            if (allowCombatSetup && IsFrenRiderEffectivelyEnabled)
+            if (allowCombatSetup && IsFrenRiderRunActive)
             {
                 CaptureExternalAutomationSnapshot("FrenRider enabled");
 
@@ -1188,14 +1194,14 @@ public sealed partial class Plugin : IDalamudPlugin
                 CombatService.ApplyBossModFollowStartupDefaults();
 
                 Log.Information("[FrenRider] Applying current BossMod preset selection");
-                CombatService.ApplyPresetSelection("FrenRider enabled", installPresets: false);
+                CombatService.ApplyPresetSelection("FrenRider enabled");
             }
             else
             {
                 Log.Information($"[FrenRider][DutyAuthority] Skipped enable-time combat setup: {CombatService.StateDetail}.");
             }
 
-            if (!IsFrenRiderEffectivelyEnabled) return;
+            if (!IsFrenRiderRunActive) return;
             var obstacleConfig = ConfigManager.GetActiveConfig();
             AutorotIpcService.SendBossModAiCommand(
                 obstacleConfig.ObstacleMapsOn
@@ -1627,7 +1633,7 @@ public sealed partial class Plugin : IDalamudPlugin
             if (IsFrenRiderEffectivelyEnabled)
                 Measure("raid-mode", RaidModeService.Update);
             Measure("ads-readiness", AdsIntegrationService.ObserveHandoffReadiness);
-            if (IsFrenRiderEffectivelyEnabled)
+            if (IsFrenRiderRunActive)
                 Measure("casting-recovery", BossModActionTweaksService.UpdateRecovery);
             Measure("coppelia-powerlevel-lease", CoppeliaPowerlevelLeaseService.Update);
             Measure("ads-hyper-focus-lease", AdsHyperFocusLeaseService.Update);
@@ -1788,17 +1794,19 @@ public sealed partial class Plugin : IDalamudPlugin
                 Measure("ads-integration", AdsIntegrationService.Update);
             Measure("ads-reflection", () => AdsReflectionIpcService.Update());
             Measure("utility-gate", AutomationService.UpdateUtilityGate);
-            if (IsFrenRiderEffectivelyEnabled)
+            if (IsFrenRiderRunActive)
                 Measure("phoenix-down-recovery", PhoenixDownRecoveryService.Update);
             Measure("chocobo-skills", chocoboSkills.Tick);
             Measure("chocobo-food", chocoboFood.Tick);
             Measure("chocobo-purchase", chocoboPurchase.Tick);
             Measure("job-stone-equip", () => AutomationService.UpdateJobStoneEquip(
                 chocoboPurchase.HoldsMovement || PhoenixDownRecoveryService.HoldMovement));
-            if (!IsFrenRiderEffectivelyEnabled)
+            if (!IsFrenRiderRunActive)
             {
-                // Manual queues above keep polling; automatic pending work must not replay on entry.
-                AutomationService.SuspendAutomatic();
+                if (!IsFrenRiderEffectivelyEnabled)
+                    AutomationService.SuspendAutomatic();
+                else if (config != null && !chocoboPurchase.HoldsMovement && !PhoenixDownRecoveryService.HoldMovement)
+                    Measure("companion-care", () => AutomationService.UpdateCompanionCare(config));
                 PartyService.SuspendAutomatic();
                 return;
             }

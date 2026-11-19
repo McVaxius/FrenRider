@@ -160,7 +160,9 @@ public class MainWindow : Window, IDisposable
                             UiGui.TextDisabled("Activation mode");
                             if (UiGui.ActivationModeControls(config)) plugin.ConfigManager.SaveCurrentAccount();
                         });
-                        if (plugin.IsWaitingForDuty)
+                        if (plugin.AutomationProvider is null)
+                            UiGui.TextColored(UiHelpers.Yellow, "Enable GodMod or God Mod Companion with BossModReborn to run FrenRider.");
+                        else if (plugin.IsWaitingForDuty)
                             UiGui.TextColored(UiHelpers.Yellow, "Waiting for duty");
                     }
                     finally { ImGui.PopID(); }

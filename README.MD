@@ -114,7 +114,7 @@ These four preferences save with the existing character profile. Disable cancels
 - Social spacing with configurable X/Z wiggle and indoor behavior.
 - Formation following for party-slot based positioning.
 - Mount and flying behavior, including Fly You Fools, own-mount chase, far-chase recovery, and vnavmesh flying-stuck recovery through ECommons keypress support. Fly You Fools uses ground navigation in no-flight Forays but remains flight-enabled in the Diadem; nearby own mounts use the local ClientStructs mount state (excluding pillion) for dismount correction.
-- Combat integration for GodMod, BMR, VBM, RotationSolver Reborn, Wrath, and Daedalus, with packaged BossMod presets.
+- Combat integration for GodMod, BossModReborn through God Mod Companion, RotationSolver Reborn, Wrath, and Daedalus.
 - Separate RotationSolver Reborn operating-mode and hostile-target choices, synchronized per character.
 - FATE sync, food use/search, companion summon/stance, idle commands, auto-discard, repair, and desynthesis helpers.
 - Optional per-character job-stone equip for level 30+ base classes, disabled by default.
@@ -224,11 +224,11 @@ During the same automation, selected VBM has both its FrenRider-owned AI and run
 
 **Equip job stone for current class** is a per-character Automation setting and defaults off. While Fren Rider is enabled, it acts only on a level 30+ base class when equipment can be changed safely and the character has a valid current gearset. Fren Rider checks the Soul Crystal armoury chest in slot order, equips the first stone whose job belongs to the current class, confirms the equipped slot, and updates that gearset once. A character already on a job is never scanned; Arcanist uses whichever matching Summoner or Scholar stone is encountered first.
 
-BossMod preset activation is provider-specific: GodMod uses GodMod, BMR uses BossModReborn, and VBM uses VanillaBossMod. RSR, Wrath and Daedalus retain their BMR companion routing. **Push Presets Now** installs the packaged presets and applies the current selection through the same routing. Multiple loaded BossMod providers block shared IPC writes because the endpoint owner is ambiguous.
+Fren Rider requires GodMod or God Mod Companion with BossModReborn for Run automation. Settings remain available. Use one native BossMod host at a time so shared IPC has a single owner.
 
-Plugin loads and updates automatically install the six shipped BossMod preset definitions when the selected provider is available. Edited copies under those six names are replaced; differently named custom presets and the current runtime selection are preserved. This definition push runs independently of rotation activation and needs no enable toggle.
+**Apply Selected Preset** selects an existing preset from GodMod or God Mod Companion.
 
-Combat's **Configure rotation preset manually** uses your selected existing preset for the current normal, deep-dungeon or FATE context. With it off, Fren Rider selects its packaged preset by job role. These choices belong to the active character profile; editing another profile in Settings does not redirect active automation.
+Combat's **Configure rotation preset manually** uses your selected existing preset for the current normal, deep-dungeon or FATE context. With it off, Fren Rider selects an existing role preset from the current host by job role. These choices belong to the active character profile; editing another profile in Settings does not redirect active automation.
 
 Daedalus is rotation option 4 and is controlled through its typed `Daedalus.IsEnabled` and `Daedalus.SetEnabled` IPC. When Daedalus is the effective normal or Foray rotation, **Daedalus Engage Mode** can send None, Focus, Split, or Kill Adds through Daedalus LAN coordination. Focus requires a living enemy hard target; failures leave Daedalus unchanged. Fren Rider disables Daedalus during conflicting rotation, mounted, Questionable, and Coppelia ownership. **Restore snapshot** returns Daedalus to the enabled state captured before Fren Rider changed it; **Turn everything off** disables it.
 
@@ -254,7 +254,7 @@ Common integrations used by code paths:
 
 - **vnavmesh**: NavMesh pathing, flying, and path-state checks.
 - **Visland**: alternative movement backend.
-- **BossMod/BossMod Reborn**: BossMod Follow and packaged autorotation presets.
+- **GodMod or GMC with BossModReborn**: BossMod Follow and suite autorotation presets.
 - **RotationSolver Reborn**, **Wrath**, and **Daedalus**: combat automation modes.
 - **ADS**: duty handoff, repair, desynthesis, and ADS exit method.
 - **Lifestream**: optional teleport-to-fren support when the fren is out of zone.

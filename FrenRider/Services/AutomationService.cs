@@ -190,7 +190,6 @@ public class AutomationService : IDisposable
 
         var inCombat = Plugin.Condition[ConditionFlag.InCombat];
         var mounted = Plugin.Condition[ConditionFlag.Mounted];
-        var inDuty = Plugin.Condition[ConditionFlag.BoundByDuty];
         var now = Environment.TickCount64;
 
         CheckAutoDesynth(config, now);
@@ -268,8 +267,19 @@ public class AutomationService : IDisposable
             CheckFood(config);
         }
 
+        UpdateCompanionCare(config);
+    }
+
+    internal void UpdateCompanionCare(CharacterConfig config)
+    {
+        if (zoneService.ZoneChanged || plugin.AdsIntegrationService.ShouldPauseDutySystems
+            || IsUtilityGateActive || VermaxionOwnsPostVoyageCleanup()
+            || Plugin.Condition[ConditionFlag.InCombat] || Plugin.Condition[ConditionFlag.Mounted])
+            return;
+
+        var now = Environment.TickCount64;
         // Companion chocobo summoning (every 15 seconds)
-        if (now - lastCompanionCheckMs > 15000 && !inCombat && !mounted && !inDuty)
+        if (now - lastCompanionCheckMs > 15000 && !Plugin.Condition[ConditionFlag.BoundByDuty])
         {
             lastCompanionCheckMs = now;
             CheckCompanion(config);

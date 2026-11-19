@@ -2823,10 +2823,10 @@ public partial class ConfigWindow : Window, IDisposable
 
     private void DrawAutorotSection(CharacterConfig config)
     {
-        UiGui.TextDisabled("FrenRider installs BossMod presets whenever it is enabled.");
+        UiGui.TextDisabled("Presets are supplied by GodMod or God Mod Companion.");
 
-        if (UiGui.Button("Push Presets Now"))
-            plugin.CombatService.ApplyPresetSelection("manual preset push");
+        if (UiGui.Button("Apply Selected Preset"))
+            plugin.CombatService.ApplyPresetSelection("manual preset selection");
         ImGui.SameLine();
         UiGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1), plugin.AutorotIpcService.LastStatus);
     }
@@ -3481,11 +3481,11 @@ public partial class ConfigWindow : Window, IDisposable
         UiGui.Text("Autorot Presets");
         ImGui.Spacing();
 
-        UiGui.TextDisabled("FrenRider installs BossMod presets whenever it is enabled.");
+        UiGui.TextDisabled("Presets are supplied by GodMod or God Mod Companion.");
 
-        if (UiGui.Button("Push Presets Now"))
+        if (UiGui.Button("Apply Selected Preset"))
         {
-            plugin.CombatService.ApplyPresetSelection("manual preset push");
+            plugin.CombatService.ApplyPresetSelection("manual preset selection");
         }
         ImGui.SameLine();
         UiGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1), plugin.AutorotIpcService.LastStatus);
