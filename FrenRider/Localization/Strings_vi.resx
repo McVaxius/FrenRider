@@ -1014,11 +1014,11 @@ Tự động: Plugin quyết định theo nghề</value>
   <data name="Customize the glyphs used for enabled/disabled icon modes." xml:space="preserve">
     <value>Tùy chỉnh ký hiệu dùng cho chế độ biểu tượng bật/tắt.</value>
   </data>
-  <data name="DTR bar display mode:&#xA;Text Only: 'FR: On/Off'&#xA;Icon+Text: '⚫ FR'&#xA;Icon Only: '⚫'" xml:space="preserve">
+  <data name="DTR bar display mode:&#xA;Text Only: 'FR: On/Off'&#xA;Icon+Text: '● FR'&#xA;Icon Only: '●'" xml:space="preserve">
     <value>Chế độ hiển thị thanh DTR:
 Chỉ chữ: 'FR: Bật/Tắt'
-Biểu tượng+Chữ: '⚫ FR'
-Chỉ biểu tượng: '⚫'</value>
+Biểu tượng+Chữ: '● FR'
+Chỉ biểu tượng: '●'</value>
   </data>
   <data name="Default List: Built-in emote list&#xA;Custom List: Your own list of commands" xml:space="preserve">
     <value>Danh sách mặc định: Danh sách biểu cảm có sẵn
@@ -1079,7 +1079,7 @@ Mặc định: 0.3 giây. CẢNH BÁO: Dưới 0.1 có thể ảnh hưởng hi�
   <data name="If configured food runs out, search inventory for any food starting from lowest item ID." xml:space="preserve">
     <value>Nếu hết thức ăn đã cấu hình, tìm bất kỳ thức ăn nào trong túi từ ID vật phẩm thấp nhất.</value>
   </data>
-  <data name="If enabled, you will summon your own mount instead of pillion riding.&#xA;Useful for flying zones.&#xA;&#xA;⚠️ IMPORTANT: This feature requires you to be grouped with your fren.&#xA;It will not work properly if ungrouped (won't jump into air to follow)." xml:space="preserve">
+  <data name="If enabled, you will summon your own mount instead of pillion riding.&#xA;Useful for flying zones.&#xA;&#xA;⚠ IMPORTANT: This feature requires you to be grouped with your fren.&#xA;It will not work properly if ungrouped (won't jump into air to follow)." xml:space="preserve">
     <value>Nếu bật, bạn sẽ triệu hồi thú cưỡi riêng thay vì ngồi sau.
 Hữu ích trong khu vực bay.
 
@@ -2074,7 +2074,7 @@ Thử lại ở lần hồi chiêu sau, kể cả thú đã đánh dấu.</value
   <data name="Waiting: {0}." xml:space="preserve">
     <value>Đang đợi: {0}.</value>
   </data>
-  <data name="⚠️ WARNING: AutoDuty Plugin Detected" xml:space="preserve">
+  <data name="⚠ WARNING: AutoDuty Plugin Detected" xml:space="preserve">
     <value>⚠ CẢNH BÁO: Phát hiện plugin AutoDuty</value>
   </data>
   <data name="• Force respawn at entrance" xml:space="preserve">

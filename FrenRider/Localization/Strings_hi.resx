@@ -989,8 +989,8 @@
   <data name="Customize the glyphs used for enabled/disabled icon modes." xml:space="preserve">
     <value>सक्षम/बंद आइकन मोड में इस्तेमाल चिह्न बदलें.</value>
   </data>
-  <data name="DTR bar display mode:&#xA;Text Only: 'FR: On/Off'&#xA;Icon+Text: '⚫ FR'&#xA;Icon Only: '⚫'" xml:space="preserve">
-    <value>DTR बार प्रदर्शन मोड:&#xA;केवल पाठ: 'FR: On/Off'&#xA;आइकन+पाठ: '⚫ FR'&#xA;केवल आइकन: '⚫'</value>
+  <data name="DTR bar display mode:&#xA;Text Only: 'FR: On/Off'&#xA;Icon+Text: '● FR'&#xA;Icon Only: '●'" xml:space="preserve">
+    <value>DTR बार प्रदर्शन मोड:&#xA;केवल पाठ: 'FR: On/Off'&#xA;आइकन+पाठ: '● FR'&#xA;केवल आइकन: '●'</value>
   </data>
   <data name="Default List: Built-in emote list&#xA;Custom List: Your own list of commands" xml:space="preserve">
     <value>डिफ़ॉल्ट सूची: अंतर्निहित emote सूची&#xA;अपनी सूची: आपकी अपनी कमांड सूची</value>
@@ -1037,8 +1037,8 @@
   <data name="If configured food runs out, search inventory for any food starting from lowest item ID." xml:space="preserve">
     <value>कॉन्फ़िगर किया भोजन खत्म हो तो सबसे कम वस्तु ID से शुरू करके सूची में कोई भी भोजन खोजें.</value>
   </data>
-  <data name="If enabled, you will summon your own mount instead of pillion riding.&#xA;Useful for flying zones.&#xA;&#xA;⚠️ IMPORTANT: This feature requires you to be grouped with your fren.&#xA;It will not work properly if ungrouped (won't jump into air to follow)." xml:space="preserve">
-    <value>सक्षम होने पर पीछे बैठने के बजाय अपनी सवारी बुलाएँगे.&#xA;उड़ने वाले क्षेत्रों के लिए उपयोगी.&#xA;&#xA;⚠️ ध्यान दें: इस सुविधा के लिए Fren के साथ समूह में होना ज़रूरी है.&#xA;समूह से बाहर सही काम नहीं करेगी (पीछा करने के लिए हवा में नहीं कूदेगी).</value>
+  <data name="If enabled, you will summon your own mount instead of pillion riding.&#xA;Useful for flying zones.&#xA;&#xA;⚠ IMPORTANT: This feature requires you to be grouped with your fren.&#xA;It will not work properly if ungrouped (won't jump into air to follow)." xml:space="preserve">
+    <value>सक्षम होने पर पीछे बैठने के बजाय अपनी सवारी बुलाएँगे.&#xA;उड़ने वाले क्षेत्रों के लिए उपयोगी.&#xA;&#xA;⚠ ध्यान दें: इस सुविधा के लिए Fren के साथ समूह में होना ज़रूरी है.&#xA;समूह से बाहर सही काम नहीं करेगी (पीछा करने के लिए हवा में नहीं कूदेगी).</value>
   </data>
   <data name="If your configured food runs out, search inventory for any food starting from lowest item ID." xml:space="preserve">
     <value>आपका कॉन्फ़िगर किया भोजन खत्म हो तो सबसे कम वस्तु ID से शुरू करके सूची में कोई भी भोजन खोजें.</value>
@@ -1964,8 +1964,8 @@
   <data name="Waiting: {0}." xml:space="preserve">
     <value>प्रतीक्षा: {0}.</value>
   </data>
-  <data name="⚠️ WARNING: AutoDuty Plugin Detected" xml:space="preserve">
-    <value>⚠️ चेतावनी: AutoDuty प्लगइन मिला</value>
+  <data name="⚠ WARNING: AutoDuty Plugin Detected" xml:space="preserve">
+    <value>⚠ चेतावनी: AutoDuty प्लगइन मिला</value>
   </data>
   <data name="• Force respawn at entrance" xml:space="preserve">
     <value>• प्रवेश पर ज़बरन दोबारा प्रकट होना</value>

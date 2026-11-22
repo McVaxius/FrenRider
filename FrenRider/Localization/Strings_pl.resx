@@ -1014,11 +1014,11 @@ Auto: Wtyczka decyduje według profesji</value>
   <data name="Customize the glyphs used for enabled/disabled icon modes." xml:space="preserve">
     <value>Dostosuj glify trybów ikon włączone/wyłączone.</value>
   </data>
-  <data name="DTR bar display mode:&#xA;Text Only: 'FR: On/Off'&#xA;Icon+Text: '⚫ FR'&#xA;Icon Only: '⚫'" xml:space="preserve">
+  <data name="DTR bar display mode:&#xA;Text Only: 'FR: On/Off'&#xA;Icon+Text: '● FR'&#xA;Icon Only: '●'" xml:space="preserve">
     <value>Tryb wyświetlania paska DTR:
 Tylko tekst: 'FR: Wł./Wył.'
-Ikona+tekst: '⚫ FR'
-Tylko ikona: '⚫'</value>
+Ikona+tekst: '● FR'
+Tylko ikona: '●'</value>
   </data>
   <data name="Default List: Built-in emote list&#xA;Custom List: Your own list of commands" xml:space="preserve">
     <value>Lista domyślna: Wbudowana lista emotek
@@ -1079,7 +1079,7 @@ Domyślnie: 0.3 s. UWAGA: Wartości poniżej 0.1 mogą wpływać na wydajność.
   <data name="If configured food runs out, search inventory for any food starting from lowest item ID." xml:space="preserve">
     <value>Po wyczerpaniu skonfigurowanego jedzenia szukaj dowolnego jedzenia w ekwipunku od najniższego ID przedmiotu.</value>
   </data>
-  <data name="If enabled, you will summon your own mount instead of pillion riding.&#xA;Useful for flying zones.&#xA;&#xA;⚠️ IMPORTANT: This feature requires you to be grouped with your fren.&#xA;It will not work properly if ungrouped (won't jump into air to follow)." xml:space="preserve">
+  <data name="If enabled, you will summon your own mount instead of pillion riding.&#xA;Useful for flying zones.&#xA;&#xA;⚠ IMPORTANT: This feature requires you to be grouped with your fren.&#xA;It will not work properly if ungrouped (won't jump into air to follow)." xml:space="preserve">
     <value>Jeśli włączone, przywołasz własnego wierzchowca zamiast jazdy jako pasażer.
 Przydatne w strefach lotu.
 
@@ -2074,7 +2074,7 @@ Ponawia przy kolejnych odnowieniach, także na już oznaczonych bestiach.</value
   <data name="Waiting: {0}." xml:space="preserve">
     <value>Oczekiwanie: {0}.</value>
   </data>
-  <data name="⚠️ WARNING: AutoDuty Plugin Detected" xml:space="preserve">
+  <data name="⚠ WARNING: AutoDuty Plugin Detected" xml:space="preserve">
     <value>⚠ UWAGA: Wykryto wtyczkę AutoDuty</value>
   </data>
   <data name="• Force respawn at entrance" xml:space="preserve">

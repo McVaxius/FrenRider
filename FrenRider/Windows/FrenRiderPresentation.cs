@@ -73,7 +73,11 @@ internal static partial class FrenRiderPresentation
     // Approved regular/compact Main and Mini envelopes; native Main version chrome is retained.
     internal const uint ReferenceAccent = 0x70C677;
     internal static readonly float[] FontSizes = [16, 16, 26, 20, 22, 18];
-    internal static readonly string[] FontFiles = ["segoeui.ttf", "seguisb.ttf", "segoeuib.ttf", "seguisb.ttf", "seguisb.ttf", "seguisb.ttf"];
+    internal static readonly MaterialFontWeight[] FontWeights =
+    [
+        MaterialFontWeight.Regular, MaterialFontWeight.Semibold, MaterialFontWeight.Bold,
+        MaterialFontWeight.Semibold, MaterialFontWeight.Semibold, MaterialFontWeight.Semibold,
+    ];
     internal static float HeaderHeight(bool compact) => compact ? 50 : 56;
     internal static float MiniWidth(bool compact) => compact ? 398 : 380;
     internal static float MiniTitleHeight(bool compact) => compact ? 50 : 54;

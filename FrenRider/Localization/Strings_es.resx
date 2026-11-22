@@ -994,7 +994,7 @@ No se puede deshacer.</value>
   <data name="Customize the glyphs used for enabled/disabled icon modes." xml:space="preserve">
     <value>Personalizar símbolos activo/inactivo.</value>
   </data>
-  <data name="DTR bar display mode:&#10;Text Only: 'FR: On/Off'&#10;Icon+Text: '⚫ FR'&#10;Icon Only: '⚫'" xml:space="preserve">
+  <data name="DTR bar display mode:&#10;Text Only: 'FR: On/Off'&#10;Icon+Text: '● FR'&#10;Icon Only: '●'" xml:space="preserve">
     <value>DTR: texto «FR: activo/inactivo», icono y texto «● FR», o solo icono «●».</value>
   </data>
   <data name="Default List: Built-in emote list&#10;Custom List: Your own list of commands" xml:space="preserve">
@@ -1042,7 +1042,7 @@ No se puede deshacer.</value>
   <data name="If configured food runs out, search inventory for any food starting from lowest item ID." xml:space="preserve">
     <value>Si se agota la comida configurada, buscar cualquier comida por ID de objeto ascendente.</value>
   </data>
-  <data name="If enabled, you will summon your own mount instead of pillion riding.&#10;Useful for flying zones.&#10;&#10;⚠️ IMPORTANT: This feature requires you to be grouped with your fren.&#10;It will not work properly if ungrouped (won't jump into air to follow)." xml:space="preserve">
+  <data name="If enabled, you will summon your own mount instead of pillion riding.&#10;Useful for flying zones.&#10;&#10;⚠ IMPORTANT: This feature requires you to be grouped with your fren.&#10;It will not work properly if ungrouped (won't jump into air to follow)." xml:space="preserve">
     <value>Invocar tu montura en vez de ir de pasajero, útil al volar. Debes estar en grupo con el amigo; sin grupo no funciona el salto para seguir por el aire.</value>
   </data>
   <data name="If your configured food runs out, search inventory for any food starting from lowest item ID." xml:space="preserve">
@@ -1969,7 +1969,7 @@ No se puede deshacer.</value>
   <data name="Waiting: {0}." xml:space="preserve">
     <value>Esperando: {0}.</value>
   </data>
-  <data name="⚠️ WARNING: AutoDuty Plugin Detected" xml:space="preserve">
+  <data name="⚠ WARNING: AutoDuty Plugin Detected" xml:space="preserve">
     <value>AVISO: Plugin AutoDuty detectado</value>
   </data>
   <data name="• Force respawn at entrance" xml:space="preserve">

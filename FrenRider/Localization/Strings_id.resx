@@ -1014,11 +1014,11 @@ Otomatis: Biarkan plugin menentukan berdasarkan job</value>
   <data name="Customize the glyphs used for enabled/disabled icon modes." xml:space="preserve">
     <value>Sesuaikan glyph yang dipakai untuk mode ikon aktif/nonaktif.</value>
   </data>
-  <data name="DTR bar display mode:&#xA;Text Only: 'FR: On/Off'&#xA;Icon+Text: '⚫ FR'&#xA;Icon Only: '⚫'" xml:space="preserve">
+  <data name="DTR bar display mode:&#xA;Text Only: 'FR: On/Off'&#xA;Icon+Text: '● FR'&#xA;Icon Only: '●'" xml:space="preserve">
     <value>Mode tampilan bilah DTR:
 Hanya teks: 'FR: On/Off'
-Ikon+teks: '⚫ FR'
-Hanya ikon: '⚫'</value>
+Ikon+teks: '● FR'
+Hanya ikon: '●'</value>
   </data>
   <data name="Default List: Built-in emote list&#xA;Custom List: Your own list of commands" xml:space="preserve">
     <value>Daftar default: Daftar emote bawaan
@@ -1079,7 +1079,7 @@ Default: 0.3s. PERINGATAN: Nilai di bawah 0.1 dapat memengaruhi performa.</value
   <data name="If configured food runs out, search inventory for any food starting from lowest item ID." xml:space="preserve">
     <value>Jika makanan terkonfigurasi habis, cari makanan apa pun di inventaris mulai dari ID item terendah.</value>
   </data>
-  <data name="If enabled, you will summon your own mount instead of pillion riding.&#xA;Useful for flying zones.&#xA;&#xA;⚠️ IMPORTANT: This feature requires you to be grouped with your fren.&#xA;It will not work properly if ungrouped (won't jump into air to follow)." xml:space="preserve">
+  <data name="If enabled, you will summon your own mount instead of pillion riding.&#xA;Useful for flying zones.&#xA;&#xA;⚠ IMPORTANT: This feature requires you to be grouped with your fren.&#xA;It will not work properly if ungrouped (won't jump into air to follow)." xml:space="preserve">
     <value>Jika aktif, panggil mount sendiri alih-alih membonceng.
 Berguna di zona terbang.
 
@@ -2074,7 +2074,7 @@ Coba lagi pada cooldown berikutnya, termasuk beast yang sudah ditandai.</value>
   <data name="Waiting: {0}." xml:space="preserve">
     <value>Menunggu: {0}.</value>
   </data>
-  <data name="⚠️ WARNING: AutoDuty Plugin Detected" xml:space="preserve">
+  <data name="⚠ WARNING: AutoDuty Plugin Detected" xml:space="preserve">
     <value>⚠ PERINGATAN: Plugin AutoDuty terdeteksi</value>
   </data>
   <data name="• Force respawn at entrance" xml:space="preserve">

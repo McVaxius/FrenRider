@@ -20,7 +20,7 @@ public class AutoDutyWarningWindow : Window
     private bool warningAcknowledged = false;
 
     public AutoDutyWarningWindow(Plugin plugin, IChatGui chatGui, IPluginLog log) 
-        : base("⚠️ AutoDuty Detected - Action Required", ImGuiWindowFlags.AlwaysAutoResize)
+        : base("⚠ AutoDuty Detected - Action Required", ImGuiWindowFlags.AlwaysAutoResize)
     {
         this.plugin = plugin;
         this.chatGui = chatGui;
@@ -81,7 +81,7 @@ public class AutoDutyWarningWindow : Window
     {
         ImGui.PushTextWrapPos(0);
         using (UiText.Font(UiFontRole.BodyStrong))
-            UiGui.TextColored(UiHelpers.Yellow, "⚠️ WARNING: AutoDuty Plugin Detected");
+            UiGui.TextColored(UiHelpers.Yellow, "⚠ WARNING: AutoDuty Plugin Detected");
         
         UiGui.TextWrapped("AutoDuty is enabled and may cause issues:");
         UiGui.TextWrapped("• Force respawn at entrance");

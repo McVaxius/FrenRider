@@ -1014,11 +1014,11 @@ Otomatik: Eklenti mesleğe göre karar verir</value>
   <data name="Customize the glyphs used for enabled/disabled icon modes." xml:space="preserve">
     <value>Etkin/kapalı simge modlarının gliflerini özelleştir.</value>
   </data>
-  <data name="DTR bar display mode:&#xA;Text Only: 'FR: On/Off'&#xA;Icon+Text: '⚫ FR'&#xA;Icon Only: '⚫'" xml:space="preserve">
+  <data name="DTR bar display mode:&#xA;Text Only: 'FR: On/Off'&#xA;Icon+Text: '● FR'&#xA;Icon Only: '●'" xml:space="preserve">
     <value>DTR çubuğu görüntü modu:
 Yalnızca metin: 'FR: Açık/Kapalı'
-Simge+metin: '⚫ FR'
-Yalnızca simge: '⚫'</value>
+Simge+metin: '● FR'
+Yalnızca simge: '●'</value>
   </data>
   <data name="Default List: Built-in emote list&#xA;Custom List: Your own list of commands" xml:space="preserve">
     <value>Varsayılan liste: Yerleşik emote listesi
@@ -1079,7 +1079,7 @@ Varsayılan: 0.3 s. UYARI: 0.1 altındaki değerler performansı etkileyebilir.<
   <data name="If configured food runs out, search inventory for any food starting from lowest item ID." xml:space="preserve">
     <value>Yapılandırılmış yiyecek biterse en düşük öğe ID'sinden başlayarak envanterde herhangi bir yiyecek ara.</value>
   </data>
-  <data name="If enabled, you will summon your own mount instead of pillion riding.&#xA;Useful for flying zones.&#xA;&#xA;⚠️ IMPORTANT: This feature requires you to be grouped with your fren.&#xA;It will not work properly if ungrouped (won't jump into air to follow)." xml:space="preserve">
+  <data name="If enabled, you will summon your own mount instead of pillion riding.&#xA;Useful for flying zones.&#xA;&#xA;⚠ IMPORTANT: This feature requires you to be grouped with your fren.&#xA;It will not work properly if ungrouped (won't jump into air to follow)." xml:space="preserve">
     <value>Etkinse artçı olmak yerine kendi bineğinizi çağırırsınız.
 Uçuş bölgelerinde kullanışlıdır.
 
@@ -2074,7 +2074,7 @@ Sahipli canavarları ve etkin seviyenizin üzerindeki düşmanları atlar, iki H
   <data name="Waiting: {0}." xml:space="preserve">
     <value>Bekliyor: {0}.</value>
   </data>
-  <data name="⚠️ WARNING: AutoDuty Plugin Detected" xml:space="preserve">
+  <data name="⚠ WARNING: AutoDuty Plugin Detected" xml:space="preserve">
     <value>⚠ UYARI: AutoDuty eklentisi algılandı</value>
   </data>
   <data name="• Force respawn at entrance" xml:space="preserve">

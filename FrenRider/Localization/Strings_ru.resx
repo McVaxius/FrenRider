@@ -994,7 +994,7 @@
   <data name="Customize the glyphs used for enabled/disabled icon modes." xml:space="preserve">
     <value>Настроить символы включённого и выключенного состояния.</value>
   </data>
-  <data name="DTR bar display mode:&#10;Text Only: 'FR: On/Off'&#10;Icon+Text: '⚫ FR'&#10;Icon Only: '⚫'" xml:space="preserve">
+  <data name="DTR bar display mode:&#10;Text Only: 'FR: On/Off'&#10;Icon+Text: '● FR'&#10;Icon Only: '●'" xml:space="preserve">
     <value>DTR: текст «FR: Вкл/Выкл», значок и текст «● FR» или только значок «●».</value>
   </data>
   <data name="Default List: Built-in emote list&#10;Custom List: Your own list of commands" xml:space="preserve">
@@ -1042,7 +1042,7 @@
   <data name="If configured food runs out, search inventory for any food starting from lowest item ID." xml:space="preserve">
     <value>Если заданная еда закончилась, искать другую в инвентаре от наименьшего ID.</value>
   </data>
-  <data name="If enabled, you will summon your own mount instead of pillion riding.&#10;Useful for flying zones.&#10;&#10;⚠️ IMPORTANT: This feature requires you to be grouped with your fren.&#10;It will not work properly if ungrouped (won't jump into air to follow)." xml:space="preserve">
+  <data name="If enabled, you will summon your own mount instead of pillion riding.&#10;Useful for flying zones.&#10;&#10;⚠ IMPORTANT: This feature requires you to be grouped with your fren.&#10;It will not work properly if ungrouped (won't jump into air to follow)." xml:space="preserve">
     <value>Призывать собственное животное вместо второго места, удобно при полёте. Нужно быть в группе с другом; без группы взлёт для следования не работает.</value>
   </data>
   <data name="If your configured food runs out, search inventory for any food starting from lowest item ID." xml:space="preserve">
@@ -1969,7 +1969,7 @@
   <data name="Waiting: {0}." xml:space="preserve">
     <value>Ожидание: {0}.</value>
   </data>
-  <data name="⚠️ WARNING: AutoDuty Plugin Detected" xml:space="preserve">
+  <data name="⚠ WARNING: AutoDuty Plugin Detected" xml:space="preserve">
     <value>ВНИМАНИЕ: обнаружен плагин AutoDuty</value>
   </data>
   <data name="• Force respawn at entrance" xml:space="preserve">

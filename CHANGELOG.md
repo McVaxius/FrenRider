@@ -567,6 +567,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added a collapsed **Saved beasts** list in Combat settings. Confirmed native XBMPet unlocks refresh on Beastmaster after login/job changes, area changes, and combat exit, even with automatic Capture disabled. Catches stay in local character account data through settings copies, resets, and profile transfers, and remain browsable on other jobs.
 
 ### Changed
+- Load the bundled UI fonts from the installed plugin folder for Linux and Wine.
 - Build only the plugin project in GitHub Actions so test and regression projects do not block production artifacts.
 
 - Capture prefers an eligible current target, then scans nearby living Combatant beasts nearest first. It automatically selects a beast whose model has a confirmed unowned candidate only after HP, level, range, native action availability, cooldown, and existing hold checks pass, so manual targeting is no longer required.

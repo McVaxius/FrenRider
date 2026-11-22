@@ -994,7 +994,7 @@
   <data name="Customize the glyphs used for enabled/disabled icon modes." xml:space="preserve">
     <value>自定义启用和禁用状态的图标字符。</value>
   </data>
-  <data name="DTR bar display mode:&#10;Text Only: 'FR: On/Off'&#10;Icon+Text: '⚫ FR'&#10;Icon Only: '⚫'" xml:space="preserve">
+  <data name="DTR bar display mode:&#10;Text Only: 'FR: On/Off'&#10;Icon+Text: '● FR'&#10;Icon Only: '●'" xml:space="preserve">
     <value>DTR显示：仅文字“FR：开/关”、图标加文字“● FR”或仅图标“●”。</value>
   </data>
   <data name="Default List: Built-in emote list&#10;Custom List: Your own list of commands" xml:space="preserve">
@@ -1042,7 +1042,7 @@
   <data name="If configured food runs out, search inventory for any food starting from lowest item ID." xml:space="preserve">
     <value>配置食物耗尽后，从最低物品ID开始在背包中查找其他食物。</value>
   </data>
-  <data name="If enabled, you will summon your own mount instead of pillion riding.&#10;Useful for flying zones.&#10;&#10;⚠️ IMPORTANT: This feature requires you to be grouped with your fren.&#10;It will not work properly if ungrouped (won't jump into air to follow)." xml:space="preserve">
+  <data name="If enabled, you will summon your own mount instead of pillion riding.&#10;Useful for flying zones.&#10;&#10;⚠ IMPORTANT: This feature requires you to be grouped with your fren.&#10;It will not work properly if ungrouped (won't jump into air to follow)." xml:space="preserve">
     <value>召唤自己的坐骑而非双人同乘，适合飞行区域。必须与好友组队；未组队时无法起飞跟随。</value>
   </data>
   <data name="If your configured food runs out, search inventory for any food starting from lowest item ID." xml:space="preserve">
@@ -1969,7 +1969,7 @@
   <data name="Waiting: {0}." xml:space="preserve">
     <value>等待：{0}。</value>
   </data>
-  <data name="⚠️ WARNING: AutoDuty Plugin Detected" xml:space="preserve">
+  <data name="⚠ WARNING: AutoDuty Plugin Detected" xml:space="preserve">
     <value>警告：检测到AutoDuty插件</value>
   </data>
   <data name="• Force respawn at entrance" xml:space="preserve">

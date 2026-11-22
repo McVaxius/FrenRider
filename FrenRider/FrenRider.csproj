@@ -71,6 +71,7 @@
       <PluginFiles Include="videos\**" />
 
       <PluginDataFiles Include="data\bm\**" />
+      <PluginFontFiles Include="$(TargetDir)Fonts\Selawik\*.ttf;$(TargetDir)Fonts\Selawik\LICENSE.txt" />
 
     </ItemGroup>
 
@@ -81,6 +82,8 @@
     <Copy SourceFiles="@(PluginDataFiles)"
 
           DestinationFiles="@(PluginDataFiles->'$(PluginOutput)\data\bm\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(PluginFontFiles)"
+          DestinationFolder="$(PluginOutput)\Fonts\Selawik" />
 
   </Target>
 

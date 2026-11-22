@@ -994,7 +994,7 @@ Cette action est irréversible.</value>
   <data name="Customize the glyphs used for enabled/disabled icon modes." xml:space="preserve">
     <value>Personnaliser les symboles actif/inactif.</value>
   </data>
-  <data name="DTR bar display mode:&#10;Text Only: 'FR: On/Off'&#10;Icon+Text: '⚫ FR'&#10;Icon Only: '⚫'" xml:space="preserve">
+  <data name="DTR bar display mode:&#10;Text Only: 'FR: On/Off'&#10;Icon+Text: '● FR'&#10;Icon Only: '●'" xml:space="preserve">
     <value>Affichage DTR : texte «FR: actif/inactif», icône et texte «● FR», ou icône «●».</value>
   </data>
   <data name="Default List: Built-in emote list&#10;Custom List: Your own list of commands" xml:space="preserve">
@@ -1042,7 +1042,7 @@ Cette action est irréversible.</value>
   <data name="If configured food runs out, search inventory for any food starting from lowest item ID." xml:space="preserve">
     <value>Si le plat configuré est épuisé, chercher toute nourriture dans l'inventaire par ID croissant.</value>
   </data>
-  <data name="If enabled, you will summon your own mount instead of pillion riding.&#10;Useful for flying zones.&#10;&#10;⚠️ IMPORTANT: This feature requires you to be grouped with your fren.&#10;It will not work properly if ungrouped (won't jump into air to follow)." xml:space="preserve">
+  <data name="If enabled, you will summon your own mount instead of pillion riding.&#10;Useful for flying zones.&#10;&#10;⚠ IMPORTANT: This feature requires you to be grouped with your fren.&#10;It will not work properly if ungrouped (won't jump into air to follow)." xml:space="preserve">
     <value>Invoquer votre monture plutôt que monter en tandem, utile en vol. Vous devez être groupé avec l'ami ; sinon le saut pour suivre en vol ne fonctionne pas.</value>
   </data>
   <data name="If your configured food runs out, search inventory for any food starting from lowest item ID." xml:space="preserve">
@@ -1969,7 +1969,7 @@ Cette action est irréversible.</value>
   <data name="Waiting: {0}." xml:space="preserve">
     <value>Attente : {0}.</value>
   </data>
-  <data name="⚠️ WARNING: AutoDuty Plugin Detected" xml:space="preserve">
+  <data name="⚠ WARNING: AutoDuty Plugin Detected" xml:space="preserve">
     <value>ATTENTION : plugin AutoDuty détecté</value>
   </data>
   <data name="• Force respawn at entrance" xml:space="preserve">

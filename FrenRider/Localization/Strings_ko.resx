@@ -994,7 +994,7 @@
   <data name="Customize the glyphs used for enabled/disabled icon modes." xml:space="preserve">
     <value>켜짐·꺼짐 상태의 아이콘 문자를 설정합니다.</value>
   </data>
-  <data name="DTR bar display mode:&#10;Text Only: 'FR: On/Off'&#10;Icon+Text: '⚫ FR'&#10;Icon Only: '⚫'" xml:space="preserve">
+  <data name="DTR bar display mode:&#10;Text Only: 'FR: On/Off'&#10;Icon+Text: '● FR'&#10;Icon Only: '●'" xml:space="preserve">
     <value>DTR 표시: 텍스트 'FR: 켜짐/꺼짐', 아이콘과 텍스트 '● FR', 아이콘만 '●'.</value>
   </data>
   <data name="Default List: Built-in emote list&#10;Custom List: Your own list of commands" xml:space="preserve">
@@ -1042,7 +1042,7 @@
   <data name="If configured food runs out, search inventory for any food starting from lowest item ID." xml:space="preserve">
     <value>설정한 음식이 떨어지면 가장 낮은 아이템 ID부터 소지품에서 다른 음식을 찾습니다.</value>
   </data>
-  <data name="If enabled, you will summon your own mount instead of pillion riding.&#10;Useful for flying zones.&#10;&#10;⚠️ IMPORTANT: This feature requires you to be grouped with your fren.&#10;It will not work properly if ungrouped (won't jump into air to follow)." xml:space="preserve">
+  <data name="If enabled, you will summon your own mount instead of pillion riding.&#10;Useful for flying zones.&#10;&#10;⚠ IMPORTANT: This feature requires you to be grouped with your fren.&#10;It will not work properly if ungrouped (won't jump into air to follow)." xml:space="preserve">
     <value>동승 대신 자신의 탈것을 소환하여 비행합니다. 친구와 같은 파티에 있어야 하며 파티가 아니면 비행 추적을 위해 이륙하지 못합니다.</value>
   </data>
   <data name="If your configured food runs out, search inventory for any food starting from lowest item ID." xml:space="preserve">
@@ -1969,7 +1969,7 @@
   <data name="Waiting: {0}." xml:space="preserve">
     <value>대기: {0}.</value>
   </data>
-  <data name="⚠️ WARNING: AutoDuty Plugin Detected" xml:space="preserve">
+  <data name="⚠ WARNING: AutoDuty Plugin Detected" xml:space="preserve">
     <value>경고: AutoDuty 플러그인 감지</value>
   </data>
   <data name="• Force respawn at entrance" xml:space="preserve">

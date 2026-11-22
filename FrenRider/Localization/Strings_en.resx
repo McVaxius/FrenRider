@@ -1008,11 +1008,11 @@ Auto: Let plugin decide based on job</value>
   <data name="Customize the glyphs used for enabled/disabled icon modes." xml:space="preserve">
     <value>Customize the glyphs used for enabled/disabled icon modes.</value>
   </data>
-  <data name="DTR bar display mode:&#10;Text Only: 'FR: On/Off'&#10;Icon+Text: '⚫ FR'&#10;Icon Only: '⚫'" xml:space="preserve">
+  <data name="DTR bar display mode:&#10;Text Only: 'FR: On/Off'&#10;Icon+Text: '● FR'&#10;Icon Only: '●'" xml:space="preserve">
     <value>DTR bar display mode:
 Text Only: 'FR: On/Off'
-Icon+Text: '⚫ FR'
-Icon Only: '⚫'</value>
+Icon+Text: '● FR'
+Icon Only: '●'</value>
   </data>
   <data name="Default List: Built-in emote list&#10;Custom List: Your own list of commands" xml:space="preserve">
     <value>Default List: Built-in emote list
@@ -1073,7 +1073,7 @@ Default: 0.3s. WARNING: Values below 0.1 may impact performance.</value>
   <data name="If configured food runs out, search inventory for any food starting from lowest item ID." xml:space="preserve">
     <value>If configured food runs out, search inventory for any food starting from lowest item ID.</value>
   </data>
-  <data name="If enabled, you will summon your own mount instead of pillion riding.&#10;Useful for flying zones.&#10;&#10;⚠️ IMPORTANT: This feature requires you to be grouped with your fren.&#10;It will not work properly if ungrouped (won't jump into air to follow)." xml:space="preserve">
+  <data name="If enabled, you will summon your own mount instead of pillion riding.&#10;Useful for flying zones.&#10;&#10;⚠ IMPORTANT: This feature requires you to be grouped with your fren.&#10;It will not work properly if ungrouped (won't jump into air to follow)." xml:space="preserve">
     <value>If enabled, you will summon your own mount instead of pillion riding.
 Useful for flying zones.
 
@@ -2068,7 +2068,7 @@ Retries on later cooldowns, including already marked beasts.</value>
   <data name="Waiting: {0}." xml:space="preserve">
     <value>Waiting: {0}.</value>
   </data>
-  <data name="⚠️ WARNING: AutoDuty Plugin Detected" xml:space="preserve">
+  <data name="⚠ WARNING: AutoDuty Plugin Detected" xml:space="preserve">
     <value>⚠ WARNING: AutoDuty Plugin Detected</value>
   </data>
   <data name="• Force respawn at entrance" xml:space="preserve">

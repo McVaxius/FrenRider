@@ -857,7 +857,7 @@ public partial class ConfigWindow : Window, IDisposable
                         config.FlyYouFools = flyYouFools;
                         SaveEditingAccount();
                     }
-                    HelpMarker("If enabled, you will summon your own mount instead of pillion riding.\nUseful for flying zones.\n\n⚠️ IMPORTANT: This feature requires you to be grouped with your fren.\nIt will not work properly if ungrouped (won't jump into air to follow).");
+                    HelpMarker("If enabled, you will summon your own mount instead of pillion riding.\nUseful for flying zones.\n\n⚠ IMPORTANT: This feature requires you to be grouped with your fren.\nIt will not work properly if ungrouped (won't jump into air to follow).");
 
                     DrawDefaultSettingSyncButton("Fly You Fools");
                 }
@@ -3359,7 +3359,7 @@ public partial class ConfigWindow : Window, IDisposable
             configuration.Save();
         }
         ImGui.SameLine();
-        HelpMarker("DTR bar display mode:\nText Only: 'FR: On/Off'\nIcon+Text: '⚫ FR'\nIcon Only: '⚫'");
+        HelpMarker("DTR bar display mode:\nText Only: 'FR: On/Off'\nIcon+Text: '● FR'\nIcon Only: '●'");
 
         ImGui.Spacing();
         UiGui.Text("DTR Icons (max 3 characters)");

@@ -994,7 +994,7 @@
   <data name="Customize the glyphs used for enabled/disabled icon modes." xml:space="preserve">
     <value>有効・無効時のアイコン文字を設定します。</value>
   </data>
-  <data name="DTR bar display mode:&#10;Text Only: 'FR: On/Off'&#10;Icon+Text: '⚫ FR'&#10;Icon Only: '⚫'" xml:space="preserve">
+  <data name="DTR bar display mode:&#10;Text Only: 'FR: On/Off'&#10;Icon+Text: '● FR'&#10;Icon Only: '●'" xml:space="preserve">
     <value>DTR表示: テキスト「FR: オン/オフ」、アイコン＋文字「● FR」、アイコンのみ「●」。</value>
   </data>
   <data name="Default List: Built-in emote list&#10;Custom List: Your own list of commands" xml:space="preserve">
@@ -1042,7 +1042,7 @@
   <data name="If configured food runs out, search inventory for any food starting from lowest item ID." xml:space="preserve">
     <value>設定した食事がなくなったら、アイテムIDの小さい順に所持品から食事を探します。</value>
   </data>
-  <data name="If enabled, you will summon your own mount instead of pillion riding.&#10;Useful for flying zones.&#10;&#10;⚠️ IMPORTANT: This feature requires you to be grouped with your fren.&#10;It will not work properly if ungrouped (won't jump into air to follow)." xml:space="preserve">
+  <data name="If enabled, you will summon your own mount instead of pillion riding.&#10;Useful for flying zones.&#10;&#10;⚠ IMPORTANT: This feature requires you to be grouped with your fren.&#10;It will not work properly if ungrouped (won't jump into air to follow)." xml:space="preserve">
     <value>相乗りせず自分のマウントを呼びます。飛行エリア向け。フレンドと同じパーティが必須です。未参加では追従のための離陸ができません。</value>
   </data>
   <data name="If your configured food runs out, search inventory for any food starting from lowest item ID." xml:space="preserve">
@@ -1969,7 +1969,7 @@
   <data name="Waiting: {0}." xml:space="preserve">
     <value>待機: {0}。</value>
   </data>
-  <data name="⚠️ WARNING: AutoDuty Plugin Detected" xml:space="preserve">
+  <data name="⚠ WARNING: AutoDuty Plugin Detected" xml:space="preserve">
     <value>警告: AutoDutyプラグインを検出</value>
   </data>
   <data name="• Force respawn at entrance" xml:space="preserve">
