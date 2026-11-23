@@ -667,7 +667,12 @@ public sealed class BeastCaptureServiceTests
                 if (method.Name == "Debug") saves++;
                 return null;
             };
-            var account = new AccountConfig { AccountId = "test-account", Characters = new() { ["First"] = new(), ["Second"] = new() } };
+            var account = new AccountConfig
+            {
+                AccountId = "test-account",
+                RotationDefaultsVersion = AccountConfig.CurrentRotationDefaultsVersion,
+                Characters = new() { ["First"] = new(), ["Second"] = new() },
+            };
             var file = Path.Combine(directory.FullName, "test-account_FrenRider.json");
             File.WriteAllText(file, JsonSerializer.Serialize(account));
             var manager = new ConfigManager(pi, log) { CurrentAccountId = account.AccountId };

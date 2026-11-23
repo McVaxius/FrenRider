@@ -12,7 +12,7 @@ public sealed class FrenRiderNarrowBundleTests
         var config = new CharacterConfig();
 
         Assert.Equal(0, config.RotationType);
-        Assert.Equal(0, config.RsrAggroType);
+        Assert.Equal(2, config.RsrAggroType);
         Assert.False(config.EquipJobStoneForCurrentClass);
         Assert.Equal(ArcanistJobPreference.Scholar, config.PreferredArcanistJob);
         Assert.Equal(ArcanistJobPreference.Scholar,

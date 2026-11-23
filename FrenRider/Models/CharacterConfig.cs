@@ -36,6 +36,7 @@ public class CharacterConfig
     public const string DefaultCustomIdleCommand = "/smile motion";
     internal const int LegacyPreviouslyEngagedRotationType = 4;
     internal const int PreviouslyEngagedRsrAggroType = 1;
+    internal const int DefaultRsrAggroType = 2;
 
     private int respawnOutsideDutiesDelaySeconds = 60;
     private int respawnInsideDutiesDelaySeconds = 60;
@@ -162,7 +163,7 @@ public class CharacterConfig
         set => limitBreak = value;
     }
     public int RotationType { get; set; } = 0; // 0=Auto, 1=Manual, 2=None, 3=Support
-    public int RsrAggroType { get; set; } = 0; // Matches RSR TargetHostileType ordering
+    public int RsrAggroType { get; set; } = DefaultRsrAggroType; // Matches RSR TargetHostileType ordering
     public bool BmrReduceActivationRangeForOutdoorAreas { get; set; } = false;
     public bool BmrDisableHuntModules { get; set; } = false;
     public bool BmrDisableQueenLunatender { get; set; } = false;

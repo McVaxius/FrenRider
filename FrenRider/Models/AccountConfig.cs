@@ -6,7 +6,7 @@ namespace FrenRider.Models;
 [Serializable]
 public class AccountConfig
 {
-    public const int CurrentRotationDefaultsVersion = 1;
+    public const int CurrentRotationDefaultsVersion = 2;
 
     public int RotationDefaultsVersion { get; set; }
     public string AccountId { get; set; } = "";

@@ -1622,11 +1622,8 @@ public class ConfigManager : IDadProfileStore
                         accounts[account.AccountId] = account;
                         var migrated = MigrateLegacyRsrSettings(account);
                         migrated |= MigrateRotationDefaults(account);
-                        if (migrated)
-                        {
-                            SaveAccount(account.AccountId);
+                        if (migrated && SaveAccount(account.AccountId))
                             log.Information($"Migrated combat settings for account {account.AccountId}");
-                        }
                         log.Information($"Loaded account {account.AccountId} ({account.AccountAlias}) with {account.Characters.Count} characters");
                     }
                 }
@@ -1644,9 +1641,21 @@ public class ConfigManager : IDadProfileStore
 
     internal static bool MigrateRotationDefaults(AccountConfig account)
     {
-        // Retire the old account-wide provider reset. New/unset fields use the
-        // model defaults; explicit selections and the existing marker stay intact.
-        return false;
+        if (account.RotationDefaultsVersion >= AccountConfig.CurrentRotationDefaultsVersion)
+            return false;
+
+        if (account.DefaultConfig is { RsrAggroType: 0 } defaults)
+            defaults.RsrAggroType = CharacterConfig.DefaultRsrAggroType;
+
+        if (account.Characters != null)
+        {
+            foreach (var config in account.Characters.Values)
+                if (config is { RsrAggroType: 0 })
+                    config.RsrAggroType = CharacterConfig.DefaultRsrAggroType;
+        }
+
+        account.RotationDefaultsVersion = AccountConfig.CurrentRotationDefaultsVersion;
+        return true;
     }
 
     internal static bool MigrateLegacyRsrSettings(AccountConfig account)

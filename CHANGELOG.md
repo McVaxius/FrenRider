@@ -1,3 +1,7 @@
+2026-11-22 - 4.1.0.26 - Combat targeting default
+
+- **Updated combat targeting.** The default is now **All Targets When Solo in Duty**. Existing local profiles on **All Attackable Targets** switch once on upgrade. For routine runs, use the new default to keep FrenRider from picking untouched enemies in group duties. Choose **All Attackable Targets** when you want it to pull those enemies.
+
 2026-11-22 - 4.1.0.25 - Bundled UI fonts for Wine
 
 - Load bundled UI fonts when opening plugin windows on Windows and Wine.
