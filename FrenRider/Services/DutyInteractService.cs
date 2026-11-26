@@ -272,6 +272,9 @@ public class DutyInteractService
             if (obj == null) continue;
             if (!obj.IsTargetable) continue;
             if (obj.ObjectKind != ObjectKind.EventObj && obj.ObjectKind != ObjectKind.Treasure) continue;
+            // Energy Tower Consoles are optional combat objects in the Labyrinth of the Ancients.
+            if (zoneService.TerritoryId == 174 && obj is { ObjectKind: ObjectKind.EventObj, BaseId: >= 2001038 and <= 2001041 })
+                continue;
 
             var name = obj.Name.TextValue;
             if (plugin.AdsDutyIpcService.ConsiderTreasureCoffers != true

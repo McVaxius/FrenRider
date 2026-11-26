@@ -1,3 +1,7 @@
+2026-11-26 - 4.1.0.28 - King Behemoth console interaction
+
+- **Fixed Labyrinth of the Ancients navigation.** Fren Rider skips King Behemoth's Energy Tower Consoles during automatic duty interaction.
+
 2026-11-26 - 4.1.0.27 - BossModReborn combat startup
 
 - **Fixed BossModReborn healer startup.** Fren Rider uses the existing **FRENRIDER - RANGED** preset for automatic healer setup.

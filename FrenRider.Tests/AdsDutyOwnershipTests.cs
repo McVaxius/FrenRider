@@ -158,6 +158,18 @@ public sealed class AdsDutyOwnershipTests
     }
 
     [Fact]
+    public void LabyrinthSkipsEnergyTowerConsolesEvenWhenTheKeywordMatches()
+    {
+        using var fixture = new CofferInteractionFixture(territory: 174);
+        for (uint id = 2001038; id <= 2001041; ++id)
+            fixture.Add("Energy Tower Console", ObjectKind.EventObj, 1 + id - 2001038, id);
+        var progression = fixture.Add("Magitek Console", ObjectKind.EventObj, 10, 2001042);
+        fixture.SetField("interactableKeywords", new List<string> { "console" });
+
+        Assert.Same(progression, fixture.FindNearest());
+    }
+
+    [Fact]
     public void OffStopsAnOwnedCofferApproachOnce()
     {
         using var fixture = new CofferInteractionFixture();
@@ -1051,7 +1063,7 @@ public sealed class AdsDutyOwnershipTests
         internal bool IsActive => interaction.IsActive;
         internal string StateDetail => interaction.StateDetail;
 
-        internal CofferInteractionFixture()
+        internal CofferInteractionFixture(uint territory = 0)
         {
             ads = CreateService(() => true, () => false, () => statusJson, () => DateTime.UtcNow);
             var plugin = (Plugin)RuntimeHelpers.GetUninitializedObject(typeof(Plugin));
@@ -1062,6 +1074,9 @@ public sealed class AdsDutyOwnershipTests
             typeof(FollowService).GetField("plugin", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(Follow, plugin);
             typeof(FollowService).GetField("zoneService", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(Follow, new ZoneService());
             SetField("plugin", plugin);
+            var zones = new ZoneService();
+            typeof(ZoneService).GetProperty(nameof(ZoneService.TerritoryId))!.SetValue(zones, territory);
+            SetField("zoneService", zones);
             SetField("interactableKeywords", new List<string>());
             typeof(DutyInteractService).GetProperty(nameof(DutyInteractService.IsActive))!.SetValue(interaction, true);
 
@@ -1095,12 +1110,13 @@ public sealed class AdsDutyOwnershipTests
                     new QuestionableIpcService(() => false, () => DateTime.UtcNow)));
         }
 
-        internal IGameObject Add(string name, ObjectKind kind, float distance)
+        internal IGameObject Add(string name, ObjectKind kind, float distance, uint baseId = 0)
         {
             var gameObject = Proxy<IGameObject>((method, _) => method.Name switch
             {
                 "get_Name" => new SeStringBuilder().AddText(name).Build(),
                 "get_ObjectKind" => kind,
+                "get_BaseId" => baseId,
                 "get_IsTargetable" => true,
                 "get_GameObjectId" => (ulong)distance,
                 "get_Position" => new Vector3(distance, 0, 0),
