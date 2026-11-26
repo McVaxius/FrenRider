@@ -823,13 +823,8 @@ public partial class CombatService
     }
 
     private string GetBossModPresetForPlugin(CharacterConfig config, string pluginName)
-    {
-        if (pluginName == "BMR" && !config.ConfigureRotationPresetManually
-            && GetCurrentClassJobId() is 6 or 24 or 28 or 33 or 40)
-            return "FRENRIDER - RANGED (GMC)";
-        return SelectBossModPresetForProvider(config, pluginName, zoneService.CurrentZone, zoneService.InFate,
+        => SelectBossModPresetForProvider(config, pluginName, zoneService.CurrentZone, zoneService.InFate,
             config.ConfigureRotationPresetManually ? string.Empty : GetManagedPresetRole());
-    }
 
     internal static string SelectBossModPresetForProvider(CharacterConfig config, string provider, ZoneType zone,
         bool inFate, string role)

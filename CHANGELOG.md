@@ -1,3 +1,7 @@
+2026-11-26 - 4.1.0.27 - BossModReborn combat startup
+
+- **Fixed BossModReborn healer startup.** Fren Rider uses the existing **FRENRIDER - RANGED** preset for automatic healer setup.
+
 2026-11-22 - 4.1.0.26 - Combat targeting default
 
 - **Updated combat targeting.** The default is now **All Targets When Solo in Duty**. Existing local profiles on **All Attackable Targets** switch once on upgrade. For routine runs, use the new default to keep FrenRider from picking untouched enemies in group duties. Choose **All Attackable Targets** when you want it to pull those enemies.

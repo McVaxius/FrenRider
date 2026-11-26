@@ -852,6 +852,32 @@ public sealed class ExternalAutomationCleanupServiceTests
         Assert.Equal(new[] { preset }, native.Active);
     }
 
+    [Fact]
+    public void AutomaticBmrHealerStartsWithTheExistingRangedPreset()
+    {
+        const string preset = "FRENRIDER - RANGED";
+        var native = new NativeBossModProvider("BMR", preset) { AiEnabled = false };
+        native.PresetDefinitions[preset + " (GMC)"] = "{\"Name\":\"Unavailable\"}";
+        using var service = native.CreateService();
+        using var runtime = new QuestingCombatRuntime(service, native.Interface, native.Log, 0,
+            commandSender: native.SendCommand);
+        runtime.PlayerHp = 100;
+        runtime.PlayerJobId = 24; // White Mage
+        runtime.Profile.ConfigureRotationPresetManually = false;
+        runtime.Profile.BossModAI = 0;
+        runtime.Profile.ActivationMode = FrenRiderActivationMode.AlwaysOn;
+        runtime.StopActivity();
+        Assert.True(service.PrepareOwnedBossModSettings("BMR", "account", "character", runtime.Profile));
+
+        Assert.Equal(true, runtime.Call("ActivateRotation", runtime.Profile, true));
+        Assert.Equal(preset, runtime.Combat.ActivePreset);
+        Assert.Equal(preset, native.Selector);
+        Assert.Contains("BossMod.Presets.SetActive " + preset, native.Writes);
+        Assert.Contains("/bmrai on", native.Writes);
+        Assert.True(native.AiEnabled);
+        Assert.Equal(0, native.PresetCreates);
+    }
+
     [Theory]
     [InlineData(" ")]
     [InlineData("Missing")]
@@ -3496,6 +3522,7 @@ public sealed class ExternalAutomationCleanupServiceTests
         internal bool LoggedIn = true;
         internal ulong ContentId = 1;
         internal uint? PlayerHp;
+        internal uint PlayerJobId;
         internal readonly HashSet<ConditionFlag> Conditions = [];
         internal readonly List<string> Commands = [];
         internal readonly ConfigManager Config;
@@ -3517,8 +3544,12 @@ public sealed class ExternalAutomationCleanupServiceTests
                 ReplaceStatic("Condition", Proxy<ICondition>((method, args) => method.Name == "get_Item" && Conditions.Contains((ConditionFlag)args![0]!)));
                 ReplaceStatic("ClientState", Proxy<IClientState>((method, _) => method.Name == "get_IsLoggedIn" ? LoggedIn : Default(method.ReturnType)));
                 ReplaceStatic("PlayerState", Proxy<IPlayerState>((method, _) => method.Name == "get_ContentId" ? ContentId : Default(method.ReturnType)));
-                var player = Proxy<Dalamud.Game.ClientState.Objects.SubKinds.IPlayerCharacter>((method, _) =>
-                    method.Name == "get_CurrentHp" ? PlayerHp ?? 0u : Default(method.ReturnType));
+                var player = Proxy<Dalamud.Game.ClientState.Objects.SubKinds.IPlayerCharacter>((method, _) => method.Name switch
+                {
+                    "get_CurrentHp" => PlayerHp ?? 0u,
+                    "get_ClassJob" => new Lumina.Excel.RowRef<Lumina.Excel.Sheets.ClassJob>(null, PlayerJobId),
+                    _ => Default(method.ReturnType),
+                });
                 ReplaceStatic("ObjectTable", Proxy<IObjectTable>((method, _) =>
                     method.Name == "get_LocalPlayer" && PlayerHp.HasValue ? player : null));
                 ReplaceStatic("Log", log);
