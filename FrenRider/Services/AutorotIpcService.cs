@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -109,7 +109,6 @@ public class AutorotIpcService : IDisposable
     private bool cleanupFailed;
     private BossModRuntimePresetState? cleanupRuntimeExpected;
     private BossModRuntimePresetState? cleanupRuntimeTarget;
-    private bool? packagedDhogHealers;
     private bool warnedMissingDhogHealers;
     private bool? observedPlayerDead;
     private (CombatSettingsSnapshot Selection, BossModSettingsSnapshot Runtime, BossModSettingsOwnership Owner, bool InCombat)? livingDeathBaseline;
@@ -332,21 +331,29 @@ public class AutorotIpcService : IDisposable
         Action<string> reportWarning)
     {
         if (!IsNativeBossModProvider(rotationProvider) || manualPreset || !IsDhogHealerJob(job)) return true;
-        var available = TryGetLiveBossMod(rotationProvider, out _, out var assembly, out _)
+        var available = TryGetLiveBossMod(rotationProvider, out var live, out var assembly, out _)
                         && HasDhogHealers(ReadDhogHealerModules(assembly!.GetType("BossMod.Autorotation.RotationModuleRegistry")));
         if (!available)
         {
             LastStatus = MissingDhogHealerRotations;
             if (!warnedMissingDhogHealers) reportWarning(LastStatus);
             warnedMissingDhogHealers = true;
-            packagedDhogHealers = false;
             return false;
         }
-        if (packagedDhogHealers != true && !CreatePresets(force: true, rotationProvider: rotationProvider)) return false;
-        var expected = LoadPresetFiles().Where(preset => preset.Name == "FRENRIDER - RANGED").Select(preset => preset.Json).FirstOrDefault();
-        if (expected == null || !MatchesDhogHealerPreset(AdaptDhogHealerPreset(expected, true),
-                TryStringIpc("BossMod.Presets.Get", "FRENRIDER - RANGED")))
+        const string name = "FRENRIDER - RANGED";
+        var existing = TryStringIpc("BossMod.Presets.Get", name);
+        if (!MatchesDhogHealerPreset(existing, existing, name))
         {
+            var bundled = LoadPresetFiles().FirstOrDefault(preset => preset.Name == name)?.Json;
+            var repaired = bundled is null ? null : RepairDhogHealerPreset(name, existing, AdaptDhogHealerPreset(bundled, true));
+            if (repaired != null && TryGetLiveBossMod(rotationProvider, out var current, out _, out _)
+                && ReferenceEquals(live, current) && TryCreatePreset(name, repaired, out _)
+                && MatchesDhogHealerPreset(repaired, TryStringIpc("BossMod.Presets.Get", name)))
+            {
+                warnedMissingDhogHealers = false;
+                return true;
+            }
+
             LastStatus = MissingDhogHealerRotations + ": the loaded preset did not retain the expected healer strategies.";
             if (!warnedMissingDhogHealers) reportWarning(LastStatus);
             warnedMissingDhogHealers = true;
@@ -356,9 +363,34 @@ public class AutorotIpcService : IDisposable
         return true;
     }
 
-    internal static bool MatchesDhogHealerPreset(string expectedJson, string? actualJson)
+    private static string? RepairDhogHealerPreset(string name, string? existing, string bundled)
     {
-        if (string.IsNullOrWhiteSpace(actualJson)) return false;
+        if (existing == null) return bundled;
+        try
+        {
+            if (JsonNode.Parse(existing) is not JsonObject saved
+                || saved["Name"] is not JsonValue savedName || !savedName.TryGetValue<string>(out var value) || value != name)
+                return null;
+            if (saved["Modules"] is not JsonObject savedModules)
+                return bundled;
+
+            var defaults = JsonNode.Parse(bundled)!["Modules"]!.AsObject();
+            foreach (var healer in DhogHealerJobs)
+            {
+                savedModules.Remove("BossMod.Autorotation.xan." + healer);
+                var key = DhogModulePrefix + healer;
+                if (savedModules[key] is not JsonArray && defaults[key] is JsonArray strategies)
+                    savedModules[key] = strategies.DeepClone();
+            }
+            savedModules.Remove("BossMod.Autorotation.xan.HealerAI");
+            return saved.ToJsonString();
+        }
+        catch (JsonException) { return null; }
+    }
+
+    internal static bool MatchesDhogHealerPreset(string? expectedJson, string? actualJson, string? expectedName = null)
+    {
+        if (string.IsNullOrWhiteSpace(expectedJson) || string.IsNullOrWhiteSpace(actualJson)) return false;
         try
         {
             using var expected = JsonDocument.Parse(expectedJson);
@@ -366,11 +398,13 @@ public class AutorotIpcService : IDisposable
             if (!actual.RootElement.TryGetProperty("Modules", out var modules)
                 || modules.ValueKind != JsonValueKind.Object
                 || !actual.RootElement.TryGetProperty("Name", out var name)
+                || name.ValueKind != JsonValueKind.String || expectedName != null && name.GetString() != expectedName
                 || !JsonElement.DeepEquals(expected.RootElement.GetProperty("Name"), name)) return false;
             var expectedModules = expected.RootElement.GetProperty("Modules");
             return !modules.TryGetProperty("BossMod.Autorotation.xan.HealerAI", out _)
                 && DhogHealerJobs.All(job => !modules.TryGetProperty("BossMod.Autorotation.xan." + job, out _)
                     && modules.TryGetProperty(DhogModulePrefix + job, out var settings)
+                    && settings.ValueKind == JsonValueKind.Array
                     && JsonElement.DeepEquals(expectedModules.GetProperty(DhogModulePrefix + job), settings));
         }
         catch (Exception ex) when (ex is JsonException or InvalidOperationException or KeyNotFoundException) { return false; }
@@ -1174,7 +1208,6 @@ public class AutorotIpcService : IDisposable
             LastStatus = "Six BossMod preset writes acknowledged; runtime selection preserved";
             log.Information(LastStatus);
             PackagedPresetRefreshPending = false;
-            if (IsNativeBossModProvider(provider)) packagedDhogHealers = useDhogHealers;
             return true;
         }
         else if (created > 0)

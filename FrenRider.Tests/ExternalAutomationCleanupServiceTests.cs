@@ -852,12 +852,20 @@ public sealed class ExternalAutomationCleanupServiceTests
         Assert.Equal(new[] { preset }, native.Active);
     }
 
-    [Fact]
-    public void AutomaticBmrHealerStartsWithTheExistingRangedPreset()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void AutomaticBmrHealerStartsWithTheExistingRangedPreset(bool missingHealers)
     {
         const string preset = "FRENRIDER - RANGED";
-        var native = new NativeBossModProvider("BMR", preset) { AiEnabled = false };
-        native.PresetDefinitions[preset + " (GMC)"] = "{\"Name\":\"Unavailable\"}";
+        var native = new NativeBossModProvider("BMR", preset, exposeDhogHealers: true) { AiEnabled = false };
+        var definition = System.Text.Json.Nodes.JsonNode.Parse(ReadPackagedPresets()[preset])!;
+        var modules = definition["Modules"]!.AsObject();
+        if (missingHealers)
+            foreach (var key in modules.Select(module => module.Key).Where(key => key.StartsWith("BMRVariantModulePack.Autorotation.Dhog.", StringComparison.Ordinal)).ToArray())
+                modules.Remove(key);
+        modules["BossMod.Autorotation.xan.BRM"] = new System.Text.Json.Nodes.JsonArray();
+        native.PresetDefinitions[preset] = definition.ToJsonString();
         using var service = native.CreateService();
         using var runtime = new QuestingCombatRuntime(service, native.Interface, native.Log, 0,
             commandSender: native.SendCommand);
@@ -875,7 +883,11 @@ public sealed class ExternalAutomationCleanupServiceTests
         Assert.Contains("BossMod.Presets.SetActive " + preset, native.Writes);
         Assert.Contains("/bmrai on", native.Writes);
         Assert.True(native.AiEnabled);
-        Assert.Equal(0, native.PresetCreates);
+        Assert.Equal(missingHealers ? 1 : 0, native.PresetCreates);
+        using var selected = JsonDocument.Parse(native.PresetDefinitions[preset]);
+        var selectedModules = selected.RootElement.GetProperty("Modules");
+        Assert.True(selectedModules.TryGetProperty("BMRVariantModulePack.Autorotation.Dhog.DhogWHM", out _));
+        Assert.True(selectedModules.TryGetProperty("BossMod.Autorotation.xan.BRM", out _));
     }
 
     [Theory]
@@ -2630,12 +2642,36 @@ public sealed class ExternalAutomationCleanupServiceTests
         }
 
         internal NativeBossModProvider(string provider, string names, bool disabled = false, bool exposeStop = true,
-            string? internalName = null, bool exposeExactSelectorRestore = true)
+            string? internalName = null, bool exposeExactSelectorRestore = true, bool exposeDhogHealers = false)
         {
             Active = names.Length == 0 ? [] : names.Split('|').ToList();
             ForceDisabled = disabled;
             var module = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("FrenRiderNativeBossMod" + Guid.NewGuid().ToString("N")),
                 AssemblyBuilderAccess.Run).DefineDynamicModule("NativeProvider");
+            if (exposeDhogHealers)
+            {
+                var registry = module.DefineType("BossMod.Autorotation.RotationModuleRegistry", TypeAttributes.Public);
+                var modules = registry.DefineField("Modules", typeof(System.Collections.IDictionary), FieldAttributes.Public | FieldAttributes.Static);
+                var namesField = registry.DefineField("Names", typeof(Dictionary<string, Type>), FieldAttributes.Public | FieldAttributes.Static);
+                var find = registry.DefineMethod("FindType", MethodAttributes.Public | MethodAttributes.Static, typeof(Type), [typeof(string)]);
+                var il = find.GetILGenerator();
+                il.Emit(OpCodes.Ldsfld, namesField);
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Callvirt, typeof(Dictionary<string, Type>).GetProperty("Item")!.GetMethod!);
+                il.Emit(OpCodes.Ret);
+                var registryType = registry.CreateType()!;
+                var registered = new System.Collections.Hashtable();
+                var byName = new Dictionary<string, Type>();
+                foreach (var job in new[] { "WHM", "SCH", "AST", "SGE" })
+                {
+                    var name = "BMRVariantModulePack.Autorotation.Dhog.Dhog" + job;
+                    var type = module.DefineType(name, TypeAttributes.Public).CreateType()!;
+                    registered[type] = new object();
+                    byName[name] = type;
+                }
+                registryType.GetField(modules.Name)!.SetValue(null, registered);
+                registryType.GetField(namesField.Name)!.SetValue(null, byName);
+            }
             var configNodeType = module.DefineType("BossMod.ConfigNode", TypeAttributes.Public | TypeAttributes.Abstract).CreateType()!;
             var nodeBuilder = module.DefineType("BossMod.AI.AIConfig", TypeAttributes.Public, configNodeType);
             nodeBuilder.DefineField("Enabled", typeof(bool), FieldAttributes.Public);

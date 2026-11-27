@@ -1,3 +1,7 @@
+2026-11-27 - 4.1.0.29 - BossModReborn healer startup
+
+- **Fixed automatic healer startup on BossModReborn.** Fren Rider restores missing healer modules in the existing `FRENRIDER - RANGED` preset before activating it.
+
 2026-11-26 - 4.1.0.28 - King Behemoth console interaction
 
 - **Fixed Labyrinth of the Ancients navigation.** Fren Rider skips King Behemoth's Energy Tower Consoles during automatic duty interaction.

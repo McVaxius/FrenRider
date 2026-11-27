@@ -1675,7 +1675,10 @@ public partial class CombatService
             return false;
         if (config.Enabled)
             plugin.CaptureExternalAutomationSnapshot($"preset selection after {reason}");
-        var applied = plugin.AutorotIpcService.ApplyBossModPreset(GetBossModPresetProvider(pluginName), presetName);
+        var applied = (pluginName != "BMR" || config.ConfigureRotationPresetManually
+            || plugin.AutorotIpcService.PrepareDhogHealerRotations(GetCurrentClassJobId() ?? 0, pluginName,
+                manualPreset: false, warning => plugin.ReportToChatAndLog(warning, isError: true)))
+            && plugin.AutorotIpcService.ApplyBossModPreset(GetBossModPresetProvider(pluginName), presetName);
         if (applied)
             ActivePreset = presetName;
         else
