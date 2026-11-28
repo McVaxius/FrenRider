@@ -1,3 +1,8 @@
+2026-11-28 - 4.1.0.30 - On-demand interface resources
+
+- Load window fonts and text shaping when the interface opens, then release them when it closes.
+- Allocate background rendering and audio resources only while their appearance features are in use.
+
 2026-11-27 - 4.1.0.29 - BossModReborn healer startup
 
 - **Fixed automatic healer startup on BossModReborn.** Fren Rider restores missing healer modules in the existing `FRENRIDER - RANGED` preset before activating it.

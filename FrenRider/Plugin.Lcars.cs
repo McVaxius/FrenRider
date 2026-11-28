@@ -32,7 +32,7 @@ public sealed partial class Plugin
     internal void SetLcarsSounds(bool enabled)
     {
         Configuration.UiLcarsSoundsMuted = !enabled;
-        if (!enabled) uiSoundPlayer?.Stop();
+        if (!enabled) ReleaseUiSounds();
         Configuration.Save();
     }
 

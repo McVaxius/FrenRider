@@ -1,3 +1,4 @@
+using Dalamud.Interface.ManagedFontAtlas;
 using AethertekUI.Dalamud;
 using System;
 using System.Collections.Generic;
@@ -145,6 +146,7 @@ public sealed partial class Plugin : IDalamudPlugin
     private MaterialTheme uiTheme = null!;
     private MaterialOptions<string> languageOptions = null!;
     private string appliedLanguage = "";
+    private bool loadedBrand;
     private uint appliedAccent;
     private Vector3 accentDraft;
     private MaterialColorSettings colorDraft = new();
@@ -160,6 +162,7 @@ public sealed partial class Plugin : IDalamudPlugin
     private string glassImageEditorDraft = "";
     private string? glassImageEditorSaved;
     private readonly FileDialogManager glassImagePicker = new();
+    private bool backgroundImagePickerOpen;
     private (uint First, uint Second, uint Third)? glassWaveEditorSaved;
     private (FrenRiderUiStyle Style, MaterialColorSettings? Glass, MaterialColorSettings? Spatial,
         MaterialColorSettings? Cyberpunk, uint Background, uint First, uint Second, uint Third) appliedSurface;
@@ -354,7 +357,7 @@ public sealed partial class Plugin : IDalamudPlugin
             HelpMessage = "Fren Rider: /fr [on|off|stop|settings|s|mini|m|debug|testchocobo]; stop disables FrenRider until explicitly enabled; testchocobo opens reload-test controls; testchocobo on/off selects reload testing; testchocobo run/stop runs or stops discovery."
         });
 
-        ApplyAppearance();
+        RefreshUiText();
         PluginInterface.UiBuilder.Draw += DrawUi;
         PluginInterface.UiBuilder.ResizeBuffers += ReleaseBackgroundGlassResources;
         PluginInterface.UiBuilder.OpenConfigUi += ToggleConfigUi;
@@ -417,17 +420,13 @@ public sealed partial class Plugin : IDalamudPlugin
         PluginInterface.UiBuilder.OpenMainUi -= ToggleMainUi;
 
         glassImagePicker.Reset();
-        backgroundGlass?.Dispose();
-        backgroundGlass = null;
+        ReleaseWindowResources();
         WindowSystem.RemoveAllWindows();
-        uiSoundPlayer?.Dispose();
 
         ConfigWindow.Dispose();
         MainWindow.Dispose();
         MagiaMiniWindow.Dispose();
-        uiFonts.Dispose();
         uiText.Dispose();
-        shapedText?.Dispose();
 
         AutorotIpcService.Dispose();
         QuestionableIpcService.Dispose();
@@ -468,6 +467,7 @@ public sealed partial class Plugin : IDalamudPlugin
 
     private readonly System.Collections.Generic.Dictionary<Dalamud.Interface.Windowing.Window, AethertekUI.Dalamud.MaterialAppearanceTitleBar> appearanceTitleBars = new();
     private MaterialGlassRenderer? backgroundGlass;
+    private bool backgroundWasBlurred;
 
     private void PrepareAppearanceTitleBars()
     {
@@ -824,15 +824,19 @@ public sealed partial class Plugin : IDalamudPlugin
                 MaterialText.Measure(UiText.T("Browse...")).X + MaterialText.Measure(UiText.T("Load image")).X +
                 ImGui.GetStyle().FramePadding.X * 4 + ImGui.GetStyle().ItemSpacing.X;
             if (UiGui.Button("Browse..."))
-                glassImagePicker.OpenFileDialog(UiText.T("Choose background image") + "###FrenRiderBackgroundImagePicker",
-                    UiText.T("Images") + "{.png,.jpg,.jpeg,.bmp,.gif,.webp,.tif,.tiff,.dds,.tga},.*",
-                    (accepted, path) =>
-                    {
-                        if (!accepted) return;
-                        var previous = Configuration.UiGlassImagePath;
-                        Configuration.UiGlassImagePath = glassImageEditorDraft = glassImageEditorSaved = path;
-                        if (path != previous) Configuration.Save();
-                    });
+            {
+                    glassImagePicker.OpenFileDialog(UiText.T("Choose background image") + "###FrenRiderBackgroundImagePicker",
+                        UiText.T("Images") + "{.png,.jpg,.jpeg,.bmp,.gif,.webp,.tif,.tiff,.dds,.tga},.*",
+                        (accepted, path) =>
+                        {
+                            backgroundImagePickerOpen = false;
+                            if (!accepted) return;
+                            var previous = Configuration.UiGlassImagePath;
+                            Configuration.UiGlassImagePath = glassImageEditorDraft = glassImageEditorSaved = path;
+                            if (path != previous) Configuration.Save();
+                        });
+                backgroundImagePickerOpen = true;
+            }
             if (inlineButtons) ImGui.SameLine();
             if (UiGui.Button("Load image"))
             {
@@ -882,22 +886,49 @@ public sealed partial class Plugin : IDalamudPlugin
     }
 
 
+    private void DisposeBackgroundGlass()
+    {
+        backgroundGlass?.Dispose();
+        backgroundGlass = null;
+        backgroundWasBlurred = false;
+    }
+
+    private void ReleaseUiSounds()
+    {
+        uiSoundPlayer?.Dispose();
+        uiSoundPlayer = null;
+    }
+
+    private void ReleaseWindowResources()
+    {
+        DisposeBackgroundGlass();
+        ReleaseUiSounds();
+        uiFonts?.Dispose();
+        uiFonts = null!;
+        shapedText?.Dispose();
+        shapedText = null!;
+        uiTheme = null!;
+        languageOptions = null!;
+    }
+
     private void ReleaseBackgroundGlassResources() => backgroundGlass?.ReleaseResources();
 
     private void DrawUi()
     {
-        ApplyAppearance();
-        // Keep the native picker usable independently of the appearance popup and plugin windows.
-        glassImagePicker.Draw();
-        using var appearance = FrenRiderPresentation.Push(Configuration);
-        if (!MainWindow.IsOpen && !ConfigWindow.IsOpen && !MagiaMiniWindow.IsOpen && !RaidWindow.IsOpen && !AutoDutyWarningWindow.IsOpen)
+        RefreshUiText();
+        // The native picker can outlive its appearance popup and owner window.
+        if (backgroundImagePickerOpen) glassImagePicker.Draw();
+        if (!WindowSystem.Windows.Any(window => window.IsOpen))
         {
-            backgroundGlass?.EndFrame(false);
+            if (uiFonts is not null) ReleaseWindowResources();
             return;
         }
+
+        ApplyWindowFonts();
+        ApplyAppearance();
+        using var appearance = FrenRiderPresentation.Push(Configuration);
         using var text = uiText.Enter();
-        shapedText ??= new(TextureProvider);
-        using var shaped = shapedText.Push();
+        using var shaped = shapedText!.Push();
         if (!uiFonts.Ready)
         {
             backgroundGlass?.EndFrame(false);
@@ -913,7 +944,7 @@ public sealed partial class Plugin : IDalamudPlugin
         {
             var generation = uiFonts.Generation;
             var hindiAvailable = true;
-            foreach (var height in FrenRiderPresentation.FontSizes)
+            foreach (var height in uiFonts.Roles.Select(role => FrenRiderPresentation.FontSizes[(int)role]).Distinct())
                 hindiAvailable &= shapedText.Renderer.TryCheckGlyphs(["हिन्दी"], height * ImGuiHelpers.GlobalScale, out _);
             languageOptions.Replace(UiText.Languages.Select(l => new MaterialOption<string>(l.Code, l.Code,
                 l.Code == "hi" && !hindiAvailable ? "Hindi (unavailable)" : l.Name, l.Code == "hi" && !hindiAvailable)).ToArray());
@@ -924,7 +955,7 @@ public sealed partial class Plugin : IDalamudPlugin
             try
             {
                 var generation = uiFonts.Generation;
-                foreach (var height in FrenRiderPresentation.FontSizes)
+                foreach (var height in uiFonts.Roles.Select(role => FrenRiderPresentation.FontSizes[(int)role]).Distinct())
                     shapedText.Renderer.CheckGlyphs(uiText.RequiredText, height * ImGuiHelpers.GlobalScale);
                 uiFonts.CheckGlyphs(uiText.RequiredText);
                 checkedFontGeneration = generation;
@@ -940,9 +971,18 @@ public sealed partial class Plugin : IDalamudPlugin
         var useGlass = FrenRiderPresentation.BackgroundBlurEnabled(Configuration);
         var useImage = Configuration.UiStylingEnabled && Configuration.UiStyle == FrenRiderUiStyle.Glassmorphism &&
             Configuration.UiGlassBackground == FrenRiderGlassBackground.Image;
-        if (useGlass || useImage) backgroundGlass ??= new(PluginInterface, Log);
-        backgroundGlass?.ConfigureImage(TextureProvider, useImage, Configuration.UiGlassImagePath);
-        backgroundGlass?.BeginFrame();
+        if (useGlass || useImage)
+        {
+            backgroundGlass ??= new(PluginInterface, Log);
+            if (backgroundWasBlurred && !useGlass) backgroundGlass.ReleaseResources();
+            backgroundGlass.BeginFrame(useGlass, useImage);
+            backgroundGlass.ConfigureImage(TextureProvider, useImage, Configuration.UiGlassImagePath);
+            backgroundWasBlurred = useGlass;
+        }
+        else
+        {
+            DisposeBackgroundGlass();
+        }
         using var glassAppearance = FrenRiderPresentation.Push(Configuration, useGlass || useImage ? backgroundGlass : null);
         using var theme = MaterialTheme.Push(uiTheme, ImGuiHelpers.GlobalScale,
             Configuration.UiStylingEnabled ? MaterialStyleMode.ColorsOnly : MaterialStyleMode.Native);
@@ -1031,22 +1071,45 @@ public sealed partial class Plugin : IDalamudPlugin
         }
     }
 
-    private void ApplyAppearance()
+    private void RefreshUiText()
     {
         var language = UiText.Languages.Any(l => l.Code == Configuration.UiLanguage) ? Configuration.UiLanguage : "en";
-        if (language != appliedLanguage)
+        if (uiText?.Language == language) return;
+        uiText?.Dispose();
+        uiText = new(language, role => uiFonts.Push(role));
+    }
+
+    private void ApplyWindowFonts()
+    {
+        var language = uiText.Language;
+        var hasBrand = MainWindow.IsOpen || ConfigWindow.IsOpen || RaidWindow.IsOpen || MagiaMiniWindow.IsOpen;
+        if (uiFonts is null || language != appliedLanguage || loadedBrand != hasBrand)
         {
             uiFonts?.Dispose();
-            uiText?.Dispose();
-            uiText = new(language, role => uiFonts!.Push(role));
-            uiFonts = new(PluginInterface.UiBuilder.FontAtlas, uiText.GlyphRanges(), language,
-                PluginInterface.AssemblyLocation.DirectoryName!);
+            uiFonts = null!;
+            if (language != appliedLanguage)
+            {
+                shapedText?.Dispose();
+                shapedText = null!;
+            }
+            shapedText ??= new(TextureProvider);
+            var ranges = uiText.GlyphRanges();
+            var atlas = PluginInterface.UiBuilder.CreateFontAtlas(FontAtlasAutoRebuildMode.OnNewFrame, true, "FrenRider UI");
+            UiFontRole[] roles = hasBrand
+                ? [UiFontRole.Body, UiFontRole.BodyStrong, UiFontRole.Title, UiFontRole.PluginName, UiFontRole.Action]
+                : [UiFontRole.Body, UiFontRole.BodyStrong, UiFontRole.Title, UiFontRole.Action];
+            uiFonts = new(atlas, ranges, language, PluginInterface.AssemblyLocation.DirectoryName!, roles);
             languageOptions = new(UiText.Languages.Select(l => new MaterialOption<string>(l.Code, l.Code, l.Name)).ToArray());
             appliedLanguage = language;
+            loadedBrand = hasBrand;
             checkedFontGeneration = -1;
             checkedHindiGeneration = -1;
             fontIssueLogged = false;
         }
+    }
+
+    private void ApplyAppearance()
+    {
         var savedColors = Configuration.UiColors ?? new MaterialColorSettings();
         if (savedColors != appliedSavedColors)
         {
@@ -1059,7 +1122,6 @@ public sealed partial class Plugin : IDalamudPlugin
         if (uiTheme is null || (Configuration.UiAccentRgb & 0xFFFFFF) != appliedAccent || colorDraft != appliedColors
             || !appliedSurfaceReady || surface != appliedSurface)
         {
-            if (!LcarsActive) uiSoundPlayer?.Stop();
             appliedAccent = Configuration.UiAccentRgb & 0xFFFFFF;
             appliedColors = colorDraft;
             appliedSurface = surface;
@@ -1072,6 +1134,7 @@ public sealed partial class Plugin : IDalamudPlugin
         uiTheme.HighlightContrastPercent = Configuration.UiHighlightContrastPercent;
         if (LcarsActive || Configuration.UiStyle != FrenRiderUiStyle.Classic)
             uiTheme.Density = Configuration.UiCompact ? MaterialDensity.Compact : MaterialDensity.Standard;
+        if (!LcarsActive || Configuration.UiLcarsSoundsMuted) ReleaseUiSounds();
     }
 
     internal void DrawAppearanceSelector()
